@@ -1,7 +1,7 @@
 
 
 from yasmin import State
-from custom_ros2 import Node
+from simple_node import Node
 from .basic_outcomes import SUCCEED, ABORT, CANCEL
 
 
