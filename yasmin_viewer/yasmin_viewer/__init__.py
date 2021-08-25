@@ -1,3 +1,3 @@
 
 
-from .yasmin_viewer_pub import Ros2FsmViewerPub
+from .yasmin_viewer_pub import YasminViewerPub

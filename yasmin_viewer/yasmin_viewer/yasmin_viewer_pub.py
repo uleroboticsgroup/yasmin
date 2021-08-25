@@ -14,7 +14,7 @@ from yasmin_interfaces.msg import (
 from yasmin import StateMachine, State
 
 
-class Ros2FsmViewerPub:
+class YasminViewerPub:
 
     def __init__(self, node: Node, fsm_name: str, fsm: StateMachine):
         self.__fsm = fsm
