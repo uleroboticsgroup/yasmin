@@ -1,4 +1,4 @@
-# YASMIN (Yet Another State Machine)
+# YASMIN (Yet Another State MachINe)
 
 ## Simple Demo
 ```python
