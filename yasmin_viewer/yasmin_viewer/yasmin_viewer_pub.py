@@ -21,28 +21,28 @@ class YasminViewerPub:
         self.__fsm_name = fsm_name
         self.__node = node
 
-        thread = Thread(target=self.start_client)
+        thread = Thread(target=self._start_publisher)
         thread.start()
 
-    def parse_state_info(self, name: str, state: Dict[str, str]) -> StateInfo:
-        msg = StateInfo()
+    def parse_state_info(self, state_name: str, state: State) -> StateInfo:
+        state_info_msg = StateInfo()
 
         for key in state["transitions"]:
             transition = Transition()
             transition.outcome = key
             transition.state = state["transitions"][key]
-            msg.transitions.append(transition)
+            state_info_msg.transitions.append(transition)
 
         for key in state["state"].get_outcomes():
-            msg.outcomes.append(key)
+            state_info_msg.outcomes.append(key)
 
-        msg.state_name = name
+        state_info_msg.state_name = state_name
 
-        return msg
+        return state_info_msg
 
-    def parse_states(self, states: List[State]) -> Structure:
+    def parse_states(self, states: Dict[str, str]) -> Structure:
 
-        fsm_structure = Structure()
+        structure_msg = Structure()
 
         for state_n in states:
 
@@ -56,17 +56,17 @@ class YasminViewerPub:
 
             if isinstance(state_o, StateMachine):
 
-                structure_msg = self.parse_states(state_o.get_states())
+                aux_structure_msg = self.parse_states(state_o.get_states())
                 state_msg.is_fsm = True
 
-                for state in structure_msg.states:
+                for state in aux_structure_msg.states:
                     state_msg.states.append(state.state)
 
                 state_msg.current_state = state_o.get_current_state()
 
-            fsm_structure.states.append(state_msg)
+            structure_msg.states.append(state_msg)
 
-        return fsm_structure
+        return structure_msg
 
     def parse_status(self, fsm: StateMachine) -> Status:
 
@@ -81,7 +81,7 @@ class YasminViewerPub:
 
         return status_msg
 
-    def start_client(self):
+    def _start_publisher(self):
         publisher = self.__node.create_publisher(Status, "/fsm_viewer", 10)
 
         rate = self.__node.create_rate(4)

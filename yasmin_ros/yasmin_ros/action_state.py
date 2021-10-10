@@ -1,6 +1,7 @@
 
 
 from yasmin import State
+from yasmin.blackboard import Blackboard
 from simple_node import Node
 from .basic_outcomes import SUCCEED, ABORT, CANCEL
 
@@ -27,18 +28,18 @@ class AcionState(State):
         self.__resutl_handler = resutl_handler
 
         if not self.__create_goal_handler:
-            raise Exception("create_goal is needed")
+            raise Exception("create_goal_handler is needed")
 
         super().__init__(_outcomes)
 
-    def _create_goal(self, blackboard):
+    def _create_goal(self, blackboard: Blackboard):
         return self.__create_goal_handler(blackboard)
 
     def cancel_state(self):
         self.__action_client.cancel_goal()
         super().cancel_state()
 
-    def execute(self, blackboard):
+    def execute(self, blackboard: Blackboard) -> str:
 
         goal = self._create_goal(blackboard)
         self.__action_client.wait_for_server()
