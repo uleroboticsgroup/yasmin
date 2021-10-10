@@ -8,9 +8,9 @@ from .basic_outcomes import SUCCEED, ABORT
 class ServiceState(State):
 
     def __init__(self,
-                 node,
-                 srv_type: str,
-                 srv_name,
+                 node: Node,
+                 srv_type,
+                 srv_name: str,
                  create_request_handler,
                  outcomes=None,
                  response_handler=None):
