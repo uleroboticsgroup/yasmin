@@ -1,62 +1,28 @@
 # YASMIN (Yet Another State MachINe)
 
-## Simple Demo
-```python
-from yasmin import State
-from yasmin import StateMachine
+## yasmin
+
+ROS 2 package that contains the base code of YASMIN.
+
+## yasmin_ros
+
+ROS 2 package that contains ROS-based states and basic outcomes.
 
 
-# define state Foo
-class Foo(State):
-    def __init__(self):
-        super().__init__(["outcome1", "outcome2"])
-        self.counter = 0
+## yasmin_interfaces
 
-    def execute(self, blackboard):
-        print("Executing state FOO")
-        if self.counter < 3:
-            self.counter += 1
-            blackboard.foo_str = "Counter: " + str(self.counter)
-            return "outcome1"
-        else:
-            return "outcome2"
+ROS 2 package that contains the interfaces of YASMIN.
 
 
-# define state Bar
-class Bar(State):
-    def __init__(self):
-        super().__init__(outcomes=["outcome2"])
+## yasmin_demo
 
-    def execute(self, blackboard):
-        print("Executing state BAR")
-        print(blackboard.foo_str)
-        return "outcome2"
+ROS 2 package that contains a simple demo in C++ and Python.
 
-
-# main
-def main():
-    print("demo_state_machine")
-
-    # Create a state machine
-    sm = StateMachine(outcomes=["outcome4", "outcome5"])
-
-    # Add states
-    sm.add_state("FOO", Foo(),
-                 transitions={"outcome1": "BAR",
-                              "outcome2": "outcome4"})
-    sm.add_state("BAR", Bar(),
-                 transitions={"outcome2": "FOO"})
-
-    # Execute
-    outcome = sm()
-    print(outcome)
-
-
-if __name__ == "__main__":
-    main()
-```
 
 ## yasmin_viewer
+
+ROS 2 package that contains a web-based FSM viewer for YASMIN.
+
 
 ### Installation
 ```shell
