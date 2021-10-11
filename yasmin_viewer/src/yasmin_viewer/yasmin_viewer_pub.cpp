@@ -1,3 +1,4 @@
+#include <chrono>
 
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
@@ -7,26 +8,20 @@ using namespace std::chrono_literals;
 YasminViewerPub::YasminViewerPub(rclcpp::Node *node, std::string fsm_name,
                                  std::shared_ptr<yasmin::StateMachine> fsm) {
 
-  this->fsm = fsm;
-  this->fsm_name = fsm_name;
   this->node = node;
 
-  this->thread = new std::thread(&YasminViewerPub::start_publisher, this);
+  this->thread = std::make_unique<std::thread>(
+      std::thread(&YasminViewerPub::start_publisher, this, fsm_name, fsm));
+  this->thread->detach();
 }
 
-YasminViewerPub::~YasminViewerPub() {
-  delete this->node;
-  delete this->thread;
-}
-
-yasmin_interfaces::msg::StateInfo
-YasminViewerPub::parse_state_info(std::string state_name,
-                                  std::shared_ptr<yasmin::State> state) {
+yasmin_interfaces::msg::StateInfo YasminViewerPub::parse_state_info(
+    std::string state_name, std::shared_ptr<yasmin::State> state,
+    std::map<std::string, std::string> transitions) {
 
   auto state_info_msg = yasmin_interfaces::msg::StateInfo();
-  auto transitions = this->fsm->get_transitions();
 
-  for (auto const &transition : transitions[state_name]) {
+  for (auto const &transition : transitions) {
     auto transition_msg = yasmin_interfaces::msg::Transition();
     transition_msg.outcome = transition.first;
     transition_msg.state = transition.second;
@@ -42,15 +37,18 @@ YasminViewerPub::parse_state_info(std::string state_name,
   return state_info_msg;
 }
 
-yasmin_interfaces::msg::Structure YasminViewerPub::parse_states(
-    std::map<std::string, std::shared_ptr<yasmin::State>> states) {
+yasmin_interfaces::msg::Structure
+YasminViewerPub::parse_states(std::shared_ptr<yasmin::StateMachine> fsm) {
 
+  std::map<std::string, std::shared_ptr<yasmin::State>> states =
+      fsm->get_states();
   auto structure_msg = yasmin_interfaces::msg::Structure();
 
   for (auto const &state : states) {
 
     auto state_msg = yasmin_interfaces::msg::State();
-    auto state_info = this->parse_state_info(state.first, state.second);
+    auto state_info = this->parse_state_info(
+        state.first, state.second, fsm->get_transitions().at(state.first));
     state_msg.state = state_info;
 
     // check if state is a fsm
@@ -59,7 +57,7 @@ yasmin_interfaces::msg::Structure YasminViewerPub::parse_states(
 
     if (state_machine != nullptr) {
 
-      auto aux_structure_msg = this->parse_states(state_machine->get_states());
+      auto aux_structure_msg = this->parse_states(state_machine);
       state_msg.is_fsm = true;
 
       for (yasmin_interfaces::msg::State aux_state_msg :
@@ -79,10 +77,9 @@ yasmin_interfaces::msg::Structure YasminViewerPub::parse_states(
 yasmin_interfaces::msg::Status
 YasminViewerPub::parse_status(std::shared_ptr<yasmin::StateMachine> fsm) {
 
-  auto states = fsm->get_states();
   auto status_msg = yasmin_interfaces::msg::Status();
 
-  auto structure_msg = this->parse_states(states);
+  auto structure_msg = this->parse_states(fsm);
   structure_msg.final_outcomes = fsm->get_outcomes();
 
   status_msg.fsm_structure = structure_msg;
@@ -91,19 +88,19 @@ YasminViewerPub::parse_status(std::shared_ptr<yasmin::StateMachine> fsm) {
   return status_msg;
 }
 
-void YasminViewerPub::start_publisher() {
+void YasminViewerPub::start_publisher(
+    std::string fsm_name, std::shared_ptr<yasmin::StateMachine> fsm) {
 
-  this->publisher =
-      this->node->create_publisher<yasmin_interfaces::msg::Status>(
-          "/fsm_viewer", 10);
+  auto publisher = this->node->create_publisher<yasmin_interfaces::msg::Status>(
+      "/fsm_viewer", 10);
 
-  this->node->create_wall_timer(
-      250ms, std::bind(&YasminViewerPub::publish_state, this));
-}
+  while (rclcpp::ok()) {
 
-void YasminViewerPub::publish_state() {
-  auto status_msg = this->parse_status(this->fsm);
-  status_msg.fsm_name = this->fsm_name;
+    auto status_msg = this->parse_status(fsm);
+    status_msg.fsm_name = fsm_name;
 
-  publisher->publish(status_msg);
+    publisher->publish(status_msg);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+  }
 }
