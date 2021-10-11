@@ -9,6 +9,7 @@
 
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+
 #include "yasmin_interfaces/msg/state.hpp"
 #include "yasmin_interfaces/msg/state_info.hpp"
 #include "yasmin_interfaces/msg/status.hpp"
@@ -24,27 +25,24 @@ class YasminViewerPub {
 public:
   YasminViewerPub(rclcpp::Node *node, std::string fsm_name,
                   std::shared_ptr<yasmin::StateMachine> fsm);
-  ~YasminViewerPub();
 
   yasmin_interfaces::msg::StateInfo
-  parse_state_info(std::string name, std::shared_ptr<yasmin::State> state);
+  parse_state_info(std::string name, std::shared_ptr<yasmin::State> state,
+                   std::map<std::string, std::string> transitions);
 
   yasmin_interfaces::msg::Structure
-  parse_states(std::map<std::string, std::shared_ptr<yasmin::State>> states);
+  parse_states(std::shared_ptr<yasmin::StateMachine> fsm);
 
   yasmin_interfaces::msg::Status
   parse_status(std::shared_ptr<yasmin::StateMachine> fsm);
 
 protected:
-  void start_publisher();
-  void publish_state();
+  void start_publisher(std::string fsm_name,
+                       std::shared_ptr<yasmin::StateMachine> fsm);
 
 private:
-  std::shared_ptr<yasmin::StateMachine> fsm;
-  std::string fsm_name;
   rclcpp::Node *node;
-  std::thread *thread;
-  rclcpp::Publisher<yasmin_interfaces::msg::Status>::SharedPtr publisher;
+  std::unique_ptr<std::thread> thread;
 };
 
 } // namespace yasmin_viewer

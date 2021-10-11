@@ -47,11 +47,12 @@ install(DIRECTORY include/
 )
 
 install(DIRECTORY yasmin_viewer_web_client/build/
-  DESTINATION yasmin_viewer_web_client/
+  DESTINATION share/yasmin_viewer/yasmin_viewer_web_client/
 )
 
 ament_export_include_directories(include)
 ament_export_libraries(${LIB})
+ament_export_dependencies(${DEPENDENCIES})
 
 
 # Python
