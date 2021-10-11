@@ -15,6 +15,8 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(yasmin REQUIRED)
+find_package(yasmin_viewer REQUIRED)
+find_package(simple_node REQUIRED)
 
 # C++
 include_directories(include)
@@ -28,6 +30,8 @@ set(SOURCES
 set(DEPENDENCIES
     rclcpp
     yasmin
+    yasmin_viewer
+    simple_node
 )
 
 add_executable(yasmin_demo
