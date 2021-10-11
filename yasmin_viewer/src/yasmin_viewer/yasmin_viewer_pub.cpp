@@ -37,19 +37,18 @@ yasmin_interfaces::msg::StateInfo YasminViewerPub::parse_state_info(
   return state_info_msg;
 }
 
-yasmin_interfaces::msg::Structure
-YasminViewerPub::parse_states(std::shared_ptr<yasmin::StateMachine> fsm) {
+yasmin_interfaces::msg::Structure YasminViewerPub::parse_states(
+    std::map<std::string, std::shared_ptr<yasmin::State>> states,
+    std::map<std::string, std::map<std::string, std::string>> transitions) {
 
-  std::map<std::string, std::shared_ptr<yasmin::State>> states =
-      fsm->get_states();
   auto structure_msg = yasmin_interfaces::msg::Structure();
 
   for (auto const &state : states) {
 
     auto state_msg = yasmin_interfaces::msg::State();
-    auto state_info = this->parse_state_info(
-        state.first, state.second, fsm->get_transitions().at(state.first));
-    state_msg.state = state_info;
+    auto state_info = this->parse_state_info(state.first, state.second,
+                                             transitions.at(state.first));
+    state_msg.state_info = state_info;
 
     // check if state is a fsm
     auto state_machine =
@@ -57,12 +56,13 @@ YasminViewerPub::parse_states(std::shared_ptr<yasmin::StateMachine> fsm) {
 
     if (state_machine != nullptr) {
 
-      auto aux_structure_msg = this->parse_states(state_machine);
+      auto aux_structure_msg = this->parse_states(
+          state_machine->get_states(), state_machine->get_transitions());
       state_msg.is_fsm = true;
 
       for (yasmin_interfaces::msg::State aux_state_msg :
            aux_structure_msg.states) {
-        state_msg.states.push_back(aux_state_msg.state);
+        state_msg.states.push_back(aux_state_msg.state_info);
       }
 
       state_msg.current_state = state_machine->get_current_state();
@@ -74,32 +74,34 @@ YasminViewerPub::parse_states(std::shared_ptr<yasmin::StateMachine> fsm) {
   return structure_msg;
 }
 
-yasmin_interfaces::msg::Status
-YasminViewerPub::parse_status(std::shared_ptr<yasmin::StateMachine> fsm) {
+yasmin_interfaces::msg::StateMachine YasminViewerPub::parse_state_machine(
+    std::shared_ptr<yasmin::StateMachine> fsm) {
 
-  auto status_msg = yasmin_interfaces::msg::Status();
+  auto state_machine_msg = yasmin_interfaces::msg::StateMachine();
 
-  auto structure_msg = this->parse_states(fsm);
+  auto structure_msg =
+      this->parse_states(fsm->get_states(), fsm->get_transitions());
   structure_msg.final_outcomes = fsm->get_outcomes();
 
-  status_msg.fsm_structure = structure_msg;
-  status_msg.current_state = fsm->get_current_state();
+  state_machine_msg.fsm_structure = structure_msg;
+  state_machine_msg.current_state = fsm->get_current_state();
 
-  return status_msg;
+  return state_machine_msg;
 }
 
 void YasminViewerPub::start_publisher(
     std::string fsm_name, std::shared_ptr<yasmin::StateMachine> fsm) {
 
-  auto publisher = this->node->create_publisher<yasmin_interfaces::msg::Status>(
-      "/fsm_viewer", 10);
+  auto publisher =
+      this->node->create_publisher<yasmin_interfaces::msg::StateMachine>(
+          "/fsm_viewer", 10);
 
   while (rclcpp::ok()) {
 
-    auto status_msg = this->parse_status(fsm);
-    status_msg.fsm_name = fsm_name;
+    auto state_machine_msg = this->parse_state_machine(fsm);
+    state_machine_msg.fsm_name = fsm_name;
 
-    publisher->publish(status_msg);
+    publisher->publish(state_machine_msg);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
   }

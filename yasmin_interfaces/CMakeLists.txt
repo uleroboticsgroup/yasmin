@@ -39,7 +39,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Transition.msg"
   "msg/StateInfo.msg"
   "msg/Structure.msg"
-  "msg/Status.msg"
+  "msg/StateMachine.msg"
   )
 
  ament_package()

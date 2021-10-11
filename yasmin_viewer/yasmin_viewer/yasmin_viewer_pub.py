@@ -7,7 +7,7 @@ from rclpy.node import Node
 from yasmin_interfaces.msg import (
     State as StateMsg,
     StateInfo,
-    Status,
+    StateMachine as StateMachineMsg,
     Structure,
     Transition
 )
@@ -52,7 +52,7 @@ class YasminViewerPub:
             state_msg = StateMsg()
             state_info = self.parse_state_info(
                 state_n, state)
-            state_msg.state = state_info
+            state_msg.state_info = state_info
 
             if isinstance(state_o, StateMachine):
 
@@ -60,7 +60,7 @@ class YasminViewerPub:
                 state_msg.is_fsm = True
 
                 for state in aux_structure_msg.states:
-                    state_msg.states.append(state.state)
+                    state_msg.states.append(state.state_info)
 
                 state_msg.current_state = state_o.get_current_state()
 
@@ -68,10 +68,10 @@ class YasminViewerPub:
 
         return structure_msg
 
-    def parse_status(self, fsm: StateMachine) -> Status:
+    def parse_status(self, fsm: StateMachine) -> StateMachineMsg:
 
         states = fsm.get_states()
-        status_msg = Status()
+        status_msg = StateMachineMsg()
 
         structure_msg = self.parse_states(states)
         structure_msg.final_outcomes = fsm.get_outcomes()
@@ -82,7 +82,8 @@ class YasminViewerPub:
         return status_msg
 
     def _start_publisher(self):
-        publisher = self.__node.create_publisher(Status, "/fsm_viewer", 10)
+        publisher = self.__node.create_publisher(
+            StateMachineMsg, "/fsm_viewer", 10)
 
         rate = self.__node.create_rate(4)
 

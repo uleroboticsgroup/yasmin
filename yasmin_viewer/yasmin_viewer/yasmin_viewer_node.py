@@ -12,7 +12,7 @@ from rclpy.node import Node
 import ament_index_python
 
 from yasmin_interfaces.msg import (
-    Status,
+    StateMachine,
     StateInfo,
     State,
     Transition
@@ -68,7 +68,7 @@ class Ros2FsmViewer(Node):
         serve(app, host="localhost", port=5000)
 
     def start_subscriber(self):
-        self.create_subscription(Status,
+        self.create_subscription(StateMachine,
                                  "/fsm_viewer",
                                  self.fsm_viewer_cb,
                                  10)
@@ -94,7 +94,7 @@ class Ros2FsmViewer(Node):
 
     def state_msg_to_dict(self, msg: State):
         if msg.is_fsm:
-            fsm_dict = self.state_info_msg_to_dict(msg.state)
+            fsm_dict = self.state_info_msg_to_dict(msg.state_info)
             fsm_dict["is_fsm"] = True
             fsm_dict["states"] = []
             fsm_dict["current_state"] = msg.current_state
@@ -105,9 +105,9 @@ class Ros2FsmViewer(Node):
             return fsm_dict
 
         else:
-            return self.state_info_msg_to_dict(msg.state)
+            return self.state_info_msg_to_dict(msg.state_info)
 
-    def msg_to_dict(self, msg: Status):
+    def msg_to_dict(self, msg: StateMachine):
         msg_dict = {
             "fsm_name": msg.fsm_name,
             "current_state": msg.current_state,
@@ -125,7 +125,7 @@ class Ros2FsmViewer(Node):
 
         return msg_dict
 
-    def fsm_viewer_cb(self, msg: Status):
+    def fsm_viewer_cb(self, msg: StateMachine):
 
         while not self.__started:
             time.sleep(0.05)
