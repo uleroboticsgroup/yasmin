@@ -31,9 +31,11 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state) {
   this->add_state(name, state, {});
 }
 
-void StateMachine::set_start(std::string state_name) {
+void StateMachine::set_start_state(std::string state_name) {
   this->start_state = state_name;
 }
+
+std::string StateMachine::get_start_state() { return this->start_state; }
 
 void StateMachine::cancel_state() {
   State::cancel_state();
@@ -52,8 +54,6 @@ std::map<std::string, std::map<std::string, std::string>> const &
 StateMachine::get_transitions() {
   return this->transitions;
 }
-
-std::string StateMachine::get_start_state() { return this->start_state; }
 
 std::string StateMachine::get_current_state() { return this->current_state; }
 
