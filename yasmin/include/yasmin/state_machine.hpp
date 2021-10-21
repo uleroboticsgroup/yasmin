@@ -21,14 +21,14 @@ public:
                  std::map<std::string, std::string> transitions);
   void add_state(std::string name, std::shared_ptr<State> state);
 
-  void set_start(std::string state_name);
+  void set_start_state(std::string state_name);
+  std::string get_start_state();
 
   void cancel_state();
 
   std::map<std::string, std::shared_ptr<State>> const &get_states();
   std::map<std::string, std::map<std::string, std::string>> const &
   get_transitions();
-  std::string get_start_state();
   std::string get_current_state();
 
   std::string

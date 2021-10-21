@@ -32,8 +32,11 @@ class StateMachine(State):
         if not self._start_state:
             self._start_state = name
 
-    def set_start(self, name: str):
+    def set_start_state(self, name: str):
         self._start_state = name.upper()
+
+    def get_start_state(self) -> str:
+        return self._start_state
 
     def cancel_state(self):
         super().cancel_state()
