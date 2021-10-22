@@ -31,7 +31,7 @@ public:
 
   AcionState(simple_node::Node *node, std::string action_name,
              CreateGoalHandler create_goal_handler,
-             std::vector<std::string> outcomes, ResutlHandler resutl_handler)
+             std::vector<std::string> outcomes, ResutlHandler result_handler)
       : State({}) {
 
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT,
@@ -46,7 +46,7 @@ public:
     this->action_client = node->create_action_client<ActionT>(action_name);
 
     this->create_goal_handler = create_goal_handler;
-    this->resutl_handler = resutl_handler;
+    this->result_handler = result_handler;
 
     if (this->create_goal_handler == nullptr) {
       throw std::invalid_argument("create_goal_handler is needed");
@@ -75,8 +75,8 @@ public:
     } else if (this->action_client->is_succeeded()) {
       Result result = this->action_client.get_result();
 
-      if (this->resutl_handler != nullptr) {
-        std::string outcome = this->resutl_handler(blackboard, result);
+      if (this->result_handler != nullptr) {
+        std::string outcome = this->result_handler(blackboard, result);
         return outcome;
       }
 
@@ -87,7 +87,7 @@ public:
 private:
   std::shared_ptr<simple_node::actions::ActionClient<ActionT>> action_client;
   CreateGoalHandler create_goal_handler;
-  ResutlHandler resutl_handler;
+  ResutlHandler result_handler;
 
   Goal create_goal(yasmin::blackboard::Blackboard blackboard) {
     return this->create_goal_handler(blackboard);

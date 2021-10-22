@@ -75,7 +75,7 @@ class TestYasminRos(unittest.TestCase):
         state = AcionState(self.node, Fibonacci, "test", create_goal_cb)
         self.assertEqual(SUCCEED, state())
 
-    def test_yasmin_ros_action_resutl_handler(self):
+    def test_yasmin_ros_action_result_handler(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
