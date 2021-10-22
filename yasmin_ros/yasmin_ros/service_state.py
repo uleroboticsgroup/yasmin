@@ -26,7 +26,7 @@ class ServiceState(State):
         self.__create_request_handler = create_request_handler
         self.__response_handler = response_handler
 
-        if not self.__create_goal_handler:
+        if not self.__create_request_handler:
             raise Exception("create_request_handler is needed")
 
         super().__init__(_outcomes)
@@ -41,13 +41,11 @@ class ServiceState(State):
 
         try:
             response = self.__service_client.call(request)
-
-            if self.__response_handler:
-                outcome = self.__response_handler(blackboard, response)
-
-                if outcome:
-                    return outcome
-
-            return SUCCEED
         except:
             return ABORT
+
+        if self.__response_handler:
+            outcome = self.__response_handler(blackboard, response)
+            return outcome
+
+        return SUCCEED

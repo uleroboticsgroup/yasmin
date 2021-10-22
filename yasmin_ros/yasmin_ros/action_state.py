@@ -14,7 +14,7 @@ class AcionState(State):
                  action_name: str,
                  create_goal_handler,
                  outcomes=None,
-                 resutl_handler=None):
+                 result_handler=None):
 
         _outcomes = [SUCCEED, ABORT, CANCEL]
 
@@ -25,7 +25,7 @@ class AcionState(State):
             action_type, action_name)
 
         self.__create_goal_handler = create_goal_handler
-        self.__resutl_handler = resutl_handler
+        self.__result_handler = result_handler
 
         if not self.__create_goal_handler:
             raise Exception("create_goal_handler is needed")
@@ -54,8 +54,8 @@ class AcionState(State):
 
             result = self.__action_client.get_result()
 
-            if not self.__resutl_handler is None:
-                outcome = self.__resutl_handler(blackboard, result)
+            if not self.__result_handler is None:
+                outcome = self.__result_handler(blackboard, result)
                 return outcome
 
             return SUCCEED
