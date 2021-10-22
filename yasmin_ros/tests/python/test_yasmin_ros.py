@@ -13,7 +13,7 @@ from simple_node import Node
 import rclpy
 
 
-class TestNode(Node):
+class AuxNode(Node):
     def __init__(self):
         super().__init__("test_node")
 
@@ -57,7 +57,7 @@ class TestYasminRos(unittest.TestCase):
 
         rclpy.init()
         self.node = Node("test_yasmin_node")
-        self.aux_node = TestNode()
+        self.aux_node = AuxNode()
 
         # states
 

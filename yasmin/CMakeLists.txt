@@ -56,7 +56,7 @@ ament_python_install_package(${PROJECT_NAME})
 # Tests
 install(
   DIRECTORY tests/python/
-  DESTINATION share/${PROJECT_NAME}/pytests
+  DESTINATION pytests/
 )
 
 install(
