@@ -68,7 +68,7 @@ class YasminViewerPub:
 
         return structure_msg
 
-    def parse_status(self, fsm: StateMachine) -> StateMachineMsg:
+    def parse_state_machine(self, fsm: StateMachine) -> StateMachineMsg:
 
         states = fsm.get_states()
         status_msg = StateMachineMsg()
@@ -88,7 +88,7 @@ class YasminViewerPub:
         rate = self.__node.create_rate(4)
 
         while rclpy.ok():
-            status_msg = self.parse_status(self.__fsm)
+            status_msg = self.parse_state_machine(self.__fsm)
             status_msg.fsm_name = self.__fsm_name
             publisher.publish(status_msg)
             rate.sleep()
