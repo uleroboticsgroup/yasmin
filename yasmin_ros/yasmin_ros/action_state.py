@@ -1,4 +1,5 @@
 
+from typing import List, Callable
 
 from yasmin import State
 from yasmin.blackboard import Blackboard
@@ -12,9 +13,9 @@ class AcionState(State):
                  node: Node,
                  action_type,
                  action_name: str,
-                 create_goal_handler,
-                 outcomes=None,
-                 result_handler=None):
+                 create_goal_handler: Callable,
+                 outcomes: List[str] = None,
+                 result_handler: Callable = None):
 
         _outcomes = [SUCCEED, ABORT, CANCEL]
 

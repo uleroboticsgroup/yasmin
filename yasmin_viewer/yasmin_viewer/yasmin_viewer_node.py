@@ -8,8 +8,9 @@ from threading import Thread
 import json
 
 import rclpy
-from rclpy.node import Node
 import ament_index_python
+
+from simple_node import Node
 
 from yasmin_interfaces.msg import (
     StateMachine,
@@ -23,7 +24,7 @@ from waitress import serve
 from expiringdict import ExpiringDict
 
 
-class Ros2FsmViewer(Node):
+class YasminFsmViewer(Node):
 
     def __init__(self):
 
@@ -138,7 +139,7 @@ class Ros2FsmViewer(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    Ros2FsmViewer()
+    YasminFsmViewer()
 
     rclpy.shutdown()
 

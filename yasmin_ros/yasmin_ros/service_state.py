@@ -1,4 +1,5 @@
 
+from typing import List, Callable
 
 from yasmin import State
 from yasmin.blackboard import Blackboard
@@ -12,9 +13,9 @@ class ServiceState(State):
                  node: Node,
                  srv_type,
                  srv_name: str,
-                 create_request_handler,
-                 outcomes=None,
-                 response_handler=None):
+                 create_request_handler: Callable,
+                 outcomes: List[str] = None,
+                 response_handler: Callable = None):
 
         _outcomes = [SUCCEED, ABORT]
 
