@@ -49,14 +49,17 @@ class AcionState(State):
 
         if self.__action_client.is_canceled():
             return CANCEL
+
         elif self.__action_client.is_aborted():
             return ABORT
-        elif self.__action_client.is_succeeded():
 
+        elif self.__action_client.is_succeeded():
             result = self.__action_client.get_result()
 
             if not self.__result_handler is None:
                 outcome = self.__result_handler(blackboard, result)
-                return outcome
+
+                if outcome:
+                    return outcome
 
             return SUCCEED

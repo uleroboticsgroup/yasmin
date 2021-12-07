@@ -47,6 +47,8 @@ class ServiceState(State):
 
         if self.__response_handler:
             outcome = self.__response_handler(blackboard, response)
-            return outcome
+
+            if outcome:
+                return outcome
 
         return SUCCEED
