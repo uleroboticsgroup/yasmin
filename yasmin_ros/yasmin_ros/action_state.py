@@ -58,8 +58,6 @@ class AcionState(State):
 
             if not self.__result_handler is None:
                 outcome = self.__result_handler(blackboard, result)
-
-                if outcome:
-                    return outcome
+                return outcome
 
             return SUCCEED
