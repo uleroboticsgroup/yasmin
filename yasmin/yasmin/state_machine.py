@@ -1,6 +1,7 @@
 
 
 from typing import Dict, List
+from threading import Lock
 from .state import State
 from .blackboard import Blackboard
 
@@ -12,7 +13,8 @@ class StateMachine(State):
 
         self._states = {}
         self._start_state = None
-        self._current_state = None
+        self.__current_state = None
+        self.__current_state_lock = Lock()
 
     def add_state(self,
                   name: str,
@@ -40,22 +42,26 @@ class StateMachine(State):
 
     def cancel_state(self):
         super().cancel_state()
-        if self._current_state:
-            self._states[self._current_state]["state"].cancel_state()
+        with self.__current_state_lock:
+            if self.__current_state:
+                self._states[self.__current_state]["state"].cancel_state()
 
     def execute(self, blackboard: Blackboard):
 
-        self._current_state = self._start_state
-
-        state = self._states[self._start_state]
+        with self.__current_state_lock:
+            self.__current_state = self._start_state
 
         while True:
+
+            with self.__current_state_lock:
+                state = self._states[self.__current_state]
+
             outcome = state["state"](blackboard)
 
             # check outcome belongs to state
             if not outcome in state["state"].get_outcomes():
                 raise Exception(
-                    "Outcome (" + outcome + ") is not register in state " + self._current_state)
+                    "Outcome (" + outcome + ") is not register in state " + self.__current_state)
 
             # tranlate outcome using transitions
             if outcome in state["transitions"]:
@@ -63,13 +69,14 @@ class StateMachine(State):
 
             # outcome is an outcome of the sm
             if outcome in self._outcomes:
-                self._current_state = None
+                with self.__current_state_lock:
+                    self.__current_state = None
                 return outcome
 
             # outcome is a state
             elif outcome in self._states:
-                self._current_state = outcome
-                state = self._states[self._current_state]
+                with self.__current_state_lock:
+                    self.__current_state = outcome
 
             # outcome is not in the sm
             else:
@@ -79,8 +86,9 @@ class StateMachine(State):
         return self._states
 
     def get_current_state(self) -> str:
-        if self._current_state:
-            return self._current_state
+        with self.__current_state_lock:
+            if self.__current_state:
+                return self.__current_state
 
         return ""
 
