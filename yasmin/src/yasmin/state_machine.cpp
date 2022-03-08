@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -14,7 +15,9 @@
 using namespace yasmin;
 
 StateMachine::StateMachine(std::vector<std::string> outcomes)
-    : State(outcomes) {}
+    : State(outcomes) {
+  this->current_state_mutex = std::make_unique<std::mutex>();
+}
 
 void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
                              std::map<std::string, std::string> transitions) {
@@ -40,6 +43,7 @@ std::string StateMachine::get_start_state() { return this->start_state; }
 void StateMachine::cancel_state() {
   State::cancel_state();
 
+  const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
   if (!this->current_state.empty()) {
     this->states.at(this->current_state)->cancel_state();
   }
@@ -55,18 +59,27 @@ StateMachine::get_transitions() {
   return this->transitions;
 }
 
-std::string StateMachine::get_current_state() { return this->current_state; }
+std::string StateMachine::get_current_state() {
+  const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
+  return this->current_state;
+}
 
 std::string
 StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
+  this->current_state_mutex->lock();
   this->current_state = this->start_state;
-  std::map<std::string, std::string> transitions =
-      this->transitions.at(this->start_state);
+  this->current_state_mutex->unlock();
+
+  std::map<std::string, std::string> transitions;
   std::string outcome;
 
   while (true) {
+
+    this->current_state_mutex->lock();
     auto state = (*this->states.at(this->current_state));
+    transitions = this->transitions.at(this->current_state);
+    this->current_state_mutex->unlock();
 
     outcome = state(blackboard);
 
@@ -86,14 +99,18 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     if (std::find(this->outcomes.begin(), this->outcomes.end(), outcome) !=
         this->outcomes.end()) {
 
+      this->current_state_mutex->lock();
       this->current_state.clear();
+      this->current_state_mutex->unlock();
+
       return outcome;
 
       // outcome is a state
     } else if (this->states.find(outcome) != this->states.end()) {
 
+      this->current_state_mutex->lock();
       this->current_state = outcome;
-      transitions = this->transitions.at(this->current_state);
+      this->current_state_mutex->unlock();
 
       // outcome is not in the sm
     } else {

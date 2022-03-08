@@ -4,6 +4,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -44,6 +45,7 @@ private:
   std::map<std::string, std::map<std::string, std::string>> transitions;
   std::string start_state;
   std::string current_state;
+  std::unique_ptr<std::mutex> current_state_mutex;
 };
 
 } // namespace yasmin
