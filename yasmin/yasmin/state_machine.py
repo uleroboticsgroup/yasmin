@@ -52,6 +52,11 @@ class StateMachine(State):
         while True:
             outcome = state["state"](blackboard)
 
+            # check outcome belongs to state
+            if not outcome in state["state"].get_outcomes():
+                raise Exception(
+                    "Outcome (" + outcome + ") is not register in state " + self._current_state)
+
             # tranlate outcome using transitions
             if outcome in state["transitions"]:
                 outcome = state["transitions"][outcome]

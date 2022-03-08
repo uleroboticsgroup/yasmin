@@ -66,7 +66,16 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   std::string outcome;
 
   while (true) {
-    outcome = (*this->states.at(this->current_state))(blackboard);
+    auto state = (*this->states.at(this->current_state));
+
+    outcome = state(blackboard);
+
+    // check outcome belongs to state
+    if (std::find(state.get_outcomes().begin(), state.get_outcomes().end(),
+                  outcome) == this->outcomes.end()) {
+      throw "Outcome (" + outcome + ") is not register in state " +
+          this->current_state;
+    }
 
     // tranlate outcome using transitions
     if (transitions.find(outcome) != transitions.end()) {
