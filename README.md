@@ -7,8 +7,8 @@ YASMIN is a project focused on implementing robot behaviors using Finite State M
 1. [Features](#features)
 2. [Installation](#installation)
 3. [Demos](#demos)
-   3.1. [Python](#python)
-   3.2. [Cpp](#cpp)
+   - [Python](#python)
+   - [Cpp](#cpp)
 4. [YASMIN Viewer](#yasmin-viewer)
 
 ## Features
