@@ -2,6 +2,15 @@
 
 YASMIN is a project focused on implementing robot behaviors using Finite State Machines (FSM). It is available for ROS 2, Python and C++.
 
+## Table of Contents
+
+1. [Features](#features)
+2. [Installation](#installation)
+3. [Demos](#demos)
+   3.1. [Python](#python)
+   3.2. [Cpp](#cpp)
+4. [YASMIN Viewer](#yasmin-viewer)
+
 ## Features
 
 - Fully integrated into ROS 2.
@@ -111,7 +120,7 @@ if __name__ == "__main__":
     main()
 ```
 
-### C++
+### Cpp
 
 ```cpp
 
@@ -207,7 +216,9 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-## yasmin_viewer
+<a name="#YASMIN-Viewer"></a>
+
+## YASMIN Viewer
 
 This viewer allows monitoring YASMIN's FSM. It is implemented with Flask and ReactJS. A filter is provided to show only one FSM.
 
