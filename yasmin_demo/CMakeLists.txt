@@ -40,7 +40,7 @@ add_executable(yasmin_demo
 
 ament_target_dependencies(yasmin_demo ${DEPENDENCIES})
 install(TARGETS 
-yasmin_demo
+  yasmin_demo
   DESTINATION lib/${PROJECT_NAME}
 )
 
