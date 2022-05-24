@@ -22,9 +22,9 @@ public:
   State(std::vector<std::string> outcomes);
 
   std::string operator()(std::shared_ptr<blackboard::Blackboard> blackboard);
+
   virtual std::string
   execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
-
     (void)blackboard;
     return "";
   }

@@ -77,14 +77,15 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   while (true) {
 
     this->current_state_mutex->lock();
-    auto state = (*this->states.at(this->current_state));
+
+    auto state = this->states.at(this->current_state);
     transitions = this->transitions.at(this->current_state);
     this->current_state_mutex->unlock();
 
-    outcome = state(blackboard);
+    outcome = (*state.get())(blackboard);
 
     // check outcome belongs to state
-    if (std::find(state.get_outcomes().begin(), state.get_outcomes().end(),
+    if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
                   outcome) == this->outcomes.end()) {
       throw "Outcome (" + outcome + ") is not register in state " +
           this->current_state;
@@ -131,7 +132,6 @@ std::string StateMachine::execute() {
 }
 
 std::string StateMachine::operator()() {
-
   std::shared_ptr<blackboard::Blackboard> blackboard =
       std::make_shared<blackboard::Blackboard>();
 
