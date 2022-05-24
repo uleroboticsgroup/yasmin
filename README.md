@@ -37,6 +37,10 @@ $ colcon build
 
 A Python and a C++ demo are included.
 
+<p align="center">
+  <img src="./images/yasmin_demo.gif" width="65%" />
+</p>
+
 ### Python
 
 ```python
@@ -222,7 +226,7 @@ int main(int argc, char *argv[]) {
 
 This viewer allows monitoring YASMIN's FSM. It is implemented with Flask and ReactJS. A filter is provided to show only one FSM.
 
-![](./viewer_example.gif)
+![](./images/viewer_example.gif)
 
 ### Usage
 
