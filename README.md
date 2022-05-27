@@ -1,5 +1,9 @@
 # YASMIN (Yet Another State MachINe)
 
+<p align="center">
+  <img src="./images/logo.png" width="50%" />
+</p>
+
 YASMIN is a project focused on implementing robot behaviors using Finite State Machines (FSM). It is available for ROS 2, Python and C++.
 
 ## Table of Contents
