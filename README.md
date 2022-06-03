@@ -14,6 +14,7 @@ YASMIN is a project focused on implementing robot behaviors using Finite State M
    - [Python](#python)
    - [Cpp](#cpp)
 4. [YASMIN Viewer](#yasmin-viewer)
+5. [Citations](#citations)
 
 ## Features
 
@@ -239,3 +240,18 @@ $ ros2 run yasmin_viewer yasmin_viewer_node
 ```
 
 http://localhost:5000/
+
+## Citations
+
+```bibtex
+@misc{https://doi.org/10.48550/arxiv.2205.13284,
+  doi = {10.48550/ARXIV.2205.13284},
+  url = {https://arxiv.org/abs/2205.13284},
+  author = {González-Santamarta, Miguel Ángel and Rodríguez-Lera, Francisco Javier and Llamas, Camino Fernández and Rico, Francisco Martín and Olivera, Vicente Matellán},
+  keywords = {Robotics (cs.RO), FOS: Computer and information sciences, FOS: Computer and information sciences},
+  title = {YASMIN: Yet Another State MachINe library for ROS 2},
+  publisher = {arXiv},
+  year = {2022},
+  copyright = {Creative Commons Attribution Non Commercial No Derivatives 4.0 International}
+}
+```
