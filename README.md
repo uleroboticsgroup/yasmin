@@ -14,7 +14,6 @@ YASMIN is a project focused on implementing robot behaviors using Finite State M
    - [Python](#python)
    - [Cpp](#cpp)
 4. [YASMIN Viewer](#yasmin-viewer)
-5. [Citations](#citations)
 
 ## Features
 
@@ -82,14 +81,14 @@ class FooState(State):
 # define state Bar
 class BarState(State):
     def __init__(self):
-        super().__init__(outcomes=["outcome2"])
+        super().__init__(outcomes=["outcome3"])
 
     def execute(self, blackboard):
         print("Executing state BAR")
         time.sleep(3)
 
         print(blackboard.foo_str)
-        return "outcome2"
+        return "outcome3"
 
 
 class DemoNode(Node):
@@ -98,14 +97,14 @@ class DemoNode(Node):
         super().__init__("yasmin_node")
 
         # create a state machine
-        sm = StateMachine(outcomes=["outcome4", "outcome5"])
+        sm = StateMachine(outcomes=["outcome4"])
 
         # add states
         sm.add_state("FOO", FooState(),
                      transitions={"outcome1": "BAR",
                                   "outcome2": "outcome4"})
         sm.add_state("BAR", BarState(),
-                     transitions={"outcome2": "FOO"})
+                     transitions={"outcome3": "FOO"})
 
         # pub
         YasminViewerPub(self, "YASMIN_DEMO", sm)
@@ -132,7 +131,6 @@ if __name__ == "__main__":
 ### Cpp
 
 ```cpp
-
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -173,7 +171,7 @@ public:
 // define state Bar
 class BarState : public yasmin::State {
 public:
-  BarState() : yasmin::State({"outcome2"}){};
+  BarState() : yasmin::State({"outcome3"}){};
 
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
@@ -182,7 +180,7 @@ public:
 
     std::cout << blackboard->get<std::string>("foo_str") << "\n";
 
-    return "outcome2";
+    return "outcome3";
   }
 
   std::string to_string() { return "BarState"; }
@@ -196,12 +194,12 @@ public:
 
     // create a state machine
     auto sm = std::make_shared<yasmin::StateMachine>(
-        yasmin::StateMachine({"outcome4", "outcome5"}));
+        yasmin::StateMachine({"outcome4"}));
 
     // add states
     sm->add_state("FOO", std::make_shared<FooState>(),
                   {{"outcome1", "BAR"}, {"outcome2", "outcome4"}});
-    sm->add_state("BAR", std::make_shared<BarState>(), {{"outcome2", "FOO"}});
+    sm->add_state("BAR", std::make_shared<BarState>(), {{"outcome3", "FOO"}});
 
     // pub
     this->yamin_pub = std::make_unique<yasmin_viewer::YasminViewerPub>(
@@ -240,18 +238,3 @@ $ ros2 run yasmin_viewer yasmin_viewer_node
 ```
 
 http://localhost:5000/
-
-## Citations
-
-```bibtex
-@misc{https://doi.org/10.48550/arxiv.2205.13284,
-  doi = {10.48550/ARXIV.2205.13284},
-  url = {https://arxiv.org/abs/2205.13284},
-  author = {González-Santamarta, Miguel Ángel and Rodríguez-Lera, Francisco Javier and Llamas, Camino Fernández and Rico, Francisco Martín and Olivera, Vicente Matellán},
-  keywords = {Robotics (cs.RO), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  title = {YASMIN: Yet Another State MachINe library for ROS 2},
-  publisher = {arXiv},
-  year = {2022},
-  copyright = {Creative Commons Attribution Non Commercial No Derivatives 4.0 International}
-}
-```

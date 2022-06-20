@@ -1,40 +1,36 @@
 import React from "react";
 
 import CytoscapeComponent from "react-cytoscapejs";
-import dagre from "cytoscape-dagre";
+//import dagre from "cytoscape-dagre";
 import klay from "cytoscape-klay";
 import cytoscape from "cytoscape";
-import cola from "cytoscape-cola";
+//import cola from "cytoscape-cola";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 
 class FSM extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   prepare_graph(fsm_data) {
-    var nodes = [];
-    var edges = [];
+    let nodes = [];
+    let edges = [];
 
-    var fsms_stack = [];
-    var fsm_outcomes_stack = [];
-    var state_amount_stack = [];
-    var current_state_path = fsm_data.fsm_name + fsm_data.current_state;
+    let fsms_stack = [];
+    let fsm_outcomes_stack = [];
+    let state_amount_stack = [];
+    let current_state_path = fsm_data.fsm_name + fsm_data.current_state;
 
-    var fsm_structure = fsm_data.fsm_structure;
-    var states = Array.from(fsm_structure.states);
+    let fsm_structure = fsm_data.fsm_structure;
+    let states = Array.from(fsm_structure.states);
 
     fsms_stack.push(fsm_data.fsm_name);
     state_amount_stack.push(states.length);
 
-    var aux_outcomes = [];
-    var outcomes = fsm_structure.final_outcomes;
+    let aux_outcomes = [];
+    let outcomes = fsm_structure.final_outcomes;
 
-    for (var key in outcomes) {
-      var outcome = outcomes[key];
+    for (let key in outcomes) {
+      let outcome = outcomes[key];
 
       aux_outcomes.push(outcome);
 
@@ -52,19 +48,19 @@ class FSM extends React.Component {
     fsm_outcomes_stack.push(aux_outcomes);
 
     while (states.length > 0) {
-      var state = states.pop();
-      var parent = "";
-      var type = "node";
-      var height = 50;
-      var width = 100;
+      let state = states.pop();
+      let parent = "";
+      let type = "node";
+      let height = 50;
+      let width = 100;
 
       //// NODE ////
-      if (fsm_data.fsm_name != fsms_stack[fsms_stack.length - 1]) {
+      if (fsm_data.fsm_name !== fsms_stack[fsms_stack.length - 1]) {
         parent = fsms_stack[fsms_stack.length - 1];
       }
 
       if (
-        current_state_path ==
+        current_state_path ===
         fsms_stack[fsms_stack.length - 1] + state.state_name
       ) {
         if (!state.is_fsm) {
@@ -101,9 +97,9 @@ class FSM extends React.Component {
       state_amount_stack[state_amount_stack.length - 1] -= 1;
 
       //// TRANSITIONS ////
-      for (var key in state.outcomes) {
-        var outcome = state.outcomes[key];
-        var source = fsms_stack[fsms_stack.length - 1] + state.state_name;
+      for (let key in state.outcomes) {
+        let outcome = state.outcomes[key];
+        let source = fsms_stack[fsms_stack.length - 1] + state.state_name;
 
         if (state.is_fsm) {
           source =
@@ -147,8 +143,8 @@ class FSM extends React.Component {
       //// STATE IS FSM ////
       if (state.is_fsm) {
         aux_outcomes = [];
-        for (var key in state.outcomes) {
-          var outcome = state.outcomes[key];
+        for (let key in state.outcomes) {
+          let outcome = state.outcomes[key];
           aux_outcomes.push(outcome);
 
           if (state.is_fsm) {
@@ -172,13 +168,13 @@ class FSM extends React.Component {
         fsm_outcomes_stack.push(aux_outcomes);
         state_amount_stack.push(state.states.length);
 
-        for (var key in state.states) {
+        for (let key in state.states) {
           states.push(state.states[key]);
         }
       }
 
       //// CLEANING STACKS ////
-      while (state_amount_stack[state_amount_stack.length - 1] == 0) {
+      while (state_amount_stack[state_amount_stack.length - 1] === 0) {
         state_amount_stack.pop();
         fsms_stack.pop();
         fsm_outcomes_stack.pop();
@@ -214,11 +210,9 @@ class FSM extends React.Component {
     //cytoscape.use(cola);
     //cytoscape.use(dagre);
 
-    var nodes;
-    var edges;
-    var graph = this.prepare_graph(this.props.fsm_data);
-    nodes = graph[0];
-    edges = graph[1];
+    let graph = this.prepare_graph(this.props.fsm_data);
+    let nodes = graph[0];
+    let edges = graph[1];
 
     return (
       <div
@@ -271,7 +265,7 @@ class FSM extends React.Component {
                     selector: "node[type = 'outcome']",
                     style: {
                       backgroundColor: "red",
-                      //shape: "diamond",
+                      shape: "round-rectangle",
                     },
                   },
                   {
@@ -299,7 +293,7 @@ class FSM extends React.Component {
                   },
                 ]}
                 layout={layout}
-                style={{ width: "100%", height: "75vh" }}
+                style={{ width: "100%", height: "40vh" }}
                 zoomingEnabled={true}
                 boxSelectionEnabled={false}
                 autoungrabify={true}
