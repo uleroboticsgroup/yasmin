@@ -18,10 +18,10 @@ class Viewer extends React.Component {
     fetch("/get_fsms")
       .then((res) => res.json())
       .then((data) => {
-        var aux_fsm_list = [{ fsm_name: "ALL" }];
+        let aux_fsm_list = [{ fsm_name: "ALL" }];
 
-        for (var key in data) {
-          var value = data[key];
+        for (let key in data) {
+          let value = data[key];
           aux_fsm_list.push(value);
         }
 
@@ -71,10 +71,10 @@ class Viewer extends React.Component {
             >
               <Autocomplete
                 id="combo-box"
-                disableClearable="true"
+                disableClearable={true}
                 options={this.state.fsm_list}
                 getOptionLabel={(option) => option.fsm_name}
-                getOptionSelected={(option, value) =>
+                isOptionEqualToValue={(option, value) =>
                   option.fsm_name === value.fsm_name
                 }
                 defaultValue={{ fsm_name: "ALL" }}
@@ -94,14 +94,14 @@ class Viewer extends React.Component {
               if (fsm.fsm_name !== "ALL") {
                 return (
                   <Grid item xs={6} key={fsm.fsm_name}>
-                    <FSM fsm_data={fsm} />
+                    <FSM fsm_data={fsm} alone={false} />
                   </Grid>
                 );
               }
             })
           ) : (
             <Grid item xs={12}>
-              <FSM fsm_data={this.state.current_fsm} />
+              <FSM fsm_data={this.state.current_fsm} alone={true} />
             </Grid>
           )}
         </Grid>

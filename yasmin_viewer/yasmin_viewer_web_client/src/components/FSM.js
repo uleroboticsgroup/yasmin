@@ -39,8 +39,6 @@ class FSM extends React.Component {
           id: fsms_stack[fsms_stack.length - 1] + outcome,
           label: outcome,
           type: "outcome",
-          width: outcome.length * 12,
-          height: (outcome.length * 12) / 2,
         },
       });
     }
@@ -51,8 +49,6 @@ class FSM extends React.Component {
       let state = states.pop();
       let parent = "";
       let type = "node";
-      let height = 50;
-      let width = 100;
 
       //// NODE ////
       if (fsm_data.fsm_name !== fsms_stack[fsms_stack.length - 1]) {
@@ -75,22 +71,12 @@ class FSM extends React.Component {
         }
       }
 
-      if (height < state.state_name.length * 6) {
-        height = state.state_name.length * 6;
-      }
-
-      if (width < state.state_name.length * 12) {
-        width = state.state_name.length * 12;
-      }
-
       nodes.push({
         data: {
           id: fsms_stack[fsms_stack.length - 1] + state.state_name,
           parent: parent,
           label: state.state_name,
           type: type,
-          width: width,
-          height: height,
         },
       });
 
@@ -157,8 +143,6 @@ class FSM extends React.Component {
                 label: outcome,
                 type: "outcome",
                 parent: fsms_stack[fsms_stack.length - 1] + state.state_name,
-                width: outcome.length * 12,
-                height: (outcome.length * 12) / 2,
               },
             });
           }
@@ -214,6 +198,11 @@ class FSM extends React.Component {
     let nodes = graph[0];
     let edges = graph[1];
 
+    let height = "40vh";
+    if (this.props.alone) {
+      height = "80vh";
+    }
+
     return (
       <div
         style={{
@@ -250,8 +239,11 @@ class FSM extends React.Component {
                       borderWidth: 2,
                       textValign: "center",
                       textHalign: "center",
-                      width: "data(width)",
-                      height: "data(height)",
+                      fontSize: 15,
+                      height: "label",
+                      width: "label",
+                      paddingBottom: 15,
+                      paddingLeft: 20,
                     },
                   },
                   {
@@ -266,6 +258,8 @@ class FSM extends React.Component {
                     style: {
                       backgroundColor: "red",
                       shape: "round-rectangle",
+                      paddingBottom: 10,
+                      paddingLeft: 10,
                     },
                   },
                   {
@@ -293,7 +287,7 @@ class FSM extends React.Component {
                   },
                 ]}
                 layout={layout}
-                style={{ width: "100%", height: "40vh" }}
+                style={{ width: "100%", height: height }}
                 zoomingEnabled={true}
                 boxSelectionEnabled={false}
                 autoungrabify={true}
