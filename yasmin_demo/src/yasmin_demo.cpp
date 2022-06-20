@@ -39,7 +39,7 @@ public:
 // define state Bar
 class BarState : public yasmin::State {
 public:
-  BarState() : yasmin::State({"outcome2"}){};
+  BarState() : yasmin::State({"outcome3"}){};
 
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
@@ -48,7 +48,7 @@ public:
 
     std::cout << blackboard->get<std::string>("foo_str") << "\n";
 
-    return "outcome2";
+    return "outcome3";
   }
 
   std::string to_string() { return "BarState"; }
@@ -62,12 +62,12 @@ public:
 
     // create a state machine
     auto sm = std::make_shared<yasmin::StateMachine>(
-        yasmin::StateMachine({"outcome4", "outcome5"}));
+        yasmin::StateMachine({"outcome4"}));
 
     // add states
     sm->add_state("FOO", std::make_shared<FooState>(),
                   {{"outcome1", "BAR"}, {"outcome2", "outcome4"}});
-    sm->add_state("BAR", std::make_shared<BarState>(), {{"outcome2", "FOO"}});
+    sm->add_state("BAR", std::make_shared<BarState>(), {{"outcome3", "FOO"}});
 
     // pub
     this->yamin_pub = std::make_unique<yasmin_viewer::YasminViewerPub>(

@@ -31,14 +31,14 @@ class FooState(State):
 # define state Bar
 class BarState(State):
     def __init__(self):
-        super().__init__(outcomes=["outcome2"])
+        super().__init__(outcomes=["outcome3"])
 
     def execute(self, blackboard):
         print("Executing state BAR")
         time.sleep(3)
 
         print(blackboard.foo_str)
-        return "outcome2"
+        return "outcome3"
 
 
 class DemoNode(Node):
@@ -47,14 +47,14 @@ class DemoNode(Node):
         super().__init__("yasmin_node")
 
         # create a state machine
-        sm = StateMachine(outcomes=["outcome4", "outcome5"])
+        sm = StateMachine(outcomes=["outcome4"])
 
         # add states
         sm.add_state("FOO", FooState(),
                      transitions={"outcome1": "BAR",
                                   "outcome2": "outcome4"})
         sm.add_state("BAR", BarState(),
-                     transitions={"outcome2": "FOO"})
+                     transitions={"outcome3": "FOO"})
 
         # pub
         YasminViewerPub(self, "YASMIN_DEMO", sm)
