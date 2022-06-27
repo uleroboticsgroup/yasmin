@@ -10,7 +10,9 @@ class Viewer extends React.Component {
 
     this.state = {
       fsm_list: [],
-      current_fsm: { fsm_name: "ALL" },
+      fsm_name_list: [],
+      current_fsm_data: undefined,
+      current_fsm: "ALL",
     };
   }
 
@@ -18,28 +20,36 @@ class Viewer extends React.Component {
     fetch("/get_fsms")
       .then((res) => res.json())
       .then((data) => {
-        let aux_fsm_list = [{ fsm_name: "ALL" }];
+        let fsm_list = [];
+        let fsm_name_list = ["ALL"];
 
         for (let key in data) {
-          let value = data[key];
-          aux_fsm_list.push(value);
+          fsm_name_list.push(key);
+          fsm_list.push(data[key]);
         }
 
-        this.setState({ fsm_list: aux_fsm_list });
+        this.setState({
+          fsm_list: fsm_list,
+          fsm_name_list: fsm_name_list,
+        });
       });
   }
 
   get_fsm() {
-    fetch("/get_fsm/" + this.state.current_fsm.fsm_name)
+    fetch("/get_fsm/" + this.state.current_fsm)
       .then((res) => res.json())
       .then((data) => {
-        this.setState({ current_fsm: data });
+        if (Object.keys(data).length !== 0) {
+          this.setState({ current_fsm_data: data });
+        } else {
+          this.setState({ current_fsm: "ALL" });
+        }
       });
   }
 
   componentDidMount() {
     this.interval = setInterval(() => {
-      if (this.state.current_fsm.fsm_name === "ALL") {
+      if (this.state.current_fsm === "ALL") {
         this.get_fsms();
       } else {
         this.get_fsm();
@@ -72,12 +82,11 @@ class Viewer extends React.Component {
               <Autocomplete
                 id="combo-box"
                 disableClearable={true}
-                options={this.state.fsm_list}
-                getOptionLabel={(option) => option.fsm_name}
-                isOptionEqualToValue={(option, value) =>
-                  option.fsm_name === value.fsm_name
-                }
-                defaultValue={{ fsm_name: "ALL" }}
+                options={this.state.fsm_name_list}
+                getOptionLabel={(option) => option}
+                isOptionEqualToValue={(option, value) => option === value}
+                defaultValue={"ALL"}
+                value={this.state.current_fsm}
                 onChange={(event, value) => {
                   this.setState({ current_fsm: value });
                 }}
@@ -89,19 +98,17 @@ class Viewer extends React.Component {
             </div>
           </Grid>
 
-          {this.state.current_fsm.fsm_name === "ALL" ? (
+          {this.state.current_fsm === "ALL" ? (
             this.state.fsm_list.map((fsm) => {
-              if (fsm.fsm_name !== "ALL") {
-                return (
-                  <Grid item xs={6} key={fsm.fsm_name}>
-                    <FSM fsm_data={fsm} alone={false} />
-                  </Grid>
-                );
-              }
+              return (
+                <Grid item xs={6} key={fsm[0].name}>
+                  <FSM fsm_data={fsm} alone={false} />
+                </Grid>
+              );
             })
           ) : (
             <Grid item xs={12}>
-              <FSM fsm_data={this.state.current_fsm} alone={true} />
+              <FSM fsm_data={this.state.current_fsm_data} alone={true} />
             </Grid>
           )}
         </Grid>

@@ -15,153 +15,111 @@ class FSM extends React.Component {
     let nodes = [];
     let edges = [];
 
-    let fsms_stack = [];
-    let fsm_outcomes_stack = [];
-    let state_amount_stack = [];
-    let current_state_path = fsm_data.fsm_name + fsm_data.current_state;
+    // get current state
+    let current_state = 0;
 
-    let fsm_structure = fsm_data.fsm_structure;
-    let states = Array.from(fsm_structure.states);
-
-    fsms_stack.push(fsm_data.fsm_name);
-    state_amount_stack.push(states.length);
-
-    let aux_outcomes = [];
-    let outcomes = fsm_structure.final_outcomes;
-
-    for (let key in outcomes) {
-      let outcome = outcomes[key];
-
-      aux_outcomes.push(outcome);
-
-      nodes.push({
-        data: {
-          id: fsms_stack[fsms_stack.length - 1] + outcome,
-          label: outcome,
-          type: "outcome",
-        },
-      });
+    while (current_state >= 0) {
+      if (fsm_data[current_state].is_fsm) {
+        current_state = fsm_data[current_state].current_state;
+      } else {
+        break;
+      }
     }
 
-    fsm_outcomes_stack.push(aux_outcomes);
+    // create nodes and edges
+    for (let state_id in fsm_data) {
+      let state = fsm_data[state_id];
+      let type = "state";
+      let name = state.name;
 
-    while (states.length > 0) {
-      let state = states.pop();
-      let parent = "";
-      let type = "node";
-
-      //// NODE ////
-      if (fsm_data.fsm_name !== fsms_stack[fsms_stack.length - 1]) {
-        parent = fsms_stack[fsms_stack.length - 1];
-      }
-
-      if (
-        current_state_path ===
-        fsms_stack[fsms_stack.length - 1] + state.state_name
-      ) {
-        if (!state.is_fsm) {
-          type = "current_state";
-        } else {
-          current_state_path = current_state_path + state.current_state;
-          type = "current_fsm";
+      if (state.is_fsm) {
+        type = "fsm";
+        if (state.id === 0) {
+          name = "";
         }
       } else {
-        if (state.is_fsm) {
-          type = "fsm";
+        if (current_state === state.id) {
+          type = "current_state";
         }
       }
 
-      nodes.push({
-        data: {
-          id: fsms_stack[fsms_stack.length - 1] + state.state_name,
-          parent: parent,
-          label: state.state_name,
-          type: type,
-        },
-      });
+      if (state.id > 0) {
+        nodes.push({
+          data: {
+            id: fsm_data[0].name + "node" + state.id,
+            parent: fsm_data[0].name + "node" + state.parent,
+            label: name,
+            type: type,
+          },
+        });
+      }
 
-      state_amount_stack[state_amount_stack.length - 1] -= 1;
+      // outcome
+      for (let outcome_id in state.outcomes) {
+        let outcome = state.outcomes[outcome_id];
 
-      //// TRANSITIONS ////
-      for (let key in state.outcomes) {
-        let outcome = state.outcomes[key];
-        let source = fsms_stack[fsms_stack.length - 1] + state.state_name;
+        // FSM outcome
+        if (state.is_fsm) {
+          nodes.push({
+            data: {
+              id: fsm_data[0].name + "node" + state.id + outcome,
+              parent: fsm_data[0].name + "node" + state.id,
+              label: outcome,
+              type: "outcome",
+            },
+          });
+        }
+
+        // edges
+        let target = 0;
+        let source = state.id;
 
         if (state.is_fsm) {
-          source =
-            fsms_stack[fsms_stack.length - 1] + state.state_name + outcome;
+          source = source + outcome;
         }
 
         if (state.transitions.hasOwnProperty(outcome)) {
+          let transition = state.transitions[outcome];
+
+          // transition to state
+          for (let aux_state_id in fsm_data) {
+            let aux_state = fsm_data[aux_state_id];
+
+            if (
+              aux_state.name === transition &&
+              aux_state.parent === state.parent
+            ) {
+              target = aux_state.id;
+              break;
+            }
+          }
+
+          // transition to outcome
+          if (target === 0 && state.parent >= 0) {
+            for (let outcome_id in fsm_data[state.parent].outcomes) {
+              let outcome = fsm_data[state.parent].outcomes[outcome_id];
+              if (outcome === transition) {
+                target = state.parent + outcome;
+                break;
+              }
+            }
+          }
+
+          // state outcome to parent outcome
+        } else {
+          target = state.parent + outcome;
+        }
+
+        if (state.parent >= 0) {
           edges.push({
             data: {
-              id:
-                fsms_stack[fsms_stack.length - 1] +
-                state.state_name +
-                outcome +
-                state.transitions[outcome],
-              source: source,
-              target:
-                fsms_stack[fsms_stack.length - 1] + state.transitions[outcome],
+              id: fsm_data[0].name + "edge" + state.id + outcome,
+              source: fsm_data[0].name + "node" + source,
+              target: fsm_data[0].name + "node" + target,
               label: outcome,
             },
           });
-        } else {
-          if (
-            fsm_outcomes_stack[fsm_outcomes_stack.length - 1].includes(outcome)
-          ) {
-            edges.push({
-              data: {
-                id:
-                  fsms_stack[fsms_stack.length - 1] +
-                  state.state_name +
-                  outcome +
-                  outcome,
-                source: source,
-                target: fsms_stack[fsms_stack.length - 1] + outcome,
-                label: outcome,
-              },
-            });
-          }
         }
-      }
-
-      //// STATE IS FSM ////
-      if (state.is_fsm) {
-        aux_outcomes = [];
-        for (let key in state.outcomes) {
-          let outcome = state.outcomes[key];
-          aux_outcomes.push(outcome);
-
-          if (state.is_fsm) {
-            nodes.push({
-              data: {
-                id:
-                  fsms_stack[fsms_stack.length - 1] +
-                  state.state_name +
-                  outcome,
-                label: outcome,
-                type: "outcome",
-                parent: fsms_stack[fsms_stack.length - 1] + state.state_name,
-              },
-            });
-          }
-        }
-
-        fsms_stack.push(fsms_stack[fsms_stack.length - 1] + state.state_name);
-        fsm_outcomes_stack.push(aux_outcomes);
-        state_amount_stack.push(state.states.length);
-
-        for (let key in state.states) {
-          states.push(state.states[key]);
-        }
-      }
-
-      //// CLEANING STACKS ////
-      while (state_amount_stack[state_amount_stack.length - 1] === 0) {
-        state_amount_stack.pop();
-        fsms_stack.pop();
-        fsm_outcomes_stack.pop();
       }
     }
 
@@ -183,7 +141,7 @@ class FSM extends React.Component {
         spacing: 40,
         direction: "DOWN",
         nodePlacement: "BRANDES_KOEPF",
-        nodeLayering: "INTERACTIVE",
+        nodeLayering: "LONGEST_PATH",
         fixedAlignment: "BALANCED",
         layoutHierarchy: true,
         mergeHierarchyCrossingEdges: false,
@@ -193,6 +151,10 @@ class FSM extends React.Component {
     cytoscape.use(klay);
     //cytoscape.use(cola);
     //cytoscape.use(dagre);
+
+    if (this.props.fsm_data === undefined) {
+      return <div></div>;
+    }
 
     let graph = this.prepare_graph(this.props.fsm_data);
     let nodes = graph[0];
@@ -214,7 +176,7 @@ class FSM extends React.Component {
         <Grid container spacing={1}>
           <Grid item xs={12}>
             <Typography variant="h4" component="h4" gutterBottom align="center">
-              {this.props.fsm_data.fsm_name}
+              {this.props.fsm_data[0].name}
             </Typography>
           </Grid>
 
@@ -258,7 +220,7 @@ class FSM extends React.Component {
                     style: {
                       backgroundColor: "red",
                       shape: "round-rectangle",
-                      paddingBottom: 10,
+                      paddingTop: 10,
                       paddingLeft: 10,
                     },
                   },
@@ -266,14 +228,6 @@ class FSM extends React.Component {
                     selector: "node[type = 'current_state']",
                     style: {
                       backgroundColor: "green",
-                    },
-                  },
-                  {
-                    selector: "node[type = 'current_fsm']",
-                    style: {
-                      borderColor: "blue",
-                      textValign: "top",
-                      textHalign: "center",
                     },
                   },
                   {

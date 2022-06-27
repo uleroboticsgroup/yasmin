@@ -1,4 +1,2 @@
 
-string fsm_name
-string current_state
-yasmin_interfaces/Structure fsm_structure
+yasmin_interfaces/State[] states

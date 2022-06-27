@@ -14,7 +14,6 @@ from simple_node import Node
 
 from yasmin_interfaces.msg import (
     StateMachine,
-    StateInfo,
     State,
     Transition
 )
@@ -84,56 +83,35 @@ class YasminFsmViewer(Node):
 
         return transition_dict
 
-    def state_info_msg_to_dict(self, msg: StateInfo):
-        state_info_dict = {
-            "state_name": msg.state_name,
+    def state_msg_to_dict(self, msg: State):
+        state_dict = {
+            "id": msg.id,
+            "parent": msg.parent,
+            "name": msg.name,
             "transitions": self.transition_msg_to_dict(msg.transitions),
             "outcomes": msg.outcomes,
-            "is_fsm": False
+            "is_fsm": False,
+            "is_fsm": msg.is_fsm,
+            "current_state": msg.current_state
         }
-        return state_info_dict
+        return state_dict
 
-    def state_msg_to_dict(self, msg: State):
-        if msg.is_fsm:
-            fsm_dict = self.state_info_msg_to_dict(msg.state_info)
-            fsm_dict["is_fsm"] = True
-            fsm_dict["states"] = []
-            fsm_dict["current_state"] = msg.current_state
+    def msg_to_dict(self,  msg: StateMachine):
 
-            for state in msg.states:
-                fsm_dict["states"].append(self.state_info_msg_to_dict(state))
+        states_dict = []
 
-            return fsm_dict
+        for state in msg.states:
+            states_dict.append(self.state_msg_to_dict(state))
 
-        else:
-            return self.state_info_msg_to_dict(msg.state_info)
-
-    def msg_to_dict(self, msg: StateMachine):
-        msg_dict = {
-            "fsm_name": msg.fsm_name,
-            "current_state": msg.current_state,
-            "fsm_structure": {
-                "final_outcomes": msg.fsm_structure.final_outcomes,
-                "states": [
-
-                ]
-            }
-        }
-
-        for state in msg.fsm_structure.states:
-            msg_dict["fsm_structure"]["states"].append(
-                self.state_msg_to_dict(state))
-
-        return msg_dict
+        return states_dict
 
     def fsm_viewer_cb(self, msg: StateMachine):
 
         while not self.__started:
             time.sleep(0.05)
 
-        # self.get_logger().info(str(msg))
-        self.__fsm_dict[msg.fsm_name.upper()] = self.msg_to_dict(msg)
-        # self.get_logger().info(str(self.__fsm_dict[msg.fsm_name]))
+        if msg.states:
+            self.__fsm_dict[msg.states[0].name.upper()] = self.msg_to_dict(msg)
 
 
 def main(args=None):

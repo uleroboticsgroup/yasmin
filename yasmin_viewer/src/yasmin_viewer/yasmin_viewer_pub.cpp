@@ -15,78 +15,62 @@ YasminViewerPub::YasminViewerPub(rclcpp::Node *node, std::string fsm_name,
   this->thread->detach();
 }
 
-yasmin_interfaces::msg::StateInfo YasminViewerPub::parse_state_info(
-    std::string state_name, std::shared_ptr<yasmin::State> state,
+std::vector<yasmin_interfaces::msg::Transition>
+YasminViewerPub::parse_transitions(
     std::map<std::string, std::string> transitions) {
-
-  auto state_info_msg = yasmin_interfaces::msg::StateInfo();
+  std::vector<yasmin_interfaces::msg::Transition> transitions_list;
 
   for (auto const &transition : transitions) {
     auto transition_msg = yasmin_interfaces::msg::Transition();
     transition_msg.outcome = transition.first;
     transition_msg.state = transition.second;
-    state_info_msg.transitions.push_back(transition_msg);
+    transitions_list.push_back(transition_msg);
   }
-
-  for (std::string outcome : state->get_outcomes()) {
-    state_info_msg.outcomes.push_back(outcome);
-  }
-
-  state_info_msg.state_name = state_name;
-
-  return state_info_msg;
+  return transitions_list;
 }
 
-yasmin_interfaces::msg::Structure YasminViewerPub::parse_states(
-    std::map<std::string, std::shared_ptr<yasmin::State>> states,
-    std::map<std::string, std::map<std::string, std::string>> transitions) {
+void YasminViewerPub::parse_state(
+    std::string state_name, std::shared_ptr<yasmin::State> state,
+    std::map<std::string, std::string> transitions,
+    std::vector<yasmin_interfaces::msg::State> &states_list, int parent) {
 
-  auto structure_msg = yasmin_interfaces::msg::Structure();
+  auto state_msg = yasmin_interfaces::msg::State();
 
-  for (auto const &state : states) {
+  state_msg.id = states_list.size();
+  state_msg.parent = parent;
 
-    auto state_msg = yasmin_interfaces::msg::State();
-    auto state_info = this->parse_state_info(state.first, state.second,
-                                             transitions.at(state.first));
-    state_msg.state_info = state_info;
+  // state info
+  state_msg.name = state_name;
+  state_msg.transitions = this->parse_transitions(transitions);
+  state_msg.outcomes = state->get_outcomes();
 
-    // check if state is a fsm
-    auto state_machine =
-        std::dynamic_pointer_cast<yasmin::StateMachine>(state.second);
+  // state is a FSM
+  auto fsm = std::dynamic_pointer_cast<yasmin::StateMachine>(state);
+  state_msg.is_fsm = (fsm != nullptr);
 
-    if (state_machine != nullptr) {
+  // add state
+  states_list.push_back(state_msg);
 
-      auto aux_structure_msg = this->parse_states(
-          state_machine->get_states(), state_machine->get_transitions());
-      state_msg.is_fsm = true;
+  // states of the FSM
+  if (state_msg.is_fsm) {
+    auto states = fsm->get_states();
+    auto aux_transitions = fsm->get_transitions();
 
-      for (yasmin_interfaces::msg::State aux_state_msg :
-           aux_structure_msg.states) {
-        state_msg.states.push_back(aux_state_msg.state_info);
-      }
-
-      state_msg.current_state = state_machine->get_current_state();
+    for (auto const &state : states) {
+      this->parse_state(state.first, state.second, aux_transitions[state.first],
+                        states_list, state_msg.id);
     }
 
-    structure_msg.states.push_back(state_msg);
+    std::string current_state = fsm->get_current_state();
+    for (auto const &child_state : states_list) {
+
+      if (child_state.name == current_state &&
+          child_state.parent == state_msg.id) {
+        states_list[state_msg.id].current_state = child_state.id;
+        break;
+      }
+    }
   }
-
-  return structure_msg;
-}
-
-yasmin_interfaces::msg::StateMachine YasminViewerPub::parse_state_machine(
-    std::shared_ptr<yasmin::StateMachine> fsm) {
-
-  auto state_machine_msg = yasmin_interfaces::msg::StateMachine();
-
-  auto structure_msg =
-      this->parse_states(fsm->get_states(), fsm->get_transitions());
-  structure_msg.final_outcomes = fsm->get_outcomes();
-
-  state_machine_msg.fsm_structure = structure_msg;
-  state_machine_msg.current_state = fsm->get_current_state();
-
-  return state_machine_msg;
 }
 
 void YasminViewerPub::start_publisher(
@@ -97,12 +81,13 @@ void YasminViewerPub::start_publisher(
           "/fsm_viewer", 10);
 
   while (rclcpp::ok()) {
+    std::vector<yasmin_interfaces::msg::State> states_list;
+    this->parse_state(fsm_name, fsm, {}, states_list, -1);
 
-    auto state_machine_msg = this->parse_state_machine(fsm);
-    state_machine_msg.fsm_name = fsm_name;
+    auto state_machine_msg = yasmin_interfaces::msg::StateMachine();
+    state_machine_msg.states = states_list;
 
     publisher->publish(state_machine_msg);
-
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
   }
 }
