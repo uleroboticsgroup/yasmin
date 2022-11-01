@@ -20,10 +20,17 @@ public:
   int times;
 
   PrintOdometryState(simple_node::Node *node, int times)
-      : yasmin_ros::MonitorState<nav_msgs::msg::Odometry>(
-            node, "odom", {"outcome1", "outcome2"},
-            std::bind(&PrintOdometryState::monitor_handler, this, _1), 10, 10,
-            10000000) {
+      : yasmin_ros::MonitorState<nav_msgs::msg::Odometry> // msg type
+        (node,                                            // node
+         "odom",                                          // topic name
+         {"outcome1", "outcome2"},                        // outcomes
+         std::bind(&PrintOdometryState::monitor_handler, this,
+                   _1), // monitor handler callback
+         10,            // qos for the topic sbscription
+         10,            // queue of the monitor handler callback
+         10000000       // timeout to wait for msgs in microseconds
+                        // if not None, CANCEL outcome is added
+        ) {
     this->times = times;
   };
 

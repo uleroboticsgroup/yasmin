@@ -14,12 +14,16 @@ from yasmin_viewer import YasminViewerPub
 # define state Foo
 class PrintOdometryState(MonitorState):
     def __init__(self, node: Node, times: int) -> None:
-        super().__init__(node,
-                         Odometry,
-                         "odom",
-                         ["outcome1", "outcome2"],
-                         self.monitor_handler,
-                         timeout=10)
+        super().__init__(node,  # node
+                         Odometry,  # msg type
+                         "odom",  # topic name
+                         ["outcome1", "outcome2"],  # outcomes
+                         self.monitor_handler,  # monitor handler callback
+                         qos=10,  # qos for the topic sbscription
+                         msg_queue=10,  # queue of the monitor handler callback
+                         timeout=10  # timeout to wait for msgs in seconds
+                                     # if not None, CANCEL outcome is added
+                         )
         self.times = times
 
     def monitor_handler(self, blackboard) -> str:
