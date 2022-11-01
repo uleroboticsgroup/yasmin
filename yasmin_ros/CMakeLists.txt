@@ -5,10 +5,10 @@ project(yasmin_ros)
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
-
 
 # Find dependencies
 find_package(ament_cmake REQUIRED)
@@ -26,12 +26,13 @@ set(LIB ${CMAKE_PROJECT_NAME}_lib)
 set(SOURCES
   src/yasmin_ros/action_state.cpp
   src/yasmin_ros/service_state.cpp
+  src/yasmin_ros/monitor_state.cpp
 )
 
 set(DEPENDENCIES
-    rclcpp
-    simple_node
-    yasmin
+  rclcpp
+  simple_node
+  yasmin
 )
 
 add_library(${LIB} STATIC ${SOURCES})
@@ -51,7 +52,6 @@ install(DIRECTORY include/
 ament_export_include_directories(include)
 ament_export_libraries(${LIB})
 ament_export_dependencies(${DEPENDENCIES})
-
 
 # Python
 ament_python_install_package(${PROJECT_NAME})

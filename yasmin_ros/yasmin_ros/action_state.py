@@ -15,7 +15,7 @@ class AcionState(State):
                  action_name: str,
                  create_goal_handler: Callable,
                  outcomes: List[str] = None,
-                 result_handler: Callable = None):
+                 result_handler: Callable = None) -> None:
 
         _outcomes = [SUCCEED, ABORT, CANCEL]
 
@@ -36,7 +36,7 @@ class AcionState(State):
     def _create_goal(self, blackboard: Blackboard):
         return self.__create_goal_handler(blackboard)
 
-    def cancel_state(self):
+    def cancel_state(self) -> None:
         self.__action_client.cancel_goal()
         super().cancel_state()
 

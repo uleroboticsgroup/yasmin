@@ -1,0 +1,87 @@
+
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include "nav_msgs/msg/odometry.hpp"
+#include "simple_node/node.hpp"
+
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/monitor_state.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using std::placeholders::_1;
+
+class PrintOdometryState
+    : public yasmin_ros::MonitorState<nav_msgs::msg::Odometry> {
+
+public:
+  int times;
+
+  PrintOdometryState(simple_node::Node *node, int times)
+      : yasmin_ros::MonitorState<nav_msgs::msg::Odometry>(
+            node, "odom", {"outcome1", "outcome2"},
+            std::bind(&PrintOdometryState::monitor_handler, this, _1), 10, 10,
+            10000000) {
+    this->times = times;
+  };
+
+  std::string
+  monitor_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+    nav_msgs::msg::Odometry msg =
+        blackboard->get<nav_msgs::msg::Odometry>("odom_msg");
+    std::cout << "x: " << msg.pose.pose.position.x << "\n";
+    std::cout << "y: " << msg.pose.pose.position.y << "\n";
+    std::cout << "z: " << msg.pose.pose.position.z << "\n";
+    std::cout << "\n";
+
+    this->times--;
+
+    if (this->times <= 0) {
+      return "outcome2";
+    }
+
+    return "outcome1";
+  }
+
+  std::string to_string() { return "PrintOdometryState"; }
+};
+
+class MonitorDemoNode : public simple_node::Node {
+public:
+  std::unique_ptr<yasmin_viewer::YasminViewerPub> yamin_pub;
+
+  MonitorDemoNode() : simple_node::Node("yasmin_node") {
+
+    // create a state machine
+    auto sm = std::make_shared<yasmin::StateMachine>(
+        yasmin::StateMachine({"outcome4"}));
+
+    // add states
+    sm->add_state("PRINTING_ODOM",
+                  std::make_shared<PrintOdometryState>(this, 5),
+                  {{"outcome1", "PRINTING_ODOM"},
+                   {"outcome2", "outcome4"},
+                   {yasmin_ros::basic_outcomes::CANCEL, "outcome4"}});
+
+    // pub
+    this->yamin_pub = std::make_unique<yasmin_viewer::YasminViewerPub>(
+        yasmin_viewer::YasminViewerPub(this, "YASMIN_MONITOR_DEMO", sm));
+
+    // execute
+    std::string outcome = (*sm.get())();
+    std::cout << outcome << "\n";
+  }
+};
+
+int main(int argc, char *argv[]) {
+
+  std::cout << "yasmin_monitor_demo\n";
+  rclcpp::init(argc, argv);
+  auto node = std::make_shared<MonitorDemoNode>();
+  node->join_spin();
+  rclcpp::shutdown();
+
+  return 0;
+}

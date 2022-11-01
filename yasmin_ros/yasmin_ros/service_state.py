@@ -15,7 +15,7 @@ class ServiceState(State):
                  srv_name: str,
                  create_request_handler: Callable,
                  outcomes: List[str] = None,
-                 response_handler: Callable = None):
+                 response_handler: Callable = None) -> None:
 
         _outcomes = [SUCCEED, ABORT]
 

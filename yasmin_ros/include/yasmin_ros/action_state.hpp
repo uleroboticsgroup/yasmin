@@ -58,7 +58,8 @@ public:
     yasmin::State::cancel_state();
   }
 
-  std::string execute(yasmin::blackboard::Blackboard blackboard) {
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
     Goal goal = this->create_goal(blackboard);
 

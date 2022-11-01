@@ -6,8 +6,6 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-
-#include "simple_node/actions/action_client.hpp"
 #include "simple_node/node.hpp"
 
 #include "yasmin/blackboard/blackboard.hpp"
@@ -56,7 +54,8 @@ public:
     }
   }
 
-  std::string execute(yasmin::blackboard::Blackboard blackboard) override {
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
 
     Request request = this->create_request(blackboard);
 
