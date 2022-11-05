@@ -37,7 +37,7 @@ public:
   std::string
   monitor_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
     nav_msgs::msg::Odometry msg =
-        blackboard->get<nav_msgs::msg::Odometry>("odom_msg");
+        blackboard->get<nav_msgs::msg::Odometry>("msg");
     std::cout << "x: " << msg.pose.pose.position.x << "\n";
     std::cout << "y: " << msg.pose.pose.position.y << "\n";
     std::cout << "z: " << msg.pose.pose.position.z << "\n";

@@ -27,7 +27,7 @@ class PrintOdometryState(MonitorState):
         self.times = times
 
     def monitor_handler(self, blackboard) -> str:
-        print(blackboard.odom_msg)
+        print(blackboard.msg)
 
         self.times -= 1
 

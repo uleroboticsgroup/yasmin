@@ -27,7 +27,6 @@ class MonitorState(State):
         super().__init__(outcomes)
 
         self.monitor_handler = monitor_handler
-        self.topic_name = topic_name
         self.msg_list = []
         self.msg_queue = msg_queue
         self.timeout = timeout
@@ -62,7 +61,7 @@ class MonitorState(State):
 
                 elapsed_time += self.time_to_wait
 
-        blackboard[self.topic_name + "_msg"] = self.msg_list.pop(0)
+        blackboard["msg"] = self.msg_list.pop(0)
 
         outcome = self.monitor_handler(blackboard)
         self.monitoring = False

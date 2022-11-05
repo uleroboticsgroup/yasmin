@@ -55,7 +55,6 @@ public:
 
     // other attributes
     this->monitor_handler = monitor_handler;
-    this->topic_name = topic_name;
     this->msg_queue = msg_queue;
     this->timeout = timeout;
     this->time_to_wait = 1000;
@@ -88,7 +87,7 @@ public:
       elapsed_time += this->time_to_wait;
     }
 
-    blackboard->set<MsgT>(this->topic_name + "_msg", this->msg_list.at(0));
+    blackboard->set<MsgT>("msg", this->msg_list.at(0));
     this->msg_list.erase(this->msg_list.begin());
 
     std::string outcome = this->monitor_handler(blackboard);
