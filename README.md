@@ -243,6 +243,29 @@ http://localhost:5000/
 ## Citations
 
 ```bibtex
+@InProceedings{10.1007/978-3-031-21062-4_43,
+author="Gonz{\'a}lez-Santamarta, Miguel {\'A}.
+and Rodr{\'i}guez-Lera, Francisco J.
+and Matell{\'a}n-Olivera, Vicente
+and Fern{\'a}ndez-Llamas, Camino",
+editor="Tardioli, Danilo
+and Matell{\'a}n, Vicente
+and Heredia, Guillermo
+and Silva, Manuel F.
+and Marques, Lino",
+title="YASMIN: Yet Another State MachINe",
+booktitle="ROBOT2022: Fifth Iberian Robotics Conference",
+year="2023",
+publisher="Springer International Publishing",
+address="Cham",
+pages="528--539",
+abstract="State machines are a common mechanism for defining behaviors in robots where each behavior is based on identifiable stages. There are several libraries available for easing the implementation of state machines in ROS 1, however, the community was focused on SMACH or SMACC. Although these tools are still predominant, there are fewer alternatives for ROS 2. Besides, Behavior Trees are spreading fast, but there is a niche for using State Machines. Here, YASMIN is presented as yet another library specifically designed for ROS 2 for easing the design of robotic behaviors using state machines. It is available in C++ and Python, and provides some default states to speed up the development, in addition to a web viewer for monitoring the execution of the system and helping in the debugging.",
+isbn="978-3-031-21062-4"
+}
+
+```
+
+```bibtex
 @misc{yasmin,
   doi = {10.48550/ARXIV.2205.13284},
   url = {https://arxiv.org/abs/2205.13284},
