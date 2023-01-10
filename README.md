@@ -29,11 +29,16 @@ YASMIN is a project focused on implementing robot behaviors using Finite State M
 ## Installation
 
 ```shell
+# clone
 $ cd ~/ros2_ws/src
-$ git clone git@github.com:uleroboticsgroup/simple_node.git
-$ git clone git@github.com:uleroboticsgroup/yasmin.git
+$ git clone https://github.com/uleroboticsgroup/simple_node.git
+$ git clone https://github.com/uleroboticsgroup/yasmin.git
+
+# dependencies
 $ cd yasmin
 $ pip3 install -r requirements.txt
+
+# colcon
 $ cd ~/ros2_ws
 $ colcon build
 ```
