@@ -55,8 +55,6 @@ class YasminFsmViewer(Node):
         @app.route("/get_fsm/<fsm_name>",  methods=["GET"])
         def get_fsm(fsm_name):
 
-            fsm_name = fsm_name.upper()
-
             if fsm_name in self.__fsm_dict:
                 return json.dumps(self.__fsm_dict[fsm_name])
 
@@ -111,7 +109,7 @@ class YasminFsmViewer(Node):
             time.sleep(0.05)
 
         if msg.states:
-            self.__fsm_dict[msg.states[0].name.upper()] = self.msg_to_dict(msg)
+            self.__fsm_dict[msg.states[0].name] = self.msg_to_dict(msg)
 
 
 def main(args=None):

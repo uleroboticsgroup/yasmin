@@ -24,8 +24,6 @@ class StateMachine(State):
         if not transitions:
             transitions = {}
 
-        name = name.upper()
-
         self._states[name] = {
             "state": state,
             "transitions": transitions
