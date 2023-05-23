@@ -31,11 +31,10 @@ class AuxNode(Node):
         if request.order >= 0:
 
             counter = 0
-            while not self.action_server.is_canceled() and counter < request.order:
+            while not goal_handle.is_cancel_requested and counter < request.order:
                 time.sleep(1)
 
-            if self.action_server.is_canceled():
-                self.__action_server.wait_for_canceling()
+            if goal_handle.is_cancel_requested:
                 goal_handle.canceled()
 
             else:
