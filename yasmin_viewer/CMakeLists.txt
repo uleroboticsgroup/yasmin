@@ -15,7 +15,7 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(yasmin REQUIRED)
-find_package(yasmin_interfaces REQUIRED)
+find_package(yasmin_msgs REQUIRED)
 
 # C++
 include_directories(include)
@@ -29,7 +29,7 @@ set(SOURCES
 set(DEPENDENCIES
     rclcpp
     yasmin
-    yasmin_interfaces
+    yasmin_msgs
 )
 
 add_library(${LIB} STATIC ${SOURCES})

@@ -12,7 +12,7 @@ import ament_index_python
 
 from simple_node import Node
 
-from yasmin_interfaces.msg import (
+from yasmin_msgs.msg import (
     StateMachine,
     State,
     Transition
@@ -42,7 +42,7 @@ class YasminFsmViewer(Node):
                     static_folder=ament_index_python.get_package_share_directory(
                         "yasmin_viewer") + "/yasmin_viewer_web_client",
                     static_url_path="/")
-        #app.config["ENV"] = "development"
+        # app.config["ENV"] = "development"
 
         @app.route("/")
         def index():
@@ -62,7 +62,7 @@ class YasminFsmViewer(Node):
 
         self.__started = True
 
-        #app.run(host="localhost", port=5000)
+        # app.run(host="localhost", port=5000)
         serve(app, host="localhost", port=5000)
 
     def start_subscriber(self):

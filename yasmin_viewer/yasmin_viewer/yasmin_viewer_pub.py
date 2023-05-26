@@ -4,7 +4,7 @@ from typing import Dict, List
 from threading import Thread
 import rclpy
 from rclpy.node import Node
-from yasmin_interfaces.msg import (
+from yasmin_msgs.msg import (
     State as StateMsg,
     StateMachine as StateMachineMsg,
     Transition as TransitionMsg

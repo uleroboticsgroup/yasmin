@@ -2,7 +2,7 @@ int32 id
 int32 parent -1
 
 string name
-yasmin_interfaces/Transition[] transitions
+yasmin_msgs/Transition[] transitions
 string[] outcomes
 
 bool is_fsm

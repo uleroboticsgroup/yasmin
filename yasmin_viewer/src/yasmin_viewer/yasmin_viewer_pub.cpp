@@ -15,13 +15,12 @@ YasminViewerPub::YasminViewerPub(rclcpp::Node *node, std::string fsm_name,
   this->thread->detach();
 }
 
-std::vector<yasmin_interfaces::msg::Transition>
-YasminViewerPub::parse_transitions(
+std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
     std::map<std::string, std::string> transitions) {
-  std::vector<yasmin_interfaces::msg::Transition> transitions_list;
+  std::vector<yasmin_msgs::msg::Transition> transitions_list;
 
   for (auto const &transition : transitions) {
-    auto transition_msg = yasmin_interfaces::msg::Transition();
+    auto transition_msg = yasmin_msgs::msg::Transition();
     transition_msg.outcome = transition.first;
     transition_msg.state = transition.second;
     transitions_list.push_back(transition_msg);
@@ -32,9 +31,9 @@ YasminViewerPub::parse_transitions(
 void YasminViewerPub::parse_state(
     std::string state_name, std::shared_ptr<yasmin::State> state,
     std::map<std::string, std::string> transitions,
-    std::vector<yasmin_interfaces::msg::State> &states_list, int parent) {
+    std::vector<yasmin_msgs::msg::State> &states_list, int parent) {
 
-  auto state_msg = yasmin_interfaces::msg::State();
+  auto state_msg = yasmin_msgs::msg::State();
 
   state_msg.id = states_list.size();
   state_msg.parent = parent;
@@ -76,15 +75,14 @@ void YasminViewerPub::parse_state(
 void YasminViewerPub::start_publisher(
     std::string fsm_name, std::shared_ptr<yasmin::StateMachine> fsm) {
 
-  auto publisher =
-      this->node->create_publisher<yasmin_interfaces::msg::StateMachine>(
-          "/fsm_viewer", 10);
+  auto publisher = this->node->create_publisher<yasmin_msgs::msg::StateMachine>(
+      "/fsm_viewer", 10);
 
   while (rclcpp::ok()) {
-    std::vector<yasmin_interfaces::msg::State> states_list;
+    std::vector<yasmin_msgs::msg::State> states_list;
     this->parse_state(fsm_name, fsm, {}, states_list, -1);
 
-    auto state_machine_msg = yasmin_interfaces::msg::StateMachine();
+    auto state_machine_msg = yasmin_msgs::msg::StateMachine();
     state_machine_msg.states = states_list;
 
     publisher->publish(state_machine_msg);

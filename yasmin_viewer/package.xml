@@ -13,7 +13,7 @@
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>yasmin</depend>
-  <depend>yasmin_interfaces</depend>
+  <depend>yasmin_msgs</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
