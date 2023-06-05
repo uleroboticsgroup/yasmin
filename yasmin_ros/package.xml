@@ -3,9 +3,9 @@
 <package format="3">
   <name>yasmin_ros</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="mgons@unileon.es">miguel</maintainer>
-  <license>TODO: License declaration</license>
+  <description>YASMIN (Yet Another State MachINe) for ROS 2</description>
+  <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
+  <license>GPL-3</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
