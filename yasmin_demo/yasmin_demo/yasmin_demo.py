@@ -22,17 +22,18 @@ import rclpy
 from simple_node import Node
 
 from yasmin import State
+from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_viewer import YasminViewerPub
 
 
 # define state Foo
 class FooState(State):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(["outcome1", "outcome2"])
         self.counter = 0
 
-    def execute(self, blackboard):
+    def execute(self, blackboard: StateMachine) -> str:
         print("Executing state FOO")
         time.sleep(3)
 
@@ -46,10 +47,10 @@ class FooState(State):
 
 # define state Bar
 class BarState(State):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(outcomes=["outcome3"])
 
-    def execute(self, blackboard):
+    def execute(self, blackboard: StateMachine) -> str:
         print("Executing state BAR")
         time.sleep(3)
 
@@ -59,7 +60,7 @@ class BarState(State):
 
 class DemoNode(Node):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("yasmin_node")
 
         # create a state machine

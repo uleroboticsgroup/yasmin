@@ -17,7 +17,7 @@
 from typing import List, Callable
 
 from yasmin import State
-from yasmin.blackboard import Blackboard
+from yasmin import Blackboard
 from simple_node import Node
 from .basic_outcomes import SUCCEED, ABORT
 

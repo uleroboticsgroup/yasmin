@@ -20,7 +20,7 @@ from typing import List, Callable, Union
 from rclpy.qos import QoSProfile
 
 from yasmin import State
-from yasmin.blackboard import Blackboard
+from yasmin import Blackboard
 from yasmin_ros.basic_outcomes import CANCEL
 from simple_node import Node
 

@@ -15,7 +15,7 @@
 
 
 import unittest
-from yasmin.blackboard import Blackboard
+from yasmin import Blackboard
 
 
 class TestBlackboard(unittest.TestCase):

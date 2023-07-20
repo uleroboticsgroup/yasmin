@@ -21,13 +21,13 @@ import rclpy
 from simple_node import Node
 from nav_msgs.msg import Odometry
 
-from yasmin_ros import MonitorState
+from yasmin import Blackboard
 from yasmin import StateMachine
+from yasmin_ros import MonitorState
 from yasmin_ros.basic_outcomes import CANCEL
 from yasmin_viewer import YasminViewerPub
 
 
-# define state Foo
 class PrintOdometryState(MonitorState):
     def __init__(self, node: Node, times: int) -> None:
         super().__init__(node,  # node
@@ -42,7 +42,7 @@ class PrintOdometryState(MonitorState):
                          )
         self.times = times
 
-    def monitor_handler(self, blackboard) -> str:
+    def monitor_handler(self, blackboard: Blackboard) -> str:
         print(blackboard.msg)
 
         self.times -= 1
