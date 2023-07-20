@@ -30,8 +30,8 @@ namespace yasmin_ros {
 
 template <typename ActionT> class AcionState : public yasmin::State {
 
-  using Goal = typename ActionT::Goal;
-  using Result = typename ActionT::Result;
+  using Goal = typename ActionT::Goal::SharedPtr;
+  using Result = typename ActionT::Result::SharedPtr;
   using CreateGoalHandler =
       std::function<Goal(std::shared_ptr<yasmin::blackboard::Blackboard>)>;
   using ResutlHandler = std::function<std::string(
@@ -42,6 +42,12 @@ public:
              CreateGoalHandler create_goal_handler,
              std::vector<std::string> outcomes)
       : AcionState(node, action_name, create_goal_handler, outcomes, nullptr) {}
+
+  AcionState(simple_node::Node *node, std::string action_name,
+             CreateGoalHandler create_goal_handler,
+             ResutlHandler result_handler)
+      : AcionState(node, action_name, create_goal_handler, {}, result_handler) {
+  }
 
   AcionState(simple_node::Node *node, std::string action_name,
              CreateGoalHandler create_goal_handler,
@@ -67,7 +73,7 @@ public:
     }
   }
 
-  void cancel_state() override {
+  void cancel_state() {
     this->action_client->cancel_goal();
     yasmin::State::cancel_state();
   }
@@ -77,8 +83,8 @@ public:
 
     Goal goal = this->create_goal(blackboard);
 
-    this->action_client->wait_for_server();
-    this->action_client->send_goal(goal);
+    this->action_client->wait_for_action_server();
+    this->action_client->send_goal(*goal);
     this->action_client->wait_for_result();
 
     if (this->action_client->is_canceled()) {
@@ -88,7 +94,7 @@ public:
       return basic_outcomes::ABORT;
 
     } else if (this->action_client->is_succeeded()) {
-      Result result = this->action_client.get_result();
+      Result result = this->action_client->get_result();
 
       if (this->result_handler != nullptr) {
         std::string outcome = this->result_handler(blackboard, result);
@@ -97,6 +103,8 @@ public:
 
       return basic_outcomes::SUCCEED;
     }
+
+    return basic_outcomes::ABORT;
   }
 
 private:
@@ -104,7 +112,7 @@ private:
   CreateGoalHandler create_goal_handler;
   ResutlHandler result_handler;
 
-  Goal create_goal(yasmin::blackboard::Blackboard blackboard) {
+  Goal create_goal(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
     return this->create_goal_handler(blackboard);
   }
 };

@@ -75,3 +75,5 @@ class AcionState(State):
                 return outcome
 
             return SUCCEED
+
+        return ABORT
