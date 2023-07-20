@@ -21,6 +21,7 @@ find_package(yasmin_viewer REQUIRED)
 find_package(simple_node REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(example_interfaces REQUIRED)
+find_package(action_tutorials_interfaces REQUIRED)
 
 # C++
 include_directories(include)
@@ -35,6 +36,7 @@ set(DEPENDENCIES
   simple_node
   nav_msgs
   example_interfaces
+  action_tutorials_interfaces
 )
 
 # demo
@@ -76,6 +78,19 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# action client demo
+add_executable(action_client_demo
+  src/action_client_demo.cpp
+)
+set(SOURCES
+  src/action_client_demo.cpp
+)
+ament_target_dependencies(action_client_demo ${DEPENDENCIES})
+install(TARGETS
+  action_client_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_export_include_directories(include)
 ament_export_libraries(${LIB})
 
@@ -94,6 +109,11 @@ install(PROGRAMS
 
 install(PROGRAMS
   yasmin_demo/service_client_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  yasmin_demo/action_client_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
