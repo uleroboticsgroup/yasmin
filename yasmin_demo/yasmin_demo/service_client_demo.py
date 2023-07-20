@@ -31,20 +31,20 @@ from yasmin_viewer import YasminViewerPub
 
 class AddTwoIntsState(ServiceState):
     def __init__(self, node: Node) -> None:
-        super().__init__(node,  # node
-                         AddTwoInts,  # srv type
-                         "/add_two_ints",  # service name
-                         self.create_request_handler,  # cb to create
-                         ["outcome1"],  # outcomes
-                         self.response_handler  # cb to process the response
-                         )
+        super().__init__(
+            node,  # node
+            AddTwoInts,  # srv type
+            "/add_two_ints",  # service name
+            self.create_request_handler,  # cb to create the request
+            ["outcome1"],  # outcomes. Includes (SUCCEED, ABORT)
+            self.response_handler  # cb to process the response
+        )
 
     def create_request_handler(self, blackboard: Blackboard) -> AddTwoInts.Request:
 
         req = AddTwoInts.Request()
         req.a = blackboard.a
         req.b = blackboard.b
-
         return req
 
     def response_handler(
@@ -54,7 +54,6 @@ class AddTwoIntsState(ServiceState):
     ) -> str:
 
         blackboard.sum = response.sum
-
         return "outcome1"
 
 

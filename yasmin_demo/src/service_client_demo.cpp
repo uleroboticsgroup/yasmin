@@ -49,7 +49,7 @@ public:
   AddTwoIntsState(simple_node::Node *node)
       : yasmin_ros::ServiceState<example_interfaces::srv::AddTwoInts> // msg
         (node,                                                        // node
-         "/add_two_ints", // topic name
+         "/add_two_ints", // srv name
          std::bind(&AddTwoIntsState::create_request_handler, this, _1),
          {"outcome1"},
          std::bind(&AddTwoIntsState::response_handler, this, _1, _2)){};
