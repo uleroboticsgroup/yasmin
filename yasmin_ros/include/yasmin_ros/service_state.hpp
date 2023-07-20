@@ -30,8 +30,8 @@ namespace yasmin_ros {
 
 template <typename ServiceT> class ServiceState : public yasmin::State {
 
-  using Request = typename ServiceT::Request;
-  using Response = typename ServiceT::Response;
+  using Request = typename ServiceT::Request::SharedPtr;
+  using Response = typename ServiceT::Response::SharedPtr;
   using CreateRequestHandler =
       std::function<Request(std::shared_ptr<yasmin::blackboard::Blackboard>)>;
   using ResponseHandler = std::function<std::string(
@@ -98,7 +98,8 @@ private:
   CreateRequestHandler create_request_handler;
   ResponseHandler response_handler;
 
-  Request create_request(yasmin::blackboard::Blackboard blackboard) {
+  Request
+  create_request(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
     return this->create_request_handler(blackboard);
   }
 };
