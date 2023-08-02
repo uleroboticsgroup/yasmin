@@ -47,6 +47,8 @@ class MonitorState(State):
         self.timeout = timeout
         self.time_to_wait = 0.001
         self.monitoring = False
+        self.outcomes = outcomes
+        self.node = node
 
         self._sub = node.create_subscription(
             msg_type, topic_name, self.__callback, qos)
@@ -64,20 +66,28 @@ class MonitorState(State):
         elapsed_time = 0
         self.msg_list = []
         self.monitoring = True
+        valid_transition = False
 
-        while len(self.msg_list) == 0:
+        while not valid_transition:
             time.sleep(self.time_to_wait)
 
             if not self.timeout is None:
 
-                if elapsed_time >= self.timeout:
-                    self.monitoring = False
-                    return CANCEL
+                    if elapsed_time >= self.timeout:
+                        self.monitoring = False
+                        return CANCEL
 
-                elapsed_time += self.time_to_wait
+                    elapsed_time += self.time_to_wait
 
-        blackboard["msg"] = self.msg_list.pop(0)
+            if len(self.msg_list) != 0:
+                blackboard["msg"] = self.msg_list[0]
+                outcome = self.monitor_handler(blackboard)
+                if outcome is None:
+                    self.node.get_logger().warn("Transition undeclared or declared but unhandled.")
+                    self.msg_list.pop(0)
+                if outcome is not None and outcome in self.outcomes:
+                    valid_transition = True
+                    break
 
-        outcome = self.monitor_handler(blackboard)
         self.monitoring = False
         return outcome
