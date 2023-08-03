@@ -28,7 +28,7 @@
 
 namespace yasmin_ros {
 
-template <typename ActionT> class AcionState : public yasmin::State {
+template <typename ActionT> class ActionState : public yasmin::State {
 
   using Goal = typename ActionT::Goal::SharedPtr;
   using Result = typename ActionT::Result::SharedPtr;
@@ -38,18 +38,18 @@ template <typename ActionT> class AcionState : public yasmin::State {
       std::shared_ptr<yasmin::blackboard::Blackboard>, Result)>;
 
 public:
-  AcionState(simple_node::Node *node, std::string action_name,
+  ActionState(simple_node::Node *node, std::string action_name,
              CreateGoalHandler create_goal_handler,
              std::vector<std::string> outcomes)
-      : AcionState(node, action_name, create_goal_handler, outcomes, nullptr) {}
+      : ActionState(node, action_name, create_goal_handler, outcomes, nullptr) {}
 
-  AcionState(simple_node::Node *node, std::string action_name,
+  ActionState(simple_node::Node *node, std::string action_name,
              CreateGoalHandler create_goal_handler,
              ResutlHandler result_handler)
-      : AcionState(node, action_name, create_goal_handler, {}, result_handler) {
+      : ActionState(node, action_name, create_goal_handler, {}, result_handler) {
   }
 
-  AcionState(simple_node::Node *node, std::string action_name,
+  ActionState(simple_node::Node *node, std::string action_name,
              CreateGoalHandler create_goal_handler,
              std::vector<std::string> outcomes, ResutlHandler result_handler)
       : State({}) {

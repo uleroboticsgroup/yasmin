@@ -21,7 +21,7 @@ from simple_node import Node
 from .basic_outcomes import SUCCEED, ABORT, CANCEL
 
 
-class AcionState(State):
+class ActionState(State):
 
     def __init__(
         self,

@@ -18,7 +18,7 @@ import unittest
 import time
 from threading import Thread
 
-from yasmin_ros import AcionState, ServiceState
+from yasmin_ros import ActionState, ServiceState
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT
 
 from example_interfaces.action import Fibonacci
@@ -86,7 +86,7 @@ class TestYasminRos(unittest.TestCase):
             goal.order = 0
             return goal
 
-        state = AcionState(self.node, Fibonacci, "test", create_goal_cb)
+        state = ActionState(self.node, Fibonacci, "test", create_goal_cb)
         self.assertEqual(SUCCEED, state())
 
     def test_yasmin_ros_action_result_handler(self):
@@ -99,8 +99,8 @@ class TestYasminRos(unittest.TestCase):
         def result_handler(blackboard, result):
             return "new_outcome"
 
-        state = AcionState(self.node, Fibonacci, "test", create_goal_cb, [
-                           "new_outcome"], result_handler)
+        state = ActionState(self.node, Fibonacci, "test", create_goal_cb, [
+            "new_outcome"], result_handler)
         self.assertEqual("new_outcome", state())
 
     def test_yasmin_ros_action_cancel(self):
@@ -114,7 +114,7 @@ class TestYasminRos(unittest.TestCase):
             time.sleep(seconds)
             state.cancel_state()
 
-        state = AcionState(self.node, Fibonacci, "test", create_goal_cb)
+        state = ActionState(self.node, Fibonacci, "test", create_goal_cb)
         thread = Thread(target=cancel_state, args=(state, 5,))
         thread.start()
         self.assertEqual(CANCEL, state())
@@ -127,7 +127,7 @@ class TestYasminRos(unittest.TestCase):
             goal.order = -1
             return goal
 
-        state = AcionState(self.node, Fibonacci, "test", create_goal_cb)
+        state = ActionState(self.node, Fibonacci, "test", create_goal_cb)
         self.assertEqual(ABORT, state())
 
     def test_yasmin_ros_service(self):

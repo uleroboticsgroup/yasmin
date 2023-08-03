@@ -51,12 +51,12 @@ print_result(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
   return yasmin_ros::basic_outcomes::SUCCEED;
 }
 
-class FibonacciState : public yasmin_ros::AcionState<
+class FibonacciState : public yasmin_ros::ActionState<
                            action_tutorials_interfaces::action::Fibonacci> {
 
 public:
   FibonacciState(simple_node::Node *node)
-      : yasmin_ros::AcionState<
+      : yasmin_ros::ActionState<
             action_tutorials_interfaces::action::Fibonacci> // msg
         (node,                                              // node
          "/fibonacci",                                      // action name

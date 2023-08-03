@@ -24,12 +24,12 @@ from action_tutorials_interfaces.action import Fibonacci
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
-from yasmin_ros import AcionState
+from yasmin_ros import ActionState
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
 from yasmin_viewer import YasminViewerPub
 
 
-class FibonacciState(AcionState):
+class FibonacciState(ActionState):
     def __init__(self, node: Node) -> None:
         super().__init__(
             node,  # node
