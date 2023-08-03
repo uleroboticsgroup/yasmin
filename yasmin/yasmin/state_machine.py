@@ -21,7 +21,7 @@ from .blackboard import Blackboard
 
 
 class StateMachine(State):
-    def __init__(self, outcomes: List[str]):
+    def __init__(self, outcomes: List[str]) -> None:
 
         super().__init__(outcomes)
 
@@ -30,10 +30,12 @@ class StateMachine(State):
         self.__current_state = None
         self.__current_state_lock = Lock()
 
-    def add_state(self,
-                  name: str,
-                  state: State,
-                  transitions: Dict[str, str] = None):
+    def add_state(
+        self,
+            name: str,
+            state: State,
+            transitions: Dict[str, str] = None
+    ) -> None:
 
         if not transitions:
             transitions = {}
@@ -46,19 +48,19 @@ class StateMachine(State):
         if not self._start_state:
             self._start_state = name
 
-    def set_start_state(self, name: str):
+    def set_start_state(self, name: str) -> None:
         self._start_state = name.upper()
 
     def get_start_state(self) -> str:
         return self._start_state
 
-    def cancel_state(self):
+    def cancel_state(self) -> None:
         super().cancel_state()
         with self.__current_state_lock:
             if self.__current_state:
                 self._states[self.__current_state]["state"].cancel_state()
 
-    def execute(self, blackboard: Blackboard):
+    def execute(self, blackboard: Blackboard) -> str:
 
         with self.__current_state_lock:
             self.__current_state = self._start_state
@@ -71,11 +73,11 @@ class StateMachine(State):
             outcome = state["state"](blackboard)
 
             # check outcome belongs to state
-            if not outcome in state["state"].get_outcomes():
+            if outcome not in state["state"].get_outcomes():
                 raise Exception(
                     "Outcome (" + outcome + ") is not register in state " + self.__current_state)
 
-            # tranlate outcome using transitions
+            # translate outcome using transitions
             if outcome in state["transitions"]:
                 outcome = state["transitions"][outcome]
 
@@ -104,5 +106,5 @@ class StateMachine(State):
 
         return ""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._states)

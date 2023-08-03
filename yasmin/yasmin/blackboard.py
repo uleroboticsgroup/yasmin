@@ -14,25 +14,28 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import Any
+
+
 class Blackboard(object):
-    def __init__(self, init=None):
+    def __init__(self, init=None) -> None:
         if init is not None:
             self.__dict__.update(init)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Any:
         return self.__dict__[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value) -> None:
         self.__dict__[key] = value
 
-    def __delitem__(self, key):
+    def __delitem__(self, key) -> None:
         del self.__dict__[key]
 
-    def __contains__(self, key):
+    def __contains__(self, key) -> bool:
         return key in self.__dict__
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.__dict__)

@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List, Callable
+from typing import List, Callable, Type, Any
 
 from yasmin import State
 from yasmin import Blackboard
@@ -24,13 +24,15 @@ from .basic_outcomes import SUCCEED, ABORT
 
 class ServiceState(State):
 
-    def __init__(self,
-                 node: Node,
-                 srv_type,
-                 srv_name: str,
-                 create_request_handler: Callable,
-                 outcomes: List[str] = None,
-                 response_handler: Callable = None) -> None:
+    def __init__(
+        self,
+            node: Node,
+            srv_type: Type,
+            srv_name: str,
+            create_request_handler: Callable,
+            outcomes: List[str] = None,
+            response_handler: Callable = None
+    ) -> None:
 
         _outcomes = [SUCCEED, ABORT]
 
@@ -47,7 +49,7 @@ class ServiceState(State):
 
         super().__init__(_outcomes)
 
-    def _create_request(self, blackboard: Blackboard):
+    def _create_request(self, blackboard: Blackboard) -> Any:
         return self.__create_request_handler(blackboard)
 
     def execute(self, blackboard: Blackboard) -> str:

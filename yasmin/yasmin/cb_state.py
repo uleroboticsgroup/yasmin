@@ -20,10 +20,10 @@ from .state import State
 
 class CbState(State):
 
-    def __init__(self, outcomes: List[str], cb: Callable):
+    def __init__(self, outcomes: List[str], cb: Callable) -> None:
 
         super().__init__(outcomes)
         self._cb = cb
 
-    def execute(self, blackboard):
+    def execute(self, blackboard) -> str:
         return self._cb(blackboard)

@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List, Callable
+from typing import List, Callable, Type, Any
 from yasmin import State
 from yasmin import Blackboard
 from simple_node import Node
@@ -23,13 +23,15 @@ from .basic_outcomes import SUCCEED, ABORT, CANCEL
 
 class AcionState(State):
 
-    def __init__(self,
-                 node: Node,
-                 action_type,
-                 action_name: str,
-                 create_goal_handler: Callable,
-                 outcomes: List[str] = None,
-                 result_handler: Callable = None) -> None:
+    def __init__(
+        self,
+            node: Node,
+            action_type: Type,
+            action_name: str,
+            create_goal_handler: Callable,
+            outcomes: List[str] = None,
+            result_handler: Callable = None
+    ) -> None:
 
         _outcomes = [SUCCEED, ABORT, CANCEL]
 
@@ -47,7 +49,7 @@ class AcionState(State):
 
         super().__init__(_outcomes)
 
-    def _create_goal(self, blackboard: Blackboard):
+    def _create_goal(self, blackboard: Blackboard) -> Any:
         return self.__create_goal_handler(blackboard)
 
     def cancel_state(self) -> None:
@@ -70,7 +72,7 @@ class AcionState(State):
         elif self.__action_client.is_succeeded():
             result = self.__action_client.get_result()
 
-            if not self.__result_handler is None:
+            if self.__result_handler is not None:
                 outcome = self.__result_handler(blackboard, result)
                 return outcome
 

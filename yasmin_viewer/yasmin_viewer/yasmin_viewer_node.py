@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
+from typing import List, Dict
 
 import time
 from threading import Thread
@@ -41,7 +41,7 @@ from expiringdict import ExpiringDict
 
 class YasminFsmViewer(Node):
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         super().__init__("yasmin_viewer")
 
@@ -53,7 +53,7 @@ class YasminFsmViewer(Node):
 
         self.start_backend_server()
 
-    def start_backend_server(self):
+    def start_backend_server(self) -> None:
         app = Flask("yasmin_viewer",
                     static_folder=ament_index_python.get_package_share_directory(
                         "yasmin_viewer") + "/yasmin_viewer_web_client",
@@ -81,7 +81,7 @@ class YasminFsmViewer(Node):
         # app.run(host="localhost", port=5000)
         serve(app, host="localhost", port=5000)
 
-    def start_subscriber(self):
+    def start_subscriber(self) -> None:
         self.create_subscription(StateMachine,
                                  "/fsm_viewer",
                                  self.fsm_viewer_cb,
@@ -89,7 +89,7 @@ class YasminFsmViewer(Node):
 
         rclpy.spin(self)
 
-    def transition_msg_to_dict(self, tansitions: List[Transition]):
+    def transition_msg_to_dict(self, tansitions: List[Transition]) -> Dict:
         transition_dict = {}
 
         for transition in tansitions:
@@ -97,7 +97,7 @@ class YasminFsmViewer(Node):
 
         return transition_dict
 
-    def state_msg_to_dict(self, msg: State):
+    def state_msg_to_dict(self, msg: State) -> Dict:
         state_dict = {
             "id": msg.id,
             "parent": msg.parent,
@@ -110,7 +110,7 @@ class YasminFsmViewer(Node):
         }
         return state_dict
 
-    def msg_to_dict(self,  msg: StateMachine):
+    def msg_to_dict(self,  msg: StateMachine) -> Dict:
 
         states_dict = []
 
@@ -119,7 +119,7 @@ class YasminFsmViewer(Node):
 
         return states_dict
 
-    def fsm_viewer_cb(self, msg: StateMachine):
+    def fsm_viewer_cb(self, msg: StateMachine) -> None:
 
         while not self.__started:
             time.sleep(0.05)
@@ -130,9 +130,7 @@ class YasminFsmViewer(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
     YasminFsmViewer()
-
     rclpy.shutdown()
 
 

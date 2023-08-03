@@ -28,7 +28,7 @@ from yasmin import StateMachine, State
 
 class YasminViewerPub:
 
-    def __init__(self, node: Node, fsm_name: str, fsm: StateMachine):
+    def __init__(self, node: Node, fsm_name: str, fsm: StateMachine) -> None:
         self.__fsm = fsm
         self.__fsm_name = fsm_name
         self.__node = node
@@ -36,9 +36,7 @@ class YasminViewerPub:
         thread = Thread(target=self._start_publisher)
         thread.start()
 
-    def parse_transitions(self,
-                          transitions: Dict[str, str]
-                          ) -> List[TransitionMsg]:
+    def parse_transitions(self, transitions: Dict[str, str]) -> List[TransitionMsg]:
 
         transitions_list = []
 
@@ -50,12 +48,13 @@ class YasminViewerPub:
 
         return transitions_list
 
-    def parse_state(self,
-                    state_name: str,
-                    state_info: Dict[str, str],
-                    states_list: List[StateMsg],
-                    parent: int = -1
-                    ) -> None:
+    def parse_state(
+        self,
+            state_name: str,
+            state_info: Dict[str, str],
+            states_list: List[StateMsg],
+            parent: int = -1
+    ) -> None:
 
         state_msg = StateMsg()
 
@@ -97,7 +96,7 @@ class YasminViewerPub:
                     state_msg.current_state = child_state.id
                     break
 
-    def _start_publisher(self):
+    def _start_publisher(self) -> None:
         publisher = self.__node.create_publisher(
             StateMachineMsg, "/fsm_viewer", 10)
 

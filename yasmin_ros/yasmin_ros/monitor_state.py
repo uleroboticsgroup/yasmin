@@ -15,7 +15,7 @@
 
 
 import time
-from typing import List, Callable, Union
+from typing import List, Callable, Union, Type
 
 from rclpy.qos import QoSProfile
 
@@ -27,15 +27,17 @@ from simple_node import Node
 
 class MonitorState(State):
 
-    def __init__(self,
-                 node: Node,
-                 msg_type,
-                 topic_name: str,
-                 outcomes: List[str],
-                 monitor_handler: Callable,
-                 qos: Union[QoSProfile, int] = 10,
-                 msg_queue: int = 10,
-                 timeout: int = None) -> None:
+    def __init__(
+        self,
+            node: Node,
+            msg_type: Type,
+            topic_name: str,
+            outcomes: List[str],
+            monitor_handler: Callable,
+            qos: Union[QoSProfile, int] = 10,
+            msg_queue: int = 10,
+            timeout: int = None
+    ) -> None:
 
         if not timeout is None:
             outcomes = [CANCEL] + outcomes
@@ -73,11 +75,11 @@ class MonitorState(State):
 
             if not self.timeout is None:
 
-                    if elapsed_time >= self.timeout:
-                        self.monitoring = False
-                        return CANCEL
+                if elapsed_time >= self.timeout:
+                    self.monitoring = False
+                    return CANCEL
 
-                    elapsed_time += self.time_to_wait
+                elapsed_time += self.time_to_wait
 
             if len(self.msg_list) != 0:
                 blackboard["msg"] = self.msg_list[0]

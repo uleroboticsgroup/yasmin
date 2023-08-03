@@ -21,7 +21,7 @@ from .blackboard import Blackboard
 
 class State(ABC):
 
-    def __init__(self, outcomes: List[str]):
+    def __init__(self, outcomes: List[str]) -> None:
         self._outcomes = []
         self._canceled = False
 
@@ -30,7 +30,7 @@ class State(ABC):
         else:
             raise Exception("There must be at least one outcome")
 
-    def __call__(self, blackboard: Blackboard = None):
+    def __call__(self, blackboard: Blackboard = None) -> str:
         self._canceled = False
 
         if blackboard is None:
@@ -38,7 +38,7 @@ class State(ABC):
 
         outcome = self.execute(blackboard)
 
-        if not outcome in self._outcomes:
+        if outcome not in self._outcomes:
             raise Exception("Outcome " + outcome + " does not belong")
 
         return outcome
@@ -47,13 +47,13 @@ class State(ABC):
     def execute(self, blackboard: Blackboard) -> str:
         """ state execution """
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__class__.__name__
 
-    def cancel_state(self):
+    def cancel_state(self) -> None:
         self._canceled = True
 
-    def is_canceled(self):
+    def is_canceled(self) -> bool:
         return self._canceled
 
     def get_outcomes(self) -> List[str]:
