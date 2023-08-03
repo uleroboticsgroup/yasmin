@@ -17,6 +17,7 @@
 
 
 import rclpy
+from rclpy.qos import qos_profile_sensor_data
 
 from simple_node import Node
 from nav_msgs.msg import Odometry
@@ -35,15 +36,15 @@ class PrintOdometryState(MonitorState):
                          "odom",  # topic name
                          ["outcome1", "outcome2"],  # outcomes
                          self.monitor_handler,  # monitor handler callback
-                         qos=10,  # qos for the topic sbscription
+                         qos=qos_profile_sensor_data,  # qos for the topic sbscription
                          msg_queue=10,  # queue of the monitor handler callback
                          timeout=10  # timeout to wait for msgs in seconds
                                      # if not None, CANCEL outcome is added
                          )
         self.times = times
 
-    def monitor_handler(self, blackboard: Blackboard) -> str:
-        print(blackboard.msg)
+    def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -> str:
+        print(msg)
 
         self.times -= 1
 

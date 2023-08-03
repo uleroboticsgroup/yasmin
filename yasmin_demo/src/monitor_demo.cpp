@@ -17,6 +17,8 @@
 #include <memory>
 #include <string>
 
+#include "rclcpp/rclcpp.hpp"
+
 #include "nav_msgs/msg/odometry.hpp"
 #include "simple_node/node.hpp"
 
@@ -26,6 +28,7 @@
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 using std::placeholders::_1;
+using std::placeholders::_2;
 
 class PrintOdometryState
     : public yasmin_ros::MonitorState<nav_msgs::msg::Odometry> {
@@ -38,23 +41,23 @@ public:
         (node,                                            // node
          "odom",                                          // topic name
          {"outcome1", "outcome2"},                        // outcomes
-         std::bind(&PrintOdometryState::monitor_handler, this,
-                   _1), // monitor handler callback
-         10,            // qos for the topic sbscription
-         10,            // queue of the monitor handler callback
-         10000000       // timeout to wait for msgs in microseconds
-                        // if not None, CANCEL outcome is added
+         std::bind(&PrintOdometryState::monitor_handler, this, _1,
+                   _2),           // monitor handler callback
+         rclcpp::SensorDataQoS(), // qos for the topic sbscription
+         10,                      // queue of the monitor handler callback
+         10                       // timeout to wait for msgs in seconds
+                                  // if >0, CANCEL outcome is added
         ) {
     this->times = times;
   };
 
   std::string
-  monitor_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-    nav_msgs::msg::Odometry msg =
-        blackboard->get<nav_msgs::msg::Odometry>("msg");
-    std::cout << "x: " << msg.pose.pose.position.x << "\n";
-    std::cout << "y: " << msg.pose.pose.position.y << "\n";
-    std::cout << "z: " << msg.pose.pose.position.z << "\n";
+  monitor_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+                  std::shared_ptr<nav_msgs::msg::Odometry> msg) {
+
+    std::cout << "x: " << msg->pose.pose.position.x << "\n";
+    std::cout << "y: " << msg->pose.pose.position.y << "\n";
+    std::cout << "z: " << msg->pose.pose.position.z << "\n";
     std::cout << "\n";
 
     this->times--;

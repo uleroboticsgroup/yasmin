@@ -81,9 +81,8 @@ class MonitorState(State):
 
                 elapsed_time += self.time_to_wait
 
-            if len(self.msg_list) != 0:
-                blackboard["msg"] = self.msg_list[0]
-                outcome = self.monitor_handler(blackboard)
+            if self.msg_list:
+                outcome = self.monitor_handler(blackboard, self.msg_list[0])
                 if outcome is None:
                     self.node.get_logger().warn("Transition undeclared or declared but unhandled.")
                     self.msg_list.pop(0)

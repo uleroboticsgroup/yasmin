@@ -34,7 +34,7 @@ namespace yasmin_ros {
 template <typename MsgT> class MonitorState : public yasmin::State {
 
   using MonitorHandler = std::function<std::string(
-      std::shared_ptr<yasmin::blackboard::Blackboard>)>;
+      std::shared_ptr<yasmin::blackboard::Blackboard>, std::shared_ptr<MsgT>)>;
 
 public:
   MonitorState(simple_node::Node *node, std::string topic_name,
@@ -92,7 +92,7 @@ public:
 
       if (this->timeout > 0) {
 
-        if (elapsed_time >= this->timeout) {
+        if (elapsed_time / 1e6 >= this->timeout) {
           this->monitoring = false;
           return basic_outcomes::CANCEL;
         }
@@ -101,10 +101,10 @@ public:
       elapsed_time += this->time_to_wait;
     }
 
-    blackboard->set<MsgT>("msg", this->msg_list.at(0));
+    std::string outcome =
+        this->monitor_handler(blackboard, this->msg_list.at(0));
     this->msg_list.erase(this->msg_list.begin());
 
-    std::string outcome = this->monitor_handler(blackboard);
     this->monitoring = false;
     return outcome;
   }
@@ -114,7 +114,7 @@ private:
 
   MonitorHandler monitor_handler;
   std::string topic_name;
-  std::vector<MsgT> msg_list;
+  std::vector<std::shared_ptr<MsgT>> msg_list;
   int msg_queue;
   int timeout;
   int time_to_wait;
@@ -123,7 +123,7 @@ private:
   void callback(const typename MsgT::SharedPtr msg) {
 
     if (this->monitoring) {
-      this->msg_list.push_back(*msg.get());
+      this->msg_list.push_back(msg);
 
       if ((int)this->msg_list.size() >= this->msg_queue) {
         this->msg_list.erase(this->msg_list.begin());
