@@ -105,7 +105,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
           this->current_state;
     }
 
-    // tranlate outcome using transitions
+    // translate outcome using transitions
     if (transitions.find(outcome) != transitions.end()) {
       outcome = transitions.at(outcome);
     }

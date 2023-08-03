@@ -75,7 +75,7 @@ class StateMachine(State):
             # check outcome belongs to state
             if outcome not in state["state"].get_outcomes():
                 raise Exception(
-                    "Outcome (" + outcome + ") is not register in state " + self.__current_state)
+                    f"Outcome ({outcome}) is not register in state {self.__current_state}")
 
             # translate outcome using transitions
             if outcome in state["transitions"]:
@@ -94,7 +94,7 @@ class StateMachine(State):
 
             # outcome is not in the sm
             else:
-                raise Exception("Outcome (" + outcome + ") without transition")
+                raise Exception(f"Outcome ({outcome}) without transition")
 
     def get_states(self) -> Dict[str, str]:
         return self._states
