@@ -1,7 +1,7 @@
 # YASMIN (Yet Another State MachINe)
 
 <p align="center">
-  <img src="./images/logo.png" width="50%" />
+  <img src="./docs/logo.png" width="50%" />
 </p>
 
 YASMIN is a project focused on implementing robot behaviors using Finite State Machines (FSM). It is available for ROS 2, Python and C++.
@@ -48,7 +48,7 @@ $ colcon build
 A Python and a C++ demo are included.
 
 <p align="center">
-  <img src="./images/demo.gif" width="65%" />
+  <img src="./docs/demo.gif" width="65%" />
 </p>
 
 ### Python
@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
 
 This viewer allows monitoring YASMIN's FSM. It is implemented with Flask and ReactJS. A filter is provided to show only one FSM.
 
-![](./images/viewer.gif)
+![](./docs/viewer.gif)
 
 ### Usage
 
