@@ -39,7 +39,7 @@ class FooState(State):
 
         if self.counter < 3:
             self.counter += 1
-            blackboard.foo_str = "Counter: " + str(self.counter)
+            blackboard.foo_str = f"Counter: {self.counter}"
             return "outcome1"
         else:
             return "outcome2"

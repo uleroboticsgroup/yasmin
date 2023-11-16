@@ -39,7 +39,8 @@ class State(ABC):
         outcome = self.execute(blackboard)
 
         if outcome not in self._outcomes:
-            raise Exception("Outcome " + outcome + " does not belong")
+            raise Exception(
+                f"Outcome {outcome} does not belong to the outcomes of the state {self}")
 
         return outcome
 
