@@ -253,6 +253,8 @@ class FSM extends React.Component {
                       targetArrowShape: "triangle",
                       curveStyle: "bezier", //unbundled
                       //"text-rotation": "autorotate",
+                      loopDirection: "-30deg",
+                      loopSweep: "-30deg"
                     },
                   },
                 ]}
