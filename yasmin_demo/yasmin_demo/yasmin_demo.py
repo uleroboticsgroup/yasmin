@@ -33,7 +33,7 @@ class FooState(State):
         super().__init__(["outcome1", "outcome2"])
         self.counter = 0
 
-    def execute(self, blackboard: StateMachine) -> str:
+    def execute(self, blackboard: Blackboard) -> str:
         print("Executing state FOO")
         time.sleep(3)
 
@@ -50,7 +50,7 @@ class BarState(State):
     def __init__(self) -> None:
         super().__init__(outcomes=["outcome3"])
 
-    def execute(self, blackboard: StateMachine) -> str:
+    def execute(self, blackboard: Blackboard) -> str:
         print("Executing state BAR")
         time.sleep(3)
 
