@@ -89,7 +89,7 @@ class YasminFsmViewer(Node):
         # app.run(host="localhost", port=5000)
         
         _host = str(self.get_parameter('host').value)
-        _port = str(self.get_parameter('port').value)
+        _port = int(self.get_parameter('port').value)
         print(f"Started Yasmin viewer on {_host}:{str(_port)}")
         serve(app, 
               host = _host, 
