@@ -245,6 +245,14 @@ $ ros2 run yasmin_viewer yasmin_viewer_node
 
 http://localhost:5000/
 
+### Also you can custom host and port
+
+```shell
+$ ros2 run yasmin_viewer yasmin_viewer_node --ros-args -p host:=127.0.0.1 -p port:=5032
+```
+
+http://127.0.0.1:5032/
+
 ## Citations
 
 ```bibtex
