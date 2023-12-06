@@ -44,7 +44,15 @@ class YasminFsmViewer(Node):
     def __init__(self) -> None:
 
         super().__init__("yasmin_viewer")
-
+        
+        self.declare_parameters(
+            namespace="",
+            parameters=[
+                ("host", "localhost"),
+                ("port", 5000),
+            ]
+        )
+        
         self.__started = False
         self.__fsm_dict = ExpiringDict(max_len=300, max_age_seconds=3)
 
@@ -79,7 +87,13 @@ class YasminFsmViewer(Node):
         self.__started = True
 
         # app.run(host="localhost", port=5000)
-        serve(app, host="localhost", port=5000)
+        
+        _host = str(self.get_parameter('host').value)
+        _port = str(self.get_parameter('port').value)
+        print(f"Started Yasmin viewer on {_host}:{str(_port)}")
+        serve(app, 
+              host = _host, 
+              port = _port)
 
     def start_subscriber(self) -> None:
         self.create_subscription(StateMachine,
