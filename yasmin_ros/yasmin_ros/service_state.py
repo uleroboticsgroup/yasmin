@@ -26,12 +26,12 @@ class ServiceState(State):
 
     def __init__(
         self,
-            node: Node,
-            srv_type: Type,
-            srv_name: str,
-            create_request_handler: Callable,
-            outcomes: List[str] = None,
-            response_handler: Callable = None
+        node: Node,
+        srv_type: Type,
+        srv_name: str,
+        create_request_handler: Callable,
+        outcomes: List[str] = None,
+        response_handler: Callable = None
     ) -> None:
 
         _outcomes = [SUCCEED, ABORT]

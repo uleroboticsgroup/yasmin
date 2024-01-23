@@ -29,14 +29,14 @@ class MonitorState(State):
 
     def __init__(
         self,
-            node: Node,
-            msg_type: Type,
-            topic_name: str,
-            outcomes: List[str],
-            monitor_handler: Callable,
-            qos: Union[QoSProfile, int] = 10,
-            msg_queue: int = 10,
-            timeout: int = None
+        node: Node,
+        msg_type: Type,
+        topic_name: str,
+        outcomes: List[str],
+        monitor_handler: Callable,
+        qos: Union[QoSProfile, int] = 10,
+        msg_queue: int = 10,
+        timeout: int = None
     ) -> None:
 
         if not timeout is None:

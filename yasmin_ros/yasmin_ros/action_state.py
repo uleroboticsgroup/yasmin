@@ -25,12 +25,12 @@ class ActionState(State):
 
     def __init__(
         self,
-            node: Node,
-            action_type: Type,
-            action_name: str,
-            create_goal_handler: Callable,
-            outcomes: List[str] = None,
-            result_handler: Callable = None
+        node: Node,
+        action_type: Type,
+        action_name: str,
+        create_goal_handler: Callable,
+        outcomes: List[str] = None,
+        result_handler: Callable = None
     ) -> None:
 
         _outcomes = [SUCCEED, ABORT, CANCEL]
