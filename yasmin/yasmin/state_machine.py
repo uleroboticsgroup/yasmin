@@ -32,9 +32,9 @@ class StateMachine(State):
 
     def add_state(
         self,
-            name: str,
-            state: State,
-            transitions: Dict[str, str] = None
+        name: str,
+        state: State,
+        transitions: Dict[str, str] = None
     ) -> None:
 
         if not transitions:
