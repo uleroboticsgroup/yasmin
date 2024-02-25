@@ -49,7 +49,7 @@ class StateMachine(State):
             self._start_state = name
 
     def set_start_state(self, name: str) -> None:
-        self._start_state = name.upper()
+        self._start_state = name
 
     def get_start_state(self) -> str:
         return self._start_state
