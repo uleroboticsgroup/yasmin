@@ -17,3 +17,4 @@
 SUCCEED = "succeeded"
 ABORT = "aborted"
 CANCEL = "canceled"
+SKIPPED = "skipped"
