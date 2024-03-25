@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+from std_msgs.msg import String
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from typing import List, Callable, Type, Any
 
 from yasmin import State
@@ -26,12 +27,13 @@ class ServiceState(State):
 
     def __init__(
         self,
-            node: Node,
-            srv_type: Type,
-            srv_name: str,
-            create_request_handler: Callable,
-            outcomes: List[str] = None,
-            response_handler: Callable = None
+        node: Node,
+        srv_type: Type,
+        srv_name: str,
+        create_request_handler: Callable,
+        outcomes: List[str] = None,
+        response_handler: Callable = None,
+        logger_topic_name: str = None
     ) -> None:
 
         _outcomes = [SUCCEED, ABORT]
@@ -44,10 +46,19 @@ class ServiceState(State):
         self.__create_request_handler = create_request_handler
         self.__response_handler = response_handler
 
+        if logger_topic_name: 
+            pubsub_callback_group = MutuallyExclusiveCallbackGroup()
+            self.__pub_logger = node.create_publisher(String, logger_topic_name, 10,
+                                                      callback_group=pubsub_callback_group)
+        else: self.__pub_logger = None
+            
         if not self.__create_request_handler:
             raise Exception("create_request_handler is needed")
 
         super().__init__(_outcomes)
+
+    def pub_logger(self, msg: str):
+        if self.__pub_logger: self.__pub_logger.publish(String(msg))
 
     def _create_request(self, blackboard: Blackboard) -> Any:
         return self.__create_request_handler(blackboard)
