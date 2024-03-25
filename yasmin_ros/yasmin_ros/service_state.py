@@ -64,7 +64,9 @@ class ServiceState(State):
         Raises:
             ros2 publish message to <pub_topic_name>
         """
-        if self.__pub_topic: self.__pub_topic.publish(String(msg))
+        _msg = String()
+        _msg.data = msg
+        if self.__pub_topic: self.__pub_topic.publish(_msg)
 
     def _create_request(self, blackboard: Blackboard) -> Any:
         return self.__create_request_handler(blackboard)

@@ -109,4 +109,6 @@ class MonitorState(State):
         Raises:
             ros2 publish message to <pub_topic_name>
         """
-        if self.__pub_topic: self.__pub_topic.publish(String(msg))
+        _msg = String()
+        _msg.data = msg
+        if self.__pub_topic: self.__pub_topic.publish(_msg)
