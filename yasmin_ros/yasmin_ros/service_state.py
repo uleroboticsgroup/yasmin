@@ -57,7 +57,13 @@ class ServiceState(State):
 
         super().__init__(_outcomes)
 
-    def pub_logger(self, msg: str):
+    def publish_msg(self, msg: str):
+        """
+        Args:
+            msg: message (string) to publish
+        Raises:
+            ros2 publish message to <pub_topic_name>
+        """
         if self.__pub_topic: self.__pub_topic.publish(String(msg))
 
     def _create_request(self, blackboard: Blackboard) -> Any:
