@@ -15,7 +15,7 @@
 
 
 from typing import List, Callable
-from .state import State
+from yasmin.state import State
 
 
 class CbState(State):

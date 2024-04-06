@@ -14,10 +14,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Dict, List
+from typing import Dict, List, Union
 from threading import Lock
-from .state import State
-from .blackboard import Blackboard
+from yasmin.state import State
+from yasmin.blackboard import Blackboard
 
 
 class StateMachine(State):
@@ -96,7 +96,7 @@ class StateMachine(State):
             else:
                 raise Exception(f"Outcome ({outcome}) without transition")
 
-    def get_states(self) -> Dict[str, str]:
+    def get_states(self) -> Dict[str, Union[State, Dict[str, str]]]:
         return self._states
 
     def get_current_state(self) -> str:

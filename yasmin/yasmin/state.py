@@ -16,7 +16,7 @@
 
 from typing import List
 from abc import ABC, abstractmethod
-from .blackboard import Blackboard
+from yasmin.blackboard import Blackboard
 
 
 class State(ABC):
@@ -46,7 +46,8 @@ class State(ABC):
 
     @abstractmethod
     def execute(self, blackboard: Blackboard) -> str:
-        """ state execution """
+        raise NotImplementedError(
+            "Subclasses must implement the execute method")
 
     def __str__(self) -> str:
         return self.__class__.__name__

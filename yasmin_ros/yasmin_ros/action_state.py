@@ -18,7 +18,7 @@ from typing import List, Callable, Type, Any
 from yasmin import State
 from yasmin import Blackboard
 from simple_node import Node
-from .basic_outcomes import SUCCEED, ABORT, CANCEL
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
 
 
 class ActionState(State):
