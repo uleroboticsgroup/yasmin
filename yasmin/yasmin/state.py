@@ -40,7 +40,7 @@ class State(ABC):
 
         if outcome not in self._outcomes:
             raise Exception(
-                f"Outcome {outcome} does not belong to the outcomes of the state {self}. The possible outcomes are: {self._outcomes}")
+                f"Outcome '{outcome}' does not belong to the outcomes of the state '{self}'. The possible outcomes are: {self._outcomes}")
 
         return outcome
 
