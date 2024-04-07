@@ -82,7 +82,7 @@ class StateMachine(State):
                 outcome = state["transitions"][outcome]
 
             # outcome is an outcome of the sm
-            if outcome in self._outcomes:
+            if outcome in self.get_outcomes():
                 with self.__current_state_lock:
                     self.__current_state = None
                 return outcome
@@ -107,4 +107,4 @@ class StateMachine(State):
         return ""
 
     def __str__(self) -> str:
-        return str(self._states)
+        return f"StateMachine: {self._states}"
