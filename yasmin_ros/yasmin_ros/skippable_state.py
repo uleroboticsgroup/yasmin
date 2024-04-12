@@ -1,5 +1,5 @@
-from typing import List, Callable
-from std_srvs.srv import SetBool, Trigger, Type
+from typing import List, Callable, Type
+from std_srvs.srv import SetBool, Trigger
 
 from yasmin import State
 from yasmin import Blackboard
@@ -37,6 +37,8 @@ class SkippableState(State):
         res: Type.Response
     ) -> Type.Response:
         pass
+    
+    
     def execute(self, blackboard: Blackboard) -> str:
 
         if self._skipped:
