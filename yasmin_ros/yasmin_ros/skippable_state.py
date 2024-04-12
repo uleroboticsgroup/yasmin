@@ -25,7 +25,7 @@ class SkippableState(State):
 
         self._skipped = False
         self.__srv = node.create_service(
-            Trigger, skip_srv_name, self._skip_state)
+            srv_type, skip_srv_name, self._skip_state)
 
         self.__execute_handler = execute_handler
 
