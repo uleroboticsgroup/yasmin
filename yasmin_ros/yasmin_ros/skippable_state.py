@@ -1,5 +1,5 @@
 from typing import List, Callable
-from std_srvs.srv import SetBool, Trigger
+from std_srvs.srv import SetBool, Trigger, Type
 
 from yasmin import State
 from yasmin import Blackboard
@@ -13,6 +13,7 @@ class SkippableState(State):
         self,
         node: Node,
         skip_srv_name: str,
+        srv_type: Type,
         execute_handler: Callable,
         outcomes: List[str] = None,
     ) -> None:
@@ -32,12 +33,10 @@ class SkippableState(State):
 
     def _skip_state(
         self,
-        req: Trigger.Request,
-        res: Trigger.Response
-    ) -> Trigger.Response:
-        self._skipped = True
-        return Trigger.Response()
-
+        req: Type.Request,
+        res: Type.Response
+    ) -> Type.Response:
+        pass
     def execute(self, blackboard: Blackboard) -> str:
 
         if self._skipped:
