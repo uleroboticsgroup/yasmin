@@ -29,5 +29,12 @@ class ServiceServer(State):
 
         super().__init__(_outcomes)
 
+    def _srv_callback(
+        self,
+        req: Type.Request,
+        res: Type.Response
+    ) -> Type.Response:
+        pass
+    
     def execute(self, blackboard: Blackboard) -> str:
         return self.__execute_handler(blackboard)
