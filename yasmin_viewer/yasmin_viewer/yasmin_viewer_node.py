@@ -16,17 +16,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import time
+import json
+from threading import Thread
 from typing import List, Dict
 
-import time
-from threading import Thread
-
-import json
-
 import rclpy
+from rclpy.node import Node
 import ament_index_python
-
-from simple_node import Node
 
 from yasmin_msgs.msg import (
     StateMachine,
@@ -44,7 +41,7 @@ class YasminFsmViewer(Node):
     def __init__(self) -> None:
 
         super().__init__("yasmin_viewer")
-        
+
         self.declare_parameters(
             namespace="",
             parameters=[
@@ -52,7 +49,7 @@ class YasminFsmViewer(Node):
                 ("port", 5000),
             ]
         )
-        
+
         self.__started = False
         self.__fsm_dict = ExpiringDict(max_len=300, max_age_seconds=3)
 
@@ -87,19 +84,21 @@ class YasminFsmViewer(Node):
         self.__started = True
 
         # app.run(host="localhost", port=5000)
-        
+
         _host = str(self.get_parameter('host').value)
         _port = int(self.get_parameter('port').value)
         print(f"Started Yasmin viewer on {_host}:{str(_port)}")
-        serve(app, 
-              host = _host, 
-              port = _port)
+        serve(app,
+              host=_host,
+              port=_port)
 
     def start_subscriber(self) -> None:
-        self.create_subscription(StateMachine,
-                                 "/fsm_viewer",
-                                 self.fsm_viewer_cb,
-                                 10)
+        self.create_subscription(
+            StateMachine,
+            "/fsm_viewer",
+            self.fsm_viewer_cb,
+            10
+        )
 
         rclpy.spin(self)
 
@@ -142,8 +141,8 @@ class YasminFsmViewer(Node):
             self.__fsm_dict[msg.states[0].name] = self.msg_to_dict(msg)
 
 
-def main(args=None):
-    rclpy.init(args=args)
+def main():
+    rclpy.init()
     YasminFsmViewer()
     rclpy.shutdown()
 

@@ -17,10 +17,7 @@
 
 
 import rclpy
-
-from simple_node import Node
 from action_tutorials_interfaces.action import Fibonacci
-
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -30,9 +27,8 @@ from yasmin_viewer import YasminViewerPub
 
 
 class FibonacciState(ActionState):
-    def __init__(self, node: Node) -> None:
+    def __init__(self) -> None:
         super().__init__(
-            node,  # node
             Fibonacci,  # action type
             "/fibonacci",  # action name
             self.create_goal_handler,  # cb to create the goal
@@ -66,39 +62,50 @@ def print_result(blackboard: Blackboard) -> str:
     return SUCCEED
 
 
-class ActionClientDemoNode(Node):
-
-    def __init__(self):
-        super().__init__("yasmin_node")
-
-        # create a state machine
-        sm = StateMachine(outcomes=["outcome4"])
-
-        # add states
-        sm.add_state("SETTING_INT", CbState([SUCCEED], set_int),
-                     transitions={SUCCEED: "CALLING_FIBONACCI"})
-        sm.add_state("CALLING_FIBONACCI", FibonacciState(self),
-                     transitions={SUCCEED: "PRINTING_RESULT",
-                                  CANCEL: "outcome4",
-                                  ABORT: "outcome4"})
-        sm.add_state("PRINTING_RESULT", CbState([SUCCEED], print_result),
-                     transitions={SUCCEED: "outcome4"})
-
-        # pub
-        YasminViewerPub(self, "YASMIN_ACTION_CLIENT_DEMO", sm)
-
-        # execute
-        outcome = sm()
-        print(outcome)
-
-
 # main
-def main(args=None):
+def main():
 
     print("yasmin_action_client_demo")
-    rclpy.init(args=args)
-    node = ActionClientDemoNode()
-    node.join_spin()
+
+    # init ROS 2
+    rclpy.init()
+
+    # create a FSM
+    sm = StateMachine(outcomes=["outcome4"])
+
+    # add states
+    sm.add_state(
+        "SETTING_INT",
+        CbState([SUCCEED], set_int),
+        transitions={
+            SUCCEED: "CALLING_FIBONACCI"
+        }
+    )
+    sm.add_state(
+        "CALLING_FIBONACCI",
+        FibonacciState(),
+        transitions={
+            SUCCEED: "PRINTING_RESULT",
+            CANCEL: "outcome4",
+            ABORT: "outcome4"
+        }
+    )
+    sm.add_state(
+        "PRINTING_RESULT",
+        CbState([SUCCEED], print_result),
+        transitions={
+            SUCCEED: "outcome4"
+        }
+    )
+
+    # pub FSM info
+    YasminViewerPub("YASMIN_ACTION_CLIENT_DEMO", sm)
+
+    # execute FSM
+    outcome = sm()
+    print(outcome)
+
+    # shutdown ROS 2
     rclpy.shutdown()
 
 

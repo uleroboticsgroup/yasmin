@@ -31,7 +31,6 @@ YASMIN is a project focused on implementing robot behaviors using Finite State M
 ```shell
 # clone
 $ cd ~/ros2_ws/src
-$ git clone https://github.com/uleroboticsgroup/simple_node.git
 $ git clone https://github.com/uleroboticsgroup/yasmin.git
 
 # dependencies
@@ -58,27 +57,25 @@ A Python and a C++ demo are included.
 
 import time
 import rclpy
-
-from simple_node import Node
-
 from yasmin import State
+from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_viewer import YasminViewerPub
 
 
 # define state Foo
 class FooState(State):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(["outcome1", "outcome2"])
         self.counter = 0
 
-    def execute(self, blackboard):
+    def execute(self, blackboard: Blackboard) -> str:
         print("Executing state FOO")
         time.sleep(3)
 
         if self.counter < 3:
             self.counter += 1
-            blackboard.foo_str = f"Counter: {self.counter}""
+            blackboard.foo_str = f"Counter: {self.counter}"
             return "outcome1"
         else:
             return "outcome2"
@@ -86,10 +83,10 @@ class FooState(State):
 
 # define state Bar
 class BarState(State):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(outcomes=["outcome3"])
 
-    def execute(self, blackboard):
+    def execute(self, blackboard: Blackboard) -> str:
         print("Executing state BAR")
         time.sleep(3)
 
@@ -97,36 +94,42 @@ class BarState(State):
         return "outcome3"
 
 
-class DemoNode(Node):
-
-    def __init__(self):
-        super().__init__("yasmin_node")
-
-        # create a state machine
-        sm = StateMachine(outcomes=["outcome4"])
-
-        # add states
-        sm.add_state("FOO", FooState(),
-                     transitions={"outcome1": "BAR",
-                                  "outcome2": "outcome4"})
-        sm.add_state("BAR", BarState(),
-                     transitions={"outcome3": "FOO"})
-
-        # pub
-        YasminViewerPub(self, "YASMIN_DEMO", sm)
-
-        # execute
-        outcome = sm()
-        print(outcome)
-
-
 # main
-def main(args=None):
+def main():
 
     print("yasmin_demo")
-    rclpy.init(args=args)
-    node = DemoNode()
-    node.join_spin()
+
+    # init ROS 2
+    rclpy.init()
+
+    # create a FSM
+    sm = StateMachine(outcomes=["outcome4"])
+
+    # add states
+    sm.add_state(
+        "FOO",
+        FooState(),
+        transitions={
+            "outcome1": "BAR",
+            "outcome2": "outcome4"
+        }
+    )
+    sm.add_state(
+        "BAR",
+        BarState(),
+        transitions={
+            "outcome3": "FOO"
+        }
+    )
+
+    # pub FSM info
+    YasminViewerPub("YASMIN_DEMO", sm)
+
+    # execute FSM
+    outcome = sm()
+    print(outcome)
+
+    # shutdown ROS 2
     rclpy.shutdown()
 
 

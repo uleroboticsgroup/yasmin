@@ -17,42 +17,54 @@
 import time
 from typing import List, Callable, Union, Type
 
+from rclpy.node import Node
+from rclpy.subscription import Subscription
 from rclpy.qos import QoSProfile
 
 from yasmin import State
 from yasmin import Blackboard
+from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import CANCEL
-from simple_node import Node
 
 
 class MonitorState(State):
 
+    _node: Node
+    _sub: Subscription
+    _monitor_handler: Callable
+
+    msg_list: List = []
+    msg_queue: int
+    timeout: int
+    time_to_wait: float = 0.001
+    monitoring: bool = False
+
     def __init__(
         self,
-        node: Node,
         msg_type: Type,
         topic_name: str,
         outcomes: List[str],
         monitor_handler: Callable,
         qos: Union[QoSProfile, int] = 10,
         msg_queue: int = 10,
-        timeout: int = None
+        timeout: int = None,
+        node: Node = None
     ) -> None:
 
         if not timeout is None:
             outcomes = [CANCEL] + outcomes
         super().__init__(outcomes)
 
-        self.monitor_handler = monitor_handler
-        self.msg_list = []
+        self._monitor_handler = monitor_handler
         self.msg_queue = msg_queue
         self.timeout = timeout
-        self.time_to_wait = 0.001
-        self.monitoring = False
-        self.outcomes = outcomes
-        self.node = node
 
-        self._sub = node.create_subscription(
+        if node is None:
+            self._node = YasminNode.get_instance()
+        else:
+            self._node = node
+
+        self._sub = self._node.create_subscription(
             msg_type, topic_name, self.__callback, qos)
 
     def __callback(self, msg) -> None:
@@ -82,11 +94,11 @@ class MonitorState(State):
                 elapsed_time += self.time_to_wait
 
             if self.msg_list:
-                outcome = self.monitor_handler(blackboard, self.msg_list[0])
+                outcome = self._monitor_handler(blackboard, self.msg_list[0])
                 if outcome is None:
-                    self.node.get_logger().warn("Transition undeclared or declared but unhandled.")
+                    self._node.get_logger().warn("Transition undeclared or declared but unhandled.")
                     self.msg_list.pop(0)
-                if outcome is not None and outcome in self.outcomes:
+                if outcome is not None and outcome in self.get_outcomes():
                     valid_transition = True
                     break
 

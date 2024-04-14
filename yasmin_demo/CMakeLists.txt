@@ -117,4 +117,9 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  yasmin_demo/nav_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
