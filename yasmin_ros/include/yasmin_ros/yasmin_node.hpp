@@ -20,7 +20,6 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
 
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/state.hpp"
