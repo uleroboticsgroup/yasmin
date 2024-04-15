@@ -18,7 +18,7 @@
 #include <string>
 
 #include "example_interfaces/srv/add_two_ints.hpp"
-#include "simple_node/node.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 #include "yasmin/cb_state.hpp"
 #include "yasmin/state_machine.hpp"
@@ -46,13 +46,13 @@ class AddTwoIntsState
     : public yasmin_ros::ServiceState<example_interfaces::srv::AddTwoInts> {
 
 public:
-  AddTwoIntsState(simple_node::Node *node)
+  AddTwoIntsState()
       : yasmin_ros::ServiceState<example_interfaces::srv::AddTwoInts> // msg
-        (node,                                                        // node
-         "/add_two_ints", // srv name
-         std::bind(&AddTwoIntsState::create_request_handler, this, _1),
-         {"outcome1"},
-         std::bind(&AddTwoIntsState::response_handler, this, _1, _2)){};
+        (                                                             // node
+            "/add_two_ints", // srv name
+            std::bind(&AddTwoIntsState::create_request_handler, this, _1),
+            {"outcome1"},
+            std::bind(&AddTwoIntsState::response_handler, this, _1, _2)){};
 
   example_interfaces::srv::AddTwoInts::Request::SharedPtr
   create_request_handler(
@@ -79,46 +79,36 @@ public:
   std::string to_string() { return "AddTwoIntsState"; }
 };
 
-class ServiceClientDemoNode : public simple_node::Node {
-public:
-  std::unique_ptr<yasmin_viewer::YasminViewerPub> yamin_pub;
-
-  ServiceClientDemoNode() : simple_node::Node("yasmin_node") {
-
-    // create a state machine
-    auto sm = std::make_shared<yasmin::StateMachine>(
-        yasmin::StateMachine({"outcome4"}));
-
-    // add states
-    sm->add_state("SETTING_INTS",
-                  std::make_shared<yasmin::CbState>(yasmin::CbState(
-                      {yasmin_ros::basic_outcomes::SUCCEED}, set_ints)),
-                  {{yasmin_ros::basic_outcomes::SUCCEED, "ADD_TWO_INTS"}});
-    sm->add_state("ADD_TWO_INTS", std::make_shared<AddTwoIntsState>(this),
-                  {{"outcome1", "PRINTING_SUM"},
-                   {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
-                   {yasmin_ros::basic_outcomes::ABORT, "outcome4"}});
-    sm->add_state("PRINTING_SUM",
-                  std::make_shared<yasmin::CbState>(yasmin::CbState(
-                      {yasmin_ros::basic_outcomes::SUCCEED}, print_sum)),
-                  {{yasmin_ros::basic_outcomes::SUCCEED, "outcome4"}});
-
-    // pub
-    this->yamin_pub = std::make_unique<yasmin_viewer::YasminViewerPub>(
-        yasmin_viewer::YasminViewerPub(this, "YASMIN_SERVICE_CLIENT_DEMO", sm));
-
-    // execute
-    std::string outcome = (*sm.get())();
-    std::cout << outcome << "\n";
-  }
-};
-
 int main(int argc, char *argv[]) {
 
   std::cout << "yasmin_service_client_demo\n";
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<ServiceClientDemoNode>();
-  node->join_spin();
+
+  // create a state machine
+  auto sm = std::make_shared<yasmin::StateMachine>(
+      yasmin::StateMachine({"outcome4"}));
+
+  // add states
+  sm->add_state("SETTING_INTS",
+                std::make_shared<yasmin::CbState>(yasmin::CbState(
+                    {yasmin_ros::basic_outcomes::SUCCEED}, set_ints)),
+                {{yasmin_ros::basic_outcomes::SUCCEED, "ADD_TWO_INTS"}});
+  sm->add_state("ADD_TWO_INTS", std::make_shared<AddTwoIntsState>(),
+                {{"outcome1", "PRINTING_SUM"},
+                 {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
+                 {yasmin_ros::basic_outcomes::ABORT, "outcome4"}});
+  sm->add_state("PRINTING_SUM",
+                std::make_shared<yasmin::CbState>(yasmin::CbState(
+                    {yasmin_ros::basic_outcomes::SUCCEED}, print_sum)),
+                {{yasmin_ros::basic_outcomes::SUCCEED, "outcome4"}});
+
+  // pub
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+
+  // execute
+  std::string outcome = (*sm.get())();
+  std::cout << outcome << "\n";
+
   rclcpp::shutdown();
 
   return 0;

@@ -145,7 +145,7 @@ if __name__ == "__main__":
 #include <memory>
 #include <string>
 
-#include "simple_node/node.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
@@ -195,37 +195,27 @@ public:
   std::string to_string() { return "BarState"; }
 };
 
-class DemoNode : public simple_node::Node {
-public:
-  std::unique_ptr<yasmin_viewer::YasminViewerPub> yamin_pub;
-
-  DemoNode() : simple_node::Node("yasmin_node") {
-
-    // create a state machine
-    auto sm = std::make_shared<yasmin::StateMachine>(
-        yasmin::StateMachine({"outcome4"}));
-
-    // add states
-    sm->add_state("FOO", std::make_shared<FooState>(),
-                  {{"outcome1", "BAR"}, {"outcome2", "outcome4"}});
-    sm->add_state("BAR", std::make_shared<BarState>(), {{"outcome3", "FOO"}});
-
-    // pub
-    this->yamin_pub = std::make_unique<yasmin_viewer::YasminViewerPub>(
-        yasmin_viewer::YasminViewerPub(this, "YASMIN_DEMO", sm));
-
-    // execute
-    std::string outcome = (*sm.get())();
-    std::cout << outcome << "\n";
-  }
-};
-
 int main(int argc, char *argv[]) {
 
   std::cout << "yasmin_demo\n";
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<DemoNode>();
-  node->join_spin();
+
+  // create a state machine
+  auto sm = std::make_shared<yasmin::StateMachine>(
+      yasmin::StateMachine({"outcome4"}));
+
+  // add states
+  sm->add_state("FOO", std::make_shared<FooState>(),
+                {{"outcome1", "BAR"}, {"outcome2", "outcome4"}});
+  sm->add_state("BAR", std::make_shared<BarState>(), {{"outcome3", "FOO"}});
+
+  // pub
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+
+  // execute
+  std::string outcome = (*sm.get())();
+  std::cout << outcome << "\n";
+
   rclcpp::shutdown();
 
   return 0;

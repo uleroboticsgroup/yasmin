@@ -15,7 +15,6 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(simple_node REQUIRED)
 find_package(yasmin REQUIRED)
 
 # C++
@@ -24,6 +23,7 @@ include_directories(src)
 
 set(LIB ${CMAKE_PROJECT_NAME}_lib)
 set(SOURCES
+  src/yasmin_ros/yasmin_node.cpp
   src/yasmin_ros/action_state.cpp
   src/yasmin_ros/service_state.cpp
   src/yasmin_ros/monitor_state.cpp
@@ -31,7 +31,6 @@ set(SOURCES
 
 set(DEPENDENCIES
   rclcpp
-  simple_node
   yasmin
 )
 

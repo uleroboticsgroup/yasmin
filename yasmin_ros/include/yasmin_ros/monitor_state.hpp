@@ -21,11 +21,11 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "simple_node/node.hpp"
 
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 
 using std::placeholders::_1;
 
@@ -37,18 +37,22 @@ template <typename MsgT> class MonitorState : public yasmin::State {
       std::shared_ptr<yasmin::blackboard::Blackboard>, std::shared_ptr<MsgT>)>;
 
 public:
-  MonitorState(simple_node::Node *node, std::string topic_name,
-               std::vector<std::string> outcomes,
+  MonitorState(std::string topic_name, std::vector<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue)
-      : MonitorState(node, topic_name, outcomes, monitor_handler, qos,
-                     msg_queue, -1) {}
+      : MonitorState(topic_name, outcomes, monitor_handler, qos, msg_queue,
+                     -1) {}
 
-  MonitorState(simple_node::Node *node, std::string topic_name,
-               std::vector<std::string> outcomes,
+  MonitorState(std::string topic_name, std::vector<std::string> outcomes,
                MonitorHandler monitor_handler)
-      : MonitorState(node, topic_name, outcomes, monitor_handler, 10, 10, -1) {}
+      : MonitorState(topic_name, outcomes, monitor_handler, 10, 10, -1) {}
 
-  MonitorState(simple_node::Node *node, std::string topic_name,
+  MonitorState(std::string topic_name, std::vector<std::string> outcomes,
+               MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue,
+               int timeout)
+      : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
+                     msg_queue, timeout) {}
+
+  MonitorState(rclcpp::Node *node, std::string topic_name,
                std::vector<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue,
                int timeout)
@@ -67,6 +71,12 @@ public:
       }
     }
 
+    if (node == nullptr) {
+      this->node = YasminNode::get_instance();
+    } else {
+      this->node = node;
+    }
+
     // other attributes
     this->monitor_handler = monitor_handler;
     this->msg_queue = msg_queue;
@@ -75,7 +85,7 @@ public:
     this->monitoring = false;
 
     // create subscriber
-    this->sub = node->create_subscription<MsgT>(
+    this->sub = this->node->create_subscription<MsgT>(
         topic_name, qos, std::bind(&MonitorState::callback, this, _1));
   }
 
@@ -110,6 +120,7 @@ public:
   }
 
 private:
+  rclcpp::Node *node;
   std::shared_ptr<rclcpp::Subscription<MsgT>> sub;
 
   MonitorHandler monitor_handler;

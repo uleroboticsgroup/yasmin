@@ -109,9 +109,7 @@ class ActionState(State):
         elif self._action_status == GoalStatus.STATUS_SUCCEEDED:
 
             if self._result_handler is not None:
-                outcome = self._result_handler(
-                    blackboard, self._action_result)
-                return outcome
+                return self._result_handler(blackboard, self._action_result)
 
             return SUCCEED
 
