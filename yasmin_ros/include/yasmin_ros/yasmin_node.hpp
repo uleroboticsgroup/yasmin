@@ -31,24 +31,16 @@ class YasminNode : public rclcpp::Node {
 
 public:
   explicit YasminNode();
-
   YasminNode(YasminNode &other) = delete;
   void operator=(const YasminNode &) = delete;
+  ~YasminNode() {}
 
   static YasminNode *get_instance() {
-
-    std::lock_guard<std::mutex> lock(mutex);
-
-    if (instance == nullptr) {
-      instance = std::make_unique<YasminNode>();
-    }
-
-    return instance.get();
+    static YasminNode instance{};
+    return &instance;
   }
 
 private:
-  inline static std::unique_ptr<YasminNode> instance;
-  inline static std::mutex mutex;
   rclcpp::executors::MultiThreadedExecutor executor;
   std::unique_ptr<std::thread> spin_thread;
 };
