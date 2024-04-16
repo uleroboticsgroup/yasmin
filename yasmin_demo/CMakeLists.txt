@@ -18,7 +18,6 @@ find_package(rclpy REQUIRED)
 find_package(yasmin REQUIRED)
 find_package(yasmin_ros REQUIRED)
 find_package(yasmin_viewer REQUIRED)
-find_package(simple_node REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(example_interfaces REQUIRED)
 find_package(action_tutorials_interfaces REQUIRED)
@@ -33,7 +32,6 @@ set(DEPENDENCIES
   yasmin
   yasmin_ros
   yasmin_viewer
-  simple_node
   nav_msgs
   example_interfaces
   action_tutorials_interfaces
@@ -114,6 +112,11 @@ install(PROGRAMS
 
 install(PROGRAMS
   yasmin_demo/action_client_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  yasmin_demo/nav_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

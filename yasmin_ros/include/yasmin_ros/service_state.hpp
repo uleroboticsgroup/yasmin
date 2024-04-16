@@ -20,11 +20,11 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "simple_node/node.hpp"
 
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 
 namespace yasmin_ros {
 
@@ -38,13 +38,19 @@ template <typename ServiceT> class ServiceState : public yasmin::State {
       std::shared_ptr<yasmin::blackboard::Blackboard>, Response)>;
 
 public:
-  ServiceState(simple_node::Node *node, std::string srv_name,
+  ServiceState(std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::vector<std::string> outcomes)
-      : ServiceState(node, srv_name, create_request_handler, outcomes,
-                     nullptr) {}
+      : ServiceState(srv_name, create_request_handler, outcomes, nullptr) {}
 
-  ServiceState(simple_node::Node *node, std::string srv_name,
+  ServiceState(std::string srv_name,
+               CreateRequestHandler create_request_handler,
+               std::vector<std::string> outcomes,
+               ResponseHandler response_handler)
+      : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
+                     response_handler) {}
+
+  ServiceState(rclcpp::Node *node, std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::vector<std::string> outcomes,
                ResponseHandler response_handler)
@@ -58,7 +64,13 @@ public:
       }
     }
 
-    this->service_client = node->create_client<ServiceT>(srv_name);
+    if (node == nullptr) {
+      this->node = YasminNode::get_instance();
+    } else {
+      this->node = node;
+    }
+
+    this->service_client = this->node->create_client<ServiceT>(srv_name);
 
     this->create_request_handler = create_request_handler;
     this->response_handler = response_handler;
@@ -94,6 +106,7 @@ public:
   }
 
 private:
+  rclcpp::Node *node;
   std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
   CreateRequestHandler create_request_handler;
   ResponseHandler response_handler;

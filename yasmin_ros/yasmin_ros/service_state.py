@@ -16,22 +16,30 @@
 
 from typing import List, Callable, Type, Any
 
+from rclpy.node import Node
+from rclpy.client import Client
+
 from yasmin import State
 from yasmin import Blackboard
-from simple_node import Node
+from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
 
 
 class ServiceState(State):
 
+    _node: Node
+    _service_client: Client
+    _create_request_handler: Callable
+    _response_handler: Callable
+
     def __init__(
         self,
-        node: Node,
         srv_type: Type,
         srv_name: str,
         create_request_handler: Callable,
         outcomes: List[str] = None,
-        response_handler: Callable = None
+        response_handler: Callable = None,
+        node: Node = None
     ) -> None:
 
         _outcomes = [SUCCEED, ABORT]
@@ -39,31 +47,33 @@ class ServiceState(State):
         if outcomes:
             _outcomes = _outcomes + outcomes
 
-        self.__service_client = node.create_client(srv_type, srv_name)
+        if node is None:
+            self._node = YasminNode.get_instance()
+        else:
+            self._node = node
 
-        self.__create_request_handler = create_request_handler
-        self.__response_handler = response_handler
+        self._service_client = self._node.create_client(srv_type, srv_name)
 
-        if not self.__create_request_handler:
+        self._create_request_handler = create_request_handler
+        self._response_handler = response_handler
+
+        if not self._create_request_handler:
             raise Exception("create_request_handler is needed")
 
         super().__init__(_outcomes)
 
-    def _create_request(self, blackboard: Blackboard) -> Any:
-        return self.__create_request_handler(blackboard)
-
     def execute(self, blackboard: Blackboard) -> str:
 
-        request = self._create_request(blackboard)
-        self.__service_client.wait_for_service()
+        request = self._create_request_handler(blackboard)
+        self._service_client.wait_for_service()
 
         try:
-            response = self.__service_client.call(request)
+            response = self._service_client.call(request)
         except:
             return ABORT
 
-        if self.__response_handler:
-            outcome = self.__response_handler(blackboard, response)
+        if self._response_handler:
+            outcome = self._response_handler(blackboard, response)
             return outcome
 
         return SUCCEED

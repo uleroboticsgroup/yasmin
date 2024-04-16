@@ -15,7 +15,6 @@
   <depend>yasmin</depend>
   <depend>yasmin_ros</depend>
   <depend>yasmin_viewer</depend>
-  <depend>simple_node</depend>
   <depend>nav_msgs</depend>
   <depend>example_interfaces</depend>
   <depend>action_tutorials_interfaces</depend>

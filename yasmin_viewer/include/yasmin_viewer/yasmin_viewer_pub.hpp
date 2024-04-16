@@ -38,6 +38,9 @@ public:
   YasminViewerPub(rclcpp::Node *node, std::string fsm_name,
                   std::shared_ptr<yasmin::StateMachine> fsm);
 
+  YasminViewerPub(std::string fsm_name,
+                  std::shared_ptr<yasmin::StateMachine> fsm);
+
   std::vector<yasmin_msgs::msg::Transition>
   parse_transitions(std::map<std::string, std::string> transitions);
 
@@ -47,12 +50,15 @@ public:
                    int parent);
 
 protected:
-  void start_publisher(std::string fsm_name,
-                       std::shared_ptr<yasmin::StateMachine> fsm);
+  void start_publisher();
 
 private:
   rclcpp::Node *node;
-  std::unique_ptr<std::thread> thread;
+  rclcpp::Publisher<yasmin_msgs::msg::StateMachine>::SharedPtr publisher;
+  rclcpp::TimerBase::SharedPtr timer;
+
+  std::string fsm_name;
+  std::shared_ptr<yasmin::StateMachine> fsm;
 };
 
 } // namespace yasmin_viewer

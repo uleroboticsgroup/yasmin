@@ -15,19 +15,32 @@
 
 #include <chrono>
 
+#include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 using namespace yasmin_viewer;
 using namespace std::chrono_literals;
 
+YasminViewerPub::YasminViewerPub(std::string fsm_name,
+                                 std::shared_ptr<yasmin::StateMachine> fsm)
+    : YasminViewerPub(nullptr, fsm_name, fsm) {}
+
 YasminViewerPub::YasminViewerPub(rclcpp::Node *node, std::string fsm_name,
-                                 std::shared_ptr<yasmin::StateMachine> fsm) {
+                                 std::shared_ptr<yasmin::StateMachine> fsm)
+    : fsm_name(fsm_name), fsm(fsm) {
 
-  this->node = node;
+  if (node == nullptr) {
+    this->node = yasmin_ros::YasminNode::get_instance();
+  } else {
+    this->node = node;
+  }
 
-  this->thread = std::make_unique<std::thread>(
-      std::thread(&YasminViewerPub::start_publisher, this, fsm_name, fsm));
-  this->thread->detach();
+  this->publisher =
+      this->node->create_publisher<yasmin_msgs::msg::StateMachine>(
+          "/fsm_viewer", 10);
+
+  this->timer = this->node->create_wall_timer(
+      250ms, std::bind(&YasminViewerPub::start_publisher, this));
 }
 
 std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
@@ -87,20 +100,13 @@ void YasminViewerPub::parse_state(
   }
 }
 
-void YasminViewerPub::start_publisher(
-    std::string fsm_name, std::shared_ptr<yasmin::StateMachine> fsm) {
+void YasminViewerPub::start_publisher() {
 
-  auto publisher = this->node->create_publisher<yasmin_msgs::msg::StateMachine>(
-      "/fsm_viewer", 10);
+  std::vector<yasmin_msgs::msg::State> states_list;
+  this->parse_state(this->fsm_name, this->fsm, {}, states_list, -1);
 
-  while (rclcpp::ok()) {
-    std::vector<yasmin_msgs::msg::State> states_list;
-    this->parse_state(fsm_name, fsm, {}, states_list, -1);
+  auto state_machine_msg = yasmin_msgs::msg::StateMachine();
+  state_machine_msg.states = states_list;
 
-    auto state_machine_msg = yasmin_msgs::msg::StateMachine();
-    state_machine_msg.states = states_list;
-
-    publisher->publish(state_machine_msg);
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-  }
+  this->publisher->publish(state_machine_msg);
 }

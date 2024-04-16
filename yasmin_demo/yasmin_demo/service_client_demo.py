@@ -17,10 +17,7 @@
 
 
 import rclpy
-
-from simple_node import Node
 from example_interfaces.srv import AddTwoInts
-
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -30,9 +27,8 @@ from yasmin_viewer import YasminViewerPub
 
 
 class AddTwoIntsState(ServiceState):
-    def __init__(self, node: Node) -> None:
+    def __init__(self) -> None:
         super().__init__(
-            node,  # node
             AddTwoInts,  # srv type
             "/add_two_ints",  # service name
             self.create_request_handler,  # cb to create the request
@@ -68,39 +64,50 @@ def print_sum(blackboard: Blackboard) -> str:
     return SUCCEED
 
 
-class ServiceClientDemoNode(Node):
-
-    def __init__(self):
-        super().__init__("yasmin_node")
-
-        # create a state machine
-        sm = StateMachine(outcomes=["outcome4"])
-
-        # add states
-        sm.add_state("SETTING_INTS", CbState([SUCCEED], set_ints),
-                     transitions={SUCCEED: "ADD_TWO_INTS"})
-        sm.add_state("ADD_TWO_INTS", AddTwoIntsState(self),
-                     transitions={"outcome1": "PRINTING_SUM",
-                                  SUCCEED: "outcome4",
-                                  ABORT: "outcome4"})
-        sm.add_state("PRINTING_SUM", CbState([SUCCEED], print_sum),
-                     transitions={SUCCEED: "outcome4"})
-
-        # pub
-        YasminViewerPub(self, "YASMIN_SERVICE_CLIENT_DEMO", sm)
-
-        # execute
-        outcome = sm()
-        print(outcome)
-
-
 # main
-def main(args=None):
+def main():
 
     print("yasmin_service_client_demo")
-    rclpy.init(args=args)
-    node = ServiceClientDemoNode()
-    node.join_spin()
+
+    # init ROS 2
+    rclpy.init()
+
+    # create a FSM
+    sm = StateMachine(outcomes=["outcome4"])
+
+    # add states
+    sm.add_state(
+        "SETTING_INTS",
+        CbState([SUCCEED], set_ints),
+        transitions={
+            SUCCEED: "ADD_TWO_INTS"
+        }
+    )
+    sm.add_state(
+        "ADD_TWO_INTS",
+        AddTwoIntsState(),
+        transitions={
+            "outcome1": "PRINTING_SUM",
+            SUCCEED: "outcome4",
+            ABORT: "outcome4"
+        }
+    )
+    sm.add_state(
+        "PRINTING_SUM",
+        CbState([SUCCEED], print_sum),
+        transitions={
+            SUCCEED: "outcome4"
+        }
+    )
+
+    # pub FSM info
+    YasminViewerPub("YASMIN_SERVICE_CLIENT_DEMO", sm)
+
+    # execute FSM
+    outcome = sm()
+    print(outcome)
+
+    # shutdown ROS 2
     rclpy.shutdown()
 
 
