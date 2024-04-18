@@ -13,8 +13,8 @@ class SkippableState(State):
         self,
         node: Node,
         skip_srv_name: str,
-        srv_type: Type,
         execute_handler: Callable,
+        srv_type: Type = Trigger,
         outcomes: List[str] = None,
     ) -> None:
 
@@ -33,10 +33,11 @@ class SkippableState(State):
 
     def _skip_state(
         self,
-        req: Type.Request,
-        res: Type.Response
-    ) -> Type.Response:
-        pass
+        req: Trigger.Request,
+        res: Trigger.Response
+    ) -> Trigger.Response:
+        self._skipped = True
+        return Trigger.Response()
     
     
     def execute(self, blackboard: Blackboard) -> str:

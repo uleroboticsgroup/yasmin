@@ -12,9 +12,9 @@ class ServiceServer(State):
     def __init__(
         self,
         node: Node,
-        srv_type: Type,
         srv_name: str,
         execute_handler: Callable,
+        srv_type: Type = SetBool,
         outcomes: List[str] = None,
     ) -> None:
 
@@ -31,9 +31,9 @@ class ServiceServer(State):
 
     def _srv_callback(
         self,
-        req: Type.Request,
-        res: Type.Response
-    ) -> Type.Response:
+        req: SetBool.Request,
+        res: SetBool.Response
+    ) -> SetBool.Response:
         pass
     
     def execute(self, blackboard: Blackboard) -> str:
