@@ -85,7 +85,7 @@ public:
     this->monitoring = false;
 
     // create subscriber
-    this->sub = this->node->create_subscription<MsgT>(
+    this->sub = this->node->template create_subscription<MsgT>(
         topic_name, qos, std::bind(&MonitorState::callback, this, _1));
   }
 

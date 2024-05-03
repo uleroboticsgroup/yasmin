@@ -70,7 +70,7 @@ public:
       this->node = node;
     }
 
-    this->service_client = this->node->create_client<ServiceT>(srv_name);
+    this->service_client = this->node->template create_client<ServiceT>(srv_name);
 
     this->create_request_handler = create_request_handler;
     this->response_handler = response_handler;
