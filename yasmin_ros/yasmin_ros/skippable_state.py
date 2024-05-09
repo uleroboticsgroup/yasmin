@@ -4,7 +4,7 @@ from std_srvs.srv import SetBool, Trigger
 from yasmin import State
 from yasmin import Blackboard
 from simple_node import Node
-from .basic_outcomes import SKIPPED
+from .basic_outcomes import SKIPPED, ABORT, SUCCEED, WAITING
 
 
 class SkippableState(State):
@@ -13,15 +13,15 @@ class SkippableState(State):
         self,
         node: Node,
         skip_srv_name: str,
-        execute_handler: Callable,
+        execute_handler: Callable = None,
         srv_type: Type = Trigger,
         outcomes: List[str] = None,
     ) -> None:
 
-        _outcomes = [SKIPPED]
+        _outcomes = [SKIPPED, ABORT, SUCCEED]
 
         if outcomes:
-            _outcomes = _outcomes + outcomes
+            _outcomes = list(set(_outcomes + outcomes))
 
         self._skipped = False
         self.__srv = node.create_service(
@@ -39,10 +39,20 @@ class SkippableState(State):
         self._skipped = True
         return Trigger.Response()
     
-    
     def execute(self, blackboard: Blackboard) -> str:
-
-        if self._skipped:
-            return SKIPPED
-
-        return self.__execute_handler(blackboard)
+        while True:
+            if self.__execute_handler: 
+                outcome = self.__execute_handler(blackboard)
+            if self._skipped:
+                self._skipped = False
+                return SKIPPED
+            if self._is_canceled(): 
+                return ABORT
+            if outcome != WAITING: break
+        return outcome
+    
+    def _is_canceled(self):
+        if self.is_canceled():
+            self._canceled = False
+            return True
+        return False

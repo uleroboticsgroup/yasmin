@@ -23,7 +23,7 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from yasmin import State
 from yasmin import Blackboard
-from yasmin_ros.basic_outcomes import CANCEL
+from yasmin_ros.basic_outcomes import CANCEL, ABORT, SUCCEED
 from simple_node import Node
 
 
@@ -42,9 +42,11 @@ class MonitorState(State):
             pub_topic_name: str = None
     ) -> None:
 
+        _outcomes = [CANCEL, ABORT, SUCCEED]
+
         if not timeout is None:
-            outcomes = [CANCEL] + outcomes
-        super().__init__(outcomes)
+            _outcomes = list(set(_outcomes + outcomes))
+        super().__init__(_outcomes)
 
         self.monitor_handler = monitor_handler
         self.msg_list = []
@@ -52,7 +54,7 @@ class MonitorState(State):
         self.timeout = timeout
         self.time_to_wait = 0.001
         self.monitoring = False
-        self.outcomes = outcomes
+        self.outcomes = _outcomes
         self.node = node
 
         self._sub = node.create_subscription(
@@ -82,6 +84,9 @@ class MonitorState(State):
         while not valid_transition:
             time.sleep(self.time_to_wait)
 
+            if self._is_canceled():
+                return ABORT
+            
             if not self.timeout is None:
 
                 if elapsed_time >= self.timeout:
@@ -112,3 +117,9 @@ class MonitorState(State):
         _msg = String()
         _msg.data = msg
         if self.__pub_topic: self.__pub_topic.publish(_msg)
+    
+    def _is_canceled(self):
+        if self.is_canceled():
+            self._canceled = False
+            return True
+        return False

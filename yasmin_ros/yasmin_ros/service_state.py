@@ -22,7 +22,6 @@ from yasmin import Blackboard
 from simple_node import Node
 from .basic_outcomes import SUCCEED, ABORT
 
-
 class ServiceState(State):
 
     def __init__(
@@ -39,7 +38,7 @@ class ServiceState(State):
         _outcomes = [SUCCEED, ABORT]
 
         if outcomes:
-            _outcomes = _outcomes + outcomes
+            _outcomes = list(set(_outcomes + outcomes))
 
         self.__service_client = node.create_client(srv_type, srv_name)
 
@@ -74,15 +73,27 @@ class ServiceState(State):
     def execute(self, blackboard: Blackboard) -> str:
 
         request = self._create_request(blackboard)
-        self.__service_client.wait_for_service()
-
+        while not self.__service_client.service_is_ready():
+            if self._is_canceled():
+                return ABORT
         try:
-            response = self.__service_client.call(request)
+            response =  self.__service_client.call_async(request)
+            while True:
+                if response.done():
+                    break
+                if self._is_canceled():
+                    return ABORT
         except:
             return ABORT
 
         if self.__response_handler:
-            outcome = self.__response_handler(blackboard, response)
+            outcome = self.__response_handler(blackboard, response.result())
             return outcome
 
         return SUCCEED
+
+    def _is_canceled(self):
+        if self.is_canceled():
+            self._canceled = False
+            return True
+        return False
