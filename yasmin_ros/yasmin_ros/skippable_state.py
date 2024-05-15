@@ -29,6 +29,12 @@ class SkippableState(State):
 
         self.__execute_handler = execute_handler
 
+        if pub_topic_name: 
+            pubsub_callback_group = MutuallyExclusiveCallbackGroup()
+            self.__pub_topic = node.create_publisher(String, pub_topic_name, 10,
+                                                      callback_group=pubsub_callback_group)
+        else: self.__pub_topic = None
+        
         super().__init__(_outcomes)
 
     def _skip_state(
@@ -56,3 +62,14 @@ class SkippableState(State):
             self._canceled = False
             return True
         return False
+    
+    def publish_msg(self, msg: str):
+        """
+        Args:
+            msg: message (string) to publish
+        Raises:
+            ros2 publish message to <pub_topic_name>
+        """
+        _msg = String()
+        _msg.data = msg
+        if self.__pub_topic: self.__pub_topic.publish(_msg)
