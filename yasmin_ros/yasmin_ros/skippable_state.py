@@ -1,4 +1,21 @@
-from typing import List, Callable, Type
+# Copyright (C) 2023  Miguel Ángel González Santamarta
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+from std_msgs.msg import String
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from typing import List, Callable, Type, Any
 from std_srvs.srv import SetBool, Trigger
 
 from yasmin import State
@@ -16,6 +33,7 @@ class SkippableState(State):
         execute_handler: Callable = None,
         srv_type: Type = Trigger,
         outcomes: List[str] = None,
+        pub_topic_name: str = None
     ) -> None:
 
         _outcomes = [SKIPPED, ABORT, SUCCEED]
@@ -34,7 +52,7 @@ class SkippableState(State):
             self.__pub_topic = node.create_publisher(String, pub_topic_name, 10,
                                                       callback_group=pubsub_callback_group)
         else: self.__pub_topic = None
-        
+
         super().__init__(_outcomes)
 
     def _skip_state(
