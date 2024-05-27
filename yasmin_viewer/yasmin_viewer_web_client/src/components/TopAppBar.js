@@ -1,0 +1,127 @@
+import * as React from "react";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Divider from "@mui/material/Divider";
+
+export default function TopAppBar({
+  fsm_name_list,
+  handle_current_fsm,
+  handle_hide_nested_fsm,
+}) {
+  const [hideNestedFSM, setHideNestedFSM] = React.useState(false);
+  const [currentFSM, setCurrentFSM] = React.useState("ALL");
+
+  const handleChangeHideNestedFSM = (event) => {
+    setHideNestedFSM(event.target.checked);
+  };
+
+  React.useEffect(() => {
+    handle_current_fsm(currentFSM);
+  }, [currentFSM]);
+
+  React.useEffect(() => {
+    handle_hide_nested_fsm(hideNestedFSM);
+  }, [hideNestedFSM]);
+
+  return (
+    <Box sx={{ flexGrow: 1 }} style={{ width: "100%", height: "6.75vh" }}>
+      <AppBar style={{ margin: 0 }}>
+        <Toolbar
+          sx={{ bgcolor: "#1e88e5", minHeight: 80, height: 80 }}
+          variant="dense"
+          disableGutters
+        >
+          <Typography
+            variant="h5"
+            component="div"
+            style={{ marginLeft: 30 }}
+            sx={{
+              display: { xs: "none", md: "flex" },
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".2rem",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          >
+            YASMIN Viewer
+          </Typography>
+
+          <Divider
+            orientation="vertical"
+            variant="middle"
+            flexItem
+            color="white"
+            style={{ marginLeft: 30, marginRight: 30 }}
+          />
+
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              display: { xs: "none", md: "flex" },
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".2rem",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          >
+            FSM:
+          </Typography>
+
+          <Autocomplete
+            id="combo-box"
+            disableClearable={true}
+            options={fsm_name_list}
+            getOptionLabel={(option) => option}
+            isOptionEqualToValue={(option, value) => option === value}
+            defaultValue={"ALL"}
+            value={currentFSM}
+            onChange={(event, value) => {
+              setCurrentFSM(value);
+            }}
+            style={{
+              width: 300,
+              backgroundColor: "#d1e7fa",
+            }}
+            renderInput={(params) => (
+              <TextField {...params} variant="outlined" />
+            )}
+          />
+
+          <Divider
+            orientation="vertical"
+            variant="middle"
+            flexItem
+            color="white"
+            style={{ marginLeft: 30, marginRight: 30 }}
+          />
+
+          <FormControlLabel
+            label="Hide Nested FSM"
+            control={
+              <Checkbox
+                checked={hideNestedFSM}
+                onChange={handleChangeHideNestedFSM}
+                inputProps={{ "aria-label": "controlled" }}
+                sx={{
+                  color: "white",
+                  "&.Mui-checked": {
+                    color: "white",
+                  },
+                }}
+              />
+            }
+          />
+        </Toolbar>
+      </AppBar>
+    </Box>
+  );
+}
