@@ -39,7 +39,8 @@ class MonitorState(State):
             qos: Union[QoSProfile, int] = 10,
             msg_queue: int = 10,
             timeout: int = None,
-            pub_topic_name: str = None
+            pub_topic_name: str = None,
+            pub_topic_type: Type = String
     ) -> None:
 
         _outcomes = [CANCEL, ABORT, SUCCEED]
@@ -62,7 +63,7 @@ class MonitorState(State):
 
         if pub_topic_name: 
             pubsub_callback_group = MutuallyExclusiveCallbackGroup()
-            self.__pub_topic = node.create_publisher(String, pub_topic_name, 10,
+            self.__pub_topic = node.create_publisher(pub_topic_type, pub_topic_name, 10,
                                                       callback_group=pubsub_callback_group)
         else: self.__pub_topic = None
 
