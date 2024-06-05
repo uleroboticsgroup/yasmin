@@ -157,7 +157,7 @@ private:
 
 #if defined(FOXY)
   void goal_response_callback(
-      const std::shared_future<GoalHandle::SharedPtr> future) {
+      std::shared_future<typename GoalHandle::SharedPtr> future) {
     std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
     this->goal_handle = future.get();
   }
