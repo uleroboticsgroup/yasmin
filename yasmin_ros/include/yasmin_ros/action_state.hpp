@@ -155,11 +155,19 @@ private:
   CreateGoalHandler create_goal_handler;
   ResutlHandler result_handler;
 
+#if defined(FOXY)
+  void goal_response_callback(
+      const std::shared_future<GoalHandle::SharedPtr> future) {
+    std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
+    this->goal_handle = future.get();
+  }
+#else
   void
   goal_response_callback(const typename GoalHandle::SharedPtr &goal_handle) {
     std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
     this->goal_handle = goal_handle;
   }
+#endif
 
   void result_callback(const typename GoalHandle::WrappedResult &result) {
     this->action_result = result.result;
