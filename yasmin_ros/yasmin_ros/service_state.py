@@ -22,7 +22,7 @@ from rclpy.client import Client
 from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT
 
 
 class ServiceState(State):
@@ -31,6 +31,8 @@ class ServiceState(State):
     _service_client: Client
     _create_request_handler: Callable
     _response_handler: Callable
+    _timeout: float
+    _srv_name: str
 
     def __init__(
         self,
@@ -39,10 +41,12 @@ class ServiceState(State):
         create_request_handler: Callable,
         outcomes: List[str] = None,
         response_handler: Callable = None,
-        node: Node = None
+        node: Node = None,
+        timeout: float = None
     ) -> None:
 
-        _outcomes = [SUCCEED, ABORT]
+        self._srv_name = srv_name
+        _outcomes = [SUCCEED, ABORT, TIMEOUT]
 
         if outcomes:
             _outcomes = _outcomes + outcomes
@@ -59,13 +63,19 @@ class ServiceState(State):
 
         if not self._create_request_handler:
             raise Exception("create_request_handler is needed")
+        
+        self._timeout = timeout
 
         super().__init__(_outcomes)
 
     def execute(self, blackboard: Blackboard) -> str:
 
         request = self._create_request_handler(blackboard)
-        self._service_client.wait_for_service()
+        serv_available = self._service_client.wait_for_service(timeout_sec = self._timeout)
+
+        if not serv_available:
+            self._node.get_logger().error("Specified timeout achieved. Service {} is not available and thus returning TIMEOUT outcome".format(self._srv_name))
+            return TIMEOUT
 
         try:
             response = self._service_client.call(request)
