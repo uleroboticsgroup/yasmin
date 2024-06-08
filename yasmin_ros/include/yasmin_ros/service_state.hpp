@@ -40,23 +40,28 @@ template <typename ServiceT> class ServiceState : public yasmin::State {
 public:
   ServiceState(std::string srv_name,
                CreateRequestHandler create_request_handler,
-               std::vector<std::string> outcomes)
-      : ServiceState(srv_name, create_request_handler, outcomes, nullptr) {}
+               std::vector<std::string> outcomes, int timeout = -1.0)
+      : ServiceState(srv_name, create_request_handler, outcomes, nullptr,
+                     timeout) {}
 
   ServiceState(std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::vector<std::string> outcomes,
-               ResponseHandler response_handler)
+               ResponseHandler response_handler, int timeout = -1.0)
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
-                     response_handler) {}
+                     response_handler, timeout) {}
 
   ServiceState(rclcpp::Node *node, std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::vector<std::string> outcomes,
-               ResponseHandler response_handler)
-      : State({}) {
+               ResponseHandler response_handler, int timeout = -1.0)
+      : State({}), timeout(timeout) {
 
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT};
+
+    if (this->timeout >= 0) {
+      this->outcomes.push_back(basic_outcomes::TIMEOUT);
+    }
 
     if (outcomes.size() > 0) {
       for (std::string outcome : outcomes) {
@@ -70,7 +75,8 @@ public:
       this->node = node;
     }
 
-    this->service_client = this->node->template create_client<ServiceT>(srv_name);
+    this->service_client =
+        this->node->template create_client<ServiceT>(srv_name);
 
     this->create_request_handler = create_request_handler;
     this->response_handler = response_handler;
@@ -85,7 +91,13 @@ public:
 
     Request request = this->create_request(blackboard);
 
-    this->service_client->wait_for_service();
+    bool serv_available = this->service_client->wait_for_service(
+        std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
+
+    if (!serv_available) {
+      return basic_outcomes::TIMEOUT;
+    }
+
     auto future = this->service_client->async_send_request(request);
 
     future.wait();
@@ -110,6 +122,7 @@ private:
   std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
   CreateRequestHandler create_request_handler;
   ResponseHandler response_handler;
+  int timeout;
 
   Request
   create_request(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {

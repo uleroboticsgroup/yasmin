@@ -46,7 +46,11 @@ class ServiceState(State):
     ) -> None:
 
         self._srv_name = srv_name
-        _outcomes = [SUCCEED, ABORT, TIMEOUT]
+        _outcomes = [SUCCEED, ABORT]
+
+        self._timeout = timeout
+        if self._timeout:
+            _outcomes.append(TIMEOUT)
 
         if outcomes:
             _outcomes = _outcomes + outcomes
@@ -63,18 +67,18 @@ class ServiceState(State):
 
         if not self._create_request_handler:
             raise Exception("create_request_handler is needed")
-        
-        self._timeout = timeout
 
         super().__init__(_outcomes)
 
     def execute(self, blackboard: Blackboard) -> str:
 
         request = self._create_request_handler(blackboard)
-        serv_available = self._service_client.wait_for_service(timeout_sec = self._timeout)
+        serv_available = self._service_client.wait_for_service(
+            timeout_sec=self._timeout)
 
         if not serv_available:
-            self._node.get_logger().error("Specified timeout achieved. Service {} is not available and thus returning TIMEOUT outcome".format(self._srv_name))
+            self._node.get_logger().error(
+                "Specified timeout achieved. Service {} is not available and thus returning TIMEOUT outcome".format(self._srv_name))
             return TIMEOUT
 
         try:

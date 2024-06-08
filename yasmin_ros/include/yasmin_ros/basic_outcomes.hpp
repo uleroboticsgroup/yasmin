@@ -24,6 +24,7 @@ namespace basic_outcomes {
 constexpr char SUCCEED[] = "succeeded";
 constexpr char ABORT[] = "aborted";
 constexpr char CANCEL[] = "canceled";
+constexpr char TIMEOUT[] = "timeout";
 
 } // namespace basic_outcomes
 } // namespace yasmin_ros
