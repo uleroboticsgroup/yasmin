@@ -26,13 +26,14 @@ from action_msgs.msg import GoalStatus
 from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL, TIMEOUT
 
 
 class ActionState(State):
 
     _node: Node
 
+    _action_name: str
     _action_client: ActionClient
     _action_done_event: Event = Event()
 
@@ -44,6 +45,7 @@ class ActionState(State):
 
     _create_goal_handler: Callable
     _result_handler: Callable
+    _timeout: float
 
     def __init__(
         self,
@@ -52,10 +54,16 @@ class ActionState(State):
         create_goal_handler: Callable,
         outcomes: List[str] = None,
         result_handler: Callable = None,
-        node: Node = None
+        node: Node = None,
+        timeout: float = None
     ) -> None:
 
+        self._action_name = action_name
         _outcomes = [SUCCEED, ABORT, CANCEL]
+
+        self._timeout = timeout
+        if self._timeout:
+            _outcomes.append(TIMEOUT)
 
         if outcomes:
             _outcomes = _outcomes + outcomes
@@ -91,9 +99,20 @@ class ActionState(State):
     def execute(self, blackboard: Blackboard) -> str:
 
         goal = self._create_goal_handler(blackboard)
-        self._action_client.wait_for_server()
+
+        self._node.get_logger().info(
+            f"Action for service {self._action_name}")
+        act_available = self._action_client.wait_for_server(self._timeout)
+
+        if not act_available:
+            self._node.get_logger().warn(
+                f"Timeout reached, action {self._action_name} is not available")
+            return TIMEOUT
 
         self._action_done_event.clear()
+
+        self._node.get_logger().info(
+            f"Sending goal to action {self._action_name}")
         send_goal_future = self._action_client.send_goal_async(goal)
         send_goal_future.add_done_callback(self._goal_response_callback)
 

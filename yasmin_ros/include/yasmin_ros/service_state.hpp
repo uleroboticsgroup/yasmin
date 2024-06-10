@@ -91,14 +91,14 @@ public:
 
     Request request = this->create_request(blackboard);
 
+    // wait for server
     RCLCPP_INFO(this->node->get_logger(), "Waiting for service %s",
                 this->srv_name.c_str());
-
-    bool serv_available = this->service_client->wait_for_service(
+    bool srv_available = this->service_client->wait_for_service(
         std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
 
-    if (!serv_available) {
-      RCLCPP_INFO(this->node->get_logger(),
+    if (!srv_available) {
+      RCLCPP_WARN(this->node->get_logger(),
                   "Timeout reached, service %s is not available",
                   this->srv_name.c_str());
       return basic_outcomes::TIMEOUT;
@@ -106,7 +106,6 @@ public:
 
     RCLCPP_INFO(this->node->get_logger(), "Sending request to service %s",
                 this->srv_name.c_str());
-
     auto future = this->service_client->async_send_request(request);
 
     future.wait();

@@ -49,24 +49,26 @@ template <typename ActionT> class ActionState : public yasmin::State {
 
 public:
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
-              std::vector<std::string> outcomes)
-      : ActionState(action_name, create_goal_handler, outcomes, nullptr) {}
+              std::vector<std::string> outcomes, int timeout = -1.0)
+      : ActionState(action_name, create_goal_handler, outcomes, nullptr,
+                    timeout) {}
 
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
-              ResutlHandler result_handler = nullptr)
-      : ActionState(action_name, create_goal_handler, {}, result_handler) {}
+              ResutlHandler result_handler = nullptr, int timeout = -1.0)
+      : ActionState(action_name, create_goal_handler, {}, result_handler,
+                    timeout) {}
 
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               std::vector<std::string> outcomes,
-              ResutlHandler result_handler = nullptr)
+              ResutlHandler result_handler = nullptr, int timeout = -1.0)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
-                    result_handler) {}
+                    result_handler, timeout) {}
 
   ActionState(rclcpp::Node *node, std::string action_name,
               CreateGoalHandler create_goal_handler,
               std::vector<std::string> outcomes,
-              ResutlHandler result_handler = nullptr)
-      : State({}) {
+              ResutlHandler result_handler = nullptr, int timeout = -1.0)
+      : State({}), action_name(action_name), timeout(timeout) {
 
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT,
                       basic_outcomes::CANCEL};
@@ -95,7 +97,7 @@ public:
   }
 
   void cancel_state() {
-    // this->action_client->cancel_goal();
+    this->action_client->cancel_goal();
     yasmin::State::cancel_state();
   }
 
@@ -106,7 +108,18 @@ public:
 
     Goal goal = this->create_goal_handler(blackboard);
 
-    this->action_client->wait_for_action_server();
+    // wait for server
+    RCLCPP_INFO(this->node->get_logger(), "Waiting for action %s",
+                this->action_name.c_str());
+    bool act_available = this->action_client->wait_for_action_server(
+        std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
+
+    if (!act_available) {
+      RCLCPP_WARN(this->node->get_logger(),
+                  "Timeout reached, action %s is not available",
+                  this->action_name.c_str());
+      return basic_outcomes::TIMEOUT;
+    }
 
     // options
     auto send_goal_options = SendGoalOptions();
@@ -116,6 +129,8 @@ public:
     send_goal_options.result_callback =
         std::bind(&ActionState::result_callback, this, _1);
 
+    RCLCPP_INFO(this->node->get_logger(), "Sending goal to action %s",
+                this->action_name.c_str());
     this->action_client->async_send_goal(goal, send_goal_options);
 
     // wait for results
@@ -141,6 +156,9 @@ public:
 
 private:
   rclcpp::Node *node;
+
+  std::string action_name;
+  int timeout;
 
   ActionClient action_client;
   std::condition_variable action_done_cond;
