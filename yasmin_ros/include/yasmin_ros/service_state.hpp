@@ -55,7 +55,7 @@ public:
                CreateRequestHandler create_request_handler,
                std::vector<std::string> outcomes,
                ResponseHandler response_handler, int timeout = -1.0)
-      : State({}), timeout(timeout) {
+      : State({}), srv_name(srv_name), timeout(timeout) {
 
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT};
 
@@ -91,12 +91,21 @@ public:
 
     Request request = this->create_request(blackboard);
 
+    RCLCPP_INFO(this->node->get_logger(), "Waiting for service %s",
+                this->srv_name);
+
     bool serv_available = this->service_client->wait_for_service(
         std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
 
     if (!serv_available) {
+      RCLCPP_INFO(this->node->get_logger(),
+                  "Timeout reached, service %s is not available",
+                  this->srv_name.c_str());
       return basic_outcomes::TIMEOUT;
     }
+
+    RCLCPP_INFO(this->node->get_logger(), "Sending request to service %s",
+                this->srv_name);
 
     auto future = this->service_client->async_send_request(request);
 
@@ -122,6 +131,7 @@ private:
   std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
   CreateRequestHandler create_request_handler;
   ResponseHandler response_handler;
+  std::string srv_name;
   int timeout;
 
   Request
