@@ -17,6 +17,7 @@
 from typing import Dict, List, Union
 from threading import Lock
 from yasmin.state import State
+from yasmin.yasmin_logs import YASMIN_LOG_INFO
 from yasmin.blackboard import Blackboard
 
 
@@ -79,18 +80,24 @@ class StateMachine(State):
 
             # translate outcome using transitions
             if outcome in state["transitions"]:
-                outcome = state["transitions"][outcome]
+                translated_outcome = state["transitions"][outcome]
 
             # outcome is an outcome of the sm
-            if outcome in self.get_outcomes():
+            if translated_outcome in self.get_outcomes():
                 with self.__current_state_lock:
                     self.__current_state = None
-                return outcome
+
+                YASMIN_LOG_INFO(
+                    "State Machine ends with outcome '%s'", translated_outcome)
+
+                return translated_outcome
 
             # outcome is a state
-            elif outcome in self._states:
+            elif translated_outcome in self._states:
                 with self.__current_state_lock:
-                    self.__current_state = outcome
+                    YASMIN_LOG_INFO(
+                        "%s: %s --> %s", self.__current_state, outcome, translated_outcome)
+                    self.__current_state = translated_outcome
 
             # outcome is not in the sm
             else:
