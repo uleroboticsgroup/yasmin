@@ -92,7 +92,7 @@ public:
     Request request = this->create_request(blackboard);
 
     RCLCPP_INFO(this->node->get_logger(), "Waiting for service %s",
-                this->srv_name);
+                this->srv_name.c_str());
 
     bool serv_available = this->service_client->wait_for_service(
         std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
@@ -105,7 +105,7 @@ public:
     }
 
     RCLCPP_INFO(this->node->get_logger(), "Sending request to service %s",
-                this->srv_name);
+                this->srv_name.c_str());
 
     auto future = this->service_client->async_send_request(request);
 
