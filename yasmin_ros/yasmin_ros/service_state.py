@@ -74,18 +74,18 @@ class ServiceState(State):
 
         request = self._create_request_handler(blackboard)
 
-        self._node.get_logger().info(f"Waiting for service {self._srv_name}")
+        self._node.get_logger().info(f"Waiting for service '{self._srv_name}'")
         srv_available = self._service_client.wait_for_service(
             timeout_sec=self._timeout)
 
         if not srv_available:
             self._node.get_logger().warn(
-                f"Timeout reached, service {self._srv_name} is not available")
+                f"Timeout reached, service '{self._srv_name}' is not available")
             return TIMEOUT
 
         try:
             self._node.get_logger().info(
-                f"Sending request to service {self._srv_name}")
+                f"Sending request to service '{self._srv_name}'")
             response = self._service_client.call(request)
         except:
             return ABORT

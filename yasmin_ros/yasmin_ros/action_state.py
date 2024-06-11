@@ -101,18 +101,18 @@ class ActionState(State):
         goal = self._create_goal_handler(blackboard)
 
         self._node.get_logger().info(
-            f"Action for service {self._action_name}")
+            f"Action for service '{self._action_name}'")
         act_available = self._action_client.wait_for_server(self._timeout)
 
         if not act_available:
             self._node.get_logger().warn(
-                f"Timeout reached, action {self._action_name} is not available")
+                f"Timeout reached, action '{self._action_name}' is not available")
             return TIMEOUT
 
         self._action_done_event.clear()
 
         self._node.get_logger().info(
-            f"Sending goal to action {self._action_name}")
+            f"Sending goal to action '{self._action_name}'")
         send_goal_future = self._action_client.send_goal_async(goal)
         send_goal_future.add_done_callback(self._goal_response_callback)
 

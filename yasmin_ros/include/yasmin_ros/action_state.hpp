@@ -109,14 +109,14 @@ public:
     Goal goal = this->create_goal_handler(blackboard);
 
     // wait for server
-    RCLCPP_INFO(this->node->get_logger(), "Waiting for action %s",
+    RCLCPP_INFO(this->node->get_logger(), "Waiting for action '%s'",
                 this->action_name.c_str());
     bool act_available = this->action_client->wait_for_action_server(
         std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
 
     if (!act_available) {
       RCLCPP_WARN(this->node->get_logger(),
-                  "Timeout reached, action %s is not available",
+                  "Timeout reached, action '%s' is not available",
                   this->action_name.c_str());
       return basic_outcomes::TIMEOUT;
     }
@@ -129,7 +129,7 @@ public:
     send_goal_options.result_callback =
         std::bind(&ActionState::result_callback, this, _1);
 
-    RCLCPP_INFO(this->node->get_logger(), "Sending goal to action %s",
+    RCLCPP_INFO(this->node->get_logger(), "Sending goal to action '%s'",
                 this->action_name.c_str());
     this->action_client->async_send_goal(goal, send_goal_options);
 

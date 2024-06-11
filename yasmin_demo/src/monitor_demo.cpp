@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   sm->add_state("PRINTING_ODOM", std::make_shared<PrintOdometryState>(5),
                 {{"outcome1", "PRINTING_ODOM"},
                  {"outcome2", "outcome4"},
-                 {yasmin_ros::basic_outcomes::CANCEL, "outcome4"}});
+                 {yasmin_ros::basic_outcomes::TIMEOUT, "outcome4"}});
 
   // pub
   yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);

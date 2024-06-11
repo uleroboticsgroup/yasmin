@@ -23,7 +23,7 @@ from nav_msgs.msg import Odometry
 from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import MonitorState
-from yasmin_ros.basic_outcomes import CANCEL
+from yasmin_ros.basic_outcomes import TIMEOUT
 from yasmin_viewer import YasminViewerPub
 
 
@@ -70,7 +70,7 @@ def main():
         transitions={
             "outcome1": "PRINTING_ODOM",
             "outcome2": "outcome4",
-            CANCEL: "outcome4"
+            TIMEOUT: "outcome4"
         }
     )
 

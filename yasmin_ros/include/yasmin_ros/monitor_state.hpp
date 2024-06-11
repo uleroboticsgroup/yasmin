@@ -56,11 +56,13 @@ public:
                std::vector<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue,
                int timeout)
-      : State({}) {
+      : State({}), topic_name(topic_name), monitor_handler(monitor_handler),
+        msg_queue(msg_queue), timeout(timeout), monitoring(false),
+        time_to_wait(1000) {
 
     // set outcomes
     if (timeout > 0) {
-      this->outcomes = {basic_outcomes::CANCEL};
+      this->outcomes = {basic_outcomes::TIMEOUT};
     } else {
       this->outcomes = {};
     }
@@ -77,13 +79,6 @@ public:
       this->node = node;
     }
 
-    // other attributes
-    this->monitor_handler = monitor_handler;
-    this->msg_queue = msg_queue;
-    this->timeout = timeout;
-    this->time_to_wait = 1000;
-    this->monitoring = false;
-
     // create subscriber
     this->sub = this->node->template create_subscription<MsgT>(
         topic_name, qos, std::bind(&MonitorState::callback, this, _1));
@@ -96,7 +91,7 @@ public:
     this->msg_list.clear();
     this->monitoring = true;
 
-    while (this->msg_list.size() == 0) {
+    while (this->msg_list.empty()) {
       std::this_thread::sleep_for(
           std::chrono::microseconds(this->time_to_wait));
 
@@ -104,13 +99,18 @@ public:
 
         if (elapsed_time / 1e6 >= this->timeout) {
           this->monitoring = false;
-          return basic_outcomes::CANCEL;
+          RCLCPP_WARN(this->node->get_logger(),
+                      "Timeout reached, topic '%s' is not available",
+                      this->topic_name.c_str());
+          return basic_outcomes::TIMEOUT;
         }
-      }
 
-      elapsed_time += this->time_to_wait;
+        elapsed_time += this->time_to_wait;
+      }
     }
 
+    RCLCPP_INFO(this->node->get_logger(), "Processing msg from topic '%s'",
+                this->topic_name.c_str());
     std::string outcome =
         this->monitor_handler(blackboard, this->msg_list.at(0));
     this->msg_list.erase(this->msg_list.begin());
@@ -122,14 +122,14 @@ public:
 private:
   rclcpp::Node *node;
   std::shared_ptr<rclcpp::Subscription<MsgT>> sub;
-
-  MonitorHandler monitor_handler;
-  std::string topic_name;
   std::vector<std::shared_ptr<MsgT>> msg_list;
+
+  std::string topic_name;
+  MonitorHandler monitor_handler;
   int msg_queue;
   int timeout;
-  int time_to_wait;
   bool monitoring;
+  int time_to_wait;
 
   void callback(const typename MsgT::SharedPtr msg) {
 
