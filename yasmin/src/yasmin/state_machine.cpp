@@ -87,7 +87,6 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
   std::map<std::string, std::string> transitions;
   std::string outcome;
-  std::string translated_outcome;
 
   while (true) {
 
@@ -108,31 +107,28 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
     // translate outcome using transitions
     if (transitions.find(outcome) != transitions.end()) {
-      translated_outcome = transitions.at(outcome);
+
+      YASMIN_LOG_INFO("%s: %s --> %s", this->current_state.c_str(),
+                      outcome.c_str(), transitions.at(outcome).c_str());
+
+      outcome = transitions.at(outcome);
     }
 
     // outcome is an outcome of the sm
-    if (std::find(this->outcomes.begin(), this->outcomes.end(),
-                  translated_outcome) != this->outcomes.end()) {
+    if (std::find(this->outcomes.begin(), this->outcomes.end(), outcome) !=
+        this->outcomes.end()) {
 
       this->current_state_mutex->lock();
       this->current_state.clear();
       this->current_state_mutex->unlock();
 
-      YASMIN_LOG_INFO("State Machine ends with outcome '%s'",
-                      translated_outcome.c_str());
-
-      return translated_outcome;
+      return outcome;
 
       // outcome is a state
-    } else if (this->states.find(translated_outcome) != this->states.end()) {
+    } else if (this->states.find(outcome) != this->states.end()) {
 
       this->current_state_mutex->lock();
-
-      YASMIN_LOG_INFO("%s: %s --> %s", this->current_state.c_str(),
-                      outcome.c_str(), translated_outcome.c_str());
-
-      this->current_state = translated_outcome;
+      this->current_state = outcome;
       this->current_state_mutex->unlock();
 
       // outcome is not in the sm

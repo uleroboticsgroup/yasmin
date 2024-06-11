@@ -80,24 +80,22 @@ class StateMachine(State):
 
             # translate outcome using transitions
             if outcome in state["transitions"]:
-                translated_outcome = state["transitions"][outcome]
+                YASMIN_LOG_INFO(
+                    "%s: %s --> %s",
+                    self.__current_state, outcome, state["transitions"][outcome]
+                )
+                outcome = state["transitions"][outcome]
 
             # outcome is an outcome of the sm
-            if translated_outcome in self.get_outcomes():
+            if outcome in self.get_outcomes():
                 with self.__current_state_lock:
                     self.__current_state = None
-
-                YASMIN_LOG_INFO(
-                    "State Machine ends with outcome '%s'", translated_outcome)
-
-                return translated_outcome
+                return outcome
 
             # outcome is a state
-            elif translated_outcome in self._states:
+            elif outcome in self._states:
                 with self.__current_state_lock:
-                    YASMIN_LOG_INFO(
-                        "%s: %s --> %s", self.__current_state, outcome, translated_outcome)
-                    self.__current_state = translated_outcome
+                    self.__current_state = outcome
 
             # outcome is not in the sm
             else:
