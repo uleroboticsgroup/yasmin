@@ -17,6 +17,7 @@
 #define YASMIN_BLACKBOARD_HPP
 
 #include <map>
+#include <mutex>
 #include <string>
 
 #include "yasmin/blackboard/blackboard_value.hpp"
@@ -28,6 +29,7 @@ namespace blackboard {
 class Blackboard {
 
 private:
+  std::recursive_mutex mutex;
   std::map<std::string, BlackboardValueInterface *> values;
 
 public:
@@ -35,7 +37,22 @@ public:
   Blackboard(const Blackboard &other);
   ~Blackboard();
 
+  template <class T> T get(std::string name) {
+
+    std::lock_guard<std::recursive_mutex> lk(this->mutex);
+
+    if (!this->contains(name)) {
+      throw "Element " + name + " does not exist in the blackboard";
+    }
+
+    BlackboardValue<T> *b_value = (BlackboardValue<T> *)this->values.at(name);
+    return b_value->get();
+  }
+
   template <class T> void set(std::string name, T value) {
+
+    std::lock_guard<std::recursive_mutex> lk(this->mutex);
+
     if (!this->contains(name)) {
       BlackboardValue<T> *b_value = new BlackboardValue<T>(value);
       this->values.insert({name, b_value});
@@ -45,17 +62,9 @@ public:
     }
   }
 
-  template <class T> T get(std::string name) {
-    if (!this->contains(name)) {
-      throw "Element " + name + " does not exist in the blackboard";
-    }
-
-    BlackboardValue<T> *b_value = (BlackboardValue<T> *)this->values.at(name);
-    return b_value->get();
-  }
-
+  void remove(std::string name);
   bool contains(std::string name);
-
+  int size();
   std::string to_string();
 };
 

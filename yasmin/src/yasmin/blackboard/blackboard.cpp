@@ -34,11 +34,25 @@ Blackboard::~Blackboard() {
   }
 }
 
+void Blackboard::remove(std::string name) {
+  std::lock_guard<std::recursive_mutex> lk(this->mutex);
+  delete this->values.at(name);
+  this->values.erase(name);
+}
+
 bool Blackboard::contains(std::string name) {
+  std::lock_guard<std::recursive_mutex> lk(this->mutex);
   return (this->values.find(name) != this->values.end());
 }
 
+int Blackboard::size() {
+  std::lock_guard<std::recursive_mutex> lk(this->mutex);
+  return this->values.size();
+}
+
 std::string Blackboard::to_string() {
+
+  std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
   std::string result = "Blackboard\n";
 

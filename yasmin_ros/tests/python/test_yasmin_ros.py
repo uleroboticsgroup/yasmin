@@ -19,7 +19,7 @@ import time
 from threading import Thread
 
 from yasmin_ros import ActionState, ServiceState, MonitorState
-from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT
+from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
 
 from example_interfaces.action import Fibonacci
 from example_interfaces.srv import AddTwoInts
@@ -195,4 +195,4 @@ class TestYasminRos(unittest.TestCase):
         state = MonitorState(String, "test1", [SUCCEED],
                              monitor_handler=monitor_handler,
                              timeout=2)
-        self.assertEqual(CANCEL, state())
+        self.assertEqual(TIMEOUT, state())
