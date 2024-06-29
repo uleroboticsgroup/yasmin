@@ -34,7 +34,7 @@ class FibonacciState(ActionState):
             self.create_goal_handler,  # cb to create the goal
             None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
             self.response_handler,  # cb to process the response
-            self.print_feedback
+            self.print_feedback  # cb to process the feedback
         )
 
     def create_goal_handler(self, blackboard: Blackboard) -> Fibonacci.Goal:

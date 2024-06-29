@@ -297,7 +297,7 @@ class FibonacciState(ActionState):
             self.create_goal_handler,  # cb to create the goal
             None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
             self.response_handler,  # cb to process the response
-            self.print_feedback
+            self.print_feedback # cb to process the feedback
         )
 
     def create_goal_handler(self, blackboard: Blackboard) -> Fibonacci.Goal:
@@ -888,9 +888,16 @@ class FibonacciState : public yasmin_ros::ActionState<Fibonacci> {
 public:
   FibonacciState()
       : yasmin_ros::ActionState<Fibonacci>(
-            "/fibonacci",
+
+            "/fibonacci", // action name
+
+            // # cb to create the goal
             std::bind(&FibonacciState::create_goal_handler, this, _1),
+            // # cb to process the response
+
             std::bind(&FibonacciState::response_handler, this, _1, _2),
+
+            // cb to process the feedback
             std::bind(&FibonacciState::print_feedback, this, _1, _2)){};
 
   Fibonacci::Goal create_goal_handler(
