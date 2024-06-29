@@ -36,6 +36,7 @@ template <typename ActionT> class ActionState : public yasmin::State {
 
   using Goal = typename ActionT::Goal;
   using Result = typename ActionT::Result::SharedPtr;
+  using Feedback = typename ActionT::Feedback;
 
   using SendGoalOptions =
       typename rclcpp_action::Client<ActionT>::SendGoalOptions;
@@ -46,29 +47,39 @@ template <typename ActionT> class ActionState : public yasmin::State {
       std::function<Goal(std::shared_ptr<yasmin::blackboard::Blackboard>)>;
   using ResutlHandler = std::function<std::string(
       std::shared_ptr<yasmin::blackboard::Blackboard>, Result)>;
+  using FeedbackHandler =
+      std::function<void(std::shared_ptr<yasmin::blackboard::Blackboard>,
+                         std::shared_ptr<const Feedback>)>;
 
 public:
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               std::vector<std::string> outcomes, int timeout = -1.0)
       : ActionState(action_name, create_goal_handler, outcomes, nullptr,
-                    timeout) {}
+                    nullptr, timeout) {}
 
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
-              ResutlHandler result_handler = nullptr, int timeout = -1.0)
+              ResutlHandler result_handler = nullptr,
+              FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
       : ActionState(action_name, create_goal_handler, {}, result_handler,
-                    timeout) {}
+                    feedback_handler, timeout) {}
 
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               std::vector<std::string> outcomes,
-              ResutlHandler result_handler = nullptr, int timeout = -1.0)
+              ResutlHandler result_handler = nullptr,
+              FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
-                    result_handler, timeout) {}
+                    result_handler, feedback_handler, timeout) {}
 
   ActionState(rclcpp::Node *node, std::string action_name,
               CreateGoalHandler create_goal_handler,
               std::vector<std::string> outcomes,
-              ResutlHandler result_handler = nullptr, int timeout = -1.0)
-      : State({}), action_name(action_name), timeout(timeout) {
+              ResutlHandler result_handler = nullptr,
+              FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
+
+      : State({}), action_name(action_name),
+        create_goal_handler(create_goal_handler),
+        result_handler(result_handler), feedback_handler(feedback_handler),
+        timeout(timeout) {
 
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT,
                       basic_outcomes::CANCEL};
@@ -87,9 +98,6 @@ public:
 
     this->action_client =
         rclcpp_action::create_client<ActionT>(this->node, action_name);
-
-    this->create_goal_handler = create_goal_handler;
-    this->result_handler = result_handler;
 
     if (this->create_goal_handler == nullptr) {
       throw std::invalid_argument("create_goal_handler is needed");
@@ -129,6 +137,15 @@ public:
     send_goal_options.result_callback =
         std::bind(&ActionState::result_callback, this, _1);
 
+    if (this->feedback_handler != nullptr) {
+      send_goal_options.feedback_callback =
+          [this, blackboard](typename GoalHandle::SharedPtr,
+                             std::shared_ptr<const Feedback> feedback) {
+            this->feedback_handler(blackboard, feedback);
+          };
+      ;
+    }
+
     RCLCPP_INFO(this->node->get_logger(), "Sending goal to action '%s'",
                 this->action_name.c_str());
     this->action_client->async_send_goal(goal, send_goal_options);
@@ -158,7 +175,6 @@ private:
   rclcpp::Node *node;
 
   std::string action_name;
-  int timeout;
 
   ActionClient action_client;
   std::condition_variable action_done_cond;
@@ -172,6 +188,9 @@ private:
 
   CreateGoalHandler create_goal_handler;
   ResutlHandler result_handler;
+  FeedbackHandler feedback_handler;
+
+  int timeout;
 
 #if defined(FOXY)
   void goal_response_callback(

@@ -45,6 +45,7 @@ class ActionState(State):
 
     _create_goal_handler: Callable
     _result_handler: Callable
+    _feedback_handler: Callable
     _timeout: float
 
     def __init__(
@@ -54,6 +55,7 @@ class ActionState(State):
         create_goal_handler: Callable,
         outcomes: List[str] = None,
         result_handler: Callable = None,
+        feedback_handler: Callable = None,
         node: Node = None,
         timeout: float = None
     ) -> None:
@@ -82,6 +84,7 @@ class ActionState(State):
 
         self._create_goal_handler = create_goal_handler
         self._result_handler = result_handler
+        self._feedback_handler = feedback_handler
 
         if not self._create_goal_handler:
             raise Exception("create_goal_handler is needed")
@@ -113,7 +116,16 @@ class ActionState(State):
 
         self._node.get_logger().info(
             f"Sending goal to action '{self._action_name}'")
-        send_goal_future = self._action_client.send_goal_async(goal)
+
+        feedback_handler = None
+
+        if self._feedback_handler is not None:
+
+            def feedback_handler(feedback):
+                self._feedback_handler(blackboard, feedback.feedback)
+
+        send_goal_future = self._action_client.send_goal_async(
+            goal, feedback_callback=feedback_handler)
         send_goal_future.add_done_callback(self._goal_response_callback)
 
         # Wait for action to be done

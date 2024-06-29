@@ -33,7 +33,8 @@ class FibonacciState(ActionState):
             "/fibonacci",  # action name
             self.create_goal_handler,  # cb to create the goal
             None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
-            self.response_handler  # cb to process the response
+            self.response_handler,  # cb to process the response
+            self.print_feedback
         )
 
     def create_goal_handler(self, blackboard: Blackboard) -> Fibonacci.Goal:
@@ -51,10 +52,12 @@ class FibonacciState(ActionState):
         blackboard.fibo_res = response.sequence
         return SUCCEED
 
-
-def set_int(blackboard: Blackboard) -> str:
-    blackboard.n = 3
-    return SUCCEED
+    def print_feedback(
+        self,
+        blackboard: Blackboard,
+        feedback: Fibonacci.Feedback
+    ) -> None:
+        print(f"Received feedback: {list(feedback.partial_sequence)}")
 
 
 def print_result(blackboard: Blackboard) -> str:
@@ -75,13 +78,6 @@ def main():
 
     # add states
     sm.add_state(
-        "SETTING_INT",
-        CbState([SUCCEED], set_int),
-        transitions={
-            SUCCEED: "CALLING_FIBONACCI"
-        }
-    )
-    sm.add_state(
         "CALLING_FIBONACCI",
         FibonacciState(),
         transitions={
@@ -101,8 +97,12 @@ def main():
     # pub FSM info
     YasminViewerPub("YASMIN_ACTION_CLIENT_DEMO", sm)
 
+    # create an initial blackoard
+    blackboard = Blackboard()
+    blackboard.n = 10
+
     # execute FSM
-    outcome = sm()
+    outcome = sm(blackboard)
     print(outcome)
 
     # shutdown ROS 2
