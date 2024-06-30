@@ -117,11 +117,8 @@ class ActionState(State):
         self._node.get_logger().info(
             f"Sending goal to action '{self._action_name}'")
 
-        feedback_handler = None
-
-        if self._feedback_handler is not None:
-
-            def feedback_handler(feedback):
+        def feedback_handler(feedback):
+            if self._feedback_handler is not None:
                 self._feedback_handler(blackboard, feedback.feedback)
 
         send_goal_future = self._action_client.send_goal_async(
