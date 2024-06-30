@@ -104,7 +104,7 @@ class ActionState(State):
         goal = self._create_goal_handler(blackboard)
 
         self._node.get_logger().info(
-            f"Action for service '{self._action_name}'")
+            f"Waiting for action '{self._action_name}'")
         act_available = self._action_client.wait_for_server(self._timeout)
 
         if not act_available:
