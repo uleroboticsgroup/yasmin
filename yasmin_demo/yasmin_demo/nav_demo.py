@@ -46,13 +46,13 @@ class Nav2State(ActionState):
     def create_goal_handler(self, blackboard: Blackboard) -> NavigateToPose.Goal:
 
         goal = NavigateToPose.Goal()
-        goal.pose.pose = blackboard.pose
+        goal.pose.pose = blackboard["pose"]
         goal.pose.header.frame_id = "map"
         return goal
 
 
 def create_waypoints(blackboard: Blackboard) -> str:
-    blackboard.waypoints = {
+    blackboard["waypoints"] = {
         "entrance": [1.25, 6.30, -0.78, 0.67],
         "bathroom": [4.89, 1.64, 0.0, 1.0],
         "livingroom": [1.55, 4.03, -0.69, 0.72],
@@ -63,19 +63,19 @@ def create_waypoints(blackboard: Blackboard) -> str:
 
 
 def take_random_waypoint(blackboard) -> str:
-    blackboard.random_waypoints = random.sample(
-        list(blackboard.waypoints.keys()),
-        blackboard.waypoints_num)
+    blackboard["random_waypoints"] = random.sample(
+        list(blackboard["waypoints"].keys()),
+        blackboard["waypoints_num"])
     return SUCCEED
 
 
 def get_next_waypoint(blackboard: Blackboard) -> str:
 
-    if not blackboard.random_waypoints:
+    if not blackboard["random_waypoints"]:
         return END
 
-    wp_name = blackboard.random_waypoints.pop(0)
-    wp = blackboard.waypoints[wp_name]
+    wp_name = blackboard["random_waypoints"].pop(0)
+    wp = blackboard["waypoints"][wp_name]
 
     pose = Pose()
     pose.position.x = wp[0]
@@ -84,8 +84,8 @@ def get_next_waypoint(blackboard: Blackboard) -> str:
     pose.orientation.z = wp[2]
     pose.orientation.w = wp[3]
 
-    blackboard.pose = pose
-    blackboard.text = f"I have reached waypoint {wp_name}"
+    blackboard["pose"] = pose
+    blackboard["text"] = f"I have reached waypoint {wp_name}"
 
     return HAS_NEXT
 
@@ -151,7 +151,7 @@ def main():
 
     # execute FSM
     blackboard = Blackboard()
-    blackboard.waypoints_num = 2
+    blackboard["waypoints_num"] = 2
     outcome = sm(blackboard)
     print(outcome)
 

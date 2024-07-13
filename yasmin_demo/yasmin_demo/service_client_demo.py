@@ -39,8 +39,8 @@ class AddTwoIntsState(ServiceState):
     def create_request_handler(self, blackboard: Blackboard) -> AddTwoInts.Request:
 
         req = AddTwoInts.Request()
-        req.a = blackboard.a
-        req.b = blackboard.b
+        req.a = blackboard["a"]
+        req.b = blackboard["b"]
         return req
 
     def response_handler(
@@ -49,18 +49,18 @@ class AddTwoIntsState(ServiceState):
         response: AddTwoInts.Response
     ) -> str:
 
-        blackboard.sum = response.sum
+        blackboard["sum"] = response.sum
         return "outcome1"
 
 
 def set_ints(blackboard: Blackboard) -> str:
-    blackboard.a = 10
-    blackboard.b = 5
+    blackboard["a"] = 10
+    blackboard["b"] = 5
     return SUCCEED
 
 
 def print_sum(blackboard: Blackboard) -> str:
-    print(f"Sum: {blackboard.sum}")
+    print(f"Sum: {blackboard['sum']}")
     return SUCCEED
 
 

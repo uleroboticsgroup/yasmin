@@ -40,7 +40,7 @@ class FibonacciState(ActionState):
     def create_goal_handler(self, blackboard: Blackboard) -> Fibonacci.Goal:
 
         goal = Fibonacci.Goal()
-        goal.order = blackboard.n
+        goal.order = blackboard["n"]
         return goal
 
     def response_handler(
@@ -49,7 +49,7 @@ class FibonacciState(ActionState):
         response: Fibonacci.Result
     ) -> str:
 
-        blackboard.fibo_res = response.sequence
+        blackboard["fibo_res"] = response.sequence
         return SUCCEED
 
     def print_feedback(
@@ -61,7 +61,7 @@ class FibonacciState(ActionState):
 
 
 def print_result(blackboard: Blackboard) -> str:
-    print(f"Result: {blackboard.fibo_res}")
+    print(f"Result: {blackboard['fibo_res']}")
     return SUCCEED
 
 
@@ -99,7 +99,7 @@ def main():
 
     # create an initial blackoard
     blackboard = Blackboard()
-    blackboard.n = 10
+    blackboard["n"] = 10
 
     # execute FSM
     outcome = sm(blackboard)

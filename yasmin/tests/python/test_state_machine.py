@@ -26,7 +26,7 @@ class FooState(State):
     def execute(self, blackboard):
         if self.counter < 3:
             self.counter += 1
-            blackboard.foo_str = f"Counter: {self.counter}"
+            blackboard["foo_str"] = f"Counter: {self.counter}"
             return "outcome1"
         else:
             return "outcome2"
@@ -46,11 +46,19 @@ class TestStateMachine(unittest.TestCase):
 
         self.sm = StateMachine(outcomes=["outcome4", "outcome5"])
 
-        self.sm.add_state("FOO", FooState(),
-                          transitions={"outcome1": "BAR",
-                                       "outcome2": "outcome4"})
-        self.sm.add_state("BAR", BarState(),
-                          transitions={"outcome2": "FOO"})
+        self.sm.add_state(
+            "FOO",
+            FooState(),
+            transitions={
+                "outcome1": "BAR",
+                "outcome2": "outcome4"
+            })
+        self.sm.add_state(
+            "BAR",
+            BarState(),
+            transitions={
+                "outcome2": "FOO"
+            })
 
     def test_state_machine_get_states(self):
 
