@@ -67,7 +67,7 @@ class ServiceServer(State):
             srv_type, srv_name, self._srv_callback)
         
         if pub_topic_name: 
-            self.__pub_topic = node.create_publisher(String, pub_topic_name, 10)
+            self.__pub_topic = self._node.create_publisher(String, pub_topic_name, 10)
 
         else: self.__pub_topic = None
 

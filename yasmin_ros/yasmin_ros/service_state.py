@@ -65,7 +65,7 @@ class ServiceState(State):
 
         if pub_topic_name: 
             pubsub_callback_group = MutuallyExclusiveCallbackGroup()
-            self.__pub_topic = node.create_publisher(String, pub_topic_name, 10,
+            self.__pub_topic = self._node.create_publisher(String, pub_topic_name, 10,
                                                       callback_group=pubsub_callback_group)
         else: self.__pub_topic = None
             
@@ -102,7 +102,7 @@ class ServiceState(State):
             return TIMEOUT
 
         try:
-            response =  self.__service_client.call_async(request)
+            response =  self._service_client.call_async(request)
             while True:
                 if response.done():
                     break
@@ -112,7 +112,7 @@ class ServiceState(State):
             return ABORT
 
         if self._response_handler:
-            outcome = self._response_handler(blackboard, response)
+            outcome = self._response_handler(blackboard, response.result())
             return outcome
 
         return SUCCEED

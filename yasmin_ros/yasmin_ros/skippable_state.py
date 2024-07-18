@@ -24,7 +24,7 @@ from rclpy.service import Service
 from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT, CANCEL, SKIPPED
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT, CANCEL, SKIPPED, WAITING
 
 
 class SkippableState(State):
@@ -49,7 +49,7 @@ class SkippableState(State):
         
         self._srv_name = srv_name
 
-        _outcomes = [SUCCEED, CANCEL, ABORT, SKIPPED]
+        _outcomes = [SUCCEED, CANCEL, ABORT, SKIPPED, WAITING]
 
         self._timeout = timeout
         if self._timeout:
@@ -69,8 +69,10 @@ class SkippableState(State):
         self._execute_handler = execute_handler
         
         if pub_topic_name: 
-            self.__pub_topic = node.create_publisher(String, pub_topic_name, 10)
+            self.__pub_topic = self._node.create_publisher(String, pub_topic_name, 10)
         else: self.__pub_topic = None
+
+        self._skipped = False
         super().__init__(_outcomes)
         print(self.__str__)
 
@@ -84,8 +86,8 @@ class SkippableState(State):
     
     def execute(self, blackboard: Blackboard) -> str:
         while True:
-            if self.__execute_handler: 
-                outcome = self.__execute_handler(blackboard)
+            if self._execute_handler: 
+                outcome = self._execute_handler(blackboard)
             if self._skipped:
                 self._skipped = False
                 return SKIPPED
