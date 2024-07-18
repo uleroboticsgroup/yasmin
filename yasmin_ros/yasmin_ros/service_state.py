@@ -54,7 +54,7 @@ class ServiceState(State):
             _outcomes.append(TIMEOUT)
 
         if outcomes:
-            _outcomes = list(set(_outcomes + outcomes))
+            _outcomes = _outcomes + outcomes
 
         if node is None:
             self._node = YasminNode.get_instance()

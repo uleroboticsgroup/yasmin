@@ -45,7 +45,7 @@ class MonitorState(State):
         self,
             msg_type: Type,
             topic_name: str,
-            outcomes: List[str] = ,
+            outcomes: List[str],
             monitor_handler: Callable,
             qos: Union[QoSProfile, int] = 10,
             msg_queue: int = 10,

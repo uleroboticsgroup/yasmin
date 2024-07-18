@@ -13,8 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from abc import ABCMeta, abstractmethod
 from typing import List, Callable, Union, Type
 from std_srvs.srv import SetBool, Trigger
+from std_msgs.msg import String
+
+from rclpy.node import Node
+from rclpy.service import Service
 
 from yasmin import State
 from yasmin import Blackboard
@@ -22,41 +27,54 @@ from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT, CANCEL, SKIPPED
 
 
-class ServiceServer(State):
+class SkippableState(State):
 
     _node: Node
     _srv_name: str
-    _service_client: Client
+    _service_server: Service
     _create_request_handler: Callable
     _response_handler: Callable
     _timeout: float
 
     def __init__(
         self,
-        srv_type: Type = Trigger,
         srv_name: str,
         execute_handler: Callable,
+        srv_type: Type = Trigger,
         outcomes: List[str] = None,
         node: Node = None,
-        timeout: float = None
+        timeout: float = None,
+        pub_topic_name: str = None
     ) -> None:
         
         self._srv_name = srv_name
 
         _outcomes = [SUCCEED, CANCEL, ABORT, SKIPPED]
 
-        if outcomes:
-            _outcomes = list(set(_outcomes + outcomes))
+        self._timeout = timeout
+        if self._timeout:
+            _outcomes.append(TIMEOUT)
 
-        self.__srv_server = node.create_service(
+        if outcomes:
+            _outcomes = _outcomes + outcomes
+
+        if node is None:
+            self._node = YasminNode.get_instance()
+        else:
+            self._node = node
+
+        self._service_server = self._node.create_service(
             srv_type, srv_name, self._srv_callback)
 
         self._execute_handler = execute_handler
-
+        
+        if pub_topic_name: 
+            self.__pub_topic = node.create_publisher(String, pub_topic_name, 10)
+        else: self.__pub_topic = None
         super().__init__(_outcomes)
         print(self.__str__)
 
-    def _skip_state(
+    def _srv_callback(
         self,
         req: Trigger.Request,
         res: Trigger.Response
