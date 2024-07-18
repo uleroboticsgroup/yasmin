@@ -21,22 +21,21 @@ from yasmin import Blackboard
 class TestBlackboard(unittest.TestCase):
 
     def setUp(self):
-
         self.blackboard = Blackboard()
 
     def test_blackboard_get(self):
-        self.blackboard.__setitem__("foo", "foo")
-        self.assertEqual("foo", self.blackboard.__getitem__("foo"))
+        self.blackboard["foo"] = "foo"
+        self.assertEqual("foo", self.blackboard["foo"])
 
     def test_blackboard_delete(self):
-        self.blackboard.__setitem__("foo", "foo")
-        self.blackboard.__delitem__("foo")
-        self.assertFalse(self.blackboard.__contains__("foo"))
+        self.blackboard["foo"] = "foo"
+        del self.blackboard["foo"]
+        self.assertFalse("foo" in self.blackboard)
 
     def test_blackboard_contains(self):
-        self.blackboard.__setitem__("foo", "foo")
-        self.assertTrue(self.blackboard.__contains__("foo"))
+        self.blackboard["foo"] = "foo"
+        self.assertTrue("foo" in self.blackboard)
 
     def test_blackboard_len(self):
-        self.blackboard.__setitem__("foo", "foo")
-        self.assertEqual(1, self.blackboard.__len__())
+        self.blackboard["foo"] = "foo"
+        self.assertEqual(1, len(self.blackboard))

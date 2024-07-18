@@ -13,33 +13,36 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import React from "react";
 
 import CytoscapeComponent from "react-cytoscapejs";
-//import dagre from "cytoscape-dagre";
-import klay from "cytoscape-klay";
 import cytoscape from "cytoscape";
+import klay from "cytoscape-klay";
 //import cola from "cytoscape-cola";
+//import dagre from "cytoscape-dagre";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 
 class FSM extends React.Component {
-  prepare_graph(fsm_data) {
+  prepare_graph(fsm_data, hide_nested_fsm) {
     let nodes = [];
     let edges = [];
 
     // get current state
     let current_state = 0;
 
-    while (current_state >= 0) {
-      if (fsm_data[current_state].is_fsm) {
-        current_state = fsm_data[current_state].current_state;
-      } else {
-        break;
+    if (!hide_nested_fsm) {
+      while (current_state >= 0) {
+        if (fsm_data[current_state].is_fsm) {
+          current_state = fsm_data[current_state].current_state;
+        } else {
+          break;
+        }
       }
+    } else {
+      current_state = fsm_data[0].current_state;
     }
 
     // create nodes and edges
@@ -48,11 +51,17 @@ class FSM extends React.Component {
       let type = "state";
       let name = state.name;
 
-      if (state.is_fsm) {
+      if (state.id === 0) {
+        name = "";
+      }
+
+      if (hide_nested_fsm && state.parent != 0 && state.id != 0) {
+        continue;
+      }
+
+      // current state
+      if (state.is_fsm && !hide_nested_fsm) {
         type = "fsm";
-        if (state.id === 0) {
-          name = "";
-        }
       } else {
         if (current_state === state.id) {
           type = "current_state";
@@ -76,21 +85,23 @@ class FSM extends React.Component {
 
         // FSM outcome
         if (state.is_fsm) {
-          nodes.push({
-            data: {
-              id: fsm_data[0].name + "node" + state.id + outcome,
-              parent: fsm_data[0].name + "node" + state.id,
-              label: outcome,
-              type: "outcome",
-            },
-          });
+          if (!hide_nested_fsm || (hide_nested_fsm && state.id == 0)) {
+            nodes.push({
+              data: {
+                id: fsm_data[0].name + "node" + state.id + outcome,
+                parent: fsm_data[0].name + "node" + state.id,
+                label: outcome,
+                type: "outcome",
+              },
+            });
+          }
         }
 
         // edges
         let target = 0;
         let source = state.id;
 
-        if (state.is_fsm) {
+        if (state.is_fsm && !hide_nested_fsm) {
           source = source + outcome;
         }
 
@@ -172,7 +183,11 @@ class FSM extends React.Component {
       return <div></div>;
     }
 
-    let graph = this.prepare_graph(this.props.fsm_data);
+    let graph = this.prepare_graph(
+      this.props.fsm_data,
+      this.props.hide_nested_fsm
+    );
+
     let nodes = graph[0];
     let edges = graph[1];
 
@@ -199,7 +214,7 @@ class FSM extends React.Component {
           <Grid item xs={12}>
             <Box
               display="flex"
-              border={1}
+              border={5}
               justifyContent="center"
               style={{ width: "100%", height: "100%" }}
             >
@@ -254,7 +269,7 @@ class FSM extends React.Component {
                       curveStyle: "bezier", //unbundled
                       //"text-rotation": "autorotate",
                       loopDirection: "-30deg",
-                      loopSweep: "-30deg"
+                      loopSweep: "-30deg",
                     },
                   },
                 ]}

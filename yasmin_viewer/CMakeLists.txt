@@ -15,6 +15,7 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(yasmin REQUIRED)
+find_package(yasmin_ros REQUIRED)
 find_package(yasmin_msgs REQUIRED)
 
 # C++
@@ -29,6 +30,7 @@ set(SOURCES
 set(DEPENDENCIES
     rclcpp
     yasmin
+    yasmin_ros
     yasmin_msgs
 )
 

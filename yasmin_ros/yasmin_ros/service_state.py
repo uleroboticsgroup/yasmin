@@ -17,33 +17,51 @@ from std_msgs.msg import String
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from typing import List, Callable, Type, Any
 
+from rclpy.node import Node
+from rclpy.client import Client
+
 from yasmin import State
 from yasmin import Blackboard
-from simple_node import Node
-from .basic_outcomes import SUCCEED, ABORT
+from yasmin_ros.yasmin_node import YasminNode
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT
 
 class ServiceState(State):
 
+    _node: Node
+    _srv_name: str
+    _service_client: Client
+    _create_request_handler: Callable
+    _response_handler: Callable
+    _timeout: float
+
     def __init__(
         self,
-        node: Node,
         srv_type: Type,
         srv_name: str,
         create_request_handler: Callable,
         outcomes: List[str] = None,
         response_handler: Callable = None,
+        node: Node = None,
+        timeout: float = None,
         pub_topic_name: str = None
     ) -> None:
 
+        self._srv_name = srv_name
         _outcomes = [SUCCEED, ABORT]
+
+        self._timeout = timeout
+        if self._timeout:
+            _outcomes.append(TIMEOUT)
 
         if outcomes:
             _outcomes = list(set(_outcomes + outcomes))
 
-        self.__service_client = node.create_client(srv_type, srv_name)
+        if node is None:
+            self._node = YasminNode.get_instance()
+        else:
+            self._node = node
 
-        self.__create_request_handler = create_request_handler
-        self.__response_handler = response_handler
+        self._service_client = self._node.create_client(srv_type, srv_name)
 
         if pub_topic_name: 
             pubsub_callback_group = MutuallyExclusiveCallbackGroup()
@@ -51,7 +69,10 @@ class ServiceState(State):
                                                       callback_group=pubsub_callback_group)
         else: self.__pub_topic = None
             
-        if not self.__create_request_handler:
+        self._create_request_handler = create_request_handler
+        self._response_handler = response_handler
+
+        if not self._create_request_handler:
             raise Exception("create_request_handler is needed")
 
         super().__init__(_outcomes)
@@ -67,15 +88,19 @@ class ServiceState(State):
         _msg.data = msg
         if self.__pub_topic: self.__pub_topic.publish(_msg)
 
-    def _create_request(self, blackboard: Blackboard) -> Any:
-        return self.__create_request_handler(blackboard)
-
     def execute(self, blackboard: Blackboard) -> str:
 
-        request = self._create_request(blackboard)
-        while not self.__service_client.service_is_ready():
-            if self._is_canceled():
-                return ABORT
+        request = self._create_request_handler(blackboard)
+
+        self._node.get_logger().info(f"Waiting for service '{self._srv_name}'")
+        srv_available = self._service_client.wait_for_service(
+            timeout_sec=self._timeout)
+
+        if not srv_available:
+            self._node.get_logger().warn(
+                f"Timeout reached, service '{self._srv_name}' is not available")
+            return TIMEOUT
+
         try:
             response =  self.__service_client.call_async(request)
             while True:
@@ -86,8 +111,8 @@ class ServiceState(State):
         except:
             return ABORT
 
-        if self.__response_handler:
-            outcome = self.__response_handler(blackboard, response.result())
+        if self._response_handler:
+            outcome = self._response_handler(blackboard, response)
             return outcome
 
         return SUCCEED

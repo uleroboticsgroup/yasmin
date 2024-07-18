@@ -20,7 +20,6 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "nav_msgs/msg/odometry.hpp"
-#include "simple_node/node.hpp"
 
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
@@ -36,17 +35,16 @@ class PrintOdometryState
 public:
   int times;
 
-  PrintOdometryState(simple_node::Node *node, int times)
+  PrintOdometryState(int times)
       : yasmin_ros::MonitorState<nav_msgs::msg::Odometry> // msg type
-        (node,                                            // node
-         "odom",                                          // topic name
+        ("odom",                                          // topic name
          {"outcome1", "outcome2"},                        // outcomes
          std::bind(&PrintOdometryState::monitor_handler, this, _1,
-                   _2),           // monitor handler callback
-         rclcpp::SensorDataQoS(), // qos for the topic sbscription
-         10,                      // queue of the monitor handler callback
-         10                       // timeout to wait for msgs in seconds
-                                  // if >0, CANCEL outcome is added
+                   _2), // monitor handler callback
+         10,            // qos for the topic sbscription
+         10,            // queue of the monitor handler callback
+         10             // timeout to wait for msgs in seconds
+                        // if >0, CANCEL outcome is added
         ) {
     this->times = times;
   };
@@ -54,6 +52,8 @@ public:
   std::string
   monitor_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
                   std::shared_ptr<nav_msgs::msg::Odometry> msg) {
+
+    (void)blackboard;
 
     std::cout << "x: " << msg->pose.pose.position.x << "\n";
     std::cout << "y: " << msg->pose.pose.position.y << "\n";
@@ -72,39 +72,28 @@ public:
   std::string to_string() { return "PrintOdometryState"; }
 };
 
-class MonitorDemoNode : public simple_node::Node {
-public:
-  std::unique_ptr<yasmin_viewer::YasminViewerPub> yamin_pub;
-
-  MonitorDemoNode() : simple_node::Node("yasmin_node") {
-
-    // create a state machine
-    auto sm = std::make_shared<yasmin::StateMachine>(
-        yasmin::StateMachine({"outcome4"}));
-
-    // add states
-    sm->add_state("PRINTING_ODOM",
-                  std::make_shared<PrintOdometryState>(this, 5),
-                  {{"outcome1", "PRINTING_ODOM"},
-                   {"outcome2", "outcome4"},
-                   {yasmin_ros::basic_outcomes::CANCEL, "outcome4"}});
-
-    // pub
-    this->yamin_pub = std::make_unique<yasmin_viewer::YasminViewerPub>(
-        yasmin_viewer::YasminViewerPub(this, "YASMIN_MONITOR_DEMO", sm));
-
-    // execute
-    std::string outcome = (*sm.get())();
-    std::cout << outcome << "\n";
-  }
-};
-
 int main(int argc, char *argv[]) {
 
   std::cout << "yasmin_monitor_demo\n";
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<MonitorDemoNode>();
-  node->join_spin();
+
+  // create a state machine
+  auto sm = std::make_shared<yasmin::StateMachine>(
+      yasmin::StateMachine({"outcome4"}));
+
+  // add states
+  sm->add_state("PRINTING_ODOM", std::make_shared<PrintOdometryState>(5),
+                {{"outcome1", "PRINTING_ODOM"},
+                 {"outcome2", "outcome4"},
+                 {yasmin_ros::basic_outcomes::TIMEOUT, "outcome4"}});
+
+  // pub
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+
+  // execute
+  std::string outcome = (*sm.get())();
+  std::cout << outcome << "\n";
+
   rclcpp::shutdown();
 
   return 0;

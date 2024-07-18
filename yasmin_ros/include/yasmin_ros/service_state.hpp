@@ -20,11 +20,11 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "simple_node/node.hpp"
 
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 
 namespace yasmin_ros {
 
@@ -38,19 +38,30 @@ template <typename ServiceT> class ServiceState : public yasmin::State {
       std::shared_ptr<yasmin::blackboard::Blackboard>, Response)>;
 
 public:
-  ServiceState(simple_node::Node *node, std::string srv_name,
+  ServiceState(std::string srv_name,
                CreateRequestHandler create_request_handler,
-               std::vector<std::string> outcomes)
-      : ServiceState(node, srv_name, create_request_handler, outcomes,
-                     nullptr) {}
+               std::vector<std::string> outcomes, int timeout = -1.0)
+      : ServiceState(srv_name, create_request_handler, outcomes, nullptr,
+                     timeout) {}
 
-  ServiceState(simple_node::Node *node, std::string srv_name,
+  ServiceState(std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::vector<std::string> outcomes,
-               ResponseHandler response_handler)
-      : State({}) {
+               ResponseHandler response_handler, int timeout = -1.0)
+      : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
+                     response_handler, timeout) {}
+
+  ServiceState(rclcpp::Node *node, std::string srv_name,
+               CreateRequestHandler create_request_handler,
+               std::vector<std::string> outcomes,
+               ResponseHandler response_handler, int timeout = -1.0)
+      : State({}), srv_name(srv_name), timeout(timeout) {
 
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT};
+
+    if (this->timeout >= 0) {
+      this->outcomes.push_back(basic_outcomes::TIMEOUT);
+    }
 
     if (outcomes.size() > 0) {
       for (std::string outcome : outcomes) {
@@ -58,7 +69,14 @@ public:
       }
     }
 
-    this->service_client = node->create_client<ServiceT>(srv_name);
+    if (node == nullptr) {
+      this->node = YasminNode::get_instance();
+    } else {
+      this->node = node;
+    }
+
+    this->service_client =
+        this->node->template create_client<ServiceT>(srv_name);
 
     this->create_request_handler = create_request_handler;
     this->response_handler = response_handler;
@@ -73,7 +91,21 @@ public:
 
     Request request = this->create_request(blackboard);
 
-    this->service_client->wait_for_service();
+    // wait for server
+    RCLCPP_INFO(this->node->get_logger(), "Waiting for service '%s'",
+                this->srv_name.c_str());
+    bool srv_available = this->service_client->wait_for_service(
+        std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
+
+    if (!srv_available) {
+      RCLCPP_WARN(this->node->get_logger(),
+                  "Timeout reached, service '%s' is not available",
+                  this->srv_name.c_str());
+      return basic_outcomes::TIMEOUT;
+    }
+
+    RCLCPP_INFO(this->node->get_logger(), "Sending request to service '%s'",
+                this->srv_name.c_str());
     auto future = this->service_client->async_send_request(request);
 
     future.wait();
@@ -94,9 +126,12 @@ public:
   }
 
 private:
+  rclcpp::Node *node;
   std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
   CreateRequestHandler create_request_handler;
   ResponseHandler response_handler;
+  std::string srv_name;
+  int timeout;
 
   Request
   create_request(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {

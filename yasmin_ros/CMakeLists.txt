@@ -10,12 +10,35 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+
+if(NOT DEFINED ENV{ROS_DISTRO})
+  message(FATAL_ERROR "ROS_DISTRO is not defined." )
+endif()
+if("$ENV{ROS_DISTRO}" STREQUAL "foxy")
+  message(STATUS "Build for ROS2 Foxy")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFOXY")
+elseif("$ENV{ROS_DISTRO}" STREQUAL "humble")
+  message(STATUS "Build for ROS2 Humble")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHUMBLE")
+elseif("$ENV{ROS_DISTRO}" STREQUAL "iron")
+  message(STATUS "Build for ROS2 Iron")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DIRON")
+elseif("$ENV{ROS_DISTRO}" STREQUAL "jazzy")
+  message(STATUS "Build for ROS2 Jazzy")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJAZZY")
+elseif("$ENV{ROS_DISTRO}" STREQUAL "rolling")
+  message(STATUS "Build for ROS2 Rolling")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DROLLING")
+else()
+  message(FATAL_ERROR "Unsupported ROS Distribution: " "$ENV{ROS_DISTRO}")
+endif()
+
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(simple_node REQUIRED)
 find_package(yasmin REQUIRED)
 
 # C++
@@ -24,6 +47,7 @@ include_directories(src)
 
 set(LIB ${CMAKE_PROJECT_NAME}_lib)
 set(SOURCES
+  src/yasmin_ros/yasmin_node.cpp
   src/yasmin_ros/action_state.cpp
   src/yasmin_ros/service_state.cpp
   src/yasmin_ros/monitor_state.cpp
@@ -31,7 +55,7 @@ set(SOURCES
 
 set(DEPENDENCIES
   rclcpp
-  simple_node
+  rclcpp_action
   yasmin
 )
 

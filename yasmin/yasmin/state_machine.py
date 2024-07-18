@@ -14,10 +14,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Dict, List
+from typing import Dict, List, Union
 from threading import Lock
-from .state import State
-from .blackboard import Blackboard
+from yasmin.state import State
+from yasmin.yasmin_logs import YASMIN_LOG_INFO
+from yasmin.blackboard import Blackboard
 
 
 class StateMachine(State):
@@ -32,9 +33,9 @@ class StateMachine(State):
 
     def add_state(
         self,
-            name: str,
-            state: State,
-            transitions: Dict[str, str] = None
+        name: str,
+        state: State,
+        transitions: Dict[str, str] = None
     ) -> None:
 
         if not transitions:
@@ -79,10 +80,14 @@ class StateMachine(State):
 
             # translate outcome using transitions
             if outcome in state["transitions"]:
+                YASMIN_LOG_INFO(
+                    "%s: %s --> %s",
+                    self.__current_state, outcome, state["transitions"][outcome]
+                )
                 outcome = state["transitions"][outcome]
 
             # outcome is an outcome of the sm
-            if outcome in self._outcomes:
+            if outcome in self.get_outcomes():
                 with self.__current_state_lock:
                     self.__current_state = None
                 return outcome
@@ -96,7 +101,7 @@ class StateMachine(State):
             else:
                 raise Exception(f"Outcome ({outcome}) without transition")
 
-    def get_states(self) -> Dict[str, str]:
+    def get_states(self) -> Dict[str, Union[State, Dict[str, str]]]:
         return self._states
 
     def get_current_state(self) -> str:
@@ -107,4 +112,4 @@ class StateMachine(State):
         return ""
 
     def __str__(self) -> str:
-        return str(self._states)
+        return f"StateMachine: {self._states}"

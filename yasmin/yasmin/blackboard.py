@@ -14,28 +14,38 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Any
+from typing import Any, Dict
+from threading import Lock
 
 
 class Blackboard(object):
-    def __init__(self, init=None) -> None:
+
+    def __init__(self, init: Dict[str, Any] = None) -> None:
+        self.__lock = Lock()
+        self._data = {}
         if init is not None:
-            self.__dict__.update(init)
+            self._data.update(init)
 
     def __getitem__(self, key) -> Any:
-        return self.__dict__[key]
+        with self.__lock:
+            return self._data[key]
 
     def __setitem__(self, key, value) -> None:
-        self.__dict__[key] = value
+        with self.__lock:
+            self._data[key] = value
 
     def __delitem__(self, key) -> None:
-        del self.__dict__[key]
+        with self.__lock:
+            del self._data[key]
 
     def __contains__(self, key) -> bool:
-        return key in self.__dict__
+        with self.__lock:
+            return key in self._data
 
     def __len__(self) -> int:
-        return len(self.__dict__)
+        with self.__lock:
+            return len(self._data)
 
     def __repr__(self) -> str:
-        return repr(self.__dict__)
+        with self.__lock:
+            return repr(self._data)

@@ -13,47 +13,48 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from std_msgs.msg import String
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
-from typing import List, Callable, Type, Any
+from typing import List, Callable, Union, Type
 from std_srvs.srv import SetBool, Trigger
 
 from yasmin import State
 from yasmin import Blackboard
-from simple_node import Node
-from .basic_outcomes import SKIPPED, ABORT, SUCCEED, WAITING
+from yasmin_ros.yasmin_node import YasminNode
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT, CANCEL, SKIPPED
 
 
-class SkippableState(State):
+class ServiceServer(State):
+
+    _node: Node
+    _srv_name: str
+    _service_client: Client
+    _create_request_handler: Callable
+    _response_handler: Callable
+    _timeout: float
 
     def __init__(
         self,
-        node: Node,
-        skip_srv_name: str,
-        execute_handler: Callable = None,
         srv_type: Type = Trigger,
+        srv_name: str,
+        execute_handler: Callable,
         outcomes: List[str] = None,
-        pub_topic_name: str = None
+        node: Node = None,
+        timeout: float = None
     ) -> None:
+        
+        self._srv_name = srv_name
 
-        _outcomes = [SKIPPED, ABORT, SUCCEED]
+        _outcomes = [SUCCEED, CANCEL, ABORT, SKIPPED]
 
         if outcomes:
             _outcomes = list(set(_outcomes + outcomes))
 
-        self._skipped = False
-        self.__srv = node.create_service(
-            srv_type, skip_srv_name, self._skip_state)
+        self.__srv_server = node.create_service(
+            srv_type, srv_name, self._srv_callback)
 
-        self.__execute_handler = execute_handler
-
-        if pub_topic_name: 
-            pubsub_callback_group = MutuallyExclusiveCallbackGroup()
-            self.__pub_topic = node.create_publisher(String, pub_topic_name, 10,
-                                                      callback_group=pubsub_callback_group)
-        else: self.__pub_topic = None
+        self._execute_handler = execute_handler
 
         super().__init__(_outcomes)
+        print(self.__str__)
 
     def _skip_state(
         self,

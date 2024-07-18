@@ -18,9 +18,6 @@
 
 import time
 import rclpy
-
-from simple_node import Node
-
 from yasmin import State
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -39,7 +36,7 @@ class FooState(State):
 
         if self.counter < 3:
             self.counter += 1
-            blackboard.foo_str = f"Counter: {self.counter}"
+            blackboard["foo_str"] = f"Counter: {self.counter}"
             return "outcome1"
         else:
             return "outcome2"
@@ -54,40 +51,46 @@ class BarState(State):
         print("Executing state BAR")
         time.sleep(3)
 
-        print(blackboard.foo_str)
+        print(blackboard["foo_str"])
         return "outcome3"
 
 
-class DemoNode(Node):
-
-    def __init__(self) -> None:
-        super().__init__("yasmin_node")
-
-        # create a state machine
-        sm = StateMachine(outcomes=["outcome4"])
-
-        # add states
-        sm.add_state("FOO", FooState(),
-                     transitions={"outcome1": "BAR",
-                                  "outcome2": "outcome4"})
-        sm.add_state("BAR", BarState(),
-                     transitions={"outcome3": "FOO"})
-
-        # pub
-        YasminViewerPub(self, "YASMIN_DEMO", sm)
-
-        # execute
-        outcome = sm()
-        print(outcome)
-
-
 # main
-def main(args=None):
+def main():
 
     print("yasmin_demo")
-    rclpy.init(args=args)
-    node = DemoNode()
-    node.join_spin()
+
+    # init ROS 2
+    rclpy.init()
+
+    # create a FSM
+    sm = StateMachine(outcomes=["outcome4"])
+
+    # add states
+    sm.add_state(
+        "FOO",
+        FooState(),
+        transitions={
+            "outcome1": "BAR",
+            "outcome2": "outcome4"
+        }
+    )
+    sm.add_state(
+        "BAR",
+        BarState(),
+        transitions={
+            "outcome3": "FOO"
+        }
+    )
+
+    # pub FSM info
+    YasminViewerPub("YASMIN_DEMO", sm)
+
+    # execute FSM
+    outcome = sm()
+    print(outcome)
+
+    # shutdown ROS 2
     rclpy.shutdown()
 
 

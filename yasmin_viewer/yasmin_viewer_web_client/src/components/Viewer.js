@@ -13,12 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import React from "react";
-import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid";
 import FSM from "./FSM";
+import TopAppBar from "./TopAppBar";
 
 class Viewer extends React.Component {
   constructor(props) {
@@ -29,7 +27,11 @@ class Viewer extends React.Component {
       fsm_name_list: [],
       current_fsm_data: undefined,
       current_fsm: "ALL",
+      hide_nested_fsm: false,
     };
+
+    this.handle_current_fsm = this.handle_current_fsm.bind(this);
+    this.handle_hide_nested_fsm = this.handle_hide_nested_fsm.bind(this);
   }
 
   get_fsms() {
@@ -77,57 +79,59 @@ class Viewer extends React.Component {
     clearInterval(this.interval);
   }
 
+  handle_current_fsm(current_fsm) {
+    this.setState({ current_fsm: current_fsm });
+  }
+
+  handle_hide_nested_fsm(hide_nested_fsm) {
+    this.setState({ hide_nested_fsm: hide_nested_fsm });
+  }
+
   render() {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Autocomplete
-                id="combo-box"
-                disableClearable={true}
-                options={this.state.fsm_name_list}
-                getOptionLabel={(option) => option}
-                isOptionEqualToValue={(option, value) => option === value}
-                defaultValue={"ALL"}
-                value={this.state.current_fsm}
-                onChange={(event, value) => {
-                  this.setState({ current_fsm: value });
-                }}
-                style={{ width: 300 }}
-                renderInput={(params) => (
-                  <TextField {...params} label="FSM" variant="outlined" />
-                )}
-              />
-            </div>
-          </Grid>
+      <div>
+        <TopAppBar
+          fsm_name_list={this.state.fsm_name_list}
+          handle_current_fsm={this.handle_current_fsm}
+          handle_hide_nested_fsm={this.handle_hide_nested_fsm}
+        />
 
-          {this.state.current_fsm === "ALL" ? (
-            this.state.fsm_list.map((fsm) => {
-              return (
-                <Grid item xs={6} key={fsm[0].name}>
-                  <FSM fsm_data={fsm} alone={false} />
-                </Grid>
-              );
-            })
-          ) : (
-            <Grid item xs={12}>
-              <FSM fsm_data={this.state.current_fsm_data} alone={true} />
-            </Grid>
-          )}
-        </Grid>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "700px",
+          }}
+        >
+          <Grid container spacing={3}>
+            {this.state.current_fsm === "ALL" ? (
+              this.state.fsm_list.map((fsm) => {
+                return (
+                  <Grid
+                    item
+                    xs={6}
+                    key={fsm[0].name + this.state.hide_nested_fsm}
+                  >
+                    <FSM
+                      fsm_data={fsm}
+                      alone={false}
+                      hide_nested_fsm={this.state.hide_nested_fsm}
+                    />
+                  </Grid>
+                );
+              })
+            ) : (
+              <Grid item xs={12} key={this.state.hide_nested_fsm}>
+                <FSM
+                  fsm_data={this.state.current_fsm_data}
+                  alone={true}
+                  hide_nested_fsm={this.state.hide_nested_fsm}
+                />
+              </Grid>
+            )}
+          </Grid>
+        </div>
       </div>
     );
   }

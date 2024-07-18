@@ -23,8 +23,8 @@
 
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/state.hpp"
-
 #include "yasmin/state_machine.hpp"
+#include "yasmin/yasmin_logs.hpp"
 
 using namespace yasmin;
 
@@ -107,6 +107,10 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
     // translate outcome using transitions
     if (transitions.find(outcome) != transitions.end()) {
+
+      YASMIN_LOG_INFO("%s: %s --> %s", this->current_state.c_str(),
+                      outcome.c_str(), transitions.at(outcome).c_str());
+
       outcome = transitions.at(outcome);
     }
 

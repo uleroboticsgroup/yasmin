@@ -17,10 +17,7 @@
 
 
 import rclpy
-
-from simple_node import Node
 from action_tutorials_interfaces.action import Fibonacci
-
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -30,20 +27,20 @@ from yasmin_viewer import YasminViewerPub
 
 
 class FibonacciState(ActionState):
-    def __init__(self, node: Node) -> None:
+    def __init__(self) -> None:
         super().__init__(
-            node,  # node
             Fibonacci,  # action type
             "/fibonacci",  # action name
             self.create_goal_handler,  # cb to create the goal
             None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
-            self.response_handler  # cb to process the response
+            self.response_handler,  # cb to process the response
+            self.print_feedback  # cb to process the feedback
         )
 
     def create_goal_handler(self, blackboard: Blackboard) -> Fibonacci.Goal:
 
         goal = Fibonacci.Goal()
-        goal.order = blackboard.n
+        goal.order = blackboard["n"]
         return goal
 
     def response_handler(
@@ -52,53 +49,63 @@ class FibonacciState(ActionState):
         response: Fibonacci.Result
     ) -> str:
 
-        blackboard.fibo_res = response.sequence
+        blackboard["fibo_res"] = response.sequence
         return SUCCEED
 
-
-def set_int(blackboard: Blackboard) -> str:
-    blackboard.n = 3
-    return SUCCEED
+    def print_feedback(
+        self,
+        blackboard: Blackboard,
+        feedback: Fibonacci.Feedback
+    ) -> None:
+        print(f"Received feedback: {list(feedback.partial_sequence)}")
 
 
 def print_result(blackboard: Blackboard) -> str:
-    print(f"Result: {blackboard.fibo_res}")
+    print(f"Result: {blackboard['fibo_res']}")
     return SUCCEED
 
 
-class ActionClientDemoNode(Node):
-
-    def __init__(self):
-        super().__init__("yasmin_node")
-
-        # create a state machine
-        sm = StateMachine(outcomes=["outcome4"])
-
-        # add states
-        sm.add_state("SETTING_INT", CbState([SUCCEED], set_int),
-                     transitions={SUCCEED: "CALLING_FIBONACCI"})
-        sm.add_state("CALLING_FIBONACCI", FibonacciState(self),
-                     transitions={SUCCEED: "PRINTING_RESULT",
-                                  CANCEL: "outcome4",
-                                  ABORT: "outcome4"})
-        sm.add_state("PRINTING_RESULT", CbState([SUCCEED], print_result),
-                     transitions={SUCCEED: "outcome4"})
-
-        # pub
-        YasminViewerPub(self, "YASMIN_ACTION_CLIENT_DEMO", sm)
-
-        # execute
-        outcome = sm()
-        print(outcome)
-
-
 # main
-def main(args=None):
+def main():
 
     print("yasmin_action_client_demo")
-    rclpy.init(args=args)
-    node = ActionClientDemoNode()
-    node.join_spin()
+
+    # init ROS 2
+    rclpy.init()
+
+    # create a FSM
+    sm = StateMachine(outcomes=["outcome4"])
+
+    # add states
+    sm.add_state(
+        "CALLING_FIBONACCI",
+        FibonacciState(),
+        transitions={
+            SUCCEED: "PRINTING_RESULT",
+            CANCEL: "outcome4",
+            ABORT: "outcome4"
+        }
+    )
+    sm.add_state(
+        "PRINTING_RESULT",
+        CbState([SUCCEED], print_result),
+        transitions={
+            SUCCEED: "outcome4"
+        }
+    )
+
+    # pub FSM info
+    YasminViewerPub("YASMIN_ACTION_CLIENT_DEMO", sm)
+
+    # create an initial blackoard
+    blackboard = Blackboard()
+    blackboard["n"] = 10
+
+    # execute FSM
+    outcome = sm(blackboard)
+    print(outcome)
+
+    # shutdown ROS 2
     rclpy.shutdown()
 
 

@@ -18,29 +18,24 @@
 #include <string>
 
 #include "action_tutorials_interfaces/action/fibonacci.hpp"
-#include "simple_node/node.hpp"
 
 #include "yasmin/cb_state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/action_state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-
-std::string
-set_int(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-  blackboard->set<int>("n", 3);
-  return yasmin_ros::basic_outcomes::SUCCEED;
-}
+using Fibonacci = action_tutorials_interfaces::action::Fibonacci;
 
 std::string
 print_result(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
   auto fibo_res = blackboard->get<std::vector<int>>("sum");
 
-  fprintf(stderr, "Sum:");
+  fprintf(stderr, "Result received:");
 
   for (auto ele : fibo_res) {
     fprintf(stderr, " %d,", ele);
@@ -51,83 +46,89 @@ print_result(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
   return yasmin_ros::basic_outcomes::SUCCEED;
 }
 
-class FibonacciState : public yasmin_ros::ActionState<
-                           action_tutorials_interfaces::action::Fibonacci> {
+class FibonacciState : public yasmin_ros::ActionState<Fibonacci> {
 
 public:
-  FibonacciState(simple_node::Node *node)
-      : yasmin_ros::ActionState<
-            action_tutorials_interfaces::action::Fibonacci> // msg
-        (node,                                              // node
-         "/fibonacci",                                      // action name
-         std::bind(&FibonacciState::create_goal_handler, this, _1),
-         std::bind(&FibonacciState::response_handler, this, _1, _2)){};
+  FibonacciState()
+      : yasmin_ros::ActionState<Fibonacci>(
 
-  action_tutorials_interfaces::action::Fibonacci::Goal::SharedPtr
-  create_goal_handler(
+            "/fibonacci", // action name
+
+            // # cb to create the goal
+            std::bind(&FibonacciState::create_goal_handler, this, _1),
+            // # cb to process the response
+
+            std::bind(&FibonacciState::response_handler, this, _1, _2),
+
+            // cb to process the feedback
+            std::bind(&FibonacciState::print_feedback, this, _1, _2)){};
+
+  Fibonacci::Goal create_goal_handler(
       std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
-    auto goal = std::make_shared<
-        action_tutorials_interfaces::action::Fibonacci::Goal>();
-
-    goal->order = blackboard->get<int>("n");
+    auto goal = Fibonacci::Goal();
+    goal.order = blackboard->get<int>("n");
 
     return goal;
   }
 
-  std::string response_handler(
-      std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-      action_tutorials_interfaces::action::Fibonacci::Result::SharedPtr
-          response) {
+  std::string
+  response_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+                   Fibonacci::Result::SharedPtr response) {
 
     blackboard->set<std::vector<int>>("sum", response->sequence);
 
     return yasmin_ros::basic_outcomes::SUCCEED;
   }
 
-  std::string to_string() { return "FibonacciState"; }
-};
+  void
+  print_feedback(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+                 std::shared_ptr<const Fibonacci::Feedback> feedback) {
+    (void)blackboard;
 
-class ActionClientDemoNode : public simple_node::Node {
-public:
-  std::unique_ptr<yasmin_viewer::YasminViewerPub> yamin_pub;
+    std::stringstream ss;
+    ss << "Next number in sequence received: ";
+    for (auto number : feedback->partial_sequence) {
+      ss << number << " ";
+    }
 
-  ActionClientDemoNode() : simple_node::Node("yasmin_node") {
-
-    // create a state machine
-    auto sm = std::make_shared<yasmin::StateMachine>(
-        yasmin::StateMachine({"outcome4"}));
-
-    // add states
-    sm->add_state("SETTING_INT",
-                  std::make_shared<yasmin::CbState>(yasmin::CbState(
-                      {yasmin_ros::basic_outcomes::SUCCEED}, set_int)),
-                  {{yasmin_ros::basic_outcomes::SUCCEED, "CALLING_FIBONACCI"}});
-    sm->add_state("CALLING_FIBONACCI", std::make_shared<FibonacciState>(this),
-                  {{yasmin_ros::basic_outcomes::SUCCEED, "PRINTING_RESULT"},
-                   {yasmin_ros::basic_outcomes::CANCEL, "outcome4"},
-                   {yasmin_ros::basic_outcomes::ABORT, "outcome4"}});
-    sm->add_state("PRINTING_RESULT",
-                  std::make_shared<yasmin::CbState>(yasmin::CbState(
-                      {yasmin_ros::basic_outcomes::SUCCEED}, print_result)),
-                  {{yasmin_ros::basic_outcomes::SUCCEED, "outcome4"}});
-
-    // pub
-    this->yamin_pub = std::make_unique<yasmin_viewer::YasminViewerPub>(
-        yasmin_viewer::YasminViewerPub(this, "YASMIN_ACTION_CLIENT_DEMO", sm));
-
-    // execute
-    std::string outcome = (*sm.get())();
-    std::cout << outcome << "\n";
+    fprintf(stderr, "%s\n", ss.str().c_str());
   }
+
+  std::string to_string() { return "FibonacciState"; }
 };
 
 int main(int argc, char *argv[]) {
 
   std::cout << "yasmin_action_client_demo\n";
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<ActionClientDemoNode>();
-  node->join_spin();
+
+  // create a state machine
+  auto sm = std::make_shared<yasmin::StateMachine>(
+      yasmin::StateMachine({"outcome4"}));
+
+  // add states
+  sm->add_state("CALLING_FIBONACCI", std::make_shared<FibonacciState>(),
+                {{yasmin_ros::basic_outcomes::SUCCEED, "PRINTING_RESULT"},
+                 {yasmin_ros::basic_outcomes::CANCEL, "outcome4"},
+                 {yasmin_ros::basic_outcomes::ABORT, "outcome4"}});
+  sm->add_state("PRINTING_RESULT",
+                std::make_shared<yasmin::CbState>(yasmin::CbState(
+                    {yasmin_ros::basic_outcomes::SUCCEED}, print_result)),
+                {{yasmin_ros::basic_outcomes::SUCCEED, "outcome4"}});
+
+  // pub
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+
+  // create an initial blackboard
+  std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =
+      std::make_shared<yasmin::blackboard::Blackboard>();
+  blackboard->set<int>("n", 10);
+
+  // execute
+  std::string outcome = (*sm.get())(blackboard);
+  std::cout << outcome << "\n";
+
   rclcpp::shutdown();
 
   return 0;
