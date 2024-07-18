@@ -53,15 +53,15 @@ ament_export_dependencies(${DEPENDENCIES})
 # Python
 ament_python_install_package(${PROJECT_NAME})
 
-# Tests
-install(
-  DIRECTORY tests/python/
-  DESTINATION pytests/
-)
+# # Tests
+# install(
+#   DIRECTORY tests/python/
+#   DESTINATION pytests/
+# )
 
-install(
-  PROGRAMS tests/python/run_pytests.sh
-  DESTINATION lib/${PROJECT_NAME}
-)
+# install(
+#   PROGRAMS tests/python/run_pytests.sh
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 ament_package()
