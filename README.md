@@ -53,7 +53,7 @@ There are some examples, for both Python and C++, that can be found in [yasmin_d
 #### Vanilla Demo (FSM)
 
 ```shell
-$ ros2 run yasmin_demos yasmin_demos.py
+$ ros2 run yasmin_demos yasmin_demo.py
 ```
 
 <p align="center">
@@ -108,7 +108,7 @@ class BarState(State):
 # main
 def main():
 
-    print("yasmin_demos")
+    print("yasmin_demo")
 
     # init ROS 2
     rclpy.init()
@@ -134,7 +134,7 @@ def main():
     )
 
     # pub FSM info
-    YasminViewerPub("yasmin_demos", sm)
+    YasminViewerPub("yasmin_demo", sm)
 
     # execute FSM
     outcome = sm()
@@ -627,7 +627,7 @@ if __name__ == "__main__":
 #### Vanilla Demo
 
 ```shell
-$ ros2 run yasmin_demos yasmin_demos
+$ ros2 run yasmin_demos yasmin_demo
 ```
 
 <details>
@@ -691,7 +691,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_demos\n";
+  std::cout << "yasmin_demo\n";
   rclcpp::init(argc, argv);
 
   // create a state machine
