@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(yasmin_demo)
+project(yasmin_demos)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -118,27 +118,27 @@ ament_export_libraries(${LIB})
 ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
-  yasmin_demo/yasmin_demo.py
+  yasmin_demos/yasmin_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(PROGRAMS
-  yasmin_demo/monitor_demo.py
+  yasmin_demos/monitor_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(PROGRAMS
-  yasmin_demo/service_client_demo.py
+  yasmin_demos/service_client_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(PROGRAMS
-  yasmin_demo/action_client_demo.py
+  yasmin_demos/action_client_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(PROGRAMS
-  yasmin_demo/nav_demo.py
+  yasmin_demos/nav_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

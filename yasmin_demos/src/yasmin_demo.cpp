@@ -70,7 +70,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_demo\n";
+  std::cout << "yasmin_demos\n";
   rclcpp::init(argc, argv);
 
   // create a state machine

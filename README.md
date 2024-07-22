@@ -46,14 +46,14 @@ $ colcon build
 
 ## Demos
 
-There are some examples, for both Python and C++, that can be found in [yasmin_demo](./yasmin_demo/).
+There are some examples, for both Python and C++, that can be found in [yasmin_demos](./yasmin_demos/).
 
 ### Python
 
 #### Vanilla Demo (FSM)
 
 ```shell
-$ ros2 run yasmin_demo yasmin_demo.py
+$ ros2 run yasmin_demos yasmin_demos.py
 ```
 
 <p align="center">
@@ -108,7 +108,7 @@ class BarState(State):
 # main
 def main():
 
-    print("yasmin_demo")
+    print("yasmin_demos")
 
     # init ROS 2
     rclpy.init()
@@ -134,7 +134,7 @@ def main():
     )
 
     # pub FSM info
-    YasminViewerPub("YASMIN_DEMO", sm)
+    YasminViewerPub("yasmin_demos", sm)
 
     # execute FSM
     outcome = sm()
@@ -157,7 +157,7 @@ $ ros2 run demo_nodes_py add_two_ints_server
 ```
 
 ```shell
-$ ros2 run yasmin_demo service_client_demo.py
+$ ros2 run yasmin_demos service_client_demo.py
 ```
 
 <details>
@@ -272,7 +272,7 @@ $ ros2 run action_tutorials_cpp fibonacci_action_server
 ```
 
 ```shell
-$ ros2 run yasmin_demo action_client_demo.py
+$ ros2 run yasmin_demos action_client_demo.py
 ```
 
 <details>
@@ -381,7 +381,7 @@ if __name__ == "__main__":
 #### Monitor Demo (FSM + ROS 2 Subscriber)
 
 ```shell
-$ ros2 run yasmin_demo monitor_demo.py
+$ ros2 run yasmin_demos monitor_demo.py
 ```
 
 <details>
@@ -466,7 +466,7 @@ if __name__ == "__main__":
 #### Nav2 Demo (Hierarchical FSM + ROS 2 Action)
 
 ```shell
-$ ros2 run yasmin_demo nav_demo.py
+$ ros2 run yasmin_demos nav_demo.py
 ```
 
 <details>
@@ -627,7 +627,7 @@ if __name__ == "__main__":
 #### Vanilla Demo
 
 ```shell
-$ ros2 run yasmin_demo yasmin_demo
+$ ros2 run yasmin_demos yasmin_demos
 ```
 
 <details>
@@ -691,7 +691,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_demo\n";
+  std::cout << "yasmin_demos\n";
   rclcpp::init(argc, argv);
 
   // create a state machine
@@ -725,7 +725,7 @@ $ ros2 run demo_nodes_py add_two_ints_server
 ```
 
 ```shell
-$ ros2 run yasmin_demo service_client_demo
+$ ros2 run yasmin_demos service_client_demo
 ```
 
 <details>
@@ -843,7 +843,7 @@ $ ros2 run action_tutorials_cpp fibonacci_action_server
 ```
 
 ```shell
-$ ros2 run yasmin_demo action_client_demo
+$ ros2 run yasmin_demos action_client_demo
 ```
 
 <details>
@@ -977,7 +977,7 @@ int main(int argc, char *argv[]) {
 #### Monitor Demo (FSM + ROS 2 Subscriber)
 
 ```shell
-$ ros2 run yasmin_demo monitor_demo
+$ ros2 run yasmin_demos monitor_demo
 ```
 
 <details>

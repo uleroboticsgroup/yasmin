@@ -58,7 +58,7 @@ class BarState(State):
 # main
 def main():
 
-    print("yasmin_demo")
+    print("yasmin_demos")
 
     # init ROS 2
     rclpy.init()
@@ -84,7 +84,7 @@ def main():
     )
 
     # pub FSM info
-    YasminViewerPub("YASMIN_DEMO", sm)
+    YasminViewerPub("yasmin_demos", sm)
 
     # execute FSM
     outcome = sm()
