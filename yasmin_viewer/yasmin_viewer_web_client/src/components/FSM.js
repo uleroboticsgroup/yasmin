@@ -55,7 +55,7 @@ class FSM extends React.Component {
         name = "";
       }
 
-      if (hide_nested_fsm && state.parent != 0 && state.id != 0) {
+      if (hide_nested_fsm && state.parent !== 0 && state.id !== 0) {
         continue;
       }
 
@@ -85,7 +85,7 @@ class FSM extends React.Component {
 
         // FSM outcome
         if (state.is_fsm) {
-          if (!hide_nested_fsm || (hide_nested_fsm && state.id == 0)) {
+          if (!hide_nested_fsm || (hide_nested_fsm && state.id === 0)) {
             nodes.push({
               data: {
                 id: fsm_data[0].name + "node" + state.id + outcome,

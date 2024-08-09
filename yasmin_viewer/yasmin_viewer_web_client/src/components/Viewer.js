@@ -28,10 +28,13 @@ class Viewer extends React.Component {
       current_fsm_data: undefined,
       current_fsm: "ALL",
       hide_nested_fsm: false,
+      show_only_active_fsms: false,
     };
 
     this.handle_current_fsm = this.handle_current_fsm.bind(this);
     this.handle_hide_nested_fsm = this.handle_hide_nested_fsm.bind(this);
+    this.handle_show_only_active_fsms =
+      this.handle_show_only_active_fsms.bind(this);
   }
 
   get_fsms() {
@@ -87,6 +90,10 @@ class Viewer extends React.Component {
     this.setState({ hide_nested_fsm: hide_nested_fsm });
   }
 
+  handle_show_only_active_fsms(show_only_active_fsms) {
+    this.setState({ show_only_active_fsms: show_only_active_fsms });
+  }
+
   render() {
     return (
       <div>
@@ -94,6 +101,7 @@ class Viewer extends React.Component {
           fsm_name_list={this.state.fsm_name_list}
           handle_current_fsm={this.handle_current_fsm}
           handle_hide_nested_fsm={this.handle_hide_nested_fsm}
+          handle_show_only_active_fsms={this.handle_show_only_active_fsms}
         />
 
         <div
@@ -107,19 +115,25 @@ class Viewer extends React.Component {
           <Grid container spacing={3}>
             {this.state.current_fsm === "ALL" ? (
               this.state.fsm_list.map((fsm) => {
-                return (
-                  <Grid
-                    item
-                    xs={6}
-                    key={fsm[0].name + this.state.hide_nested_fsm}
-                  >
-                    <FSM
-                      fsm_data={fsm}
-                      alone={false}
-                      hide_nested_fsm={this.state.hide_nested_fsm}
-                    />
-                  </Grid>
-                );
+                if (
+                  (this.state.show_only_active_fsms &&
+                    fsm[0].current_state !== -1) ||
+                  !this.state.show_only_active_fsms
+                ) {
+                  return (
+                    <Grid
+                      item
+                      xs={6}
+                      key={fsm[0].name + this.state.hide_nested_fsm}
+                    >
+                      <FSM
+                        fsm_data={fsm}
+                        alone={false}
+                        hide_nested_fsm={this.state.hide_nested_fsm}
+                      />
+                    </Grid>
+                  );
+                }
               })
             ) : (
               <Grid item xs={12} key={this.state.hide_nested_fsm}>

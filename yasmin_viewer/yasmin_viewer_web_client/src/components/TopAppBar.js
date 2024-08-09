@@ -13,12 +13,18 @@ export default function TopAppBar({
   fsm_name_list,
   handle_current_fsm,
   handle_hide_nested_fsm,
+  handle_show_only_active_fsms,
 }) {
-  const [hideNestedFSM, setHideNestedFSM] = React.useState(false);
   const [currentFSM, setCurrentFSM] = React.useState("ALL");
+  const [hideNestedFSM, setHideNestedFSM] = React.useState(false);
+  const [showOnlyActiveFSMs, setShowOnlyActiveFSMs] = React.useState(false);
 
   const handleChangeHideNestedFSM = (event) => {
     setHideNestedFSM(event.target.checked);
+  };
+
+  const handleShowOnlyActiveFSMs = (event) => {
+    setShowOnlyActiveFSMs(event.target.checked);
   };
 
   React.useEffect(() => {
@@ -28,6 +34,10 @@ export default function TopAppBar({
   React.useEffect(() => {
     handle_hide_nested_fsm(hideNestedFSM);
   }, [hideNestedFSM]);
+
+  React.useEffect(() => {
+    handle_show_only_active_fsms(showOnlyActiveFSMs);
+  }, [showOnlyActiveFSMs]);
 
   return (
     <Box sx={{ flexGrow: 1 }} style={{ width: "100%", height: "6.75vh" }}>
@@ -105,11 +115,36 @@ export default function TopAppBar({
           />
 
           <FormControlLabel
-            label="Hide Nested FSM"
+            label="Hide Nested FSMs"
             control={
               <Checkbox
                 checked={hideNestedFSM}
                 onChange={handleChangeHideNestedFSM}
+                inputProps={{ "aria-label": "controlled" }}
+                sx={{
+                  color: "white",
+                  "&.Mui-checked": {
+                    color: "white",
+                  },
+                }}
+              />
+            }
+          />
+
+          <Divider
+            orientation="vertical"
+            variant="middle"
+            flexItem
+            color="white"
+            style={{ marginLeft: 30, marginRight: 30 }}
+          />
+
+          <FormControlLabel
+            label="Show Only Active FSMs"
+            control={
+              <Checkbox
+                checked={showOnlyActiveFSMs}
+                onChange={handleShowOnlyActiveFSMs}
                 inputProps={{ "aria-label": "controlled" }}
                 sx={{
                   color: "white",
