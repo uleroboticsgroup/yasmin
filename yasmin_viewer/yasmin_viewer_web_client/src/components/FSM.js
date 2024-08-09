@@ -64,7 +64,11 @@ class FSM extends React.Component {
         type = "fsm";
       } else {
         if (current_state === state.id) {
-          type = "current_state";
+          if (state.is_fsm && hide_nested_fsm) {
+            type = "current_hidden_fsm";
+          } else {
+            type = "current_state";
+          }
         } else if (state.is_fsm && hide_nested_fsm) {
           type = "hidden_fsm";
         }
@@ -246,6 +250,14 @@ class FSM extends React.Component {
                     style: {
                       shape: "octagon",
                       borderWidth: 3,
+                    },
+                  },
+                  {
+                    selector: "node[type = 'current_hidden_fsm']",
+                    style: {
+                      shape: "octagon",
+                      borderWidth: 3,
+                      backgroundColor: "green",
                     },
                   },
                   {
