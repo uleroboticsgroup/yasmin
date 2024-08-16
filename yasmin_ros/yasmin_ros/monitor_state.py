@@ -25,7 +25,7 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from yasmin import State
 from yasmin import Blackboard
-from yasmin_ros.basic_outcomes import TIMEOUT
+from yasmin_ros.basic_outcomes import TIMEOUT, ABORT
 from yasmin_ros.yasmin_node import YasminNode
 
 class MonitorState(State):
