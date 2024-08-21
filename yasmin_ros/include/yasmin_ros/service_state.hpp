@@ -51,7 +51,7 @@ public:
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
                      response_handler, timeout) {}
 
-  ServiceState(rclcpp::Node *node, std::string srv_name,
+  ServiceState(rclcpp::Node::SharedPtr node, std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::vector<std::string> outcomes,
                ResponseHandler response_handler, int timeout = -1.0)
@@ -70,13 +70,13 @@ public:
     }
 
     if (node == nullptr) {
-      this->node = YasminNode::get_instance();
+      this->node_ = YasminNode::get_instance();
     } else {
-      this->node = node;
+      this->node_ = node;
     }
 
     this->service_client =
-        this->node->template create_client<ServiceT>(srv_name);
+        this->node_->template create_client<ServiceT>(srv_name);
 
     this->create_request_handler = create_request_handler;
     this->response_handler = response_handler;
@@ -92,19 +92,19 @@ public:
     Request request = this->create_request(blackboard);
 
     // wait for server
-    RCLCPP_INFO(this->node->get_logger(), "Waiting for service '%s'",
+    RCLCPP_INFO(this->node_->get_logger(), "Waiting for service '%s'",
                 this->srv_name.c_str());
     bool srv_available = this->service_client->wait_for_service(
         std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
 
     if (!srv_available) {
-      RCLCPP_WARN(this->node->get_logger(),
+      RCLCPP_WARN(this->node_->get_logger(),
                   "Timeout reached, service '%s' is not available",
                   this->srv_name.c_str());
       return basic_outcomes::TIMEOUT;
     }
 
-    RCLCPP_INFO(this->node->get_logger(), "Sending request to service '%s'",
+    RCLCPP_INFO(this->node_->get_logger(), "Sending request to service '%s'",
                 this->srv_name.c_str());
     auto future = this->service_client->async_send_request(request);
 
@@ -126,7 +126,7 @@ public:
   }
 
 private:
-  rclcpp::Node *node;
+  rclcpp::Node::SharedPtr node_;
   std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
   CreateRequestHandler create_request_handler;
   ResponseHandler response_handler;

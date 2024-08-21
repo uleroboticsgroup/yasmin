@@ -25,21 +25,21 @@ YasminViewerPub::YasminViewerPub(std::string fsm_name,
                                  std::shared_ptr<yasmin::StateMachine> fsm)
     : YasminViewerPub(nullptr, fsm_name, fsm) {}
 
-YasminViewerPub::YasminViewerPub(rclcpp::Node *node, std::string fsm_name,
+YasminViewerPub::YasminViewerPub(rclcpp::Node::SharedPtr node, std::string fsm_name,
                                  std::shared_ptr<yasmin::StateMachine> fsm)
     : fsm_name(fsm_name), fsm(fsm) {
 
   if (node == nullptr) {
-    this->node = yasmin_ros::YasminNode::get_instance();
+    this->node_ = yasmin_ros::YasminNode::get_instance();
   } else {
-    this->node = node;
+    this->node_ = node;
   }
 
   this->publisher =
-      this->node->create_publisher<yasmin_msgs::msg::StateMachine>(
+      this->node_->create_publisher<yasmin_msgs::msg::StateMachine>(
           "/fsm_viewer", 10);
 
-  this->timer = this->node->create_wall_timer(
+  this->timer = this->node_->create_wall_timer(
       250ms, std::bind(&YasminViewerPub::start_publisher, this));
 }
 
