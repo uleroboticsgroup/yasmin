@@ -70,7 +70,7 @@ public:
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
                     result_handler, feedback_handler, timeout) {}
 
-  ActionState(const rclcpp::Node::SharedPtr & node, std::string action_name,
+  ActionState(const rclcpp::Node::SharedPtr &node, std::string action_name,
               CreateGoalHandler create_goal_handler,
               std::vector<std::string> outcomes,
               ResutlHandler result_handler = nullptr,

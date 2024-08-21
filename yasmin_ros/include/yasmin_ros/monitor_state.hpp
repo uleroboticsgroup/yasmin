@@ -52,7 +52,7 @@ public:
       : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
                      msg_queue, timeout) {}
 
-  MonitorState(rclcpp::Node::SharedPtr node, std::string topic_name,
+  MonitorState(const rclcpp::Node::SharedPtr &node, std::string topic_name,
                std::vector<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue,
                int timeout)

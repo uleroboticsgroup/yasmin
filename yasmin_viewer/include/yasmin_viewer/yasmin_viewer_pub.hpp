@@ -35,7 +35,7 @@ namespace yasmin_viewer {
 class YasminViewerPub {
 
 public:
-  YasminViewerPub(rclcpp::Node::SharedPtr node, std::string fsm_name,
+  YasminViewerPub(const rclcpp::Node::SharedPtr &node, std::string fsm_name,
                   std::shared_ptr<yasmin::StateMachine> fsm);
 
   YasminViewerPub(std::string fsm_name,

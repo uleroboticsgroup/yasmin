@@ -51,7 +51,7 @@ public:
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
                      response_handler, timeout) {}
 
-  ServiceState(rclcpp::Node::SharedPtr node, std::string srv_name,
+  ServiceState(const rclcpp::Node::SharedPtr &node, std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::vector<std::string> outcomes,
                ResponseHandler response_handler, int timeout = -1.0)
