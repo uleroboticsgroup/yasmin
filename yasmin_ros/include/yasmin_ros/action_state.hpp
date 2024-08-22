@@ -70,7 +70,7 @@ public:
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
                     result_handler, feedback_handler, timeout) {}
 
-  ActionState(rclcpp::Node *node, std::string action_name,
+  ActionState(const rclcpp::Node::SharedPtr &node, std::string action_name,
               CreateGoalHandler create_goal_handler,
               std::vector<std::string> outcomes,
               ResutlHandler result_handler = nullptr,
@@ -91,13 +91,13 @@ public:
     }
 
     if (node == nullptr) {
-      this->node = YasminNode::get_instance();
+      this->node_ = YasminNode::get_instance();
     } else {
-      this->node = node;
+      this->node_ = node;
     }
 
     this->action_client =
-        rclcpp_action::create_client<ActionT>(this->node, action_name);
+        rclcpp_action::create_client<ActionT>(this->node_, action_name);
 
     if (this->create_goal_handler == nullptr) {
       throw std::invalid_argument("create_goal_handler is needed");
@@ -117,13 +117,13 @@ public:
     Goal goal = this->create_goal_handler(blackboard);
 
     // wait for server
-    RCLCPP_INFO(this->node->get_logger(), "Waiting for action '%s'",
+    RCLCPP_INFO(this->node_->get_logger(), "Waiting for action '%s'",
                 this->action_name.c_str());
     bool act_available = this->action_client->wait_for_action_server(
         std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
 
     if (!act_available) {
-      RCLCPP_WARN(this->node->get_logger(),
+      RCLCPP_WARN(this->node_->get_logger(),
                   "Timeout reached, action '%s' is not available",
                   this->action_name.c_str());
       return basic_outcomes::TIMEOUT;
@@ -146,7 +146,7 @@ public:
       ;
     }
 
-    RCLCPP_INFO(this->node->get_logger(), "Sending goal to action '%s'",
+    RCLCPP_INFO(this->node_->get_logger(), "Sending goal to action '%s'",
                 this->action_name.c_str());
     this->action_client->async_send_goal(goal, send_goal_options);
 
@@ -172,7 +172,7 @@ public:
   }
 
 private:
-  rclcpp::Node *node;
+  rclcpp::Node::SharedPtr node_;
 
   std::string action_name;
 

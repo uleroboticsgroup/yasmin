@@ -52,7 +52,7 @@ public:
       : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
                      msg_queue, timeout) {}
 
-  MonitorState(rclcpp::Node *node, std::string topic_name,
+  MonitorState(const rclcpp::Node::SharedPtr &node, std::string topic_name,
                std::vector<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue,
                int timeout)
@@ -74,13 +74,13 @@ public:
     }
 
     if (node == nullptr) {
-      this->node = YasminNode::get_instance();
+      this->node_ = YasminNode::get_instance();
     } else {
-      this->node = node;
+      this->node_ = node;
     }
 
     // create subscriber
-    this->sub = this->node->template create_subscription<MsgT>(
+    this->sub = this->node_->template create_subscription<MsgT>(
         topic_name, qos, std::bind(&MonitorState::callback, this, _1));
   }
 
@@ -99,7 +99,7 @@ public:
 
         if (elapsed_time / 1e6 >= this->timeout) {
           this->monitoring = false;
-          RCLCPP_WARN(this->node->get_logger(),
+          RCLCPP_WARN(this->node_->get_logger(),
                       "Timeout reached, topic '%s' is not available",
                       this->topic_name.c_str());
           return basic_outcomes::TIMEOUT;
@@ -109,7 +109,7 @@ public:
       }
     }
 
-    RCLCPP_INFO(this->node->get_logger(), "Processing msg from topic '%s'",
+    RCLCPP_INFO(this->node_->get_logger(), "Processing msg from topic '%s'",
                 this->topic_name.c_str());
     std::string outcome =
         this->monitor_handler(blackboard, this->msg_list.at(0));
@@ -120,7 +120,7 @@ public:
   }
 
 private:
-  rclcpp::Node *node;
+  rclcpp::Node::SharedPtr node_;
   std::shared_ptr<rclcpp::Subscription<MsgT>> sub;
   std::vector<std::shared_ptr<MsgT>> msg_list;
 
