@@ -25,7 +25,8 @@ YasminViewerPub::YasminViewerPub(std::string fsm_name,
                                  std::shared_ptr<yasmin::StateMachine> fsm)
     : YasminViewerPub(nullptr, fsm_name, fsm) {}
 
-YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node, std::string fsm_name,
+YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
+                                 std::string fsm_name,
                                  std::shared_ptr<yasmin::StateMachine> fsm)
     : fsm_name(fsm_name), fsm(fsm) {
 

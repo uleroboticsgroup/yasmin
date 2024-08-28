@@ -51,20 +51,20 @@ If your operating system doesn't support ROS 2 humble, docker is a great alterna
 First of all, you have to build the project and create an  image like so:
 
 ```shell
-## Assuimg you are in the correct project directory
+## Assuming you are in the correct project directory
 $ docker build -t yasmin .
 ```
 To use a shortcut, you may use the following command:
 
 ```shell
-## Assuimg you are in the correct project directory
+## Assuming you are in the correct project directory
 $ make docker_build
 ```
 
 After the image is created, copy and paste the following command to the terminal to run the image:
 
 ```shell
-## Assuimg you are in the correct project directory
+## Assuming you are in the correct project directory
 $ docker run -it --net=host --ipc=host --privileged --env="DISPLAY"  --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --volume="${XAUTHORITY}:/root/.Xauthority"  --entrypoint /bin/bash yasmin
 ```
 To use a shortcut, you may use following command:

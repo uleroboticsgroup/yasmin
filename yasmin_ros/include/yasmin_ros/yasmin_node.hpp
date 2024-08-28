@@ -36,7 +36,8 @@ public:
   ~YasminNode() {}
 
   static std::shared_ptr<YasminNode> get_instance() {
-    static std::shared_ptr<YasminNode> instance = std::make_shared<YasminNode>();
+    static std::shared_ptr<YasminNode> instance =
+        std::make_shared<YasminNode>();
     return instance;
   }
 
