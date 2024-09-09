@@ -17,6 +17,7 @@ from std_msgs.msg import String
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from typing import List, Callable, Type, Any
 
+import time
 from rclpy.node import Node
 from rclpy.client import Client
 
@@ -92,10 +93,9 @@ class ServiceState(State):
 
         request = self._create_request_handler(blackboard)
 
-        self._node.get_logger().info(f"Waiting for service '{self._srv_name}'")
+        self._node.get_logger().info(f"Waiting for service '{self._srv_name}' timeout: {self._timeout}")
         srv_available = self._service_client.wait_for_service(
             timeout_sec=self._timeout)
-
         if not srv_available:
             self._node.get_logger().warn(
                 f"Timeout reached, service '{self._srv_name}' is not available")
@@ -103,11 +103,15 @@ class ServiceState(State):
 
         try:
             response =  self._service_client.call_async(request)
+            start = time.time()
             while True:
-                if response.done():
-                    break
-                if self._is_canceled():
-                    return ABORT
+                if response.done():break
+                if self._is_canceled(): return ABORT
+                if self._timeout: 
+                    if time.time() - start > self._timeout:
+                        self._node.get_logger().warn(
+                            f"Timeout reached, service '{self._srv_name}' not response.")
+                        return TIMEOUT
         except:
             return ABORT
 
