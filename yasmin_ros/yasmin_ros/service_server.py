@@ -14,8 +14,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from abc import ABCMeta, abstractmethod
-from typing import List, Callable, Union, Type
-from std_srvs.srv import SetBool, Trigger
+from typing import List, Callable, Type
+from std_srvs.srv import Trigger
 from std_msgs.msg import String
 
 from rclpy.node import Node
@@ -24,7 +24,7 @@ from rclpy.service import Service
 from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT, CANCEL
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT, CANCEL, WAITING
 
 
 class ServiceServer(State):
@@ -35,6 +35,7 @@ class ServiceServer(State):
     _create_request_handler: Callable
     _response_handler: Callable
     _timeout: float
+    __abort_event: Callable = None
 
     def __init__(
         self,
@@ -44,7 +45,8 @@ class ServiceServer(State):
         outcomes: List[str] = None,
         node: Node = None,
         timeout: float = None,
-        pub_topic_name: str = None
+        pub_topic_name: str = None,
+        abort_event: Callable = None
     ) -> None:
         
         self._srv_name = srv_name
@@ -68,27 +70,26 @@ class ServiceServer(State):
         
         if pub_topic_name: 
             self.__pub_topic = self._node.create_publisher(String, pub_topic_name, 10)
-
         else: self.__pub_topic = None
+
+        if abort_event:
+            self.__abort_event = abort_event
 
         self._execute_handler = execute_handler
 
         super().__init__(_outcomes)
         print(self.__str__)
 
-    @abstractmethod
-    def _srv_callback(
-        self,
-        req: Trigger.Request,
-        res: Trigger.Response
-    ) -> Trigger.Response:
+    def _srv_callback(self,*args, **kwargs):
         """ state service callback """
+        return
 
     def execute(self, blackboard: Blackboard) -> str:
         while True:
             if self._execute_handler: 
                 outcome = self._execute_handler(blackboard)
             if self._is_canceled(): 
+                self.__abort_event()
                 return ABORT
             if outcome != WAITING: break
         return outcome
