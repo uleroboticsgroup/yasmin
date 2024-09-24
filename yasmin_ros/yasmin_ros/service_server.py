@@ -32,6 +32,7 @@ class ServiceServer(State):
     _node: Node
     _srv_name: str
     _service_server: Service
+    _srv_callback: Callable
     _create_request_handler: Callable
     _response_handler: Callable
     _timeout: float
@@ -41,6 +42,7 @@ class ServiceServer(State):
         self,
         srv_name: str,
         execute_handler: Callable,
+        srv_callback: Callable = None,
         srv_type: Type = Trigger,
         outcomes: List[str] = None,
         node: Node = None,
@@ -65,6 +67,7 @@ class ServiceServer(State):
         else:
             self._node = node
 
+        if srv_callback: self._srv_callback = srv_callback
         self._service_server = self._node.create_service(
             srv_type, srv_name, self._srv_callback)
         
@@ -77,17 +80,24 @@ class ServiceServer(State):
 
         self._execute_handler = execute_handler
 
+        if srv_callback: self._srv_callback = srv_callback
+
+        self.__transition:bool = False  # trigger to change state
         super().__init__(_outcomes)
         print(self.__str__)
 
-    def _srv_callback(self,*args, **kwargs):
+    def _srv_callback(self, request, response):
         """ state service callback """
-        return
+        self.__transition = True
+        return response
 
     def execute(self, blackboard: Blackboard) -> str:
         while True:
             if self._execute_handler: 
                 outcome = self._execute_handler(blackboard)
+            if self.__transition:
+                outcome = SUCCEED
+                self.__transition = False
             if self._is_canceled(): 
                 self.__abort_event()
                 return ABORT
