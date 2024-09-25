@@ -17,7 +17,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
-#include <stdexcept>
+#include <exception>
 #include <string>
 #include <vector>
 
@@ -101,8 +101,8 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     // check outcome belongs to state
     if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
                   outcome) == this->outcomes.end()) {
-      throw "Outcome (" + outcome + ") is not register in state " +
-          this->current_state;
+      throw std::logic_error("Outcome (" + outcome + ") is not register in state " +
+          this->current_state);
     }
 
     // translate outcome using transitions
@@ -133,7 +133,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
       // outcome is not in the sm
     } else {
-      throw "Outcome (" + outcome + ") without transition";
+      throw std::logic_error("Outcome (" + outcome + ") without transition");
     }
   }
 
