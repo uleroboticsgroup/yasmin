@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <exception>
 
 #include "yasmin/state.hpp"
 
@@ -30,7 +31,7 @@ State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
   if (std::find(this->outcomes.begin(), this->outcomes.end(), outcome) ==
       this->outcomes.end()) {
-    throw "Outcome (" + outcome + ") does not exist";
+    throw std::logic_error("Outcome (" + outcome + ") does not exist");
   }
 
   return outcome;
