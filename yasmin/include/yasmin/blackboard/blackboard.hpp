@@ -16,10 +16,10 @@
 #ifndef YASMIN_BLACKBOARD_HPP
 #define YASMIN_BLACKBOARD_HPP
 
+#include <exception>
 #include <map>
 #include <mutex>
 #include <string>
-#include <exception>
 
 #include "yasmin/blackboard/blackboard_value.hpp"
 #include "yasmin/blackboard/blackboard_value_interface.hpp"
@@ -43,7 +43,8 @@ public:
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
     if (!this->contains(name)) {
-      throw std::runtime_error("Element " + name + " does not exist in the blackboard");
+      throw std::runtime_error("Element " + name +
+                               " does not exist in the blackboard");
     }
 
     BlackboardValue<T> *b_value = (BlackboardValue<T> *)this->values.at(name);

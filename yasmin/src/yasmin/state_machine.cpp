@@ -14,10 +14,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
+#include <exception>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <exception>
 #include <string>
 #include <vector>
 
@@ -101,8 +101,9 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     // check outcome belongs to state
     if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
                   outcome) == this->outcomes.end()) {
-      throw std::logic_error("Outcome (" + outcome + ") is not register in state " +
-          this->current_state);
+      throw std::logic_error("Outcome (" + outcome +
+                             ") is not register in state " +
+                             this->current_state);
     }
 
     // translate outcome using transitions
