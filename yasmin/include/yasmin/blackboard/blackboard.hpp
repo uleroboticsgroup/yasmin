@@ -19,6 +19,7 @@
 #include <exception>
 #include <map>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 
 #include "yasmin/blackboard/blackboard_value.hpp"
