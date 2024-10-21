@@ -16,6 +16,7 @@
 #ifndef YASMIN_STATE_HPP
 #define YASMIN_STATE_HPP
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include <vector>
@@ -30,7 +31,7 @@ protected:
   std::vector<std::string> outcomes;
 
 private:
-  bool canceled;
+  std::atomic_bool canceled{false};
 
 public:
   State(std::vector<std::string> outcomes);
@@ -43,8 +44,8 @@ public:
     return "";
   }
 
-  void cancel_state();
-  bool is_canceled();
+  virtual void cancel_state();
+  bool is_canceled() const;
 
   std::vector<std::string> const &get_outcomes();
 
