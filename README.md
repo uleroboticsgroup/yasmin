@@ -10,11 +10,12 @@ YASMIN is a project focused on implementing robot behaviors using Finite State M
 
 1. [Features](#features)
 2. [Installation](#installation)
-3. [Demos](#demos)
+3. [Docker](#docker)
+4. [Demos](#demos)
    - [Python](#python)
    - [Cpp](#cpp)
-4. [YASMIN Viewer](#yasmin-viewer)
-5. [Citations](#citations)
+5. [YASMIN Viewer](#yasmin-viewer)
+6. [Citations](#citations)
 
 ## Features
 
@@ -44,7 +45,7 @@ $ cd ~/ros2_ws
 $ colcon build
 ```
 
-## Docker Setup
+## Docker
 
 If your operating system doesn't support ROS 2 humble, docker is a great alternative.
 
@@ -52,7 +53,7 @@ First of all, you have to build the project and create an  image like so:
 
 ```shell
 ## Assuming you are in the correct project directory
-$ docker build -t yasmin .
+$ docker build . -t yasmin
 ```
 To use a shortcut, you may use the following command:
 
@@ -65,7 +66,7 @@ After the image is created, copy and paste the following command to the terminal
 
 ```shell
 ## Assuming you are in the correct project directory
-$ docker run -it --net=host --ipc=host --privileged --env="DISPLAY"  --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --volume="${XAUTHORITY}:/root/.Xauthority"  --entrypoint /bin/bash yasmin
+$ docker run -it --net=host --ipc=host --privileged --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --volume="${XAUTHORITY}:/root/.Xauthority" --entrypoint /bin/bash yasmin
 ```
 To use a shortcut, you may use following command:
 
@@ -733,7 +734,7 @@ int main(int argc, char *argv[]) {
 
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      yasmin::StateMachine({"outcome4"}));
+      std::initializer_list<std::string>{"outcome4"});
 
   // add states
   sm->add_state("FOO", std::make_shared<FooState>(),
@@ -842,20 +843,24 @@ int main(int argc, char *argv[]) {
 
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      yasmin::StateMachine({"outcome4"}));
+      std::initializer_list<std::string>{"outcome4"});
 
   // add states
   sm->add_state("SETTING_INTS",
-                std::make_shared<yasmin::CbState>(yasmin::CbState(
-                    {yasmin_ros::basic_outcomes::SUCCEED}, set_ints)),
+                std::make_shared<yasmin::CbState>(
+                    std::initializer_list<std::string>{
+                        yasmin_ros::basic_outcomes::SUCCEED},
+                    set_ints),
                 {{yasmin_ros::basic_outcomes::SUCCEED, "ADD_TWO_INTS"}});
   sm->add_state("ADD_TWO_INTS", std::make_shared<AddTwoIntsState>(),
                 {{"outcome1", "PRINTING_SUM"},
                  {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                  {yasmin_ros::basic_outcomes::ABORT, "outcome4"}});
   sm->add_state("PRINTING_SUM",
-                std::make_shared<yasmin::CbState>(yasmin::CbState(
-                    {yasmin_ros::basic_outcomes::SUCCEED}, print_sum)),
+                std::make_shared<yasmin::CbState>(
+                    std::initializer_list<std::string>{
+                        yasmin_ros::basic_outcomes::SUCCEED},
+                    print_sum),
                 {{yasmin_ros::basic_outcomes::SUCCEED, "outcome4"}});
 
   // pub
@@ -979,7 +984,7 @@ int main(int argc, char *argv[]) {
 
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      yasmin::StateMachine({"outcome4"}));
+      std::initializer_list<std::string>{"outcome4"});
 
   // add states
   sm->add_state("CALLING_FIBONACCI", std::make_shared<FibonacciState>(),
@@ -987,8 +992,10 @@ int main(int argc, char *argv[]) {
                  {yasmin_ros::basic_outcomes::CANCEL, "outcome4"},
                  {yasmin_ros::basic_outcomes::ABORT, "outcome4"}});
   sm->add_state("PRINTING_RESULT",
-                std::make_shared<yasmin::CbState>(yasmin::CbState(
-                    {yasmin_ros::basic_outcomes::SUCCEED}, print_result)),
+                std::make_shared<yasmin::CbState>(
+                    std::initializer_list<std::string>{
+                        yasmin_ros::basic_outcomes::SUCCEED},
+                    print_result),
                 {{yasmin_ros::basic_outcomes::SUCCEED, "outcome4"}});
 
   // pub
@@ -1021,6 +1028,21 @@ $ ros2 run yasmin_demos monitor_demo
 <summary>Click to expand</summary>
 
 ```cpp
+// Copyright (C) 2023  Miguel Ángel González Santamarta
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -1087,13 +1109,13 @@ int main(int argc, char *argv[]) {
 
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      yasmin::StateMachine({"outcome4"}));
+      std::initializer_list<std::string>{"outcome4"});
 
   // add states
   sm->add_state("PRINTING_ODOM", std::make_shared<PrintOdometryState>(5),
                 {{"outcome1", "PRINTING_ODOM"},
                  {"outcome2", "outcome4"},
-                 {yasmin_ros::basic_outcomes::CANCEL, "outcome4"}});
+                 {yasmin_ros::basic_outcomes::TIMEOUT, "outcome4"}});
 
   // pub
   yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
