@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      yasmin::StateMachine({"outcome4"}));
+      std::initializer_list<std::string>{"outcome4"});
 
   // add states
   sm->add_state("FOO", std::make_shared<FooState>(),

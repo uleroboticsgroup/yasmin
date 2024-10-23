@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      yasmin::StateMachine({"outcome4"}));
+      std::initializer_list<std::string>{"outcome4"});
 
   // add states
   sm->add_state("CALLING_FIBONACCI", std::make_shared<FibonacciState>(),
@@ -113,8 +113,10 @@ int main(int argc, char *argv[]) {
                  {yasmin_ros::basic_outcomes::CANCEL, "outcome4"},
                  {yasmin_ros::basic_outcomes::ABORT, "outcome4"}});
   sm->add_state("PRINTING_RESULT",
-                std::make_shared<yasmin::CbState>(yasmin::CbState(
-                    {yasmin_ros::basic_outcomes::SUCCEED}, print_result)),
+                std::make_shared<yasmin::CbState>(
+                    std::initializer_list<std::string>{
+                        yasmin_ros::basic_outcomes::SUCCEED},
+                    print_result),
                 {{yasmin_ros::basic_outcomes::SUCCEED, "outcome4"}});
 
   // pub

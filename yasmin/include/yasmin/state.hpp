@@ -44,7 +44,7 @@ public:
     return "";
   }
 
-  virtual void cancel_state();
+  virtual void cancel_state() { this->canceled.store(true); };
   bool is_canceled() const;
 
   std::vector<std::string> const &get_outcomes();

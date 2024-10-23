@@ -38,8 +38,6 @@ State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
   return outcome;
 }
 
-void State::cancel_state() { this->canceled.store(true); }
-
 bool State::is_canceled() const { return this->canceled.load(); }
 
 std::vector<std::string> const &State::get_outcomes() { return this->outcomes; }
