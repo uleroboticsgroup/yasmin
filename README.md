@@ -47,14 +47,13 @@ $ colcon build
 
 ## Docker
 
-If your operating system doesn't support ROS 2 humble, docker is a great alternative.
-
-First of all, you have to build the project and create an  image like so:
+If your operating system doesn't support ROS 2 humble, docker is a great alternative. First of all, you have to build the project and create an image like so:
 
 ```shell
 ## Assuming you are in the correct project directory
-$ docker build . -t yasmin
+$ docker build -t yasmin .
 ```
+
 To use a shortcut, you may use the following command:
 
 ```shell
@@ -62,17 +61,19 @@ To use a shortcut, you may use the following command:
 $ make docker_build
 ```
 
-After the image is created, copy and paste the following command to the terminal to run the image:
+After the image is created, run a docker container with the following command:
 
 ```shell
 ## Assuming you are in the correct project directory
 $ docker run -it --net=host --ipc=host --privileged --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --volume="${XAUTHORITY}:/root/.Xauthority" --entrypoint /bin/bash yasmin
 ```
+
 To use a shortcut, you may use following command:
 
 ```shell
 $ make docker_run
 ```
+
 ### Running the package at docker image
 
 If you are in the docker image , this project is already sourced and the demo script can be run as the following command;
