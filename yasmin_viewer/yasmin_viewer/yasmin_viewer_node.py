@@ -22,6 +22,7 @@ from threading import Thread
 from typing import List, Dict
 
 import rclpy
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 import ament_index_python
 
@@ -100,7 +101,10 @@ class YasminFsmViewer(Node):
             10
         )
 
-        rclpy.spin(self)
+        try:
+            rclpy.spin(self)
+        except ExternalShutdownException:
+            pass
 
     def transition_msg_to_dict(self, tansitions: List[Transition]) -> Dict:
         transition_dict = {}
@@ -144,7 +148,6 @@ class YasminFsmViewer(Node):
 def main():
     rclpy.init()
     YasminFsmViewer()
-    rclpy.shutdown()
 
 
 if __name__ == "__main__":
