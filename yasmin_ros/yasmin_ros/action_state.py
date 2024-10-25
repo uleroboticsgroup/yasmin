@@ -57,7 +57,7 @@ class ActionState(State):
         result_handler: Callable = None,
         feedback_handler: Callable = None,
         node: Node = None,
-        timeout: float = None
+        timeout: float = None,
     ) -> None:
 
         self._action_name = action_name
@@ -79,7 +79,7 @@ class ActionState(State):
             self._node,
             action_type,
             action_name,
-            callback_group=ReentrantCallbackGroup()
+            callback_group=ReentrantCallbackGroup(),
         )
 
         self._create_goal_handler = create_goal_handler
@@ -103,26 +103,26 @@ class ActionState(State):
 
         goal = self._create_goal_handler(blackboard)
 
-        self._node.get_logger().info(
-            f"Waiting for action '{self._action_name}'")
+        self._node.get_logger().info(f"Waiting for action '{self._action_name}'")
         act_available = self._action_client.wait_for_server(self._timeout)
 
         if not act_available:
             self._node.get_logger().warn(
-                f"Timeout reached, action '{self._action_name}' is not available")
+                f"Timeout reached, action '{self._action_name}' is not available"
+            )
             return TIMEOUT
 
         self._action_done_event.clear()
 
-        self._node.get_logger().info(
-            f"Sending goal to action '{self._action_name}'")
+        self._node.get_logger().info(f"Sending goal to action '{self._action_name}'")
 
         def feedback_handler(feedback):
             if self._feedback_handler is not None:
                 self._feedback_handler(blackboard, feedback.feedback)
 
         send_goal_future = self._action_client.send_goal_async(
-            goal, feedback_callback=feedback_handler)
+            goal, feedback_callback=feedback_handler
+        )
         send_goal_future.add_done_callback(self._goal_response_callback)
 
         # Wait for action to be done

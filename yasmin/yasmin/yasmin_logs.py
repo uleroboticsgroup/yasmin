@@ -17,7 +17,7 @@
 import logging
 
 # Define the logging configuration
-logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 
 def YASMIN_LOG_ERROR(text, *args):

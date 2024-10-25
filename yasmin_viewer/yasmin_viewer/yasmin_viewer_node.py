@@ -26,11 +26,7 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 import ament_index_python
 
-from yasmin_msgs.msg import (
-    StateMachine,
-    State,
-    Transition
-)
+from yasmin_msgs.msg import StateMachine, State, Transition
 
 from flask import Flask
 from waitress import serve
@@ -48,7 +44,7 @@ class YasminFsmViewer(Node):
             parameters=[
                 ("host", "localhost"),
                 ("port", 5000),
-            ]
+            ],
         )
 
         self.__started = False
@@ -60,10 +56,14 @@ class YasminFsmViewer(Node):
         self.start_backend_server()
 
     def start_backend_server(self) -> None:
-        app = Flask("yasmin_viewer",
-                    static_folder=ament_index_python.get_package_share_directory(
-                        "yasmin_viewer") + "/yasmin_viewer_web_client",
-                    static_url_path="/")
+        app = Flask(
+            "yasmin_viewer",
+            static_folder=ament_index_python.get_package_share_directory(
+                "yasmin_viewer"
+            )
+            + "/yasmin_viewer_web_client",
+            static_url_path="/",
+        )
         # app.config["ENV"] = "development"
 
         @app.route("/")
@@ -74,7 +74,7 @@ class YasminFsmViewer(Node):
         def get_fsms():
             return json.dumps(self.__fsm_dict)
 
-        @app.route("/get_fsm/<fsm_name>",  methods=["GET"])
+        @app.route("/get_fsm/<fsm_name>", methods=["GET"])
         def get_fsm(fsm_name):
 
             if fsm_name in self.__fsm_dict:
@@ -86,20 +86,13 @@ class YasminFsmViewer(Node):
 
         # app.run(host="localhost", port=5000)
 
-        _host = str(self.get_parameter('host').value)
-        _port = int(self.get_parameter('port').value)
+        _host = str(self.get_parameter("host").value)
+        _port = int(self.get_parameter("port").value)
         print(f"Started Yasmin viewer on http://{_host}:{str(_port)}")
-        serve(app,
-              host=_host,
-              port=_port)
+        serve(app, host=_host, port=_port)
 
     def start_subscriber(self) -> None:
-        self.create_subscription(
-            StateMachine,
-            "/fsm_viewer",
-            self.fsm_viewer_cb,
-            10
-        )
+        self.create_subscription(StateMachine, "/fsm_viewer", self.fsm_viewer_cb, 10)
 
         try:
             rclpy.spin(self)
@@ -123,11 +116,11 @@ class YasminFsmViewer(Node):
             "outcomes": msg.outcomes,
             "is_fsm": False,
             "is_fsm": msg.is_fsm,
-            "current_state": msg.current_state
+            "current_state": msg.current_state,
         }
         return state_dict
 
-    def msg_to_dict(self,  msg: StateMachine) -> Dict:
+    def msg_to_dict(self, msg: StateMachine) -> Dict:
 
         states_dict = []
 

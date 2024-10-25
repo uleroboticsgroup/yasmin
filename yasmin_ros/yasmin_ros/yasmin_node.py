@@ -42,8 +42,7 @@ class YasminNode(Node):
         if not YasminNode._instance is None:
             raise Exception("This class is a Singleton")
 
-        super().__init__(
-            f"yasmin_{str(uuid.uuid4()).replace('-', '_')}_node")
+        super().__init__(f"yasmin_{str(uuid.uuid4()).replace('-', '_')}_node")
 
         # executor
         self._executor = MultiThreadedExecutor()

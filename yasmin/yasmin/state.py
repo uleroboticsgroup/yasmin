@@ -40,14 +40,14 @@ class State(ABC):
 
         if outcome not in self._outcomes:
             raise Exception(
-                f"Outcome '{outcome}' does not belong to the outcomes of the state '{self}'. The possible outcomes are: {self._outcomes}")
+                f"Outcome '{outcome}' does not belong to the outcomes of the state '{self}'. The possible outcomes are: {self._outcomes}"
+            )
 
         return outcome
 
     @abstractmethod
     def execute(self, blackboard: Blackboard) -> str:
-        raise NotImplementedError(
-            "Subclasses must implement the execute method")
+        raise NotImplementedError("Subclasses must implement the execute method")
 
     def __str__(self) -> str:
         return self.__class__.__name__

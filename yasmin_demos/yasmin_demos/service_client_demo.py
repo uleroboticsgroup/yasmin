@@ -33,7 +33,7 @@ class AddTwoIntsState(ServiceState):
             "/add_two_ints",  # service name
             self.create_request_handler,  # cb to create the request
             ["outcome1"],  # outcomes. Includes (SUCCEED, ABORT)
-            self.response_handler  # cb to process the response
+            self.response_handler,  # cb to process the response
         )
 
     def create_request_handler(self, blackboard: Blackboard) -> AddTwoInts.Request:
@@ -44,9 +44,7 @@ class AddTwoIntsState(ServiceState):
         return req
 
     def response_handler(
-        self,
-        blackboard: Blackboard,
-        response: AddTwoInts.Response
+        self, blackboard: Blackboard, response: AddTwoInts.Response
     ) -> str:
 
         blackboard["sum"] = response.sum
@@ -79,9 +77,7 @@ def main():
     sm.add_state(
         "SETTING_INTS",
         CbState([SUCCEED], set_ints),
-        transitions={
-            SUCCEED: "ADD_TWO_INTS"
-        }
+        transitions={SUCCEED: "ADD_TWO_INTS"},
     )
     sm.add_state(
         "ADD_TWO_INTS",
@@ -89,15 +85,11 @@ def main():
         transitions={
             "outcome1": "PRINTING_SUM",
             SUCCEED: "outcome4",
-            ABORT: "outcome4"
-        }
+            ABORT: "outcome4",
+        },
     )
     sm.add_state(
-        "PRINTING_SUM",
-        CbState([SUCCEED], print_sum),
-        transitions={
-            SUCCEED: "outcome4"
-        }
+        "PRINTING_SUM", CbState([SUCCEED], print_sum), transitions={SUCCEED: "outcome4"}
     )
 
     # pub FSM info

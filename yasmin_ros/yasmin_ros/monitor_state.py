@@ -68,7 +68,8 @@ class MonitorState(State):
             self._node = node
 
         self._sub = self._node.create_subscription(
-            msg_type, topic_name, self.__callback, qos)
+            msg_type, topic_name, self.__callback, qos
+        )
 
     def __callback(self, msg) -> None:
 
@@ -92,15 +93,14 @@ class MonitorState(State):
                 if elapsed_time >= self._timeout:
                     self.monitoring = False
                     self._node.get_logger().warn(
-                        f"Timeout reached, topic '{self._topic_name}' is not available")
+                        f"Timeout reached, topic '{self._topic_name}' is not available"
+                    )
                     return TIMEOUT
 
                 elapsed_time += self.time_to_wait
 
-        self._node.get_logger().info(
-            f"Processing msg from topic '{self._topic_name}'")
-        outcome = self._monitor_handler(
-            blackboard, self.msg_list.pop(0))
+        self._node.get_logger().info(f"Processing msg from topic '{self._topic_name}'")
+        outcome = self._monitor_handler(blackboard, self.msg_list.pop(0))
 
         self.monitoring = False
         return outcome

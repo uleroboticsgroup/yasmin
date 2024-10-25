@@ -32,19 +32,13 @@ class StateMachine(State):
         self.__current_state_lock = Lock()
 
     def add_state(
-        self,
-        name: str,
-        state: State,
-        transitions: Dict[str, str] = None
+        self, name: str, state: State, transitions: Dict[str, str] = None
     ) -> None:
 
         if not transitions:
             transitions = {}
 
-        self._states[name] = {
-            "state": state,
-            "transitions": transitions
-        }
+        self._states[name] = {"state": state, "transitions": transitions}
 
         if not self._start_state:
             self._start_state = name
@@ -76,13 +70,16 @@ class StateMachine(State):
             # check outcome belongs to state
             if outcome not in state["state"].get_outcomes():
                 raise Exception(
-                    f"Outcome ({outcome}) is not register in state {self.__current_state}")
+                    f"Outcome ({outcome}) is not register in state {self.__current_state}"
+                )
 
             # translate outcome using transitions
             if outcome in state["transitions"]:
                 YASMIN_LOG_INFO(
                     "%s: %s --> %s",
-                    self.__current_state, outcome, state["transitions"][outcome]
+                    self.__current_state,
+                    outcome,
+                    state["transitions"][outcome],
                 )
                 outcome = state["transitions"][outcome]
 

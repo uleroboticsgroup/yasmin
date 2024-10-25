@@ -68,20 +68,9 @@ def main():
 
     # add states
     sm.add_state(
-        "FOO",
-        FooState(),
-        transitions={
-            "outcome1": "BAR",
-            "outcome2": "outcome4"
-        }
+        "FOO", FooState(), transitions={"outcome1": "BAR", "outcome2": "outcome4"}
     )
-    sm.add_state(
-        "BAR",
-        BarState(),
-        transitions={
-            "outcome3": "FOO"
-        }
-    )
+    sm.add_state("BAR", BarState(), transitions={"outcome3": "FOO"})
 
     # pub FSM info
     YasminViewerPub("yasmin_demo", sm)

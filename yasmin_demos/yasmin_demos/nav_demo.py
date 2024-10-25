@@ -40,7 +40,7 @@ class Nav2State(ActionState):
             "/navigate_to_pose",  # action name
             self.create_goal_handler,  # cb to create the goal
             None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
-            None  # cb to process the response
+            None,  # cb to process the response
         )
 
     def create_goal_handler(self, blackboard: Blackboard) -> NavigateToPose.Goal:
@@ -64,8 +64,8 @@ def create_waypoints(blackboard: Blackboard) -> str:
 
 def take_random_waypoint(blackboard) -> str:
     blackboard["random_waypoints"] = random.sample(
-        list(blackboard["waypoints"].keys()),
-        blackboard["waypoints_num"])
+        list(blackboard["waypoints"].keys()), blackboard["waypoints_num"]
+    )
     return SUCCEED
 
 
@@ -106,44 +106,29 @@ def main():
     sm.add_state(
         "CREATING_WAYPOINTS",
         CbState([SUCCEED], create_waypoints),
-        transitions={
-            SUCCEED: "TAKING_RANDOM_WAYPOINTS"
-        }
+        transitions={SUCCEED: "TAKING_RANDOM_WAYPOINTS"},
     )
     sm.add_state(
         "TAKING_RANDOM_WAYPOINTS",
         CbState([SUCCEED], take_random_waypoint),
-        transitions={
-            SUCCEED: "NAVIGATING"
-        }
+        transitions={SUCCEED: "NAVIGATING"},
     )
 
     nav_sm.add_state(
         "GETTING_NEXT_WAYPOINT",
         CbState([END, HAS_NEXT], get_next_waypoint),
-        transitions={
-            END: SUCCEED,
-            HAS_NEXT: "NAVIGATING"
-        }
+        transitions={END: SUCCEED, HAS_NEXT: "NAVIGATING"},
     )
     nav_sm.add_state(
         "NAVIGATING",
         Nav2State(),
-        transitions={
-            SUCCEED: "GETTING_NEXT_WAYPOINT",
-            CANCEL: CANCEL,
-            ABORT: ABORT
-        }
+        transitions={SUCCEED: "GETTING_NEXT_WAYPOINT", CANCEL: CANCEL, ABORT: ABORT},
     )
 
     sm.add_state(
         "NAVIGATING",
         nav_sm,
-        transitions={
-            SUCCEED: SUCCEED,
-            CANCEL: CANCEL,
-            ABORT: ABORT
-        }
+        transitions={SUCCEED: SUCCEED, CANCEL: CANCEL, ABORT: ABORT},
     )
 
     # pub FSM info

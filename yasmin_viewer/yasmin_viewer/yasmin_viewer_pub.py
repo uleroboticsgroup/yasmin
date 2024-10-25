@@ -19,7 +19,7 @@ from rclpy.node import Node
 from yasmin_msgs.msg import (
     State as StateMsg,
     StateMachine as StateMachineMsg,
-    Transition as TransitionMsg
+    Transition as TransitionMsg,
 )
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin import StateMachine, State
@@ -32,11 +32,7 @@ class YasminViewerPub:
     _fsm_name: str
 
     def __init__(
-        self,
-        fsm_name: str,
-        fsm: StateMachine,
-        rate: int = 4,
-        node: Node = None
+        self, fsm_name: str, fsm: StateMachine, rate: int = 4, node: Node = None
     ) -> None:
 
         self._fsm = fsm
@@ -47,8 +43,7 @@ class YasminViewerPub:
         else:
             self._node = node
 
-        self.pub = self._node.create_publisher(
-            StateMachineMsg, "/fsm_viewer", 10)
+        self.pub = self._node.create_publisher(StateMachineMsg, "/fsm_viewer", 10)
         self._timer = self._node.create_timer(1 / rate, self._start_publisher)
 
     def parse_transitions(self, transitions: Dict[str, str]) -> List[TransitionMsg]:
@@ -68,7 +63,7 @@ class YasminViewerPub:
         state_name: str,
         state_info: Dict[str, str],
         states_list: List[StateMsg],
-        parent: int = -1
+        parent: int = -1,
     ) -> None:
 
         state_msg = StateMsg()
@@ -79,8 +74,7 @@ class YasminViewerPub:
         # state info
         state: State = state_info["state"]
         state_msg.name = state_name
-        state_msg.transitions = self.parse_transitions(
-            state_info["transitions"])
+        state_msg.transitions = self.parse_transitions(state_info["transitions"])
         state_msg.outcomes = state.get_outcomes()
 
         # state is a FSM
@@ -98,15 +92,14 @@ class YasminViewerPub:
 
             for state_name in states:
                 state_info = states[state_name]
-                self.parse_state(state_name, state_info,
-                                 states_list, state_msg.id)
+                self.parse_state(state_name, state_info, states_list, state_msg.id)
 
             current_state = fsm.get_current_state()
 
             for child_state in states_list:
                 if (
-                    child_state.name == current_state and
-                    child_state.parent == state_msg.id
+                    child_state.name == current_state
+                    and child_state.parent == state_msg.id
                 ):
                     state_msg.current_state = child_state.id
                     break
@@ -114,12 +107,9 @@ class YasminViewerPub:
     def _start_publisher(self) -> None:
 
         states_list = []
-        self.parse_state(self._fsm_name,
-                         {
-                             "state": self._fsm,
-                             "transitions": {}
-                         },
-                         states_list)
+        self.parse_state(
+            self._fsm_name, {"state": self._fsm, "transitions": {}}, states_list
+        )
 
         state_machine_msg = StateMachineMsg()
         state_machine_msg.states = states_list

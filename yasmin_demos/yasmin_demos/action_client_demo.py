@@ -34,7 +34,7 @@ class FibonacciState(ActionState):
             self.create_goal_handler,  # cb to create the goal
             None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
             self.response_handler,  # cb to process the response
-            self.print_feedback  # cb to process the feedback
+            self.print_feedback,  # cb to process the feedback
         )
 
     def create_goal_handler(self, blackboard: Blackboard) -> Fibonacci.Goal:
@@ -44,18 +44,14 @@ class FibonacciState(ActionState):
         return goal
 
     def response_handler(
-        self,
-        blackboard: Blackboard,
-        response: Fibonacci.Result
+        self, blackboard: Blackboard, response: Fibonacci.Result
     ) -> str:
 
         blackboard["fibo_res"] = response.sequence
         return SUCCEED
 
     def print_feedback(
-        self,
-        blackboard: Blackboard,
-        feedback: Fibonacci.Feedback
+        self, blackboard: Blackboard, feedback: Fibonacci.Feedback
     ) -> None:
         print(f"Received feedback: {list(feedback.partial_sequence)}")
 
@@ -80,18 +76,12 @@ def main():
     sm.add_state(
         "CALLING_FIBONACCI",
         FibonacciState(),
-        transitions={
-            SUCCEED: "PRINTING_RESULT",
-            CANCEL: "outcome4",
-            ABORT: "outcome4"
-        }
+        transitions={SUCCEED: "PRINTING_RESULT", CANCEL: "outcome4", ABORT: "outcome4"},
     )
     sm.add_state(
         "PRINTING_RESULT",
         CbState([SUCCEED], print_result),
-        transitions={
-            SUCCEED: "outcome4"
-        }
+        transitions={SUCCEED: "outcome4"},
     )
 
     # pub FSM info

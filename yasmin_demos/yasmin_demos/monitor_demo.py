@@ -36,7 +36,7 @@ class PrintOdometryState(MonitorState):
             self.monitor_handler,  # monitor handler callback
             qos=qos_profile_sensor_data,  # qos for the topic sbscription
             msg_queue=10,  # queue of the monitor handler callback
-            timeout=10  # timeout to wait for msgs in seconds
+            timeout=10,  # timeout to wait for msgs in seconds
             # if not None, CANCEL outcome is added
         )
         self.times = times
@@ -70,8 +70,8 @@ def main():
         transitions={
             "outcome1": "PRINTING_ODOM",
             "outcome2": "outcome4",
-            TIMEOUT: "outcome4"
-        }
+            TIMEOUT: "outcome4",
+        },
     )
 
     # pub FSM info

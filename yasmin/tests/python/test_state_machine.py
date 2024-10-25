@@ -47,25 +47,14 @@ class TestStateMachine(unittest.TestCase):
         self.sm = StateMachine(outcomes=["outcome4", "outcome5"])
 
         self.sm.add_state(
-            "FOO",
-            FooState(),
-            transitions={
-                "outcome1": "BAR",
-                "outcome2": "outcome4"
-            })
-        self.sm.add_state(
-            "BAR",
-            BarState(),
-            transitions={
-                "outcome2": "FOO"
-            })
+            "FOO", FooState(), transitions={"outcome1": "BAR", "outcome2": "outcome4"}
+        )
+        self.sm.add_state("BAR", BarState(), transitions={"outcome2": "FOO"})
 
     def test_state_machine_get_states(self):
 
-        self.assertTrue(isinstance(self.sm.get_states()
-                                   ["FOO"]["state"], FooState))
-        self.assertTrue(isinstance(self.sm.get_states()
-                                   ["BAR"]["state"], BarState))
+        self.assertTrue(isinstance(self.sm.get_states()["FOO"]["state"], FooState))
+        self.assertTrue(isinstance(self.sm.get_states()["BAR"]["state"], BarState))
 
     def test_state_machine_get_start_state(self):
 
