@@ -74,7 +74,7 @@ To use a shortcut, you may use following command:
 $ make docker_run
 ```
 
-### Running the package at docker image
+### Running the docker image
 
 If you are in the docker image , this project is already sourced and the demo script can be run as the following command;
 
