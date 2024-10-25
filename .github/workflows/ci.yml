@@ -1,0 +1,41 @@
+name: CI with Formatting Check and Docker
+
+on: [push, pull_request]
+
+jobs:
+  python_formatter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Black Formatter
+        uses: lgeiger/black-action@master
+        with:
+          args: ". --check --diff"
+
+  cpp_formatter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Clang Formatter
+        uses: DoozyX/clang-format-lint-action@v0.18.1
+        with:
+          clangFormatVersion: 14
+          source: "."
+
+  docker_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker
+        uses: docker/build-push-action@v6
+        with:
+          push: false
