@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
                  {yasmin_ros::basic_outcomes::TIMEOUT, "outcome4"}});
 
   // pub
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_MONITOR_DEMO", sm);
 
   // execute
   std::string outcome = (*sm.get())();

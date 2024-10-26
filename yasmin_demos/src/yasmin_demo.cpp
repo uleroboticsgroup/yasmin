@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
   sm->add_state("BAR", std::make_shared<BarState>(), {{"outcome3", "FOO"}});
 
   // pub
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);
 
   // execute
   std::string outcome = (*sm.get())();
