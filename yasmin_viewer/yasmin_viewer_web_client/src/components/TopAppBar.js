@@ -11,6 +11,7 @@ import Divider from "@mui/material/Divider";
 
 export default function TopAppBar({
   fsm_name_list,
+  current_fsm,
   handle_current_fsm,
   handle_hide_nested_fsm,
   handle_show_only_active_fsms,
@@ -30,6 +31,12 @@ export default function TopAppBar({
   React.useEffect(() => {
     handle_current_fsm(currentFSM);
   }, [currentFSM]);
+
+  React.useEffect(() => {
+    if (current_fsm !== currentFSM) {
+      setCurrentFSM(current_fsm);
+    }
+  }, [current_fsm]);
 
   React.useEffect(() => {
     handle_hide_nested_fsm(hideNestedFSM);
