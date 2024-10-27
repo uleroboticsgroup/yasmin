@@ -124,7 +124,6 @@ class StateMachine(State):
                 errors += f"\n\tState machine outcome '{o}' not registered as outcome neither state"
 
         if errors:
-
             errors = f"{'*' * 100}\nState machine failed validation check:{errors}\n\n\tAvailable states: {list(self._states.keys())}\n{'*' * 100}"
 
             if raise_exception:
