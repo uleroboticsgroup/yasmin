@@ -28,6 +28,7 @@ class FooState(State):
             self.counter += 1
             blackboard["foo_str"] = f"Counter: {self.counter}"
             return "outcome1"
+
         else:
             return "outcome2"
 
@@ -42,30 +43,122 @@ class BarState(State):
 
 class TestStateMachine(unittest.TestCase):
 
-    def setUp(self):
+    maxDiff = None
 
-        self.sm = StateMachine(outcomes=["outcome4", "outcome5"])
+    def setUp(self):
+        self.sm = StateMachine(outcomes=["outcome4"])
 
         self.sm.add_state(
-            "FOO", FooState(), transitions={"outcome1": "BAR", "outcome2": "outcome4"}
+            "FOO",
+            FooState(),
+            transitions={
+                "outcome1": "BAR",
+                "outcome2": "outcome4",
+            },
         )
-        self.sm.add_state("BAR", BarState(), transitions={"outcome2": "FOO"})
+        self.sm.add_state(
+            "BAR",
+            BarState(),
+            transitions={"outcome2": "FOO"},
+        )
 
     def test_state_machine_get_states(self):
-
         self.assertTrue(isinstance(self.sm.get_states()["FOO"]["state"], FooState))
         self.assertTrue(isinstance(self.sm.get_states()["BAR"]["state"], BarState))
 
     def test_state_machine_get_start_state(self):
-
         self.assertEqual("FOO", self.sm.get_start_state())
         self.sm.set_start_state("BAR")
         self.assertEqual("BAR", self.sm.get_start_state())
 
     def test_state_machine_get_current_state(self):
-
         self.assertEqual("", self.sm.get_current_state())
 
     def test_state_call(self):
-
         self.assertEqual("outcome4", self.sm())
+
+    def test_add_repeated_state(self):
+        with self.assertRaises(Exception) as context:
+            self.sm.add_state(
+                "FOO",
+                FooState(),
+                transitions={
+                    "outcome1": "BAR",
+                },
+            )
+        self.assertEqual(
+            str(context.exception),
+            "State 'FOO' already registered in the state machine",
+        )
+
+    def test_add_state_with_wrong_outcome(self):
+        with self.assertRaises(Exception) as context:
+            self.sm.add_state(
+                "FOO1",
+                FooState(),
+                transitions={
+                    "outcome9": "BAR",
+                },
+            )
+        self.assertEqual(
+            str(context.exception),
+            "State 'FOO1' references unregistered outcomes: 'outcome9', available outcomes are: ['outcome1', 'outcome2']",
+        )
+
+    def test_add_wrong_source_transition(self):
+        with self.assertRaises(Exception) as context:
+            self.sm.add_state(
+                "FOO1",
+                FooState(),
+                transitions={
+                    "": "BAR",
+                },
+            )
+        self.assertEqual(
+            str(context.exception), "Transitions with empty source in state 'FOO1'"
+        )
+
+    def test_add_wrong_target_transition(self):
+        with self.assertRaises(Exception) as context:
+            self.sm.add_state(
+                "FOO1",
+                FooState(),
+                transitions={
+                    "outcome1": "",
+                },
+            )
+        self.assertEqual(
+            str(context.exception), "Transitions with empty target in state 'FOO1'"
+        )
+
+    def test_validate_state_machine(self):
+
+        sm_1 = StateMachine(outcomes=["outcome4"])
+
+        sm_2 = StateMachine(outcomes=["outcome4", "outcome5"])
+        sm_1.add_state("FSM", sm_2)
+
+        sm_2.add_state(
+            "FOO",
+            FooState(),
+            transitions={
+                "outcome1": "BAR",
+            },
+        )
+        with self.assertRaises(Exception) as context:
+            sm_1.validate()
+        self.assertEqual(
+            str(context.exception),
+            (
+                f"{'*' * 100}\nState machine failed validation check:"
+                "\n\tState 'FSM' outcome 'outcome5' not registered in transitions"
+                f"\n\tState machine 'FSM' failed validation check\n{'*' * 100}\n"
+                "State machine failed validation check:"
+                "\n\tState 'FOO' outcome 'outcome2' not registered in transitions"
+                "\n\tTarget outcome 'outcome4' not registered in transitions"
+                "\n\tTarget outcome 'outcome5' not registered in transitions"
+                "\n\tState machine outcome 'BAR' not registered as outcome neither state"
+                f"\n\n\tAvailable states: ['FOO']\n{'*' * 100}"
+                f"\n\n\tAvailable states: ['FSM']\n{'*' * 100}"
+            ),
+        )
