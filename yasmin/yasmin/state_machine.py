@@ -112,19 +112,23 @@ class StateMachine(State):
 
         # check terminal outcomes for the state machine
         terminal_outcomes = set(terminal_outcomes)
+
+        # check if all state machine outcomes are in the terminal outcomes
         for o in self.get_outcomes():
             if o not in terminal_outcomes:
                 errors += f"\n\tTarget outcome '{o}' not registered in transitions"
 
+        # check if all terminal outcomes are states or state machine outcomes
         for o in terminal_outcomes:
             if o not in set(list(self._states.keys()) + self.get_outcomes()):
                 errors += f"\n\tState machine outcome '{o}' not registered as outcome neither state"
 
         if errors:
+
             errors = f"{'*' * 100}\nState machine failed validation check:{errors}\n\n\tAvailable states: {list(self._states.keys())}\n{'*' * 100}"
 
-        if raise_exception and errors:
-            raise Exception(errors)
+            if raise_exception:
+                raise Exception(errors)
 
         return errors
 
