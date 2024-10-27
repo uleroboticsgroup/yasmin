@@ -12,8 +12,6 @@ endif()
 # Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclpy REQUIRED)
 
 # C++
 include_directories(include)
@@ -27,12 +25,7 @@ set(SOURCES
   src/yasmin/state_machine.cpp
 )
 
-set(DEPENDENCIES
-    rclcpp
-)
-
 add_library(${LIB} STATIC ${SOURCES})
-
 ament_target_dependencies(${LIB} ${DEPENDENCIES})
 
 install(TARGETS ${LIB}
