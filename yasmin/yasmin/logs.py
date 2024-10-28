@@ -15,8 +15,8 @@
 
 import yasmin
 import logging
-
-import yasmin.logs
+import inspect
+from typing import Callable
 
 __all__ = [
     "set_loggers",
@@ -26,28 +26,44 @@ __all__ = [
     "YASMIN_LOG_DEBUG",
 ]
 
-
-# Define the logging configuration
+# define the logging configuration with custom format to include location data
 logging.basicConfig(level=logging.NOTSET, format="%(message)s")
 
 
+def get_caller_info():
+    frame = inspect.stack()[2]
+    file = frame.filename
+    line = frame.lineno
+    function = frame.function
+    return file, function, line
+
+
 def YASMIN_LOG_ERROR(text: str) -> None:
-    logging.error("[ERROR] " + text)
+    file, function, line = get_caller_info()
+    logging.error(f"[ERROR] [{file}:{function}:{line}] {text}")
 
 
 def YASMIN_LOG_WARN(text: str) -> None:
-    logging.warning("[WARN] " + text)
+    file, function, line = get_caller_info()
+    logging.warning(f"[WARN] [{file}:{function}:{line}] {text}")
 
 
 def YASMIN_LOG_INFO(text: str) -> None:
-    logging.info("[INFO] " + text)
+    file, function, line = get_caller_info()
+    logging.info(f"[INFO] [{file}:{function}:{line}] {text}")
 
 
 def YASMIN_LOG_DEBUG(text: str) -> None:
-    logging.debug("[DEBUG] " + text)
+    file, function, line = get_caller_info()
+    logging.debug(f"[DEBUG] [{file}:{function}:{line}] {text}")
 
 
-def set_loggers(info, warn, debug, error):
+def set_loggers(
+    info: Callable,
+    warn: Callable,
+    debug: Callable,
+    error: Callable,
+) -> None:
     yasmin.YASMIN_LOG_ERROR = error
     yasmin.YASMIN_LOG_WARN = warn
     yasmin.YASMIN_LOG_INFO = info

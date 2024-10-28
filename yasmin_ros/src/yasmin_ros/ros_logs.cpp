@@ -22,7 +22,8 @@
 
 namespace yasmin_ros {
 
-void ros_log_error(const char *text, ...) {
+void ros_log_error(const char *file, const char *function, int line,
+                   const char *text, ...) {
   va_list args;
   va_start(args, text);
 
@@ -35,10 +36,12 @@ void ros_log_error(const char *text, ...) {
   vsnprintf(&buffer[0], buffer.size(), text, args);
   va_end(args);
 
-  RCLCPP_ERROR(YasminNode::get_instance()->get_logger(), "%s", buffer.c_str());
+  RCLCPP_ERROR(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
+               function, line, buffer.c_str());
 }
 
-void ros_log_warn(const char *text, ...) {
+void ros_log_warn(const char *file, const char *function, int line,
+                  const char *text, ...) {
   va_list args;
   va_start(args, text);
 
@@ -51,10 +54,12 @@ void ros_log_warn(const char *text, ...) {
   vsnprintf(&buffer[0], buffer.size(), text, args);
   va_end(args);
 
-  RCLCPP_WARN(YasminNode::get_instance()->get_logger(), "%s", buffer.c_str());
+  RCLCPP_WARN(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
+              function, line, buffer.c_str());
 }
 
-void ros_log_info(const char *text, ...) {
+void ros_log_info(const char *file, const char *function, int line,
+                  const char *text, ...) {
   va_list args;
   va_start(args, text);
 
@@ -67,10 +72,12 @@ void ros_log_info(const char *text, ...) {
   vsnprintf(&buffer[0], buffer.size(), text, args);
   va_end(args);
 
-  RCLCPP_INFO(YasminNode::get_instance()->get_logger(), "%s", buffer.c_str());
+  RCLCPP_INFO(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
+              function, line, buffer.c_str());
 }
 
-void ros_log_debug(const char *text, ...) {
+void ros_log_debug(const char *file, const char *function, int line,
+                   const char *text, ...) {
   va_list args;
   va_start(args, text);
 
@@ -83,11 +90,12 @@ void ros_log_debug(const char *text, ...) {
   vsnprintf(&buffer[0], buffer.size(), text, args);
   va_end(args);
 
-  RCLCPP_DEBUG(YasminNode::get_instance()->get_logger(), "%s", buffer.c_str());
+  RCLCPP_DEBUG(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
+               function, line, buffer.c_str());
 }
 
 void set_ros_loggers() {
-  yasmin::set_loggers(ros_log_info, ros_log_warn, ros_log_debug, ros_log_error);
+  yasmin::set_loggers(ros_log_error, ros_log_warn, ros_log_info, ros_log_debug);
 }
 
 } // namespace yasmin_ros

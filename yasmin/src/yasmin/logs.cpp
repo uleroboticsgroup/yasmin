@@ -17,50 +17,54 @@
 
 namespace yasmin {
 
-// define the default log functions
-void default_log_error(const char *text, ...) {
+// Define the default log functions with file and function parameters
+void default_log_error(const char *file, const char *function, int line,
+                       const char *text, ...) {
   va_list args;
   va_start(args, text);
-  fprintf(stderr, "[ERROR] ");
+  fprintf(stderr, "[ERROR] [%s:%s:%d] ", file, function, line);
   vfprintf(stderr, text, args);
   fprintf(stderr, "\n");
   va_end(args);
 }
 
-void default_log_warn(const char *text, ...) {
+void default_log_warn(const char *file, const char *function, int line,
+                      const char *text, ...) {
   va_list args;
   va_start(args, text);
-  fprintf(stderr, "[WARN] ");
+  fprintf(stderr, "[WARN] [%s:%s:%d] ", file, function, line);
   vfprintf(stderr, text, args);
   fprintf(stderr, "\n");
   va_end(args);
 }
 
-void default_log_info(const char *text, ...) {
+void default_log_info(const char *file, const char *function, int line,
+                      const char *text, ...) {
   va_list args;
   va_start(args, text);
-  fprintf(stderr, "[INFO] ");
+  fprintf(stderr, "[INFO] [%s:%s:%d] ", file, function, line);
   vfprintf(stderr, text, args);
   fprintf(stderr, "\n");
   va_end(args);
 }
 
-void default_log_debug(const char *text, ...) {
+void default_log_debug(const char *file, const char *function, int line,
+                       const char *text, ...) {
   va_list args;
   va_start(args, text);
-  fprintf(stderr, "[DEBUG] ");
+  fprintf(stderr, "[DEBUG] [%s:%s:%d] ", file, function, line);
   vfprintf(stderr, text, args);
   fprintf(stderr, "\n");
   va_end(args);
 }
 
-// define the function pointers to be initialized with default log functions
+// Define the function pointers, initialized with default log functions
 LogFunction log_error = default_log_error;
 LogFunction log_warn = default_log_warn;
 LogFunction log_info = default_log_info;
 LogFunction log_debug = default_log_debug;
 
-// implement the set_loggers function
+// Implement the set_loggers function with updated signature
 void set_loggers(LogFunction error, LogFunction warn, LogFunction info,
                  LogFunction debug) {
   log_error = error ? error : default_log_error;

@@ -21,22 +21,27 @@
 
 namespace yasmin {
 
-// define raw function pointer type for logging
-typedef void (*LogFunction)(const char *, ...);
+// Define raw function pointer type for logging with file and function
+// parameters
+typedef void (*LogFunction)(const char *, const char *, int, const char *, ...);
 
-// declare function pointers as extern
+// Declare function pointers as extern
 extern LogFunction log_error;
 extern LogFunction log_warn;
 extern LogFunction log_info;
 extern LogFunction log_debug;
 
-// macros to use the function pointers for logging
-#define YASMIN_LOG_ERROR(text, ...) yasmin::log_error(text, ##__VA_ARGS__)
-#define YASMIN_LOG_WARN(text, ...) yasmin::log_warn(text, ##__VA_ARGS__)
-#define YASMIN_LOG_INFO(text, ...) yasmin::log_info(text, ##__VA_ARGS__)
-#define YASMIN_LOG_DEBUG(text, ...) yasmin::log_debug(text, ##__VA_ARGS__)
+// Macros to use the function pointers for logging, passing file and function
+#define YASMIN_LOG_ERROR(text, ...)                                            \
+  yasmin::log_error(__FILE__, __FUNCTION__, __LINE__, text, ##__VA_ARGS__)
+#define YASMIN_LOG_WARN(text, ...)                                             \
+  yasmin::log_warn(__FILE__, __FUNCTION__, __LINE__, text, ##__VA_ARGS__)
+#define YASMIN_LOG_INFO(text, ...)                                             \
+  yasmin::log_info(__FILE__, __FUNCTION__, __LINE__, text, ##__VA_ARGS__)
+#define YASMIN_LOG_DEBUG(text, ...)                                            \
+  yasmin::log_debug(__FILE__, __FUNCTION__, __LINE__, text, ##__VA_ARGS__)
 
-// function to set custom log functions
+// Function to set custom log functions
 void set_loggers(LogFunction error, LogFunction warn, LogFunction info,
                  LogFunction debug);
 

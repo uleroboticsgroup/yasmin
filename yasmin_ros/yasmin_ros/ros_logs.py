@@ -14,15 +14,50 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import inspect
 import yasmin
 from yasmin_ros.yasmin_node import YasminNode
 
 
-def set_ros_loggers() -> None:
+__all__ = ["set_ros_loggers"]
+
+
+def get_caller_info():
+    frame = inspect.stack()[2]
+    file = frame.filename
+    line = frame.lineno
+    function = frame.function
+    return file, function, line
+
+
+def ros_log_error(text: str) -> None:
+    file, function, line = get_caller_info()
     node = YasminNode.get_instance()
+    node.get_logger().error(f"[{file}:{function}:{line}] {text}")
+
+
+def ros_log_warn(text: str) -> None:
+    file, function, line = get_caller_info()
+    node = YasminNode.get_instance()
+    node.get_logger().warn(f"[{file}:{function}:{line}] {text}")
+
+
+def ros_log_info(text: str) -> None:
+    file, function, line = get_caller_info()
+    node = YasminNode.get_instance()
+    node.get_logger().info(f"[{file}:{function}:{line}] {text}")
+
+
+def ros_log_debug(text: str) -> None:
+    file, function, line = get_caller_info()
+    node = YasminNode.get_instance()
+    node.get_logger().debug(f"[{file}:{function}:{line}] {text}")
+
+
+def set_ros_loggers() -> None:
     yasmin.set_loggers(
-        node.get_logger().info,
-        node.get_logger().warn,
-        node.get_logger().debug,
-        node.get_logger().error,
+        ros_log_info,
+        ros_log_warn,
+        ros_log_debug,
+        ros_log_error,
     )
