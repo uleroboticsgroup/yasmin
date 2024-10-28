@@ -17,16 +17,20 @@
 import logging
 
 # Define the logging configuration
-logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+logging.basicConfig(level=logging.NOTSET, format="%(message)s")
 
 
-def YASMIN_LOG_ERROR(text, *args):
+def YASMIN_LOG_ERROR(text: str, *args) -> None:
     logging.error("[ERROR] " + text, *args)
 
 
-def YASMIN_LOG_WARN(text, *args):
+def YASMIN_LOG_WARN(text: str, *args) -> None:
     logging.warning("[WARN] " + text, *args)
 
 
-def YASMIN_LOG_INFO(text, *args):
+def YASMIN_LOG_INFO(text: str, *args) -> None:
     logging.info("[INFO] " + text, *args)
+
+
+def YASMIN_LOG_DEBUG(text: str, *args) -> None:
+    logging.info("[DEBUG] " + text, *args)
