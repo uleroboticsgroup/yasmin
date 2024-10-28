@@ -16,8 +16,9 @@
 
 from typing import Dict, List, Union
 from threading import Lock
-from yasmin.state import State
-from yasmin.yasmin_logs import YASMIN_LOG_INFO
+
+import yasmin
+from yasmin import State
 from yasmin.blackboard import Blackboard
 
 
@@ -153,11 +154,8 @@ class StateMachine(State):
 
             # translate outcome using transitions
             if outcome in state["transitions"]:
-                YASMIN_LOG_INFO(
-                    "%s: %s --> %s",
-                    self.__current_state,
-                    outcome,
-                    state["transitions"][outcome],
+                yasmin.YASMIN_LOG_INFO(
+                    f"{self.__current_state}: {outcome} --> {state['transitions'][outcome]}"
                 )
                 outcome = state["transitions"][outcome]
 
