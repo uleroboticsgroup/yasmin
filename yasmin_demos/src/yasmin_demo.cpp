@@ -22,6 +22,7 @@
 
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 // define state Foo
@@ -72,6 +73,9 @@ int main(int argc, char *argv[]) {
 
   std::cout << "yasmin_demo\n";
   rclcpp::init(argc, argv);
+
+  // set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
 
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(

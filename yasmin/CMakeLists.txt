@@ -20,6 +20,7 @@ include_directories(src)
 set(LIB ${CMAKE_PROJECT_NAME}_lib)
 set(SOURCES
   src/yasmin/blackboard/blackboard.cpp
+  src/yasmin/logs.cpp
   src/yasmin/state.cpp
   src/yasmin/cb_state.cpp
   src/yasmin/state_machine.cpp

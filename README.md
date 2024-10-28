@@ -103,13 +103,13 @@ $ ros2 run yasmin_demos yasmin_demo.py
 <summary>Click to expand</summary>
 
 ```python
-#!/usr/bin/env python3
-
 import time
 import rclpy
+
 from yasmin import State
 from yasmin import Blackboard
 from yasmin import StateMachine
+from yasmin_ros.ros_logs import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
 
@@ -125,7 +125,7 @@ class FooState(State):
 
         if self.counter < 3:
             self.counter += 1
-            blackboard.foo_str = f"Counter: {self.counter}"
+            blackboard["foo_str"] = f"Counter: {self.counter}"
             return "outcome1"
         else:
             return "outcome2"
@@ -140,7 +140,7 @@ class BarState(State):
         print("Executing state BAR")
         time.sleep(3)
 
-        print(blackboard.foo_str)
+        print(blackboard["foo_str"])
         return "outcome3"
 
 
@@ -152,25 +152,17 @@ def main():
     # init ROS 2
     rclpy.init()
 
+    # set ROS 2 logs
+    set_ros_loggers()
+
     # create a FSM
     sm = StateMachine(outcomes=["outcome4"])
 
     # add states
     sm.add_state(
-        "FOO",
-        FooState(),
-        transitions={
-            "outcome1": "BAR",
-            "outcome2": "outcome4"
-        }
+        "FOO", FooState(), transitions={"outcome1": "BAR", "outcome2": "outcome4"}
     )
-    sm.add_state(
-        "BAR",
-        BarState(),
-        transitions={
-            "outcome3": "FOO"
-        }
-    )
+    sm.add_state("BAR", BarState(), transitions={"outcome3": "FOO"})
 
     # pub FSM info
     YasminViewerPub("yasmin_demo", sm)
@@ -205,10 +197,12 @@ $ ros2 run yasmin_demos service_client_demo.py
 ```python
 import rclpy
 from example_interfaces.srv import AddTwoInts
+
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import ServiceState
+from yasmin_ros.ros_logs import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
 from yasmin_viewer import YasminViewerPub
 
@@ -220,34 +214,32 @@ class AddTwoIntsState(ServiceState):
             "/add_two_ints",  # service name
             self.create_request_handler,  # cb to create the request
             ["outcome1"],  # outcomes. Includes (SUCCEED, ABORT)
-            self.response_handler  # cb to process the response
+            self.response_handler,  # cb to process the response
         )
 
     def create_request_handler(self, blackboard: Blackboard) -> AddTwoInts.Request:
 
         req = AddTwoInts.Request()
-        req.a = blackboard.a
-        req.b = blackboard.b
+        req.a = blackboard["a"]
+        req.b = blackboard["b"]
         return req
 
     def response_handler(
-        self,
-        blackboard: Blackboard,
-        response: AddTwoInts.Response
+        self, blackboard: Blackboard, response: AddTwoInts.Response
     ) -> str:
 
-        blackboard.sum = response.sum
+        blackboard["sum"] = response.sum
         return "outcome1"
 
 
 def set_ints(blackboard: Blackboard) -> str:
-    blackboard.a = 10
-    blackboard.b = 5
+    blackboard["a"] = 10
+    blackboard["b"] = 5
     return SUCCEED
 
 
 def print_sum(blackboard: Blackboard) -> str:
-    print(f"Sum: {blackboard.sum}")
+    print(f"Sum: {blackboard['sum']}")
     return SUCCEED
 
 
@@ -259,6 +251,9 @@ def main():
     # init ROS 2
     rclpy.init()
 
+    # set ROS 2 logs
+    set_ros_loggers()
+
     # create a FSM
     sm = StateMachine(outcomes=["outcome4"])
 
@@ -266,9 +261,7 @@ def main():
     sm.add_state(
         "SETTING_INTS",
         CbState([SUCCEED], set_ints),
-        transitions={
-            SUCCEED: "ADD_TWO_INTS"
-        }
+        transitions={SUCCEED: "ADD_TWO_INTS"},
     )
     sm.add_state(
         "ADD_TWO_INTS",
@@ -276,15 +269,11 @@ def main():
         transitions={
             "outcome1": "PRINTING_SUM",
             SUCCEED: "outcome4",
-            ABORT: "outcome4"
-        }
+            ABORT: "outcome4",
+        },
     )
     sm.add_state(
-        "PRINTING_SUM",
-        CbState([SUCCEED], print_sum),
-        transitions={
-            SUCCEED: "outcome4"
-        }
+        "PRINTING_SUM", CbState([SUCCEED], print_sum), transitions={SUCCEED: "outcome4"}
     )
 
     # pub FSM info
@@ -320,10 +309,12 @@ $ ros2 run yasmin_demos action_client_demo.py
 ```python
 import rclpy
 from action_tutorials_interfaces.action import Fibonacci
+
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import ActionState
+from yasmin_ros.ros_logs import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
 from yasmin_viewer import YasminViewerPub
 
@@ -336,34 +327,30 @@ class FibonacciState(ActionState):
             self.create_goal_handler,  # cb to create the goal
             None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
             self.response_handler,  # cb to process the response
-            self.print_feedback # cb to process the feedback
+            self.print_feedback,  # cb to process the feedback
         )
 
     def create_goal_handler(self, blackboard: Blackboard) -> Fibonacci.Goal:
 
         goal = Fibonacci.Goal()
-        goal.order = blackboard.n
+        goal.order = blackboard["n"]
         return goal
 
     def response_handler(
-        self,
-        blackboard: Blackboard,
-        response: Fibonacci.Result
+        self, blackboard: Blackboard, response: Fibonacci.Result
     ) -> str:
 
-        blackboard.fibo_res = response.sequence
+        blackboard["fibo_res"] = response.sequence
         return SUCCEED
 
     def print_feedback(
-        self,
-        blackboard: Blackboard,
-        feedback: Fibonacci.Feedback
+        self, blackboard: Blackboard, feedback: Fibonacci.Feedback
     ) -> None:
         print(f"Received feedback: {list(feedback.partial_sequence)}")
 
 
 def print_result(blackboard: Blackboard) -> str:
-    print(f"Result: {blackboard.fibo_res}")
+    print(f"Result: {blackboard['fibo_res']}")
     return SUCCEED
 
 
@@ -375,6 +362,9 @@ def main():
     # init ROS 2
     rclpy.init()
 
+    # set ROS 2 logs
+    set_ros_loggers()
+
     # create a FSM
     sm = StateMachine(outcomes=["outcome4"])
 
@@ -382,18 +372,12 @@ def main():
     sm.add_state(
         "CALLING_FIBONACCI",
         FibonacciState(),
-        transitions={
-            SUCCEED: "PRINTING_RESULT",
-            CANCEL: "outcome4",
-            ABORT: "outcome4"
-        }
+        transitions={SUCCEED: "PRINTING_RESULT", CANCEL: "outcome4", ABORT: "outcome4"},
     )
     sm.add_state(
         "PRINTING_RESULT",
         CbState([SUCCEED], print_result),
-        transitions={
-            SUCCEED: "outcome4"
-        }
+        transitions={SUCCEED: "outcome4"},
     )
 
     # pub FSM info
@@ -401,7 +385,7 @@ def main():
 
     # create an initial blackoard
     blackboard = Blackboard()
-    blackboard.n = 10
+    blackboard["n"] = 10
 
     # execute FSM
     outcome = sm(blackboard)
@@ -434,7 +418,8 @@ from nav_msgs.msg import Odometry
 from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import MonitorState
-from yasmin_ros.basic_outcomes import CANCEL
+from yasmin_ros.ros_logs import set_ros_loggers
+from yasmin_ros.basic_outcomes import TIMEOUT
 from yasmin_viewer import YasminViewerPub
 
 
@@ -447,7 +432,7 @@ class PrintOdometryState(MonitorState):
             self.monitor_handler,  # monitor handler callback
             qos=qos_profile_sensor_data,  # qos for the topic sbscription
             msg_queue=10,  # queue of the monitor handler callback
-            timeout=10  # timeout to wait for msgs in seconds
+            timeout=10,  # timeout to wait for msgs in seconds
             # if not None, CANCEL outcome is added
         )
         self.times = times
@@ -471,6 +456,9 @@ def main():
     # init ROS 2
     rclpy.init()
 
+    # set ROS 2 logs
+    set_ros_loggers()
+
     # create a FSM
     sm = StateMachine(outcomes=["outcome4"])
 
@@ -481,8 +469,8 @@ def main():
         transitions={
             "outcome1": "PRINTING_ODOM",
             "outcome2": "outcome4",
-            CANCEL: "outcome4"
-        }
+            TIMEOUT: "outcome4",
+        },
     )
 
     # pub FSM info
@@ -522,6 +510,7 @@ from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import ActionState
+from yasmin_ros.ros_logs import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
 from yasmin_viewer import YasminViewerPub
 
@@ -536,19 +525,19 @@ class Nav2State(ActionState):
             "/navigate_to_pose",  # action name
             self.create_goal_handler,  # cb to create the goal
             None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
-            None  # cb to process the response
+            None,  # cb to process the response
         )
 
     def create_goal_handler(self, blackboard: Blackboard) -> NavigateToPose.Goal:
 
         goal = NavigateToPose.Goal()
-        goal.pose.pose = blackboard.pose
+        goal.pose.pose = blackboard["pose"]
         goal.pose.header.frame_id = "map"
         return goal
 
 
 def create_waypoints(blackboard: Blackboard) -> str:
-    blackboard.waypoints = {
+    blackboard["waypoints"] = {
         "entrance": [1.25, 6.30, -0.78, 0.67],
         "bathroom": [4.89, 1.64, 0.0, 1.0],
         "livingroom": [1.55, 4.03, -0.69, 0.72],
@@ -559,19 +548,19 @@ def create_waypoints(blackboard: Blackboard) -> str:
 
 
 def take_random_waypoint(blackboard) -> str:
-    blackboard.random_waypoints = random.sample(
-        list(blackboard.waypoints.keys()),
-        blackboard.waypoints_num)
+    blackboard["random_waypoints"] = random.sample(
+        list(blackboard["waypoints"].keys()), blackboard["waypoints_num"]
+    )
     return SUCCEED
 
 
 def get_next_waypoint(blackboard: Blackboard) -> str:
 
-    if not blackboard.random_waypoints:
+    if not blackboard["random_waypoints"]:
         return END
 
-    wp_name = blackboard.random_waypoints.pop(0)
-    wp = blackboard.waypoints[wp_name]
+    wp_name = blackboard["random_waypoints"].pop(0)
+    wp = blackboard["waypoints"][wp_name]
 
     pose = Pose()
     pose.position.x = wp[0]
@@ -580,8 +569,8 @@ def get_next_waypoint(blackboard: Blackboard) -> str:
     pose.orientation.z = wp[2]
     pose.orientation.w = wp[3]
 
-    blackboard.pose = pose
-    blackboard.text = f"I have reached waypoint {wp_name}"
+    blackboard["pose"] = pose
+    blackboard["text"] = f"I have reached waypoint {wp_name}"
 
     return HAS_NEXT
 
@@ -594,6 +583,9 @@ def main():
     # init ROS 2
     rclpy.init()
 
+    # set ROS 2 logs
+    set_ros_loggers()
+
     # create state machines
     sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])
     nav_sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])
@@ -602,44 +594,29 @@ def main():
     sm.add_state(
         "CREATING_WAYPOINTS",
         CbState([SUCCEED], create_waypoints),
-        transitions={
-            SUCCEED: "TAKING_RANDOM_WAYPOINTS"
-        }
+        transitions={SUCCEED: "TAKING_RANDOM_WAYPOINTS"},
     )
     sm.add_state(
         "TAKING_RANDOM_WAYPOINTS",
         CbState([SUCCEED], take_random_waypoint),
-        transitions={
-            SUCCEED: "NAVIGATING"
-        }
+        transitions={SUCCEED: "NAVIGATING"},
     )
 
     nav_sm.add_state(
         "GETTING_NEXT_WAYPOINT",
         CbState([END, HAS_NEXT], get_next_waypoint),
-        transitions={
-            END: SUCCEED,
-            HAS_NEXT: "NAVIGATING"
-        }
+        transitions={END: SUCCEED, HAS_NEXT: "NAVIGATING"},
     )
     nav_sm.add_state(
         "NAVIGATING",
         Nav2State(),
-        transitions={
-            SUCCEED: "GETTING_NEXT_WAYPOINT",
-            CANCEL: CANCEL,
-            ABORT: ABORT
-        }
+        transitions={SUCCEED: "GETTING_NEXT_WAYPOINT", CANCEL: CANCEL, ABORT: ABORT},
     )
 
     sm.add_state(
         "NAVIGATING",
         nav_sm,
-        transitions={
-            SUCCEED: SUCCEED,
-            CANCEL: CANCEL,
-            ABORT: ABORT
-        }
+        transitions={SUCCEED: SUCCEED, CANCEL: CANCEL, ABORT: ABORT},
     )
 
     # pub FSM info
@@ -647,7 +624,7 @@ def main():
 
     # execute FSM
     blackboard = Blackboard()
-    blackboard.waypoints_num = 2
+    blackboard["waypoints_num"] = 2
     outcome = sm(blackboard)
     print(outcome)
 
@@ -682,6 +659,7 @@ $ ros2 run yasmin_demos yasmin_demo
 
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 // define state Foo
@@ -733,6 +711,9 @@ int main(int argc, char *argv[]) {
   std::cout << "yasmin_demo\n";
   rclcpp::init(argc, argv);
 
+  // set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
+
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
@@ -781,6 +762,7 @@ $ ros2 run yasmin_demos service_client_demo
 #include "yasmin/cb_state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/service_state.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
@@ -842,6 +824,9 @@ int main(int argc, char *argv[]) {
   std::cout << "yasmin_service_client_demo\n";
   rclcpp::init(argc, argv);
 
+  // set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
+
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
@@ -893,6 +878,8 @@ $ ros2 run yasmin_demos action_client_demo
 <summary>Click to expand</summary>
 
 ```cpp
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -903,6 +890,7 @@ $ ros2 run yasmin_demos action_client_demo
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/action_state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
@@ -983,6 +971,9 @@ int main(int argc, char *argv[]) {
   std::cout << "yasmin_action_client_demo\n";
   rclcpp::init(argc, argv);
 
+  // set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
+
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
@@ -1029,21 +1020,6 @@ $ ros2 run yasmin_demos monitor_demo
 <summary>Click to expand</summary>
 
 ```cpp
-// Copyright (C) 2023  Miguel Ángel González Santamarta
-
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #include <iostream>
 #include <memory>
 #include <string>
@@ -1055,6 +1031,7 @@ $ ros2 run yasmin_demos monitor_demo
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/monitor_state.hpp"
+#include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 using std::placeholders::_1;
@@ -1107,6 +1084,9 @@ int main(int argc, char *argv[]) {
 
   std::cout << "yasmin_monitor_demo\n";
   rclcpp::init(argc, argv);
+
+  // set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
 
   // create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(

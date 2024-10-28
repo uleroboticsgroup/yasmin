@@ -23,9 +23,9 @@
 #include <vector>
 
 #include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
-#include "yasmin/yasmin_logs.hpp"
 
 using namespace yasmin;
 

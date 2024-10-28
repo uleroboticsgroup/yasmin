@@ -20,8 +20,6 @@ from threading import Thread, RLock
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 
-import yasmin
-
 
 class YasminNode(Node):
 
@@ -45,13 +43,6 @@ class YasminNode(Node):
             raise Exception("This class is a Singleton")
 
         super().__init__(f"yasmin_{str(uuid.uuid4()).replace('-', '_')}_node")
-
-        yasmin.set_loggers(
-            self.get_logger().info,
-            self.get_logger().warn,
-            self.get_logger().debug,
-            self.get_logger().error,
-        )
 
         # executor
         self._executor = MultiThreadedExecutor()

@@ -16,7 +16,7 @@
 import yasmin
 import logging
 
-import yasmin.yasmin_logs
+import yasmin.logs
 
 __all__ = [
     "set_loggers",

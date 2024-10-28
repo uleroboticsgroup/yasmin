@@ -3,7 +3,7 @@ from yasmin.cb_state import CbState
 from yasmin.blackboard import Blackboard
 from yasmin.state_machine import StateMachine
 
-from yasmin.yasmin_logs import (
+from yasmin.logs import (
     set_loggers,
     YASMIN_LOG_ERROR,
     YASMIN_LOG_WARN,
