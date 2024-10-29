@@ -63,6 +63,13 @@ class StateMachine(State):
             self._start_state = name
 
     def set_start_state(self, name: str) -> None:
+
+        if not name:
+            raise Exception("Initial state cannot be empty")
+
+        elif name not in self._states:
+            raise Exception(f"Initial state '{name}' is not in the state machine")
+
         self._start_state = name
 
     def get_start_state(self) -> str:
@@ -77,12 +84,8 @@ class StateMachine(State):
     def validate(self) -> None:
 
         # check initial state
-        if self._start_state is None:
+        if not self._start_state:
             raise Exception("No initial state set")
-        elif self._start_state not in self._states:
-            raise Exception(
-                f"Initial state label: '{self._start_state}' is not in the state machine"
-            )
 
         terminal_outcomes = []
 

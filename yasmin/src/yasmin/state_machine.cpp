@@ -83,6 +83,15 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state) {
 }
 
 void StateMachine::set_start_state(std::string state_name) {
+
+  if (state_name.empty()) {
+    throw std::invalid_argument("Initial state cannot be empty");
+
+  } else if (this->states.find(state_name) == this->states.end()) {
+    throw std::invalid_argument("Initial state '" + state_name +
+                                "' is not in the state machine");
+  }
+
   this->start_state = state_name;
 }
 
@@ -117,10 +126,6 @@ void StateMachine::validate() {
   // check initial state
   if (this->start_state.empty()) {
     throw std::runtime_error("No initial state set");
-
-  } else if (this->states.find(this->start_state) == this->states.end()) {
-    throw std::runtime_error("Initial state label: '" + this->start_state +
-                             "' is not in the state machine");
   }
 
   std::set<std::string> terminal_outcomes;
@@ -188,6 +193,8 @@ void StateMachine::validate() {
 
 std::string
 StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
+
+  this->validate();
 
   this->current_state_mutex->lock();
   this->current_state = this->start_state;

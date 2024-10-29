@@ -77,6 +77,18 @@ class TestStateMachine(unittest.TestCase):
     def test_state_call(self):
         self.assertEqual("outcome4", self.sm())
 
+    def test_set_start_state_empty(self):
+        with self.assertRaises(Exception) as context:
+            self.sm.set_start_state("")
+        self.assertEqual(str(context.exception), "Initial state cannot be empty")
+
+    def test_set_start_state_wrong_state(self):
+        with self.assertRaises(Exception) as context:
+            self.sm.set_start_state("FOO1")
+        self.assertEqual(
+            str(context.exception), "Initial state 'FOO1' is not in the state machine"
+        )
+
     def test_add_repeated_state(self):
         with self.assertRaises(Exception) as context:
             self.sm.add_state(
