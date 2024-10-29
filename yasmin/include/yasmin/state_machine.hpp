@@ -53,6 +53,7 @@ public:
   using State::operator();
 
   std::string to_string();
+  void validate();
 
 private:
   std::map<std::string, std::shared_ptr<State>> states;

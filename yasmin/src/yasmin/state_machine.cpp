@@ -18,6 +18,8 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -36,6 +38,37 @@ StateMachine::StateMachine(std::vector<std::string> outcomes)
 
 void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
                              std::map<std::string, std::string> transitions) {
+
+  if (this->states.find(name) != this->states.end()) {
+    throw std::logic_error("State '" + name +
+                           "' already registered in the state machine");
+  }
+
+  for (auto it = transitions.begin(); it != transitions.end(); ++it) {
+    const std::string &key = it->first;
+    const std::string &value = it->second;
+
+    if (key.empty()) {
+      throw std::invalid_argument("Transitions with empty source in state '" +
+                                  name + "'");
+    }
+
+    if (value.empty()) {
+      throw std::invalid_argument("Transitions with empty target in state '" +
+                                  name + "'");
+    }
+
+    if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
+                  key) == state->get_outcomes().end()) {
+      std::ostringstream oss;
+      oss << "State '" << name << "' references unregistered outcomes '" << key
+          << "', available outcomes are ";
+      for (const auto &outcome : state->get_outcomes()) {
+        oss << outcome << " ";
+      }
+      throw std::invalid_argument(oss.str());
+    }
+  }
 
   this->states.insert({name, state});
   this->transitions.insert({name, transitions});
@@ -77,6 +110,80 @@ StateMachine::get_transitions() {
 std::string StateMachine::get_current_state() {
   const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
   return this->current_state;
+}
+
+void StateMachine::validate() {
+
+  // check initial state
+  if (this->start_state.empty()) {
+    throw std::runtime_error("No initial state set");
+
+  } else if (this->states.find(this->start_state) == this->states.end()) {
+    throw std::runtime_error("Initial state label: '" + this->start_state +
+                             "' is not in the state machine");
+  }
+
+  std::set<std::string> terminal_outcomes;
+
+  // check all states
+  for (auto it = this->states.begin(); it != this->states.end(); ++it) {
+
+    const std::string &state_name = it->first;
+    const std::shared_ptr<State> &state = it->second;
+    std::map<std::string, std::string> transitions =
+        this->transitions.at(state_name);
+
+    std::vector<std::string> outcomes = state->get_outcomes();
+
+    // check if all state outcomes are in transitions
+    for (const std::string &o : outcomes) {
+
+      if (transitions.find(o) == transitions.end() &&
+          std::find(this->get_outcomes().begin(), this->get_outcomes().end(),
+                    o) == this->get_outcomes().end()) {
+
+        throw std::runtime_error("State '" + state_name + "' outcome '" + o +
+                                 "' not registered in transitions");
+
+      } else if (std::find(this->get_outcomes().begin(),
+                           this->get_outcomes().end(),
+                           o) != this->get_outcomes().end()) {
+        terminal_outcomes.insert(o);
+      }
+    }
+
+    // if state is a state machine, validate it
+    if (std::dynamic_pointer_cast<StateMachine>(state)) {
+      std::dynamic_pointer_cast<StateMachine>(state)->validate();
+    }
+
+    // add terminal outcomes
+    for (auto it = transitions.begin(); it != transitions.end(); ++it) {
+      const std::string &value = it->second;
+      terminal_outcomes.insert(value);
+    }
+  }
+
+  // check terminal outcomes for the state machine
+  std::set<std::string> sm_outcomes(this->get_outcomes().begin(),
+                                    this->get_outcomes().end());
+
+  // check if all state machine outcomes are in the terminal outcomes
+  for (const std::string &o : this->get_outcomes()) {
+    if (terminal_outcomes.find(o) == terminal_outcomes.end()) {
+      throw std::runtime_error("Target outcome '" + o +
+                               "' not registered in transitions");
+    }
+  }
+
+  // check if all terminal outcomes are states or state machine outcomes
+  for (const std::string &o : terminal_outcomes) {
+    if (this->states.find(o) == this->states.end() &&
+        sm_outcomes.find(o) == sm_outcomes.end()) {
+      throw std::runtime_error("State machine outcome '" + o +
+                               "' not registered as outcome or state");
+    }
+  }
 }
 
 std::string
