@@ -54,7 +54,7 @@ class StateMachine(State):
 
             if key not in state.get_outcomes():
                 raise Exception(
-                    f"State '{name}' references unregistered outcomes: '{key}', available outcomes are: {state.get_outcomes()}"
+                    f"State '{name}' references unregistered outcomes '{key}', available outcomes are {state.get_outcomes()}"
                 )
 
         self._states[name] = {"state": state, "transitions": transitions}
@@ -74,14 +74,15 @@ class StateMachine(State):
             if self.__current_state:
                 self._states[self.__current_state]["state"].cancel_state()
 
-    def validate(self, raise_exception: bool = True) -> str:
-        errors = ""
+    def validate(self) -> None:
 
         # check initial state
         if self._start_state is None:
-            errors += "\n\tNo initial state set."
+            raise Exception("No initial state set")
         elif self._start_state not in self._states:
-            errors += f"\n\tInitial state label: '{self._start_state}' is not in the state machine."
+            raise Exception(
+                f"Initial state label: '{self._start_state}' is not in the state machine"
+            )
 
         terminal_outcomes = []
 
@@ -96,7 +97,9 @@ class StateMachine(State):
             # check if all state outcomes are in transitions
             for o in outcomes:
                 if o not in set(list(transitions.keys()) + self.get_outcomes()):
-                    errors += f"\n\tState '{state_name}' outcome '{o}' not registered in transitions"
+                    raise Exception(
+                        f"State '{state_name}' outcome '{o}' not registered in transitions"
+                    )
 
                 # state outcomes that are in state machines out do not need transitions
                 elif o in self.get_outcomes():
@@ -104,9 +107,7 @@ class StateMachine(State):
 
             # if sate is a state machine, validate it
             if isinstance(state, StateMachine):
-                aux_errors = state.validate(False)
-                if aux_errors:
-                    errors += f"\n\tState machine '{state_name}' failed validation check\n{aux_errors}"
+                state.validate()
 
             # add terminal outcomes
             terminal_outcomes.extend([transitions[key] for key in transitions])
@@ -117,20 +118,14 @@ class StateMachine(State):
         # check if all state machine outcomes are in the terminal outcomes
         for o in self.get_outcomes():
             if o not in terminal_outcomes:
-                errors += f"\n\tTarget outcome '{o}' not registered in transitions"
+                raise Exception(f"Target outcome '{o}' not registered in transitions")
 
         # check if all terminal outcomes are states or state machine outcomes
         for o in terminal_outcomes:
             if o not in set(list(self._states.keys()) + self.get_outcomes()):
-                errors += f"\n\tState machine outcome '{o}' not registered as outcome neither state"
-
-        if errors:
-            errors = f"{'*' * 100}\nState machine failed validation check:{errors}\n\n\tAvailable states: {list(self._states.keys())}\n{'*' * 100}"
-
-            if raise_exception:
-                raise Exception(errors)
-
-        return errors
+                raise Exception(
+                    f"State machine outcome '{o}' not registered as outcome neither state"
+                )
 
     def execute(self, blackboard: Blackboard) -> str:
 

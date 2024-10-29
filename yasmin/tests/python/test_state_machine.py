@@ -102,7 +102,7 @@ class TestStateMachine(unittest.TestCase):
             )
         self.assertEqual(
             str(context.exception),
-            "State 'FOO1' references unregistered outcomes: 'outcome9', available outcomes are: ['outcome1', 'outcome2']",
+            "State 'FOO1' references unregistered outcomes 'outcome9', available outcomes are ['outcome1', 'outcome2']",
         )
 
     def test_add_wrong_source_transition(self):
@@ -131,7 +131,7 @@ class TestStateMachine(unittest.TestCase):
             str(context.exception), "Transitions with empty target in state 'FOO1'"
         )
 
-    def test_validate_state_machine(self):
+    def test_validate_state_machine_outcome_from_fsm_not_used(self):
 
         sm_1 = StateMachine(outcomes=["outcome4"])
 
@@ -142,23 +142,90 @@ class TestStateMachine(unittest.TestCase):
             "FOO",
             FooState(),
             transitions={
-                "outcome1": "BAR",
+                "outcome1": "outcome4",
+                "outcome2": "outcome4",
             },
         )
         with self.assertRaises(Exception) as context:
             sm_1.validate()
         self.assertEqual(
             str(context.exception),
-            (
-                f"{'*' * 100}\nState machine failed validation check:"
-                "\n\tState 'FSM' outcome 'outcome5' not registered in transitions"
-                f"\n\tState machine 'FSM' failed validation check\n{'*' * 100}\n"
-                "State machine failed validation check:"
-                "\n\tState 'FOO' outcome 'outcome2' not registered in transitions"
-                "\n\tTarget outcome 'outcome4' not registered in transitions"
-                "\n\tTarget outcome 'outcome5' not registered in transitions"
-                "\n\tState machine outcome 'BAR' not registered as outcome neither state"
-                f"\n\n\tAvailable states: ['FOO']\n{'*' * 100}"
-                f"\n\n\tAvailable states: ['FSM']\n{'*' * 100}"
-            ),
+            "State 'FSM' outcome 'outcome5' not registered in transitions",
+        )
+
+    def test_validate_state_machine_outcome_from_state_not_used(self):
+
+        sm_1 = StateMachine(outcomes=["outcome4"])
+
+        sm_2 = StateMachine(outcomes=["outcome4"])
+        sm_1.add_state("FSM", sm_2)
+
+        sm_2.add_state(
+            "FOO",
+            FooState(),
+            transitions={
+                "outcome1": "outcome4",
+            },
+        )
+        with self.assertRaises(Exception) as context:
+            sm_1.validate()
+        self.assertEqual(
+            str(context.exception),
+            "State 'FOO' outcome 'outcome2' not registered in transitions",
+        )
+
+    def test_validate_state_machine_fsm_outcome_not_used(self):
+
+        sm_1 = StateMachine(outcomes=["outcome4"])
+
+        sm_2 = StateMachine(outcomes=["outcome4", "outcome5"])
+        sm_1.add_state(
+            "FSM",
+            sm_2,
+            transitions={
+                "outcome5": "outcome4",
+            },
+        )
+
+        sm_2.add_state(
+            "FOO",
+            FooState(),
+            transitions={
+                "outcome1": "outcome4",
+                "outcome2": "outcome4",
+            },
+        )
+        with self.assertRaises(Exception) as context:
+            sm_1.validate()
+        self.assertEqual(
+            str(context.exception),
+            "Target outcome 'outcome5' not registered in transitions",
+        )
+
+    def test_validate_state_machine_wrong_state(self):
+
+        sm_1 = StateMachine(outcomes=["outcome4"])
+
+        sm_2 = StateMachine(outcomes=["outcome4"])
+        sm_1.add_state(
+            "FSM",
+            sm_2,
+            transitions={
+                "outcome4": "outcome4",
+            },
+        )
+
+        sm_2.add_state(
+            "FOO",
+            FooState(),
+            transitions={
+                "outcome1": "BAR",
+                "outcome2": "outcome4",
+            },
+        )
+        with self.assertRaises(Exception) as context:
+            sm_1.validate()
+        self.assertEqual(
+            str(context.exception),
+            "State machine outcome 'BAR' not registered as outcome neither state",
         )
