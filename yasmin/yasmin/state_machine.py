@@ -43,17 +43,17 @@ class StateMachine(State):
             transitions = {}
 
         if name in self._states:
-            raise Exception(f"State '{name}' already registered in the state machine")
+            raise KeyError(f"State '{name}' already registered in the state machine")
 
         for key in transitions:
             if not key:
-                raise Exception(f"Transitions with empty source in state '{name}'")
+                raise ValueError(f"Transitions with empty source in state '{name}'")
 
             if not transitions[key]:
-                raise Exception(f"Transitions with empty target in state '{name}'")
+                raise ValueError(f"Transitions with empty target in state '{name}'")
 
             if key not in state.get_outcomes():
-                raise Exception(
+                raise KeyError(
                     f"State '{name}' references unregistered outcomes '{key}', available outcomes are {state.get_outcomes()}"
                 )
 
@@ -65,10 +65,10 @@ class StateMachine(State):
     def set_start_state(self, name: str) -> None:
 
         if not name:
-            raise Exception("Initial state cannot be empty")
+            raise ValueError("Initial state cannot be empty")
 
         elif name not in self._states:
-            raise Exception(f"Initial state '{name}' is not in the state machine")
+            raise KeyError(f"Initial state '{name}' is not in the state machine")
 
         self._start_state = name
 
@@ -85,7 +85,7 @@ class StateMachine(State):
 
         # check initial state
         if not self._start_state:
-            raise Exception("No initial state set")
+            raise RuntimeError("No initial state set")
 
         terminal_outcomes = []
 
@@ -100,7 +100,7 @@ class StateMachine(State):
             # check if all state outcomes are in transitions
             for o in outcomes:
                 if o not in set(list(transitions.keys()) + self.get_outcomes()):
-                    raise Exception(
+                    raise KeyError(
                         f"State '{state_name}' outcome '{o}' not registered in transitions"
                     )
 
@@ -121,12 +121,12 @@ class StateMachine(State):
         # check if all state machine outcomes are in the terminal outcomes
         for o in self.get_outcomes():
             if o not in terminal_outcomes:
-                raise Exception(f"Target outcome '{o}' not registered in transitions")
+                raise KeyError(f"Target outcome '{o}' not registered in transitions")
 
         # check if all terminal outcomes are states or state machine outcomes
         for o in terminal_outcomes:
             if o not in set(list(self._states.keys()) + self.get_outcomes()):
-                raise Exception(
+                raise KeyError(
                     f"State machine outcome '{o}' not registered as outcome neither state"
                 )
 
@@ -146,7 +146,7 @@ class StateMachine(State):
 
             # check outcome belongs to state
             if outcome not in state["state"].get_outcomes():
-                raise Exception(
+                raise KeyError(
                     f"Outcome ({outcome}) is not register in state {self.__current_state}"
                 )
 
@@ -170,7 +170,7 @@ class StateMachine(State):
 
             # outcome is not in the sm
             else:
-                raise Exception(f"Outcome ({outcome}) without transition")
+                raise KeyError(f"Outcome ({outcome}) without transition")
 
     def get_states(self) -> Dict[str, Union[State, Dict[str, str]]]:
         return self._states

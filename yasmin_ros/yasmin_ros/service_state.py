@@ -66,7 +66,7 @@ class ServiceState(State):
         self._response_handler = response_handler
 
         if not self._create_request_handler:
-            raise Exception("create_request_handler is needed")
+            raise ValueError("create_request_handler is needed")
 
         super().__init__(_outcomes)
 

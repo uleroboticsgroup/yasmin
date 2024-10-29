@@ -87,7 +87,7 @@ class ActionState(State):
         self._feedback_handler = feedback_handler
 
         if not self._create_goal_handler:
-            raise Exception("create_goal_handler is needed")
+            raise ValueError("create_goal_handler is needed")
 
         super().__init__(_outcomes)
 

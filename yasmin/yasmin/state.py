@@ -28,7 +28,7 @@ class State(ABC):
         if outcomes:
             self._outcomes = outcomes
         else:
-            raise Exception("There must be at least one outcome")
+            raise ValueError("There must be at least one outcome")
 
     def __call__(self, blackboard: Blackboard = None) -> str:
         self._canceled = False
@@ -39,7 +39,7 @@ class State(ABC):
         outcome = self.execute(blackboard)
 
         if outcome not in self._outcomes:
-            raise Exception(
+            raise ValueError(
                 f"Outcome '{outcome}' does not belong to the outcomes of the state '{self}'. The possible outcomes are: {self._outcomes}"
             )
 
