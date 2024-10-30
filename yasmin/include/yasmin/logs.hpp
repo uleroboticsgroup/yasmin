@@ -18,6 +18,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>
 
 namespace yasmin {
 
@@ -32,14 +33,26 @@ extern LogFunction log_info;
 extern LogFunction log_debug;
 
 // Macros to use the function pointers for logging, passing file and function
+inline const char *extract_filename(const char *path) {
+  const char *filename = std::strrchr(path, '/');
+  if (!filename) {
+    filename = std::strrchr(path, '\\'); // Handle Windows-style paths
+  }
+  return filename ? filename + 1 : path;
+}
+
 #define YASMIN_LOG_ERROR(text, ...)                                            \
-  yasmin::log_error(__FILE__, __FUNCTION__, __LINE__, text, ##__VA_ARGS__)
+  yasmin::log_error(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,  \
+                    ##__VA_ARGS__)
 #define YASMIN_LOG_WARN(text, ...)                                             \
-  yasmin::log_warn(__FILE__, __FUNCTION__, __LINE__, text, ##__VA_ARGS__)
+  yasmin::log_warn(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,   \
+                   ##__VA_ARGS__)
 #define YASMIN_LOG_INFO(text, ...)                                             \
-  yasmin::log_info(__FILE__, __FUNCTION__, __LINE__, text, ##__VA_ARGS__)
+  yasmin::log_info(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,   \
+                   ##__VA_ARGS__)
 #define YASMIN_LOG_DEBUG(text, ...)                                            \
-  yasmin::log_debug(__FILE__, __FUNCTION__, __LINE__, text, ##__VA_ARGS__)
+  yasmin::log_debug(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,  \
+                    ##__VA_ARGS__)
 
 // Function to set custom log functions
 void set_loggers(LogFunction error, LogFunction warn, LogFunction info,

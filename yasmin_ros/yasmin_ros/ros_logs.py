@@ -14,42 +14,34 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import inspect
 import yasmin
+import yasmin.logs
 from yasmin_ros.yasmin_node import YasminNode
 
 
 __all__ = ["set_ros_loggers"]
 
 
-def get_caller_info():
-    frame = inspect.stack()[2]
-    file = frame.filename
-    line = frame.lineno
-    function = frame.function
-    return file, function, line
-
-
 def ros_log_error(text: str) -> None:
-    file, function, line = get_caller_info()
+    file, function, line = yasmin.logs.get_caller_info()
     node = YasminNode.get_instance()
     node.get_logger().error(f"[{file}:{function}:{line}] {text}")
 
 
 def ros_log_warn(text: str) -> None:
-    file, function, line = get_caller_info()
+    file, function, line = yasmin.logs.get_caller_info()
     node = YasminNode.get_instance()
     node.get_logger().warn(f"[{file}:{function}:{line}] {text}")
 
 
 def ros_log_info(text: str) -> None:
-    file, function, line = get_caller_info()
+    file, function, line = yasmin.logs.get_caller_info()
     node = YasminNode.get_instance()
     node.get_logger().info(f"[{file}:{function}:{line}] {text}")
 
 
 def ros_log_debug(text: str) -> None:
-    file, function, line = get_caller_info()
+    file, function, line = yasmin.logs.get_caller_info()
     node = YasminNode.get_instance()
     node.get_logger().debug(f"[{file}:{function}:{line}] {text}")
 

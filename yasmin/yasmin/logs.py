@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import yasmin
 import logging
 import inspect
@@ -24,6 +25,7 @@ __all__ = [
     "YASMIN_LOG_WARN",
     "YASMIN_LOG_INFO",
     "YASMIN_LOG_DEBUG",
+    "get_caller_info",
 ]
 
 # define the logging configuration with custom format to include location data
@@ -32,7 +34,7 @@ logging.basicConfig(level=logging.NOTSET, format="%(message)s")
 
 def get_caller_info():
     frame = inspect.stack()[2]
-    file = frame.filename
+    file = os.path.basename(frame.filename)
     line = frame.lineno
     function = frame.function
     return file, function, line

@@ -25,15 +25,14 @@ std::string generateUUID() {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> dis(0, 15);
+
   auto rand_hex_digit = [&gen, &dis]() {
     constexpr char hex_digits[] = "0123456789abcdef";
     return hex_digits[dis(gen)];
   };
 
   std::stringstream ss;
-  for (int i = 0; i < 32; ++i) {
-    if (i == 8 || i == 12 || i == 16 || i == 20)
-      ss << "_";
+  for (int i = 0; i < 16; ++i) {
     ss << rand_hex_digit();
   }
   return ss.str();
