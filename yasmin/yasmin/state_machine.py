@@ -233,7 +233,7 @@ class StateMachine(State):
             # outcome is a state
             elif outcome in self._states:
                 yasmin.YASMIN_LOG_INFO(
-                    f"State machine transitioning '{self.__current_state}' : {old_outcome} --> {outcome}"
+                    f"State machine transitioning '{self.__current_state}' : '{old_outcome}' --> '{outcome}'"
                 )
 
                 self._call_transition_cbs(

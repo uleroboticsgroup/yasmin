@@ -34,7 +34,7 @@ class State(ABC):
 
     def __call__(self, blackboard: Blackboard = None) -> str:
 
-        yasmin.YASMIN_LOG_INFO(f"Executing state {self}")
+        yasmin.YASMIN_LOG_DEBUG(f"Executing state {self}")
 
         self._canceled = False
 
