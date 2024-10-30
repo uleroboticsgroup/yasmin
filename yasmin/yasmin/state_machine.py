@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Dict, List, Union
+from typing import Dict, List, Any, Union, Callable
 from threading import Lock
 
 import yasmin
@@ -31,6 +31,9 @@ class StateMachine(State):
         self._start_state = None
         self.__current_state = None
         self.__current_state_lock = Lock()
+        self.__start_cbs = []
+        self.__transition_cbs = []
+        self.__end_cbs = []
 
     def add_state(
         self,
@@ -80,6 +83,58 @@ class StateMachine(State):
         with self.__current_state_lock:
             if self.__current_state:
                 self._states[self.__current_state]["state"].cancel_state()
+
+    def get_states(self) -> Dict[str, Union[State, Dict[str, str]]]:
+        return self._states
+
+    def get_current_state(self) -> str:
+        with self.__current_state_lock:
+            if self.__current_state:
+                return self.__current_state
+
+        return ""
+
+    def add_start_cb(self, cb: Callable, args: List[Any] = None) -> None:
+        if args is None:
+            args = []
+        self.__start_cbs.append((cb, args))
+
+    def add_transition_cb(self, cb: Callable, args: List[Any] = None) -> None:
+        if args is None:
+            args = []
+        self.__transition_cbs.append((cb, args))
+
+    def add_end_cb(self, cb: Callable, args: List[Any] = None) -> None:
+        if args is None:
+            args = []
+        self.__end_cbs.append((cb, args))
+
+    def _call_start_cbs(self, blackboard: Blackboard, start_state: str) -> None:
+        try:
+            for cb, args in self.__start_cbs:
+                cb(blackboard, start_state, *args)
+        except Exception as e:
+            yasmin.YASMIN_LOG_ERROR(f"Could not execute start callback: {e}")
+
+    def _call_transition_cbs(
+        self,
+        blackboard: Blackboard,
+        from_state: str,
+        to_state: str,
+        outcome: str,
+    ) -> None:
+        try:
+            for cb, args in self.__transition_cbs:
+                cb(blackboard, from_state, to_state, outcome, *args)
+        except Exception as e:
+            yasmin.YASMIN_LOG_ERROR(f"Could not execute transition callback: {e}")
+
+    def _call_end_cbs(self, blackboard: Blackboard, outcome: str) -> None:
+        try:
+            for cb, args in self.__end_cbs:
+                cb(blackboard, outcome, *args)
+        except Exception as e:
+            yasmin.YASMIN_LOG_ERROR(f"Could not execute end callback: {e}")
 
     def validate(self) -> None:
 
@@ -134,6 +189,8 @@ class StateMachine(State):
 
         self.validate()
 
+        self._call_start_cbs(blackboard, self._start_state)
+
         with self.__current_state_lock:
             self.__current_state = self._start_state
 
@@ -143,11 +200,12 @@ class StateMachine(State):
                 state = self._states[self.__current_state]
 
             outcome = state["state"](blackboard)
+            old_come = outcome
 
             # check outcome belongs to state
             if outcome not in state["state"].get_outcomes():
                 raise KeyError(
-                    f"Outcome ({outcome}) is not register in state {self.__current_state}"
+                    f"Outcome '{outcome}' is not register in state {self.__current_state}"
                 )
 
             # translate outcome using transitions
@@ -161,26 +219,29 @@ class StateMachine(State):
             if outcome in self.get_outcomes():
                 with self.__current_state_lock:
                     self.__current_state = None
+
+                yasmin.YASMIN_LOG_INFO(f"State machine ends with outcome '{outcome}'")
+                self._call_end_cbs(blackboard, outcome)
                 return outcome
 
             # outcome is a state
             elif outcome in self._states:
+
+                self._call_transition_cbs(
+                    blackboard,
+                    self.get_current_state(),
+                    outcome,
+                    old_come,
+                )
+
                 with self.__current_state_lock:
                     self.__current_state = outcome
 
             # outcome is not in the sm
             else:
-                raise KeyError(f"Outcome ({outcome}) without transition")
-
-    def get_states(self) -> Dict[str, Union[State, Dict[str, str]]]:
-        return self._states
-
-    def get_current_state(self) -> str:
-        with self.__current_state_lock:
-            if self.__current_state:
-                return self.__current_state
-
-        return ""
+                raise KeyError(
+                    f"Outcome '{outcome}' is not a state neither a state machine outcome"
+                )
 
     def __str__(self) -> str:
         return f"StateMachine: {self._states}"

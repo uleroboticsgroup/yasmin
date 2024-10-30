@@ -121,6 +121,68 @@ std::string StateMachine::get_current_state() {
   return this->current_state;
 }
 
+void StateMachine::add_start_cb(EndCallbackType cb,
+                                std::vector<std::string> args) {
+  this->start_cbs.emplace_back(cb, args);
+}
+
+void StateMachine::add_transition_cb(TransitionCallbackType cb,
+                                     std::vector<std::string> args) {
+  this->transition_cbs.emplace_back(cb, args);
+}
+
+void StateMachine::add_end_cb(EndCallbackType cb,
+                              std::vector<std::string> args) {
+  this->end_cbs.emplace_back(cb, args);
+}
+
+void StateMachine::call_start_cbs(
+    std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+    const std::string &start_state) {
+  try {
+    for (const auto &callback_pair : this->start_cbs) {
+      const auto &cb = callback_pair.first;
+      const auto &args = callback_pair.second;
+      cb(blackboard, start_state, args);
+    }
+  } catch (const std::exception &e) {
+    YASMIN_LOG_ERROR("Could not execute start callback: %s"),
+        std::string(e.what());
+  }
+}
+
+void StateMachine::call_transition_cbs(
+    std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+    const std::string &from_state, const std::string &to_state,
+    const std::string &outcome) {
+  try {
+    for (const auto &callback_pair : this->transition_cbs) {
+      const auto &cb = callback_pair.first;
+      const auto &args = callback_pair.second;
+      cb(blackboard, from_state, to_state, outcome, args);
+    }
+  } catch (const std::exception &e) {
+    YASMIN_LOG_ERROR("Could not execute transition callback: %s"),
+        std::string(e.what());
+  }
+}
+
+void StateMachine::call_end_cbs(
+    std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+    const std::string &outcome) {
+  try {
+
+    for (const auto &callback_pair : this->end_cbs) {
+      const auto &cb = callback_pair.first;
+      const auto &args = callback_pair.second;
+      cb(blackboard, outcome, args);
+    }
+  } catch (const std::exception &e) {
+    YASMIN_LOG_ERROR("Could not execute end callback: %s"),
+        std::string(e.what());
+  }
+}
+
 void StateMachine::validate() {
 
   // check initial state
@@ -196,12 +258,15 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
   this->validate();
 
+  this->call_start_cbs(blackboard, this->get_start_state());
+
   this->current_state_mutex->lock();
   this->current_state = this->start_state;
   this->current_state_mutex->unlock();
 
   std::map<std::string, std::string> transitions;
   std::string outcome;
+  std::string old_outcome;
 
   while (true) {
 
@@ -212,12 +277,13 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     this->current_state_mutex->unlock();
 
     outcome = (*state.get())(blackboard);
+    old_outcome = std::string(outcome);
 
     // check outcome belongs to state
     if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
                   outcome) == this->outcomes.end()) {
-      throw std::logic_error("Outcome (" + outcome +
-                             ") is not register in state " +
+      throw std::logic_error("Outcome '" + outcome +
+                             "' is not register in state " +
                              this->current_state);
     }
 
@@ -238,6 +304,8 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
       this->current_state.clear();
       this->current_state_mutex->unlock();
 
+      this->call_end_cbs(blackboard, outcome);
+
       return outcome;
 
       // outcome is a state
@@ -247,9 +315,14 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
       this->current_state = outcome;
       this->current_state_mutex->unlock();
 
+      this->call_transition_cbs(blackboard, this->get_start_state(), outcome,
+                                old_outcome);
+
       // outcome is not in the sm
     } else {
-      throw std::logic_error("Outcome (" + outcome + ") without transition");
+      throw std::logic_error(
+          "Outcome '" + outcome +
+          "' is not a state neither a state machine outcome");
     }
   }
 

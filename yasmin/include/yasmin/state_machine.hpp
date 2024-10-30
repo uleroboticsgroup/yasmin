@@ -16,6 +16,7 @@
 #ifndef YASMIN_STATE_MACHINE_HPP
 #define YASMIN_STATE_MACHINE_HPP
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -28,6 +29,17 @@
 namespace yasmin {
 
 class StateMachine : public State {
+
+  using StartCallbackType = std::function<void(
+      std::shared_ptr<yasmin::blackboard::Blackboard>, const std::string &,
+      const std::vector<std::string> &)>;
+  using TransitionCallbackType = std::function<void(
+      std::shared_ptr<yasmin::blackboard::Blackboard>, const std::string &,
+      const std::string &, const std::string &,
+      const std::vector<std::string> &)>;
+  using EndCallbackType = std::function<void(
+      std::shared_ptr<yasmin::blackboard::Blackboard>, const std::string &,
+      const std::vector<std::string> &)>;
 
 public:
   StateMachine(std::vector<std::string> outcomes);
@@ -46,6 +58,21 @@ public:
   get_transitions();
   std::string get_current_state();
 
+  void add_start_cb(StartCallbackType cb, std::vector<std::string> args = {});
+  void add_transition_cb(TransitionCallbackType cb,
+                         std::vector<std::string> args = {});
+  void add_end_cb(EndCallbackType cb, std::vector<std::string> args = {});
+  void
+  call_start_cbs(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+                 const std::string &start_state);
+  void call_transition_cbs(
+      std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+      const std::string &from_state, const std::string &to_state,
+      const std::string &outcome);
+  void call_end_cbs(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+                    const std::string &outcome);
+
+  void validate();
   std::string
   execute(std::shared_ptr<blackboard::Blackboard> blackboard) override;
   std::string execute();
@@ -53,7 +80,6 @@ public:
   using State::operator();
 
   std::string to_string();
-  void validate();
 
 private:
   std::map<std::string, std::shared_ptr<State>> states;
@@ -61,6 +87,11 @@ private:
   std::string start_state;
   std::string current_state;
   std::unique_ptr<std::mutex> current_state_mutex;
+
+  std::vector<std::pair<StartCallbackType, std::vector<std::string>>> start_cbs;
+  std::vector<std::pair<TransitionCallbackType, std::vector<std::string>>>
+      transition_cbs;
+  std::vector<std::pair<EndCallbackType, std::vector<std::string>>> end_cbs;
 };
 
 } // namespace yasmin
