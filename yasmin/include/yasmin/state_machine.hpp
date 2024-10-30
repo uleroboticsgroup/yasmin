@@ -51,8 +51,6 @@ public:
   void set_start_state(std::string state_name);
   std::string get_start_state();
 
-  void cancel_state() override;
-
   std::map<std::string, std::shared_ptr<State>> const &get_states();
   std::map<std::string, std::map<std::string, std::string>> const &
   get_transitions();
@@ -78,6 +76,7 @@ public:
   std::string execute();
   std::string operator()();
   using State::operator();
+  void cancel_state() override;
 
   std::string to_string();
 

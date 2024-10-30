@@ -24,6 +24,7 @@
 
 #include "yasmin/blackboard/blackboard_value.hpp"
 #include "yasmin/blackboard/blackboard_value_interface.hpp"
+#include "yasmin/logs.hpp"
 
 namespace yasmin {
 namespace blackboard {
@@ -41,6 +42,8 @@ public:
 
   template <class T> T get(std::string name) {
 
+    YASMIN_LOG_DEBUG("Getting '%s' from the blackboard", name.c_str());
+
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
     if (!this->contains(name)) {
@@ -53,6 +56,8 @@ public:
   }
 
   template <class T> void set(std::string name, T value) {
+
+    YASMIN_LOG_DEBUG("Setting '%s' in the blackboard", name.c_str());
 
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
 

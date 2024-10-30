@@ -19,6 +19,7 @@
 import rclpy
 from example_interfaces.srv import AddTwoInts
 
+import yasmin
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -60,14 +61,14 @@ def set_ints(blackboard: Blackboard) -> str:
 
 
 def print_sum(blackboard: Blackboard) -> str:
-    print(f"Sum: {blackboard['sum']}")
+    yasmin.YASMIN_LOG_INFO(f"Sum: {blackboard['sum']}")
     return SUCCEED
 
 
 # main
 def main():
 
-    print("yasmin_service_client_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
 
     # init ROS 2
     rclpy.init()
@@ -94,7 +95,11 @@ def main():
         },
     )
     sm.add_state(
-        "PRINTING_SUM", CbState([SUCCEED], print_sum), transitions={SUCCEED: "outcome4"}
+        "PRINTING_SUM",
+        CbState([SUCCEED], print_sum),
+        transitions={
+            SUCCEED: "outcome4",
+        },
     )
 
     # pub FSM info
@@ -102,7 +107,7 @@ def main():
 
     # execute FSM
     outcome = sm()
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()

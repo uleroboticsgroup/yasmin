@@ -21,6 +21,7 @@
 
 #include "nav_msgs/msg/odometry.hpp"
 
+#include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/monitor_state.hpp"
@@ -29,6 +30,7 @@
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using namespace yasmin;
 
 class PrintOdometryState
     : public yasmin_ros::MonitorState<nav_msgs::msg::Odometry> {
@@ -56,10 +58,9 @@ public:
 
     (void)blackboard;
 
-    std::cout << "x: " << msg->pose.pose.position.x << "\n";
-    std::cout << "y: " << msg->pose.pose.position.y << "\n";
-    std::cout << "z: " << msg->pose.pose.position.z << "\n";
-    std::cout << "\n";
+    YASMIN_LOG_INFO("x: %d", msg->pose.pose.position.x);
+    YASMIN_LOG_INFO("y: %d", msg->pose.pose.position.y);
+    YASMIN_LOG_INFO("z: %d", msg->pose.pose.position.z);
 
     this->times--;
 
@@ -73,7 +74,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_monitor_demo\n";
+  YASMIN_LOG_INFO("yasmin_monitor_demo");
   rclcpp::init(argc, argv);
 
   // set ROS 2 logs
@@ -94,7 +95,7 @@ int main(int argc, char *argv[]) {
 
   // execute
   std::string outcome = (*sm.get())();
-  std::cout << outcome << "\n";
+  YASMIN_LOG_INFO(outcome.c_str());
 
   rclcpp::shutdown();
 

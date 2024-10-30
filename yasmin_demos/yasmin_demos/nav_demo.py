@@ -22,6 +22,7 @@ import rclpy
 from geometry_msgs.msg import Pose
 from nav2_msgs.action import NavigateToPose
 
+import yasmin
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -94,7 +95,7 @@ def get_next_waypoint(blackboard: Blackboard) -> str:
 # main
 def main():
 
-    print("yasmin_nav2_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
 
     # init ROS 2
     rclpy.init()
@@ -110,29 +111,44 @@ def main():
     sm.add_state(
         "CREATING_WAYPOINTS",
         CbState([SUCCEED], create_waypoints),
-        transitions={SUCCEED: "TAKING_RANDOM_WAYPOINTS"},
+        transitions={
+            SUCCEED: "TAKING_RANDOM_WAYPOINTS",
+        },
     )
     sm.add_state(
         "TAKING_RANDOM_WAYPOINTS",
         CbState([SUCCEED], take_random_waypoint),
-        transitions={SUCCEED: "NAVIGATING"},
+        transitions={
+            SUCCEED: "NAVIGATING",
+        },
     )
 
     nav_sm.add_state(
         "GETTING_NEXT_WAYPOINT",
         CbState([END, HAS_NEXT], get_next_waypoint),
-        transitions={END: SUCCEED, HAS_NEXT: "NAVIGATING"},
+        transitions={
+            END: SUCCEED,
+            HAS_NEXT: "NAVIGATING",
+        },
     )
     nav_sm.add_state(
         "NAVIGATING",
         Nav2State(),
-        transitions={SUCCEED: "GETTING_NEXT_WAYPOINT", CANCEL: CANCEL, ABORT: ABORT},
+        transitions={
+            SUCCEED: "GETTING_NEXT_WAYPOINT",
+            CANCEL: CANCEL,
+            ABORT: ABORT,
+        },
     )
 
     sm.add_state(
         "NAVIGATING",
         nav_sm,
-        transitions={SUCCEED: SUCCEED, CANCEL: CANCEL, ABORT: ABORT},
+        transitions={
+            SUCCEED: SUCCEED,
+            CANCEL: CANCEL,
+            ABORT: ABORT,
+        },
     )
 
     # pub FSM info
@@ -142,7 +158,7 @@ def main():
     blackboard = Blackboard()
     blackboard["waypoints_num"] = 2
     outcome = sm(blackboard)
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()

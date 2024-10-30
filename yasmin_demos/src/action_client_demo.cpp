@@ -20,6 +20,7 @@
 #include "action_tutorials_interfaces/action/fibonacci.hpp"
 
 #include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/action_state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
@@ -30,6 +31,7 @@
 using std::placeholders::_1;
 using std::placeholders::_2;
 using Fibonacci = action_tutorials_interfaces::action::Fibonacci;
+using namespace yasmin;
 
 std::string
 print_result(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
@@ -99,7 +101,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_action_client_demo\n";
+  YASMIN_LOG_INFO("yasmin_action_client_demo");
   rclcpp::init(argc, argv);
 
   // set ROS 2 logs
@@ -131,7 +133,7 @@ int main(int argc, char *argv[]) {
 
   // execute
   std::string outcome = (*sm.get())(blackboard);
-  std::cout << outcome << "\n";
+  YASMIN_LOG_INFO(outcome.c_str());
 
   rclcpp::shutdown();
 

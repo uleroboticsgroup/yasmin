@@ -35,12 +35,18 @@ Blackboard::~Blackboard() {
 }
 
 void Blackboard::remove(std::string name) {
+
+  YASMIN_LOG_DEBUG("Removing '%s' from the blackboard", name.c_str());
+
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
   delete this->values.at(name);
   this->values.erase(name);
 }
 
 bool Blackboard::contains(std::string name) {
+
+  YASMIN_LOG_DEBUG("Checking if '%s' is in the blackboard", name.c_str());
+
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
   return (this->values.find(name) != this->values.end());
 }

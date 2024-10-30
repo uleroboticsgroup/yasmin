@@ -60,29 +60,33 @@ class StateMachine(State):
                     f"State '{name}' references unregistered outcomes '{key}', available outcomes are {state.get_outcomes()}"
                 )
 
+        transition_string = ""
+        for key in transitions:
+            transition_string += "\n\t" + key + " --> " + transitions[key]
+
+        yasmin.YASMIN_LOG_DEBUG(
+            f"Adding state '{name}' of type '{state}' with transitions: {transition_string}"
+        )
+
         self._states[name] = {"state": state, "transitions": transitions}
 
         if not self._start_state:
-            self._start_state = name
+            self.set_start_state(name)
 
-    def set_start_state(self, name: str) -> None:
+    def set_start_state(self, state_name: str) -> None:
 
-        if not name:
+        if not state_name:
             raise ValueError("Initial state cannot be empty")
 
-        elif name not in self._states:
-            raise KeyError(f"Initial state '{name}' is not in the state machine")
+        elif state_name not in self._states:
+            raise KeyError(f"Initial state '{state_name}' is not in the state machine")
 
-        self._start_state = name
+        yasmin.YASMIN_LOG_DEBUG(f"Setting start state to '{state_name}'")
+
+        self._start_state = state_name
 
     def get_start_state(self) -> str:
         return self._start_state
-
-    def cancel_state(self) -> None:
-        super().cancel_state()
-        with self.__current_state_lock:
-            if self.__current_state:
-                self._states[self.__current_state]["state"].cancel_state()
 
     def get_states(self) -> Dict[str, Union[State, Dict[str, str]]]:
         return self._states
@@ -137,6 +141,8 @@ class StateMachine(State):
             yasmin.YASMIN_LOG_ERROR(f"Could not execute end callback: {e}")
 
     def validate(self) -> None:
+
+        yasmin.YASMIN_LOG_DEBUG("Validating state machine")
 
         # check initial state
         if not self._start_state:
@@ -227,7 +233,7 @@ class StateMachine(State):
             # outcome is a state
             elif outcome in self._states:
                 yasmin.YASMIN_LOG_INFO(
-                    f"{self.__current_state} ({old_outcome}) --> {outcome}"
+                    f"State machine transitioning '{self.__current_state}' : {old_outcome} --> {outcome}"
                 )
 
                 self._call_transition_cbs(
@@ -246,5 +252,18 @@ class StateMachine(State):
                     f"Outcome '{outcome}' is not a state neither a state machine outcome"
                 )
 
+    def cancel_state(self) -> None:
+        super().cancel_state()
+        with self.__current_state_lock:
+            if self.__current_state:
+                self._states[self.__current_state]["state"].cancel_state()
+
     def __str__(self) -> str:
-        return f"StateMachine: {self._states}"
+        result = "State Machine\n"
+
+        for key in self._states:
+            result += f"{key} ({self._states[key]['state']})\n"
+            for tkey in self._states[key]["transitions"]:
+                result += f"\t{tkey} --> {self._states[key]['transitions'][tkey]}\n"
+
+        return result

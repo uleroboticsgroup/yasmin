@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 
 using namespace yasmin;
@@ -27,6 +28,9 @@ State::State(std::vector<std::string> outcomes) { this->outcomes = outcomes; }
 
 std::string
 State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
+
+  YASMIN_LOG_DEBUG("Executing state %s", this->to_string().c_str());
+
   this->canceled.store(false);
   std::string outcome = this->execute(blackboard);
 

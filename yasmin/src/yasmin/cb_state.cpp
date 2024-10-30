@@ -25,9 +25,7 @@ using namespace yasmin;
 CbState::CbState(
     std::vector<std::string> outcomes,
     std::string (*callback)(std::shared_ptr<blackboard::Blackboard> blackboard))
-    : State(outcomes) {
-  this->callback = callback;
-}
+    : State(outcomes), callback(callback) {}
 
 std::string
 CbState::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {

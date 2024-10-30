@@ -106,6 +106,7 @@ $ ros2 run yasmin_demos yasmin_demo.py
 import time
 import rclpy
 
+import yasmin
 from yasmin import State
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -120,7 +121,7 @@ class FooState(State):
         self.counter = 0
 
     def execute(self, blackboard: Blackboard) -> str:
-        print("Executing state FOO")
+        yasmin.YASMIN_LOG_INFO("Executing state FOO")
         time.sleep(3)
 
         if self.counter < 3:
@@ -137,17 +138,17 @@ class BarState(State):
         super().__init__(outcomes=["outcome3"])
 
     def execute(self, blackboard: Blackboard) -> str:
-        print("Executing state BAR")
+        yasmin.YASMIN_LOG_INFO("Executing state BAR")
         time.sleep(3)
 
-        print(blackboard["foo_str"])
+        yasmin.YASMIN_LOG_INFO(blackboard["foo_str"])
         return "outcome3"
 
 
 # main
 def main():
 
-    print("yasmin_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_demo")
 
     # init ROS 2
     rclpy.init()
@@ -160,16 +161,26 @@ def main():
 
     # add states
     sm.add_state(
-        "FOO", FooState(), transitions={"outcome1": "BAR", "outcome2": "outcome4"}
+        "FOO",
+        FooState(),
+        transitions={
+            "outcome1": "BAR",
+            "outcome2": "outcome4",
+        },
     )
-    sm.add_state("BAR", BarState(), transitions={"outcome3": "FOO"})
-
+    sm.add_state(
+        "BAR",
+        BarState(),
+        transitions={
+            "outcome3": "FOO",
+        },
+    )
     # pub FSM info
     YasminViewerPub("yasmin_demo", sm)
 
     # execute FSM
     outcome = sm()
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()
@@ -198,6 +209,7 @@ $ ros2 run yasmin_demos service_client_demo.py
 import rclpy
 from example_interfaces.srv import AddTwoInts
 
+import yasmin
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -239,14 +251,14 @@ def set_ints(blackboard: Blackboard) -> str:
 
 
 def print_sum(blackboard: Blackboard) -> str:
-    print(f"Sum: {blackboard['sum']}")
+    yasmin.YASMIN_LOG_INFO(f"Sum: {blackboard['sum']}")
     return SUCCEED
 
 
 # main
 def main():
 
-    print("yasmin_service_client_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
 
     # init ROS 2
     rclpy.init()
@@ -273,7 +285,11 @@ def main():
         },
     )
     sm.add_state(
-        "PRINTING_SUM", CbState([SUCCEED], print_sum), transitions={SUCCEED: "outcome4"}
+        "PRINTING_SUM",
+        CbState([SUCCEED], print_sum),
+        transitions={
+            SUCCEED: "outcome4",
+        },
     )
 
     # pub FSM info
@@ -281,7 +297,7 @@ def main():
 
     # execute FSM
     outcome = sm()
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()
@@ -310,6 +326,7 @@ $ ros2 run yasmin_demos action_client_demo.py
 import rclpy
 from action_tutorials_interfaces.action import Fibonacci
 
+import yasmin
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -346,18 +363,18 @@ class FibonacciState(ActionState):
     def print_feedback(
         self, blackboard: Blackboard, feedback: Fibonacci.Feedback
     ) -> None:
-        print(f"Received feedback: {list(feedback.partial_sequence)}")
+        yasmin.YASMIN_LOG_INFO(f"Received feedback: {list(feedback.partial_sequence)}")
 
 
 def print_result(blackboard: Blackboard) -> str:
-    print(f"Result: {blackboard['fibo_res']}")
+    yasmin.YASMIN_LOG_INFO(f"Result: {blackboard['fibo_res']}")
     return SUCCEED
 
 
 # main
 def main():
 
-    print("yasmin_action_client_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_action_client_demo")
 
     # init ROS 2
     rclpy.init()
@@ -372,12 +389,18 @@ def main():
     sm.add_state(
         "CALLING_FIBONACCI",
         FibonacciState(),
-        transitions={SUCCEED: "PRINTING_RESULT", CANCEL: "outcome4", ABORT: "outcome4"},
+        transitions={
+            SUCCEED: "PRINTING_RESULT",
+            CANCEL: "outcome4",
+            ABORT: "outcome4",
+        },
     )
     sm.add_state(
         "PRINTING_RESULT",
         CbState([SUCCEED], print_result),
-        transitions={SUCCEED: "outcome4"},
+        transitions={
+            SUCCEED: "outcome4",
+        },
     )
 
     # pub FSM info
@@ -389,7 +412,7 @@ def main():
 
     # execute FSM
     outcome = sm(blackboard)
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()
@@ -415,6 +438,7 @@ import rclpy
 from rclpy.qos import qos_profile_sensor_data
 from nav_msgs.msg import Odometry
 
+import yasmin
 from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import MonitorState
@@ -438,7 +462,7 @@ class PrintOdometryState(MonitorState):
         self.times = times
 
     def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -> str:
-        print(msg)
+        yasmin.YASMIN_LOG_INFO(msg)
 
         self.times -= 1
 
@@ -451,7 +475,7 @@ class PrintOdometryState(MonitorState):
 # main
 def main():
 
-    print("yasmin_monitor_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
 
     # init ROS 2
     rclpy.init()
@@ -478,7 +502,7 @@ def main():
 
     # execute FSM
     outcome = sm()
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()
@@ -506,6 +530,7 @@ import rclpy
 from geometry_msgs.msg import Pose
 from nav2_msgs.action import NavigateToPose
 
+import yasmin
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -578,7 +603,7 @@ def get_next_waypoint(blackboard: Blackboard) -> str:
 # main
 def main():
 
-    print("yasmin_nav2_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
 
     # init ROS 2
     rclpy.init()
@@ -594,29 +619,34 @@ def main():
     sm.add_state(
         "CREATING_WAYPOINTS",
         CbState([SUCCEED], create_waypoints),
-        transitions={SUCCEED: "TAKING_RANDOM_WAYPOINTS"},
+        transitions={
+            SUCCEED: "TAKING_RANDOM_WAYPOINTS",
+        },
     )
     sm.add_state(
         "TAKING_RANDOM_WAYPOINTS",
         CbState([SUCCEED], take_random_waypoint),
-        transitions={SUCCEED: "NAVIGATING"},
+        transitions={
+            SUCCEED: "NAVIGATING",
+        },
     )
 
     nav_sm.add_state(
         "GETTING_NEXT_WAYPOINT",
         CbState([END, HAS_NEXT], get_next_waypoint),
-        transitions={END: SUCCEED, HAS_NEXT: "NAVIGATING"},
+        transitions={
+            END: SUCCEED,
+            HAS_NEXT: "NAVIGATING",
+        },
     )
     nav_sm.add_state(
         "NAVIGATING",
         Nav2State(),
-        transitions={SUCCEED: "GETTING_NEXT_WAYPOINT", CANCEL: CANCEL, ABORT: ABORT},
-    )
-
-    sm.add_state(
-        "NAVIGATING",
-        nav_sm,
-        transitions={SUCCEED: SUCCEED, CANCEL: CANCEL, ABORT: ABORT},
+        transitions={
+            SUCCEED: "GETTING_NEXT_WAYPOINT",
+            CANCEL: CANCEL,
+            ABORT: ABORT,
+        },
     )
 
     # pub FSM info
@@ -626,7 +656,7 @@ def main():
     blackboard = Blackboard()
     blackboard["waypoints_num"] = 2
     outcome = sm(blackboard)
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()
@@ -657,10 +687,13 @@ $ ros2 run yasmin_demos yasmin_demo
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using namespace yasmin;
 
 // define state Foo
 class FooState : public yasmin::State {
@@ -671,7 +704,7 @@ public:
 
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-    std::cout << "Executing state FOO\n";
+    YASMIN_LOG_INFO("Executing state FOO");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
     if (this->counter < 3) {
@@ -693,10 +726,10 @@ public:
 
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-    std::cout << "Executing state BAR\n";
+    YASMIN_LOG_INFO("Executing state BAR");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
-    std::cout << blackboard->get<std::string>("foo_str") << "\n";
+    YASMIN_LOG_INFO(blackboard->get<std::string>("foo_str").c_str());
 
     return "outcome3";
   }
@@ -704,7 +737,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_demo\n";
+  YASMIN_LOG_INFO("yasmin_demo");
   rclcpp::init(argc, argv);
 
   // set ROS 2 logs
@@ -724,7 +757,7 @@ int main(int argc, char *argv[]) {
 
   // execute
   std::string outcome = (*sm.get())();
-  std::cout << outcome << "\n";
+  YASMIN_LOG_INFO(outcome.c_str());
 
   rclcpp::shutdown();
 
@@ -756,6 +789,7 @@ $ ros2 run yasmin_demos service_client_demo
 #include "rclcpp/rclcpp.hpp"
 
 #include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/ros_logs.hpp"
@@ -764,6 +798,7 @@ $ ros2 run yasmin_demos service_client_demo
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using namespace yasmin;
 
 std::string
 set_ints(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
@@ -815,7 +850,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_service_client_demo\n";
+  YASMIN_LOG_INFO("yasmin_service_client_demo");
   rclcpp::init(argc, argv);
 
   // set ROS 2 logs
@@ -848,7 +883,7 @@ int main(int argc, char *argv[]) {
 
   // execute
   std::string outcome = (*sm.get())();
-  std::cout << outcome << "\n";
+  YASMIN_LOG_INFO(outcome.c_str());
 
   rclcpp::shutdown();
 
@@ -872,8 +907,6 @@ $ ros2 run yasmin_demos action_client_demo
 <summary>Click to expand</summary>
 
 ```cpp
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #include <iostream>
 #include <memory>
 #include <string>
@@ -881,6 +914,7 @@ $ ros2 run yasmin_demos action_client_demo
 #include "action_tutorials_interfaces/action/fibonacci.hpp"
 
 #include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/action_state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
@@ -891,6 +925,7 @@ $ ros2 run yasmin_demos action_client_demo
 using std::placeholders::_1;
 using std::placeholders::_2;
 using Fibonacci = action_tutorials_interfaces::action::Fibonacci;
+using namespace yasmin;
 
 std::string
 print_result(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
@@ -960,7 +995,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_action_client_demo\n";
+  YASMIN_LOG_INFO("yasmin_action_client_demo");
   rclcpp::init(argc, argv);
 
   // set ROS 2 logs
@@ -992,7 +1027,7 @@ int main(int argc, char *argv[]) {
 
   // execute
   std::string outcome = (*sm.get())(blackboard);
-  std::cout << outcome << "\n";
+  YASMIN_LOG_INFO(outcome.c_str());
 
   rclcpp::shutdown();
 
@@ -1020,6 +1055,7 @@ $ ros2 run yasmin_demos monitor_demo
 
 #include "nav_msgs/msg/odometry.hpp"
 
+#include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/monitor_state.hpp"
@@ -1028,6 +1064,7 @@ $ ros2 run yasmin_demos monitor_demo
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using namespace yasmin;
 
 class PrintOdometryState
     : public yasmin_ros::MonitorState<nav_msgs::msg::Odometry> {
@@ -1055,10 +1092,9 @@ public:
 
     (void)blackboard;
 
-    std::cout << "x: " << msg->pose.pose.position.x << "\n";
-    std::cout << "y: " << msg->pose.pose.position.y << "\n";
-    std::cout << "z: " << msg->pose.pose.position.z << "\n";
-    std::cout << "\n";
+    YASMIN_LOG_INFO("x: %d", msg->pose.pose.position.x);
+    YASMIN_LOG_INFO("y: %d", msg->pose.pose.position.y);
+    YASMIN_LOG_INFO("z: %d", msg->pose.pose.position.z);
 
     this->times--;
 
@@ -1072,7 +1108,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_monitor_demo\n";
+  YASMIN_LOG_INFO("yasmin_monitor_demo");
   rclcpp::init(argc, argv);
 
   // set ROS 2 logs
@@ -1093,7 +1129,7 @@ int main(int argc, char *argv[]) {
 
   // execute
   std::string outcome = (*sm.get())();
-  std::cout << outcome << "\n";
+  YASMIN_LOG_INFO(outcome.c_str());
 
   rclcpp::shutdown();
 

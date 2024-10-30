@@ -20,10 +20,13 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using namespace yasmin;
 
 // define state Foo
 class FooState : public yasmin::State {
@@ -34,7 +37,7 @@ public:
 
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-    std::cout << "Executing state FOO\n";
+    YASMIN_LOG_INFO("Executing state FOO");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
     if (this->counter < 3) {
@@ -56,10 +59,10 @@ public:
 
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-    std::cout << "Executing state BAR\n";
+    YASMIN_LOG_INFO("Executing state BAR");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
-    std::cout << blackboard->get<std::string>("foo_str") << "\n";
+    YASMIN_LOG_INFO(blackboard->get<std::string>("foo_str").c_str());
 
     return "outcome3";
   }
@@ -67,7 +70,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_demo\n";
+  YASMIN_LOG_INFO("yasmin_demo");
   rclcpp::init(argc, argv);
 
   // set ROS 2 logs
@@ -87,7 +90,7 @@ int main(int argc, char *argv[]) {
 
   // execute
   std::string outcome = (*sm.get())();
-  std::cout << outcome << "\n";
+  YASMIN_LOG_INFO(outcome.c_str());
 
   rclcpp::shutdown();
 

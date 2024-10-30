@@ -17,6 +17,8 @@
 from typing import Any, Dict
 from threading import Lock
 
+import yasmin
+
 
 class Blackboard(object):
 
@@ -27,18 +29,30 @@ class Blackboard(object):
             self._data.update(init)
 
     def __getitem__(self, key) -> Any:
+
+        yasmin.YASMIN_LOG_DEBUG(f"Getting '{key}' from the blackboard")
+
         with self.__lock:
             return self._data[key]
 
     def __setitem__(self, key, value) -> None:
+
+        yasmin.YASMIN_LOG_DEBUG(f"Setting '{key}' in the blackboard")
+
         with self.__lock:
             self._data[key] = value
 
     def __delitem__(self, key) -> None:
+
+        yasmin.YASMIN_LOG_DEBUG(f"Removing '{key}' from the blackboard")
+
         with self.__lock:
             del self._data[key]
 
     def __contains__(self, key) -> bool:
+
+        yasmin.YASMIN_LOG_DEBUG(f"Checking if '{key}' is in the blackboard")
+
         with self.__lock:
             return key in self._data
 

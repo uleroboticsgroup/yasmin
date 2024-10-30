@@ -52,13 +52,20 @@ public:
   std::vector<std::string> const &get_outcomes();
 
   virtual std::string to_string() {
-    int status = 0;
-    char *demangledName =
-        abi::__cxa_demangle(typeid(*this).name(), nullptr, nullptr, &status);
-    std::string className =
-        (status == 0) ? demangledName : typeid(*this).name();
-    free(demangledName);
-    return className;
+    std::string name = typeid(*this).name();
+
+#ifdef __GNUG__ // if using GCC/G++
+    int status;
+    // demangle the name using GCC's demangling function
+    char *demangled =
+        abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
+    if (status == 0) {
+      name = demangled;
+    }
+    free(demangled);
+#endif
+
+    return name;
   }
 };
 

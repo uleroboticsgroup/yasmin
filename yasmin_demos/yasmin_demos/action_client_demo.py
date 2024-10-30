@@ -19,6 +19,7 @@
 import rclpy
 from action_tutorials_interfaces.action import Fibonacci
 
+import yasmin
 from yasmin import CbState
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -55,18 +56,18 @@ class FibonacciState(ActionState):
     def print_feedback(
         self, blackboard: Blackboard, feedback: Fibonacci.Feedback
     ) -> None:
-        print(f"Received feedback: {list(feedback.partial_sequence)}")
+        yasmin.YASMIN_LOG_INFO(f"Received feedback: {list(feedback.partial_sequence)}")
 
 
 def print_result(blackboard: Blackboard) -> str:
-    print(f"Result: {blackboard['fibo_res']}")
+    yasmin.YASMIN_LOG_INFO(f"Result: {blackboard['fibo_res']}")
     return SUCCEED
 
 
 # main
 def main():
 
-    print("yasmin_action_client_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_action_client_demo")
 
     # init ROS 2
     rclpy.init()
@@ -81,12 +82,18 @@ def main():
     sm.add_state(
         "CALLING_FIBONACCI",
         FibonacciState(),
-        transitions={SUCCEED: "PRINTING_RESULT", CANCEL: "outcome4", ABORT: "outcome4"},
+        transitions={
+            SUCCEED: "PRINTING_RESULT",
+            CANCEL: "outcome4",
+            ABORT: "outcome4",
+        },
     )
     sm.add_state(
         "PRINTING_RESULT",
         CbState([SUCCEED], print_result),
-        transitions={SUCCEED: "outcome4"},
+        transitions={
+            SUCCEED: "outcome4",
+        },
     )
 
     # pub FSM info
@@ -98,7 +105,7 @@ def main():
 
     # execute FSM
     outcome = sm(blackboard)
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()

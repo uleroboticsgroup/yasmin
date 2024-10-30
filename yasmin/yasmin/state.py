@@ -16,6 +16,8 @@
 
 from typing import List
 from abc import ABC, abstractmethod
+
+import yasmin
 from yasmin.blackboard import Blackboard
 
 
@@ -31,6 +33,9 @@ class State(ABC):
             raise ValueError("There must be at least one outcome")
 
     def __call__(self, blackboard: Blackboard = None) -> str:
+
+        yasmin.YASMIN_LOG_INFO(f"Executing state {self}")
+
         self._canceled = False
 
         if blackboard is None:

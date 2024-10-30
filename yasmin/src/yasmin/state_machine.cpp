@@ -70,11 +70,21 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
     }
   }
 
+  std::string transition_string = "";
+
+  for (auto t : transitions) {
+    transition_string += "\n\t" + t.first + " --> " + t.second;
+  }
+
+  YASMIN_LOG_DEBUG("Adding state '%s' of type '%s' with transitions: %s",
+                   name.c_str(), state->to_string().c_str(),
+                   transition_string.c_str());
+
   this->states.insert({name, state});
   this->transitions.insert({name, transitions});
 
   if (this->start_state.empty()) {
-    this->start_state = name;
+    this->set_start_state(name);
   }
 }
 
@@ -92,19 +102,12 @@ void StateMachine::set_start_state(std::string state_name) {
                                 "' is not in the state machine");
   }
 
+  YASMIN_LOG_DEBUG("Setting start state to '%s'", state_name.c_str());
+
   this->start_state = state_name;
 }
 
 std::string StateMachine::get_start_state() { return this->start_state; }
-
-void StateMachine::cancel_state() {
-  State::cancel_state();
-
-  const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
-  if (!this->current_state.empty()) {
-    this->states.at(this->current_state)->cancel_state();
-  }
-}
 
 std::map<std::string, std::shared_ptr<State>> const &
 StateMachine::get_states() {
@@ -184,6 +187,8 @@ void StateMachine::call_end_cbs(
 }
 
 void StateMachine::validate() {
+
+  YASMIN_LOG_DEBUG("Validating state machine");
 
   // check initial state
   if (this->start_state.empty()) {
@@ -310,8 +315,9 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
       // outcome is a state
     } else if (this->states.find(outcome) != this->states.end()) {
 
-      YASMIN_LOG_INFO("%s (%s) --> %s", this->current_state.c_str(),
-                      old_outcome.c_str(), outcome.c_str());
+      YASMIN_LOG_INFO("State machine transitioning '%s' : '%s' --> '%s'",
+                      this->current_state.c_str(), old_outcome.c_str(),
+                      outcome.c_str());
       this->call_transition_cbs(blackboard, this->get_start_state(), outcome,
                                 old_outcome);
 
@@ -344,6 +350,15 @@ std::string StateMachine::operator()() {
       std::make_shared<blackboard::Blackboard>();
 
   return this->operator()(blackboard);
+}
+
+void StateMachine::cancel_state() {
+  State::cancel_state();
+
+  const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
+  if (!this->current_state.empty()) {
+    this->states.at(this->current_state)->cancel_state();
+  }
 }
 
 std::string StateMachine::to_string() {

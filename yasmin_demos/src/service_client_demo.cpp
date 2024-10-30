@@ -21,6 +21,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/ros_logs.hpp"
@@ -29,6 +30,7 @@
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using namespace yasmin;
 
 std::string
 set_ints(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
@@ -80,7 +82,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-  std::cout << "yasmin_service_client_demo\n";
+  YASMIN_LOG_INFO("yasmin_service_client_demo");
   rclcpp::init(argc, argv);
 
   // set ROS 2 logs
@@ -113,7 +115,7 @@ int main(int argc, char *argv[]) {
 
   // execute
   std::string outcome = (*sm.get())();
-  std::cout << outcome << "\n";
+  YASMIN_LOG_INFO(outcome.c_str());
 
   rclcpp::shutdown();
 

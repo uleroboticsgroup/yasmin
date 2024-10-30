@@ -19,6 +19,7 @@
 import time
 import rclpy
 
+import yasmin
 from yasmin import State
 from yasmin import Blackboard
 from yasmin import StateMachine
@@ -33,7 +34,7 @@ class FooState(State):
         self.counter = 0
 
     def execute(self, blackboard: Blackboard) -> str:
-        print("Executing state FOO")
+        yasmin.YASMIN_LOG_INFO("Executing state FOO")
         time.sleep(3)
 
         if self.counter < 3:
@@ -50,17 +51,17 @@ class BarState(State):
         super().__init__(outcomes=["outcome3"])
 
     def execute(self, blackboard: Blackboard) -> str:
-        print("Executing state BAR")
+        yasmin.YASMIN_LOG_INFO("Executing state BAR")
         time.sleep(3)
 
-        print(blackboard["foo_str"])
+        yasmin.YASMIN_LOG_INFO(blackboard["foo_str"])
         return "outcome3"
 
 
 # main
 def main():
 
-    print("yasmin_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_demo")
 
     # init ROS 2
     rclpy.init()
@@ -73,16 +74,27 @@ def main():
 
     # add states
     sm.add_state(
-        "FOO", FooState(), transitions={"outcome1": "BAR", "outcome2": "outcome4"}
+        "FOO",
+        FooState(),
+        transitions={
+            "outcome1": "BAR",
+            "outcome2": "outcome4",
+        },
     )
-    sm.add_state("BAR", BarState(), transitions={"outcome3": "FOO"})
+    sm.add_state(
+        "BAR",
+        BarState(),
+        transitions={
+            "outcome3": "FOO",
+        },
+    )
 
     # pub FSM info
     YasminViewerPub("yasmin_demo", sm)
 
     # execute FSM
     outcome = sm()
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()

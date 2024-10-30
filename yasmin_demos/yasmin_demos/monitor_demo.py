@@ -20,6 +20,7 @@ import rclpy
 from rclpy.qos import qos_profile_sensor_data
 from nav_msgs.msg import Odometry
 
+import yasmin
 from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import MonitorState
@@ -43,7 +44,7 @@ class PrintOdometryState(MonitorState):
         self.times = times
 
     def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -> str:
-        print(msg)
+        yasmin.YASMIN_LOG_INFO(msg)
 
         self.times -= 1
 
@@ -56,7 +57,7 @@ class PrintOdometryState(MonitorState):
 # main
 def main():
 
-    print("yasmin_monitor_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
 
     # init ROS 2
     rclpy.init()
@@ -83,7 +84,7 @@ def main():
 
     # execute FSM
     outcome = sm()
-    print(outcome)
+    yasmin.YASMIN_LOG_INFO(outcome)
 
     # shutdown ROS 2
     rclpy.shutdown()
