@@ -189,6 +189,9 @@ class StateMachine(State):
 
         self.validate()
 
+        yasmin.YASMIN_LOG_INFO(
+            f"Executing state machine with initial state '{self._start_state}'"
+        )
         self._call_start_cbs(blackboard, self._start_state)
 
         with self.__current_state_lock:
@@ -200,7 +203,7 @@ class StateMachine(State):
                 state = self._states[self.__current_state]
 
             outcome = state["state"](blackboard)
-            old_come = outcome
+            old_outcome = outcome
 
             # check outcome belongs to state
             if outcome not in state["state"].get_outcomes():
@@ -210,9 +213,6 @@ class StateMachine(State):
 
             # translate outcome using transitions
             if outcome in state["transitions"]:
-                yasmin.YASMIN_LOG_INFO(
-                    f"{self.__current_state}: {outcome} --> {state['transitions'][outcome]}"
-                )
                 outcome = state["transitions"][outcome]
 
             # outcome is an outcome of the sm
@@ -226,12 +226,15 @@ class StateMachine(State):
 
             # outcome is a state
             elif outcome in self._states:
+                yasmin.YASMIN_LOG_INFO(
+                    f"{self.__current_state} ({old_outcome}) --> {outcome}"
+                )
 
                 self._call_transition_cbs(
                     blackboard,
                     self.get_current_state(),
                     outcome,
-                    old_come,
+                    old_outcome,
                 )
 
                 with self.__current_state_lock:

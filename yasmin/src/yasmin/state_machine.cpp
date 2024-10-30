@@ -258,6 +258,8 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
   this->validate();
 
+  YASMIN_LOG_INFO("Executing state machine with initial state '%s'",
+                  this->start_state.c_str());
   this->call_start_cbs(blackboard, this->get_start_state());
 
   this->current_state_mutex->lock();
@@ -289,10 +291,6 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
     // translate outcome using transitions
     if (transitions.find(outcome) != transitions.end()) {
-
-      YASMIN_LOG_INFO("%s: %s --> %s", this->current_state.c_str(),
-                      outcome.c_str(), transitions.at(outcome).c_str());
-
       outcome = transitions.at(outcome);
     }
 
@@ -304,6 +302,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
       this->current_state.clear();
       this->current_state_mutex->unlock();
 
+      YASMIN_LOG_INFO("State machine ends with outcome '%s'", outcome.c_str());
       this->call_end_cbs(blackboard, outcome);
 
       return outcome;
@@ -311,12 +310,14 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
       // outcome is a state
     } else if (this->states.find(outcome) != this->states.end()) {
 
+      YASMIN_LOG_INFO("%s (%s) --> %s", this->current_state.c_str(),
+                      old_outcome.c_str(), outcome.c_str());
+      this->call_transition_cbs(blackboard, this->get_start_state(), outcome,
+                                old_outcome);
+
       this->current_state_mutex->lock();
       this->current_state = outcome;
       this->current_state_mutex->unlock();
-
-      this->call_transition_cbs(blackboard, this->get_start_state(), outcome,
-                                old_outcome);
 
       // outcome is not in the sm
     } else {
