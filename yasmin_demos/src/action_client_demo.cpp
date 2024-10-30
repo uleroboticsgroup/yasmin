@@ -95,8 +95,6 @@ public:
 
     fprintf(stderr, "%s\n", ss.str().c_str());
   }
-
-  std::string to_string() { return "FibonacciState"; }
 };
 
 int main(int argc, char *argv[]) {

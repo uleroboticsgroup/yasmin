@@ -69,8 +69,6 @@ public:
 
     return "outcome1";
   }
-
-  std::string to_string() { return "PrintOdometryState"; }
 };
 
 int main(int argc, char *argv[]) {

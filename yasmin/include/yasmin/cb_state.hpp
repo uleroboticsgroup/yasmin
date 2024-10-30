@@ -35,8 +35,6 @@ public:
 
   std::string
   execute(std::shared_ptr<blackboard::Blackboard> blackboard) override;
-
-  std::string to_string();
 };
 
 } // namespace yasmin

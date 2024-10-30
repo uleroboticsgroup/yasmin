@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include <cxxabi.h>
+
 #include "yasmin/blackboard/blackboard.hpp"
 
 namespace yasmin {
@@ -49,7 +51,15 @@ public:
 
   std::vector<std::string> const &get_outcomes();
 
-  virtual std::string to_string() { return "State"; }
+  virtual std::string to_string() {
+    int status = 0;
+    char *demangledName =
+        abi::__cxa_demangle(typeid(*this).name(), nullptr, nullptr, &status);
+    std::string className =
+        (status == 0) ? demangledName : typeid(*this).name();
+    free(demangledName);
+    return className;
+  }
 };
 
 } // namespace yasmin

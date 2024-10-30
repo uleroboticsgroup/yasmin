@@ -684,8 +684,6 @@ public:
       return "outcome2";
     }
   }
-
-  std::string to_string() { return "FooState"; }
 };
 
 // define state Bar
@@ -702,8 +700,6 @@ public:
 
     return "outcome3";
   }
-
-  std::string to_string() { return "BarState"; }
 };
 
 int main(int argc, char *argv[]) {
@@ -815,8 +811,6 @@ public:
 
     return "outcome1";
   }
-
-  std::string to_string() { return "AddTwoIntsState"; }
 };
 
 int main(int argc, char *argv[]) {
@@ -962,8 +956,6 @@ public:
 
     fprintf(stderr, "%s\n", ss.str().c_str());
   }
-
-  std::string to_string() { return "FibonacciState"; }
 };
 
 int main(int argc, char *argv[]) {
@@ -1076,8 +1068,6 @@ public:
 
     return "outcome1";
   }
-
-  std::string to_string() { return "PrintOdometryState"; }
 };
 
 int main(int argc, char *argv[]) {

@@ -47,8 +47,6 @@ public:
       return "outcome2";
     }
   }
-
-  std::string to_string() { return "FooState"; }
 };
 
 // define state Bar
@@ -65,8 +63,6 @@ public:
 
     return "outcome3";
   }
-
-  std::string to_string() { return "BarState"; }
 };
 
 int main(int argc, char *argv[]) {

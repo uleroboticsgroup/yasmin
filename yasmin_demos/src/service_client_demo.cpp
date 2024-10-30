@@ -76,8 +76,6 @@ public:
 
     return "outcome1";
   }
-
-  std::string to_string() { return "AddTwoIntsState"; }
 };
 
 int main(int argc, char *argv[]) {
