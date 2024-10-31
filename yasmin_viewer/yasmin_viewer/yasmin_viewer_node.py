@@ -21,16 +21,16 @@ import json
 from threading import Thread
 from typing import List, Dict
 
+from flask import Flask
+from waitress import serve
+from expiringdict import ExpiringDict
+
 import rclpy
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 import ament_index_python
 
 from yasmin_msgs.msg import StateMachine, State, Transition
-
-from flask import Flask
-from waitress import serve
-from expiringdict import ExpiringDict
 
 
 class YasminFsmViewer(Node):

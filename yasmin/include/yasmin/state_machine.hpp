@@ -20,6 +20,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -42,7 +43,7 @@ class StateMachine : public State {
       const std::vector<std::string> &)>;
 
 public:
-  StateMachine(std::vector<std::string> outcomes);
+  StateMachine(std::set<std::string> outcomes);
 
   void add_state(std::string name, std::shared_ptr<State> state,
                  std::map<std::string, std::string> transitions);

@@ -14,13 +14,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List, Callable
+from typing import Set, Callable
 from yasmin.state import State
 
 
 class CbState(State):
 
-    def __init__(self, outcomes: List[str], cb: Callable) -> None:
+    def __init__(self, outcomes: Set[str], cb: Callable) -> None:
 
         super().__init__(outcomes)
         self._cb = cb

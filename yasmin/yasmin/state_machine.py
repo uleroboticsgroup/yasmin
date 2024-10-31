@@ -14,7 +14,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Dict, List, Any, Union, Callable
+from typing import Set, List, Dict, Any
+from typing import Union, Callable
 from threading import Lock
 
 import yasmin
@@ -23,7 +24,7 @@ from yasmin.blackboard import Blackboard
 
 
 class StateMachine(State):
-    def __init__(self, outcomes: List[str]) -> None:
+    def __init__(self, outcomes: Set[str]) -> None:
 
         super().__init__(outcomes)
 

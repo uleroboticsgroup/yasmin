@@ -23,7 +23,7 @@
 using namespace yasmin;
 
 CbState::CbState(
-    std::vector<std::string> outcomes,
+    std::set<std::string> outcomes,
     std::string (*callback)(std::shared_ptr<blackboard::Blackboard> blackboard))
     : State(outcomes), callback(callback) {}
 

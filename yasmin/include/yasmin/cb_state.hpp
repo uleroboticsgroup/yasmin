@@ -29,7 +29,7 @@ private:
   std::string (*callback)(std::shared_ptr<blackboard::Blackboard> blackboard);
 
 public:
-  CbState(std::vector<std::string> outcomes,
+  CbState(std::set<std::string> outcomes,
           std::string (*callback)(
               std::shared_ptr<blackboard::Blackboard> blackboard));
 

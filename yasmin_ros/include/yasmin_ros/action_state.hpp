@@ -53,7 +53,7 @@ template <typename ActionT> class ActionState : public yasmin::State {
 
 public:
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
-              std::vector<std::string> outcomes, int timeout = -1.0)
+              std::set<std::string> outcomes, int timeout = -1.0)
       : ActionState(action_name, create_goal_handler, outcomes, nullptr,
                     nullptr, timeout) {}
 
@@ -64,7 +64,7 @@ public:
                     feedback_handler, timeout) {}
 
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
-              std::vector<std::string> outcomes,
+              std::set<std::string> outcomes,
               ResutlHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
@@ -72,7 +72,7 @@ public:
 
   ActionState(const rclcpp::Node::SharedPtr &node, std::string action_name,
               CreateGoalHandler create_goal_handler,
-              std::vector<std::string> outcomes,
+              std::set<std::string> outcomes,
               ResutlHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
 
@@ -86,7 +86,7 @@ public:
 
     if (outcomes.size() > 0) {
       for (std::string outcome : outcomes) {
-        this->outcomes.push_back(outcome);
+        this->outcomes.insert(outcome);
       }
     }
 

@@ -72,7 +72,9 @@ void YasminViewerPub::parse_state(
   // state info
   state_msg.name = state_name;
   state_msg.transitions = this->parse_transitions(transitions);
-  state_msg.outcomes = state->get_outcomes();
+  auto outcomes = state->get_outcomes();
+  state_msg.outcomes =
+      std::vector<std::string>(outcomes.begin(), outcomes.end());
 
   // state is a FSM
   auto fsm = std::dynamic_pointer_cast<yasmin::StateMachine>(state);

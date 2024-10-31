@@ -31,8 +31,7 @@
 
 using namespace yasmin;
 
-StateMachine::StateMachine(std::vector<std::string> outcomes)
-    : State(outcomes) {
+StateMachine::StateMachine(std::set<std::string> outcomes) : State(outcomes) {
   this->current_state_mutex = std::make_unique<std::mutex>();
 }
 
@@ -205,7 +204,7 @@ void StateMachine::validate() {
     std::map<std::string, std::string> transitions =
         this->transitions.at(state_name);
 
-    std::vector<std::string> outcomes = state->get_outcomes();
+    std::set<std::string> outcomes = state->get_outcomes();
 
     // check if all state outcomes are in transitions
     for (const std::string &o : outcomes) {

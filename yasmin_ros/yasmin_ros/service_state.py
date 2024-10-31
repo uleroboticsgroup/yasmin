@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List, Callable, Type, Any
+from typing import Set, Callable, Type, Any
 
 from rclpy.node import Node
 from rclpy.client import Client
@@ -39,7 +39,7 @@ class ServiceState(State):
         srv_type: Type,
         srv_name: str,
         create_request_handler: Callable,
-        outcomes: List[str] = None,
+        outcomes: Set[str] = None,
         response_handler: Callable = None,
         node: Node = None,
         timeout: float = None,

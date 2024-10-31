@@ -24,7 +24,7 @@
 
 using namespace yasmin;
 
-State::State(std::vector<std::string> outcomes) { this->outcomes = outcomes; }
+State::State(std::set<std::string> outcomes) : outcomes(outcomes) {}
 
 std::string
 State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
@@ -55,4 +55,4 @@ State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
 bool State::is_canceled() const { return this->canceled.load(); }
 
-std::vector<std::string> const &State::get_outcomes() { return this->outcomes; }
+std::set<std::string> const &State::get_outcomes() { return this->outcomes; }

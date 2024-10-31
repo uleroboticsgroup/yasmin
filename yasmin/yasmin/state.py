@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List
+from typing import Set
 from abc import ABC, abstractmethod
 
 import yasmin
@@ -23,8 +23,8 @@ from yasmin.blackboard import Blackboard
 
 class State(ABC):
 
-    def __init__(self, outcomes: List[str]) -> None:
-        self._outcomes = []
+    def __init__(self, outcomes: Set[str]) -> None:
+        self._outcomes = set()
         self._canceled = False
 
         if outcomes:
@@ -64,5 +64,5 @@ class State(ABC):
     def is_canceled(self) -> bool:
         return self._canceled
 
-    def get_outcomes(self) -> List[str]:
+    def get_outcomes(self) -> Set[str]:
         return self._outcomes

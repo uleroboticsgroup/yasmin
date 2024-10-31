@@ -15,7 +15,7 @@
 
 
 import time
-from typing import List, Callable, Union, Type
+from typing import Set, Callable, Union, Type
 
 from rclpy.node import Node
 from rclpy.subscription import Subscription
@@ -34,7 +34,7 @@ class MonitorState(State):
     _monitor_handler: Callable
     _topic_name: str
 
-    msg_list: List = []
+    msg_list: Set = []
     msg_queue: int
     time_to_wait: float = 0.001
     monitoring: bool = False
@@ -44,7 +44,7 @@ class MonitorState(State):
         self,
         msg_type: Type,
         topic_name: str,
-        outcomes: List[str],
+        outcomes: Set[str],
         monitor_handler: Callable,
         qos: Union[QoSProfile, int] = 10,
         msg_queue: int = 10,

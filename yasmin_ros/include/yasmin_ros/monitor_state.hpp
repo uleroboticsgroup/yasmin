@@ -37,25 +37,24 @@ template <typename MsgT> class MonitorState : public yasmin::State {
       std::shared_ptr<yasmin::blackboard::Blackboard>, std::shared_ptr<MsgT>)>;
 
 public:
-  MonitorState(std::string topic_name, std::vector<std::string> outcomes,
+  MonitorState(std::string topic_name, std::set<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue)
       : MonitorState(topic_name, outcomes, monitor_handler, qos, msg_queue,
                      -1) {}
 
-  MonitorState(std::string topic_name, std::vector<std::string> outcomes,
+  MonitorState(std::string topic_name, std::set<std::string> outcomes,
                MonitorHandler monitor_handler)
       : MonitorState(topic_name, outcomes, monitor_handler, 10, 10, -1) {}
 
-  MonitorState(std::string topic_name, std::vector<std::string> outcomes,
+  MonitorState(std::string topic_name, std::set<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue,
                int timeout)
       : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
                      msg_queue, timeout) {}
 
   MonitorState(const rclcpp::Node::SharedPtr &node, std::string topic_name,
-               std::vector<std::string> outcomes,
-               MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue,
-               int timeout)
+               std::set<std::string> outcomes, MonitorHandler monitor_handler,
+               rclcpp::QoS qos, int msg_queue, int timeout)
       : State({}), topic_name(topic_name), monitor_handler(monitor_handler),
         msg_queue(msg_queue), timeout(timeout), monitoring(false),
         time_to_wait(1000) {
@@ -69,7 +68,7 @@ public:
 
     if (outcomes.size() > 0) {
       for (std::string outcome : outcomes) {
-        this->outcomes.push_back(outcome);
+        this->outcomes.insert(outcome);
       }
     }
 

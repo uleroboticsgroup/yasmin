@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -31,13 +32,13 @@ namespace yasmin {
 class State {
 
 protected:
-  std::vector<std::string> outcomes;
+  std::set<std::string> outcomes;
 
 private:
   std::atomic_bool canceled{false};
 
 public:
-  State(std::vector<std::string> outcomes);
+  State(std::set<std::string> outcomes);
 
   std::string operator()(std::shared_ptr<blackboard::Blackboard> blackboard);
 
@@ -53,7 +54,7 @@ public:
   };
   bool is_canceled() const;
 
-  std::vector<std::string> const &get_outcomes();
+  std::set<std::string> const &get_outcomes();
 
   virtual std::string to_string() {
     std::string name = typeid(*this).name();

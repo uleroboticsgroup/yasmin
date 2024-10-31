@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import List, Callable, Type, Any
+from typing import Set, Callable, Type, Any
 from threading import RLock, Event
 
 from rclpy.node import Node
@@ -53,7 +53,7 @@ class ActionState(State):
         action_type: Type,
         action_name: str,
         create_goal_handler: Callable,
-        outcomes: List[str] = None,
+        outcomes: Set[str] = None,
         result_handler: Callable = None,
         feedback_handler: Callable = None,
         node: Node = None,

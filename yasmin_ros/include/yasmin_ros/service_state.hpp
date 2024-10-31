@@ -40,32 +40,32 @@ template <typename ServiceT> class ServiceState : public yasmin::State {
 public:
   ServiceState(std::string srv_name,
                CreateRequestHandler create_request_handler,
-               std::vector<std::string> outcomes, int timeout = -1.0)
+               std::set<std::string> outcomes, int timeout = -1.0)
       : ServiceState(srv_name, create_request_handler, outcomes, nullptr,
                      timeout) {}
 
   ServiceState(std::string srv_name,
                CreateRequestHandler create_request_handler,
-               std::vector<std::string> outcomes,
-               ResponseHandler response_handler, int timeout = -1.0)
+               std::set<std::string> outcomes, ResponseHandler response_handler,
+               int timeout = -1.0)
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
                      response_handler, timeout) {}
 
   ServiceState(const rclcpp::Node::SharedPtr &node, std::string srv_name,
                CreateRequestHandler create_request_handler,
-               std::vector<std::string> outcomes,
-               ResponseHandler response_handler, int timeout = -1.0)
+               std::set<std::string> outcomes, ResponseHandler response_handler,
+               int timeout = -1.0)
       : State({}), srv_name(srv_name), timeout(timeout) {
 
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT};
 
     if (this->timeout >= 0) {
-      this->outcomes.push_back(basic_outcomes::TIMEOUT);
+      this->outcomes.insert(basic_outcomes::TIMEOUT);
     }
 
     if (outcomes.size() > 0) {
       for (std::string outcome : outcomes) {
-        this->outcomes.push_back(outcome);
+        this->outcomes.insert(outcome);
       }
     }
 
