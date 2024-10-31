@@ -98,17 +98,23 @@ int main(int argc, char *argv[]) {
                     std::initializer_list<std::string>{
                         yasmin_ros::basic_outcomes::SUCCEED},
                     set_ints),
-                {{yasmin_ros::basic_outcomes::SUCCEED, "ADD_TWO_INTS"}});
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "ADD_TWO_INTS"},
+                });
   sm->add_state("ADD_TWO_INTS", std::make_shared<AddTwoIntsState>(),
-                {{"outcome1", "PRINTING_SUM"},
-                 {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
-                 {yasmin_ros::basic_outcomes::ABORT, "outcome4"}});
+                {
+                    {"outcome1", "PRINTING_SUM"},
+                    {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
+                    {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
+                });
   sm->add_state("PRINTING_SUM",
                 std::make_shared<yasmin::CbState>(
                     std::initializer_list<std::string>{
                         yasmin_ros::basic_outcomes::SUCCEED},
                     print_sum),
-                {{yasmin_ros::basic_outcomes::SUCCEED, "outcome4"}});
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
+                });
 
   // pub
   yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);

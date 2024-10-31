@@ -15,11 +15,13 @@
 
 #include <chrono>
 
+#include "yasmin/logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 using namespace yasmin_viewer;
 using namespace std::chrono_literals;
+using namespace yasmin;
 
 YasminViewerPub::YasminViewerPub(std::string fsm_name,
                                  std::shared_ptr<yasmin::StateMachine> fsm)
@@ -41,7 +43,7 @@ YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
           "/fsm_viewer", 10);
 
   this->timer = this->node_->create_wall_timer(
-      250ms, std::bind(&YasminViewerPub::start_publisher, this));
+      250ms, std::bind(&YasminViewerPub::publish_data, this));
 }
 
 std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
@@ -101,13 +103,24 @@ void YasminViewerPub::parse_state(
   }
 }
 
-void YasminViewerPub::start_publisher() {
+void YasminViewerPub::publish_data() {
 
-  std::vector<yasmin_msgs::msg::State> states_list;
-  this->parse_state(this->fsm_name, this->fsm, {}, states_list, -1);
+  try {
+    this->fsm->validate();
 
-  auto state_machine_msg = yasmin_msgs::msg::StateMachine();
-  state_machine_msg.states = states_list;
+    std::vector<yasmin_msgs::msg::State> states_list;
+    this->parse_state(this->fsm_name, this->fsm, {}, states_list, -1);
 
-  this->publisher->publish(state_machine_msg);
+    auto state_machine_msg = yasmin_msgs::msg::StateMachine();
+    state_machine_msg.states = states_list;
+
+    YASMIN_LOG_DEBUG("Publishing data of state machine '%s'",
+                     this->fsm_name.c_str());
+    this->publisher->publish(state_machine_msg);
+
+  } catch (const std::exception &e) {
+    YASMIN_LOG_ERROR("Not publishing state machine '%s' due to "
+                     "validation failure: \"%s\"",
+                     this->fsm_name.c_str(), e.what());
+  }
 }

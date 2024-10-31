@@ -82,8 +82,14 @@ int main(int argc, char *argv[]) {
 
   // add states
   sm->add_state("FOO", std::make_shared<FooState>(),
-                {{"outcome1", "BAR"}, {"outcome2", "outcome4"}});
-  sm->add_state("BAR", std::make_shared<BarState>(), {{"outcome3", "FOO"}});
+                {
+                    {"outcome1", "BAR"},
+                    {"outcome2", "outcome4"},
+                });
+  sm->add_state("BAR", std::make_shared<BarState>(),
+                {
+                    {"outcome3", "FOO"},
+                });
 
   // pub
   yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);

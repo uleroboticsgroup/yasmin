@@ -49,8 +49,7 @@ public:
                    std::vector<yasmin_msgs::msg::State> &states_list,
                    int parent);
 
-protected:
-  void start_publisher();
+  void publish_data();
 
 private:
   rclcpp::Node::SharedPtr node_;

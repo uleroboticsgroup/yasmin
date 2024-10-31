@@ -16,13 +16,15 @@
 
 from typing import Dict, List
 from rclpy.node import Node
+
+import yasmin
+from yasmin import StateMachine, State
+from yasmin_ros.yasmin_node import YasminNode
 from yasmin_msgs.msg import (
     State as StateMsg,
     StateMachine as StateMachineMsg,
     Transition as TransitionMsg,
 )
-from yasmin_ros.yasmin_node import YasminNode
-from yasmin import StateMachine, State
 
 
 class YasminViewerPub:
@@ -44,7 +46,7 @@ class YasminViewerPub:
             self._node = node
 
         self.pub = self._node.create_publisher(StateMachineMsg, "/fsm_viewer", 10)
-        self._timer = self._node.create_timer(1 / rate, self._start_publisher)
+        self._timer = self._node.create_timer(1 / rate, self._publish_data)
 
     def parse_transitions(self, transitions: Dict[str, str]) -> List[TransitionMsg]:
 
@@ -104,14 +106,27 @@ class YasminViewerPub:
                     state_msg.current_state = child_state.id
                     break
 
-    def _start_publisher(self) -> None:
+    def _publish_data(self) -> None:
 
-        states_list = []
-        self.parse_state(
-            self._fsm_name, {"state": self._fsm, "transitions": {}}, states_list
-        )
+        try:
+            self._fsm.validate()
 
-        state_machine_msg = StateMachineMsg()
-        state_machine_msg.states = states_list
+            states_list = []
+            self.parse_state(
+                self._fsm_name,
+                {"state": self._fsm, "transitions": {}},
+                states_list,
+            )
 
-        self.pub.publish(state_machine_msg)
+            state_machine_msg = StateMachineMsg()
+            state_machine_msg.states = states_list
+
+            yasmin.YASMIN_LOG_DEBUG(
+                f"Publishing data of state machine '{self._fsm_name}'"
+            )
+            self.pub.publish(state_machine_msg)
+
+        except Exception as e:
+            yasmin.YASMIN_LOG_ERROR(
+                f"Not publishing state machine '{self._fsm_name}' due to validation failure: {e}"
+            )
