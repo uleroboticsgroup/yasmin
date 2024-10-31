@@ -14,10 +14,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import yasmin
-import logging
 import inspect
+import logging
 from typing import Callable
+
+import yasmin
 
 __all__ = [
     "set_loggers",

@@ -22,21 +22,20 @@
 
 namespace yasmin {
 
-// Define raw function pointer type for logging with file and function
-// parameters
+// define function type for logging with file and function parameters
 typedef void (*LogFunction)(const char *, const char *, int, const char *, ...);
 
-// Declare function pointers as extern
+// declare function pointers as extern
 extern LogFunction log_error;
 extern LogFunction log_warn;
 extern LogFunction log_info;
 extern LogFunction log_debug;
 
-// Macros to use the function pointers for logging, passing file and function
+// macros to use the function pointers for logging, passing file and function
 inline const char *extract_filename(const char *path) {
   const char *filename = std::strrchr(path, '/');
   if (!filename) {
-    filename = std::strrchr(path, '\\'); // Handle Windows-style paths
+    filename = std::strrchr(path, '\\'); // handle Windows-style paths
   }
   return filename ? filename + 1 : path;
 }
@@ -54,7 +53,7 @@ inline const char *extract_filename(const char *path) {
   yasmin::log_debug(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,  \
                     ##__VA_ARGS__)
 
-// Function to set custom log functions
+// function to set custom log functions
 void set_loggers(LogFunction error, LogFunction warn, LogFunction info,
                  LogFunction debug);
 
