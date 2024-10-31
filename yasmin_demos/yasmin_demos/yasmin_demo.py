@@ -93,11 +93,15 @@ def main():
     YasminViewerPub("yasmin_demo", sm)
 
     # execute FSM
-    outcome = sm()
-    yasmin.YASMIN_LOG_INFO(outcome)
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        sm.cancel_state()
 
     # shutdown ROS 2
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

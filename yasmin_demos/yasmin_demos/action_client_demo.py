@@ -104,11 +104,15 @@ def main():
     blackboard["n"] = 10
 
     # execute FSM
-    outcome = sm(blackboard)
-    yasmin.YASMIN_LOG_INFO(outcome)
+    try:
+        outcome = sm(blackboard)
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        sm.cancel_state()
 
     # shutdown ROS 2
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

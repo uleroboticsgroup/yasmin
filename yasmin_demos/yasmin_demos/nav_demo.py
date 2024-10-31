@@ -157,11 +157,16 @@ def main():
     # execute FSM
     blackboard = Blackboard()
     blackboard["waypoints_num"] = 2
-    outcome = sm(blackboard)
-    yasmin.YASMIN_LOG_INFO(outcome)
+
+    try:
+        outcome = sm(blackboard)
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        sm.cancel_state()
 
     # shutdown ROS 2
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

@@ -179,11 +179,15 @@ def main():
     YasminViewerPub("yasmin_demo", sm)
 
     # execute FSM
-    outcome = sm()
-    yasmin.YASMIN_LOG_INFO(outcome)
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        sm.cancel_state()
 
     # shutdown ROS 2
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -296,11 +300,15 @@ def main():
     YasminViewerPub("YASMIN_SERVICE_CLIENT_DEMO", sm)
 
     # execute FSM
-    outcome = sm()
-    yasmin.YASMIN_LOG_INFO(outcome)
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        sm.cancel_state()
 
     # shutdown ROS 2
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -411,11 +419,15 @@ def main():
     blackboard["n"] = 10
 
     # execute FSM
-    outcome = sm(blackboard)
-    yasmin.YASMIN_LOG_INFO(outcome)
+    try:
+        outcome = sm(blackboard)
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        sm.cancel_state()
 
     # shutdown ROS 2
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -501,11 +513,15 @@ def main():
     YasminViewerPub("YASMIN_MONITOR_DEMO", sm)
 
     # execute FSM
-    outcome = sm()
-    yasmin.YASMIN_LOG_INFO(outcome)
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        sm.cancel_state()
 
     # shutdown ROS 2
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -655,11 +671,16 @@ def main():
     # execute FSM
     blackboard = Blackboard()
     blackboard["waypoints_num"] = 2
-    outcome = sm(blackboard)
-    yasmin.YASMIN_LOG_INFO(outcome)
+
+    try:
+        outcome = sm(blackboard)
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        sm.cancel_state()
 
     # shutdown ROS 2
-    rclpy.shutdown()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
