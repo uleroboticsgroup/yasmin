@@ -48,7 +48,7 @@ public:
   }
 
   virtual void cancel_state() {
-    YASMIN_LOG_INFO("Canceling state '%s'", this->to_string());
+    YASMIN_LOG_INFO("Canceling state '%s'", this->to_string().c_str());
     this->canceled.store(true);
   };
   bool is_canceled() const;
