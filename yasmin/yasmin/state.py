@@ -58,6 +58,7 @@ class State(ABC):
         return self.__class__.__name__
 
     def cancel_state(self) -> None:
+        yasmin.YASMIN_LOG_INFO(f"Canceling state '{self}'")
         self._canceled = True
 
     def is_canceled(self) -> bool:

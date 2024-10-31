@@ -24,6 +24,7 @@
 #include <cxxabi.h>
 
 #include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/logs.hpp"
 
 namespace yasmin {
 
@@ -46,7 +47,10 @@ public:
     return "";
   }
 
-  virtual void cancel_state() { this->canceled.store(true); };
+  virtual void cancel_state() {
+    YASMIN_LOG_INFO("Canceling state '%s'", this->to_string());
+    this->canceled.store(true);
+  };
   bool is_canceled() const;
 
   std::vector<std::string> const &get_outcomes();

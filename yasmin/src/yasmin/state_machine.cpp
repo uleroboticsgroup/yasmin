@@ -275,7 +275,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   std::string outcome;
   std::string old_outcome;
 
-  while (true) {
+  while (!this->is_canceled()) {
 
     this->current_state_mutex->lock();
 

@@ -203,7 +203,7 @@ class StateMachine(State):
         with self.__current_state_lock:
             self.__current_state = self._start_state
 
-        while True:
+        while not self.is_canceled():
 
             with self.__current_state_lock:
                 state = self._states[self.__current_state]
