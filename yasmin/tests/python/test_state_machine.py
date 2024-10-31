@@ -62,6 +62,9 @@ class TestStateMachine(unittest.TestCase):
             transitions={"outcome2": "FOO"},
         )
 
+    def test_state_machine_str(self):
+        self.assertEqual("State Machine [BAR (BarState), FOO (FooState)]", str(self.sm))
+
     def test_state_machine_get_states(self):
         self.assertTrue(isinstance(self.sm.get_states()["FOO"]["state"], FooState))
         self.assertTrue(isinstance(self.sm.get_states()["BAR"]["state"], BarState))

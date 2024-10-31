@@ -260,11 +260,14 @@ class StateMachine(State):
                 self._states[self.__current_state]["state"].cancel_state()
 
     def __str__(self) -> str:
-        result = "State Machine\n"
+        result = "State Machine ["
+        keys = sorted(list(self._states.keys()))
 
-        for key in self._states:
-            result += f"{key} ({self._states[key]['state']})\n"
-            for tkey in self._states[key]["transitions"]:
-                result += f"\t{tkey} --> {self._states[key]['transitions'][tkey]}\n"
+        for i, key in enumerate(keys):
+            result += f"{key} ({self._states[key]['state']})"
 
+            if i < len(keys) - 1:
+                result += ", "
+
+        result += "]"
         return result

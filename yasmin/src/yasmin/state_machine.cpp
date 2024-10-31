@@ -287,7 +287,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
     // check outcome belongs to state
     if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
-                  outcome) == this->outcomes.end()) {
+                  outcome) == state->get_outcomes().end()) {
       throw std::logic_error("Outcome '" + outcome +
                              "' is not register in state " +
                              this->current_state);
@@ -362,14 +362,19 @@ void StateMachine::cancel_state() {
 
 std::string StateMachine::to_string() {
 
-  std::string result = "State Machine\n";
+  std::string result = "State Machine [";
+  const auto &states = this->get_states();
 
-  for (const auto &s : this->get_states()) {
-    result += s.first + " (" + s.second->to_string() + ")\n";
-    for (const auto &t : this->transitions.at(s.first)) {
-      result += "\t" + t.first + " --> " + t.second + "\n";
+  for (auto it = states.begin(); it != states.end(); ++it) {
+    const auto &s = *it;
+    result += s.first + " (" + s.second->to_string() + ")";
+
+    if (std::next(it) != states.end()) {
+      result += ", ";
     }
   }
+
+  result += "]";
 
   return result;
 }

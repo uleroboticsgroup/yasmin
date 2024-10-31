@@ -57,7 +57,6 @@ class MonitorState(State):
         self._timeout = timeout
         if not timeout is None:
             outcomes = [TIMEOUT] + outcomes
-        super().__init__(outcomes)
 
         self._monitor_handler = monitor_handler
         self.msg_queue = msg_queue
@@ -70,6 +69,8 @@ class MonitorState(State):
         self._sub = self._node.create_subscription(
             msg_type, topic_name, self.__callback, qos
         )
+
+        super().__init__(outcomes)
 
     def __callback(self, msg) -> None:
 
