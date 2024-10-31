@@ -38,16 +38,25 @@ State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
       this->outcomes.end()) {
 
     std::string outcomes_string = "[";
-    for (auto o : this->get_outcomes()) {
-      outcomes_string += o;
+    auto outcomes = this->get_outcomes();
+
+    for (auto it = outcomes.begin(); it != outcomes.end(); ++it) {
+      const auto &s = *it;
+      outcomes_string += s;
+
+      if (std::next(it) != outcomes.end()) {
+        outcomes_string += ", ";
+      }
     }
+
     outcomes_string += "]";
 
-    throw std::logic_error("Outcome '" + outcome +
-                           "' does not belong to the outcomes of "
-                           "the state '" +
-                           this->to_string() +
-                           "'. The possible outcomes are: " + outcomes_string);
+    throw std::logic_error(
+        "Outcome '" + outcome +
+        "' does not belong to the outcomes of "
+        "the state '" +
+        this->to_string() +
+        "'. The possible outcomes are: " + outcomes_string.c_str());
   }
 
   return outcome;

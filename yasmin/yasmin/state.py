@@ -28,7 +28,8 @@ class State(ABC):
         self._canceled = False
 
         if outcomes:
-            self._outcomes = outcomes
+            self._outcomes.update(outcomes)
+            self._outcomes = sorted(self._outcomes)
         else:
             raise ValueError("There must be at least one outcome")
 

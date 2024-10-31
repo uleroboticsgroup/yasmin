@@ -58,7 +58,7 @@ class StateMachine(State):
 
             if key not in state.get_outcomes():
                 raise KeyError(
-                    f"State '{name}' references unregistered outcomes '{key}', available outcomes are {state.get_outcomes()}"
+                    f"State '{name}' references unregistered outcomes '{key}', available outcomes are {list(state.get_outcomes())}"
                 )
 
         transition_string = ""
@@ -161,7 +161,7 @@ class StateMachine(State):
 
             # check if all state outcomes are in transitions
             for o in outcomes:
-                if o not in set(list(transitions.keys()) + self.get_outcomes()):
+                if o not in set(list(transitions.keys()) + list(self.get_outcomes())):
                     raise KeyError(
                         f"State '{state_name}' outcome '{o}' not registered in transitions"
                     )
@@ -187,7 +187,7 @@ class StateMachine(State):
 
         # check if all terminal outcomes are states or state machine outcomes
         for o in terminal_outcomes:
-            if o not in set(list(self._states.keys()) + self.get_outcomes()):
+            if o not in set(list(self._states.keys()) + list(self.get_outcomes())):
                 raise KeyError(
                     f"State machine outcome '{o}' not registered as outcome neither state"
                 )
