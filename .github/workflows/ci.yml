@@ -1,4 +1,4 @@
-name: CI with Formatting Check and Docker Build
+name: CI with Formatting Checks and Docker Builds
 
 on: [push, pull_request]
 
@@ -26,7 +26,7 @@ jobs:
           clangFormatVersion: 14
           source: "."
 
-  docker_build:
+  foxy_docker_build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -38,4 +38,35 @@ jobs:
       - name: Build Docker
         uses: docker/build-push-action@v6
         with:
+          build-args: ROS_DISTRO=foxy
+          push: false
+
+  humble_docker_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker
+        uses: docker/build-push-action@v6
+        with:
+          build-args: ROS_DISTRO=humble
+          push: false
+
+  jazzy_docker_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker
+        uses: docker/build-push-action@v6
+        with:
+          build-args: ROS_DISTRO=jazzy
           push: false
