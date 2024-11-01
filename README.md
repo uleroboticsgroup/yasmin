@@ -6,6 +6,14 @@
 
 YASMIN is a project focused on implementing robot behaviors using Finite State Machines (FSM). It is available for ROS 2, Python and C++.
 
+[![License: MIT](https://img.shields.io/badge/GitHub-GPL--3.0-informational)](https://opensource.org/license/gpl-3-0) [![Python Formatter Check](https://github.com/uleroboticsgroup/yasmin/actions/workflows/python_formatter.yml/badge.svg)](https://github.com/uleroboticsgroup/yasmin/actions/workflows/python_formatter.yml)[![C++ Formatter Check](https://github.com/uleroboticsgroup/yasmin/actions/workflows/cpp_formatter.yml/badge.svg)](https://github.com/uleroboticsgroup/yasmin/actions/workflows/cpp_formatter.yml)
+
+| ROS 2 Distro |                             Branch                             |                                                                                              Build status                                                                                               |
+| :----------: | :------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|   **Foxy**   | [`main`](https://github.com/uleroboticsgroup/yasmin/tree/main) |    [![Foxy Build](https://github.com/uleroboticsgroup/yasmin/actions/workflows/foxy-docker-build.yml/badge.svg)](https://github.com/uleroboticsgroup/yasmin/actions/workflows/foxy-docker-build.yml)    |
+|  **Humble**  | [`main`](https://github.com/uleroboticsgroup/yasmin/tree/main) | [![Humble Build](https://github.com/uleroboticsgroup/yasmin/actions/workflows/humble-docker-build.yml/badge.svg)](https://github.com/uleroboticsgroup/yasmin/actions/workflows/humble-docker-build.yml) |
+|  **Jazzy**   | [`main`](https://github.com/uleroboticsgroup/yasmin/tree/main) |  [![Jazzy Build](https://github.com/uleroboticsgroup/yasmin/actions/workflows/jazzy-docker-build.yml/badge.svg)](https://github.com/uleroboticsgroup/yasmin/actions/workflows/jazzy-docker-build.yml)   |
+
 ## Table of Contents
 
 1. [Features](#features)
