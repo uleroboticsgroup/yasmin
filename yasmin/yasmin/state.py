@@ -25,6 +25,7 @@ class State(ABC):
 
     def __init__(self, outcomes: Set[str]) -> None:
         self._outcomes = set()
+        self._running = False
         self._canceled = False
 
         if outcomes:
@@ -38,6 +39,7 @@ class State(ABC):
         yasmin.YASMIN_LOG_DEBUG(f"Executing state '{self}'")
 
         self._canceled = False
+        self._running = True
 
         if blackboard is None:
             blackboard = Blackboard()
@@ -49,6 +51,7 @@ class State(ABC):
                 f"Outcome '{outcome}' does not belong to the outcomes of the state '{self}'. The possible outcomes are: {self._outcomes}"
             )
 
+        self._running = False
         return outcome
 
     @abstractmethod
@@ -64,6 +67,9 @@ class State(ABC):
 
     def is_canceled(self) -> bool:
         return self._canceled
+
+    def is_running(self) -> bool:
+        return self._running
 
     def get_outcomes(self) -> Set[str]:
         return self._outcomes

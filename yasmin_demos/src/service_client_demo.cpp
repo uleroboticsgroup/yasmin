@@ -93,7 +93,11 @@ int main(int argc, char *argv[]) {
       std::initializer_list<std::string>{"outcome4"});
 
   // cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() { sm->cancel_state(); });
+  rclcpp::on_shutdown([sm]() {
+    if (sm->is_running()) {
+      sm->cancel_state();
+    }
+  });
 
   // add states
   sm->add_state("SETTING_INTS",

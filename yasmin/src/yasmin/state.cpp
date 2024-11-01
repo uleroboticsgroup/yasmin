@@ -32,6 +32,7 @@ State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
   YASMIN_LOG_DEBUG("Executing state '%s'", this->to_string().c_str());
 
   this->canceled.store(false);
+  this->running.store(true);
   std::string outcome = this->execute(blackboard);
 
   if (std::find(this->outcomes.begin(), this->outcomes.end(), outcome) ==
@@ -59,9 +60,12 @@ State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
         "'. The possible outcomes are: " + outcomes_string.c_str());
   }
 
+  this->running.store(false);
   return outcome;
 }
 
 bool State::is_canceled() const { return this->canceled.load(); }
+
+bool State::is_running() const { return this->running.load(); }
 
 std::set<std::string> const &State::get_outcomes() { return this->outcomes; }

@@ -87,7 +87,8 @@ def main():
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
     except KeyboardInterrupt:
-        sm.cancel_state()
+        if sm.is_running():
+            sm.cancel_state()
 
     # shutdown ROS 2
     if rclpy.ok():

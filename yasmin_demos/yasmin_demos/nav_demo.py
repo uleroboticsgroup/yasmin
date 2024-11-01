@@ -166,7 +166,8 @@ def main():
 
     # shutdown ROS 2
     if rclpy.ok():
-        rclpy.shutdown()
+        if sm.is_running():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":

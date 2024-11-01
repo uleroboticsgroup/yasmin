@@ -36,6 +36,7 @@ protected:
 
 private:
   std::atomic_bool canceled{false};
+  std::atomic_bool running{false};
 
 public:
   State(std::set<std::string> outcomes);
@@ -53,6 +54,7 @@ public:
     this->canceled.store(true);
   };
   bool is_canceled() const;
+  bool is_running() const;
 
   std::set<std::string> const &get_outcomes();
 

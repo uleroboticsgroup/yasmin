@@ -37,7 +37,6 @@ class BarState(State):
 class TestState(unittest.TestCase):
 
     def setUp(self):
-
         self.state = FooState()
 
     def test_state_call(self):
