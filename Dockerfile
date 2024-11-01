@@ -1,13 +1,13 @@
-# Use the official ROS 2 humble base image
+# use the official ROS 2 humble base image
 ARG ROS_DISTRO=humble
 FROM ros:${ROS_DISTRO} AS deps
 
-# Set the working directory and copy files
+# set the working directory and copy files
 WORKDIR /root/ros2_ws
 SHELL ["/bin/bash", "-c"]
 COPY . /root/ros2_ws/src
 
-# Install dependencies
+# install dependencies
 RUN source /opt/ros/${ROS_DISTRO}/setup.bash
 RUN apt-get update \
     && apt-get -y --quiet --no-install-recommends install \
@@ -21,17 +21,17 @@ RUN if [ "$ROS_DISTRO" = "jazzy" ] || [ "$ROS_DISTRO" = "rolling" ]; then \
     else \
     pip3 install -r src/requirements.txt; \
     fi
-RUN if [ "$ROS_DISTRO" = "rolling"]; then \
+RUN if [ "$ROS_DISTRO" = "rolling" ]; then \
     apt install -y ros-rolling-action-tutorials-interfaces; \
     fi
 
-# Colcon the ws
+# colcon the ws
 FROM deps AS builder
 ARG CMAKE_BUILD_TYPE=Release
 RUN source /opt/ros/${ROS_DISTRO}/setup.bash && colcon build
 
-# Source the ROS2 setup file
+# source the ROS 2 setup file
 RUN echo "source /root/ros2_ws/install/setup.bash" >> ~/.bashrc
 
-# Run a default command, e.g., starting a bash shell
+# run a default command, e.g., starting a bash shell
 CMD ["bash"]
