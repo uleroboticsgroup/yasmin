@@ -16,8 +16,11 @@ RUN apt-get update \
     python3 \
     python3-pip
 RUN rosdep install --from-paths src --ignore-src -r -y
-RUN python3 -m pip install pip==24.3
-RUN pip3 install -r src/requirements.txt --break-system-packages
+RUN if [ "$ROS_DISTRO" = "jazzy" ]; then \
+    pip3 install -r src/requirements.txt --break-system-packages; \
+    else \
+    pip3 install -r src/requirements.txt; \
+    fi
 
 # Colcon the ws
 FROM deps AS builder
