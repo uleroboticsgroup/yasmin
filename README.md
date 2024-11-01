@@ -17,6 +17,7 @@ YASMIN is a project focused on implementing robot behaviors using Finite State M
 |  **Humble**  | [`main`](https://github.com/uleroboticsgroup/yasmin/tree/main) |    [![Humble Build](https://github.com/uleroboticsgroup/yasmin/actions/workflows/humble-docker-build.yml/badge.svg?branch=main)](https://github.com/uleroboticsgroup/yasmin/actions/workflows/humble-docker-build.yml?branch=main)    |
 |   **Iron**   | [`main`](https://github.com/uleroboticsgroup/yasmin/tree/main) |       [![Iron Build](https://github.com/uleroboticsgroup/yasmin/actions/workflows/iron-docker-build.yml/badge.svg?branch=main)](https://github.com/uleroboticsgroup/yasmin/actions/workflows/iron-docker-build.yml?branch=main)       |
 |  **Jazzy**   | [`main`](https://github.com/uleroboticsgroup/yasmin/tree/main) |     [![Jazzy Build](https://github.com/uleroboticsgroup/yasmin/actions/workflows/jazzy-docker-build.yml/badge.svg?branch=main)](https://github.com/uleroboticsgroup/yasmin/actions/workflows/jazzy-docker-build.yml?branch=main)      |
+| **Rolling**  | [`main`](https://github.com/uleroboticsgroup/yasmin/tree/main) |  [![Rolling Build](https://github.com/uleroboticsgroup/yasmin/actions/workflows/rolling-docker-build.yml/badge.svg?branch=main)](https://github.com/uleroboticsgroup/yasmin/actions/workflows/rolling-docker-build.yml?branch=main)   |
 
 </div>
 
