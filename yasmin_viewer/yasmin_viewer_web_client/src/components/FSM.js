@@ -1,3 +1,18 @@
+// Copyright (C) 2023  Miguel Ángel González Santamarta
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import React, { useEffect, useMemo, useRef } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape from "cytoscape";
@@ -242,45 +257,80 @@ const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm }) => {
         }
       }
 
+      // Check nodes and edges
+      let node_names = nodes.map((n) => n.data.id);
+
+      for (const e of edges) {
+        if (
+          !node_names.includes(e.data.source) ||
+          !node_names.includes(e.data.target)
+        ) {
+          return { nodes: undefined, edges: undefined };
+        }
+      }
+
       return { nodes, edges };
     };
 
     return prepare_graph(fsm_data, hide_nested_fsm);
   }, [fsm_data, hide_nested_fsm]);
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <Typography variant="h4" component="h4" gutterBottom align="center">
-            {fsm_data && fsm_data[0]?.name}
-          </Typography>
-        </Grid>
+  // If nodes are undefined, return an empty div
+  if (!nodes || !edges) {
+    return (
+      <Box
+        display="flex"
+        border={5}
+        justifyContent="center"
+        alignItems="center"
+        style={{ width: "100%", height: height }}
+      >
+        <Typography
+          variant="h4"
+          component="h4"
+          gutterBottom
+          align="center"
+          style={{ color: "red" }}
+        >
+          State machine {fsm_data[0].name} malformed
+        </Typography>
+      </Box>
+    );
+  } else {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Grid container spacing={1}>
+          <Grid item xs={12}>
+            <Typography variant="h4" component="h4" gutterBottom align="center">
+              {fsm_data && fsm_data[0]?.name}
+            </Typography>
+          </Grid>
 
-        <Grid item xs={12}>
-          <Box
-            display="flex"
-            border={5}
-            justifyContent="center"
-            style={{ width: "100%", height: "100%" }}
-          >
-            <Graph
-              nodes={nodes}
-              edges={edges}
-              layout={layout}
-              height={height}
-            />
-          </Box>
+          <Grid item xs={12}>
+            <Box
+              display="flex"
+              border={5}
+              justifyContent="center"
+              style={{ width: "100%", height: "100%" }}
+            >
+              <Graph
+                nodes={nodes}
+                edges={edges}
+                layout={layout}
+                height={height}
+              />
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
-    </div>
-  );
+      </div>
+    );
+  }
 });
 
 export default FSM;
