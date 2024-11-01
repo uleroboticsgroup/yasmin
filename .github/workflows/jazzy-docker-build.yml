@@ -1,4 +1,4 @@
-name: jazzy Docker Builds
+name: Jazzy Docker Builds
 
 on: [push, pull_request]
 

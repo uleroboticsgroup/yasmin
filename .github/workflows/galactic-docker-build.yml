@@ -1,4 +1,4 @@
-name: galactic Docker Builds
+name: Galactic Docker Builds
 
 on: [push, pull_request]
 
