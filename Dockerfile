@@ -16,7 +16,7 @@ RUN apt-get update \
     python3 \
     python3-pip
 RUN rosdep install --from-paths src --ignore-src -r -y
-RUN if [ "$ROS_DISTRO" = "jazzy" ]; then \
+RUN if [ "$ROS_DISTRO" = "jazzy" ] || [ "$ROS_DISTRO" = "rolling" ]; then \
     pip3 install -r src/requirements.txt --break-system-packages; \
     else \
     pip3 install -r src/requirements.txt; \
