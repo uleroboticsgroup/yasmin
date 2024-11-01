@@ -71,7 +71,7 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
 
   std::string transition_string = "";
 
-  for (auto t : transitions) {
+  for (auto const &t : transitions) {
     transition_string += "\n\t" + t.first + " --> " + t.second;
   }
 
@@ -141,12 +141,14 @@ void StateMachine::add_end_cb(EndCallbackType cb,
 void StateMachine::call_start_cbs(
     std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
     const std::string &start_state) {
+
   try {
     for (const auto &callback_pair : this->start_cbs) {
       const auto &cb = callback_pair.first;
       const auto &args = callback_pair.second;
       cb(blackboard, start_state, args);
     }
+
   } catch (const std::exception &e) {
     YASMIN_LOG_ERROR("Could not execute start callback: %s"),
         std::string(e.what());
@@ -157,12 +159,14 @@ void StateMachine::call_transition_cbs(
     std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
     const std::string &from_state, const std::string &to_state,
     const std::string &outcome) {
+
   try {
     for (const auto &callback_pair : this->transition_cbs) {
       const auto &cb = callback_pair.first;
       const auto &args = callback_pair.second;
       cb(blackboard, from_state, to_state, outcome, args);
     }
+
   } catch (const std::exception &e) {
     YASMIN_LOG_ERROR("Could not execute transition callback: %s"),
         std::string(e.what());
@@ -172,13 +176,14 @@ void StateMachine::call_transition_cbs(
 void StateMachine::call_end_cbs(
     std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
     const std::string &outcome) {
-  try {
 
+  try {
     for (const auto &callback_pair : this->end_cbs) {
       const auto &cb = callback_pair.first;
       const auto &args = callback_pair.second;
       cb(blackboard, outcome, args);
     }
+
   } catch (const std::exception &e) {
     YASMIN_LOG_ERROR("Could not execute end callback: %s"),
         std::string(e.what());
@@ -187,7 +192,7 @@ void StateMachine::call_end_cbs(
 
 void StateMachine::validate() {
 
-  YASMIN_LOG_DEBUG("Validating state machine");
+  YASMIN_LOG_DEBUG("Validating state machine '%s'", this->to_string().c_str());
 
   // check initial state
   if (this->start_state.empty()) {
@@ -332,7 +337,8 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     }
   }
 
-  return "";
+  throw std::runtime_error("Ending canceled state machine '" +
+                           this->to_string() + "' with bad transition");
 }
 
 std::string StateMachine::execute() {

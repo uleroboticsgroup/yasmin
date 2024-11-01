@@ -139,8 +139,12 @@ int main(int argc, char *argv[]) {
   blackboard->set<int>("n", 10);
 
   // execute
-  std::string outcome = (*sm.get())(blackboard);
-  YASMIN_LOG_INFO(outcome.c_str());
+  try {
+    std::string outcome = (*sm.get())(blackboard);
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
 
   rclcpp::shutdown();
 

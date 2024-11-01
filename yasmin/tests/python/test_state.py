@@ -49,7 +49,7 @@ class TestState(unittest.TestCase):
         self.assertTrue(self.state.is_canceled())
 
     def test_state_get_outcomes(self):
-        self.assertEqual("outcome1", list(self.state.get_outcomes())[1])
+        self.assertEqual("outcome1", list(self.state.get_outcomes())[0])
 
     def test_state_str(self):
         self.assertEqual("FooState", str(self.state))

@@ -29,7 +29,7 @@ State::State(std::set<std::string> outcomes) : outcomes(outcomes) {}
 std::string
 State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
-  YASMIN_LOG_DEBUG("Executing state %s", this->to_string().c_str());
+  YASMIN_LOG_DEBUG("Executing state '%s'", this->to_string().c_str());
 
   this->canceled.store(false);
   std::string outcome = this->execute(blackboard);

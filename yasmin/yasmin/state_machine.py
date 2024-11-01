@@ -143,7 +143,7 @@ class StateMachine(State):
 
     def validate(self) -> None:
 
-        yasmin.YASMIN_LOG_DEBUG("Validating state machine")
+        yasmin.YASMIN_LOG_DEBUG(f"Validating state machine '{self}'")
 
         # check initial state
         if not self._start_state:
@@ -252,6 +252,10 @@ class StateMachine(State):
                 raise KeyError(
                     f"Outcome '{outcome}' is not a state neither a state machine outcome"
                 )
+
+        raise RuntimeError(
+            f"Ending canceled state machine '{self}' with bad transition"
+        )
 
     def cancel_state(self) -> None:
         super().cancel_state()

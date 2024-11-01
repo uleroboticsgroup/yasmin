@@ -123,8 +123,12 @@ int main(int argc, char *argv[]) {
   yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
 
   // execute
-  std::string outcome = (*sm.get())();
-  YASMIN_LOG_INFO(outcome.c_str());
+  try {
+    std::string outcome = (*sm.get())();
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
 
   rclcpp::shutdown();
 
