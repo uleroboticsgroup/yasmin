@@ -21,6 +21,9 @@ RUN if [ "$ROS_DISTRO" = "jazzy" ] || [ "$ROS_DISTRO" = "rolling" ]; then \
     else \
     pip3 install -r src/requirements.txt; \
     fi
+RUN if [ "$ROS_DISTRO" = "rolling"]; then \
+    apt install -y ros-rolling-action-tutorials-interfaces; \
+    fi
 
 # Colcon the ws
 FROM deps AS builder
