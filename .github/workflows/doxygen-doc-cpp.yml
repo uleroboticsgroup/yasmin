@@ -1,0 +1,20 @@
+name: Generate and Deploy Doxygen for C++ Code
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  doxygen_generation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          config_file: ./.github/Doxyfile-cpp
+          doxygen_version: 1.9.6
