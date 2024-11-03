@@ -13,9 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Set, List, Dict, Any
+from typing import Set, List, Tuple, Dict, Any
 from typing import Union, Callable
 from threading import Lock
+
 import yasmin
 from yasmin import State
 from yasmin.blackboard import Blackboard
@@ -31,20 +32,29 @@ class StateMachine(State):
         _start_state (str): The name of the initial state of the state machine.
         __current_state (str): The name of the current state being executed.
         __current_state_lock (Lock): A threading lock to manage access to the current state.
-        __start_cbs (List[Tuple[Callable, List[Any]]]): A list of callbacks to call when the state machine starts.
-        __transition_cbs (List[Tuple[Callable, List[Any]]]): A list of callbacks to call during state transitions.
-        __end_cbs (List[Tuple[Callable, List[Any]]]): A list of callbacks to call when the state machine ends.
+        __start_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call when the state machine starts.
+        __transition_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call during state transitions.
+        __end_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call when the state machine ends.
     """
 
-    _states: dict  ##< A dictionary mapping state names to their corresponding state objects and transitions.
-    _start_state: str  ##< The name of the initial state of the state machine.
-    __current_state: str  ##< The name of the current state being executed.
-    __current_state_lock: (
-        Lock  ##< A threading lock to manage access to the current state.
-    )
-    __start_cbs: list  ##< A list of callbacks to call when the state machine starts.
-    __transition_cbs: list  ##< A list of callbacks to call during state transitions.
-    __end_cbs: list  ##< A list of callbacks to call when the state machine ends.
+    ## A dictionary mapping state names to their corresponding state objects and transitions.
+    _states: Dict[str, Dict[str, Any]]
+    ## The name of the initial state of the state machine.
+    _start_state: str = None
+    ## The name of the current state being executed.
+    __current_state: str = None
+    ## A threading lock to manage access to the current state.
+    __current_state_lock: Lock = Lock()
+    ## A list of callbacks to call when the state machine starts.
+    __start_cbs: List[
+        Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
+    ] = []
+    ## A list of callbacks to call during state transitions.
+    __transition_cbs: List[
+        Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
+    ] = []
+    ## A list of callbacks to call when the state machine ends.
+    __end_cbs: List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]] = []
 
     def __init__(self, outcomes: Set[str]) -> None:
         """
@@ -55,13 +65,7 @@ class StateMachine(State):
         """
         super().__init__(outcomes)
 
-        self._states: dict = {}
-        self._start_state: str = None
-        self.__current_state: str = None
-        self.__current_state_lock: Lock = Lock()
-        self.__start_cbs: list = []
-        self.__transition_cbs: list = []
-        self.__end_cbs: list = []
+        self._states: Dict[str, Dict[str, Any]] = {}
 
     def add_state(
         self,
@@ -332,13 +336,14 @@ class StateMachine(State):
         """
         self.validate()
 
+        start_state = self._start_state
         yasmin.YASMIN_LOG_INFO(
-            f"Executing state machine with initial state '{self._start_state}'"
+            f"Executing state machine with initial state '{start_state}'"
         )
-        self._call_start_cbs(blackboard, self._start_state)
+        self._call_start_cbs(blackboard, start_state)
 
         with self.__current_state_lock:
-            self.__current_state: str = self._start_state
+            self.__current_state: str = start_state
 
         while not self.is_canceled():
             with self.__current_state_lock:

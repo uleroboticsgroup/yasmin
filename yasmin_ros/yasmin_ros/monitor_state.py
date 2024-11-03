@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
-from typing import Set, Callable, Union, Type
+from typing import List, Set, Callable, Union, Type, Any
 
 from rclpy.node import Node
 from rclpy.subscription import Subscription
@@ -33,9 +33,9 @@ class MonitorState(State):
     Attributes:
         _node (Node): The ROS 2 node instance used for subscriptions.
         _sub (Subscription): Subscription object for the specified topic.
-        _monitor_handler (Callable): Function to handle incoming messages.
+        _monitor_handler (Callable[[Blackboard, Any], None]): Function to handle incoming messages.
         _topic_name (str): The name of the topic to monitor.
-        msg_list (Set): A set of messages received from the topic.
+        msg_list (List[Any]): A set of messages received from the topic.
         msg_queue (int): The maximum number of messages to retain.
         time_to_wait (float): Time to wait between checks for messages.
         monitoring (bool): Flag indicating if monitoring is active.
@@ -45,15 +45,23 @@ class MonitorState(State):
         None raised directly; timeout is managed via outcome handling.
     """
 
+    ## The ROS 2 node instance used for subscriptions.
     _node: Node
+    ## Subscription object for the specified topic.
     _sub: Subscription
-    _monitor_handler: Callable
+    ## Function to handle incoming messages.
+    _monitor_handler: Callable[[Blackboard, Any], None]
+    ## The name of the topic to monitor.
     _topic_name: str
-
-    msg_list: Set = []
+    ## A set of messages received from the topic.
+    msg_list: List[Any] = []
+    ## The maximum number of messages to retain.
     msg_queue: int
+    ## Time to wait between checks for messages.
     time_to_wait: float = 0.001
+    ## Flag indicating if monitoring is active.
     monitoring: bool = False
+    ## Timeout duration for monitoring.
     _timeout: int
 
     def __init__(
@@ -84,20 +92,20 @@ class MonitorState(State):
             None
         """
 
-        self._topic_name = topic_name
-        self._timeout = timeout
+        self._topic_name: str = topic_name
+        self._timeout: int = timeout
         if timeout is not None:
             outcomes = [TIMEOUT] + outcomes
 
-        self._monitor_handler = monitor_handler
-        self.msg_queue = msg_queue
+        self._monitor_handler: Callable[[Blackboard, Any], None] = monitor_handler
+        self.msg_queue: int = msg_queue
 
+        # Create ROS 2 subscriber
         if node is None:
-            self._node = YasminNode.get_instance()
-        else:
-            self._node = node
+            node = YasminNode.get_instance()
 
-        self._sub = self._node.create_subscription(
+        self._node: Node = node
+        self._sub: Subscription = self._node.create_subscription(
             msg_type, topic_name, self.__callback, qos
         )
 
@@ -139,9 +147,9 @@ class MonitorState(State):
             None raised directly; timeouts are handled gracefully.
         """
 
-        elapsed_time = 0
-        self.msg_list = []
-        self.monitoring = True
+        elapsed_time: float = 0.0
+        self.msg_list: List[Any] = []
+        self.monitoring: bool = True
 
         # Wait until a message is received or timeout is reached
         while not self.msg_list:
@@ -149,7 +157,7 @@ class MonitorState(State):
 
             if self._timeout is not None:
                 if elapsed_time >= self._timeout:
-                    self.monitoring = False
+                    self.monitoring: bool = False
                     self._node.get_logger().warn(
                         f"Timeout reached, topic '{self._topic_name}' is not available"
                     )
@@ -159,5 +167,5 @@ class MonitorState(State):
         self._node.get_logger().info(f"Processing msg from topic '{self._topic_name}'")
         outcome = self._monitor_handler(blackboard, self.msg_list.pop(0))
 
-        self.monitoring = False
+        self.monitoring: bool = False
         return outcome

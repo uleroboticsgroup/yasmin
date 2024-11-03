@@ -48,7 +48,7 @@ class CbState(State):
             TypeError: If 'outcomes' is not a set or 'cb' is not callable.
         """
         super().__init__(outcomes)
-        self._cb = cb
+        self._cb: Callable = cb
 
     def execute(self, blackboard: Blackboard) -> str:
         """

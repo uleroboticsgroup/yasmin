@@ -36,16 +36,22 @@ class ServiceState(State):
         _node (Node): The ROS node used to communicate with the service.
         _srv_name (str): The name of the service to call.
         _service_client (Client): The client used to call the service.
-        _create_request_handler (Callable): A function that creates the service request.
-        _response_handler (Callable): A function that processes the service response.
+        _create_request_handler (Callable[[Blackboard], Any]): A function that creates the service request.
+        _response_handler (Callable[[Blackboard, Any], str]): A function that processes the service response.
         _timeout (float): Timeout duration for the service call.
     """
 
+    ## The ROS node used to communicate with the service.
     _node: Node
+    ## The name of the service to call.
     _srv_name: str
+    ## The client used to call the service.
     _service_client: Client
-    _create_request_handler: Callable
-    _response_handler: Callable
+    ## A function that creates the service request.
+    _create_request_handler: Callable[[Blackboard], Any]
+    ## A function that processes the service response.
+    _response_handler: Callable[[Blackboard, Any], str]
+    ## Timeout duration for the service call.
     _timeout: float
 
     def __init__(
@@ -73,25 +79,27 @@ class ServiceState(State):
         Raises:
             ValueError: If the create_request_handler is not provided.
         """
-        self._srv_name = srv_name
+        self._srv_name: str = srv_name
         _outcomes = [SUCCEED, ABORT]
 
-        self._timeout = timeout
+        self._timeout: float = timeout
         if self._timeout:
             _outcomes.append(TIMEOUT)
 
         if outcomes:
             _outcomes = _outcomes + outcomes
 
+        # Create ROS 2 service
         if node is None:
-            self._node = YasminNode.get_instance()
-        else:
-            self._node = node
+            node: Node = YasminNode.get_instance()
 
-        self._service_client = self._node.create_client(srv_type, srv_name)
+        self._node: Node = node
+        self._service_client: Client = self._node.create_client(srv_type, srv_name)
 
-        self._create_request_handler = create_request_handler
-        self._response_handler = response_handler
+        self._create_request_handler: Callable[[Blackboard], Any] = (
+            create_request_handler
+        )
+        self._response_handler: Callable[[Blackboard, Any], str] = response_handler
 
         if not self._create_request_handler:
             raise ValueError("create_request_handler is needed")

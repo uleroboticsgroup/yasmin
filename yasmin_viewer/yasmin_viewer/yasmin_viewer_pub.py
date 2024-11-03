@@ -42,9 +42,12 @@ class YasminViewerPub:
         _publish_data(): Publishes the current state of the FSM.
     """
 
-    _node: Node  ##< The ROS 2 node instance used for publishing.
-    _fsm: StateMachine  ##< The finite state machine to be published.
-    _fsm_name: str  ##< The name of the finite state machine.
+    ## The ROS 2 node instance used for publishing.
+    _node: Node
+    ## The finite state machine to be published.
+    _fsm: StateMachine
+    ## The name of the finite state machine.
+    _fsm_name: str
 
     def __init__(
         self,

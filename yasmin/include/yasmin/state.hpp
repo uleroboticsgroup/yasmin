@@ -45,10 +45,10 @@ protected:
   std::set<std::string> outcomes; ///< The possible outcomes of this state.
 
 private:
-  std::atomic_bool canceled{
-      false}; ///< Indicates if the state has been canceled.
-  std::atomic_bool running{
-      false}; ///< Indicates if the state is currently running.
+  /// Indicates if the state has been canceled.
+  std::atomic_bool canceled{false};
+  /// Indicates if the state is currently running.
+  std::atomic_bool running{false};
 
 public:
   /**

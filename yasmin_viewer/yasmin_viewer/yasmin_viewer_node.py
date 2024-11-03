@@ -54,10 +54,10 @@ class YasminFsmViewerNode(Node):
         fsm_viewer_cb(msg): Callback function for processing FSM updates.
     """
 
-    __started: bool  ##< ndicates whether the server has started.
-    __fsm_dict: (
-        ExpiringDict  ##< A dictionary that stores FSM data with automatic expiration.
-    )
+    ## ndicates whether the server has started.
+    __started: bool = False
+    ## A dictionary that stores FSM data with automatic expiration.
+    __fsm_dict: ExpiringDict = ExpiringDict(max_len=300, max_age_seconds=3)
 
     def __init__(self) -> None:
         """
@@ -76,9 +76,6 @@ class YasminFsmViewerNode(Node):
                 ("port", 5000),
             ],
         )
-
-        self.__started: bool = False
-        self.__fsm_dict = ExpiringDict(max_len=300, max_age_seconds=3)
 
         # Start the subscriber in a separate thread
         thread_subscriber = Thread(target=self.start_subscriber)

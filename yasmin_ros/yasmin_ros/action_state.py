@@ -17,6 +17,7 @@ from typing import Set, Callable, Type, Any
 from threading import RLock, Event
 
 from rclpy.node import Node
+from rclpy.task import Future
 from rclpy.action import ActionClient
 from rclpy.action.client import ClientGoalHandle
 from rclpy.callback_groups import ReentrantCallbackGroup
@@ -44,27 +45,35 @@ class ActionState(State):
         _action_status (GoalStatus): The status of the action execution.
         _goal_handle (ClientGoalHandle): Handle for the goal sent to the action server.
         _goal_handle_lock (RLock): Lock to manage access to the goal handle.
-        _create_goal_handler (Callable): Function that creates the goal to send.
-        _result_handler (Callable): Function to handle the result from the action server.
-        _feedback_handler (Callable): Function to handle feedback from the action server.
+        _create_goal_handler (Callable[[Blackboard], Any]): Function that creates the goal to send.
+        _result_handler (Callable[[Blackboard, Any], str]): Function to handle the result from the action server.
+        _feedback_handler (Callable[[Blackboard, Any], None]): Function to handle feedback from the action server.
         _timeout (float): Timeout duration for waiting for the action server.
     """
 
+    ## The ROS 2 node instance used to communicate with the action server.
     _node: Node
-
+    ## The name of the action to be performed.
     _action_name: str
+    ## The action client used to send goals.
     _action_client: ActionClient
+    ## Event used to wait for action completion.
     _action_done_event: Event = Event()
-
+    ## The result returned by the action server.
     _action_result: Any
+    ## The status of the action execution.
     _action_status: GoalStatus
-
+    ## Handle for the goal sent to the action server.
     _goal_handle: ClientGoalHandle
+    ## Lock to manage access to the goal handle.
     _goal_handle_lock: RLock = RLock()
-
-    _create_goal_handler: Callable
-    _result_handler: Callable
-    _feedback_handler: Callable
+    ## Function that creates the goal to send.
+    _create_goal_handler: Callable[[Blackboard], Any]
+    ## Function to handle the result from the action server.
+    _result_handler: Callable[[Blackboard, Any], str]
+    ## Function to handle feedback from the action server.
+    _feedback_handler: Callable[[Blackboard, Any], None]
+    ## Timeout duration for waiting for the action server.
     _timeout: float
 
     def __init__(
@@ -96,10 +105,10 @@ class ActionState(State):
         Raises:
             ValueError: If create_goal_handler is None.
         """
-        self._action_name = action_name
+        self._action_name: str = action_name
         _outcomes = [SUCCEED, ABORT, CANCEL]
 
-        self._timeout = timeout
+        self._timeout: float = timeout
         if self._timeout:
             _outcomes.append(TIMEOUT)
 
@@ -107,20 +116,20 @@ class ActionState(State):
             _outcomes = _outcomes + outcomes
 
         if node is None:
-            self._node = YasminNode.get_instance()
-        else:
-            self._node = node
+            node: Node = YasminNode.get_instance()
 
-        self._action_client = ActionClient(
-            self._node,
+        # Create ROS 2 action
+        self._node: Node = node
+        self._action_client: ActionClient = ActionClient(
+            node,
             action_type,
             action_name,
             callback_group=ReentrantCallbackGroup(),
         )
 
-        self._create_goal_handler = create_goal_handler
-        self._result_handler = result_handler
-        self._feedback_handler = feedback_handler
+        self._create_goal_handler: Callable[[Blackboard], Any] = create_goal_handler
+        self._result_handler: Callable[[Blackboard, Any], str] = result_handler
+        self._feedback_handler: Callable[[Blackboard, Any], None] = feedback_handler
 
         if not self._create_goal_handler:
             raise ValueError("create_goal_handler is needed")
@@ -181,14 +190,15 @@ class ActionState(State):
 
         # Wait for action to be done
         self._action_done_event.wait()
+        status = self._action_status
 
-        if self._action_status == GoalStatus.STATUS_CANCELED:
+        if status == GoalStatus.STATUS_CANCELED:
             return CANCEL
 
-        elif self._action_status == GoalStatus.STATUS_ABORTED:
+        elif status == GoalStatus.STATUS_ABORTED:
             return ABORT
 
-        elif self._action_status == GoalStatus.STATUS_SUCCEEDED:
+        elif status == GoalStatus.STATUS_SUCCEEDED:
             if self._result_handler is not None:
                 return self._result_handler(blackboard, self._action_result)
 
@@ -196,7 +206,7 @@ class ActionState(State):
 
         return ABORT
 
-    def _goal_response_callback(self, future) -> None:
+    def _goal_response_callback(self, future: Future) -> None:
         """
         Callback to handle the response from sending a goal.
 
@@ -206,11 +216,11 @@ class ActionState(State):
             future: The future object representing the result of the goal sending operation.
         """
         with self._goal_handle_lock:
-            self._goal_handle = future.result()
+            self._goal_handle: ClientGoalHandle = future.result()
             get_result_future = self._goal_handle.get_result_async()
             get_result_future.add_done_callback(self._get_result_callback)
 
-    def _get_result_callback(self, future) -> None:
+    def _get_result_callback(self, future: Future) -> None:
         """
         Callback to handle the result of the executed action.
 
@@ -219,6 +229,6 @@ class ActionState(State):
         Parameters:
             future: The future object representing the result of the action execution.
         """
-        self._action_result = future.result().result
-        self._action_status = future.result().status
+        self._action_result: Any = future.result().result
+        self._action_status: GoalStatus = future.result().status
         self._action_done_event.set()
