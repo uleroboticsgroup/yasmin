@@ -103,57 +103,85 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1CbState.html">CbState</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a state that executes a callback function.  <a href="classyasmin_1_1CbState.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1State.html">State</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a state in a state machine.  <a href="classyasmin_1_1State.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1StateMachine.html">StateMachine</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A class that implements a state machine with a set of states, transitions, and callback mechanisms for state changes.  <a href="classyasmin_1_1StateMachine.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a55052b48991741289305ea43f99408c0" id="r_a55052b48991741289305ea43f99408c0"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a>) (const char *, const char *, int, const char *,...)</td></tr>
-<tr class="separator:a55052b48991741289305ea43f99408c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a866a0df2f805efdc06b88de08f4b56f4" id="r_a866a0df2f805efdc06b88de08f4b56f4"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>) (const char *file, const char *function, int line, const char *text,...)</td></tr>
+<tr class="memdesc:a866a0df2f805efdc06b88de08f4b56f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type definition for a logging function.  <br /></td></tr>
+<tr class="separator:a866a0df2f805efdc06b88de08f4b56f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ac4c3670c31fc1412360a3cb293c54299" id="r_ac4c3670c31fc1412360a3cb293c54299"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac4c3670c31fc1412360a3cb293c54299">extract_filename</a> (const char *path)</td></tr>
+<tr class="memdesc:ac4c3670c31fc1412360a3cb293c54299"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts the filename from a given file path.  <br /></td></tr>
 <tr class="separator:ac4c3670c31fc1412360a3cb293c54299"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa32b69eee23f39441ace98686f28bbc" id="r_afa32b69eee23f39441ace98686f28bbc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa32b69eee23f39441ace98686f28bbc">set_loggers</a> (<a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a> error, <a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a> warn, <a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a> info, <a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a> debug)</td></tr>
+<tr class="memitem:afa32b69eee23f39441ace98686f28bbc" id="r_afa32b69eee23f39441ace98686f28bbc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa32b69eee23f39441ace98686f28bbc">set_loggers</a> (<a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> error, <a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> warn, <a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> info, <a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> debug)</td></tr>
+<tr class="memdesc:afa32b69eee23f39441ace98686f28bbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets custom logging functions for different log levels.  <br /></td></tr>
 <tr class="separator:afa32b69eee23f39441ace98686f28bbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acfeb0bbddeafd3881c2ad929d540cfcf" id="r_acfeb0bbddeafd3881c2ad929d540cfcf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acfeb0bbddeafd3881c2ad929d540cfcf">set_default_loggers</a> ()</td></tr>
+<tr class="memdesc:acfeb0bbddeafd3881c2ad929d540cfcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the default logging functions for all log levels.  <br /></td></tr>
 <tr class="separator:acfeb0bbddeafd3881c2ad929d540cfcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acbcc0d2b0a2705a838f386c8440681a9" id="r_acbcc0d2b0a2705a838f386c8440681a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acbcc0d2b0a2705a838f386c8440681a9">default_log_error</a> (const char *file, const char *function, int line, const char *text,...)</td></tr>
+<tr class="memdesc:acbcc0d2b0a2705a838f386c8440681a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default error logging function.  <br /></td></tr>
 <tr class="separator:acbcc0d2b0a2705a838f386c8440681a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9d748ecefa9b29e4729b14cdb8d0b87" id="r_af9d748ecefa9b29e4729b14cdb8d0b87"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9d748ecefa9b29e4729b14cdb8d0b87">default_log_warn</a> (const char *file, const char *function, int line, const char *text,...)</td></tr>
+<tr class="memdesc:af9d748ecefa9b29e4729b14cdb8d0b87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default warning logging function.  <br /></td></tr>
 <tr class="separator:af9d748ecefa9b29e4729b14cdb8d0b87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00d4a2e0441e9c239d6b1ee1d86605c7" id="r_a00d4a2e0441e9c239d6b1ee1d86605c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00d4a2e0441e9c239d6b1ee1d86605c7">default_log_info</a> (const char *file, const char *function, int line, const char *text,...)</td></tr>
+<tr class="memdesc:a00d4a2e0441e9c239d6b1ee1d86605c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default info logging function.  <br /></td></tr>
 <tr class="separator:a00d4a2e0441e9c239d6b1ee1d86605c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7afeb9a611449ffcf59d3d5d154dfefa" id="r_a7afeb9a611449ffcf59d3d5d154dfefa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7afeb9a611449ffcf59d3d5d154dfefa">default_log_debug</a> (const char *file, const char *function, int line, const char *text,...)</td></tr>
+<tr class="memdesc:a7afeb9a611449ffcf59d3d5d154dfefa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default debug logging function.  <br /></td></tr>
 <tr class="separator:a7afeb9a611449ffcf59d3d5d154dfefa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:adb1305adc16f36e9ae7ea7d887d5040b" id="r_adb1305adc16f36e9ae7ea7d887d5040b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adb1305adc16f36e9ae7ea7d887d5040b">log_error</a> = <a class="el" href="#acbcc0d2b0a2705a838f386c8440681a9">default_log_error</a></td></tr>
+<tr class="memitem:adb1305adc16f36e9ae7ea7d887d5040b" id="r_adb1305adc16f36e9ae7ea7d887d5040b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adb1305adc16f36e9ae7ea7d887d5040b">log_error</a> = <a class="el" href="#acbcc0d2b0a2705a838f386c8440681a9">default_log_error</a></td></tr>
+<tr class="memdesc:adb1305adc16f36e9ae7ea7d887d5040b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the error logging function.  <br /></td></tr>
 <tr class="separator:adb1305adc16f36e9ae7ea7d887d5040b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53f366428638fdd68ed9d6293f4aec97" id="r_a53f366428638fdd68ed9d6293f4aec97"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a53f366428638fdd68ed9d6293f4aec97">log_warn</a> = <a class="el" href="#af9d748ecefa9b29e4729b14cdb8d0b87">default_log_warn</a></td></tr>
+<tr class="memitem:a53f366428638fdd68ed9d6293f4aec97" id="r_a53f366428638fdd68ed9d6293f4aec97"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a53f366428638fdd68ed9d6293f4aec97">log_warn</a> = <a class="el" href="#af9d748ecefa9b29e4729b14cdb8d0b87">default_log_warn</a></td></tr>
+<tr class="memdesc:a53f366428638fdd68ed9d6293f4aec97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the warning logging function.  <br /></td></tr>
 <tr class="separator:a53f366428638fdd68ed9d6293f4aec97"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a57f86f2f42912a6d1ed0a88c3387a5f3" id="r_a57f86f2f42912a6d1ed0a88c3387a5f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57f86f2f42912a6d1ed0a88c3387a5f3">log_info</a> = <a class="el" href="#a00d4a2e0441e9c239d6b1ee1d86605c7">default_log_info</a></td></tr>
+<tr class="memitem:a57f86f2f42912a6d1ed0a88c3387a5f3" id="r_a57f86f2f42912a6d1ed0a88c3387a5f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57f86f2f42912a6d1ed0a88c3387a5f3">log_info</a> = <a class="el" href="#a00d4a2e0441e9c239d6b1ee1d86605c7">default_log_info</a></td></tr>
+<tr class="memdesc:a57f86f2f42912a6d1ed0a88c3387a5f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the info logging function.  <br /></td></tr>
 <tr class="separator:a57f86f2f42912a6d1ed0a88c3387a5f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9184407adbc84d4d95e2c8719e9208b4" id="r_a9184407adbc84d4d95e2c8719e9208b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9184407adbc84d4d95e2c8719e9208b4">log_debug</a> = <a class="el" href="#a7afeb9a611449ffcf59d3d5d154dfefa">default_log_debug</a></td></tr>
+<tr class="memitem:a9184407adbc84d4d95e2c8719e9208b4" id="r_a9184407adbc84d4d95e2c8719e9208b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9184407adbc84d4d95e2c8719e9208b4">log_debug</a> = <a class="el" href="#a7afeb9a611449ffcf59d3d5d154dfefa">default_log_debug</a></td></tr>
+<tr class="memdesc:a9184407adbc84d4d95e2c8719e9208b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the debug logging function.  <br /></td></tr>
 <tr class="separator:a9184407adbc84d4d95e2c8719e9208b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
-<a id="a55052b48991741289305ea43f99408c0" name="a55052b48991741289305ea43f99408c0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55052b48991741289305ea43f99408c0">&#9670;&#160;</a></span>LogFunction</h2>
+<a id="a866a0df2f805efdc06b88de08f4b56f4" name="a866a0df2f805efdc06b88de08f4b56f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a866a0df2f805efdc06b88de08f4b56f4">&#9670;&#160;</a></span>LogFunction</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef void(* yasmin::LogFunction) (const char *, const char *, int, const char *,...)</td>
+          <td class="memname">typedef void(* yasmin::LogFunction) (const char *file, const char *function, int line, const char *text,...)</td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Type definition for a logging function. </p>
+<p>This type represents a function pointer that takes a file name, function name, line number, log message, and a variable number of additional arguments for formatting the log message.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file</td><td>The name of the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">function</td><td>The name of the function where the log function is called. </td></tr>
+    <tr><td class="paramname">line</td><td>The line number in the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">text</td><td>The format string for the log message, similar to printf. </td></tr>
+    <tr><td class="paramname">...</td><td>Additional arguments for the format string. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -192,6 +220,19 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Default debug logging function. </p>
+<p>This function logs a debug message to stderr with the format: [DEBUG] [<a href="file:function:line">file:function:line</a>] message.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file</td><td>The name of the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">function</td><td>The name of the function where the log function is called. </td></tr>
+    <tr><td class="paramname">line</td><td>The line number in the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">text</td><td>The format string for the log message. </td></tr>
+    <tr><td class="paramname">...</td><td>Additional arguments for the format string. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="acbcc0d2b0a2705a838f386c8440681a9" name="acbcc0d2b0a2705a838f386c8440681a9"></a>
@@ -227,6 +268,19 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Default error logging function. </p>
+<p>This function logs an error message to stderr with the format: [ERROR] [<a href="file:function:line">file:function:line</a>] message.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file</td><td>The name of the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">function</td><td>The name of the function where the log function is called. </td></tr>
+    <tr><td class="paramname">line</td><td>The line number in the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">text</td><td>The format string for the log message. </td></tr>
+    <tr><td class="paramname">...</td><td>Additional arguments for the format string. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -264,6 +318,19 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Default info logging function. </p>
+<p>This function logs an informational message to stderr with the format: [INFO] [<a href="file:function:line">file:function:line</a>] message.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file</td><td>The name of the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">function</td><td>The name of the function where the log function is called. </td></tr>
+    <tr><td class="paramname">line</td><td>The line number in the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">text</td><td>The format string for the log message. </td></tr>
+    <tr><td class="paramname">...</td><td>Additional arguments for the format string. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="af9d748ecefa9b29e4729b14cdb8d0b87" name="af9d748ecefa9b29e4729b14cdb8d0b87"></a>
@@ -300,6 +367,19 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Default warning logging function. </p>
+<p>This function logs a warning message to stderr with the format: [WARN] [<a href="file:function:line">file:function:line</a>] message.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file</td><td>The name of the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">function</td><td>The name of the function where the log function is called. </td></tr>
+    <tr><td class="paramname">line</td><td>The line number in the source file where the log function is called. </td></tr>
+    <tr><td class="paramname">text</td><td>The format string for the log message. </td></tr>
+    <tr><td class="paramname">...</td><td>Additional arguments for the format string. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="ac4c3670c31fc1412360a3cb293c54299" name="ac4c3670c31fc1412360a3cb293c54299"></a>
@@ -325,6 +405,16 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Extracts the filename from a given file path. </p>
+<p>This function takes a full path to a file and returns just the file name.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>The full path to the file. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A pointer to the extracted filename. </dd></dl>
+
 </div>
 </div>
 <a id="acfeb0bbddeafd3881c2ad929d540cfcf" name="acfeb0bbddeafd3881c2ad929d540cfcf"></a>
@@ -342,6 +432,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Sets the default logging functions for all log levels. </p>
+<p>This function initializes the logging functions to the default implementations. </p>
+
 </div>
 </div>
 <a id="afa32b69eee23f39441ace98686f28bbc" name="afa32b69eee23f39441ace98686f28bbc"></a>
@@ -353,25 +446,37 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">void yasmin::set_loggers </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>error</em></span>, </td>
+          <td class="paramtype"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>error</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>warn</em></span>, </td>
+          <td class="paramtype"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>warn</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>info</em></span>, </td>
+          <td class="paramtype"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>info</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>debug</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>debug</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets custom logging functions for different log levels. </p>
+<p>This function allows the user to specify custom logging functions for error, warning, info, and debug logs. If a null function is provided for any log level, the default logging function will be used instead.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">error</td><td>Pointer to the custom error logging function. </td></tr>
+    <tr><td class="paramname">warn</td><td>Pointer to the custom warning logging function. </td></tr>
+    <tr><td class="paramname">info</td><td>Pointer to the custom info logging function. </td></tr>
+    <tr><td class="paramname">debug</td><td>Pointer to the custom debug logging function. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -383,10 +488,12 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a> yasmin::log_debug = <a class="el" href="#a7afeb9a611449ffcf59d3d5d154dfefa">default_log_debug</a></td>
+          <td class="memname"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> yasmin::log_debug = <a class="el" href="#a7afeb9a611449ffcf59d3d5d154dfefa">default_log_debug</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Pointer to the debug logging function. </p>
 
 </div>
 </div>
@@ -397,10 +504,12 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a> yasmin::log_error = <a class="el" href="#acbcc0d2b0a2705a838f386c8440681a9">default_log_error</a></td>
+          <td class="memname"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> yasmin::log_error = <a class="el" href="#acbcc0d2b0a2705a838f386c8440681a9">default_log_error</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Pointer to the error logging function. </p>
 
 </div>
 </div>
@@ -411,10 +520,12 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a> yasmin::log_info = <a class="el" href="#a00d4a2e0441e9c239d6b1ee1d86605c7">default_log_info</a></td>
+          <td class="memname"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> yasmin::log_info = <a class="el" href="#a00d4a2e0441e9c239d6b1ee1d86605c7">default_log_info</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Pointer to the info logging function. </p>
 
 </div>
 </div>
@@ -425,10 +536,12 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="#a55052b48991741289305ea43f99408c0">LogFunction</a> yasmin::log_warn = <a class="el" href="#af9d748ecefa9b29e4729b14cdb8d0b87">default_log_warn</a></td>
+          <td class="memname"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> yasmin::log_warn = <a class="el" href="#af9d748ecefa9b29e4729b14cdb8d0b87">default_log_warn</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Pointer to the warning logging function. </p>
 
 </div>
 </div>

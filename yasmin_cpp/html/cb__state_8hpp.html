@@ -95,7 +95,9 @@ $(function(){ initResizable(false); });
   <div class="headertitle"><div class="title">cb_state.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;string&gt;</code><br />
+<div class="textblock"><code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;set&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
 <code>#include &quot;<a class="el" href="blackboard_8hpp_source.html">yasmin/blackboard/blackboard.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="state_8hpp_source.html">yasmin/state.hpp</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
@@ -103,50 +105,52 @@ Include dependency graph for cb_state.hpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="cb__state_8hpp__incl.png" border="0" usemap="#ayasmin_2include_2yasmin_2cb__state_8hpp" alt=""/></div>
 <map name="ayasmin_2include_2yasmin_2cb__state_8hpp" id="ayasmin_2include_2yasmin_2cb__state_8hpp">
-<area shape="rect" title=" " alt="" coords="308,5,460,46"/>
-<area shape="rect" title=" " alt="" coords="256,419,309,444"/>
-<area shape="poly" title=" " alt="" coords="308,44,214,66,116,97,73,116,39,136,16,157,10,168,8,179,8,263,15,300,33,331,61,356,95,377,133,394,172,406,241,422,240,427,171,412,131,399,93,382,58,361,29,334,10,302,3,263,3,179,5,166,12,154,35,132,71,111,114,92,213,61,307,39"/>
-<area shape="rect" href="blackboard_8hpp.html" title=" " alt="" coords="274,168,494,193"/>
-<area shape="poly" title=" " alt="" coords="387,46,387,152,381,152,381,46"/>
-<area shape="rect" href="state_8hpp.html" title=" " alt="" coords="872,94,992,120"/>
-<area shape="poly" title=" " alt="" coords="461,35,857,92,857,97,460,41"/>
-<area shape="poly" title=" " alt="" coords="274,192,215,199,159,210,112,224,95,233,83,243,75,256,71,268,74,293,89,318,113,341,144,363,178,382,243,412,240,417,176,387,141,367,110,345,84,321,69,295,66,268,70,254,79,240,92,229,110,219,157,204,214,194,273,186"/>
-<area shape="rect" title=" " alt="" coords="94,249,170,274"/>
-<area shape="poly" title=" " alt="" coords="340,196,183,244,178,246,176,241,182,239,339,191"/>
-<area shape="rect" title=" " alt="" coords="194,249,240,274"/>
-<area shape="poly" title=" " alt="" coords="357,196,254,244,252,239,355,191"/>
-<area shape="rect" title=" " alt="" coords="265,249,322,274"/>
-<area shape="poly" title=" " alt="" coords="372,196,320,241,317,237,368,192"/>
-<area shape="rect" title=" " alt="" coords="345,249,423,274"/>
-<area shape="poly" title=" " alt="" coords="387,194,387,233,381,233,381,194"/>
-<area shape="rect" href="blackboard__value_8hpp.html" title=" " alt="" coords="447,241,644,282"/>
-<area shape="poly" title=" " alt="" coords="410,192,493,232,490,236,408,196"/>
-<area shape="rect" href="blackboard__value__interface_8hpp.html" title=" " alt="" coords="411,330,608,371"/>
-<area shape="poly" title=" " alt="" coords="495,189,593,208,633,222,658,240,666,253,667,266,662,279,653,290,625,310,590,326,588,322,622,306,649,286,657,276,661,266,661,255,654,243,630,226,592,213,494,195"/>
-<area shape="rect" href="logs_8hpp.html" title=" " alt="" coords="719,249,833,274"/>
-<area shape="poly" title=" " alt="" coords="456,191,701,239,715,242,714,247,699,244,455,197"/>
-<area shape="poly" title=" " alt="" coords="447,283,365,305,331,318,310,332,299,348,291,366,285,404,280,403,286,365,294,345,306,328,329,313,363,300,446,278"/>
-<area shape="rect" title=" " alt="" coords="320,338,386,363"/>
-<area shape="poly" title=" " alt="" coords="503,285,395,333,393,328,501,280"/>
-<area shape="poly" title=" " alt="" coords="540,284,526,317,521,315,535,281"/>
-<area shape="poly" title=" " alt="" coords="454,374,325,418,323,413,452,369"/>
-<area shape="rect" title=" " alt="" coords="632,338,696,363"/>
-<area shape="poly" title=" " alt="" coords="762,277,693,330,690,326,759,273"/>
-<area shape="rect" title=" " alt="" coords="720,338,776,363"/>
-<area shape="poly" title=" " alt="" coords="775,276,759,324,754,322,770,274"/>
-<area shape="rect" title=" " alt="" coords="800,338,861,363"/>
-<area shape="poly" title=" " alt="" coords="786,274,817,323,813,326,781,276"/>
-<area shape="poly" title=" " alt="" coords="933,121,909,258,892,332,883,358,875,373,844,386,789,397,632,414,459,425,325,431,325,426,459,420,631,409,788,392,842,381,872,369,879,356,887,331,903,257,928,120"/>
-<area shape="poly" title=" " alt="" coords="872,119,493,168,492,162,871,113"/>
-<area shape="poly" title=" " alt="" coords="922,122,801,240,797,236,918,118"/>
-<area shape="rect" title=" " alt="" coords="936,168,997,193"/>
-<area shape="poly" title=" " alt="" coords="940,119,956,152,952,155,935,121"/>
-<area shape="rect" title=" " alt="" coords="1021,168,1088,193"/>
-<area shape="poly" title=" " alt="" coords="954,118,1022,157,1020,162,951,123"/>
-<area shape="rect" title=" " alt="" coords="1112,168,1152,193"/>
-<area shape="poly" title=" " alt="" coords="967,118,1098,164,1097,169,965,123"/>
-<area shape="rect" title=" " alt="" coords="1175,168,1233,193"/>
-<area shape="poly" title=" " alt="" coords="982,118,1161,164,1159,169,980,123"/>
+<area shape="rect" title=" " alt="" coords="77,5,230,46"/>
+<area shape="rect" title=" " alt="" coords="42,168,110,193"/>
+<area shape="poly" title=" " alt="" coords="146,47,91,155,87,152,141,45"/>
+<area shape="rect" title=" " alt="" coords="134,168,173,193"/>
+<area shape="poly" title=" " alt="" coords="156,46,156,152,151,152,151,46"/>
+<area shape="rect" title=" " alt="" coords="544,419,597,444"/>
+<area shape="poly" title=" " alt="" coords="114,49,79,71,45,101,18,137,11,157,8,179,8,263,12,282,24,299,44,315,70,331,137,357,218,379,306,396,392,409,529,424,528,429,391,414,305,401,217,384,135,362,67,335,41,320,20,303,7,284,3,263,3,179,6,156,14,135,41,97,76,67,111,44"/>
+<area shape="rect" href="blackboard_8hpp.html" title=" " alt="" coords="535,168,756,193"/>
+<area shape="poly" title=" " alt="" coords="217,44,593,160,591,165,216,49"/>
+<area shape="rect" href="state_8hpp.html" title=" " alt="" coords="196,94,316,120"/>
+<area shape="poly" title=" " alt="" coords="180,44,230,82,227,86,177,49"/>
+<area shape="poly" title=" " alt="" coords="704,191,749,210,771,223,790,239,817,272,834,304,837,321,836,338,831,355,819,372,805,384,785,394,730,410,669,422,613,429,613,424,668,416,729,405,783,389,803,380,815,369,826,352,831,336,832,321,829,306,812,275,786,243,768,227,747,214,702,196"/>
+<area shape="rect" title=" " alt="" coords="880,249,957,274"/>
+<area shape="poly" title=" " alt="" coords="693,191,862,239,869,241,868,246,861,244,691,196"/>
+<area shape="rect" title=" " alt="" coords="981,249,1027,274"/>
+<area shape="poly" title=" " alt="" coords="756,191,861,209,970,239,972,240,970,245,969,244,860,214,756,196"/>
+<area shape="rect" title=" " alt="" coords="376,249,432,274"/>
+<area shape="poly" title=" " alt="" coords="597,197,525,217,445,244,442,245,441,240,443,239,523,212,596,191"/>
+<area shape="rect" title=" " alt="" coords="677,249,755,274"/>
+<area shape="poly" title=" " alt="" coords="658,192,697,235,693,239,654,196"/>
+<area shape="rect" href="blackboard__value_8hpp.html" title=" " alt="" coords="456,241,653,282"/>
+<area shape="poly" title=" " alt="" coords="633,196,590,233,587,229,630,192"/>
+<area shape="rect" href="blackboard__value__interface_8hpp.html" title=" " alt="" coords="608,330,805,371"/>
+<area shape="poly" title=" " alt="" coords="700,192,738,210,755,223,769,240,775,261,771,283,759,303,744,321,740,317,754,300,766,281,770,261,764,243,751,227,735,214,697,196"/>
+<area shape="rect" href="logs_8hpp.html" title=" " alt="" coords="238,249,352,274"/>
+<area shape="poly" title=" " alt="" coords="584,197,365,244,353,247,351,242,363,239,583,191"/>
+<area shape="poly" title=" " alt="" coords="559,282,571,403,565,404,554,282"/>
+<area shape="rect" title=" " alt="" coords="467,338,533,363"/>
+<area shape="poly" title=" " alt="" coords="545,284,518,326,513,323,540,281"/>
+<area shape="poly" title=" " alt="" coords="590,280,661,320,658,325,588,285"/>
+<area shape="poly" title=" " alt="" coords="674,374,606,413,603,408,671,369"/>
+<area shape="rect" title=" " alt="" coords="213,338,278,363"/>
+<area shape="poly" title=" " alt="" coords="290,276,262,326,257,323,285,274"/>
+<area shape="rect" title=" " alt="" coords="301,338,358,363"/>
+<area shape="poly" title=" " alt="" coords="302,274,321,322,317,324,297,276"/>
+<area shape="rect" title=" " alt="" coords="382,338,442,363"/>
+<area shape="poly" title=" " alt="" coords="313,273,385,326,382,330,309,277"/>
+<area shape="poly" title=" " alt="" coords="226,123,122,164,120,159,224,118"/>
+<area shape="poly" title=" " alt="" coords="240,122,185,161,181,156,237,118"/>
+<area shape="poly" title=" " alt="" coords="250,121,222,166,192,232,183,269,180,305,186,339,203,369,225,385,258,398,348,415,446,424,528,427,528,433,446,430,347,421,257,403,222,390,199,372,181,340,174,305,177,268,187,231,217,164,245,118"/>
+<area shape="poly" title=" " alt="" coords="316,116,564,162,563,167,316,122"/>
+<area shape="poly" title=" " alt="" coords="262,119,290,233,285,234,256,121"/>
+<area shape="rect" title=" " alt="" coords="299,168,360,193"/>
+<area shape="poly" title=" " alt="" coords="270,118,308,155,304,159,266,122"/>
+<area shape="rect" title=" " alt="" coords="383,168,441,193"/>
+<area shape="poly" title=" " alt="" coords="284,118,373,158,371,163,281,123"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -169,6 +173,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1CbState.html">yasmin::CbState</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a state that executes a callback function.  <a href="classyasmin_1_1CbState.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>

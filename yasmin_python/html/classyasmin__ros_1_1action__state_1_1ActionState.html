@@ -185,8 +185,8 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a1555710ee5f97796f4a11da3ae7e1cfa" id="r_a1555710ee5f97796f4a11da3ae7e1cfa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1555710ee5f97796f4a11da3ae7e1cfa">_get_result_callback</a></td></tr>
 <tr class="separator:a1555710ee5f97796f4a11da3ae7e1cfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
-<tr class="memitem:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a96f5ad095d6d9b19eb9398e9a4e353eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a96f5ad095d6d9b19eb9398e9a4e353eb">_outcomes</a> = set()</td></tr>
-<tr class="separator:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a6a5b0960e11722eaa5f1a975a2b2f222"><td class="memItemLeft" align="right" valign="top">set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a6a5b0960e11722eaa5f1a975a2b2f222">_outcomes</a> = set()</td></tr>
+<tr class="separator:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_aed635b4d7a38f282ac74f415f969f783"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#aed635b4d7a38f282ac74f415f969f783">_running</a> = False</td></tr>
 <tr class="separator:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
@@ -199,7 +199,26 @@ Static Protected Attributes</h2></td></tr>
 <tr class="memitem:ad7d8962d73d2cfcc2a4c12dcdacba0de" id="r_ad7d8962d73d2cfcc2a4c12dcdacba0de"><td class="memItemLeft" align="right" valign="top">RLock&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad7d8962d73d2cfcc2a4c12dcdacba0de">_goal_handle_lock</a> = RLock()</td></tr>
 <tr class="separator:ad7d8962d73d2cfcc2a4c12dcdacba0de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><pre class="fragment">Represents a state that interacts with a ROS 2 action server.
+
+This class encapsulates the functionality needed to manage
+the sending and receiving of goals to and from an action server.
+
+Attributes:
+    _node (Node): The ROS 2 node instance used to communicate with the action server.
+    _action_name (str): The name of the action to be performed.
+    _action_client (ActionClient): The action client used to send goals.
+    _action_done_event (Event): Event used to wait for action completion.
+    _action_result (Any): The result returned by the action server.
+    _action_status (GoalStatus): The status of the action execution.
+    _goal_handle (ClientGoalHandle): Handle for the goal sent to the action server.
+    _goal_handle_lock (RLock): Lock to manage access to the goal handle.
+    _create_goal_handler (Callable): Function that creates the goal to send.
+    _result_handler (Callable): Function to handle the result from the action server.
+    _feedback_handler (Callable): Function to handle feedback from the action server.
+    _timeout (float): Timeout duration for waiting for the action server.
+</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a482a0e1011dbf96a17bc5fd49fb4b2f5" name="a482a0e1011dbf96a17bc5fd49fb4b2f5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a482a0e1011dbf96a17bc5fd49fb4b2f5">&#9670;&#160;</a></span>__init__()</h2>
 
@@ -253,7 +272,23 @@ Static Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Initializes the ActionState instance.
 
+This constructor sets up the action client and prepares to handle goals.
+
+Parameters:
+    action_type (Type): The type of the action to be executed.
+    action_name (str): The name of the action to be executed.
+    create_goal_handler (Callable): A function that generates the goal.
+    outcomes (Set[str], optional): Additional outcomes that this state can return.
+    result_handler (Callable, optional): A function to process the result of the action.
+    feedback_handler (Callable, optional): A function to process feedback from the action.
+    node (Node, optional): The ROS 2 node to use. If None, uses the default YasminNode.
+    timeout (float, optional): Timeout duration for waiting for the action server.
+
+Raises:
+    ValueError: If create_goal_handler is None.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#a5f3f8a8f6e7fd2de1b30057606271a5a">yasmin.state.State</a>.</p>
 
 <p>Reimplemented in <a class="el" href="classyasmin__demos_1_1action__client__demo_1_1FibonacciState.html#a8a3e9f00b98565086ee44ba5445b6baa">yasmin_demos.action_client_demo.FibonacciState</a>, and <a class="el" href="classyasmin__demos_1_1nav__demo_1_1Nav2State.html#add9766b8326fdba63280de3092609cd9">yasmin_demos.nav_demo.Nav2State</a>.</p>
@@ -287,7 +322,13 @@ Static Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<pre class="fragment">Callback to handle the result of the executed action.
 
+This method sets the action result and status, and signals that the action is done.
+
+Parameters:
+    future: The future object representing the result of the action execution.
+</pre> 
 </div>
 </div>
 <a id="aba323812fc417e28d6993fe3e1a33608" name="aba323812fc417e28d6993fe3e1a33608"></a>
@@ -316,7 +357,13 @@ Static Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<pre class="fragment">Callback to handle the response from sending a goal.
 
+This method retrieves the goal handle and sets up the result callback.
+
+Parameters:
+    future: The future object representing the result of the goal sending operation.
+</pre> 
 </div>
 </div>
 <a id="ae4f30e331df3c8672856edf1a7f65945" name="ae4f30e331df3c8672856edf1a7f65945"></a>
@@ -333,7 +380,10 @@ Static Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Cancels the current action state.
 
+This method cancels the goal sent to the action server, if it exists.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#ab9675d75bb5d348b4332c3859a7d0add">yasmin.state.State</a>.</p>
 
 </div>
@@ -356,7 +406,20 @@ Static Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Executes the action state by sending a goal to the action server.
 
+This method waits for the action server to be available, sends the goal,
+and waits for the action to complete, handling feedback and results.
+
+Parameters:
+    blackboard (Blackboard): The blackboard instance used for state management.
+
+Returns:
+    str: The outcome of the action execution (e.g., SUCCEED, ABORT, CANCEL, TIMEOUT).
+
+Raises:
+    Exception: Raises an exception if any error occurs during action execution.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#a531c80a2c77722089d92e7a9c73f69d8">yasmin.state.State</a>.</p>
 
 </div>

@@ -173,14 +173,25 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a4505e9a0ffb632cd4dd3dca62eb3025b inherit pro_attribs_classyasmin__ros_1_1service__state_1_1ServiceState" id="r_a4505e9a0ffb632cd4dd3dca62eb3025b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin__ros_1_1service__state_1_1ServiceState.html#a4505e9a0ffb632cd4dd3dca62eb3025b">_response_handler</a> = response_handler</td></tr>
 <tr class="separator:a4505e9a0ffb632cd4dd3dca62eb3025b inherit pro_attribs_classyasmin__ros_1_1service__state_1_1ServiceState"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
-<tr class="memitem:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a96f5ad095d6d9b19eb9398e9a4e353eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a96f5ad095d6d9b19eb9398e9a4e353eb">_outcomes</a> = set()</td></tr>
-<tr class="separator:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a6a5b0960e11722eaa5f1a975a2b2f222"><td class="memItemLeft" align="right" valign="top">set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a6a5b0960e11722eaa5f1a975a2b2f222">_outcomes</a> = set()</td></tr>
+<tr class="separator:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_aed635b4d7a38f282ac74f415f969f783"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#aed635b4d7a38f282ac74f415f969f783">_running</a> = False</td></tr>
 <tr class="separator:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
 <tr class="separator:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><pre class="fragment">A state that calls the AddTwoInts service to add two integers.
+
+This class is a state in a finite state machine that sends a request
+to the AddTwoInts service, retrieves the response, and updates the
+blackboard with the result.
+
+Attributes:
+    service_type (type): The service type being used (AddTwoInts).
+    service_name (str): The name of the service.
+    outcomes (list): The list of possible outcomes for this state.
+</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a2d4be40ae5a1528cf019af2279e084a8" name="a2d4be40ae5a1528cf019af2279e084a8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2d4be40ae5a1528cf019af2279e084a8">&#9670;&#160;</a></span>__init__()</h2>
 
@@ -195,7 +206,11 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Initializes the AddTwoIntsState.
 
+Calls the parent constructor with the specific service type,
+service name, request handler, outcomes, and response handler.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin__ros_1_1service__state_1_1ServiceState.html#a6aab905f657a87496b3b0d5f8b0f6eda">yasmin_ros.service_state.ServiceState</a>.</p>
 
 </div>
@@ -219,7 +234,14 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Creates the service request from the blackboard data.
 
+Args:
+    blackboard (Blackboard): The blackboard containing the input values.
+
+Returns:
+    AddTwoInts.Request: The request object populated with values from the blackboard.
+</pre> 
 </div>
 </div>
 <a id="a498cdab71df1476d0fa6e5b633b9df02" name="a498cdab71df1476d0fa6e5b633b9df02"></a>
@@ -246,7 +268,17 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Processes the response from the AddTwoInts service.
 
+Updates the blackboard with the sum result from the response.
+
+Args:
+    blackboard (Blackboard): The blackboard to update with the sum.
+    response (AddTwoInts.Response): The response from the service call.
+
+Returns:
+    str: The outcome of the operation, which is "outcome1".
+</pre> 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>

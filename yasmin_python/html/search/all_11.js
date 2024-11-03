@@ -30,7 +30,7 @@ var searchData=
   ['yasmin_5fviewer_3a_3ayasmin_5fviewer_5fpub_27',['yasmin_viewer_pub',['../namespaceyasmin__viewer_1_1yasmin__viewer__pub.html',1,'yasmin_viewer']]],
   ['yasmin_5fviewer_5fnode_2epy_28',['yasmin_viewer_node.py',['../yasmin__viewer__node_8py.html',1,'']]],
   ['yasmin_5fviewer_5fpub_2epy_29',['yasmin_viewer_pub.py',['../yasmin__viewer__pub_8py.html',1,'']]],
-  ['yasminfsmviewer_30',['YasminFsmViewer',['../classyasmin__viewer_1_1yasmin__viewer__node_1_1YasminFsmViewer.html',1,'yasmin_viewer::yasmin_viewer_node']]],
+  ['yasminfsmviewernode_30',['YasminFsmViewerNode',['../classyasmin__viewer_1_1yasmin__viewer__node_1_1YasminFsmViewerNode.html',1,'yasmin_viewer::yasmin_viewer_node']]],
   ['yasminnode_31',['YasminNode',['../classyasmin__ros_1_1yasmin__node_1_1YasminNode.html',1,'yasmin_ros::yasmin_node']]],
   ['yasminviewerpub_32',['YasminViewerPub',['../classyasmin__viewer_1_1yasmin__viewer__pub_1_1YasminViewerPub.html',1,'yasmin_viewer::yasmin_viewer_pub']]]
 ];

@@ -91,10 +91,15 @@ $(function(){ initResizable(false); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-types">Private Types</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classyasmin_1_1StateMachine-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin::StateMachine Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>A class that implements a state machine with a set of states, transitions, and callback mechanisms for state changes.  
+ <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="state__machine_8hpp_source.html">state_machine.hpp</a>&gt;</code></p>
 <div class="dynheader">
@@ -102,8 +107,8 @@ Inheritance diagram for yasmin::StateMachine:</div>
 <div class="dyncontent">
 <div class="center"><img src="classyasmin_1_1StateMachine__inherit__graph.png" border="0" usemap="#ayasmin_1_1StateMachine_inherit__map" alt="Inheritance graph"/></div>
 <map name="ayasmin_1_1StateMachine_inherit__map" id="ayasmin_1_1StateMachine_inherit__map">
-<area shape="rect" title=" " alt="" coords="5,79,154,105"/>
-<area shape="rect" href="classyasmin_1_1State.html" title=" " alt="" coords="30,5,129,31"/>
+<area shape="rect" title="A class that implements a state machine with a set of states, transitions, and callback mechanisms fo..." alt="" coords="5,79,154,105"/>
+<area shape="rect" href="classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="30,5,129,31"/>
 <area shape="poly" title=" " alt="" coords="82,46,82,79,77,79,77,46"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
@@ -112,78 +117,251 @@ Collaboration diagram for yasmin::StateMachine:</div>
 <div class="dyncontent">
 <div class="center"><img src="classyasmin_1_1StateMachine__coll__graph.png" border="0" usemap="#ayasmin_1_1StateMachine_coll__map" alt="Collaboration graph"/></div>
 <map name="ayasmin_1_1StateMachine_coll__map" id="ayasmin_1_1StateMachine_coll__map">
-<area shape="rect" title=" " alt="" coords="5,348,154,373"/>
-<area shape="rect" href="classyasmin_1_1State.html" title=" " alt="" coords="30,273,129,298"/>
-<area shape="poly" title=" " alt="" coords="82,314,82,347,77,347,77,314"/>
-<area shape="rect" title=" " alt="" coords="9,184,150,210"/>
-<area shape="poly" title=" " alt="" coords="82,225,82,272,77,272,77,225"/>
-<area shape="rect" title=" " alt="" coords="41,95,118,121"/>
-<area shape="poly" title=" " alt="" coords="82,137,82,184,77,184,77,137"/>
-<area shape="rect" title=" " alt="" coords="18,5,141,46"/>
-<area shape="poly" title=" " alt="" coords="82,61,82,95,77,95,77,61"/>
+<area shape="rect" title="A class that implements a state machine with a set of states, transitions, and callback mechanisms fo..." alt="" coords="1616,272,1764,298"/>
+<area shape="rect" href="classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="697,130,796,156"/>
+<area shape="poly" title=" " alt="" coords="811,128,850,121,901,113,953,109,1093,104,1202,109,1310,125,1447,151,1523,163,1555,171,1593,189,1621,208,1645,230,1681,270,1677,273,1641,233,1617,212,1591,194,1553,176,1522,168,1447,157,1309,130,1201,114,1093,109,953,114,902,118,851,126,812,133"/>
+<area shape="rect" title=" " alt="" coords="977,123,1135,164"/>
+<area shape="poly" title=" " alt="" coords="812,141,977,141,977,146,812,146"/>
+<area shape="rect" title=" " alt="" coords="333,133,475,159"/>
+<area shape="poly" title=" " alt="" coords="490,143,697,141,697,146,490,148"/>
+<area shape="rect" title=" " alt="" coords="178,185,255,211"/>
+<area shape="poly" title=" " alt="" coords="230,170,256,129,295,84,318,64,344,48,372,37,402,33,1356,33,1397,35,1431,41,1460,51,1486,65,1535,104,1594,155,1623,184,1649,216,1684,270,1679,273,1645,219,1619,187,1590,159,1532,108,1483,70,1458,56,1429,46,1396,40,1356,38,403,38,374,42,347,52,322,68,299,88,261,132,234,173"/>
+<area shape="poly" title=" " alt="" coords="269,179,279,177,351,157,352,162,280,182,271,185"/>
+<area shape="rect" title=" " alt="" coords="1274,166,1436,222"/>
+<area shape="poly" title=" " alt="" coords="271,195,1274,192,1274,197,271,200"/>
+<area shape="rect" title=" " alt="" coords="499,229,643,284"/>
+<area shape="poly" title=" " alt="" coords="252,217,280,229,336,242,394,251,498,256,498,261,393,256,335,248,278,234,250,222"/>
+<area shape="rect" title=" " alt="" coords="667,365,826,391"/>
+<area shape="poly" title=" " alt="" coords="246,219,286,249,334,276,421,307,511,332,667,364,666,369,509,337,420,312,332,281,283,254,243,224"/>
+<area shape="rect" title=" " alt="" coords="5,178,129,218"/>
+<area shape="poly" title=" " alt="" coords="144,195,178,195,178,201,144,201"/>
+<area shape="poly" title=" " alt="" coords="1451,205,1521,219,1593,238,1665,269,1663,274,1591,243,1520,224,1450,210"/>
+<area shape="poly" title=" " alt="" coords="1151,157,1274,178,1273,183,1150,162"/>
+<area shape="poly" title=" " alt="" coords="658,255,889,257,1356,257,1494,262,1616,273,1615,279,1494,268,1356,262,888,262,658,260"/>
+<area shape="rect" title=" " alt="" coords="1288,536,1422,577"/>
+<area shape="poly" title=" " alt="" coords="1437,540,1475,528,1516,513,1555,493,1590,467,1626,425,1654,376,1672,331,1683,297,1688,299,1677,333,1658,379,1631,428,1594,471,1558,497,1518,518,1477,533,1438,545"/>
+<area shape="rect" title=" " alt="" coords="1016,544,1096,570"/>
+<area shape="poly" title=" " alt="" coords="1112,554,1287,554,1287,559,1112,559"/>
+<area shape="rect" title=" " alt="" coords="1273,297,1436,352"/>
+<area shape="poly" title=" " alt="" coords="1452,310,1615,291,1616,296,1452,316"/>
+<area shape="rect" title=" " alt="" coords="978,308,1134,363"/>
+<area shape="poly" title=" " alt="" coords="1149,329,1272,325,1273,330,1149,335"/>
+<area shape="poly" title=" " alt="" coords="842,362,978,343,978,349,842,368"/>
+<area shape="rect" title=" " alt="" coords="953,387,1159,428"/>
+<area shape="poly" title=" " alt="" coords="842,384,953,395,953,400,842,390"/>
+<area shape="rect" title=" " alt="" coords="965,458,1147,498"/>
+<area shape="poly" title=" " alt="" coords="798,394,851,413,983,455,982,460,849,418,796,399"/>
+<area shape="rect" title=" " alt="" coords="1263,377,1447,432"/>
+<area shape="poly" title=" " alt="" coords="1461,372,1591,328,1662,296,1664,300,1593,333,1462,377"/>
+<area shape="poly" title=" " alt="" coords="1174,404,1262,403,1262,408,1174,409"/>
+<area shape="rect" title=" " alt="" coords="1273,457,1436,512"/>
+<area shape="poly" title=" " alt="" coords="1450,455,1521,427,1591,388,1618,366,1642,341,1678,296,1682,300,1646,344,1621,370,1593,393,1524,432,1452,460"/>
+<area shape="poly" title=" " alt="" coords="1162,478,1273,480,1273,486,1162,483"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af17cb6c6a44ef5b725b5e32107296dba" id="r_af17cb6c6a44ef5b725b5e32107296dba"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af17cb6c6a44ef5b725b5e32107296dba">StateMachine</a> (std::set&lt; std::string &gt; <a class="el" href="classyasmin_1_1State.html#a88bfac0491ea9c8987addc9c7009b550">outcomes</a>)</td></tr>
+<tr class="memdesc:af17cb6c6a44ef5b725b5e32107296dba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new <a class="el" href="classyasmin_1_1StateMachine.html" title="A class that implements a state machine with a set of states, transitions, and callback mechanisms fo...">StateMachine</a> object.  <br /></td></tr>
 <tr class="separator:af17cb6c6a44ef5b725b5e32107296dba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a738a0b240069ecaecaae4d7577fbdad9" id="r_a738a0b240069ecaecaae4d7577fbdad9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a738a0b240069ecaecaae4d7577fbdad9">add_state</a> (std::string name, std::shared_ptr&lt; <a class="el" href="classyasmin_1_1State.html">State</a> &gt; state, std::map&lt; std::string, std::string &gt; transitions)</td></tr>
+<tr class="memitem:a738a0b240069ecaecaae4d7577fbdad9" id="r_a738a0b240069ecaecaae4d7577fbdad9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a738a0b240069ecaecaae4d7577fbdad9">add_state</a> (std::string name, std::shared_ptr&lt; <a class="el" href="classyasmin_1_1State.html">State</a> &gt; state, std::map&lt; std::string, std::string &gt; <a class="el" href="#aa00eead7d9c2d1e4570b45f18a9a7da1">transitions</a>)</td></tr>
+<tr class="memdesc:a738a0b240069ecaecaae4d7577fbdad9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a state to the state machine with specified transitions.  <br /></td></tr>
 <tr class="separator:a738a0b240069ecaecaae4d7577fbdad9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab16f8ab59149459b64984782e24ea6c5" id="r_ab16f8ab59149459b64984782e24ea6c5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab16f8ab59149459b64984782e24ea6c5">add_state</a> (std::string name, std::shared_ptr&lt; <a class="el" href="classyasmin_1_1State.html">State</a> &gt; state)</td></tr>
+<tr class="memdesc:ab16f8ab59149459b64984782e24ea6c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a state to the state machine without transitions.  <br /></td></tr>
 <tr class="separator:ab16f8ab59149459b64984782e24ea6c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf2bc07558dfa102b24c2a6a6dbc360c" id="r_acf2bc07558dfa102b24c2a6a6dbc360c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf2bc07558dfa102b24c2a6a6dbc360c">set_start_state</a> (std::string state_name)</td></tr>
+<tr class="memdesc:acf2bc07558dfa102b24c2a6a6dbc360c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the start state for the state machine.  <br /></td></tr>
 <tr class="separator:acf2bc07558dfa102b24c2a6a6dbc360c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab7a6e84b47ed4312a63a446c2b3ffde6" id="r_ab7a6e84b47ed4312a63a446c2b3ffde6"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab7a6e84b47ed4312a63a446c2b3ffde6">get_start_state</a> ()</td></tr>
+<tr class="memdesc:ab7a6e84b47ed4312a63a446c2b3ffde6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the name of the start state.  <br /></td></tr>
 <tr class="separator:ab7a6e84b47ed4312a63a446c2b3ffde6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea692a3240b794c43e400a97cd848a7d" id="r_aea692a3240b794c43e400a97cd848a7d"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::string, std::shared_ptr&lt; <a class="el" href="classyasmin_1_1State.html">State</a> &gt; &gt; const &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea692a3240b794c43e400a97cd848a7d">get_states</a> ()</td></tr>
+<tr class="memdesc:aea692a3240b794c43e400a97cd848a7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a constant reference to the map of states.  <br /></td></tr>
 <tr class="separator:aea692a3240b794c43e400a97cd848a7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b4a4f20cb036925c01c94c3d88c5313" id="r_a7b4a4f20cb036925c01c94c3d88c5313"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::string, std::map&lt; std::string, std::string &gt; &gt; const &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b4a4f20cb036925c01c94c3d88c5313">get_transitions</a> ()</td></tr>
+<tr class="memdesc:a7b4a4f20cb036925c01c94c3d88c5313"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a constant reference to the map of transitions.  <br /></td></tr>
 <tr class="separator:a7b4a4f20cb036925c01c94c3d88c5313"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a291a93c96f96bfd30a37dfd13a9e4bdf" id="r_a291a93c96f96bfd30a37dfd13a9e4bdf"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a291a93c96f96bfd30a37dfd13a9e4bdf">get_current_state</a> ()</td></tr>
+<tr class="memdesc:a291a93c96f96bfd30a37dfd13a9e4bdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the current state name.  <br /></td></tr>
 <tr class="separator:a291a93c96f96bfd30a37dfd13a9e4bdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a9b78423ec112ec833f5fe54ae6c27e" id="r_a8a9b78423ec112ec833f5fe54ae6c27e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a9b78423ec112ec833f5fe54ae6c27e">add_start_cb</a> (StartCallbackType cb, std::vector&lt; std::string &gt; args={})</td></tr>
+<tr class="memitem:a8a9b78423ec112ec833f5fe54ae6c27e" id="r_a8a9b78423ec112ec833f5fe54ae6c27e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a9b78423ec112ec833f5fe54ae6c27e">add_start_cb</a> (<a class="el" href="#adec291e248ecafa22b66ae7a74a11ae3">StartCallbackType</a> cb, std::vector&lt; std::string &gt; args={})</td></tr>
+<tr class="memdesc:a8a9b78423ec112ec833f5fe54ae6c27e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a callback function to be called when the state machine starts.  <br /></td></tr>
 <tr class="separator:a8a9b78423ec112ec833f5fe54ae6c27e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3b2d4918664815deb8d9e88638a16b4" id="r_af3b2d4918664815deb8d9e88638a16b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af3b2d4918664815deb8d9e88638a16b4">add_transition_cb</a> (TransitionCallbackType cb, std::vector&lt; std::string &gt; args={})</td></tr>
+<tr class="memitem:af3b2d4918664815deb8d9e88638a16b4" id="r_af3b2d4918664815deb8d9e88638a16b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af3b2d4918664815deb8d9e88638a16b4">add_transition_cb</a> (<a class="el" href="#a19e6b40f2a25c21a707096ed3b7ba481">TransitionCallbackType</a> cb, std::vector&lt; std::string &gt; args={})</td></tr>
+<tr class="memdesc:af3b2d4918664815deb8d9e88638a16b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a callback function for state transitions.  <br /></td></tr>
 <tr class="separator:af3b2d4918664815deb8d9e88638a16b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b10b2ce1898037fedfc83113ae05078" id="r_a8b10b2ce1898037fedfc83113ae05078"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b10b2ce1898037fedfc83113ae05078">add_end_cb</a> (EndCallbackType cb, std::vector&lt; std::string &gt; args={})</td></tr>
+<tr class="memitem:a8b10b2ce1898037fedfc83113ae05078" id="r_a8b10b2ce1898037fedfc83113ae05078"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b10b2ce1898037fedfc83113ae05078">add_end_cb</a> (<a class="el" href="#a4972620f374524162cd70f83339eaddf">EndCallbackType</a> cb, std::vector&lt; std::string &gt; args={})</td></tr>
+<tr class="memdesc:a8b10b2ce1898037fedfc83113ae05078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a callback function to be called when the state machine ends.  <br /></td></tr>
 <tr class="separator:a8b10b2ce1898037fedfc83113ae05078"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a700de49294d566933858bb6b044c31" id="r_a1a700de49294d566933858bb6b044c31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1a700de49294d566933858bb6b044c31">call_start_cbs</a> (std::shared_ptr&lt; <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">yasmin::blackboard::Blackboard</a> &gt; blackboard, const std::string &amp;start_state)</td></tr>
+<tr class="memitem:a1a700de49294d566933858bb6b044c31" id="r_a1a700de49294d566933858bb6b044c31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1a700de49294d566933858bb6b044c31">call_start_cbs</a> (std::shared_ptr&lt; <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">yasmin::blackboard::Blackboard</a> &gt; blackboard, const std::string &amp;<a class="el" href="#a9fa44a4dabe9b4c7791ef50282df5e15">start_state</a>)</td></tr>
+<tr class="memdesc:a1a700de49294d566933858bb6b044c31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls start callbacks with the given blackboard and start state.  <br /></td></tr>
 <tr class="separator:a1a700de49294d566933858bb6b044c31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85bc581a07b2b19172f21436d1e775c2" id="r_a85bc581a07b2b19172f21436d1e775c2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85bc581a07b2b19172f21436d1e775c2">call_transition_cbs</a> (std::shared_ptr&lt; <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">yasmin::blackboard::Blackboard</a> &gt; blackboard, const std::string &amp;from_state, const std::string &amp;to_state, const std::string &amp;outcome)</td></tr>
+<tr class="memdesc:a85bc581a07b2b19172f21436d1e775c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls transition callbacks when transitioning between states.  <br /></td></tr>
 <tr class="separator:a85bc581a07b2b19172f21436d1e775c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4664f1eb401366e959dc7c1cadf1ac0" id="r_af4664f1eb401366e959dc7c1cadf1ac0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af4664f1eb401366e959dc7c1cadf1ac0">call_end_cbs</a> (std::shared_ptr&lt; <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">yasmin::blackboard::Blackboard</a> &gt; blackboard, const std::string &amp;outcome)</td></tr>
+<tr class="memdesc:af4664f1eb401366e959dc7c1cadf1ac0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls end callbacks with the given blackboard and outcome.  <br /></td></tr>
 <tr class="separator:af4664f1eb401366e959dc7c1cadf1ac0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a313d2ff62b94d8370614a7cdb41301e9" id="r_a313d2ff62b94d8370614a7cdb41301e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a313d2ff62b94d8370614a7cdb41301e9">validate</a> ()</td></tr>
+<tr class="memdesc:a313d2ff62b94d8370614a7cdb41301e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates the state machine configuration.  <br /></td></tr>
 <tr class="separator:a313d2ff62b94d8370614a7cdb41301e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23c788ba8c7e021ace6bdeabe729f26d" id="r_a23c788ba8c7e021ace6bdeabe729f26d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a23c788ba8c7e021ace6bdeabe729f26d">execute</a> (std::shared_ptr&lt; <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">blackboard::Blackboard</a> &gt; blackboard) override</td></tr>
+<tr class="memdesc:a23c788ba8c7e021ace6bdeabe729f26d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the state machine.  <br /></td></tr>
 <tr class="separator:a23c788ba8c7e021ace6bdeabe729f26d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11378410888e2a3acc67da37303fed3a" id="r_a11378410888e2a3acc67da37303fed3a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a11378410888e2a3acc67da37303fed3a">execute</a> ()</td></tr>
+<tr class="memdesc:a11378410888e2a3acc67da37303fed3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the state machine using a default blackboard.  <br /></td></tr>
 <tr class="separator:a11378410888e2a3acc67da37303fed3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f4c79f39edab76abb832b816b38ec75" id="r_a3f4c79f39edab76abb832b816b38ec75"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f4c79f39edab76abb832b816b38ec75">operator()</a> ()</td></tr>
+<tr class="memdesc:a3f4c79f39edab76abb832b816b38ec75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Invokes the state machine using a default blackboard.  <br /></td></tr>
 <tr class="separator:a3f4c79f39edab76abb832b816b38ec75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af8b61b5359fb1c5bbf2a20e92bdd8abb" id="r_af8b61b5359fb1c5bbf2a20e92bdd8abb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af8b61b5359fb1c5bbf2a20e92bdd8abb">cancel_state</a> () override</td></tr>
+<tr class="memdesc:af8b61b5359fb1c5bbf2a20e92bdd8abb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cancels the current state execution.  <br /></td></tr>
 <tr class="separator:af8b61b5359fb1c5bbf2a20e92bdd8abb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8526dad48b4dae3746dd5a511097d43" id="r_ae8526dad48b4dae3746dd5a511097d43"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae8526dad48b4dae3746dd5a511097d43">to_string</a> ()</td></tr>
+<tr class="memdesc:ae8526dad48b4dae3746dd5a511097d43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts the state machine to a string representation.  <br /></td></tr>
 <tr class="separator:ae8526dad48b4dae3746dd5a511097d43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classyasmin_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classyasmin_1_1State')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classyasmin_1_1State.html">yasmin::State</a></td></tr>
 <tr class="memitem:a99401305d1648ff131344229e72cdf35 inherit pub_methods_classyasmin_1_1State" id="r_a99401305d1648ff131344229e72cdf35"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1State.html#a99401305d1648ff131344229e72cdf35">State</a> (std::set&lt; std::string &gt; <a class="el" href="classyasmin_1_1State.html#a88bfac0491ea9c8987addc9c7009b550">outcomes</a>)</td></tr>
+<tr class="memdesc:a99401305d1648ff131344229e72cdf35 inherit pub_methods_classyasmin_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a <a class="el" href="classyasmin_1_1State.html" title="Represents a state in a state machine.">State</a> with a set of possible outcomes.  <br /></td></tr>
 <tr class="separator:a99401305d1648ff131344229e72cdf35 inherit pub_methods_classyasmin_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff4dcd836ceabddff649006c204df6a9 inherit pub_methods_classyasmin_1_1State" id="r_aff4dcd836ceabddff649006c204df6a9"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1State.html#aff4dcd836ceabddff649006c204df6a9">operator()</a> (std::shared_ptr&lt; <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">blackboard::Blackboard</a> &gt; blackboard)</td></tr>
+<tr class="memdesc:aff4dcd836ceabddff649006c204df6a9 inherit pub_methods_classyasmin_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the state and returns the outcome.  <br /></td></tr>
 <tr class="separator:aff4dcd836ceabddff649006c204df6a9 inherit pub_methods_classyasmin_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2cf9aa360eb0036d4e20d3aaa0cddcd3 inherit pub_methods_classyasmin_1_1State" id="r_a2cf9aa360eb0036d4e20d3aaa0cddcd3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1State.html#a2cf9aa360eb0036d4e20d3aaa0cddcd3">is_canceled</a> () const</td></tr>
+<tr class="memdesc:a2cf9aa360eb0036d4e20d3aaa0cddcd3 inherit pub_methods_classyasmin_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the state has been canceled.  <br /></td></tr>
 <tr class="separator:a2cf9aa360eb0036d4e20d3aaa0cddcd3 inherit pub_methods_classyasmin_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac98335d292943beb701c267e93891995 inherit pub_methods_classyasmin_1_1State" id="r_ac98335d292943beb701c267e93891995"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1State.html#ac98335d292943beb701c267e93891995">is_running</a> () const</td></tr>
+<tr class="memdesc:ac98335d292943beb701c267e93891995 inherit pub_methods_classyasmin_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the state is currently running.  <br /></td></tr>
 <tr class="separator:ac98335d292943beb701c267e93891995 inherit pub_methods_classyasmin_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a84797445dd8a01bbc7009bf70e0c5c3b inherit pub_methods_classyasmin_1_1State" id="r_a84797445dd8a01bbc7009bf70e0c5c3b"><td class="memItemLeft" align="right" valign="top">std::set&lt; std::string &gt; const &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1State.html#a84797445dd8a01bbc7009bf70e0c5c3b">get_outcomes</a> ()</td></tr>
+<tr class="memdesc:a84797445dd8a01bbc7009bf70e0c5c3b inherit pub_methods_classyasmin_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the set of possible outcomes for this state.  <br /></td></tr>
 <tr class="separator:a84797445dd8a01bbc7009bf70e0c5c3b inherit pub_methods_classyasmin_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private Types</h2></td></tr>
+<tr class="memitem:adec291e248ecafa22b66ae7a74a11ae3" id="r_adec291e248ecafa22b66ae7a74a11ae3"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adec291e248ecafa22b66ae7a74a11ae3">StartCallbackType</a></td></tr>
+<tr class="separator:adec291e248ecafa22b66ae7a74a11ae3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19e6b40f2a25c21a707096ed3b7ba481" id="r_a19e6b40f2a25c21a707096ed3b7ba481"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a19e6b40f2a25c21a707096ed3b7ba481">TransitionCallbackType</a></td></tr>
+<tr class="separator:a19e6b40f2a25c21a707096ed3b7ba481"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4972620f374524162cd70f83339eaddf" id="r_a4972620f374524162cd70f83339eaddf"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4972620f374524162cd70f83339eaddf">EndCallbackType</a></td></tr>
+<tr class="separator:a4972620f374524162cd70f83339eaddf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a5dc20da167d0b4c439d41016d9c2a22d" id="r_a5dc20da167d0b4c439d41016d9c2a22d"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::string, std::shared_ptr&lt; <a class="el" href="classyasmin_1_1State.html">State</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5dc20da167d0b4c439d41016d9c2a22d">states</a></td></tr>
+<tr class="memdesc:a5dc20da167d0b4c439d41016d9c2a22d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map of states.  <br /></td></tr>
+<tr class="separator:a5dc20da167d0b4c439d41016d9c2a22d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa00eead7d9c2d1e4570b45f18a9a7da1" id="r_aa00eead7d9c2d1e4570b45f18a9a7da1"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::string, std::map&lt; std::string, std::string &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa00eead7d9c2d1e4570b45f18a9a7da1">transitions</a></td></tr>
+<tr class="memdesc:aa00eead7d9c2d1e4570b45f18a9a7da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map of transitions.  <br /></td></tr>
+<tr class="separator:aa00eead7d9c2d1e4570b45f18a9a7da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fa44a4dabe9b4c7791ef50282df5e15" id="r_a9fa44a4dabe9b4c7791ef50282df5e15"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9fa44a4dabe9b4c7791ef50282df5e15">start_state</a></td></tr>
+<tr class="memdesc:a9fa44a4dabe9b4c7791ef50282df5e15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the start state.  <br /></td></tr>
+<tr class="separator:a9fa44a4dabe9b4c7791ef50282df5e15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25516d4297e07b3286eafa7a703e1e9a" id="r_a25516d4297e07b3286eafa7a703e1e9a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a25516d4297e07b3286eafa7a703e1e9a">current_state</a></td></tr>
+<tr class="memdesc:a25516d4297e07b3286eafa7a703e1e9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the current state.  <br /></td></tr>
+<tr class="separator:a25516d4297e07b3286eafa7a703e1e9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00aa0351ac86ba15f32ec87f53c30229" id="r_a00aa0351ac86ba15f32ec87f53c30229"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; std::mutex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00aa0351ac86ba15f32ec87f53c30229">current_state_mutex</a></td></tr>
+<tr class="memdesc:a00aa0351ac86ba15f32ec87f53c30229"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex for current state access.  <br /></td></tr>
+<tr class="separator:a00aa0351ac86ba15f32ec87f53c30229"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9169917ac5f541501bead757fe92a7c" id="r_af9169917ac5f541501bead757fe92a7c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; <a class="el" href="#adec291e248ecafa22b66ae7a74a11ae3">StartCallbackType</a>, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9169917ac5f541501bead757fe92a7c">start_cbs</a></td></tr>
+<tr class="memdesc:af9169917ac5f541501bead757fe92a7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start callbacks.  <br /></td></tr>
+<tr class="separator:af9169917ac5f541501bead757fe92a7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b5d2108a3bbd738201611aa8e098ee1" id="r_a8b5d2108a3bbd738201611aa8e098ee1"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; <a class="el" href="#a19e6b40f2a25c21a707096ed3b7ba481">TransitionCallbackType</a>, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b5d2108a3bbd738201611aa8e098ee1">transition_cbs</a></td></tr>
+<tr class="memdesc:a8b5d2108a3bbd738201611aa8e098ee1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transition callbacks.  <br /></td></tr>
+<tr class="separator:a8b5d2108a3bbd738201611aa8e098ee1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18c3e572cdb26df60dffc474a7b449b1" id="r_a18c3e572cdb26df60dffc474a7b449b1"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; <a class="el" href="#a4972620f374524162cd70f83339eaddf">EndCallbackType</a>, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18c3e572cdb26df60dffc474a7b449b1">end_cbs</a></td></tr>
+<tr class="memdesc:a18c3e572cdb26df60dffc474a7b449b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">End callbacks.  <br /></td></tr>
+<tr class="separator:a18c3e572cdb26df60dffc474a7b449b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1State.html">yasmin::State</a></td></tr>
 <tr class="memitem:a88bfac0491ea9c8987addc9c7009b550 inherit pro_attribs_classyasmin_1_1State" id="r_a88bfac0491ea9c8987addc9c7009b550"><td class="memItemLeft" align="right" valign="top">std::set&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1State.html#a88bfac0491ea9c8987addc9c7009b550">outcomes</a></td></tr>
+<tr class="memdesc:a88bfac0491ea9c8987addc9c7009b550 inherit pro_attribs_classyasmin_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">The possible outcomes of this state.  <br /></td></tr>
 <tr class="separator:a88bfac0491ea9c8987addc9c7009b550 inherit pro_attribs_classyasmin_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A class that implements a state machine with a set of states, transitions, and callback mechanisms for state changes. </p>
+<p>The <a class="el" href="classyasmin_1_1StateMachine.html" title="A class that implements a state machine with a set of states, transitions, and callback mechanisms fo...">StateMachine</a> class inherits from the <a class="el" href="classyasmin_1_1State.html" title="Represents a state in a state machine.">State</a> class and allows the registration of states with their respective transitions and callbacks for start, transition, and end events. </p>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="a4972620f374524162cd70f83339eaddf" name="a4972620f374524162cd70f83339eaddf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4972620f374524162cd70f83339eaddf">&#9670;&#160;</a></span>EndCallbackType</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="#a4972620f374524162cd70f83339eaddf">yasmin::StateMachine::EndCallbackType</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line"> std::function&lt;void(</div>
+<div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt;, <span class="keyword">const</span> std::string &amp;,</div>
+<div class="line">      <span class="keyword">const</span> std::vector&lt;std::string&gt; &amp;)&gt;</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="adec291e248ecafa22b66ae7a74a11ae3" name="adec291e248ecafa22b66ae7a74a11ae3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adec291e248ecafa22b66ae7a74a11ae3">&#9670;&#160;</a></span>StartCallbackType</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="#adec291e248ecafa22b66ae7a74a11ae3">yasmin::StateMachine::StartCallbackType</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line"> std::function&lt;void(</div>
+<div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt;, <span class="keyword">const</span> std::string &amp;,</div>
+<div class="line">      <span class="keyword">const</span> std::vector&lt;std::string&gt; &amp;)&gt;</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a19e6b40f2a25c21a707096ed3b7ba481" name="a19e6b40f2a25c21a707096ed3b7ba481"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19e6b40f2a25c21a707096ed3b7ba481">&#9670;&#160;</a></span>TransitionCallbackType</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="#a19e6b40f2a25c21a707096ed3b7ba481">yasmin::StateMachine::TransitionCallbackType</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line"> std::function&lt;void(</div>
+<div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt;, <span class="keyword">const</span> std::string &amp;,</div>
+<div class="line">      <span class="keyword">const</span> std::string &amp;, <span class="keyword">const</span> std::string &amp;,</div>
+<div class="line">      <span class="keyword">const</span> std::vector&lt;std::string&gt; &amp;)&gt;</div>
+</div><!-- fragment -->
+</div>
+</div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af17cb6c6a44ef5b725b5e32107296dba" name="af17cb6c6a44ef5b725b5e32107296dba"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af17cb6c6a44ef5b725b5e32107296dba">&#9670;&#160;</a></span>StateMachine()</h2>
@@ -200,6 +378,14 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Construct a new <a class="el" href="classyasmin_1_1StateMachine.html" title="A class that implements a state machine with a set of states, transitions, and callback mechanisms fo...">StateMachine</a> object. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">outcomes</td><td>A set of possible outcomes for the state machine. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -212,7 +398,7 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname">void StateMachine::add_end_cb </td>
           <td>(</td>
-          <td class="paramtype">EndCallbackType</td>          <td class="paramname"><span class="paramname"><em>cb</em></span>, </td>
+          <td class="paramtype"><a class="el" href="#a4972620f374524162cd70f83339eaddf">EndCallbackType</a></td>          <td class="paramname"><span class="paramname"><em>cb</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -221,6 +407,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Adds a callback function to be called when the state machine ends. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cb</td><td>The callback function to execute. </td></tr>
+    <tr><td class="paramname">args</td><td>Optional arguments to pass to the callback. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -233,7 +428,7 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname">void StateMachine::add_start_cb </td>
           <td>(</td>
-          <td class="paramtype">StartCallbackType</td>          <td class="paramname"><span class="paramname"><em>cb</em></span>, </td>
+          <td class="paramtype"><a class="el" href="#adec291e248ecafa22b66ae7a74a11ae3">StartCallbackType</a></td>          <td class="paramname"><span class="paramname"><em>cb</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -242,6 +437,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Adds a callback function to be called when the state machine starts. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cb</td><td>The callback function to execute. </td></tr>
+    <tr><td class="paramname">args</td><td>Optional arguments to pass to the callback. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -263,6 +467,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Adds a state to the state machine without transitions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>The name of the state. </td></tr>
+    <tr><td class="paramname">state</td><td>A shared pointer to the <a class="el" href="classyasmin_1_1State.html" title="Represents a state in a state machine.">State</a> object representing the new state. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -290,6 +503,23 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Adds a state to the state machine with specified transitions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>The name of the state. </td></tr>
+    <tr><td class="paramname">state</td><td>A shared pointer to the <a class="el" href="classyasmin_1_1State.html" title="Represents a state in a state machine.">State</a> object representing the new state. </td></tr>
+    <tr><td class="paramname">transitions</td><td>A map of transitions where the key is the outcome and the value is the target state name. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::logic_error</td><td>If the state is already registered. </td></tr>
+    <tr><td class="paramname">std::invalid_argument</td><td>If any transition has empty source or target, or references unregistered outcomes. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="af3b2d4918664815deb8d9e88638a16b4" name="af3b2d4918664815deb8d9e88638a16b4"></a>
@@ -301,7 +531,7 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname">void StateMachine::add_transition_cb </td>
           <td>(</td>
-          <td class="paramtype">TransitionCallbackType</td>          <td class="paramname"><span class="paramname"><em>cb</em></span>, </td>
+          <td class="paramtype"><a class="el" href="#a19e6b40f2a25c21a707096ed3b7ba481">TransitionCallbackType</a></td>          <td class="paramname"><span class="paramname"><em>cb</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -310,6 +540,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Adds a callback function for state transitions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cb</td><td>The callback function to execute. </td></tr>
+    <tr><td class="paramname">args</td><td>Optional arguments to pass to the callback. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -332,6 +571,15 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Calls end callbacks with the given blackboard and outcome. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blackboard</td><td>A shared pointer to the blackboard. </td></tr>
+    <tr><td class="paramname">outcome</td><td>The outcome when the state machine ends. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a1a700de49294d566933858bb6b044c31" name="a1a700de49294d566933858bb6b044c31"></a>
@@ -352,6 +600,15 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Calls start callbacks with the given blackboard and start state. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blackboard</td><td>A shared pointer to the blackboard. </td></tr>
+    <tr><td class="paramname">start_state</td><td>The name of the start state. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -384,6 +641,17 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Calls transition callbacks when transitioning between states. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blackboard</td><td>A shared pointer to the blackboard. </td></tr>
+    <tr><td class="paramname">from_state</td><td>The state being transitioned from. </td></tr>
+    <tr><td class="paramname">to_state</td><td>The state being transitioned to. </td></tr>
+    <tr><td class="paramname">outcome</td><td>The outcome that triggered the transition. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="af8b61b5359fb1c5bbf2a20e92bdd8abb" name="af8b61b5359fb1c5bbf2a20e92bdd8abb"></a>
@@ -409,6 +677,8 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Cancels the current state execution. </p>
+
 <p>Reimplemented from <a class="el" href="classyasmin_1_1State.html#ae14b86eb035aca0290c355c35435caa3">yasmin::State</a>.</p>
 
 </div>
@@ -427,6 +697,9 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Executes the state machine using a default blackboard. </p>
+<dl class="section return"><dt>Returns</dt><dd>The outcome of the state machine execution. </dd></dl>
 
 </div>
 </div>
@@ -453,6 +726,21 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Executes the state machine. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">blackboard</td><td>A shared pointer to the blackboard used during execution. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The outcome of the state machine execution. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::runtime_error</td><td>If the execution cannot be completed due to invalid states or transitions. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p>Reimplemented from <a class="el" href="classyasmin_1_1State.html#a75e278d4aabe7a7921eae527ce72a595">yasmin::State</a>.</p>
 
 </div>
@@ -472,6 +760,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Retrieves the current state name. </p>
+<dl class="section return"><dt>Returns</dt><dd>The name of the current state. </dd></dl>
+
 </div>
 </div>
 <a id="ab7a6e84b47ed4312a63a446c2b3ffde6" name="ab7a6e84b47ed4312a63a446c2b3ffde6"></a>
@@ -488,6 +779,9 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Retrieves the name of the start state. </p>
+<dl class="section return"><dt>Returns</dt><dd>The name of the start state. </dd></dl>
 
 </div>
 </div>
@@ -506,6 +800,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Gets a constant reference to the map of states. </p>
+<dl class="section return"><dt>Returns</dt><dd>A constant reference to the map of states. </dd></dl>
+
 </div>
 </div>
 <a id="a7b4a4f20cb036925c01c94c3d88c5313" name="a7b4a4f20cb036925c01c94c3d88c5313"></a>
@@ -522,6 +819,9 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Gets a constant reference to the map of transitions. </p>
+<dl class="section return"><dt>Returns</dt><dd>A constant reference to the map of transitions. </dd></dl>
 
 </div>
 </div>
@@ -540,6 +840,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Invokes the state machine using a default blackboard. </p>
+<dl class="section return"><dt>Returns</dt><dd>The outcome of the state machine execution. </dd></dl>
+
 </div>
 </div>
 <a id="acf2bc07558dfa102b24c2a6a6dbc360c" name="acf2bc07558dfa102b24c2a6a6dbc360c"></a>
@@ -556,6 +859,20 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Sets the start state for the state machine. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state_name</td><td>The name of the state to set as the start state. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>If the state name is empty or not registered. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -582,6 +899,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Converts the state machine to a string representation. </p>
+<dl class="section return"><dt>Returns</dt><dd>A string describing the state machine and its states. </dd></dl>
+
 <p>Reimplemented from <a class="el" href="classyasmin_1_1State.html#ae05ce1db267d16649f56fdf82a74778c">yasmin::State</a>.</p>
 
 </div>
@@ -600,6 +920,207 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Validates the state machine configuration. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::runtime_error</td><td>If the state machine is misconfigured. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a25516d4297e07b3286eafa7a703e1e9a" name="a25516d4297e07b3286eafa7a703e1e9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25516d4297e07b3286eafa7a703e1e9a">&#9670;&#160;</a></span>current_state</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string yasmin::StateMachine::current_state</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Name of the current state. </p>
+
+</div>
+</div>
+<a id="a00aa0351ac86ba15f32ec87f53c30229" name="a00aa0351ac86ba15f32ec87f53c30229"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00aa0351ac86ba15f32ec87f53c30229">&#9670;&#160;</a></span>current_state_mutex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt;std::mutex&gt; yasmin::StateMachine::current_state_mutex</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mutex for current state access. </p>
+
+</div>
+</div>
+<a id="a18c3e572cdb26df60dffc474a7b449b1" name="a18c3e572cdb26df60dffc474a7b449b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18c3e572cdb26df60dffc474a7b449b1">&#9670;&#160;</a></span>end_cbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::pair&lt;<a class="el" href="#a4972620f374524162cd70f83339eaddf">EndCallbackType</a>, std::vector&lt;std::string&gt; &gt; &gt; yasmin::StateMachine::end_cbs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>End callbacks. </p>
+
+</div>
+</div>
+<a id="af9169917ac5f541501bead757fe92a7c" name="af9169917ac5f541501bead757fe92a7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9169917ac5f541501bead757fe92a7c">&#9670;&#160;</a></span>start_cbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::pair&lt;<a class="el" href="#adec291e248ecafa22b66ae7a74a11ae3">StartCallbackType</a>, std::vector&lt;std::string&gt; &gt; &gt; yasmin::StateMachine::start_cbs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Start callbacks. </p>
+
+</div>
+</div>
+<a id="a9fa44a4dabe9b4c7791ef50282df5e15" name="a9fa44a4dabe9b4c7791ef50282df5e15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fa44a4dabe9b4c7791ef50282df5e15">&#9670;&#160;</a></span>start_state</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string yasmin::StateMachine::start_state</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Name of the start state. </p>
+
+</div>
+</div>
+<a id="a5dc20da167d0b4c439d41016d9c2a22d" name="a5dc20da167d0b4c439d41016d9c2a22d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5dc20da167d0b4c439d41016d9c2a22d">&#9670;&#160;</a></span>states</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::string, std::shared_ptr&lt;<a class="el" href="classyasmin_1_1State.html">State</a>&gt; &gt; yasmin::StateMachine::states</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Map of states. </p>
+
+</div>
+</div>
+<a id="a8b5d2108a3bbd738201611aa8e098ee1" name="a8b5d2108a3bbd738201611aa8e098ee1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b5d2108a3bbd738201611aa8e098ee1">&#9670;&#160;</a></span>transition_cbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::pair&lt;<a class="el" href="#a19e6b40f2a25c21a707096ed3b7ba481">TransitionCallbackType</a>, std::vector&lt;std::string&gt; &gt; &gt; yasmin::StateMachine::transition_cbs</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Transition callbacks. </p>
+
+</div>
+</div>
+<a id="aa00eead7d9c2d1e4570b45f18a9a7da1" name="aa00eead7d9c2d1e4570b45f18a9a7da1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa00eead7d9c2d1e4570b45f18a9a7da1">&#9670;&#160;</a></span>transitions</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::string, std::map&lt;std::string, std::string&gt; &gt; yasmin::StateMachine::transitions</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Map of transitions. </p>
 
 </div>
 </div>

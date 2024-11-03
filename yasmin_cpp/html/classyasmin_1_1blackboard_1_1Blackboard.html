@@ -91,37 +91,80 @@ $(function(){ initResizable(false); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classyasmin_1_1blackboard_1_1Blackboard-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin::blackboard::Blackboard Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
+<p>A thread-safe storage for key-value pairs of varying types.  
+ <a href="#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="blackboard_8hpp_source.html">blackboard.hpp</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for yasmin::blackboard::Blackboard:</div>
+<div class="dyncontent">
+<div class="center"><img src="classyasmin_1_1blackboard_1_1Blackboard__coll__graph.png" border="0" usemap="#ayasmin_1_1blackboard_1_1Blackboard_coll__map" alt="Collaboration graph"/></div>
+<map name="ayasmin_1_1blackboard_1_1Blackboard_coll__map" id="ayasmin_1_1blackboard_1_1Blackboard_coll__map">
+<area shape="rect" title="A thread&#45;safe storage for key&#45;value pairs of varying types." alt="" coords="737,30,868,70"/>
+<area shape="rect" title=" " alt="" coords="483,5,623,31"/>
+<area shape="poly" title=" " alt="" coords="639,26,737,39,736,44,638,32"/>
+<area shape="rect" title=" " alt="" coords="458,56,648,111"/>
+<area shape="poly" title=" " alt="" coords="663,66,736,56,736,62,664,71"/>
+<area shape="rect" title=" " alt="" coords="228,36,305,62"/>
+<area shape="poly" title=" " alt="" coords="321,53,458,69,458,75,320,58"/>
+<area shape="rect" title=" " alt="" coords="5,28,129,69"/>
+<area shape="poly" title=" " alt="" coords="144,46,227,46,227,52,144,52"/>
+<area shape="rect" href="classyasmin_1_1blackboard_1_1BlackboardValueInterface.html" title="Interface for blackboard value types." alt="" coords="178,86,354,126"/>
+<area shape="poly" title=" " alt="" coords="370,101,434,97,458,95,459,100,435,102,370,107"/>
+</map>
+<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a83b8477e21df0582ed1b57527f4631af" id="r_a83b8477e21df0582ed1b57527f4631af"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83b8477e21df0582ed1b57527f4631af">Blackboard</a> ()</td></tr>
+<tr class="memdesc:a83b8477e21df0582ed1b57527f4631af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor for <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html" title="A thread-safe storage for key-value pairs of varying types.">Blackboard</a>.  <br /></td></tr>
 <tr class="separator:a83b8477e21df0582ed1b57527f4631af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73f399ba63211a23279ee4eece49a81f" id="r_a73f399ba63211a23279ee4eece49a81f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73f399ba63211a23279ee4eece49a81f">Blackboard</a> (const <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a> &amp;other)</td></tr>
+<tr class="memdesc:a73f399ba63211a23279ee4eece49a81f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor for <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html" title="A thread-safe storage for key-value pairs of varying types.">Blackboard</a>.  <br /></td></tr>
 <tr class="separator:a73f399ba63211a23279ee4eece49a81f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0c7a3c8f1d8074679b178631c262298" id="r_ad0c7a3c8f1d8074679b178631c262298"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad0c7a3c8f1d8074679b178631c262298">~Blackboard</a> ()</td></tr>
+<tr class="memdesc:ad0c7a3c8f1d8074679b178631c262298"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor for <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html" title="A thread-safe storage for key-value pairs of varying types.">Blackboard</a>.  <br /></td></tr>
 <tr class="separator:ad0c7a3c8f1d8074679b178631c262298"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a796fd89d57249a3fa4c1e2cf6b3db60a" id="r_a796fd89d57249a3fa4c1e2cf6b3db60a"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a796fd89d57249a3fa4c1e2cf6b3db60a"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a796fd89d57249a3fa4c1e2cf6b3db60a">get</a> (std::string name)</td></tr>
+<tr class="memdesc:a796fd89d57249a3fa4c1e2cf6b3db60a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve a value from the blackboard.  <br /></td></tr>
 <tr class="separator:a796fd89d57249a3fa4c1e2cf6b3db60a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64db86d298db6460f53a30caba89e2cc" id="r_a64db86d298db6460f53a30caba89e2cc"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a64db86d298db6460f53a30caba89e2cc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a64db86d298db6460f53a30caba89e2cc">set</a> (std::string name, T value)</td></tr>
+<tr class="memdesc:a64db86d298db6460f53a30caba89e2cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a value in the blackboard.  <br /></td></tr>
 <tr class="separator:a64db86d298db6460f53a30caba89e2cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af083917aa9f4a8684df7e31e2f7e0168" id="r_af083917aa9f4a8684df7e31e2f7e0168"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af083917aa9f4a8684df7e31e2f7e0168">remove</a> (std::string name)</td></tr>
+<tr class="memdesc:af083917aa9f4a8684df7e31e2f7e0168"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a value from the blackboard.  <br /></td></tr>
 <tr class="separator:af083917aa9f4a8684df7e31e2f7e0168"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a846cfed8ff895e8b8a72437c144b0fad" id="r_a846cfed8ff895e8b8a72437c144b0fad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a846cfed8ff895e8b8a72437c144b0fad">contains</a> (std::string name)</td></tr>
+<tr class="memdesc:a846cfed8ff895e8b8a72437c144b0fad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a key exists in the blackboard.  <br /></td></tr>
 <tr class="separator:a846cfed8ff895e8b8a72437c144b0fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a1eceebc117e55aa4029d4cb86c7124" id="r_a6a1eceebc117e55aa4029d4cb86c7124"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6a1eceebc117e55aa4029d4cb86c7124">size</a> ()</td></tr>
+<tr class="memdesc:a6a1eceebc117e55aa4029d4cb86c7124"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of key-value pairs in the blackboard.  <br /></td></tr>
 <tr class="separator:a6a1eceebc117e55aa4029d4cb86c7124"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff72ba45c84919cfc9d90fbdde3c9bba" id="r_aff72ba45c84919cfc9d90fbdde3c9bba"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff72ba45c84919cfc9d90fbdde3c9bba">to_string</a> ()</td></tr>
+<tr class="memdesc:aff72ba45c84919cfc9d90fbdde3c9bba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert the contents of the blackboard to a string.  <br /></td></tr>
 <tr class="separator:aff72ba45c84919cfc9d90fbdde3c9bba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:aebee1e68d936130695d9f3848f359c9b" id="r_aebee1e68d936130695d9f3848f359c9b"><td class="memItemLeft" align="right" valign="top">std::recursive_mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aebee1e68d936130695d9f3848f359c9b">mutex</a></td></tr>
+<tr class="memdesc:aebee1e68d936130695d9f3848f359c9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex for thread safety.  <br /></td></tr>
+<tr class="separator:aebee1e68d936130695d9f3848f359c9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c5d5efbd5f67a00956893179e42a525" id="r_a5c5d5efbd5f67a00956893179e42a525"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::string, <a class="el" href="classyasmin_1_1blackboard_1_1BlackboardValueInterface.html">BlackboardValueInterface</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5c5d5efbd5f67a00956893179e42a525">values</a></td></tr>
+<tr class="memdesc:a5c5d5efbd5f67a00956893179e42a525"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for key-value pairs.  <br /></td></tr>
+<tr class="separator:a5c5d5efbd5f67a00956893179e42a525"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A thread-safe storage for key-value pairs of varying types. </p>
+<p>The <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html" title="A thread-safe storage for key-value pairs of varying types.">Blackboard</a> class allows storing, retrieving, and managing values associated with string keys in a thread-safe manner using a recursive mutex. Values are stored as pointers to <a class="el" href="classyasmin_1_1blackboard_1_1BlackboardValueInterface.html" title="Interface for blackboard value types.">BlackboardValueInterface</a> instances. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a83b8477e21df0582ed1b57527f4631af" name="a83b8477e21df0582ed1b57527f4631af"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a83b8477e21df0582ed1b57527f4631af">&#9670;&#160;</a></span>Blackboard() <span class="overload">[1/2]</span></h2>
 
@@ -136,6 +179,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Default constructor for <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html" title="A thread-safe storage for key-value pairs of varying types.">Blackboard</a>. </p>
 
 </div>
 </div>
@@ -154,6 +199,14 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Copy constructor for <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html" title="A thread-safe storage for key-value pairs of varying types.">Blackboard</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td>The instance to copy from. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="ad0c7a3c8f1d8074679b178631c262298" name="ad0c7a3c8f1d8074679b178631c262298"></a>
@@ -170,6 +223,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Destructor for <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html" title="A thread-safe storage for key-value pairs of varying types.">Blackboard</a>. </p>
 
 </div>
 </div>
@@ -188,6 +243,15 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Check if a key exists in the blackboard. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>The key to check. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the key exists, false otherwise. </dd></dl>
 
 </div>
 </div>
@@ -216,6 +280,27 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>Retrieve a value from the blackboard. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>The type of the value to retrieve. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>The key associated with the value. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The value associated with the specified key. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::runtime_error</td><td>if the key does not exist. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="af083917aa9f4a8684df7e31e2f7e0168" name="af083917aa9f4a8684df7e31e2f7e0168"></a>
@@ -232,6 +317,14 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Remove a value from the blackboard. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>The key associated with the value to remove. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -264,6 +357,21 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>Set a value in the blackboard. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>The type of the value to store. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>The key to associate with the value. </td></tr>
+    <tr><td class="paramname">value</td><td>The value to store. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a6a1eceebc117e55aa4029d4cb86c7124" name="a6a1eceebc117e55aa4029d4cb86c7124"></a>
@@ -281,6 +389,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
+<p>Get the number of key-value pairs in the blackboard. </p>
+<dl class="section return"><dt>Returns</dt><dd>The size of the blackboard. </dd></dl>
+
 </div>
 </div>
 <a id="aff72ba45c84919cfc9d90fbdde3c9bba" name="aff72ba45c84919cfc9d90fbdde3c9bba"></a>
@@ -297,6 +408,58 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Convert the contents of the blackboard to a string. </p>
+<dl class="section return"><dt>Returns</dt><dd>A string representation of the blackboard. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="aebee1e68d936130695d9f3848f359c9b" name="aebee1e68d936130695d9f3848f359c9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebee1e68d936130695d9f3848f359c9b">&#9670;&#160;</a></span>mutex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::recursive_mutex yasmin::blackboard::Blackboard::mutex</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mutex for thread safety. </p>
+
+</div>
+</div>
+<a id="a5c5d5efbd5f67a00956893179e42a525" name="a5c5d5efbd5f67a00956893179e42a525"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c5d5efbd5f67a00956893179e42a525">&#9670;&#160;</a></span>values</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::string, <a class="el" href="classyasmin_1_1blackboard_1_1BlackboardValueInterface.html">BlackboardValueInterface</a> *&gt; yasmin::blackboard::Blackboard::values</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Storage for key-value pairs. </p>
 
 </div>
 </div>

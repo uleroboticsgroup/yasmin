@@ -94,6 +94,7 @@ $(function(){ initResizable(false); });
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="classyasmin__ros_1_1monitor__state_1_1MonitorState-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin_ros.monitor_state.MonitorState Class Reference</div></div>
 </div><!--header-->
@@ -172,14 +173,35 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:af164ec1f6d058b2bdd7ab84dd281d7cb" id="r_af164ec1f6d058b2bdd7ab84dd281d7cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af164ec1f6d058b2bdd7ab84dd281d7cb">_sub</a></td></tr>
 <tr class="separator:af164ec1f6d058b2bdd7ab84dd281d7cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
-<tr class="memitem:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a96f5ad095d6d9b19eb9398e9a4e353eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a96f5ad095d6d9b19eb9398e9a4e353eb">_outcomes</a> = set()</td></tr>
-<tr class="separator:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a6a5b0960e11722eaa5f1a975a2b2f222"><td class="memItemLeft" align="right" valign="top">set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a6a5b0960e11722eaa5f1a975a2b2f222">_outcomes</a> = set()</td></tr>
+<tr class="separator:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_aed635b4d7a38f282ac74f415f969f783"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#aed635b4d7a38f282ac74f415f969f783">_running</a> = False</td></tr>
 <tr class="separator:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
 <tr class="separator:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:aaf04c092d94adc75e39da6fc3e7a3eb1" id="r_aaf04c092d94adc75e39da6fc3e7a3eb1"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaf04c092d94adc75e39da6fc3e7a3eb1">__callback</a> (self, msg)</td></tr>
+<tr class="separator:aaf04c092d94adc75e39da6fc3e7a3eb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><pre class="fragment">MonitorState is a state that monitors messages from a ROS topic.
+
+Attributes:
+    _node (Node): The ROS 2 node instance used for subscriptions.
+    _sub (Subscription): Subscription object for the specified topic.
+    _monitor_handler (Callable): Function to handle incoming messages.
+    _topic_name (str): The name of the topic to monitor.
+    msg_list (Set): A set of messages received from the topic.
+    msg_queue (int): The maximum number of messages to retain.
+    time_to_wait (float): Time to wait between checks for messages.
+    monitoring (bool): Flag indicating if monitoring is active.
+    _timeout (int): Timeout duration for monitoring.
+
+Exceptions:
+    None raised directly; timeout is managed via outcome handling.
+</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a29bf9ad62c98935e7e25fdcf227ce72f" name="a29bf9ad62c98935e7e25fdcf227ce72f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a29bf9ad62c98935e7e25fdcf227ce72f">&#9670;&#160;</a></span>__init__()</h2>
 
@@ -233,7 +255,21 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Initializes the MonitorState.
 
+Parameters:
+    msg_type (Type): The type of message to be monitored.
+    topic_name (str): The name of the topic to subscribe to.
+    outcomes (Set[str]): The set of possible outcomes from the state.
+    monitor_handler (Callable): The function to call with the received messages.
+    qos (Union[QoSProfile, int], optional): Quality of Service profile or depth.
+    msg_queue (int, optional): Maximum number of messages to store. Default is 10.
+    node (Node, optional): The ROS node to use. If None, a default node is created.
+    timeout (int, optional): Timeout in seconds for monitoring before giving up.
+
+Returns:
+    None
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#a5f3f8a8f6e7fd2de1b30057606271a5a">yasmin.state.State</a>.</p>
 
 <p>Reimplemented in <a class="el" href="classyasmin__demos_1_1monitor__demo_1_1PrintOdometryState.html#a0403270791dda2a8db96ecaf7a31e7da">yasmin_demos.monitor_demo.PrintOdometryState</a>.</p>
@@ -241,6 +277,44 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="aaf04c092d94adc75e39da6fc3e7a3eb1" name="aaf04c092d94adc75e39da6fc3e7a3eb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf04c092d94adc75e39da6fc3e7a3eb1">&#9670;&#160;</a></span>__callback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None yasmin_ros.monitor_state.MonitorState.__callback </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>msg</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">Callback function that handles incoming messages.
+
+This method is called when a new message is received on the monitored topic.
+
+Parameters:
+    msg: The message received from the topic.
+
+Returns:
+    None
+</pre> 
+</div>
+</div>
 <a id="a36aacf5706e180e1837c96e1fad56df6" name="a36aacf5706e180e1837c96e1fad56df6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a36aacf5706e180e1837c96e1fad56df6">&#9670;&#160;</a></span>execute()</h2>
 
@@ -259,7 +333,21 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Executes the monitoring state.
 
+This method waits for messages from the monitored topic and processes them using
+the specified monitor handler.
+
+Parameters:
+    blackboard (Blackboard): The blackboard instance that holds shared data.
+
+Returns:
+    str: The outcome of the monitoring process. Returns TIMEOUT if the monitoring
+    time exceeds the specified timeout.
+
+Exceptions:
+    None raised directly; timeouts are handled gracefully.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#a531c80a2c77722089d92e7a9c73f69d8">yasmin.state.State</a>.</p>
 
 </div>

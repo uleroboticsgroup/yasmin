@@ -179,14 +179,32 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:af164ec1f6d058b2bdd7ab84dd281d7cb inherit pro_attribs_classyasmin__ros_1_1monitor__state_1_1MonitorState" id="r_af164ec1f6d058b2bdd7ab84dd281d7cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin__ros_1_1monitor__state_1_1MonitorState.html#af164ec1f6d058b2bdd7ab84dd281d7cb">_sub</a></td></tr>
 <tr class="separator:af164ec1f6d058b2bdd7ab84dd281d7cb inherit pro_attribs_classyasmin__ros_1_1monitor__state_1_1MonitorState"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
-<tr class="memitem:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a96f5ad095d6d9b19eb9398e9a4e353eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a96f5ad095d6d9b19eb9398e9a4e353eb">_outcomes</a> = set()</td></tr>
-<tr class="separator:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a6a5b0960e11722eaa5f1a975a2b2f222"><td class="memItemLeft" align="right" valign="top">set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a6a5b0960e11722eaa5f1a975a2b2f222">_outcomes</a> = set()</td></tr>
+<tr class="separator:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_aed635b4d7a38f282ac74f415f969f783"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#aed635b4d7a38f282ac74f415f969f783">_running</a> = False</td></tr>
 <tr class="separator:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
 <tr class="separator:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><pre class="fragment">MonitorState subclass to handle Odometry messages.
+
+This state monitors Odometry messages from the specified ROS topic,
+logging them and transitioning based on the number of messages received.
+
+Attributes:
+    times (int): The number of messages to monitor before transitioning
+                 to the next outcome.
+
+Parameters:
+    times (int): The initial count of how many Odometry messages to
+                 process before changing state.
+
+Methods:
+    monitor_handler(blackboard: Blackboard, msg: Odometry) -&gt; str:
+        Handles incoming Odometry messages, logging the message and
+        returning the appropriate outcome based on the remaining count.
+</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a0403270791dda2a8db96ecaf7a31e7da" name="a0403270791dda2a8db96ecaf7a31e7da"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0403270791dda2a8db96ecaf7a31e7da">&#9670;&#160;</a></span>__init__()</h2>
 
@@ -205,7 +223,12 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Initializes the PrintOdometryState.
 
+Parameters:
+    times (int): The number of Odometry messages to monitor before
+                 transitioning to the next outcome.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin__ros_1_1monitor__state_1_1MonitorState.html#a29bf9ad62c98935e7e25fdcf227ce72f">yasmin_ros.monitor_state.MonitorState</a>.</p>
 
 </div>
@@ -234,7 +257,23 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Handles incoming Odometry messages.
 
+This method is called whenever a new Odometry message is received.
+It logs the message, decrements the count of messages to process,
+and determines the next state outcome.
+
+Parameters:
+    blackboard (Blackboard): The shared data storage for states.
+    msg (Odometry): The incoming Odometry message.
+
+Returns:
+    str: The next state outcome, either "outcome1" to continue
+         monitoring or "outcome2" to transition to the next state.
+
+Exceptions:
+    None
+</pre> 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>

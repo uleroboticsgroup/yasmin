@@ -121,7 +121,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Main function to initialize and run the ROS 2 state machine.
 
+This function initializes ROS 2, sets up logging, creates a finite state
+machine (FSM), adds states to the FSM, and executes the FSM. It handles
+cleanup and shutdown of ROS 2 gracefully.
+
+Exceptions:
+    KeyboardInterrupt: Caught to allow graceful cancellation of the
+                      state machine during execution.
+</pre> 
 </div>
 </div>
 </div><!-- contents -->

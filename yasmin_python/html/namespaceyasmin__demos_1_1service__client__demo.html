@@ -125,7 +125,14 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">The main function to execute the finite state machine (FSM).
 
+This function initializes the ROS 2 environment, sets up logging,
+creates the FSM with defined states, and executes the FSM.
+
+Raises:
+    KeyboardInterrupt: If the user interrupts the program.
+</pre> 
 </div>
 </div>
 <a id="aedfdd50b714611f271d7512ddb2549e1" name="aedfdd50b714611f271d7512ddb2549e1"></a>
@@ -142,7 +149,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Logs the sum value from the blackboard.
 
+This function retrieves the sum from the blackboard and logs it.
+
+Args:
+    blackboard (Blackboard): The blackboard from which to retrieve the sum.
+
+Returns:
+    str: The outcome of the operation, which is SUCCEED.
+</pre> 
 </div>
 </div>
 <a id="a522dc92d336019a6dd464206b9744011" name="a522dc92d336019a6dd464206b9744011"></a>
@@ -159,7 +175,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Sets the integer values in the blackboard.
 
+This function initializes the blackboard with two integer values to be added.
+
+Args:
+    blackboard (Blackboard): The blackboard to update with integer values.
+
+Returns:
+    str: The outcome of the operation, which is SUCCEED.
+</pre> 
 </div>
 </div>
 </div><!-- contents -->

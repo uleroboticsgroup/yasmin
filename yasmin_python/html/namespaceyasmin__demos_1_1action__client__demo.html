@@ -123,7 +123,20 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Main function to execute the ROS 2 action client demo.
 
+This function initializes the ROS 2 client, sets up the finite state
+machine, adds the states, and starts the action processing.
+
+Parameters:
+    None
+
+Returns:
+    None
+
+Raises:
+    KeyboardInterrupt: If the user interrupts the execution.
+</pre> 
 </div>
 </div>
 <a id="aa1b52df73df29943208e8d1a502b9d6e" name="aa1b52df73df29943208e8d1a502b9d6e"></a>
@@ -140,7 +153,19 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Prints the result of the Fibonacci action.
 
+This function logs the final result stored in the blackboard.
+
+Parameters:
+    blackboard (Blackboard): The blackboard containing the result.
+
+Returns:
+    str: Outcome of the operation, typically SUCCEED.
+
+Raises:
+    None
+</pre> 
 </div>
 </div>
 </div><!-- contents -->

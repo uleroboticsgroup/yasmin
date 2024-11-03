@@ -158,14 +158,27 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a4505e9a0ffb632cd4dd3dca62eb3025b" id="r_a4505e9a0ffb632cd4dd3dca62eb3025b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4505e9a0ffb632cd4dd3dca62eb3025b">_response_handler</a> = response_handler</td></tr>
 <tr class="separator:a4505e9a0ffb632cd4dd3dca62eb3025b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
-<tr class="memitem:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a96f5ad095d6d9b19eb9398e9a4e353eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a96f5ad095d6d9b19eb9398e9a4e353eb">_outcomes</a> = set()</td></tr>
-<tr class="separator:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a6a5b0960e11722eaa5f1a975a2b2f222"><td class="memItemLeft" align="right" valign="top">set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a6a5b0960e11722eaa5f1a975a2b2f222">_outcomes</a> = set()</td></tr>
+<tr class="separator:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_aed635b4d7a38f282ac74f415f969f783"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#aed635b4d7a38f282ac74f415f969f783">_running</a> = False</td></tr>
 <tr class="separator:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
 <tr class="separator:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><pre class="fragment">A state representing a service call in a behavior tree.
+
+This state manages the communication with a ROS service, creating and sending
+requests, and handling responses. It can handle timeouts and custom outcomes.
+
+Attributes:
+    _node (Node): The ROS node used to communicate with the service.
+    _srv_name (str): The name of the service to call.
+    _service_client (Client): The client used to call the service.
+    _create_request_handler (Callable): A function that creates the service request.
+    _response_handler (Callable): A function that processes the service response.
+    _timeout (float): Timeout duration for the service call.
+</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6aab905f657a87496b3b0d5f8b0f6eda" name="a6aab905f657a87496b3b0d5f8b0f6eda"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6aab905f657a87496b3b0d5f8b0f6eda">&#9670;&#160;</a></span>__init__()</h2>
 
@@ -214,7 +227,20 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Initializes the ServiceState with the provided parameters.
 
+Parameters:
+    srv_type (Type): The type of the service.
+    srv_name (str): The name of the service to be called.
+    create_request_handler (Callable): A handler to create the request based on the blackboard data.
+    outcomes (Set[str], optional): A set of additional outcomes for this state.
+    response_handler (Callable, optional): A handler to process the service response.
+    node (Node, optional): A ROS node instance; if None, a default instance is used.
+    timeout (float, optional): Timeout duration for waiting on the service.
+
+Raises:
+    ValueError: If the create_request_handler is not provided.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#a5f3f8a8f6e7fd2de1b30057606271a5a">yasmin.state.State</a>.</p>
 
 <p>Reimplemented in <a class="el" href="classyasmin__demos_1_1service__client__demo_1_1AddTwoIntsState.html#a2d4be40ae5a1528cf019af2279e084a8">yasmin_demos.service_client_demo.AddTwoIntsState</a>.</p>
@@ -240,7 +266,22 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Executes the service call.
 
+This method prepares the request using the provided blackboard,
+waits for the service to become available, and sends the request.
+It also handles the response and can process outcomes based on the
+response handler.
+
+Parameters:
+    blackboard (Blackboard): The blackboard object that holds the data for request creation.
+
+Returns:
+    str: The outcome of the state execution, which can be SUCCEED, ABORT, or TIMEOUT.
+
+Exceptions:
+    Exception: Catches all exceptions during the service call and returns ABORT.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#a531c80a2c77722089d92e7a9c73f69d8">yasmin.state.State</a>.</p>
 
 </div>

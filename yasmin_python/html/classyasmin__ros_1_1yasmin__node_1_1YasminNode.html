@@ -137,15 +137,33 @@ Static Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
 <tr class="memitem:a631f0f56b431ede3f50715e4af88f99a" id="r_a631f0f56b431ede3f50715e4af88f99a"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a631f0f56b431ede3f50715e4af88f99a">_instance</a> = None</td></tr>
+<tr class="memdesc:a631f0f56b431ede3f50715e4af88f99a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The single instance of <a class="el" href="classyasmin__ros_1_1yasmin__node_1_1YasminNode.html">YasminNode</a>.  <br /></td></tr>
 <tr class="separator:a631f0f56b431ede3f50715e4af88f99a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae16abd788a61626d624286c1499a6f8e" id="r_ae16abd788a61626d624286c1499a6f8e"><td class="memItemLeft" align="right" valign="top">RLock&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae16abd788a61626d624286c1499a6f8e">_lock</a> = RLock()</td></tr>
+<tr class="memdesc:ae16abd788a61626d624286c1499a6f8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lock to control access to the instance.  <br /></td></tr>
 <tr class="separator:ae16abd788a61626d624286c1499a6f8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01d7717a1c05323eb9741648e4bbcaad" id="r_a01d7717a1c05323eb9741648e4bbcaad"><td class="memItemLeft" align="right" valign="top">MultiThreadedExecutor&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01d7717a1c05323eb9741648e4bbcaad">_executor</a> = None</td></tr>
+<tr class="memdesc:a01d7717a1c05323eb9741648e4bbcaad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executor for managing node operations.  <br /></td></tr>
 <tr class="separator:a01d7717a1c05323eb9741648e4bbcaad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a95aeba65bb3f62acb0282f9356a3e4d6" id="r_a95aeba65bb3f62acb0282f9356a3e4d6"><td class="memItemLeft" align="right" valign="top">Thread&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a95aeba65bb3f62acb0282f9356a3e4d6">_spin_thread</a> = None</td></tr>
+<tr class="memdesc:a95aeba65bb3f62acb0282f9356a3e4d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread to execute the spinning of the node.  <br /></td></tr>
 <tr class="separator:a95aeba65bb3f62acb0282f9356a3e4d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><pre class="fragment">A Singleton ROS 2 Node for the Yasmin application.
+
+This class implements a Singleton pattern to ensure that only one instance
+of YasminNode exists throughout the application. It manages a ROS 2 Node
+and a MultiThreadedExecutor to handle callbacks.
+
+@section attributes Attributes
+- _instance: The single instance of YasminNode.
+- _lock: A reentrant lock for thread safety.
+- _executor: An instance of MultiThreadedExecutor to manage node execution.
+- _spin_thread: A thread that runs the executor's spin method.
+
+@exception RuntimeError Raised when attempting to instantiate the node more than once.
+</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="afb82e875ce859cf8c3f1f6330ad03d14" name="afb82e875ce859cf8c3f1f6330ad03d14"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afb82e875ce859cf8c3f1f6330ad03d14">&#9670;&#160;</a></span>__init__()</h2>
 
@@ -160,7 +178,16 @@ Static Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Initializes the YasminNode instance.
 
+This constructor initializes the ROS 2 Node with a unique name and
+starts a MultiThreadedExecutor for handling node callbacks.
+It raises a RuntimeError if an attempt is made to create a second instance
+of this Singleton class.
+
+@exception RuntimeError Raised when an attempt is made to create
+more than one instance of YasminNode.
+</pre> 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -186,7 +213,14 @@ Static Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<pre class="fragment">Retrieves the single instance of YasminNode.
 
+If the instance does not exist, it creates one in a thread-safe manner.
+
+@return A reference to the YasminNode instance.
+
+@exception RuntimeError Raised if the creation of the instance fails.
+</pre> 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -210,6 +244,8 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Executor for managing node operations. </p>
+
 </div>
 </div>
 <a id="a631f0f56b431ede3f50715e4af88f99a" name="a631f0f56b431ede3f50715e4af88f99a"></a>
@@ -231,6 +267,8 @@ Static Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>The single instance of <a class="el" href="classyasmin__ros_1_1yasmin__node_1_1YasminNode.html">YasminNode</a>. </p>
 
 </div>
 </div>
@@ -254,6 +292,8 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Lock to control access to the instance. </p>
+
 </div>
 </div>
 <a id="a95aeba65bb3f62acb0282f9356a3e4d6" name="a95aeba65bb3f62acb0282f9356a3e4d6"></a>
@@ -275,6 +315,8 @@ Static Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Thread to execute the spinning of the node. </p>
 
 </div>
 </div>

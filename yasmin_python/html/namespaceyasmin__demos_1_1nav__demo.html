@@ -106,18 +106,20 @@ Classes</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:acd9fd423e064eac494d0fa878be73602" id="r_acd9fd423e064eac494d0fa878be73602"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd9fd423e064eac494d0fa878be73602">create_waypoints</a> (<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a> blackboard)</td></tr>
 <tr class="separator:acd9fd423e064eac494d0fa878be73602"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33e2a01922da14f15fe6742327ed2263" id="r_a33e2a01922da14f15fe6742327ed2263"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33e2a01922da14f15fe6742327ed2263">take_random_waypoint</a> (blackboard)</td></tr>
-<tr class="separator:a33e2a01922da14f15fe6742327ed2263"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1b52a7b34892abac93ee74798d646a4" id="r_aa1b52a7b34892abac93ee74798d646a4"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1b52a7b34892abac93ee74798d646a4">take_random_waypoint</a> (<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a> blackboard)</td></tr>
+<tr class="separator:aa1b52a7b34892abac93ee74798d646a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aecc106ebaf89336e43fd6ab10288e65d" id="r_aecc106ebaf89336e43fd6ab10288e65d"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aecc106ebaf89336e43fd6ab10288e65d">get_next_waypoint</a> (<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a> blackboard)</td></tr>
 <tr class="separator:aecc106ebaf89336e43fd6ab10288e65d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abdeac45577a356d684c5fe9dc513f1a6" id="r_abdeac45577a356d684c5fe9dc513f1a6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abdeac45577a356d684c5fe9dc513f1a6">main</a> ()</td></tr>
-<tr class="separator:abdeac45577a356d684c5fe9dc513f1a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a561d38313d3382c1120c0274e9cfcade" id="r_a561d38313d3382c1120c0274e9cfcade"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a561d38313d3382c1120c0274e9cfcade">main</a> ()</td></tr>
+<tr class="separator:a561d38313d3382c1120c0274e9cfcade"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:ae23cd38cbb88c854d3a8a7651aaccdd3" id="r_ae23cd38cbb88c854d3a8a7651aaccdd3"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae23cd38cbb88c854d3a8a7651aaccdd3">HAS_NEXT</a> = &quot;has_next&quot;</td></tr>
+<tr class="memdesc:ae23cd38cbb88c854d3a8a7651aaccdd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates there are more waypoints.  <br /></td></tr>
 <tr class="separator:ae23cd38cbb88c854d3a8a7651aaccdd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78d6bb53106c319ce42240d9432da877" id="r_a78d6bb53106c319ce42240d9432da877"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a78d6bb53106c319ce42240d9432da877">END</a> = &quot;end&quot;</td></tr>
+<tr class="memdesc:a78d6bb53106c319ce42240d9432da877"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates no more waypoints.  <br /></td></tr>
 <tr class="separator:a78d6bb53106c319ce42240d9432da877"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
@@ -135,7 +137,14 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Initializes waypoints in the blackboard for navigation.
 
+Args:
+    blackboard (Blackboard): The blackboard instance to store waypoints.
+
+Returns:
+    str: Outcome indicating success (SUCCEED).
+</pre> 
 </div>
 </div>
 <a id="aecc106ebaf89336e43fd6ab10288e65d" name="aecc106ebaf89336e43fd6ab10288e65d"></a>
@@ -152,28 +161,41 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Retrieves the next waypoint from the list of random waypoints.
 
+Updates the blackboard with the pose of the next waypoint.
+
+Args:
+    blackboard (Blackboard): The blackboard instance holding current state data.
+
+Returns:
+    str: Outcome indicating whether there is a next waypoint (HAS_NEXT) or if
+         navigation is complete (END).
+</pre> 
 </div>
 </div>
-<a id="abdeac45577a356d684c5fe9dc513f1a6" name="abdeac45577a356d684c5fe9dc513f1a6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abdeac45577a356d684c5fe9dc513f1a6">&#9670;&#160;</a></span>main()</h2>
+<a id="a561d38313d3382c1120c0274e9cfcade" name="a561d38313d3382c1120c0274e9cfcade"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a561d38313d3382c1120c0274e9cfcade">&#9670;&#160;</a></span>main()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">yasmin_demos.nav_demo.main </td>
+          <td class="memname"> None yasmin_demos.nav_demo.main </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Initializes the ROS 2 node, sets up state machines for navigation, and executes the FSM.
 
+Handles cleanup and shutdown of the ROS 2 node upon completion.
+</pre> 
 </div>
 </div>
-<a id="a33e2a01922da14f15fe6742327ed2263" name="a33e2a01922da14f15fe6742327ed2263"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a33e2a01922da14f15fe6742327ed2263">&#9670;&#160;</a></span>take_random_waypoint()</h2>
+<a id="aa1b52a7b34892abac93ee74798d646a4" name="aa1b52a7b34892abac93ee74798d646a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1b52a7b34892abac93ee74798d646a4">&#9670;&#160;</a></span>take_random_waypoint()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -181,12 +203,19 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname"> str yasmin_demos.nav_demo.take_random_waypoint </td>
           <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>blackboard</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a></td>          <td class="paramname"><span class="paramname"><em>blackboard</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Selects a random set of waypoints from the available waypoints.
 
+Args:
+    blackboard (Blackboard): The blackboard instance to store random waypoints.
+
+Returns:
+    str: Outcome indicating success (SUCCEED).
+</pre> 
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
@@ -202,6 +231,8 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Indicates no more waypoints. </p>
+
 </div>
 </div>
 <a id="ae23cd38cbb88c854d3a8a7651aaccdd3" name="ae23cd38cbb88c854d3a8a7651aaccdd3"></a>
@@ -215,6 +246,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Indicates there are more waypoints. </p>
 
 </div>
 </div>

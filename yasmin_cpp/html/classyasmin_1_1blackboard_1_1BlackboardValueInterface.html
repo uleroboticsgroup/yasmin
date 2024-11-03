@@ -96,14 +96,17 @@ $(function(){ initResizable(false); });
 </div><!--header-->
 <div class="contents">
 
+<p>Interface for blackboard value types.  
+ <a href="#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="blackboard__value__interface_8hpp_source.html">blackboard_value_interface.hpp</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for yasmin::blackboard::BlackboardValueInterface:</div>
 <div class="dyncontent">
 <div class="center"><img src="classyasmin_1_1blackboard_1_1BlackboardValueInterface__inherit__graph.png" border="0" usemap="#ayasmin_1_1blackboard_1_1BlackboardValueInterface_inherit__map" alt="Inheritance graph"/></div>
 <map name="ayasmin_1_1blackboard_1_1BlackboardValueInterface_inherit__map" id="ayasmin_1_1blackboard_1_1BlackboardValueInterface_inherit__map">
-<area shape="rect" title=" " alt="" coords="5,5,182,46"/>
-<area shape="rect" href="classyasmin_1_1blackboard_1_1BlackboardValue.html" title=" " alt="" coords="16,94,171,135"/>
+<area shape="rect" title="Interface for blackboard value types." alt="" coords="5,5,182,46"/>
+<area shape="rect" href="classyasmin_1_1blackboard_1_1BlackboardValue.html" title="A template class that wraps a value of type T." alt="" coords="16,94,171,135"/>
 <area shape="poly" title=" " alt="" coords="96,62,96,94,91,94,91,62"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
@@ -111,11 +114,16 @@ Inheritance diagram for yasmin::blackboard::BlackboardValueInterface:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a35ebd8033c482a184cda1b57c69b0735" id="r_a35ebd8033c482a184cda1b57c69b0735"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35ebd8033c482a184cda1b57c69b0735">~BlackboardValueInterface</a> ()</td></tr>
+<tr class="memdesc:a35ebd8033c482a184cda1b57c69b0735"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor for the interface.  <br /></td></tr>
 <tr class="separator:a35ebd8033c482a184cda1b57c69b0735"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34b5d92bf9c6a91e0679d32dfd27b810" id="r_a34b5d92bf9c6a91e0679d32dfd27b810"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34b5d92bf9c6a91e0679d32dfd27b810">to_string</a> ()</td></tr>
+<tr class="memdesc:a34b5d92bf9c6a91e0679d32dfd27b810"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert the value to a string representation.  <br /></td></tr>
 <tr class="separator:a34b5d92bf9c6a91e0679d32dfd27b810"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Interface for blackboard value types. </p>
+<p>This interface defines the contract for value types that can be stored in a blackboard. It requires implementing a method to represent the value as a string. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a35ebd8033c482a184cda1b57c69b0735" name="a35ebd8033c482a184cda1b57c69b0735"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a35ebd8033c482a184cda1b57c69b0735">&#9670;&#160;</a></span>~BlackboardValueInterface()</h2>
 
@@ -138,6 +146,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Virtual destructor for the interface. </p>
 
 </div>
 </div>
@@ -164,6 +174,10 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Convert the value to a string representation. </p>
+<dl class="section return"><dt>Returns</dt><dd>A string that represents the value.</dd></dl>
+<p>This method should be implemented by derived classes to provide an appropriate string representation of the value they encapsulate. </p>
 
 <p>Reimplemented in <a class="el" href="classyasmin_1_1blackboard_1_1BlackboardValue.html#a209a5cf781c35a35b8e884379d9605ef">yasmin::blackboard::BlackboardValue&lt; T &gt;</a>.</p>
 

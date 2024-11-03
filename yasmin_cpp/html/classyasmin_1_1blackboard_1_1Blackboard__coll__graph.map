@@ -1,0 +1,13 @@
+<map id="yasmin::blackboard::Blackboard" name="yasmin::blackboard::Blackboard">
+<area shape="rect" id="Node000001" title="A thread&#45;safe storage for key&#45;value pairs of varying types." alt="" coords="737,30,868,70"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="483,5,623,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="639,26,737,39,736,44,638,32"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="458,56,648,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="663,66,736,56,736,62,664,71"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="228,36,305,62"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="321,53,458,69,458,75,320,58"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,28,129,69"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="144,46,227,46,227,52,144,52"/>
+<area shape="rect" id="Node000006" href="$classyasmin_1_1blackboard_1_1BlackboardValueInterface.html" title="Interface for blackboard value types." alt="" coords="178,86,354,126"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="370,101,434,97,458,95,459,100,435,102,370,107"/>
+</map>

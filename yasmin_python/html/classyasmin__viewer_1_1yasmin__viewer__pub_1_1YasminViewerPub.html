@@ -98,10 +98,27 @@ $(function(){ initResizable(false); });
   <div class="headertitle"><div class="title">yasmin_viewer.yasmin_viewer_pub.YasminViewerPub Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+<div class="dynheader">
+Collaboration diagram for yasmin_viewer.yasmin_viewer_pub.YasminViewerPub:</div>
+<div class="dyncontent">
+<div class="center"><img src="classyasmin__viewer_1_1yasmin__viewer__pub_1_1YasminViewerPub__coll__graph.png" border="0" usemap="#ayasmin__viewer_8yasmin__viewer__pub_8YasminViewerPub_coll__map" alt="Collaboration graph"/></div>
+<map name="ayasmin__viewer_8yasmin__viewer__pub_8YasminViewerPub_coll__map" id="ayasmin__viewer_8yasmin__viewer__pub_8YasminViewerPub_coll__map">
+<area shape="rect" title=" " alt="" coords="66,289,270,330"/>
+<area shape="rect" href="classyasmin_1_1state__machine_1_1StateMachine.html" title=" " alt="" coords="5,155,190,196"/>
+<area shape="poly" title=" " alt="" coords="118,209,160,287,155,290,113,211"/>
+<area shape="rect" href="classyasmin_1_1state_1_1State.html" title=" " alt="" coords="33,80,162,106"/>
+<area shape="poly" title=" " alt="" coords="100,122,100,155,95,155,95,122"/>
+<area shape="rect" title=" " alt="" coords="73,5,122,31"/>
+<area shape="poly" title=" " alt="" coords="100,46,100,80,95,80,95,46"/>
+<area shape="rect" title=" " alt="" coords="214,163,266,188"/>
+<area shape="poly" title=" " alt="" coords="228,204,181,290,177,287,224,201"/>
+</map>
+<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac5804c2de50acccdcfbbf28692dfbe77" id="r_ac5804c2de50acccdcfbbf28692dfbe77"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac5804c2de50acccdcfbbf28692dfbe77">__init__</a> (self, str fsm_name, <a class="el" href="classyasmin_1_1state__machine_1_1StateMachine.html">StateMachine</a> fsm, int rate=4, Node node=None)</td></tr>
+<tr class="memdesc:ac5804c2de50acccdcfbbf28692dfbe77"><td class="mdescLeft">&#160;</td><td class="mdescRight">The ROS 2 node instance used for publishing.  <br /></td></tr>
 <tr class="separator:ac5804c2de50acccdcfbbf28692dfbe77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ab9f2d28fc9cc39ca1281655d72b8d6" id="r_a8ab9f2d28fc9cc39ca1281655d72b8d6"><td class="memItemLeft" align="right" valign="top">List[TransitionMsg]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ab9f2d28fc9cc39ca1281655d72b8d6">parse_transitions</a> (self, Dict[str, str] transitions)</td></tr>
 <tr class="separator:a8ab9f2d28fc9cc39ca1281655d72b8d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -110,8 +127,8 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a6d3866822013b8d52ade5b4071f9f4f5" id="r_a6d3866822013b8d52ade5b4071f9f4f5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d3866822013b8d52ade5b4071f9f4f5">pub</a> = self._node.create_publisher(StateMachineMsg, &quot;/fsm_viewer&quot;, 10)</td></tr>
-<tr class="separator:a6d3866822013b8d52ade5b4071f9f4f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1db0321d580fa91f50a423e57ae7f556" id="r_a1db0321d580fa91f50a423e57ae7f556"><td class="memItemLeft" align="right" valign="top">Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1db0321d580fa91f50a423e57ae7f556">pub</a> = self._node.create_publisher(StateMachineMsg, &quot;/fsm_viewer&quot;, 10)</td></tr>
+<tr class="separator:a1db0321d580fa91f50a423e57ae7f556"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -120,16 +137,30 @@ Protected Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a1eb233aec9065e4efa0df25270515725" id="r_a1eb233aec9065e4efa0df25270515725"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1eb233aec9065e4efa0df25270515725">_fsm</a> = fsm</td></tr>
+<tr class="memitem:a1eb233aec9065e4efa0df25270515725" id="r_a1eb233aec9065e4efa0df25270515725"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyasmin_1_1state__machine_1_1StateMachine.html">StateMachine</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1eb233aec9065e4efa0df25270515725">_fsm</a> = fsm</td></tr>
 <tr class="separator:a1eb233aec9065e4efa0df25270515725"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52c8b39100684d666045b59be4e41815" id="r_a52c8b39100684d666045b59be4e41815"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a52c8b39100684d666045b59be4e41815">_fsm_name</a> = fsm_name</td></tr>
+<tr class="memitem:a52c8b39100684d666045b59be4e41815" id="r_a52c8b39100684d666045b59be4e41815"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a52c8b39100684d666045b59be4e41815">_fsm_name</a> = fsm_name</td></tr>
 <tr class="separator:a52c8b39100684d666045b59be4e41815"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a89706791b89fe9ce785129fe80637e4a" id="r_a89706791b89fe9ce785129fe80637e4a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89706791b89fe9ce785129fe80637e4a">_node</a> = <a class="el" href="classyasmin__ros_1_1yasmin__node_1_1YasminNode.html#af77d5da3851543c5bb7edcb8bb7b69d0">YasminNode.get_instance</a>()</td></tr>
-<tr class="separator:a89706791b89fe9ce785129fe80637e4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a57c9e5ef79dce980d01d79420633d891" id="r_a57c9e5ef79dce980d01d79420633d891"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57c9e5ef79dce980d01d79420633d891">_timer</a> = self._node.create_timer(1 / rate, self._publish_data)</td></tr>
-<tr class="separator:a57c9e5ef79dce980d01d79420633d891"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab655d193dc02ded92309779d4fb51d04" id="r_ab655d193dc02ded92309779d4fb51d04"><td class="memItemLeft" align="right" valign="top">Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab655d193dc02ded92309779d4fb51d04">_node</a> = <a class="el" href="classyasmin__ros_1_1yasmin__node_1_1YasminNode.html#af77d5da3851543c5bb7edcb8bb7b69d0">YasminNode.get_instance</a>()</td></tr>
+<tr class="separator:ab655d193dc02ded92309779d4fb51d04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6740d66d41e776e3279950d43226af7f" id="r_a6740d66d41e776e3279950d43226af7f"><td class="memItemLeft" align="right" valign="top">Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6740d66d41e776e3279950d43226af7f">_timer</a> = self._node.create_timer(1 / rate, self._publish_data)</td></tr>
+<tr class="separator:a6740d66d41e776e3279950d43226af7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><pre class="fragment">A class to publish the state of a Finite State Machine (FSM) for visualization.
+
+Attributes:
+    _node (Node): The ROS 2 node instance used for publishing.
+    _fsm (StateMachine): The finite state machine to be published.
+    _fsm_name (str): The name of the finite state machine.
+    pub: The publisher for the state machine messages.
+    _timer: A timer to periodically publish the FSM state.
+
+Methods:
+    parse_transitions(transitions): Converts a dictionary of transitions to a list of TransitionMsg.
+    parse_state(state_name, state_info, states_list, parent): Parses a state and its children recursively.
+    _publish_data(): Publishes the current state of the FSM.
+</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ac5804c2de50acccdcfbbf28692dfbe77" name="ac5804c2de50acccdcfbbf28692dfbe77"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac5804c2de50acccdcfbbf28692dfbe77">&#9670;&#160;</a></span>__init__()</h2>
 
@@ -164,6 +195,20 @@ Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>The ROS 2 node instance used for publishing. </p>
+<p>The finite state machine to be published.</p>
+<p>The name of the finite state machine.</p>
+<pre class="fragment">Initializes the YasminViewerPub instance.
+
+Args:
+    fsm_name (str): The name of the FSM.
+    fsm (StateMachine): The FSM instance to be published.
+    rate (int): The rate in Hz at which to publish updates. Defaults to 4.
+    node (Node, optional): A custom Node instance. If None, a new YasminNode is created.
+
+Raises:
+    ValueError: If fsm_name is empty.
+</pre> 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -189,7 +234,17 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<pre class="fragment">Publishes the current state of the FSM.
 
+This method validates the FSM, gathers its state data, and publishes it.
+If validation fails, an error message is logged.
+
+Returns:
+    None
+
+Raises:
+    Exception: If the FSM validation fails, an error is logged and the function exits without publishing.
+</pre> 
 </div>
 </div>
 <a id="a8651feda9d2b07ab95b751ea9f17db97" name="a8651feda9d2b07ab95b751ea9f17db97"></a>
@@ -225,7 +280,17 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Recursively parses a state and its transitions, adding the resulting StateMsg to the states list.
 
+Args:
+    state_name (str): The name of the state.
+    state_info (Dict[str, str]): Information about the state, including its transitions.
+    states_list (List[StateMsg]): A list to which the parsed StateMsg will be appended.
+    parent (int, optional): The ID of the parent state. Defaults to -1.
+
+Returns:
+    None
+</pre> 
 </div>
 </div>
 <a id="a8ab9f2d28fc9cc39ca1281655d72b8d6" name="a8ab9f2d28fc9cc39ca1281655d72b8d6"></a>
@@ -246,7 +311,14 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Converts a dictionary of transitions into a list of TransitionMsg.
 
+Args:
+    transitions (Dict[str, str]): A dictionary where keys are outcome names and values are state names.
+
+Returns:
+    List[TransitionMsg]: A list of TransitionMsg representing the FSM transitions.
+</pre> 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -294,8 +366,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a89706791b89fe9ce785129fe80637e4a" name="a89706791b89fe9ce785129fe80637e4a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a89706791b89fe9ce785129fe80637e4a">&#9670;&#160;</a></span>_node</h2>
+<a id="ab655d193dc02ded92309779d4fb51d04" name="ab655d193dc02ded92309779d4fb51d04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab655d193dc02ded92309779d4fb51d04">&#9670;&#160;</a></span>_node</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -304,7 +376,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">yasmin_viewer.yasmin_viewer_pub.YasminViewerPub._node = <a class="el" href="classyasmin__ros_1_1yasmin__node_1_1YasminNode.html#af77d5da3851543c5bb7edcb8bb7b69d0">YasminNode.get_instance</a>()</td>
+          <td class="memname">Node yasmin_viewer.yasmin_viewer_pub.YasminViewerPub._node = <a class="el" href="classyasmin__ros_1_1yasmin__node_1_1YasminNode.html#af77d5da3851543c5bb7edcb8bb7b69d0">YasminNode.get_instance</a>()</td>
         </tr>
       </table>
   </td>
@@ -316,8 +388,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a57c9e5ef79dce980d01d79420633d891" name="a57c9e5ef79dce980d01d79420633d891"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57c9e5ef79dce980d01d79420633d891">&#9670;&#160;</a></span>_timer</h2>
+<a id="a6740d66d41e776e3279950d43226af7f" name="a6740d66d41e776e3279950d43226af7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6740d66d41e776e3279950d43226af7f">&#9670;&#160;</a></span>_timer</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -326,7 +398,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">yasmin_viewer.yasmin_viewer_pub.YasminViewerPub._timer = self._node.create_timer(1 / rate, self._publish_data)</td>
+          <td class="memname">Node yasmin_viewer.yasmin_viewer_pub.YasminViewerPub._timer = self._node.create_timer(1 / rate, self._publish_data)</td>
         </tr>
       </table>
   </td>
@@ -338,14 +410,14 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a6d3866822013b8d52ade5b4071f9f4f5" name="a6d3866822013b8d52ade5b4071f9f4f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d3866822013b8d52ade5b4071f9f4f5">&#9670;&#160;</a></span>pub</h2>
+<a id="a1db0321d580fa91f50a423e57ae7f556" name="a1db0321d580fa91f50a423e57ae7f556"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1db0321d580fa91f50a423e57ae7f556">&#9670;&#160;</a></span>pub</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">yasmin_viewer.yasmin_viewer_pub.YasminViewerPub.pub = self._node.create_publisher(StateMachineMsg, &quot;/fsm_viewer&quot;, 10)</td>
+          <td class="memname">Node yasmin_viewer.yasmin_viewer_pub.YasminViewerPub.pub = self._node.create_publisher(StateMachineMsg, &quot;/fsm_viewer&quot;, 10)</td>
         </tr>
       </table>
 </div><div class="memdoc">

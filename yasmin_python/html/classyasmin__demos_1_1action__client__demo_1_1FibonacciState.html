@@ -198,8 +198,8 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a1555710ee5f97796f4a11da3ae7e1cfa inherit pro_attribs_classyasmin__ros_1_1action__state_1_1ActionState" id="r_a1555710ee5f97796f4a11da3ae7e1cfa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin__ros_1_1action__state_1_1ActionState.html#a1555710ee5f97796f4a11da3ae7e1cfa">_get_result_callback</a></td></tr>
 <tr class="separator:a1555710ee5f97796f4a11da3ae7e1cfa inherit pro_attribs_classyasmin__ros_1_1action__state_1_1ActionState"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
-<tr class="memitem:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a96f5ad095d6d9b19eb9398e9a4e353eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a96f5ad095d6d9b19eb9398e9a4e353eb">_outcomes</a> = set()</td></tr>
-<tr class="separator:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a6a5b0960e11722eaa5f1a975a2b2f222"><td class="memItemLeft" align="right" valign="top">set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a6a5b0960e11722eaa5f1a975a2b2f222">_outcomes</a> = set()</td></tr>
+<tr class="separator:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_aed635b4d7a38f282ac74f415f969f783"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#aed635b4d7a38f282ac74f415f969f783">_running</a> = False</td></tr>
 <tr class="separator:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
@@ -210,7 +210,15 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:ad7d8962d73d2cfcc2a4c12dcdacba0de inherit pro_static_attribs_classyasmin__ros_1_1action__state_1_1ActionState" id="r_ad7d8962d73d2cfcc2a4c12dcdacba0de"><td class="memItemLeft" align="right" valign="top">RLock&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin__ros_1_1action__state_1_1ActionState.html#ad7d8962d73d2cfcc2a4c12dcdacba0de">_goal_handle_lock</a> = RLock()</td></tr>
 <tr class="separator:ad7d8962d73d2cfcc2a4c12dcdacba0de inherit pro_static_attribs_classyasmin__ros_1_1action__state_1_1ActionState"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><pre class="fragment">Class representing the state of the Fibonacci action.
+
+Inherits from ActionState and implements methods to handle the
+Fibonacci action in a finite state machine.
+
+Attributes:
+    None
+</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a8a3e9f00b98565086ee44ba5445b6baa" name="a8a3e9f00b98565086ee44ba5445b6baa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8a3e9f00b98565086ee44ba5445b6baa">&#9670;&#160;</a></span>__init__()</h2>
 
@@ -225,7 +233,18 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Initializes the FibonacciState.
 
+Sets up the action type and the action name for the Fibonacci
+action. Initializes goal, response handler, and feedback
+processing callbacks.
+
+Parameters:
+    None
+
+Returns:
+    None
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin__ros_1_1action__state_1_1ActionState.html#a482a0e1011dbf96a17bc5fd49fb4b2f5">yasmin_ros.action_state.ActionState</a>.</p>
 
 </div>
@@ -249,7 +268,21 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Creates the goal for the Fibonacci action.
 
+This method retrieves the input value from the blackboard and
+populates the Fibonacci goal.
+
+Parameters:
+    blackboard (Blackboard): The blackboard containing the state
+    information.
+
+Returns:
+    Fibonacci.Goal: The populated goal object for the Fibonacci action.
+
+Raises:
+    KeyError: If the expected key is not present in the blackboard.
+</pre> 
 </div>
 </div>
 <a id="a19e0d2d1fde558f15c5a32ca7ec042e9" name="a19e0d2d1fde558f15c5a32ca7ec042e9"></a>
@@ -276,7 +309,20 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Prints feedback from the Fibonacci action.
 
+This method logs the partial sequence received during the action.
+
+Parameters:
+    blackboard (Blackboard): The blackboard (not used in this method).
+    feedback (Fibonacci.Feedback): The feedback object from the Fibonacci action.
+
+Returns:
+    None
+
+Raises:
+    None
+</pre> 
 </div>
 </div>
 <a id="ab0ab446a55066101e6cd20c9e8c6aefd" name="ab0ab446a55066101e6cd20c9e8c6aefd"></a>
@@ -303,7 +349,21 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Handles the response from the Fibonacci action.
 
+This method processes the result of the Fibonacci action and
+stores it in the blackboard.
+
+Parameters:
+    blackboard (Blackboard): The blackboard to store the result.
+    response (Fibonacci.Result): The result object from the Fibonacci action.
+
+Returns:
+    str: Outcome of the operation, typically SUCCEED.
+
+Raises:
+    None
+</pre> 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>

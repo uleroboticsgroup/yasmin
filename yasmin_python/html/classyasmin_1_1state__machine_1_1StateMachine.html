@@ -94,6 +94,8 @@ $(function(){ initResizable(false); });
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classyasmin_1_1state__machine_1_1StateMachine-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin.state_machine.StateMachine Class Reference</div></div>
 </div><!--header-->
@@ -126,6 +128,7 @@ Collaboration diagram for yasmin.state_machine.StateMachine:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a7f15946b9d1ac10fc7f177953185a903" id="r_a7f15946b9d1ac10fc7f177953185a903"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7f15946b9d1ac10fc7f177953185a903">__init__</a> (self, Set[str] outcomes)</td></tr>
+<tr class="memdesc:a7f15946b9d1ac10fc7f177953185a903"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of callbacks to call when the state machine starts.  <br /></td></tr>
 <tr class="separator:a7f15946b9d1ac10fc7f177953185a903"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca39dc53115f3f2b291447b775357046" id="r_aca39dc53115f3f2b291447b775357046"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca39dc53115f3f2b291447b775357046">add_state</a> (self, str name, <a class="el" href="classyasmin_1_1state_1_1State.html">State</a> state, Dict[str, str] transitions=None)</td></tr>
 <tr class="separator:aca39dc53115f3f2b291447b775357046"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -163,7 +166,7 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a34d3f93273dc0fa87ee563a6f0b8a25b" id="r_a34d3f93273dc0fa87ee563a6f0b8a25b"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34d3f93273dc0fa87ee563a6f0b8a25b">_states</a> = &quot;&quot;</td></tr>
+<tr class="memitem:a34d3f93273dc0fa87ee563a6f0b8a25b" id="r_a34d3f93273dc0fa87ee563a6f0b8a25b"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34d3f93273dc0fa87ee563a6f0b8a25b">_states</a></td></tr>
 <tr class="separator:a34d3f93273dc0fa87ee563a6f0b8a25b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2883b2b505f4f0cba0e4cfebd3d35417" id="r_a2883b2b505f4f0cba0e4cfebd3d35417"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2883b2b505f4f0cba0e4cfebd3d35417">_start_state</a> = []</td></tr>
 <tr class="separator:a2883b2b505f4f0cba0e4cfebd3d35417"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -183,17 +186,46 @@ Protected Member Functions</h2></td></tr>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a6c11c3bce5c23c40631dbe2ed578908d" id="r_a6c11c3bce5c23c40631dbe2ed578908d"><td class="memItemLeft" align="right" valign="top">dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6c11c3bce5c23c40631dbe2ed578908d">_states</a> = {}</td></tr>
 <tr class="separator:a6c11c3bce5c23c40631dbe2ed578908d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0afea75c967425101d9470a6408e24bc" id="r_a0afea75c967425101d9470a6408e24bc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0afea75c967425101d9470a6408e24bc">_start_state</a> = None</td></tr>
+<tr class="memitem:a0afea75c967425101d9470a6408e24bc" id="r_a0afea75c967425101d9470a6408e24bc"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0afea75c967425101d9470a6408e24bc">_start_state</a> = None</td></tr>
 <tr class="separator:a0afea75c967425101d9470a6408e24bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
-<tr class="memitem:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a96f5ad095d6d9b19eb9398e9a4e353eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a96f5ad095d6d9b19eb9398e9a4e353eb">_outcomes</a> = set()</td></tr>
-<tr class="separator:a96f5ad095d6d9b19eb9398e9a4e353eb inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a6a5b0960e11722eaa5f1a975a2b2f222"><td class="memItemLeft" align="right" valign="top">set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a6a5b0960e11722eaa5f1a975a2b2f222">_outcomes</a> = set()</td></tr>
+<tr class="separator:a6a5b0960e11722eaa5f1a975a2b2f222 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_aed635b4d7a38f282ac74f415f969f783"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#aed635b4d7a38f282ac74f415f969f783">_running</a> = False</td></tr>
 <tr class="separator:aed635b4d7a38f282ac74f415f969f783 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
 <tr class="separator:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a6874c0baacea3a462e531d6522e4f540" id="r_a6874c0baacea3a462e531d6522e4f540"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6874c0baacea3a462e531d6522e4f540">__current_state</a> = None</td></tr>
+<tr class="separator:a6874c0baacea3a462e531d6522e4f540"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20c4ad61b45b0efa5ba3b9f4bd4370d5" id="r_a20c4ad61b45b0efa5ba3b9f4bd4370d5"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a20c4ad61b45b0efa5ba3b9f4bd4370d5">__start_cbs</a> = []</td></tr>
+<tr class="separator:a20c4ad61b45b0efa5ba3b9f4bd4370d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12fdcec96abfeb222ee0cc15712a5aa0" id="r_a12fdcec96abfeb222ee0cc15712a5aa0"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a12fdcec96abfeb222ee0cc15712a5aa0">__transition_cbs</a> = []</td></tr>
+<tr class="separator:a12fdcec96abfeb222ee0cc15712a5aa0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9409abdfda0ac340c3ac8758c47f30b" id="r_ab9409abdfda0ac340c3ac8758c47f30b"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9409abdfda0ac340c3ac8758c47f30b">__end_cbs</a> = []</td></tr>
+<tr class="separator:ab9409abdfda0ac340c3ac8758c47f30b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a9c68efcc3a63a38e9c934fd134f3af5b" id="r_a9c68efcc3a63a38e9c934fd134f3af5b"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9c68efcc3a63a38e9c934fd134f3af5b">__current_state_lock</a></td></tr>
+<tr class="memdesc:a9c68efcc3a63a38e9c934fd134f3af5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dictionary mapping state names to their corresponding state objects and transitions.  <br /></td></tr>
+<tr class="separator:a9c68efcc3a63a38e9c934fd134f3af5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><pre class="fragment">Represents a state machine that can manage states and transitions
+between them, including callbacks for different state events.
+
+Attributes:
+    _states (Dict[str, Dict[str, Any]]): A dictionary mapping state names to their corresponding state objects and transitions.
+    _start_state (str): The name of the initial state of the state machine.
+    __current_state (str): The name of the current state being executed.
+    __current_state_lock (Lock): A threading lock to manage access to the current state.
+    __start_cbs (List[Tuple[Callable, List[Any]]]): A list of callbacks to call when the state machine starts.
+    __transition_cbs (List[Tuple[Callable, List[Any]]]): A list of callbacks to call during state transitions.
+    __end_cbs (List[Tuple[Callable, List[Any]]]): A list of callbacks to call when the state machine ends.
+</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a7f15946b9d1ac10fc7f177953185a903" name="a7f15946b9d1ac10fc7f177953185a903"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7f15946b9d1ac10fc7f177953185a903">&#9670;&#160;</a></span>__init__()</h2>
 
@@ -213,6 +245,14 @@ Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>A list of callbacks to call when the state machine starts. </p>
+<p>A list of callbacks to call during state transitions.</p>
+<p>A list of callbacks to call when the state machine ends.</p>
+<pre class="fragment">Initializes the StateMachine with a set of possible outcomes.
+
+Parameters:
+    outcomes (Set[str]): A set of possible outcomes for the state machine.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#a5f3f8a8f6e7fd2de1b30057606271a5a">yasmin.state.State</a>.</p>
 
 </div>
@@ -232,7 +272,11 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Returns a string representation of the state machine, listing all states and their types.
 
+Returns:
+    str: A string representation of the state machine.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#a05f40eddb0e2cea82ea125a193724cad">yasmin.state.State</a>.</p>
 
 </div>
@@ -268,7 +312,15 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<pre class="fragment">Executes all end callbacks.
 
+Parameters:
+    blackboard (Blackboard): The blackboard instance used for sharing state.
+    outcome (str): The outcome of the state machine execution.
+
+Raises:
+    Exception: If an error occurs while executing a callback.
+</pre> 
 </div>
 </div>
 <a id="a8392bcd1d8d832dbb58302faad9b3d90" name="a8392bcd1d8d832dbb58302faad9b3d90"></a>
@@ -302,7 +354,15 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<pre class="fragment">Executes all start callbacks.
 
+Parameters:
+    blackboard (Blackboard): The blackboard instance used for sharing state.
+    start_state (str): The name of the state machine's starting state.
+
+Raises:
+    Exception: If an error occurs while executing a callback.
+</pre> 
 </div>
 </div>
 <a id="a64da925a64fcc5923f2973812754e4fa" name="a64da925a64fcc5923f2973812754e4fa"></a>
@@ -346,7 +406,17 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<pre class="fragment">Executes all transition callbacks.
 
+Parameters:
+    blackboard (Blackboard): The blackboard instance used for sharing state.
+    from_state (str): The state the transition is coming from.
+    to_state (str): The state the transition is going to.
+    outcome (str): The outcome of the transition.
+
+Raises:
+    Exception: If an error occurs while executing a callback.
+</pre> 
 </div>
 </div>
 <a id="ad26b4c87836e89fed5b8667e910c2314" name="ad26b4c87836e89fed5b8667e910c2314"></a>
@@ -372,7 +442,12 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Adds a callback to be called when the state machine ends.
 
+Parameters:
+    cb (Callable): The callback function to execute.
+    args (List[Any], optional): A list of arguments to pass to the callback. Defaults to None.
+</pre> 
 </div>
 </div>
 <a id="ac8cb5e1e71f73d673e001217573de23b" name="ac8cb5e1e71f73d673e001217573de23b"></a>
@@ -398,7 +473,12 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Adds a callback to be called when the state machine starts.
 
+Parameters:
+    cb (Callable): The callback function to execute.
+    args (List[Any], optional): A list of arguments to pass to the callback. Defaults to None.
+</pre> 
 </div>
 </div>
 <a id="aca39dc53115f3f2b291447b775357046" name="aca39dc53115f3f2b291447b775357046"></a>
@@ -429,7 +509,18 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Adds a new state to the state machine.
 
+Parameters:
+    name (str): The name of the state to add.
+    state (State): The State object to associate with the name.
+    transitions (Dict[str, str], optional): A dictionary mapping source outcomes to target states. Defaults to None.
+
+Raises:
+    KeyError: If the state name is already registered.
+    ValueError: If transitions contain empty keys or values.
+    KeyError: If transitions reference unregistered outcomes.
+</pre> 
 </div>
 </div>
 <a id="af85ff105f02c9ef4d722965412e39b1f" name="af85ff105f02c9ef4d722965412e39b1f"></a>
@@ -455,7 +546,12 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Adds a callback to be called during state transitions.
 
+Parameters:
+    cb (Callable): The callback function to execute.
+    args (List[Any], optional): A list of arguments to pass to the callback. Defaults to None.
+</pre> 
 </div>
 </div>
 <a id="a5f17fd5d6fbbbc85d8524802c3bbe3b7" name="a5f17fd5d6fbbbc85d8524802c3bbe3b7"></a>
@@ -472,7 +568,10 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Cancels the current state and any associated operations.
 
+Overrides the cancel_state method from the parent State class.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#ab9675d75bb5d348b4332c3859a7d0add">yasmin.state.State</a>.</p>
 
 </div>
@@ -495,7 +594,18 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Executes the state machine starting from the initial state.
 
+Parameters:
+    blackboard (Blackboard): The blackboard instance used for sharing state.
+
+Returns:
+    str: The final outcome of the state machine execution.
+
+Raises:
+    RuntimeError: If the execution is canceled unexpectedly.
+    KeyError: If an outcome does not belong to a state or the state machine.
+</pre> 
 <p>Reimplemented from <a class="el" href="classyasmin_1_1state_1_1State.html#a531c80a2c77722089d92e7a9c73f69d8">yasmin.state.State</a>.</p>
 
 </div>
@@ -514,7 +624,11 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Retrieves the name of the current state being executed.
 
+Returns:
+    str: The name of the current state, or an empty string if none is set.
+</pre> 
 </div>
 </div>
 <a id="a11db8bc8a845f6f4a14f127be7005a68" name="a11db8bc8a845f6f4a14f127be7005a68"></a>
@@ -531,7 +645,11 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Retrieves the name of the current starting state.
 
+Returns:
+    str: The name of the starting state.
+</pre> 
 </div>
 </div>
 <a id="af7027e239c2eada2ff4d18ba719cc12d" name="af7027e239c2eada2ff4d18ba719cc12d"></a>
@@ -548,7 +666,11 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Retrieves all states in the state machine.
 
+Returns:
+    Dict[str, Union[State, Dict[str, str]]]: A dictionary of states and their transitions.
+</pre> 
 </div>
 </div>
 <a id="a91a4ed13326774118815c1d502771cb2" name="a91a4ed13326774118815c1d502771cb2"></a>
@@ -569,7 +691,15 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Sets the initial state for the state machine.
 
+Parameters:
+    state_name (str): The name of the initial state to set.
+
+Raises:
+    ValueError: If the state name is empty.
+    KeyError: If the state name is not found in the states.
+</pre> 
 </div>
 </div>
 <a id="a896b1dea10aca27b49730dd6f2c7886b" name="a896b1dea10aca27b49730dd6f2c7886b"></a>
@@ -586,12 +716,68 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Validates the state machine to ensure all states and transitions are correct.
 
+Raises:
+    RuntimeError: If no initial state is set.
+    KeyError: If there are any unregistered outcomes or transitions.
+</pre> 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a6874c0baacea3a462e531d6522e4f540" name="a6874c0baacea3a462e531d6522e4f540"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6874c0baacea3a462e531d6522e4f540">&#9670;&#160;</a></span>__current_state</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">str yasmin.state_machine.StateMachine.__current_state = None</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9c68efcc3a63a38e9c934fd134f3af5b" name="a9c68efcc3a63a38e9c934fd134f3af5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c68efcc3a63a38e9c934fd134f3af5b">&#9670;&#160;</a></span>__current_state_lock <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">str yasmin.state_machine.StateMachine.__current_state_lock</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">      : (</div>
+<div class="line">        Lock  </div>
+<div class="line">    )</div>
+</div><!-- fragment -->
+<p>A dictionary mapping state names to their corresponding state objects and transitions. </p>
+<p>The name of the initial state of the state machine.</p>
+<p>The name of the current state being executed. </p>
+
+</div>
+</div>
 <a id="a02f97da5b9498ee914606b931a48c608" name="a02f97da5b9498ee914606b931a48c608"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a02f97da5b9498ee914606b931a48c608">&#9670;&#160;</a></span>__current_state_lock</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a02f97da5b9498ee914606b931a48c608">&#9670;&#160;</a></span>__current_state_lock <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -600,6 +786,72 @@ Protected Attributes</h2></td></tr>
           <td class="memname">dict yasmin.state_machine.StateMachine.__current_state_lock = self._states[self.__current_state]</td>
         </tr>
       </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab9409abdfda0ac340c3ac8758c47f30b" name="ab9409abdfda0ac340c3ac8758c47f30b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9409abdfda0ac340c3ac8758c47f30b">&#9670;&#160;</a></span>__end_cbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">list yasmin.state_machine.StateMachine.__end_cbs = []</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a20c4ad61b45b0efa5ba3b9f4bd4370d5" name="a20c4ad61b45b0efa5ba3b9f4bd4370d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20c4ad61b45b0efa5ba3b9f4bd4370d5">&#9670;&#160;</a></span>__start_cbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">list yasmin.state_machine.StateMachine.__start_cbs = []</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a12fdcec96abfeb222ee0cc15712a5aa0" name="a12fdcec96abfeb222ee0cc15712a5aa0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12fdcec96abfeb222ee0cc15712a5aa0">&#9670;&#160;</a></span>__transition_cbs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">list yasmin.state_machine.StateMachine.__transition_cbs = []</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>
@@ -669,11 +921,14 @@ Protected Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">str yasmin.state_machine.StateMachine._states = &quot;&quot;</td>
+          <td class="memname">str yasmin.state_machine.StateMachine._states</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
+<b>Initial value:</b><div class="fragment"><div class="line">=  <span class="stringliteral">&quot;\n\t&quot;</span> + <span class="stringliteral">&quot;\n\t&quot;</span>.join(</div>
+<div class="line">            f<span class="stringliteral">&quot;{key} --&gt; {transitions[key]}&quot;</span> <span class="keywordflow">for</span> key <span class="keywordflow">in</span> transitions</div>
+<div class="line">        )</div>
+</div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>

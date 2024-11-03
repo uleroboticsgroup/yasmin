@@ -94,19 +94,29 @@ $(function(){ initResizable(false); });
   <div class="headertitle"><div class="title">yasmin_ros::basic_outcomes Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Provides common outcome constants for ROS 2 actions.  
+<a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:a5573f527607429f73c199d683f78a6a7" id="r_a5573f527607429f73c199d683f78a6a7"><td class="memItemLeft" align="right" valign="top">constexpr char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5573f527607429f73c199d683f78a6a7">SUCCEED</a> [] = &quot;succeeded&quot;</td></tr>
+<tr class="memdesc:a5573f527607429f73c199d683f78a6a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant representing a successful action outcome.  <br /></td></tr>
 <tr class="separator:a5573f527607429f73c199d683f78a6a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae27bb90d1a3bef7392009daaf6af5a21" id="r_ae27bb90d1a3bef7392009daaf6af5a21"><td class="memItemLeft" align="right" valign="top">constexpr char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae27bb90d1a3bef7392009daaf6af5a21">ABORT</a> [] = &quot;aborted&quot;</td></tr>
+<tr class="memdesc:ae27bb90d1a3bef7392009daaf6af5a21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant representing an aborted action outcome.  <br /></td></tr>
 <tr class="separator:ae27bb90d1a3bef7392009daaf6af5a21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa16f429e9a49afef61173041aeb88525" id="r_aa16f429e9a49afef61173041aeb88525"><td class="memItemLeft" align="right" valign="top">constexpr char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa16f429e9a49afef61173041aeb88525">CANCEL</a> [] = &quot;canceled&quot;</td></tr>
+<tr class="memdesc:aa16f429e9a49afef61173041aeb88525"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant representing a canceled action outcome.  <br /></td></tr>
 <tr class="separator:aa16f429e9a49afef61173041aeb88525"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1e861086a64adb5672adec78f7c3316" id="r_aa1e861086a64adb5672adec78f7c3316"><td class="memItemLeft" align="right" valign="top">constexpr char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1e861086a64adb5672adec78f7c3316">TIMEOUT</a> [] = &quot;timeout&quot;</td></tr>
+<tr class="memdesc:aa1e861086a64adb5672adec78f7c3316"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant representing a timed-out action outcome.  <br /></td></tr>
 <tr class="separator:aa1e861086a64adb5672adec78f7c3316"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Variable Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Provides common outcome constants for ROS 2 actions. </p>
+<p>The <a class="el" href="namespaceyasmin__ros_1_1basic__outcomes.html" title="Provides common outcome constants for ROS 2 actions.">basic_outcomes</a> namespace defines constants for common action outcomes within the <a class="el" href="namespaceyasmin__ros.html">yasmin_ros</a> framework. These constants represent the status of actions or tasks, making it easier to standardize result handling. </p>
+</div><h2 class="groupheader">Variable Documentation</h2>
 <a id="ae27bb90d1a3bef7392009daaf6af5a21" name="ae27bb90d1a3bef7392009daaf6af5a21"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae27bb90d1a3bef7392009daaf6af5a21">&#9670;&#160;</a></span>ABORT</h2>
 
@@ -126,6 +136,9 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Constant representing an aborted action outcome. </p>
+<p>This string constant signifies that an action was aborted, likely due to an error or unexpected condition that prevented its completion. </p>
 
 </div>
 </div>
@@ -149,6 +162,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Constant representing a canceled action outcome. </p>
+<p>This string constant is used when an action is manually canceled by a user or system before it could complete. </p>
+
 </div>
 </div>
 <a id="a5573f527607429f73c199d683f78a6a7" name="a5573f527607429f73c199d683f78a6a7"></a>
@@ -171,6 +187,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Constant representing a successful action outcome. </p>
+<p>This string constant is used to indicate that an action has successfully completed without any issues. </p>
+
 </div>
 </div>
 <a id="aa1e861086a64adb5672adec78f7c3316" name="aa1e861086a64adb5672adec78f7c3316"></a>
@@ -192,6 +211,9 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Constant representing a timed-out action outcome. </p>
+<p>This string constant is used to indicate that an action did not complete within the allocated time, resulting in a timeout status. </p>
 
 </div>
 </div>
