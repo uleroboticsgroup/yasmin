@@ -41,7 +41,6 @@ class YasminFsmViewerNode(Node):
     a dictionary with expiring entries to manage the FSM data.
 
     Attributes:
-        __started (bool): Indicates whether the server has started.
         __fsm_dict (ExpiringDict): A dictionary that stores FSM data with
                                     automatic expiration.
 
@@ -62,9 +61,6 @@ class YasminFsmViewerNode(Node):
         starts the subscriber thread, and initializes the backend server.
         """
         super().__init__("yasmin_viewer")
-
-        ## indicates whether the server has started.
-        self.__started: bool = False
 
         ## A dictionary that stores FSM data with automatic expiration.
         self.__fsm_dict: ExpiringDict = ExpiringDict(max_len=300, max_age_seconds=3)
@@ -123,11 +119,10 @@ class YasminFsmViewerNode(Node):
 
             return json.dumps({})
 
-        self.__started: bool = True
-
         _host = str(self.get_parameter("host").value)
         _port = int(self.get_parameter("port").value)
-        print(f"Started Yasmin viewer on http://{_host}:{str(_port)}")
+
+        self.get_logger().info(f"Started Yasmin viewer on http://{_host}:{str(_port)}")
         serve(app, host=_host, port=_port)
 
     def start_subscriber(self) -> None:
@@ -196,8 +191,6 @@ class YasminFsmViewerNode(Node):
 
         :param msg: The StateMachine message containing the FSM data.
         """
-        while not self.__started:
-            time.sleep(0.05)
 
         if msg.states:
             self.__fsm_dict[msg.states[0].name] = self.msg_to_dict(msg)
