@@ -39,9 +39,6 @@ class Blackboard(object):
         __repr__(): Return a string representation of the blackboard's data.
     """
 
-    ## A threading lock to ensure thread-safe access to the _data attribute.
-    __lock: Lock = Lock()
-
     def __init__(self, init: Dict[str, Any] = None) -> None:
         """
         Initializes the Blackboard with an optional initial dictionary.
@@ -54,6 +51,8 @@ class Blackboard(object):
             None
         """
 
+        ## A threading lock to ensure thread-safe access to the _data attribute.
+        self.__lock: Lock = Lock()
         ## A dictionary holding the data stored in the blackboard.
         self._data: Dict[str, Any] = {}
 

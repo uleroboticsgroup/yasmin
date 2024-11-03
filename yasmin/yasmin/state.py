@@ -33,13 +33,6 @@ class State(ABC):
         _canceled (bool): A flag indicating whether the state has been canceled.
     """
 
-    ## A set of valid outcomes for this state.
-    _outcomes: Set
-    ## A flag indicating whether the state is currently running.
-    _running: bool = False
-    ## A flag indicating whether the state has been canceled.
-    _canceled: bool = False
-
     def __init__(self, outcomes: Set[str]) -> None:
         """
         Initializes the State instance.
@@ -49,7 +42,12 @@ class State(ABC):
         :raises ValueError: If the provided outcomes set is empty.
         """
 
+        ## A set of valid outcomes for this state.
         self._outcomes: Set = set()
+        ## A flag indicating whether the state is currently running.
+        self._running: bool = False
+        ## A flag indicating whether the state has been canceled.
+        self._canceled: bool = False
 
         if outcomes:
             self._outcomes.update(outcomes)

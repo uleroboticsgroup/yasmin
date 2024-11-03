@@ -37,25 +37,6 @@ class StateMachine(State):
         __end_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call when the state machine ends.
     """
 
-    ## A dictionary mapping state names to their corresponding state objects and transitions.
-    _states: Dict[str, Dict[str, Any]]
-    ## The name of the initial state of the state machine.
-    _start_state: str = None
-    ## The name of the current state being executed.
-    __current_state: str = None
-    ## A threading lock to manage access to the current state.
-    __current_state_lock: Lock = Lock()
-    ## A list of callbacks to call when the state machine starts.
-    __start_cbs: List[
-        Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
-    ] = []
-    ## A list of callbacks to call during state transitions.
-    __transition_cbs: List[
-        Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
-    ] = []
-    ## A list of callbacks to call when the state machine ends.
-    __end_cbs: List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]] = []
-
     def __init__(self, outcomes: Set[str]) -> None:
         """
         Initializes the StateMachine with a set of possible outcomes.
@@ -65,7 +46,26 @@ class StateMachine(State):
         """
         super().__init__(outcomes)
 
+        ## A dictionary mapping state names to their corresponding state objects and transitions.
         self._states: Dict[str, Dict[str, Any]] = {}
+        ## The name of the initial state of the state machine.
+        self._start_state: str = None
+        ## The name of the current state being executed.
+        self.__current_state: str = None
+        ## A threading lock to manage access to the current state.
+        self.__current_state_lock: Lock = Lock()
+        ## A list of callbacks to call when the state machine starts.
+        self.__start_cbs: List[
+            Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
+        ] = []
+        ## A list of callbacks to call during state transitions.
+        self.__transition_cbs: List[
+            Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
+        ] = []
+        ## A list of callbacks to call when the state machine ends.
+        self.__end_cbs: List[
+            Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
+        ] = []
 
     def add_state(
         self,

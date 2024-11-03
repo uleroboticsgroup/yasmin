@@ -33,8 +33,6 @@ class CbState(State):
         cb (Callable): A callable that will be invoked when the state is executed.
     """
 
-    _cb: Callable  ##< A callable that will be invoked when the state is executed.
-
     def __init__(self, outcomes: Set[str], cb: Callable) -> None:
         """
         Initializes a new instance of CbState.
@@ -48,6 +46,8 @@ class CbState(State):
             TypeError: If 'outcomes' is not a set or 'cb' is not callable.
         """
         super().__init__(outcomes)
+
+        ## A callable that will be invoked when the state is executed.
         self._cb: Callable = cb
 
     def execute(self, blackboard: Blackboard) -> str:
