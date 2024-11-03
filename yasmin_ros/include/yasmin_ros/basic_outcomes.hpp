@@ -22,7 +22,7 @@ namespace yasmin_ros {
 
 /**
  * @namespace yasmin_ros::basic_outcomes
- * @brief Provides common outcome constants for ROS actions.
+ * @brief Provides common outcome constants for ROS 2 actions.
  *
  * The basic_outcomes namespace defines constants for common action outcomes
  * within the yasmin_ros framework. These constants represent the status of

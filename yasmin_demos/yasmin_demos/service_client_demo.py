@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2023  Miguel Ángel González Santamarta
-
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 
 import rclpy
 from example_interfaces.srv import AddTwoInts
@@ -30,7 +29,26 @@ from yasmin_viewer import YasminViewerPub
 
 
 class AddTwoIntsState(ServiceState):
+    """
+    A state that calls the AddTwoInts service to add two integers.
+
+    This class is a state in a finite state machine that sends a request
+    to the AddTwoInts service, retrieves the response, and updates the
+    blackboard with the result.
+
+    Attributes:
+        service_type (type): The service type being used (AddTwoInts).
+        service_name (str): The name of the service.
+        outcomes (list): The list of possible outcomes for this state.
+    """
+
     def __init__(self) -> None:
+        """
+        Initializes the AddTwoIntsState.
+
+        Calls the parent constructor with the specific service type,
+        service name, request handler, outcomes, and response handler.
+        """
         super().__init__(
             AddTwoInts,  # srv type
             "/add_two_ints",  # service name
@@ -40,7 +58,15 @@ class AddTwoIntsState(ServiceState):
         )
 
     def create_request_handler(self, blackboard: Blackboard) -> AddTwoInts.Request:
+        """
+        Creates the service request from the blackboard data.
 
+        Args:
+            blackboard (Blackboard): The blackboard containing the input values.
+
+        Returns:
+            AddTwoInts.Request: The request object populated with values from the blackboard.
+        """
         req = AddTwoInts.Request()
         req.a = blackboard["a"]
         req.b = blackboard["b"]
@@ -49,37 +75,77 @@ class AddTwoIntsState(ServiceState):
     def response_handler(
         self, blackboard: Blackboard, response: AddTwoInts.Response
     ) -> str:
+        """
+        Processes the response from the AddTwoInts service.
 
+        Updates the blackboard with the sum result from the response.
+
+        Args:
+            blackboard (Blackboard): The blackboard to update with the sum.
+            response (AddTwoInts.Response): The response from the service call.
+
+        Returns:
+            str: The outcome of the operation, which is "outcome1".
+        """
         blackboard["sum"] = response.sum
         return "outcome1"
 
 
 def set_ints(blackboard: Blackboard) -> str:
+    """
+    Sets the integer values in the blackboard.
+
+    This function initializes the blackboard with two integer values to be added.
+
+    Args:
+        blackboard (Blackboard): The blackboard to update with integer values.
+
+    Returns:
+        str: The outcome of the operation, which is SUCCEED.
+    """
     blackboard["a"] = 10
     blackboard["b"] = 5
     return SUCCEED
 
 
 def print_sum(blackboard: Blackboard) -> str:
+    """
+    Logs the sum value from the blackboard.
+
+    This function retrieves the sum from the blackboard and logs it.
+
+    Args:
+        blackboard (Blackboard): The blackboard from which to retrieve the sum.
+
+    Returns:
+        str: The outcome of the operation, which is SUCCEED.
+    """
     yasmin.YASMIN_LOG_INFO(f"Sum: {blackboard['sum']}")
     return SUCCEED
 
 
-# main
 def main():
+    """
+    The main function to execute the finite state machine (FSM).
 
+    This function initializes the ROS 2 environment, sets up logging,
+    creates the FSM with defined states, and executes the FSM.
+
+    Raises:
+        KeyboardInterrupt: If the user interrupts the program.
+    """
     yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
 
-    # init ROS 2
+    # Init ROS 2
     rclpy.init()
 
-    # set ROS 2 logs
+    # Set ROS 2 logs
     set_ros_loggers()
 
-    # create a FSM
+    # Create a FSM
     sm = StateMachine(outcomes=["outcome4"])
 
-    # add states
+    # Add states
     sm.add_state(
         "SETTING_INTS",
         CbState([SUCCEED], set_ints),
@@ -102,10 +168,10 @@ def main():
         },
     )
 
-    # pub FSM info
+    # Publish FSM info
     YasminViewerPub("YASMIN_SERVICE_CLIENT_DEMO", sm)
 
-    # execute FSM
+    # Execute FSM
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
@@ -113,7 +179,7 @@ def main():
         if sm.is_running():
             sm.cancel_state()
 
-    # shutdown ROS 2
+    # Shutdown ROS 2
     if rclpy.ok():
         rclpy.shutdown()
 

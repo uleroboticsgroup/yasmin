@@ -31,13 +31,13 @@
 namespace yasmin_ros {
 
 /**
- * @brief A state class that interacts with a ROS service.
+ * @brief A state class that interacts with a ROS 2 service.
  *
- * This class manages communication with a specified ROS service,
+ * This class manages communication with a specified ROS 2 service,
  * allowing it to send requests and handle responses. It extends
  * the base `yasmin::State` class.
  *
- * @tparam ServiceT The type of the ROS service this state interacts with.
+ * @tparam ServiceT The type of the ROS 2 service this state interacts with.
  */
 template <typename ServiceT> class ServiceState : public yasmin::State {
 
@@ -83,9 +83,9 @@ public:
                      response_handler, timeout) {}
 
   /**
-   * @brief Construct a ServiceState with a ROS node and handlers.
+   * @brief Construct a ServiceState with a ROS 2 node and handlers.
    *
-   * @param node A shared pointer to the ROS node.
+   * @param node A shared pointer to the ROS 2 node.
    * @param srv_name The name of the service to call.
    * @param create_request_handler Function to create a service request.
    * @param outcomes A set of possible outcomes for this state.
@@ -111,7 +111,7 @@ public:
       this->outcomes.insert(outcomes.begin(), outcomes.end());
     }
 
-    // Assign the appropriate ROS node
+    // Assign the appropriate ROS 2 node
     if (node == nullptr) {
       this->node_ = YasminNode::get_instance();
     } else {
@@ -182,7 +182,7 @@ public:
   }
 
 private:
-  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS node.
+  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS 2 node.
   std::shared_ptr<rclcpp::Client<ServiceT>>
       service_client; ///< Shared pointer to the service client.
   CreateRequestHandler

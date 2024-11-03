@@ -35,11 +35,11 @@ using std::placeholders::_1;
 namespace yasmin_ros {
 
 /**
- * @brief Template class to monitor a ROS topic and process incoming messages.
+ * @brief Template class to monitor a ROS 2 topic and process incoming messages.
  *
- * This class provides functionality to subscribe to a ROS topic of type `MsgT`,
- * execute a custom monitoring handler, and return specific outcomes based on
- * the messages received.
+ * This class provides functionality to subscribe to a ROS 2 topic of type
+ * `MsgT`, execute a custom monitoring handler, and return specific outcomes
+ * based on the messages received.
  *
  * @tparam MsgT The message type of the topic to subscribe to.
  */
@@ -178,9 +178,9 @@ public:
   }
 
 private:
-  rclcpp::Node::SharedPtr node_; /**< ROS node pointer. */
+  rclcpp::Node::SharedPtr node_; /**< ROS 2 node pointer. */
   std::shared_ptr<rclcpp::Subscription<MsgT>>
-      sub; /**< Subscription to the ROS topic. */
+      sub; /**< Subscription to the ROS 2 topic. */
   std::vector<std::shared_ptr<MsgT>>
       msg_list; /**< List to store queued messages. */
 

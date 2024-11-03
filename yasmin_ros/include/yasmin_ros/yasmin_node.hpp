@@ -30,10 +30,10 @@ namespace yasmin_ros {
 
 /**
  * @class YasminNode
- * @brief A ROS2 node for managing and handling YASMIN-based applications.
+ * @brief A ROS 2 node for managing and handling YASMIN-based applications.
  *
  * YasminNode is a singleton class derived from rclcpp::Node and integrates
- * custom functionalities for executing specific tasks in a ROS2 environment.
+ * custom functionalities for executing specific tasks in a ROS 2 environment.
  */
 class YasminNode : public rclcpp::Node {
 

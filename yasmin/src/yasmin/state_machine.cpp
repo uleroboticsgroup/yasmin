@@ -294,7 +294,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
                   outcome) == state->get_outcomes().end()) {
       throw std::logic_error("Outcome '" + outcome +
-                             "' is not register in state " +
+                             "' is not registered in state " +
                              this->current_state);
     }
 
@@ -331,9 +331,8 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
       // Outcome is not in the sm
     } else {
-      throw std::logic_error(
-          "Outcome '" + outcome +
-          "' is not a state neither a state machine outcome");
+      throw std::logic_error("Outcome '" + outcome +
+                             "' is not a state nor a state machine outcome");
     }
   }
 

@@ -19,12 +19,12 @@
 namespace yasmin_ros {
 
 /**
- * @brief Sets the logging functions for ROS, linking ROS log levels to YASMIN
+ * @brief Sets the logging functions for ROS, linking ROS 2 log levels to YASMIN
  * loggers.
  *
- * This function configures YASMIN to use ROS logging mechanisms for error,
+ * This function configures YASMIN to use ROS 2 logging mechanisms for error,
  * warning, info, and debug levels, ensuring messages from YASMIN are routed
- * through ROS loggers.
+ * through ROS 2 loggers.
  *
  * @note This function should be called once to set up the loggers before any
  * logging occurs within YASMIN components.

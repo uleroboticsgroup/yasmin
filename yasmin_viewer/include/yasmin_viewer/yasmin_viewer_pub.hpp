@@ -39,9 +39,9 @@ class YasminViewerPub {
 
 public:
   /**
-   * @brief Constructs YasminViewerPub with a given ROS node, state machine
+   * @brief Constructs YasminViewerPub with a given ROS 2 node, state machine
    * name, and state machine instance.
-   * @param node Shared pointer to the ROS node.
+   * @param node Shared pointer to the ROS 2 node.
    * @param fsm_name Name of the finite state machine.
    * @param fsm Shared pointer to the StateMachine instance to be published.
    */
@@ -49,7 +49,7 @@ public:
                   std::shared_ptr<yasmin::StateMachine> fsm);
 
   /**
-   * @brief Constructs YasminViewerPub with a default ROS node instance, state
+   * @brief Constructs YasminViewerPub with a default ROS 2 node instance, state
    * machine name, and state machine instance.
    * @param fsm_name Name of the finite state machine.
    * @param fsm Shared pointer to the StateMachine instance to be published.
@@ -89,7 +89,7 @@ public:
   void publish_data();
 
 private:
-  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS node.
+  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS 2 node.
   rclcpp::Publisher<yasmin_msgs::msg::StateMachine>::SharedPtr
       publisher;                      ///< Publisher for StateMachine messages.
   rclcpp::TimerBase::SharedPtr timer; ///< Timer for periodic publishing.

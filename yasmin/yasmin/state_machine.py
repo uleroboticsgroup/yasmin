@@ -1,40 +1,67 @@
 # Copyright (C) 2023  Miguel Ángel González Santamarta
-
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 
 from typing import Set, List, Dict, Any
 from typing import Union, Callable
 from threading import Lock
-
 import yasmin
 from yasmin import State
 from yasmin.blackboard import Blackboard
 
 
 class StateMachine(State):
-    def __init__(self, outcomes: Set[str]) -> None:
+    """
+    Represents a state machine that can manage states and transitions
+    between them, including callbacks for different state events.
 
+    Attributes:
+        _states (Dict[str, Dict[str, Any]]): A dictionary mapping state names to their corresponding state objects and transitions.
+        _start_state (str): The name of the initial state of the state machine.
+        __current_state (str): The name of the current state being executed.
+        __current_state_lock (Lock): A threading lock to manage access to the current state.
+        __start_cbs (List[Tuple[Callable, List[Any]]]): A list of callbacks to call when the state machine starts.
+        __transition_cbs (List[Tuple[Callable, List[Any]]]): A list of callbacks to call during state transitions.
+        __end_cbs (List[Tuple[Callable, List[Any]]]): A list of callbacks to call when the state machine ends.
+    """
+
+    _states: dict  ##< A dictionary mapping state names to their corresponding state objects and transitions.
+    _start_state: str  ##< The name of the initial state of the state machine.
+    __current_state: str  ##< The name of the current state being executed.
+    __current_state_lock: (
+        Lock  ##< A threading lock to manage access to the current state.
+    )
+    __start_cbs: list  ##< A list of callbacks to call when the state machine starts.
+    __transition_cbs: list  ##< A list of callbacks to call during state transitions.
+    __end_cbs: list  ##< A list of callbacks to call when the state machine ends.
+
+    def __init__(self, outcomes: Set[str]) -> None:
+        """
+        Initializes the StateMachine with a set of possible outcomes.
+
+        Parameters:
+            outcomes (Set[str]): A set of possible outcomes for the state machine.
+        """
         super().__init__(outcomes)
 
-        self._states = {}
-        self._start_state = None
-        self.__current_state = None
-        self.__current_state_lock = Lock()
-        self.__start_cbs = []
-        self.__transition_cbs = []
-        self.__end_cbs = []
+        self._states: dict = {}
+        self._start_state: str = None
+        self.__current_state: str = None
+        self.__current_state_lock: Lock = Lock()
+        self.__start_cbs: list = []
+        self.__transition_cbs: list = []
+        self.__end_cbs: list = []
 
     def add_state(
         self,
@@ -42,7 +69,19 @@ class StateMachine(State):
         state: State,
         transitions: Dict[str, str] = None,
     ) -> None:
+        """
+        Adds a new state to the state machine.
 
+        Parameters:
+            name (str): The name of the state to add.
+            state (State): The State object to associate with the name.
+            transitions (Dict[str, str], optional): A dictionary mapping source outcomes to target states. Defaults to None.
+
+        Raises:
+            KeyError: If the state name is already registered.
+            ValueError: If transitions contain empty keys or values.
+            KeyError: If transitions reference unregistered outcomes.
+        """
         if not transitions:
             transitions = {}
 
@@ -61,9 +100,9 @@ class StateMachine(State):
                     f"State '{name}' references unregistered outcomes '{key}', available outcomes are {list(state.get_outcomes())}"
                 )
 
-        transition_string = ""
-        for key in transitions:
-            transition_string += "\n\t" + key + " --> " + transitions[key]
+        transition_string = "\n\t" + "\n\t".join(
+            f"{key} --> {transitions[key]}" for key in transitions
+        )
 
         yasmin.YASMIN_LOG_DEBUG(
             f"Adding state '{name}' of type '{state}' with transitions: {transition_string}"
@@ -75,7 +114,16 @@ class StateMachine(State):
             self.set_start_state(name)
 
     def set_start_state(self, state_name: str) -> None:
+        """
+        Sets the initial state for the state machine.
 
+        Parameters:
+            state_name (str): The name of the initial state to set.
+
+        Raises:
+            ValueError: If the state name is empty.
+            KeyError: If the state name is not found in the states.
+        """
         if not state_name:
             raise ValueError("Initial state cannot be empty")
 
@@ -84,15 +132,33 @@ class StateMachine(State):
 
         yasmin.YASMIN_LOG_DEBUG(f"Setting start state to '{state_name}'")
 
-        self._start_state = state_name
+        self._start_state: str = state_name
 
     def get_start_state(self) -> str:
+        """
+        Retrieves the name of the current starting state.
+
+        Returns:
+            str: The name of the starting state.
+        """
         return self._start_state
 
     def get_states(self) -> Dict[str, Union[State, Dict[str, str]]]:
+        """
+        Retrieves all states in the state machine.
+
+        Returns:
+            Dict[str, Union[State, Dict[str, str]]]: A dictionary of states and their transitions.
+        """
         return self._states
 
     def get_current_state(self) -> str:
+        """
+        Retrieves the name of the current state being executed.
+
+        Returns:
+            str: The name of the current state, or an empty string if none is set.
+        """
         with self.__current_state_lock:
             if self.__current_state:
                 return self.__current_state
@@ -100,21 +166,52 @@ class StateMachine(State):
         return ""
 
     def add_start_cb(self, cb: Callable, args: List[Any] = None) -> None:
+        """
+        Adds a callback to be called when the state machine starts.
+
+        Parameters:
+            cb (Callable): The callback function to execute.
+            args (List[Any], optional): A list of arguments to pass to the callback. Defaults to None.
+        """
         if args is None:
             args = []
         self.__start_cbs.append((cb, args))
 
     def add_transition_cb(self, cb: Callable, args: List[Any] = None) -> None:
+        """
+        Adds a callback to be called during state transitions.
+
+        Parameters:
+            cb (Callable): The callback function to execute.
+            args (List[Any], optional): A list of arguments to pass to the callback. Defaults to None.
+        """
         if args is None:
             args = []
         self.__transition_cbs.append((cb, args))
 
     def add_end_cb(self, cb: Callable, args: List[Any] = None) -> None:
+        """
+        Adds a callback to be called when the state machine ends.
+
+        Parameters:
+            cb (Callable): The callback function to execute.
+            args (List[Any], optional): A list of arguments to pass to the callback. Defaults to None.
+        """
         if args is None:
             args = []
         self.__end_cbs.append((cb, args))
 
     def _call_start_cbs(self, blackboard: Blackboard, start_state: str) -> None:
+        """
+        Executes all start callbacks.
+
+        Parameters:
+            blackboard (Blackboard): The blackboard instance used for sharing state.
+            start_state (str): The name of the state machine's starting state.
+
+        Raises:
+            Exception: If an error occurs while executing a callback.
+        """
         try:
             for cb, args in self.__start_cbs:
                 cb(blackboard, start_state, *args)
@@ -128,6 +225,18 @@ class StateMachine(State):
         to_state: str,
         outcome: str,
     ) -> None:
+        """
+        Executes all transition callbacks.
+
+        Parameters:
+            blackboard (Blackboard): The blackboard instance used for sharing state.
+            from_state (str): The state the transition is coming from.
+            to_state (str): The state the transition is going to.
+            outcome (str): The outcome of the transition.
+
+        Raises:
+            Exception: If an error occurs while executing a callback.
+        """
         try:
             for cb, args in self.__transition_cbs:
                 cb(blackboard, from_state, to_state, outcome, *args)
@@ -135,6 +244,16 @@ class StateMachine(State):
             yasmin.YASMIN_LOG_ERROR(f"Could not execute transition callback: {e}")
 
     def _call_end_cbs(self, blackboard: Blackboard, outcome: str) -> None:
+        """
+        Executes all end callbacks.
+
+        Parameters:
+            blackboard (Blackboard): The blackboard instance used for sharing state.
+            outcome (str): The outcome of the state machine execution.
+
+        Raises:
+            Exception: If an error occurs while executing a callback.
+        """
         try:
             for cb, args in self.__end_cbs:
                 cb(blackboard, outcome, *args)
@@ -142,50 +261,55 @@ class StateMachine(State):
             yasmin.YASMIN_LOG_ERROR(f"Could not execute end callback: {e}")
 
     def validate(self) -> None:
+        """
+        Validates the state machine to ensure all states and transitions are correct.
 
+        Raises:
+            RuntimeError: If no initial state is set.
+            KeyError: If there are any unregistered outcomes or transitions.
+        """
         yasmin.YASMIN_LOG_DEBUG(f"Validating state machine '{self}'")
 
-        # check initial state
+        # Check initial state
         if not self._start_state:
             raise RuntimeError("No initial state set")
 
         terminal_outcomes = []
 
-        # check all states
+        # Check all states
         for state_name in self._states:
-
             state: State = self._states[state_name]["state"]
             transitions: Dict[str, str] = self._states[state_name]["transitions"]
 
             outcomes = state.get_outcomes()
 
-            # check if all state outcomes are in transitions
+            # Check if all state outcomes are in transitions
             for o in outcomes:
                 if o not in set(list(transitions.keys()) + list(self.get_outcomes())):
                     raise KeyError(
                         f"State '{state_name}' outcome '{o}' not registered in transitions"
                     )
 
-                # state outcomes that are in state machines out do not need transitions
+                # State outcomes that are in state machine outcomes do not need transitions
                 elif o in self.get_outcomes():
                     terminal_outcomes.append(o)
 
-            # if sate is a state machine, validate it
+            # If state is a state machine, validate it
             if isinstance(state, StateMachine):
                 state.validate()
 
-            # add terminal outcomes
+            # Add terminal outcomes
             terminal_outcomes.extend([transitions[key] for key in transitions])
 
-        # check terminal outcomes for the state machine
+        # Check terminal outcomes for the state machine
         terminal_outcomes = set(terminal_outcomes)
 
-        # check if all state machine outcomes are in the terminal outcomes
+        # Check if all state machine outcomes are in the terminal outcomes
         for o in self.get_outcomes():
             if o not in terminal_outcomes:
                 raise KeyError(f"Target outcome '{o}' not registered in transitions")
 
-        # check if all terminal outcomes are states or state machine outcomes
+        # Check if all terminal outcomes are states or state machine outcomes
         for o in terminal_outcomes:
             if o not in set(list(self._states.keys()) + list(self.get_outcomes())):
                 raise KeyError(
@@ -193,7 +317,19 @@ class StateMachine(State):
                 )
 
     def execute(self, blackboard: Blackboard) -> str:
+        """
+        Executes the state machine starting from the initial state.
 
+        Parameters:
+            blackboard (Blackboard): The blackboard instance used for sharing state.
+
+        Returns:
+            str: The final outcome of the state machine execution.
+
+        Raises:
+            RuntimeError: If the execution is canceled unexpectedly.
+            KeyError: If an outcome does not belong to a state or the state machine.
+        """
         self.validate()
 
         yasmin.YASMIN_LOG_INFO(
@@ -202,36 +338,35 @@ class StateMachine(State):
         self._call_start_cbs(blackboard, self._start_state)
 
         with self.__current_state_lock:
-            self.__current_state = self._start_state
+            self.__current_state: str = self._start_state
 
         while not self.is_canceled():
-
             with self.__current_state_lock:
                 state = self._states[self.__current_state]
 
             outcome = state["state"](blackboard)
             old_outcome = outcome
 
-            # check outcome belongs to state
+            # Check if outcome belongs to state
             if outcome not in state["state"].get_outcomes():
                 raise KeyError(
-                    f"Outcome '{outcome}' is not register in state {self.__current_state}"
+                    f"Outcome '{outcome}' is not registered in state {self.__current_state}"
                 )
 
-            # translate outcome using transitions
+            # Translate outcome using transitions
             if outcome in state["transitions"]:
                 outcome = state["transitions"][outcome]
 
-            # outcome is an outcome of the sm
+            # Outcome is an outcome of the state machine
             if outcome in self.get_outcomes():
                 with self.__current_state_lock:
-                    self.__current_state = None
+                    self.__current_state: str = None
 
                 yasmin.YASMIN_LOG_INFO(f"State machine ends with outcome '{outcome}'")
                 self._call_end_cbs(blackboard, outcome)
                 return outcome
 
-            # outcome is a state
+            # Outcome is a state
             elif outcome in self._states:
                 yasmin.YASMIN_LOG_INFO(
                     f"State machine transitioning '{self.__current_state}' : '{old_outcome}' --> '{outcome}'"
@@ -245,12 +380,12 @@ class StateMachine(State):
                 )
 
                 with self.__current_state_lock:
-                    self.__current_state = outcome
+                    self.__current_state: str = outcome
 
-            # outcome is not in the sm
+            # Outcome is not in the state machine
             else:
                 raise KeyError(
-                    f"Outcome '{outcome}' is not a state neither a state machine outcome"
+                    f"Outcome '{outcome}' is not a state nor a state machine outcome"
                 )
 
         raise RuntimeError(
@@ -258,12 +393,23 @@ class StateMachine(State):
         )
 
     def cancel_state(self) -> None:
+        """
+        Cancels the current state and any associated operations.
+
+        Overrides the cancel_state method from the parent State class.
+        """
         super().cancel_state()
         with self.__current_state_lock:
             if self.__current_state:
                 self._states[self.__current_state]["state"].cancel_state()
 
     def __str__(self) -> str:
+        """
+        Returns a string representation of the state machine, listing all states and their types.
+
+        Returns:
+            str: A string representation of the state machine.
+        """
         result = "State Machine ["
         keys = sorted(list(self._states.keys()))
 

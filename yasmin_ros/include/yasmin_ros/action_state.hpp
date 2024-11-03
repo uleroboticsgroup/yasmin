@@ -35,9 +35,9 @@ using namespace std::placeholders;
 namespace yasmin_ros {
 
 /**
- * @brief A state class for handling ROS2 action client operations.
+ * @brief A state class for handling ROS 2 action client operations.
  *
- * This class encapsulates the behavior of a ROS2 action client within a YASMIN
+ * This class encapsulates the behavior of a ROS 2 action client within a YASMIN
  * state. It allows the creation and management of goals, feedback, and results
  * associated with an action server.
  *
@@ -139,10 +139,10 @@ public:
   /**
    * @brief Construct an ActionState with a specified node and action name.
    *
-   * This constructor allows specifying a ROS node in addition to the action
+   * This constructor allows specifying a ROS 2 node in addition to the action
    * name and goal handler.
    *
-   * @param node A shared pointer to the ROS node.
+   * @param node A shared pointer to the ROS 2 node.
    * @param action_name The name of the action to communicate with.
    * @param create_goal_handler A function that creates a goal for the action.
    * @param outcomes A set of possible outcomes for this action state.
@@ -294,7 +294,7 @@ public:
   }
 
 private:
-  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS node.
+  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS 2 node.
 
   std::string action_name; ///< Name of the action to communicate with.
 
