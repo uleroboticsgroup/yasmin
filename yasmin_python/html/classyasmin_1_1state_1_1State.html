@@ -92,7 +92,6 @@ $(function(){ initResizable(false); });
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
-<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classyasmin_1_1state_1_1State-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin.state.State Class Reference</div></div>
 </div><!--header-->
@@ -164,12 +163,10 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:ac9a306ed083f382403851017b163a644" id="r_ac9a306ed083f382403851017b163a644"><td class="memItemLeft" align="right" valign="top">Set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac9a306ed083f382403851017b163a644">_outcomes</a> = set()</td></tr>
+<tr class="memdesc:ac9a306ed083f382403851017b163a644"><td class="mdescLeft">&#160;</td><td class="mdescRight">A set of valid outcomes for this state.  <br /></td></tr>
 <tr class="separator:ac9a306ed083f382403851017b163a644"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
-Static Protected Attributes</h2></td></tr>
 <tr class="memitem:aed635b4d7a38f282ac74f415f969f783" id="r_aed635b4d7a38f282ac74f415f969f783"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aed635b4d7a38f282ac74f415f969f783">_running</a> = False</td></tr>
-<tr class="memdesc:aed635b4d7a38f282ac74f415f969f783"><td class="mdescLeft">&#160;</td><td class="mdescRight">A set of valid outcomes for this state.  <br /></td></tr>
+<tr class="memdesc:aed635b4d7a38f282ac74f415f969f783"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag indicating whether the state is currently running.  <br /></td></tr>
 <tr class="separator:aed635b4d7a38f282ac74f415f969f783"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
 <tr class="memdesc:a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag indicating whether the state has been canceled.  <br /></td></tr>
@@ -396,7 +393,7 @@ when the state is executed.
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -425,6 +422,8 @@ when the state is executed.
 </table>
 </div><div class="memdoc">
 
+<p>A set of valid outcomes for this state. </p>
+
 </div>
 </div>
 <a id="aed635b4d7a38f282ac74f415f969f783" name="aed635b4d7a38f282ac74f415f969f783"></a>
@@ -442,12 +441,11 @@ when the state is executed.
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>A set of valid outcomes for this state. </p>
 <p>A flag indicating whether the state is currently running. </p>
 
 </div>
