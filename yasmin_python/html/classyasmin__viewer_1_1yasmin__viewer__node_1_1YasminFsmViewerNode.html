@@ -113,12 +113,10 @@ Collaboration diagram for yasmin_viewer.yasmin_viewer_node.YasminFsmViewerNode:<
 <div class="center"><img src="classyasmin__viewer_1_1yasmin__viewer__node_1_1YasminFsmViewerNode__coll__graph.png" border="0" usemap="#ayasmin__viewer_8yasmin__viewer__node_8YasminFsmViewerNode_coll__map" alt="Collaboration graph"/></div>
 <map name="ayasmin__viewer_8yasmin__viewer__node_8YasminFsmViewerNode_coll__map" id="ayasmin__viewer_8yasmin__viewer__node_8YasminFsmViewerNode_coll__map">
 <area shape="rect" title=" " alt="" coords="5,94,251,135"/>
-<area shape="rect" title=" " alt="" coords="30,5,82,31"/>
-<area shape="poly" title=" " alt="" coords="76,41,115,92,111,95,72,45"/>
-<area shape="rect" title=" " alt="" coords="106,5,150,31"/>
-<area shape="poly" title=" " alt="" coords="131,46,131,93,125,93,125,46"/>
-<area shape="rect" title=" " alt="" coords="174,5,263,31"/>
-<area shape="poly" title=" " alt="" coords="209,46,191,72,163,96,160,91,187,68,205,43"/>
+<area shape="rect" title=" " alt="" coords="55,5,108,31"/>
+<area shape="poly" title=" " alt="" coords="96,44,121,92,116,95,92,46"/>
+<area shape="rect" title=" " alt="" coords="131,5,221,31"/>
+<area shape="poly" title=" " alt="" coords="166,46,140,95,136,92,161,43"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -143,14 +141,9 @@ Public Member Functions</h2></td></tr>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a420854d6be4d291a2566a007138282fe" id="r_a420854d6be4d291a2566a007138282fe"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a420854d6be4d291a2566a007138282fe">fsm_viewer_cb</a></td></tr>
 <tr class="separator:a420854d6be4d291a2566a007138282fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09cabbbe726a4977247580dba9521f9f" id="r_a09cabbbe726a4977247580dba9521f9f"><td class="memItemLeft" align="right" valign="top">Dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09cabbbe726a4977247580dba9521f9f">__started</a> = self.msg_to_dict(msg)</td></tr>
-<tr class="separator:a09cabbbe726a4977247580dba9521f9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a0e68be632aa2c0ac515a3cb3c5f944e7" id="r_a0e68be632aa2c0ac515a3cb3c5f944e7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e68be632aa2c0ac515a3cb3c5f944e7">__started</a> = False</td></tr>
-<tr class="memdesc:a0e68be632aa2c0ac515a3cb3c5f944e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">indicates whether the server has started.  <br /></td></tr>
-<tr class="separator:a0e68be632aa2c0ac515a3cb3c5f944e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8316484e7e47c69548b5dab6db00a732" id="r_a8316484e7e47c69548b5dab6db00a732"><td class="memItemLeft" align="right" valign="top">ExpiringDict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8316484e7e47c69548b5dab6db00a732">__fsm_dict</a> = ExpiringDict(max_len=300, max_age_seconds=3)</td></tr>
 <tr class="memdesc:a8316484e7e47c69548b5dab6db00a732"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dictionary that stores FSM data with automatic expiration.  <br /></td></tr>
 <tr class="separator:a8316484e7e47c69548b5dab6db00a732"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -163,7 +156,6 @@ This class subscribes to FSM updates and serves them over HTTP. It utilizes
 a dictionary with expiring entries to manage the FSM data.
 
 Attributes:
-    __started (bool): Indicates whether the server has started.
     __fsm_dict (ExpiringDict): A dictionary that stores FSM data with
                                 automatic expiration.
 
@@ -365,44 +357,6 @@ processes incoming messages.
 </div><div class="memdoc">
 
 <p>A dictionary that stores FSM data with automatic expiration. </p>
-
-</div>
-</div>
-<a id="a0e68be632aa2c0ac515a3cb3c5f944e7" name="a0e68be632aa2c0ac515a3cb3c5f944e7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0e68be632aa2c0ac515a3cb3c5f944e7">&#9670;&#160;</a></span>__started <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool yasmin_viewer.yasmin_viewer_node.YasminFsmViewerNode.__started = False</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>indicates whether the server has started. </p>
-
-</div>
-</div>
-<a id="a09cabbbe726a4977247580dba9521f9f" name="a09cabbbe726a4977247580dba9521f9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a09cabbbe726a4977247580dba9521f9f">&#9670;&#160;</a></span>__started <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Dict yasmin_viewer.yasmin_viewer_node.YasminFsmViewerNode.__started = self.msg_to_dict(msg)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
 </div>
 </div>

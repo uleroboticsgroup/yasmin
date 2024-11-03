@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>C++ YASMIN (Yet Another State MachINe): Main Page</title>
+<title>C++ YASMIN (Yet Another State MachINe): YASMIN (Yet Another State MachINe)</title>
 <link rel="icon" href="logo.png" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -84,10 +84,1267 @@ $(function(){ initResizable(false); });
 </div>
 </div>
 
-<div class="header">
-  <div class="headertitle"><div class="title">C++ YASMIN (Yet Another State MachINe) Documentation</div></div>
+<div><div class="header">
+  <div class="headertitle"><div class="title">YASMIN (Yet Another State MachINe) </div></div>
 </div><!--header-->
 <div class="contents">
+<div class="textblock"><p><a class="anchor" id="md_README"></a></p>
+<p align="center"></p>
+<p><img src="./docs/logo.png" alt="" width="50%" class="inline"/> </p>
+<p>YASMIN is a project focused on implementing robot behaviors using Finite State Machines (FSM). It is available for ROS 2, Python and C++.</p>
+<p><a href="https://opensource.org/license/gpl-3-0"><img src="https://img.shields.io/badge/GitHub-GPL--3.0-informational" alt="License: MIT" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/releases"><img src="https://img.shields.io/github/release/uleroboticsgroup/yasmin.svg" alt="GitHub release" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin?branch=main"><img src="https://img.shields.io/github/languages/code-size/uleroboticsgroup/yasmin.svg?branch=main" alt="Code Size" style="pointer-events: none;" class="inline"/></a> <a href="https://libraries.io/github/uleroboticsgroup/yasmin?branch=main"><img src="https://img.shields.io/librariesio/github/uleroboticsgroup/yasmin?branch=main" alt="Dependencies" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/commits/main"><img src="https://img.shields.io/github/last-commit/uleroboticsgroup/yasmin.svg" alt="Last Commit" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/issues"><img src="https://img.shields.io/github/issues/uleroboticsgroup/yasmin" alt="GitHub issues" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/pulls"><img src="https://img.shields.io/github/issues-pr/uleroboticsgroup/yasmin" alt="GitHub pull requests" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/graphs/contributors"><img src="https://img.shields.io/github/contributors/uleroboticsgroup/yasmin.svg" alt="Contributors" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/python_formatter.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/python_formatter.yml/badge.svg?branch=main" alt="Python Formatter Check" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/cpp_formatter.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/cpp_formatter.yml/badge.svg?branch=main" alt="C++ Formatter Check" style="pointer-events: none;" class="inline"/></a></p>
+<div align="center"></div><div align="center"><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadCenter">ROS 2 Distro   </th><th class="markdownTableHeadCenter">Branch   </th><th class="markdownTableHeadCenter">Build status   </th><th class="markdownTableHeadCenter">Docker Image   </th><th class="markdownTableHeadNone">Documentation    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter"><b>Foxy</b>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main"><code>main</code></a>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/foxy-docker-build.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/foxy-docker-build.yml/badge.svg?branch=main" alt="Foxy Build" style="pointer-events: none;" class="inline"/></a>   </td><td class="markdownTableBodyCenter"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=foxy"><img src="https://img.shields.io/badge/Docker%20Image%20-foxy-blue" alt="Docker Image" class="inline"/></a>   </td><td class="markdownTableBodyNone"><a href="https://uleroboticsgroup.github.io/yasmin/"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/doxygen-doc.yml/badge.svg" alt="Doxygen Deployment" style="pointer-events: none;" class="inline"/></a>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter"><b>Galatic</b>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main"><code>main</code></a>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/galactic-docker-build.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/galactic-docker-build.yml/badge.svg?branch=main" alt="Galactic Build" style="pointer-events: none;" class="inline"/></a>   </td><td class="markdownTableBodyCenter"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=galactic"><img src="https://img.shields.io/badge/Docker%20Image%20-galactic-blue" alt="Docker Image" class="inline"/></a>   </td><td class="markdownTableBodyNone"><a href="https://uleroboticsgroup.github.io/yasmin/"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/doxygen-doc.yml/badge.svg" alt="Doxygen Deployment" style="pointer-events: none;" class="inline"/></a>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter"><b>Humble</b>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main"><code>main</code></a>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/humble-docker-build.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/humble-docker-build.yml/badge.svg?branch=main" alt="Humble Build" style="pointer-events: none;" class="inline"/></a>   </td><td class="markdownTableBodyCenter"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=humble"><img src="https://img.shields.io/badge/Docker%20Image%20-humble-blue" alt="Docker Image" class="inline"/></a>   </td><td class="markdownTableBodyNone"><a href="https://uleroboticsgroup.github.io/yasmin/"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/doxygen-doc.yml/badge.svg" alt="Doxygen Deployment" style="pointer-events: none;" class="inline"/></a>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter"><b>Iron</b>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main"><code>main</code></a>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/iron-docker-build.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/iron-docker-build.yml/badge.svg?branch=main" alt="Iron Build" style="pointer-events: none;" class="inline"/></a>   </td><td class="markdownTableBodyCenter"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=iron"><img src="https://img.shields.io/badge/Docker%20Image%20-iron-blue" alt="Docker Image" class="inline"/></a>   </td><td class="markdownTableBodyNone"><a href="https://uleroboticsgroup.github.io/yasmin/"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/doxygen-doc.yml/badge.svg" alt="Doxygen Deployment" style="pointer-events: none;" class="inline"/></a>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter"><b>Jazzy</b>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main"><code>main</code></a>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/jazzy-docker-build.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/jazzy-docker-build.yml/badge.svg?branch=main" alt="Jazzy Build" style="pointer-events: none;" class="inline"/></a>   </td><td class="markdownTableBodyCenter"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=jazzy"><img src="https://img.shields.io/badge/Docker%20Image%20-jazzy-blue" alt="Docker Image" class="inline"/></a>   </td><td class="markdownTableBodyNone"><a href="https://uleroboticsgroup.github.io/yasmin/"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/doxygen-doc.yml/badge.svg" alt="Doxygen Deployment" style="pointer-events: none;" class="inline"/></a>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter"><b>Rolling</b>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main"><code>main</code></a>   </td><td class="markdownTableBodyCenter"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/rolling-docker-build.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/rolling-docker-build.yml/badge.svg?branch=main" alt="Rolling Build" style="pointer-events: none;" class="inline"/></a>   </td><td class="markdownTableBodyCenter"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=rolling"><img src="https://img.shields.io/badge/Docker%20Image%20-rolling-blue" alt="Docker Image" class="inline"/></a>   </td><td class="markdownTableBodyNone"><a href="https://uleroboticsgroup.github.io/yasmin/"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/doxygen-doc.yml/badge.svg" alt="Doxygen Deployment" style="pointer-events: none;" class="inline"/></a>   </td></tr>
+</table>
+</div><div align="center"></div><h1><a class="anchor" id="autotoc_md1"></a>
+Table of Contents</h1>
+<ol type="1">
+<li>Features</li>
+<li>Installation</li>
+<li>Docker</li>
+<li>Demos<ul>
+<li>Python</li>
+<li>Cpp</li>
+</ul>
+</li>
+<li>YASMIN Viewer</li>
+<li>Citations</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md2"></a>
+Features</h1>
+<ul>
+<li>Fully integrated into ROS 2.</li>
+<li>Available for Python and C++.</li>
+<li>Fast prototyping.</li>
+<li>Default states for ROS 2 action and service clients.</li>
+<li>Blackboards are used to share data between states and state machines.</li>
+<li>State machines can be canceled and stopped, which means stopping the current executing state.</li>
+<li>A web viewer is included, which allows monitoring of the execution of the state machines.</li>
+</ul>
+<h1><a class="anchor" id="autotoc_md3"></a>
+Installation</h1>
+<div class="fragment"><div class="line"># clone</div>
+<div class="line">$ cd ~/ros2_ws/src</div>
+<div class="line">$ git clone https://github.com/uleroboticsgroup/yasmin.git</div>
+<div class="line"> </div>
+<div class="line"># dependencies</div>
+<div class="line">$ cd ~/ros2_ws</div>
+<div class="line">$ rosdep install --from-paths src --ignore-src -r -y</div>
+<div class="line">$ cd src/yasmin</div>
+<div class="line">$ pip3 install -r requirements.txt</div>
+<div class="line"> </div>
+<div class="line"># colcon</div>
+<div class="line">$ cd ~/ros2_ws</div>
+<div class="line">$ colcon build</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md4"></a>
+Docker</h1>
+<p>If your operating system doesn't support ROS 2 humble, docker is a great alternative. First of all, you have to build the project and create an image like so:</p>
+<div class="fragment"><div class="line">## Assuming you are in the correct project directory</div>
+<div class="line">$ docker build -t yasmin .</div>
+</div><!-- fragment --><p>To use a shortcut, you may use the following command:</p>
+<div class="fragment"><div class="line">## Assuming you are in the correct project directory</div>
+<div class="line">$ make docker_build</div>
+</div><!-- fragment --><p>After the image is created, run a docker container with the following command:</p>
+<div class="fragment"><div class="line">## Assuming you are in the correct project directory</div>
+<div class="line">$ docker run -it --net=host --ipc=host --privileged --env=&quot;DISPLAY&quot; --env=&quot;QT_X11_NO_MITSHM=1&quot; --volume=&quot;/tmp/.X11-unix:/tmp/.X11-unix:rw&quot; --volume=&quot;${XAUTHORITY}:/root/.Xauthority&quot; --entrypoint /bin/bash yasmin</div>
+</div><!-- fragment --><p>To use a shortcut, you may use following command:</p>
+<div class="fragment"><div class="line">$ make docker_run</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md5"></a>
+Running the docker image</h2>
+<p>If you are in the docker image , this project is already sourced and the demo script can be run as the following command;</p>
+<div class="fragment"><div class="line">$ cd /root/ros2_ws/</div>
+<div class="line">$ ros2 run yasmin_demos yasmin_demo.py</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md6"></a>
+Demos</h1>
+<p>There are some examples, for both Python and C++, that can be found in <a href="./yasmin_demos/">yasmin_demos</a>.</p>
+<h2><a class="anchor" id="autotoc_md7"></a>
+Python</h2>
+<h3><a class="anchor" id="autotoc_md8"></a>
+Vanilla Demo (FSM)</h3>
+<div class="fragment"><div class="line">$ ros2 run yasmin_demos yasmin_demo.py</div>
+</div><!-- fragment --><p><img src="./docs/demo.gif" alt="" width="65%" class="inline"/> </p>
+<details >
+<summary >
+Click to expand</summary>
+<p></p>
+<div class="fragment"><div class="line"><span class="keyword">import</span> time</div>
+<div class="line"><span class="keyword">import</span> rclpy</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">import</span> yasmin</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> State</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment"># define state Foo</span></div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classFooState.html">FooState</a>(<a class="code hl_function" href="classyasmin_1_1State.html#a99401305d1648ff131344229e72cdf35">State</a>):</div>
+<div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        super().__init__([<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>])</div>
+<div class="line">        self.counter = 0</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">def </span>execute(self, blackboard: Blackboard) -&gt; str:</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;Executing state FOO&quot;</span>)</div>
+<div class="line">        time.sleep(3)</div>
+<div class="line"> </div>
+<div class="line">        <span class="keywordflow">if</span> self.counter &lt; 3:</div>
+<div class="line">            self.counter += 1</div>
+<div class="line">            blackboard[<span class="stringliteral">&quot;foo_str&quot;</span>] = f<span class="stringliteral">&quot;Counter: {self.counter}&quot;</span></div>
+<div class="line">            <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span></div>
+<div class="line">        <span class="keywordflow">else</span>:</div>
+<div class="line">            <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome2&quot;</span></div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment"># define state Bar</span></div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classBarState.html">BarState</a>(<a class="code hl_function" href="classyasmin_1_1State.html#a99401305d1648ff131344229e72cdf35">State</a>):</div>
+<div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        super().__init__(outcomes=[<span class="stringliteral">&quot;outcome3&quot;</span>])</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">def </span>execute(self, blackboard: Blackboard) -&gt; str:</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;Executing state BAR&quot;</span>)</div>
+<div class="line">        time.sleep(3)</div>
+<div class="line"> </div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(blackboard[<span class="stringliteral">&quot;foo_str&quot;</span>])</div>
+<div class="line">        <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome3&quot;</span></div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment"># main</span></div>
+<div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
+<div class="line"> </div>
+<div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_demo&quot;</span>)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    rclpy.init()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    set_ros_loggers()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># create a FSM</span></div>
+<div class="line">    sm = StateMachine(outcomes=[<span class="stringliteral">&quot;outcome4&quot;</span>])</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;FOO&quot;</span>,</div>
+<div class="line">        <a class="code hl_class" href="classFooState.html">FooState</a>(),</div>
+<div class="line">        transitions={</div>
+<div class="line">            <span class="stringliteral">&quot;outcome1&quot;</span>: <span class="stringliteral">&quot;BAR&quot;</span>,</div>
+<div class="line">            <span class="stringliteral">&quot;outcome2&quot;</span>: <span class="stringliteral">&quot;outcome4&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;BAR&quot;</span>,</div>
+<div class="line">        <a class="code hl_class" href="classBarState.html">BarState</a>(),</div>
+<div class="line">        transitions={</div>
+<div class="line">            <span class="stringliteral">&quot;outcome3&quot;</span>: <span class="stringliteral">&quot;FOO&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line">    YasminViewerPub(<span class="stringliteral">&quot;yasmin_demo&quot;</span>, sm)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    <span class="keywordflow">try</span>:</div>
+<div class="line">        outcome = sm()</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
+<div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
+<div class="line">        sm.cancel_state()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
+<div class="line">        rclpy.shutdown()</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keywordflow">if</span> __name__ == <span class="stringliteral">&quot;__main__&quot;</span>:</div>
+<div class="line">    <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>()</div>
+<div class="ttc" id="aaction__client__demo_8cpp_html_a0ddf1224851353fc92bfbff6f499fa97"><div class="ttname"><a href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a></div><div class="ttdeci">int main(int argc, char *argv[])</div><div class="ttdoc">Main function for the Fibonacci action client.</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:152</div></div>
+<div class="ttc" id="aclassBarState_html"><div class="ttname"><a href="classBarState.html">BarState</a></div><div class="ttdoc">Represents the &quot;Bar&quot; state in the state machine.</div><div class="ttdef"><b>Definition</b> yasmin_demo.cpp:80</div></div>
+<div class="ttc" id="aclassFooState_html"><div class="ttname"><a href="classFooState.html">FooState</a></div><div class="ttdoc">Represents the &quot;Foo&quot; state in the state machine.</div><div class="ttdef"><b>Definition</b> yasmin_demo.cpp:36</div></div>
+<div class="ttc" id="aclassyasmin_1_1State_html_a99401305d1648ff131344229e72cdf35"><div class="ttname"><a href="classyasmin_1_1State.html#a99401305d1648ff131344229e72cdf35">yasmin::State::State</a></div><div class="ttdeci">State(std::set&lt; std::string &gt; outcomes)</div><div class="ttdoc">Constructs a State with a set of possible outcomes.</div><div class="ttdef"><b>Definition</b> state.cpp:27</div></div>
+</div><!-- fragment --><p></p>
+</details>
+<h3><a class="anchor" id="autotoc_md9"></a>
+Service Demo (FSM + ROS 2 Service Client)</h3>
+<div class="fragment"><div class="line">$ ros2 run demo_nodes_py add_two_ints_server</div>
+</div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos service_client_demo.py</div>
+</div><!-- fragment --><details >
+<summary >
+Click to expand</summary>
+<p></p>
+<div class="fragment"><div class="line"><span class="keyword">import</span> rclpy</div>
+<div class="line"><span class="keyword">from</span> example_interfaces.srv <span class="keyword">import</span> AddTwoInts</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">import</span> yasmin</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> CbState</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> ServiceState</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> SUCCEED, ABORT</div>
+<div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classAddTwoIntsState.html">AddTwoIntsState</a>(<a class="code hl_function" href="classyasmin__ros_1_1ServiceState.html#ab74e60ff312219ee1033a34842c749a1">ServiceState</a>):</div>
+<div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        super().__init__(</div>
+<div class="line">            AddTwoInts,  <span class="comment"># srv type</span></div>
+<div class="line">            <span class="stringliteral">&quot;/add_two_ints&quot;</span>,  <span class="comment"># service name</span></div>
+<div class="line">            self.create_request_handler,  <span class="comment"># cb to create the request</span></div>
+<div class="line">            [<span class="stringliteral">&quot;outcome1&quot;</span>],  <span class="comment"># outcomes. Includes (SUCCEED, ABORT)</span></div>
+<div class="line">            self.response_handler,  <span class="comment"># cb to process the response</span></div>
+<div class="line">        )</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">def </span>create_request_handler(self, blackboard: Blackboard) -&gt; AddTwoInts.Request:</div>
+<div class="line"> </div>
+<div class="line">        req = AddTwoInts.Request()</div>
+<div class="line">        req.a = blackboard[<span class="stringliteral">&quot;a&quot;</span>]</div>
+<div class="line">        req.b = blackboard[<span class="stringliteral">&quot;b&quot;</span>]</div>
+<div class="line">        <span class="keywordflow">return</span> req</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">def </span>response_handler(</div>
+<div class="line">        self, blackboard: Blackboard, response: AddTwoInts.Response</div>
+<div class="line">    ) -&gt; str:</div>
+<div class="line"> </div>
+<div class="line">        blackboard[<span class="stringliteral">&quot;sum&quot;</span>] = response.sum</div>
+<div class="line">        <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span></div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">def </span><a class="code hl_function" href="service__client__demo_8cpp.html#a5a773e3074e84e335d0e87393eb53cb1">set_ints</a>(blackboard: Blackboard) -&gt; str:</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;a&quot;</span>] = 10</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;b&quot;</span>] = 5</div>
+<div class="line">    <span class="keywordflow">return</span> SUCCEED</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">def </span><a class="code hl_function" href="service__client__demo_8cpp.html#ad7658a89fcb000382a8345891e0dda91">print_sum</a>(blackboard: Blackboard) -&gt; str:</div>
+<div class="line">    yasmin.YASMIN_LOG_INFO(f<span class="stringliteral">&quot;Sum: {blackboard[&#39;sum&#39;]}&quot;</span>)</div>
+<div class="line">    <span class="keywordflow">return</span> SUCCEED</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment"># main</span></div>
+<div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
+<div class="line"> </div>
+<div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_service_client_demo&quot;</span>)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    rclpy.init()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    set_ros_loggers()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># create a FSM</span></div>
+<div class="line">    sm = StateMachine(outcomes=[<span class="stringliteral">&quot;outcome4&quot;</span>])</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;SETTING_INTS&quot;</span>,</div>
+<div class="line">        CbState([SUCCEED], set_ints),</div>
+<div class="line">        transitions={SUCCEED: <span class="stringliteral">&quot;ADD_TWO_INTS&quot;</span>},</div>
+<div class="line">    )</div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;ADD_TWO_INTS&quot;</span>,</div>
+<div class="line">        <a class="code hl_class" href="classAddTwoIntsState.html">AddTwoIntsState</a>(),</div>
+<div class="line">        transitions={</div>
+<div class="line">            <span class="stringliteral">&quot;outcome1&quot;</span>: <span class="stringliteral">&quot;PRINTING_SUM&quot;</span>,</div>
+<div class="line">            SUCCEED: <span class="stringliteral">&quot;outcome4&quot;</span>,</div>
+<div class="line">            ABORT: <span class="stringliteral">&quot;outcome4&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;PRINTING_SUM&quot;</span>,</div>
+<div class="line">        CbState([SUCCEED], print_sum),</div>
+<div class="line">        transitions={</div>
+<div class="line">            SUCCEED: <span class="stringliteral">&quot;outcome4&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line">    YasminViewerPub(<span class="stringliteral">&quot;YASMIN_SERVICE_CLIENT_DEMO&quot;</span>, sm)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    <span class="keywordflow">try</span>:</div>
+<div class="line">        outcome = sm()</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
+<div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
+<div class="line">        sm.cancel_state()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
+<div class="line">        rclpy.shutdown()</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keywordflow">if</span> __name__ == <span class="stringliteral">&quot;__main__&quot;</span>:</div>
+<div class="line">    <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>()</div>
+<div class="ttc" id="aclassAddTwoIntsState_html"><div class="ttname"><a href="classAddTwoIntsState.html">AddTwoIntsState</a></div><div class="ttdoc">State for calling the AddTwoInts service in ROS 2.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:74</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_ab74e60ff312219ee1033a34842c749a1"><div class="ttname"><a href="classyasmin__ros_1_1ServiceState.html#ab74e60ff312219ee1033a34842c749a1">yasmin_ros::ServiceState&lt; example_interfaces::srv::AddTwoInts &gt;::ServiceState</a></div><div class="ttdeci">ServiceState(std::string srv_name, CreateRequestHandler create_request_handler, std::set&lt; std::string &gt; outcomes, int timeout=-1.0)</div><div class="ttdef"><b>Definition</b> service_state.hpp:61</div></div>
+<div class="ttc" id="anamespaceyasmin__ros_1_1basic__outcomes_html"><div class="ttname"><a href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros::basic_outcomes</a></div><div class="ttdoc">Provides common outcome constants for ROS 2 actions.</div></div>
+<div class="ttc" id="aservice__client__demo_8cpp_html_a5a773e3074e84e335d0e87393eb53cb1"><div class="ttname"><a href="service__client__demo_8cpp.html#a5a773e3074e84e335d0e87393eb53cb1">set_ints</a></div><div class="ttdeci">std::string set_ints(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard)</div><div class="ttdoc">Sets two integer values in the blackboard.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:46</div></div>
+<div class="ttc" id="aservice__client__demo_8cpp_html_ad7658a89fcb000382a8345891e0dda91"><div class="ttname"><a href="service__client__demo_8cpp.html#ad7658a89fcb000382a8345891e0dda91">print_sum</a></div><div class="ttdeci">std::string print_sum(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard)</div><div class="ttdoc">Prints the sum stored in the blackboard.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:61</div></div>
+</div><!-- fragment --><p></p>
+</details>
+<h3><a class="anchor" id="autotoc_md10"></a>
+Action Demo (FSM + ROS 2 Action)</h3>
+<div class="fragment"><div class="line">$ ros2 run action_tutorials_cpp fibonacci_action_server</div>
+</div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos action_client_demo.py</div>
+</div><!-- fragment --><details >
+<summary >
+Click to expand</summary>
+<p></p>
+<div class="fragment"><div class="line"><span class="keyword">import</span> rclpy</div>
+<div class="line"><span class="keyword">from</span> action_tutorials_interfaces.action <span class="keyword">import</span> Fibonacci</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">import</span> yasmin</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> CbState</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> ActionState</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> SUCCEED, ABORT, CANCEL</div>
+<div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>(<a class="code hl_function" href="classyasmin__ros_1_1ActionState.html#aa7902878db3392a3e00613a68e23b4d0">ActionState</a>):</div>
+<div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        super().__init__(</div>
+<div class="line">            Fibonacci,  <span class="comment"># action type</span></div>
+<div class="line">            <span class="stringliteral">&quot;/fibonacci&quot;</span>,  <span class="comment"># action name</span></div>
+<div class="line">            self.create_goal_handler,  <span class="comment"># cb to create the goal</span></div>
+<div class="line">            <span class="keywordtype">None</span>,  <span class="comment"># outcomes. Includes (SUCCEED, ABORT, CANCEL)</span></div>
+<div class="line">            self.response_handler,  <span class="comment"># cb to process the response</span></div>
+<div class="line">            self.print_feedback,  <span class="comment"># cb to process the feedback</span></div>
+<div class="line">        )</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">def </span>create_goal_handler(self, blackboard: Blackboard) -&gt; Fibonacci.Goal:</div>
+<div class="line"> </div>
+<div class="line">        goal = Fibonacci.Goal()</div>
+<div class="line">        goal.order = blackboard[<span class="stringliteral">&quot;n&quot;</span>]</div>
+<div class="line">        <span class="keywordflow">return</span> goal</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">def </span>response_handler(</div>
+<div class="line">        self, blackboard: Blackboard, response: Fibonacci.Result</div>
+<div class="line">    ) -&gt; str:</div>
+<div class="line"> </div>
+<div class="line">        blackboard[<span class="stringliteral">&quot;fibo_res&quot;</span>] = response.sequence</div>
+<div class="line">        <span class="keywordflow">return</span> SUCCEED</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">def </span>print_feedback(</div>
+<div class="line">        self, blackboard: Blackboard, feedback: Fibonacci.Feedback</div>
+<div class="line">    ) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(f<span class="stringliteral">&quot;Received feedback: {list(feedback.partial_sequence)}&quot;</span>)</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#ac1846bfe6ea5494fa8a7d56f7bc96a09">print_result</a>(blackboard: Blackboard) -&gt; str:</div>
+<div class="line">    yasmin.YASMIN_LOG_INFO(f<span class="stringliteral">&quot;Result: {blackboard[&#39;fibo_res&#39;]}&quot;</span>)</div>
+<div class="line">    <span class="keywordflow">return</span> SUCCEED</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment"># main</span></div>
+<div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
+<div class="line"> </div>
+<div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_action_client_demo&quot;</span>)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    rclpy.init()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    set_ros_loggers()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># create a FSM</span></div>
+<div class="line">    sm = StateMachine(outcomes=[<span class="stringliteral">&quot;outcome4&quot;</span>])</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;CALLING_FIBONACCI&quot;</span>,</div>
+<div class="line">        <a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>(),</div>
+<div class="line">        transitions={</div>
+<div class="line">            SUCCEED: <span class="stringliteral">&quot;PRINTING_RESULT&quot;</span>,</div>
+<div class="line">            CANCEL: <span class="stringliteral">&quot;outcome4&quot;</span>,</div>
+<div class="line">            ABORT: <span class="stringliteral">&quot;outcome4&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;PRINTING_RESULT&quot;</span>,</div>
+<div class="line">        CbState([SUCCEED], print_result),</div>
+<div class="line">        transitions={</div>
+<div class="line">            SUCCEED: <span class="stringliteral">&quot;outcome4&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line">    YasminViewerPub(<span class="stringliteral">&quot;YASMIN_ACTION_CLIENT_DEMO&quot;</span>, sm)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># create an initial blackoard</span></div>
+<div class="line">    blackboard = Blackboard()</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;n&quot;</span>] = 10</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    <span class="keywordflow">try</span>:</div>
+<div class="line">        outcome = sm(blackboard)</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
+<div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
+<div class="line">        sm.cancel_state()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
+<div class="line">        rclpy.shutdown()</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keywordflow">if</span> __name__ == <span class="stringliteral">&quot;__main__&quot;</span>:</div>
+<div class="line">    <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>()</div>
+<div class="ttc" id="aaction__client__demo_8cpp_html_ac1846bfe6ea5494fa8a7d56f7bc96a09"><div class="ttname"><a href="action__client__demo_8cpp.html#ac1846bfe6ea5494fa8a7d56f7bc96a09">print_result</a></div><div class="ttdeci">std::string print_result(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard)</div><div class="ttdoc">Prints the result of the Fibonacci action.</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:47</div></div>
+<div class="ttc" id="aclassFibonacciState_html"><div class="ttname"><a href="classFibonacciState.html">FibonacciState</a></div><div class="ttdoc">Represents the action state for the Fibonacci action.</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:69</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1ActionState_html_aa7902878db3392a3e00613a68e23b4d0"><div class="ttname"><a href="classyasmin__ros_1_1ActionState.html#aa7902878db3392a3e00613a68e23b4d0">yasmin_ros::ActionState&lt; Fibonacci &gt;::ActionState</a></div><div class="ttdeci">ActionState(std::string action_name, CreateGoalHandler create_goal_handler, std::set&lt; std::string &gt; outcomes, int timeout=-1.0)</div><div class="ttdef"><b>Definition</b> action_state.hpp:87</div></div>
+</div><!-- fragment --><p></p>
+</details>
+<h3><a class="anchor" id="autotoc_md11"></a>
+Monitor Demo (FSM + ROS 2 Subscriber)</h3>
+<div class="fragment"><div class="line">$ ros2 run yasmin_demos monitor_demo.py</div>
+</div><!-- fragment --><details >
+<summary >
+Click to expand</summary>
+<p></p>
+<div class="fragment"><div class="line"><span class="keyword">import</span> rclpy</div>
+<div class="line"><span class="keyword">from</span> rclpy.qos <span class="keyword">import</span> qos_profile_sensor_data</div>
+<div class="line"><span class="keyword">from</span> nav_msgs.msg <span class="keyword">import</span> Odometry</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">import</span> yasmin</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> MonitorState</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> TIMEOUT</div>
+<div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classPrintOdometryState.html">PrintOdometryState</a>(<a class="code hl_function" href="classyasmin__ros_1_1MonitorState.html#a8df77197e3a40a3a6229969e1a6da9a5">MonitorState</a>):</div>
+<div class="line">    <span class="keyword">def </span>__init__(self, times: int) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line">        super().__init__(</div>
+<div class="line">            Odometry,  <span class="comment"># msg type</span></div>
+<div class="line">            <span class="stringliteral">&quot;odom&quot;</span>,  <span class="comment"># topic name</span></div>
+<div class="line">            [<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>],  <span class="comment"># outcomes</span></div>
+<div class="line">            self.monitor_handler,  <span class="comment"># monitor handler callback</span></div>
+<div class="line">            qos=qos_profile_sensor_data,  <span class="comment"># qos for the topic sbscription</span></div>
+<div class="line">            msg_queue=10,  <span class="comment"># queue of the monitor handler callback</span></div>
+<div class="line">            timeout=10,  <span class="comment"># timeout to wait for msgs in seconds</span></div>
+<div class="line">            <span class="comment"># if not None, CANCEL outcome is added</span></div>
+<div class="line">        )</div>
+<div class="line">        self.times = times</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">def </span>monitor_handler(self, blackboard: Blackboard, msg: Odometry) -&gt; str:</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(msg)</div>
+<div class="line"> </div>
+<div class="line">        self.times -= 1</div>
+<div class="line"> </div>
+<div class="line">        <span class="keywordflow">if</span> self.times &lt;= 0:</div>
+<div class="line">            <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome2&quot;</span></div>
+<div class="line"> </div>
+<div class="line">        <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span></div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment"># main</span></div>
+<div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
+<div class="line"> </div>
+<div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_monitor_demo&quot;</span>)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    rclpy.init()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    set_ros_loggers()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># create a FSM</span></div>
+<div class="line">    sm = StateMachine(outcomes=[<span class="stringliteral">&quot;outcome4&quot;</span>])</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>,</div>
+<div class="line">        <a class="code hl_class" href="classPrintOdometryState.html">PrintOdometryState</a>(5),</div>
+<div class="line">        transitions={</div>
+<div class="line">            <span class="stringliteral">&quot;outcome1&quot;</span>: <span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>,</div>
+<div class="line">            <span class="stringliteral">&quot;outcome2&quot;</span>: <span class="stringliteral">&quot;outcome4&quot;</span>,</div>
+<div class="line">            TIMEOUT: <span class="stringliteral">&quot;outcome4&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line">    YasminViewerPub(<span class="stringliteral">&quot;YASMIN_MONITOR_DEMO&quot;</span>, sm)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    <span class="keywordflow">try</span>:</div>
+<div class="line">        outcome = sm()</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
+<div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
+<div class="line">        sm.cancel_state()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
+<div class="line">        rclpy.shutdown()</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keywordflow">if</span> __name__ == <span class="stringliteral">&quot;__main__&quot;</span>:</div>
+<div class="line">    <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>()</div>
+<div class="ttc" id="aclassPrintOdometryState_html"><div class="ttname"><a href="classPrintOdometryState.html">PrintOdometryState</a></div><div class="ttdoc">A state that monitors odometry data and transitions based on a specified count.</div><div class="ttdef"><b>Definition</b> monitor_demo.cpp:44</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1MonitorState_html_a8df77197e3a40a3a6229969e1a6da9a5"><div class="ttname"><a href="classyasmin__ros_1_1MonitorState.html#a8df77197e3a40a3a6229969e1a6da9a5">yasmin_ros::MonitorState&lt; nav_msgs::msg::Odometry &gt;::MonitorState</a></div><div class="ttdeci">MonitorState(std::string topic_name, std::set&lt; std::string &gt; outcomes, MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue)</div><div class="ttdef"><b>Definition</b> monitor_state.hpp:62</div></div>
+</div><!-- fragment --><p></p>
+</details>
+<h3><a class="anchor" id="autotoc_md12"></a>
+Nav2 Demo (Hierarchical FSM + ROS 2 Action)</h3>
+<div class="fragment"><div class="line">$ ros2 run yasmin_demos nav_demo.py</div>
+</div><!-- fragment --><details >
+<summary >
+Click to expand</summary>
+<p></p>
+<div class="fragment"><div class="line"><span class="keyword">import</span> random</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">import</span> rclpy</div>
+<div class="line"><span class="keyword">from</span> geometry_msgs.msg <span class="keyword">import</span> Pose</div>
+<div class="line"><span class="keyword">from</span> nav2_msgs.action <span class="keyword">import</span> NavigateToPose</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">import</span> yasmin</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> CbState</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> ActionState</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> SUCCEED, ABORT, CANCEL</div>
+<div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
+<div class="line"> </div>
+<div class="line">HAS_NEXT = <span class="stringliteral">&quot;has_next&quot;</span></div>
+<div class="line">END = <span class="stringliteral">&quot;end&quot;</span></div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">class </span>Nav2State(ActionState):</div>
+<div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        super().__init__(</div>
+<div class="line">            NavigateToPose,  <span class="comment"># action type</span></div>
+<div class="line">            <span class="stringliteral">&quot;/navigate_to_pose&quot;</span>,  <span class="comment"># action name</span></div>
+<div class="line">            self.create_goal_handler,  <span class="comment"># cb to create the goal</span></div>
+<div class="line">            <span class="keywordtype">None</span>,  <span class="comment"># outcomes. Includes (SUCCEED, ABORT, CANCEL)</span></div>
+<div class="line">            <span class="keywordtype">None</span>,  <span class="comment"># cb to process the response</span></div>
+<div class="line">        )</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">def </span>create_goal_handler(self, blackboard: Blackboard) -&gt; NavigateToPose.Goal:</div>
+<div class="line"> </div>
+<div class="line">        goal = NavigateToPose.Goal()</div>
+<div class="line">        goal.pose.pose = blackboard[<span class="stringliteral">&quot;pose&quot;</span>]</div>
+<div class="line">        goal.pose.header.frame_id = <span class="stringliteral">&quot;map&quot;</span></div>
+<div class="line">        <span class="keywordflow">return</span> goal</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">def </span>create_waypoints(blackboard: Blackboard) -&gt; str:</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;waypoints&quot;</span>] = {</div>
+<div class="line">        <span class="stringliteral">&quot;entrance&quot;</span>: [1.25, 6.30, -0.78, 0.67],</div>
+<div class="line">        <span class="stringliteral">&quot;bathroom&quot;</span>: [4.89, 1.64, 0.0, 1.0],</div>
+<div class="line">        <span class="stringliteral">&quot;livingroom&quot;</span>: [1.55, 4.03, -0.69, 0.72],</div>
+<div class="line">        <span class="stringliteral">&quot;kitchen&quot;</span>: [3.79, 6.77, 0.99, 0.12],</div>
+<div class="line">        <span class="stringliteral">&quot;bedroom&quot;</span>: [7.50, 4.89, 0.76, 0.65],</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">return</span> SUCCEED</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">def </span>take_random_waypoint(blackboard) -&gt; str:</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;random_waypoints&quot;</span>] = random.sample(</div>
+<div class="line">        list(blackboard[<span class="stringliteral">&quot;waypoints&quot;</span>].keys()), blackboard[<span class="stringliteral">&quot;waypoints_num&quot;</span>]</div>
+<div class="line">    )</div>
+<div class="line">    <span class="keywordflow">return</span> SUCCEED</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">def </span>get_next_waypoint(blackboard: Blackboard) -&gt; str:</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">if</span> <span class="keywordflow">not</span> blackboard[<span class="stringliteral">&quot;random_waypoints&quot;</span>]:</div>
+<div class="line">        <span class="keywordflow">return</span> END</div>
+<div class="line"> </div>
+<div class="line">    wp_name = blackboard[<span class="stringliteral">&quot;random_waypoints&quot;</span>].pop(0)</div>
+<div class="line">    wp = blackboard[<span class="stringliteral">&quot;waypoints&quot;</span>][wp_name]</div>
+<div class="line"> </div>
+<div class="line">    pose = Pose()</div>
+<div class="line">    pose.position.x = wp[0]</div>
+<div class="line">    pose.position.y = wp[1]</div>
+<div class="line"> </div>
+<div class="line">    pose.orientation.z = wp[2]</div>
+<div class="line">    pose.orientation.w = wp[3]</div>
+<div class="line"> </div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;pose&quot;</span>] = pose</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;text&quot;</span>] = f<span class="stringliteral">&quot;I have reached waypoint {wp_name}&quot;</span></div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> HAS_NEXT</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment"># main</span></div>
+<div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
+<div class="line"> </div>
+<div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_nav2_demo&quot;</span>)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    rclpy.init()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    set_ros_loggers()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># create state machines</span></div>
+<div class="line">    sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])</div>
+<div class="line">    nav_sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;CREATING_WAYPOINTS&quot;</span>,</div>
+<div class="line">        CbState([SUCCEED], create_waypoints),</div>
+<div class="line">        transitions={</div>
+<div class="line">            SUCCEED: <span class="stringliteral">&quot;TAKING_RANDOM_WAYPOINTS&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;TAKING_RANDOM_WAYPOINTS&quot;</span>,</div>
+<div class="line">        CbState([SUCCEED], take_random_waypoint),</div>
+<div class="line">        transitions={</div>
+<div class="line">            SUCCEED: <span class="stringliteral">&quot;NAVIGATING&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line"> </div>
+<div class="line">    nav_sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;GETTING_NEXT_WAYPOINT&quot;</span>,</div>
+<div class="line">        CbState([END, HAS_NEXT], get_next_waypoint),</div>
+<div class="line">        transitions={</div>
+<div class="line">            END: SUCCEED,</div>
+<div class="line">            HAS_NEXT: <span class="stringliteral">&quot;NAVIGATING&quot;</span>,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line">    nav_sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;NAVIGATING&quot;</span>,</div>
+<div class="line">        Nav2State(),</div>
+<div class="line">        transitions={</div>
+<div class="line">            SUCCEED: <span class="stringliteral">&quot;GETTING_NEXT_WAYPOINT&quot;</span>,</div>
+<div class="line">            CANCEL: CANCEL,</div>
+<div class="line">            ABORT: ABORT,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line">    YasminViewerPub(<span class="stringliteral">&quot;YASMIN_NAV_DEMO&quot;</span>, sm)</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    blackboard = Blackboard()</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;waypoints_num&quot;</span>] = 2</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">try</span>:</div>
+<div class="line">        outcome = sm(blackboard)</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
+<div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
+<div class="line">        sm.cancel_state()</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
+<div class="line">        rclpy.shutdown()</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keywordflow">if</span> __name__ == <span class="stringliteral">&quot;__main__&quot;</span>:</div>
+<div class="line">    <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>()</div>
+</div><!-- fragment --><p></p>
+</details>
+<h2><a class="anchor" id="autotoc_md13"></a>
+Cpp</h2>
+<h3><a class="anchor" id="autotoc_md14"></a>
+Vanilla Demo</h3>
+<div class="fragment"><div class="line">$ ros2 run yasmin_demos yasmin_demo</div>
+</div><!-- fragment --><details >
+<summary >
+Click to expand</summary>
+<p></p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;chrono&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;rclcpp/rclcpp.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="logs_8hpp.html">yasmin/logs.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="state_8hpp.html">yasmin/state.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="state__machine_8hpp.html">yasmin/state_machine.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="ros__logs_8hpp.html">yasmin_ros/ros_logs.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="yasmin__viewer__pub_8hpp.html">yasmin_viewer/yasmin_viewer_pub.hpp</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>;</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// define state Foo</span></div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classFooState.html">FooState</a> : <span class="keyword">public</span> <a class="code hl_class" href="classyasmin_1_1State.html">yasmin::State</a> {</div>
+<div class="line"><span class="keyword">public</span>:</div>
+<div class="line">  <span class="keywordtype">int</span> <a class="code hl_variable" href="classFooState.html#a9c41a04e25dfd44c4e7fe32cb3cad467">counter</a>;</div>
+<div class="line"> </div>
+<div class="line">  <a class="code hl_function" href="classFooState.html#a6ae85df2d67293997c452444c2e0b6a4">FooState</a>() : <a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>::<a class="code hl_class" href="classyasmin_1_1State.html">State</a>({<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>}) { this-&gt;counter = 0; };</div>
+<div class="line"> </div>
+<div class="line">  std::string</div>
+<div class="line">  <a class="code hl_function" href="classFooState.html#acddc8f367d86d5f79a8ce8fc1ded0b8d">execute</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;Executing state FOO&quot;</span>);</div>
+<div class="line">    std::this_thread::sleep_for(std::chrono::seconds(3));</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">if</span> (this-&gt;counter &lt; 3) {</div>
+<div class="line">      this-&gt;counter += 1;</div>
+<div class="line">      blackboard-&gt;set&lt;std::string&gt;(<span class="stringliteral">&quot;foo_str&quot;</span>,</div>
+<div class="line">                                   <span class="stringliteral">&quot;Counter: &quot;</span> + std::to_string(this-&gt;counter));</div>
+<div class="line">      <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span>;</div>
+<div class="line"> </div>
+<div class="line">    } <span class="keywordflow">else</span> {</div>
+<div class="line">      <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome2&quot;</span>;</div>
+<div class="line">    }</div>
+<div class="line">  }</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// define state Bar</span></div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classBarState.html">BarState</a> : <span class="keyword">public</span> <a class="code hl_class" href="classyasmin_1_1State.html">yasmin::State</a> {</div>
+<div class="line"><span class="keyword">public</span>:</div>
+<div class="line">  <a class="code hl_function" href="classBarState.html#afc590f0fcaaea12f89f14582ad60d866">BarState</a>() : <a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>::<a class="code hl_class" href="classyasmin_1_1State.html">State</a>({<span class="stringliteral">&quot;outcome3&quot;</span>}){};</div>
+<div class="line"> </div>
+<div class="line">  std::string</div>
+<div class="line">  <a class="code hl_function" href="classBarState.html#af393c4602c588eb13a620ef02a187925">execute</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;Executing state BAR&quot;</span>);</div>
+<div class="line">    std::this_thread::sleep_for(std::chrono::seconds(3));</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(blackboard-&gt;get&lt;std::string&gt;(<span class="stringliteral">&quot;foo_str&quot;</span>).c_str());</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome3&quot;</span>;</div>
+<div class="line">  }</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]) {</div>
+<div class="line"> </div>
+<div class="line">  <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;yasmin_demo&quot;</span>);</div>
+<div class="line">  rclcpp::init(argc, argv);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// set ROS 2 logs</span></div>
+<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// create a state machine</span></div>
+<div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
+<div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// cancel state machine on ROS 2 shutdown</span></div>
+<div class="line">  rclcpp::on_shutdown([sm]() {</div>
+<div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
+<div class="line">      sm-&gt;cancel_state();</div>
+<div class="line">    }</div>
+<div class="line">  });</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// add states</span></div>
+<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;FOO&quot;</span>, std::make_shared&lt;FooState&gt;(),</div>
+<div class="line">                {</div>
+<div class="line">                    {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;BAR&quot;</span>},</div>
+<div class="line">                    {<span class="stringliteral">&quot;outcome2&quot;</span>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
+<div class="line">                });</div>
+<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;BAR&quot;</span>, std::make_shared&lt;BarState&gt;(),</div>
+<div class="line">                {</div>
+<div class="line">                    {<span class="stringliteral">&quot;outcome3&quot;</span>, <span class="stringliteral">&quot;FOO&quot;</span>},</div>
+<div class="line">                });</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// pub</span></div>
+<div class="line">  <a class="code hl_class" href="classyasmin__viewer_1_1YasminViewerPub.html">yasmin_viewer::YasminViewerPub</a> yasmin_pub(<span class="stringliteral">&quot;yasmin_demo&quot;</span>, sm);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// execute</span></div>
+<div class="line">  <span class="keywordflow">try</span> {</div>
+<div class="line">    std::string outcome = (*sm.get())();</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
+<div class="line">  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception &amp;e) {</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#ae06a2a3a4eaa2d0fc4d4cc807e7d9d72">YASMIN_LOG_WARN</a>(e.what());</div>
+<div class="line">  }</div>
+<div class="line"> </div>
+<div class="line">  rclcpp::shutdown();</div>
+<div class="line"> </div>
+<div class="line">  <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="aclassBarState_html_af393c4602c588eb13a620ef02a187925"><div class="ttname"><a href="classBarState.html#af393c4602c588eb13a620ef02a187925">BarState::execute</a></div><div class="ttdeci">std::string execute(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard) override</div><div class="ttdoc">Executes the Bar state logic.</div><div class="ttdef"><b>Definition</b> yasmin_demo.cpp:97</div></div>
+<div class="ttc" id="aclassBarState_html_afc590f0fcaaea12f89f14582ad60d866"><div class="ttname"><a href="classBarState.html#afc590f0fcaaea12f89f14582ad60d866">BarState::BarState</a></div><div class="ttdeci">BarState()</div><div class="ttdoc">Constructs a BarState object.</div><div class="ttdef"><b>Definition</b> yasmin_demo.cpp:85</div></div>
+<div class="ttc" id="aclassFooState_html_a6ae85df2d67293997c452444c2e0b6a4"><div class="ttname"><a href="classFooState.html#a6ae85df2d67293997c452444c2e0b6a4">FooState::FooState</a></div><div class="ttdeci">FooState()</div><div class="ttdoc">Constructs a FooState object, initializing the counter.</div><div class="ttdef"><b>Definition</b> yasmin_demo.cpp:44</div></div>
+<div class="ttc" id="aclassFooState_html_a9c41a04e25dfd44c4e7fe32cb3cad467"><div class="ttname"><a href="classFooState.html#a9c41a04e25dfd44c4e7fe32cb3cad467">FooState::counter</a></div><div class="ttdeci">int counter</div><div class="ttdoc">Counter to track the number of executions.</div><div class="ttdef"><b>Definition</b> yasmin_demo.cpp:39</div></div>
+<div class="ttc" id="aclassFooState_html_acddc8f367d86d5f79a8ce8fc1ded0b8d"><div class="ttname"><a href="classFooState.html#acddc8f367d86d5f79a8ce8fc1ded0b8d">FooState::execute</a></div><div class="ttdeci">std::string execute(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard) override</div><div class="ttdoc">Executes the Foo state logic.</div><div class="ttdef"><b>Definition</b> yasmin_demo.cpp:58</div></div>
+<div class="ttc" id="aclassyasmin_1_1State_html"><div class="ttname"><a href="classyasmin_1_1State.html">yasmin::State</a></div><div class="ttdoc">Represents a state in a state machine.</div><div class="ttdef"><b>Definition</b> state.hpp:42</div></div>
+<div class="ttc" id="aclassyasmin__viewer_1_1YasminViewerPub_html"><div class="ttname"><a href="classyasmin__viewer_1_1YasminViewerPub.html">yasmin_viewer::YasminViewerPub</a></div><div class="ttdoc">Publishes state machine data for visualization.</div><div class="ttdef"><b>Definition</b> yasmin_viewer_pub.hpp:38</div></div>
+<div class="ttc" id="alogs_8hpp_html"><div class="ttname"><a href="logs_8hpp.html">logs.hpp</a></div></div>
+<div class="ttc" id="alogs_8hpp_html_a054be408d85e8c53f3265107512555bd"><div class="ttname"><a href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a></div><div class="ttdeci">#define YASMIN_LOG_INFO(text,...)</div><div class="ttdef"><b>Definition</b> logs.hpp:71</div></div>
+<div class="ttc" id="alogs_8hpp_html_ae06a2a3a4eaa2d0fc4d4cc807e7d9d72"><div class="ttname"><a href="logs_8hpp.html#ae06a2a3a4eaa2d0fc4d4cc807e7d9d72">YASMIN_LOG_WARN</a></div><div class="ttdeci">#define YASMIN_LOG_WARN(text,...)</div><div class="ttdef"><b>Definition</b> logs.hpp:68</div></div>
+<div class="ttc" id="anamespaceyasmin__ros_html_a53edaeca0ab52253d940c0da47bffd74"><div class="ttname"><a href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a></div><div class="ttdeci">void set_ros_loggers()</div><div class="ttdoc">Sets the logging functions for ROS, linking ROS 2 log levels to YASMIN loggers.</div><div class="ttdef"><b>Definition</b> ros_logs.cpp:138</div></div>
+<div class="ttc" id="anamespaceyasmin_html"><div class="ttname"><a href="namespaceyasmin.html">yasmin</a></div><div class="ttdef"><b>Definition</b> blackboard.hpp:29</div></div>
+<div class="ttc" id="aros__logs_8hpp_html"><div class="ttname"><a href="ros__logs_8hpp.html">ros_logs.hpp</a></div></div>
+<div class="ttc" id="astate_8hpp_html"><div class="ttname"><a href="state_8hpp.html">state.hpp</a></div></div>
+<div class="ttc" id="astate__machine_8hpp_html"><div class="ttname"><a href="state__machine_8hpp.html">state_machine.hpp</a></div></div>
+<div class="ttc" id="ayasmin__viewer__pub_8hpp_html"><div class="ttname"><a href="yasmin__viewer__pub_8hpp.html">yasmin_viewer_pub.hpp</a></div></div>
+</div><!-- fragment --><p></p>
+</details>
+<h3><a class="anchor" id="autotoc_md15"></a>
+Service Demo (FSM + ROS 2 Service Client)</h3>
+<div class="fragment"><div class="line">$ ros2 run demo_nodes_py add_two_ints_server</div>
+</div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos service_client_demo</div>
+</div><!-- fragment --><details >
+<summary >
+Click to expand</summary>
+<p></p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;example_interfaces/srv/add_two_ints.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;rclcpp/rclcpp.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="cb__state_8hpp.html">yasmin/cb_state.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="logs_8hpp.html">yasmin/logs.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="state__machine_8hpp.html">yasmin/state_machine.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="basic__outcomes_8hpp.html">yasmin_ros/basic_outcomes.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="ros__logs_8hpp.html">yasmin_ros/ros_logs.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="service__state_8hpp.html">yasmin_ros/service_state.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="yasmin__viewer__pub_8hpp.html">yasmin_viewer/yasmin_viewer_pub.hpp</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">using </span>std::placeholders::_1;</div>
+<div class="line"><span class="keyword">using </span>std::placeholders::_2;</div>
+<div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>;</div>
+<div class="line"> </div>
+<div class="line">std::string</div>
+<div class="line"><a class="code hl_function" href="service__client__demo_8cpp.html#a5a773e3074e84e335d0e87393eb53cb1">set_ints</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {</div>
+<div class="line">  blackboard-&gt;set&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;a&quot;</span>, 10);</div>
+<div class="line">  blackboard-&gt;set&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;b&quot;</span>, 5);</div>
+<div class="line">  <span class="keywordflow">return</span> <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">std::string</div>
+<div class="line"><a class="code hl_function" href="service__client__demo_8cpp.html#ad7658a89fcb000382a8345891e0dda91">print_sum</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {</div>
+<div class="line">  fprintf(stderr, <span class="stringliteral">&quot;Sum: %d\n&quot;</span>, blackboard-&gt;get&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;sum&quot;</span>));</div>
+<div class="line">  <span class="keywordflow">return</span> <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classAddTwoIntsState.html">AddTwoIntsState</a></div>
+<div class="line">    : <span class="keyword">public</span> <a class="code hl_class" href="classyasmin__ros_1_1ServiceState.html">yasmin_ros::ServiceState</a>&lt;example_interfaces::srv::AddTwoInts&gt; {</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">public</span>:</div>
+<div class="line">  <a class="code hl_function" href="classAddTwoIntsState.html#adafe175a2a8667af73abeee9cd0439f0">AddTwoIntsState</a>()</div>
+<div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1ServiceState.html#ab74e60ff312219ee1033a34842c749a1">ServiceState</a>&lt;example_interfaces::srv::AddTwoInts&gt; <span class="comment">// msg</span></div>
+<div class="line">        (                                                             <span class="comment">// node</span></div>
+<div class="line">            <span class="stringliteral">&quot;/add_two_ints&quot;</span>, <span class="comment">// srv name</span></div>
+<div class="line">            std::bind(&amp;<a class="code hl_class" href="classAddTwoIntsState.html">AddTwoIntsState</a>::<a class="code hl_variable" href="classyasmin__ros_1_1ServiceState.html#a089345db165d860c0b84a755b6cf49e0">create_request_handler</a>, this, _1),</div>
+<div class="line">            {<span class="stringliteral">&quot;outcome1&quot;</span>},</div>
+<div class="line">            std::bind(&amp;<a class="code hl_variable" href="classyasmin__ros_1_1ServiceState.html#a250abf3c365cd36e63170b35db29b62c">AddTwoIntsState::response_handler</a>, <span class="keyword">this</span>, _1, _2)){};</div>
+<div class="line"> </div>
+<div class="line">  example_interfaces::srv::AddTwoInts::Request::SharedPtr</div>
+<div class="line">  <a class="code hl_variable" href="classyasmin__ros_1_1ServiceState.html#a089345db165d860c0b84a755b6cf49e0">create_request_handler</a>(</div>
+<div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">auto</span> request =</div>
+<div class="line">        std::make_shared&lt;example_interfaces::srv::AddTwoInts::Request&gt;();</div>
+<div class="line"> </div>
+<div class="line">    request-&gt;a = blackboard-&gt;get&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;a&quot;</span>);</div>
+<div class="line">    request-&gt;b = blackboard-&gt;get&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;b&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> request;</div>
+<div class="line">  }</div>
+<div class="line"> </div>
+<div class="line">  std::string <a class="code hl_variable" href="classyasmin__ros_1_1ServiceState.html#a250abf3c365cd36e63170b35db29b62c">response_handler</a>(</div>
+<div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,</div>
+<div class="line">      example_interfaces::srv::AddTwoInts::Response::SharedPtr response) {</div>
+<div class="line"> </div>
+<div class="line">    blackboard-&gt;set&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;sum&quot;</span>, response-&gt;sum);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span>;</div>
+<div class="line">  }</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]) {</div>
+<div class="line"> </div>
+<div class="line">  <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;yasmin_service_client_demo&quot;</span>);</div>
+<div class="line">  rclcpp::init(argc, argv);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// set ROS 2 logs</span></div>
+<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// create a state machine</span></div>
+<div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
+<div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// cancel state machine on ROS 2 shutdown</span></div>
+<div class="line">  rclcpp::on_shutdown([sm]() {</div>
+<div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
+<div class="line">      sm-&gt;cancel_state();</div>
+<div class="line">    }</div>
+<div class="line">  });</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// add states</span></div>
+<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;SETTING_INTS&quot;</span>,</div>
+<div class="line">                std::make_shared&lt;yasmin::CbState&gt;(</div>
+<div class="line">                    std::initializer_list&lt;std::string&gt;{</div>
+<div class="line">                        <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>},</div>
+<div class="line">                    <a class="code hl_function" href="service__client__demo_8cpp.html#a5a773e3074e84e335d0e87393eb53cb1">set_ints</a>),</div>
+<div class="line">                {</div>
+<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;ADD_TWO_INTS&quot;</span>},</div>
+<div class="line">                });</div>
+<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;ADD_TWO_INTS&quot;</span>, std::make_shared&lt;AddTwoIntsState&gt;(),</div>
+<div class="line">                {</div>
+<div class="line">                    {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;PRINTING_SUM&quot;</span>},</div>
+<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
+<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#ae27bb90d1a3bef7392009daaf6af5a21">yasmin_ros::basic_outcomes::ABORT</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
+<div class="line">                });</div>
+<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;PRINTING_SUM&quot;</span>,</div>
+<div class="line">                std::make_shared&lt;yasmin::CbState&gt;(</div>
+<div class="line">                    std::initializer_list&lt;std::string&gt;{</div>
+<div class="line">                        <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>},</div>
+<div class="line">                    <a class="code hl_function" href="service__client__demo_8cpp.html#ad7658a89fcb000382a8345891e0dda91">print_sum</a>),</div>
+<div class="line">                {</div>
+<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
+<div class="line">                });</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// pub</span></div>
+<div class="line">  <a class="code hl_class" href="classyasmin__viewer_1_1YasminViewerPub.html">yasmin_viewer::YasminViewerPub</a> yasmin_pub(<span class="stringliteral">&quot;YASMIN_ACTION_CLIENT_DEMO&quot;</span>, sm);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// execute</span></div>
+<div class="line">  <span class="keywordflow">try</span> {</div>
+<div class="line">    std::string outcome = (*sm.get())();</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
+<div class="line">  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception &amp;e) {</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#ae06a2a3a4eaa2d0fc4d4cc807e7d9d72">YASMIN_LOG_WARN</a>(e.what());</div>
+<div class="line">  }</div>
+<div class="line"> </div>
+<div class="line">  rclcpp::shutdown();</div>
+<div class="line"> </div>
+<div class="line">  <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="abasic__outcomes_8hpp_html"><div class="ttname"><a href="basic__outcomes_8hpp.html">basic_outcomes.hpp</a></div></div>
+<div class="ttc" id="acb__state_8hpp_html"><div class="ttname"><a href="cb__state_8hpp.html">cb_state.hpp</a></div></div>
+<div class="ttc" id="aclassAddTwoIntsState_html_adafe175a2a8667af73abeee9cd0439f0"><div class="ttname"><a href="classAddTwoIntsState.html#adafe175a2a8667af73abeee9cd0439f0">AddTwoIntsState::AddTwoIntsState</a></div><div class="ttdeci">AddTwoIntsState()</div><div class="ttdoc">Constructor for AddTwoIntsState.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:82</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html"><div class="ttname"><a href="classyasmin__ros_1_1ServiceState.html">yasmin_ros::ServiceState</a></div><div class="ttdoc">A state class that interacts with a ROS 2 service.</div><div class="ttdef"><b>Definition</b> service_state.hpp:42</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_a089345db165d860c0b84a755b6cf49e0"><div class="ttname"><a href="classyasmin__ros_1_1ServiceState.html#a089345db165d860c0b84a755b6cf49e0">yasmin_ros::ServiceState&lt; example_interfaces::srv::AddTwoInts &gt;::create_request_handler</a></div><div class="ttdeci">CreateRequestHandler create_request_handler</div><div class="ttdef"><b>Definition</b> service_state.hpp:189</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_a250abf3c365cd36e63170b35db29b62c"><div class="ttname"><a href="classyasmin__ros_1_1ServiceState.html#a250abf3c365cd36e63170b35db29b62c">yasmin_ros::ServiceState&lt; example_interfaces::srv::AddTwoInts &gt;::response_handler</a></div><div class="ttdeci">ResponseHandler response_handler</div><div class="ttdef"><b>Definition</b> service_state.hpp:190</div></div>
+<div class="ttc" id="anamespaceyasmin__ros_1_1basic__outcomes_html_a5573f527607429f73c199d683f78a6a7"><div class="ttname"><a href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a></div><div class="ttdeci">constexpr char SUCCEED[]</div><div class="ttdoc">Constant representing a successful action outcome.</div><div class="ttdef"><b>Definition</b> basic_outcomes.hpp:39</div></div>
+<div class="ttc" id="anamespaceyasmin__ros_1_1basic__outcomes_html_ae27bb90d1a3bef7392009daaf6af5a21"><div class="ttname"><a href="namespaceyasmin__ros_1_1basic__outcomes.html#ae27bb90d1a3bef7392009daaf6af5a21">yasmin_ros::basic_outcomes::ABORT</a></div><div class="ttdeci">constexpr char ABORT[]</div><div class="ttdoc">Constant representing an aborted action outcome.</div><div class="ttdef"><b>Definition</b> basic_outcomes.hpp:47</div></div>
+<div class="ttc" id="anamespaceyasmin__ros_html"><div class="ttname"><a href="namespaceyasmin__ros.html">yasmin_ros</a></div><div class="ttdef"><b>Definition</b> action_state.hpp:35</div></div>
+<div class="ttc" id="aservice__state_8hpp_html"><div class="ttname"><a href="service__state_8hpp.html">service_state.hpp</a></div></div>
+</div><!-- fragment --><p></p>
+</details>
+<h3><a class="anchor" id="autotoc_md16"></a>
+Action Demo (FSM + ROS 2 Action)</h3>
+<div class="fragment"><div class="line">$ ros2 run action_tutorials_cpp fibonacci_action_server</div>
+</div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos action_client_demo</div>
+</div><!-- fragment --><details >
+<summary >
+Click to expand</summary>
+<p></p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;action_tutorials_interfaces/action/fibonacci.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="cb__state_8hpp.html">yasmin/cb_state.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="logs_8hpp.html">yasmin/logs.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="state__machine_8hpp.html">yasmin/state_machine.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="action__state_8hpp.html">yasmin_ros/action_state.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="basic__outcomes_8hpp.html">yasmin_ros/basic_outcomes.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="ros__logs_8hpp.html">yasmin_ros/ros_logs.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="yasmin__node_8hpp.html">yasmin_ros/yasmin_node.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="yasmin__viewer__pub_8hpp.html">yasmin_viewer/yasmin_viewer_pub.hpp</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">using </span>std::placeholders::_1;</div>
+<div class="line"><span class="keyword">using </span>std::placeholders::_2;</div>
+<div class="line"><span class="keyword">using </span><a class="code hl_typedef" href="action__client__demo_8cpp.html#a1d63ef8c5e1b933c7f0e383f3e18bb08">Fibonacci</a> = action_tutorials_interfaces::action::Fibonacci;</div>
+<div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>;</div>
+<div class="line"> </div>
+<div class="line">std::string</div>
+<div class="line"><a class="code hl_function" href="action__client__demo_8cpp.html#ac1846bfe6ea5494fa8a7d56f7bc96a09">print_result</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {</div>
+<div class="line"> </div>
+<div class="line">  <span class="keyword">auto</span> fibo_res = blackboard-&gt;get&lt;std::vector&lt;int&gt;&gt;(<span class="stringliteral">&quot;sum&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">  fprintf(stderr, <span class="stringliteral">&quot;Result received:&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">  <span class="keywordflow">for</span> (<span class="keyword">auto</span> ele : fibo_res) {</div>
+<div class="line">    fprintf(stderr, <span class="stringliteral">&quot; %d,&quot;</span>, ele);</div>
+<div class="line">  }</div>
+<div class="line"> </div>
+<div class="line">  fprintf(stderr, <span class="stringliteral">&quot;\n&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">  <span class="keywordflow">return</span> <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classFibonacciState.html">FibonacciState</a> : <span class="keyword">public</span> <a class="code hl_class" href="classyasmin__ros_1_1ActionState.html">yasmin_ros::ActionState</a>&lt;Fibonacci&gt; {</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">public</span>:</div>
+<div class="line">  <a class="code hl_function" href="classFibonacciState.html#a80f2a3be8fb203badc608c4ef5410c0e">FibonacciState</a>()</div>
+<div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1ActionState.html#aa7902878db3392a3e00613a68e23b4d0">ActionState</a>&lt;<a class="code hl_typedef" href="action__client__demo_8cpp.html#a1d63ef8c5e1b933c7f0e383f3e18bb08">Fibonacci</a>&gt;(</div>
+<div class="line"> </div>
+<div class="line">            <span class="stringliteral">&quot;/fibonacci&quot;</span>, <span class="comment">// action name</span></div>
+<div class="line"> </div>
+<div class="line">            <span class="comment">// # cb to create the goal</span></div>
+<div class="line">            std::bind(&amp;<a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>::<a class="code hl_variable" href="classyasmin__ros_1_1ActionState.html#ac1dcef8cc246e1d77bee45d4594f607b">create_goal_handler</a>, this, _1),</div>
+<div class="line">            <span class="comment">// # cb to process the response</span></div>
+<div class="line"> </div>
+<div class="line">            std::bind(&amp;<a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>::<a class="code hl_function" href="classFibonacciState.html#ae6733a8e4b4dfd8fdd1341862b5386f8">response_handler</a>, this, _1, _2),</div>
+<div class="line"> </div>
+<div class="line">            <span class="comment">// cb to process the feedback</span></div>
+<div class="line">            std::bind(&amp;<a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>::<a class="code hl_function" href="classFibonacciState.html#ab7bb07a4a795109bc2cb5032a8d6ce6f">print_feedback</a>, this, _1, _2)){};</div>
+<div class="line"> </div>
+<div class="line">  Fibonacci::Goal <a class="code hl_variable" href="classyasmin__ros_1_1ActionState.html#ac1dcef8cc246e1d77bee45d4594f607b">create_goal_handler</a>(</div>
+<div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">auto</span> goal = Fibonacci::Goal();</div>
+<div class="line">    goal.order = blackboard-&gt;get&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;n&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> goal;</div>
+<div class="line">  }</div>
+<div class="line"> </div>
+<div class="line">  std::string</div>
+<div class="line">  <a class="code hl_function" href="classFibonacciState.html#ae6733a8e4b4dfd8fdd1341862b5386f8">response_handler</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,</div>
+<div class="line">                   Fibonacci::Result::SharedPtr response) {</div>
+<div class="line"> </div>
+<div class="line">    blackboard-&gt;set&lt;std::vector&lt;int&gt;&gt;(<span class="stringliteral">&quot;sum&quot;</span>, response-&gt;sequence);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>;</div>
+<div class="line">  }</div>
+<div class="line"> </div>
+<div class="line">  <span class="keywordtype">void</span></div>
+<div class="line">  <a class="code hl_function" href="classFibonacciState.html#ab7bb07a4a795109bc2cb5032a8d6ce6f">print_feedback</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,</div>
+<div class="line">                 std::shared_ptr&lt;const Fibonacci::Feedback&gt; feedback) {</div>
+<div class="line">    (void)blackboard;</div>
+<div class="line"> </div>
+<div class="line">    std::stringstream ss;</div>
+<div class="line">    ss &lt;&lt; <span class="stringliteral">&quot;Next number in sequence received: &quot;</span>;</div>
+<div class="line">    <span class="keywordflow">for</span> (<span class="keyword">auto</span> number : feedback-&gt;partial_sequence) {</div>
+<div class="line">      ss &lt;&lt; number &lt;&lt; <span class="stringliteral">&quot; &quot;</span>;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    fprintf(stderr, <span class="stringliteral">&quot;%s\n&quot;</span>, ss.str().c_str());</div>
+<div class="line">  }</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]) {</div>
+<div class="line"> </div>
+<div class="line">  <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;yasmin_action_client_demo&quot;</span>);</div>
+<div class="line">  rclcpp::init(argc, argv);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// set ROS 2 logs</span></div>
+<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// create a state machine</span></div>
+<div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
+<div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// cancel state machine on ROS 2 shutdown</span></div>
+<div class="line">  rclcpp::on_shutdown([sm]() {</div>
+<div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
+<div class="line">      sm-&gt;cancel_state();</div>
+<div class="line">    }</div>
+<div class="line">  });</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// add states</span></div>
+<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;CALLING_FIBONACCI&quot;</span>, std::make_shared&lt;FibonacciState&gt;(),</div>
+<div class="line">                {</div>
+<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;PRINTING_RESULT&quot;</span>},</div>
+<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#aa16f429e9a49afef61173041aeb88525">yasmin_ros::basic_outcomes::CANCEL</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
+<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#ae27bb90d1a3bef7392009daaf6af5a21">yasmin_ros::basic_outcomes::ABORT</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
+<div class="line">                });</div>
+<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;PRINTING_RESULT&quot;</span>,</div>
+<div class="line">                std::make_shared&lt;yasmin::CbState&gt;(</div>
+<div class="line">                    std::initializer_list&lt;std::string&gt;{</div>
+<div class="line">                        <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>},</div>
+<div class="line">                    <a class="code hl_function" href="action__client__demo_8cpp.html#ac1846bfe6ea5494fa8a7d56f7bc96a09">print_result</a>),</div>
+<div class="line">                {</div>
+<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
+<div class="line">                });</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// pub</span></div>
+<div class="line">  <a class="code hl_class" href="classyasmin__viewer_1_1YasminViewerPub.html">yasmin_viewer::YasminViewerPub</a> yasmin_pub(<span class="stringliteral">&quot;YASMIN_ACTION_CLIENT_DEMO&quot;</span>, sm);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// create an initial blackboard</span></div>
+<div class="line">  std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard =</div>
+<div class="line">      std::make_shared&lt;yasmin::blackboard::Blackboard&gt;();</div>
+<div class="line">  blackboard-&gt;set&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;n&quot;</span>, 10);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// execute</span></div>
+<div class="line">  <span class="keywordflow">try</span> {</div>
+<div class="line">    std::string outcome = (*sm.get())(blackboard);</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
+<div class="line">  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception &amp;e) {</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#ae06a2a3a4eaa2d0fc4d4cc807e7d9d72">YASMIN_LOG_WARN</a>(e.what());</div>
+<div class="line">  }</div>
+<div class="line"> </div>
+<div class="line">  rclcpp::shutdown();</div>
+<div class="line"> </div>
+<div class="line">  <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="aaction__client__demo_8cpp_html_a1d63ef8c5e1b933c7f0e383f3e18bb08"><div class="ttname"><a href="action__client__demo_8cpp.html#a1d63ef8c5e1b933c7f0e383f3e18bb08">Fibonacci</a></div><div class="ttdeci">action_tutorials_interfaces::action::Fibonacci Fibonacci</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:33</div></div>
+<div class="ttc" id="aaction__state_8hpp_html"><div class="ttname"><a href="action__state_8hpp.html">action_state.hpp</a></div></div>
+<div class="ttc" id="aclassFibonacciState_html_a80f2a3be8fb203badc608c4ef5410c0e"><div class="ttname"><a href="classFibonacciState.html#a80f2a3be8fb203badc608c4ef5410c0e">FibonacciState::FibonacciState</a></div><div class="ttdeci">FibonacciState()</div><div class="ttdoc">Constructs a new FibonacciState object and initializes callbacks.</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:75</div></div>
+<div class="ttc" id="aclassFibonacciState_html_ab7bb07a4a795109bc2cb5032a8d6ce6f"><div class="ttname"><a href="classFibonacciState.html#ab7bb07a4a795109bc2cb5032a8d6ce6f">FibonacciState::print_feedback</a></div><div class="ttdeci">void print_feedback(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard, std::shared_ptr&lt; const Fibonacci::Feedback &gt; feedback)</div><div class="ttdoc">Callback for printing action feedback.</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:127</div></div>
+<div class="ttc" id="aclassFibonacciState_html_ae6733a8e4b4dfd8fdd1341862b5386f8"><div class="ttname"><a href="classFibonacciState.html#ae6733a8e4b4dfd8fdd1341862b5386f8">FibonacciState::response_handler</a></div><div class="ttdeci">std::string response_handler(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard, Fibonacci::Result::SharedPtr response)</div><div class="ttdoc">Callback for handling the action response.</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:109</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1ActionState_html"><div class="ttname"><a href="classyasmin__ros_1_1ActionState.html">yasmin_ros::ActionState</a></div><div class="ttdoc">A state class for handling ROS 2 action client operations.</div><div class="ttdef"><b>Definition</b> action_state.hpp:46</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1ActionState_html_ac1dcef8cc246e1d77bee45d4594f607b"><div class="ttname"><a href="classyasmin__ros_1_1ActionState.html#ac1dcef8cc246e1d77bee45d4594f607b">yasmin_ros::ActionState&lt; Fibonacci &gt;::create_goal_handler</a></div><div class="ttdeci">CreateGoalHandler create_goal_handler</div><div class="ttdef"><b>Definition</b> action_state.hpp:317</div></div>
+<div class="ttc" id="anamespaceyasmin__ros_1_1basic__outcomes_html_aa16f429e9a49afef61173041aeb88525"><div class="ttname"><a href="namespaceyasmin__ros_1_1basic__outcomes.html#aa16f429e9a49afef61173041aeb88525">yasmin_ros::basic_outcomes::CANCEL</a></div><div class="ttdeci">constexpr char CANCEL[]</div><div class="ttdoc">Constant representing a canceled action outcome.</div><div class="ttdef"><b>Definition</b> basic_outcomes.hpp:55</div></div>
+<div class="ttc" id="ayasmin__node_8hpp_html"><div class="ttname"><a href="yasmin__node_8hpp.html">yasmin_node.hpp</a></div></div>
+</div><!-- fragment --><p></p>
+</details>
+<h3><a class="anchor" id="autotoc_md17"></a>
+Monitor Demo (FSM + ROS 2 Subscriber)</h3>
+<div class="fragment"><div class="line">$ ros2 run yasmin_demos monitor_demo</div>
+</div><!-- fragment --><details >
+<summary >
+Click to expand</summary>
+<p></p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;rclcpp/rclcpp.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;nav_msgs/msg/odometry.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="logs_8hpp.html">yasmin/logs.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="state__machine_8hpp.html">yasmin/state_machine.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="basic__outcomes_8hpp.html">yasmin_ros/basic_outcomes.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="monitor__state_8hpp.html">yasmin_ros/monitor_state.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="ros__logs_8hpp.html">yasmin_ros/ros_logs.hpp</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="yasmin__viewer__pub_8hpp.html">yasmin_viewer/yasmin_viewer_pub.hpp</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">using </span>std::placeholders::_1;</div>
+<div class="line"><span class="keyword">using </span>std::placeholders::_2;</div>
+<div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>;</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">class </span><a class="code hl_class" href="classPrintOdometryState.html">PrintOdometryState</a></div>
+<div class="line">    : <span class="keyword">public</span> <a class="code hl_class" href="classyasmin__ros_1_1MonitorState.html">yasmin_ros::MonitorState</a>&lt;nav_msgs::msg::Odometry&gt; {</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">public</span>:</div>
+<div class="line">  <span class="keywordtype">int</span> <a class="code hl_variable" href="classPrintOdometryState.html#ac26fa7c2dc61ebd7ee0a12026fa7c1ec">times</a>;</div>
+<div class="line"> </div>
+<div class="line">  <a class="code hl_function" href="classPrintOdometryState.html#a7077bc7b49ec1036a47409a37fae84e2">PrintOdometryState</a>(<span class="keywordtype">int</span> <a class="code hl_variable" href="classPrintOdometryState.html#ac26fa7c2dc61ebd7ee0a12026fa7c1ec">times</a>)</div>
+<div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1MonitorState.html#a8df77197e3a40a3a6229969e1a6da9a5">MonitorState</a>&lt;nav_msgs::msg::Odometry&gt; <span class="comment">// msg type</span></div>
+<div class="line">        (<span class="stringliteral">&quot;odom&quot;</span>,                                          <span class="comment">// topic name</span></div>
+<div class="line">         {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>},                        <span class="comment">// outcomes</span></div>
+<div class="line">         std::bind(&amp;<a class="code hl_variable" href="classyasmin__ros_1_1MonitorState.html#a49277a171d35159f716f5605b185df4b">PrintOdometryState::monitor_handler</a>, <span class="keyword">this</span>, _1,</div>
+<div class="line">                   _2), <span class="comment">// monitor handler callback</span></div>
+<div class="line">         10,            <span class="comment">// qos for the topic sbscription</span></div>
+<div class="line">         10,            <span class="comment">// queue of the monitor handler callback</span></div>
+<div class="line">         10             <span class="comment">// timeout to wait for msgs in seconds</span></div>
+<div class="line">                        <span class="comment">// if &gt;0, CANCEL outcome is added</span></div>
+<div class="line">        ) {</div>
+<div class="line">    this-&gt;times = <a class="code hl_variable" href="classPrintOdometryState.html#ac26fa7c2dc61ebd7ee0a12026fa7c1ec">times</a>;</div>
+<div class="line">  };</div>
+<div class="line"> </div>
+<div class="line">  std::string</div>
+<div class="line">  <a class="code hl_variable" href="classyasmin__ros_1_1MonitorState.html#a49277a171d35159f716f5605b185df4b">monitor_handler</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,</div>
+<div class="line">                  std::shared_ptr&lt;nav_msgs::msg::Odometry&gt; msg) {</div>
+<div class="line"> </div>
+<div class="line">    (void)blackboard;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;x: %d&quot;</span>, msg-&gt;pose.pose.position.x);</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;y: %d&quot;</span>, msg-&gt;pose.pose.position.y);</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;z: %d&quot;</span>, msg-&gt;pose.pose.position.z);</div>
+<div class="line"> </div>
+<div class="line">    this-&gt;times--;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">if</span> (this-&gt;times &lt;= 0) {</div>
+<div class="line">      <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome2&quot;</span>;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span>;</div>
+<div class="line">  }</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]) {</div>
+<div class="line"> </div>
+<div class="line">  <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;yasmin_monitor_demo&quot;</span>);</div>
+<div class="line">  rclcpp::init(argc, argv);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// set ROS 2 logs</span></div>
+<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// create a state machine</span></div>
+<div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
+<div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// cancel state machine on ROS 2 shutdown</span></div>
+<div class="line">  rclcpp::on_shutdown([sm]() {</div>
+<div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
+<div class="line">      sm-&gt;cancel_state();</div>
+<div class="line">    }</div>
+<div class="line">  });</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// add states</span></div>
+<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>, std::make_shared&lt;PrintOdometryState&gt;(5),</div>
+<div class="line">                {</div>
+<div class="line">                    {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>},</div>
+<div class="line">                    {<span class="stringliteral">&quot;outcome2&quot;</span>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
+<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#aa1e861086a64adb5672adec78f7c3316">yasmin_ros::basic_outcomes::TIMEOUT</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
+<div class="line">                });</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// pub</span></div>
+<div class="line">  <a class="code hl_class" href="classyasmin__viewer_1_1YasminViewerPub.html">yasmin_viewer::YasminViewerPub</a> yasmin_pub(<span class="stringliteral">&quot;YASMIN_MONITOR_DEMO&quot;</span>, sm);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// execute</span></div>
+<div class="line">  <span class="keywordflow">try</span> {</div>
+<div class="line">    std::string outcome = (*sm.get())();</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
+<div class="line">  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception &amp;e) {</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#ae06a2a3a4eaa2d0fc4d4cc807e7d9d72">YASMIN_LOG_WARN</a>(e.what());</div>
+<div class="line">  }</div>
+<div class="line"> </div>
+<div class="line">  rclcpp::shutdown();</div>
+<div class="line"> </div>
+<div class="line">  <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+<div class="ttc" id="aclassPrintOdometryState_html_a7077bc7b49ec1036a47409a37fae84e2"><div class="ttname"><a href="classPrintOdometryState.html#a7077bc7b49ec1036a47409a37fae84e2">PrintOdometryState::PrintOdometryState</a></div><div class="ttdeci">PrintOdometryState(int times)</div><div class="ttdoc">Constructor for the PrintOdometryState class.</div><div class="ttdef"><b>Definition</b> monitor_demo.cpp:54</div></div>
+<div class="ttc" id="aclassPrintOdometryState_html_ac26fa7c2dc61ebd7ee0a12026fa7c1ec"><div class="ttname"><a href="classPrintOdometryState.html#ac26fa7c2dc61ebd7ee0a12026fa7c1ec">PrintOdometryState::times</a></div><div class="ttdeci">int times</div><div class="ttdef"><b>Definition</b> monitor_demo.cpp:47</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1MonitorState_html"><div class="ttname"><a href="classyasmin__ros_1_1MonitorState.html">yasmin_ros::MonitorState</a></div><div class="ttdoc">Template class to monitor a ROS 2 topic and process incoming messages.</div><div class="ttdef"><b>Definition</b> monitor_state.hpp:46</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1MonitorState_html_a49277a171d35159f716f5605b185df4b"><div class="ttname"><a href="classyasmin__ros_1_1MonitorState.html#a49277a171d35159f716f5605b185df4b">yasmin_ros::MonitorState&lt; nav_msgs::msg::Odometry &gt;::monitor_handler</a></div><div class="ttdeci">MonitorHandler monitor_handler</div><div class="ttdef"><b>Definition</b> monitor_state.hpp:189</div></div>
+<div class="ttc" id="amonitor__state_8hpp_html"><div class="ttname"><a href="monitor__state_8hpp.html">monitor_state.hpp</a></div></div>
+<div class="ttc" id="anamespaceyasmin__ros_1_1basic__outcomes_html_aa1e861086a64adb5672adec78f7c3316"><div class="ttname"><a href="namespaceyasmin__ros_1_1basic__outcomes.html#aa1e861086a64adb5672adec78f7c3316">yasmin_ros::basic_outcomes::TIMEOUT</a></div><div class="ttdeci">constexpr char TIMEOUT[]</div><div class="ttdoc">Constant representing a timed-out action outcome.</div><div class="ttdef"><b>Definition</b> basic_outcomes.hpp:63</div></div>
+</div><!-- fragment --><p></p>
+</details>
+<p><a class="anchor" id="#YASMIN-Viewer"></a></p>
+<h1><a class="anchor" id="autotoc_md18"></a>
+YASMIN Viewer</h1>
+<p>This viewer allows monitoring YASMIN's FSM. It is implemented with Flask and ReactJS. A filter is provided to show only one FSM.</p>
+<p><img src="./docs/viewer.gif" alt="" class="inline"/></p>
+<h2><a class="anchor" id="autotoc_md19"></a>
+Usage</h2>
+<div class="fragment"><div class="line">$ ros2 run yasmin_viewer yasmin_viewer_node</div>
+</div><!-- fragment --><p><a href="http://localhost:5000/">http://localhost:5000/</a></p>
+<h2><a class="anchor" id="autotoc_md20"></a>
+Custom host and port</h2>
+<div class="fragment"><div class="line">$ ros2 run yasmin_viewer yasmin_viewer_node --ros-args -p host:=127.0.0.1 -p port:=5032</div>
+</div><!-- fragment --><p><a href="http://127.0.0.1:5032/">http://127.0.0.1:5032/</a></p>
+<h1><a class="anchor" id="autotoc_md21"></a>
+Citations</h1>
+<div class="fragment"><div class="line">@InProceedings{10.1007/978-3-031-21062-4_43,</div>
+<div class="line">author=&quot;Gonz{\&#39;a}lez-Santamarta, Miguel {\&#39;A}.</div>
+<div class="line">and Rodr{\&#39;i}guez-Lera, Francisco J.</div>
+<div class="line">and Matell{\&#39;a}n-Olivera, Vicente</div>
+<div class="line">and Fern{\&#39;a}ndez-Llamas, Camino&quot;,</div>
+<div class="line">editor=&quot;Tardioli, Danilo</div>
+<div class="line">and Matell{\&#39;a}n, Vicente</div>
+<div class="line">and Heredia, Guillermo</div>
+<div class="line">and Silva, Manuel F.</div>
+<div class="line">and Marques, Lino&quot;,</div>
+<div class="line">title=&quot;YASMIN: Yet Another State MachINe&quot;,</div>
+<div class="line">booktitle=&quot;ROBOT2022: Fifth Iberian Robotics Conference&quot;,</div>
+<div class="line">year=&quot;2023&quot;,</div>
+<div class="line">publisher=&quot;Springer International Publishing&quot;,</div>
+<div class="line">address=&quot;Cham&quot;,</div>
+<div class="line">pages=&quot;528--539&quot;,</div>
+<div class="line">abstract=&quot;State machines are a common mechanism for defining behaviors in robots where each behavior is based on identifiable stages. There are several libraries available for easing the implementation of state machines in ROS 1, however, the community was focused on SMACH or SMACC. Although these tools are still predominant, there are fewer alternatives for ROS 2. Besides, Behavior Trees are spreading fast, but there is a niche for using State Machines. Here, YASMIN is presented as yet another library specifically designed for ROS 2 for easing the design of robotic behaviors using state machines. It is available in C++ and Python, and provides some default states to speed up the development, in addition to a web viewer for monitoring the execution of the system and helping in the debugging.&quot;,</div>
+<div class="line">isbn=&quot;978-3-031-21062-4&quot;</div>
+<div class="line">}</div>
+</div><!-- fragment --><div class="fragment"><div class="line">@misc{yasmin,</div>
+<div class="line">  doi = {10.48550/ARXIV.2205.13284},</div>
+<div class="line">  url = {https://arxiv.org/abs/2205.13284},</div>
+<div class="line">  author = {González-Santamarta, Miguel Ángel and Rodríguez-Lera, Francisco Javier and Llamas, Camino Fernández and Rico, Francisco Martín and Olivera, Vicente Matellán},</div>
+<div class="line">  keywords = {Robotics (cs.RO), FOS: Computer and information sciences, FOS: Computer and information sciences},</div>
+<div class="line">  title = {YASMIN: Yet Another State MachINe library for ROS 2},</div>
+<div class="line">  publisher = {arXiv},</div>
+<div class="line">  year = {2022},</div>
+<div class="line">  copyright = {Creative Commons Attribution Non Commercial No Derivatives 4.0 International}</div>
+<div class="line">}</div>
+</div><!-- fragment --> </div></div><!-- PageDoc -->
 <a href="doxygen_crawl.html"></a>
 </div><!-- contents -->
 <!-- start footer part -->

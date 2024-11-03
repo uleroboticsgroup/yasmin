@@ -91,7 +91,6 @@ $(function(){ initResizable(false); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
@@ -167,13 +166,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae904186744d93be595c17b9c9489750d inherit pub_methods_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5631519cc0b56dfa8f8c51bc047cbe4 inherit pub_methods_classyasmin_1_1state_1_1State" id="r_af5631519cc0b56dfa8f8c51bc047cbe4"><td class="memItemLeft" align="right" valign="top">Set[str]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#af5631519cc0b56dfa8f8c51bc047cbe4">get_outcomes</a> (self)</td></tr>
 <tr class="separator:af5631519cc0b56dfa8f8c51bc047cbe4 inherit pub_methods_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a34d3f93273dc0fa87ee563a6f0b8a25b" id="r_a34d3f93273dc0fa87ee563a6f0b8a25b"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34d3f93273dc0fa87ee563a6f0b8a25b">_states</a></td></tr>
-<tr class="separator:a34d3f93273dc0fa87ee563a6f0b8a25b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2883b2b505f4f0cba0e4cfebd3d35417" id="r_a2883b2b505f4f0cba0e4cfebd3d35417"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2883b2b505f4f0cba0e4cfebd3d35417">_start_state</a> = []</td></tr>
-<tr class="separator:a2883b2b505f4f0cba0e4cfebd3d35417"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -850,7 +842,7 @@ Raises:
 </div>
 </div>
 <a id="aff1274f3ae60ca1246bba25e81b50ff5" name="aff1274f3ae60ca1246bba25e81b50ff5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aff1274f3ae60ca1246bba25e81b50ff5">&#9670;&#160;</a></span>_start_state <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aff1274f3ae60ca1246bba25e81b50ff5">&#9670;&#160;</a></span>_start_state</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -873,22 +865,8 @@ Raises:
 
 </div>
 </div>
-<a id="a2883b2b505f4f0cba0e4cfebd3d35417" name="a2883b2b505f4f0cba0e4cfebd3d35417"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2883b2b505f4f0cba0e4cfebd3d35417">&#9670;&#160;</a></span>_start_state <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">list yasmin.state_machine.StateMachine._start_state = []</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a6c11c3bce5c23c40631dbe2ed578908d" name="a6c11c3bce5c23c40631dbe2ed578908d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6c11c3bce5c23c40631dbe2ed578908d">&#9670;&#160;</a></span>_states <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c11c3bce5c23c40631dbe2ed578908d">&#9670;&#160;</a></span>_states</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -909,23 +887,6 @@ Raises:
 
 <p>A dictionary mapping state names to their corresponding state objects and transitions. </p>
 
-</div>
-</div>
-<a id="a34d3f93273dc0fa87ee563a6f0b8a25b" name="a34d3f93273dc0fa87ee563a6f0b8a25b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a34d3f93273dc0fa87ee563a6f0b8a25b">&#9670;&#160;</a></span>_states <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">str yasmin.state_machine.StateMachine._states</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">=  <span class="stringliteral">&quot;\n\t&quot;</span> + <span class="stringliteral">&quot;\n\t&quot;</span>.join(</div>
-<div class="line">            f<span class="stringliteral">&quot;{key} --&gt; {transitions[key]}&quot;</span> <span class="keywordflow">for</span> key <span class="keywordflow">in</span> transitions</div>
-<div class="line">        )</div>
-</div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['nav2state_0',['Nav2State',['../classyasmin__demos_1_1nav__demo_1_1Nav2State.html',1,'yasmin_demos::nav_demo']]],
-  ['nav_5fdemo_2epy_1',['nav_demo.py',['../nav__demo_8py.html',1,'']]],
-  ['notset_2',['NOTSET',['../namespaceyasmin_1_1logs.html#a0d062b60bcb7ff2703eb7a2b9612325f',1,'yasmin::logs']]]
+  ['learn_20more_0',['Learn More',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md28',1,'']]],
+  ['level_1',['level',['../namespaceyasmin_1_1logs.html#a409247b3492fe518fad66027fe66be9f',1,'yasmin::logs']]],
+  ['logs_2epy_2',['logs.py',['../logs_8py.html',1,'']]]
 ];
