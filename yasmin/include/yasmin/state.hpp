@@ -22,7 +22,9 @@
 #include <string>
 #include <vector>
 
-#include <cxxabi.h>
+#ifdef __GNUG__     // if using GCC/G++
+#include <cxxabi.h> // for abi::__cxa_demangle
+#endif
 
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/logs.hpp"
