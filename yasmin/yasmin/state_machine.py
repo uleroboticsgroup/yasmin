@@ -89,9 +89,15 @@ class StateMachine(State):
         if not transitions:
             transitions = {}
 
+        transition_string = "\n\t" + "\n\t".join(
+            f"{key} --> {transitions[key]}" for key in transitions
+        )
+
+        # Check if state name is already in the state machine
         if name in self._states:
             raise KeyError(f"State '{name}' already registered in the state machine")
 
+        # Check the transitions
         for key in transitions:
             if not key:
                 raise ValueError(f"Transitions with empty source in state '{name}'")
@@ -103,11 +109,6 @@ class StateMachine(State):
                 raise KeyError(
                     f"State '{name}' references unregistered outcomes '{key}', available outcomes are {list(state.get_outcomes())}"
                 )
-
-        # Debug state and its transitions
-        transition_string = "\n\t" + "\n\t".join(
-            f"{key} --> {transitions[key]}" for key in transitions
-        )
 
         yasmin.YASMIN_LOG_DEBUG(
             f"Adding state '{name}' of type '{state}' with transitions: {transition_string}"
@@ -275,12 +276,12 @@ class StateMachine(State):
         """
         yasmin.YASMIN_LOG_DEBUG(f"Validating state machine '{self}'")
 
+        # terminal outcomes
+        terminal_outcomes = []
+
         # Check initial state
         if not self._start_state:
             raise RuntimeError("No initial state set")
-
-        # terminal outcomes
-        terminal_outcomes = []
 
         # Check all states
         for state_name in self._states:
