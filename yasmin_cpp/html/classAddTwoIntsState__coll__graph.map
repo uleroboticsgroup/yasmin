@@ -1,7 +1,13 @@
 <map id="AddTwoIntsState" name="AddTwoIntsState">
-<area shape="rect" id="Node000001" title=" " alt="" coords="28,183,151,208"/>
-<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1ServiceState.html" title=" " alt="" coords="5,79,174,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,150,92,182,87,182,87,150"/>
-<area shape="rect" id="Node000003" href="$classyasmin_1_1State.html" title=" " alt="" coords="40,5,139,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,47,92,78,87,78,87,47"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="28,453,151,478"/>
+<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1ServiceState.html" title=" " alt="" coords="5,348,174,403"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,419,92,452,87,452,87,419"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1State.html" title=" " alt="" coords="40,273,139,298"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,314,92,347,87,347,87,314"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="19,184,160,210"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="92,225,92,272,87,272,87,225"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="51,95,128,121"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="92,137,92,184,87,184,87,137"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="28,5,151,46"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="92,61,92,95,87,95,87,61"/>
 </map>

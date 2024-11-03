@@ -1,5 +1,11 @@
 <map id="yasmin::StateMachine" name="yasmin::StateMachine">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,154,105"/>
-<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title=" " alt="" coords="30,5,129,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,46,82,79,77,79,77,46"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,348,154,373"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title=" " alt="" coords="30,273,129,298"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,314,82,347,77,347,77,314"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="9,184,150,210"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="82,225,82,272,77,272,77,225"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="41,95,118,121"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="82,137,82,184,77,184,77,137"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="18,5,141,46"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="82,61,82,95,77,95,77,61"/>
 </map>

@@ -1,7 +1,13 @@
 <map id="PrintOdometryState" name="PrintOdometryState">
-<area shape="rect" id="Node000001" title=" " alt="" coords="36,168,171,193"/>
-<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1MonitorState.html" title=" " alt="" coords="5,79,202,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,135,106,167,101,167,101,135"/>
-<area shape="rect" id="Node000003" href="$classyasmin_1_1State.html" title=" " alt="" coords="54,5,153,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="106,46,106,79,101,79,101,46"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="36,438,171,463"/>
+<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1MonitorState.html" title=" " alt="" coords="5,348,202,388"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,404,106,437,101,437,101,404"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1State.html" title=" " alt="" coords="54,273,153,298"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="106,314,106,348,101,348,101,314"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="33,184,174,210"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="106,225,106,272,101,272,101,225"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="65,95,142,121"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="106,137,106,184,101,184,101,137"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="42,5,165,46"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="106,61,106,95,101,95,101,61"/>
 </map>
