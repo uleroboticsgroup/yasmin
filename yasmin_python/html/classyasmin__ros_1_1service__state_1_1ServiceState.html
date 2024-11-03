@@ -92,7 +92,6 @@ $(function(){ initResizable(false); });
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
-<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classyasmin__ros_1_1service__state_1_1ServiceState-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin_ros.service_state.ServiceState Class Reference</div></div>
 </div><!--header-->
@@ -116,26 +115,25 @@ Collaboration diagram for yasmin_ros.service_state.ServiceState:</div>
 <div class="dyncontent">
 <div class="center"><img src="classyasmin__ros_1_1service__state_1_1ServiceState__coll__graph.png" border="0" usemap="#ayasmin__ros_8service__state_8ServiceState_coll__map" alt="Collaboration graph"/></div>
 <map name="ayasmin__ros_8service__state_8ServiceState_coll__map" id="ayasmin__ros_8service__state_8ServiceState_coll__map">
-<area shape="rect" title=" " alt="" coords="211,198,346,238"/>
+<area shape="rect" title=" " alt="" coords="194,183,329,223"/>
 <area shape="rect" href="classyasmin_1_1state_1_1State.html" title=" " alt="" coords="5,94,134,120"/>
-<area shape="poly" title=" " alt="" coords="102,126,181,171,232,195,229,199,179,176,99,130"/>
+<area shape="poly" title=" " alt="" coords="109,124,222,180,220,184,107,129"/>
 <area shape="rect" title=" " alt="" coords="11,5,59,31"/>
 <area shape="poly" title=" " alt="" coords="48,44,67,93,62,95,43,46"/>
 <area shape="rect" title=" " alt="" coords="84,5,125,31"/>
 <area shape="poly" title=" " alt="" coords="96,46,77,95,72,93,91,44"/>
 <area shape="rect" title=" " alt="" coords="157,94,224,120"/>
-<area shape="poly" title=" " alt="" coords="188,135,188,154,195,172,206,185,220,195,217,199,202,189,190,175,183,155,183,135"/>
-<area shape="rect" title=" " alt="" coords="341,94,393,120"/>
-<area shape="poly" title=" " alt="" coords="361,136,352,156,340,175,314,199,310,195,335,172,347,153,356,134"/>
-<area shape="rect" title=" " alt="" coords="417,94,471,120"/>
-<area shape="poly" title=" " alt="" coords="433,135,419,156,399,176,375,191,348,202,346,197,372,186,396,172,415,153,429,132"/>
+<area shape="poly" title=" " alt="" coords="189,135,195,158,204,170,217,180,214,184,201,174,190,160,184,136"/>
+<area shape="rect" title=" " alt="" coords="307,94,360,120"/>
+<area shape="poly" title=" " alt="" coords="323,134,306,160,285,184,281,180,302,157,319,132"/>
+<area shape="rect" title=" " alt="" coords="384,94,438,120"/>
+<area shape="poly" title=" " alt="" coords="392,133,359,161,315,185,312,180,356,156,388,129"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a6aab905f657a87496b3b0d5f8b0f6eda" id="r_a6aab905f657a87496b3b0d5f8b0f6eda"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6aab905f657a87496b3b0d5f8b0f6eda">__init__</a> (self, Type srv_type, str srv_name, Callable create_request_handler, Set[str] outcomes=None, Callable response_handler=None, Node node=None, float timeout=None)</td></tr>
-<tr class="memdesc:a6aab905f657a87496b3b0d5f8b0f6eda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timeout duration for the service call.  <br /></td></tr>
 <tr class="separator:a6aab905f657a87496b3b0d5f8b0f6eda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89fdfb19019d8619f06fb1ac0a2b3dac" id="r_a89fdfb19019d8619f06fb1ac0a2b3dac"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89fdfb19019d8619f06fb1ac0a2b3dac">execute</a> (self, <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a> blackboard)</td></tr>
 <tr class="separator:a89fdfb19019d8619f06fb1ac0a2b3dac"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,13 +153,23 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a062b06ab6440e27e81b14666f7525fd6" id="r_a062b06ab6440e27e81b14666f7525fd6"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a062b06ab6440e27e81b14666f7525fd6">_srv_name</a> = srv_name</td></tr>
-<tr class="separator:a062b06ab6440e27e81b14666f7525fd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66afa1424fc2a8bacafb57e2f730730e" id="r_a66afa1424fc2a8bacafb57e2f730730e"><td class="memItemLeft" align="right" valign="top">tuple&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a66afa1424fc2a8bacafb57e2f730730e">_create_request_handler</a></td></tr>
+<tr class="memdesc:a66afa1424fc2a8bacafb57e2f730730e"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function that creates the service request.  <br /></td></tr>
+<tr class="separator:a66afa1424fc2a8bacafb57e2f730730e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a008725f8428bb29b2094962f62e75ed1" id="r_a008725f8428bb29b2094962f62e75ed1"><td class="memItemLeft" align="right" valign="top">Callable[[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>, Any], str]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a008725f8428bb29b2094962f62e75ed1">_response_handler</a> = response_handler</td></tr>
+<tr class="memdesc:a008725f8428bb29b2094962f62e75ed1"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function that processes the service response.  <br /></td></tr>
+<tr class="separator:a008725f8428bb29b2094962f62e75ed1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05dae29d1e2a198075ecf319d40bf766" id="r_a05dae29d1e2a198075ecf319d40bf766"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a05dae29d1e2a198075ecf319d40bf766">_timeout</a> = timeout</td></tr>
+<tr class="memdesc:a05dae29d1e2a198075ecf319d40bf766"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timeout duration for the service call.  <br /></td></tr>
 <tr class="separator:a05dae29d1e2a198075ecf319d40bf766"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11e0d8b1418519720a790010c734f788" id="r_a11e0d8b1418519720a790010c734f788"><td class="memItemLeft" align="right" valign="top">Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a11e0d8b1418519720a790010c734f788">_node</a> = node</td></tr>
+<tr class="memdesc:a11e0d8b1418519720a790010c734f788"><td class="mdescLeft">&#160;</td><td class="mdescRight">The ROS node used to communicate with the service.  <br /></td></tr>
 <tr class="separator:a11e0d8b1418519720a790010c734f788"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a062b06ab6440e27e81b14666f7525fd6" id="r_a062b06ab6440e27e81b14666f7525fd6"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a062b06ab6440e27e81b14666f7525fd6">_srv_name</a> = srv_name</td></tr>
+<tr class="memdesc:a062b06ab6440e27e81b14666f7525fd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The name of the service to call.  <br /></td></tr>
+<tr class="separator:a062b06ab6440e27e81b14666f7525fd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac07f81cad5500c8e9589b1fd5633c807" id="r_ac07f81cad5500c8e9589b1fd5633c807"><td class="memItemLeft" align="right" valign="top">Client&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac07f81cad5500c8e9589b1fd5633c807">_service_client</a> = self._node.create_client(srv_type, srv_name)</td></tr>
+<tr class="memdesc:ac07f81cad5500c8e9589b1fd5633c807"><td class="mdescLeft">&#160;</td><td class="mdescRight">The client used to call the service.  <br /></td></tr>
 <tr class="separator:ac07f81cad5500c8e9589b1fd5633c807"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
 <tr class="memitem:ac9a306ed083f382403851017b163a644 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_ac9a306ed083f382403851017b163a644"><td class="memItemLeft" align="right" valign="top">Set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#ac9a306ed083f382403851017b163a644">_outcomes</a> = set()</td></tr>
@@ -173,15 +181,6 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
 <tr class="memdesc:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag indicating whether the state has been canceled.  <br /></td></tr>
 <tr class="separator:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
-Static Protected Attributes</h2></td></tr>
-<tr class="memitem:aba0304abe1c93ba553e71a0774c4d214" id="r_aba0304abe1c93ba553e71a0774c4d214"><td class="memItemLeft" align="right" valign="top">Callable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aba0304abe1c93ba553e71a0774c4d214">_create_request_handler</a> [[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>], Any]</td></tr>
-<tr class="memdesc:aba0304abe1c93ba553e71a0774c4d214"><td class="mdescLeft">&#160;</td><td class="mdescRight">The ROS node used to communicate with the service.  <br /></td></tr>
-<tr class="separator:aba0304abe1c93ba553e71a0774c4d214"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a53c8fea5fe1a34fbe023e41d74a50c" id="r_a1a53c8fea5fe1a34fbe023e41d74a50c"><td class="memItemLeft" align="right" valign="top">Callable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1a53c8fea5fe1a34fbe023e41d74a50c">_response_handler</a> [[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>, Any], str]</td></tr>
-<tr class="memdesc:a1a53c8fea5fe1a34fbe023e41d74a50c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function that processes the service response.  <br /></td></tr>
-<tr class="separator:a1a53c8fea5fe1a34fbe023e41d74a50c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">A state representing a service call in a behavior tree.
@@ -245,8 +244,6 @@ Attributes:
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Timeout duration for the service call. </p>
 <pre class="fragment">Initializes the ServiceState with the provided parameters.
 
 Parameters:
@@ -307,8 +304,8 @@ Exceptions:
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="aba0304abe1c93ba553e71a0774c4d214" name="aba0304abe1c93ba553e71a0774c4d214"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba0304abe1c93ba553e71a0774c4d214">&#9670;&#160;</a></span>_create_request_handler</h2>
+<a id="a66afa1424fc2a8bacafb57e2f730730e" name="a66afa1424fc2a8bacafb57e2f730730e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66afa1424fc2a8bacafb57e2f730730e">&#9670;&#160;</a></span>_create_request_handler</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -317,19 +314,19 @@ Exceptions:
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Callable yasmin_ros.service_state.ServiceState._create_request_handler [[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>], Any]</td>
+          <td class="memname">tuple yasmin_ros.service_state.ServiceState._create_request_handler</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
-
-<p>The ROS node used to communicate with the service. </p>
-<p>The name of the service to call.</p>
-<p>The client used to call the service.</p>
+<b>Initial value:</b><div class="fragment"><div class="line">=  (</div>
+<div class="line">            create_request_handler</div>
+<div class="line">        )</div>
+</div><!-- fragment -->
 <p>A function that creates the service request. </p>
 
 </div>
@@ -354,10 +351,12 @@ Exceptions:
 </table>
 </div><div class="memdoc">
 
+<p>The ROS node used to communicate with the service. </p>
+
 </div>
 </div>
-<a id="a1a53c8fea5fe1a34fbe023e41d74a50c" name="a1a53c8fea5fe1a34fbe023e41d74a50c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1a53c8fea5fe1a34fbe023e41d74a50c">&#9670;&#160;</a></span>_response_handler</h2>
+<a id="a008725f8428bb29b2094962f62e75ed1" name="a008725f8428bb29b2094962f62e75ed1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a008725f8428bb29b2094962f62e75ed1">&#9670;&#160;</a></span>_response_handler</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -366,12 +365,12 @@ Exceptions:
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Callable yasmin_ros.service_state.ServiceState._response_handler [[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>, Any], str]</td>
+          <td class="memname">Callable[[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>, Any], str] yasmin_ros.service_state.ServiceState._response_handler = response_handler</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -400,6 +399,8 @@ Exceptions:
 </table>
 </div><div class="memdoc">
 
+<p>The client used to call the service. </p>
+
 </div>
 </div>
 <a id="a062b06ab6440e27e81b14666f7525fd6" name="a062b06ab6440e27e81b14666f7525fd6"></a>
@@ -422,6 +423,8 @@ Exceptions:
 </table>
 </div><div class="memdoc">
 
+<p>The name of the service to call. </p>
+
 </div>
 </div>
 <a id="a05dae29d1e2a198075ecf319d40bf766" name="a05dae29d1e2a198075ecf319d40bf766"></a>
@@ -443,6 +446,8 @@ Exceptions:
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Timeout duration for the service call. </p>
 
 </div>
 </div>

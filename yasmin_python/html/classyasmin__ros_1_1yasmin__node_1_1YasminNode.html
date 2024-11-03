@@ -92,6 +92,7 @@ $(function(){ initResizable(false); });
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classyasmin__ros_1_1yasmin__node_1_1YasminNode-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin_ros.yasmin_node.YasminNode Class Reference</div></div>
@@ -134,6 +135,15 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:af77d5da3851543c5bb7edcb8bb7b69d0" id="r_af77d5da3851543c5bb7edcb8bb7b69d0"><td class="memItemLeft" align="right" valign="top">&quot;YasminNode&quot;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af77d5da3851543c5bb7edcb8bb7b69d0">get_instance</a> ()</td></tr>
 <tr class="separator:af77d5da3851543c5bb7edcb8bb7b69d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:a01d7717a1c05323eb9741648e4bbcaad" id="r_a01d7717a1c05323eb9741648e4bbcaad"><td class="memItemLeft" align="right" valign="top">MultiThreadedExecutor&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01d7717a1c05323eb9741648e4bbcaad">_executor</a> = MultiThreadedExecutor()</td></tr>
+<tr class="memdesc:a01d7717a1c05323eb9741648e4bbcaad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executor for managing node operations.  <br /></td></tr>
+<tr class="separator:a01d7717a1c05323eb9741648e4bbcaad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95aeba65bb3f62acb0282f9356a3e4d6" id="r_a95aeba65bb3f62acb0282f9356a3e4d6"><td class="memItemLeft" align="right" valign="top">Thread&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a95aeba65bb3f62acb0282f9356a3e4d6">_spin_thread</a> = Thread(target=self._executor.spin)</td></tr>
+<tr class="memdesc:a95aeba65bb3f62acb0282f9356a3e4d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread to execute the spinning of the node.  <br /></td></tr>
+<tr class="separator:a95aeba65bb3f62acb0282f9356a3e4d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
 <tr class="memitem:a631f0f56b431ede3f50715e4af88f99a" id="r_a631f0f56b431ede3f50715e4af88f99a"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a631f0f56b431ede3f50715e4af88f99a">_instance</a> = None</td></tr>
@@ -142,12 +152,6 @@ Static Protected Attributes</h2></td></tr>
 <tr class="memitem:ae16abd788a61626d624286c1499a6f8e" id="r_ae16abd788a61626d624286c1499a6f8e"><td class="memItemLeft" align="right" valign="top">RLock&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae16abd788a61626d624286c1499a6f8e">_lock</a> = RLock()</td></tr>
 <tr class="memdesc:ae16abd788a61626d624286c1499a6f8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lock to control access to the instance.  <br /></td></tr>
 <tr class="separator:ae16abd788a61626d624286c1499a6f8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01d7717a1c05323eb9741648e4bbcaad" id="r_a01d7717a1c05323eb9741648e4bbcaad"><td class="memItemLeft" align="right" valign="top">MultiThreadedExecutor&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01d7717a1c05323eb9741648e4bbcaad">_executor</a> = None</td></tr>
-<tr class="memdesc:a01d7717a1c05323eb9741648e4bbcaad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executor for managing node operations.  <br /></td></tr>
-<tr class="separator:a01d7717a1c05323eb9741648e4bbcaad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95aeba65bb3f62acb0282f9356a3e4d6" id="r_a95aeba65bb3f62acb0282f9356a3e4d6"><td class="memItemLeft" align="right" valign="top">Thread&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a95aeba65bb3f62acb0282f9356a3e4d6">_spin_thread</a> = None</td></tr>
-<tr class="memdesc:a95aeba65bb3f62acb0282f9356a3e4d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread to execute the spinning of the node.  <br /></td></tr>
-<tr class="separator:a95aeba65bb3f62acb0282f9356a3e4d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">A Singleton ROS 2 Node for the Yasmin application.
@@ -234,12 +238,12 @@ If the instance does not exist, it creates one in a thread-safe manner.
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">MultiThreadedExecutor yasmin_ros.yasmin_node.YasminNode._executor = None</td>
+          <td class="memname">MultiThreadedExecutor yasmin_ros.yasmin_node.YasminNode._executor = MultiThreadedExecutor()</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -306,12 +310,12 @@ If the instance does not exist, it creates one in a thread-safe manner.
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Thread yasmin_ros.yasmin_node.YasminNode._spin_thread = None</td>
+          <td class="memname">Thread yasmin_ros.yasmin_node.YasminNode._spin_thread = Thread(target=self._executor.spin)</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

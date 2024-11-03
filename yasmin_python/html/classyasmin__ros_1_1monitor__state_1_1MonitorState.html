@@ -92,9 +92,7 @@ $(function(){ initResizable(false); });
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
-<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="classyasmin__ros_1_1monitor__state_1_1MonitorState-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin_ros.monitor_state.MonitorState Class Reference</div></div>
@@ -138,7 +136,6 @@ Collaboration diagram for yasmin_ros.monitor_state.MonitorState:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a29bf9ad62c98935e7e25fdcf227ce72f" id="r_a29bf9ad62c98935e7e25fdcf227ce72f"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a29bf9ad62c98935e7e25fdcf227ce72f">__init__</a> (self, Type msg_type, str topic_name, Set[str] outcomes, Callable monitor_handler, Union[QoSProfile, int] qos=10, int <a class="el" href="#a156629b1fc94a5e92bae4e058be2bb73">msg_queue</a>=10, Node node=None, int timeout=None)</td></tr>
-<tr class="memdesc:a29bf9ad62c98935e7e25fdcf227ce72f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timeout duration for monitoring.  <br /></td></tr>
 <tr class="separator:a29bf9ad62c98935e7e25fdcf227ce72f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a36aacf5706e180e1837c96e1fad56df6" id="r_a36aacf5706e180e1837c96e1fad56df6"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a36aacf5706e180e1837c96e1fad56df6">execute</a> (self, <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a> blackboard)</td></tr>
 <tr class="separator:a36aacf5706e180e1837c96e1fad56df6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -158,16 +155,14 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a156629b1fc94a5e92bae4e058be2bb73" id="r_a156629b1fc94a5e92bae4e058be2bb73"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a156629b1fc94a5e92bae4e058be2bb73">msg_queue</a> = msg_queue</td></tr>
-<tr class="separator:a156629b1fc94a5e92bae4e058be2bb73"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
-Static Public Attributes</h2></td></tr>
 <tr class="memitem:aabec7c49502ef6e4755daef03645c8a7" id="r_aabec7c49502ef6e4755daef03645c8a7"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aabec7c49502ef6e4755daef03645c8a7">msg_list</a> = []</td></tr>
-<tr class="memdesc:aabec7c49502ef6e4755daef03645c8a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The name of the topic to monitor.  <br /></td></tr>
+<tr class="memdesc:aabec7c49502ef6e4755daef03645c8a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">A set of messages received from the topic.  <br /></td></tr>
 <tr class="separator:aabec7c49502ef6e4755daef03645c8a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a156629b1fc94a5e92bae4e058be2bb73" id="r_a156629b1fc94a5e92bae4e058be2bb73"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a156629b1fc94a5e92bae4e058be2bb73">msg_queue</a> = msg_queue</td></tr>
+<tr class="memdesc:a156629b1fc94a5e92bae4e058be2bb73"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum number of messages to retain.  <br /></td></tr>
+<tr class="separator:a156629b1fc94a5e92bae4e058be2bb73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae55608c606add1997bc503b49dc50a1a" id="r_ae55608c606add1997bc503b49dc50a1a"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae55608c606add1997bc503b49dc50a1a">time_to_wait</a> = 0.001</td></tr>
-<tr class="memdesc:ae55608c606add1997bc503b49dc50a1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum number of messages to retain.  <br /></td></tr>
+<tr class="memdesc:ae55608c606add1997bc503b49dc50a1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time to wait between checks for messages.  <br /></td></tr>
 <tr class="separator:ae55608c606add1997bc503b49dc50a1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac70babaefc209b687de4fbbd19666b9f" id="r_ac70babaefc209b687de4fbbd19666b9f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac70babaefc209b687de4fbbd19666b9f">monitoring</a> = False</td></tr>
 <tr class="memdesc:ac70babaefc209b687de4fbbd19666b9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag indicating if monitoring is active.  <br /></td></tr>
@@ -175,13 +170,20 @@ Static Public Attributes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a74e5aa7454e86ca72d59592c193cdc26" id="r_a74e5aa7454e86ca72d59592c193cdc26"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a74e5aa7454e86ca72d59592c193cdc26">_topic_name</a> = topic_name</td></tr>
-<tr class="separator:a74e5aa7454e86ca72d59592c193cdc26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd2d762bee3cfcba8b22fda8b2509e45" id="r_afd2d762bee3cfcba8b22fda8b2509e45"><td class="memItemLeft" align="right" valign="top">Callable[[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>, Any], None]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afd2d762bee3cfcba8b22fda8b2509e45">_monitor_handler</a> = monitor_handler</td></tr>
+<tr class="memdesc:afd2d762bee3cfcba8b22fda8b2509e45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to handle incoming messages.  <br /></td></tr>
+<tr class="separator:afd2d762bee3cfcba8b22fda8b2509e45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac012bd29f882f5bd5cfa8296c4c56aa5" id="r_ac012bd29f882f5bd5cfa8296c4c56aa5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac012bd29f882f5bd5cfa8296c4c56aa5">_timeout</a> = timeout</td></tr>
+<tr class="memdesc:ac012bd29f882f5bd5cfa8296c4c56aa5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timeout duration for monitoring.  <br /></td></tr>
 <tr class="separator:ac012bd29f882f5bd5cfa8296c4c56aa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa68d722187593fd053f1c83a7f174771" id="r_aa68d722187593fd053f1c83a7f174771"><td class="memItemLeft" align="right" valign="top">Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa68d722187593fd053f1c83a7f174771">_node</a> = node</td></tr>
+<tr class="memdesc:aa68d722187593fd053f1c83a7f174771"><td class="mdescLeft">&#160;</td><td class="mdescRight">The ROS 2 node instance used for subscriptions.  <br /></td></tr>
 <tr class="separator:aa68d722187593fd053f1c83a7f174771"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74e5aa7454e86ca72d59592c193cdc26" id="r_a74e5aa7454e86ca72d59592c193cdc26"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a74e5aa7454e86ca72d59592c193cdc26">_topic_name</a> = topic_name</td></tr>
+<tr class="memdesc:a74e5aa7454e86ca72d59592c193cdc26"><td class="mdescLeft">&#160;</td><td class="mdescRight">The name of the topic to monitor.  <br /></td></tr>
+<tr class="separator:a74e5aa7454e86ca72d59592c193cdc26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa01456215f2947d1cbfec83686aa747d" id="r_aa01456215f2947d1cbfec83686aa747d"><td class="memItemLeft" align="right" valign="top">Subscription&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa01456215f2947d1cbfec83686aa747d">_sub</a></td></tr>
+<tr class="memdesc:aa01456215f2947d1cbfec83686aa747d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscription object for the specified topic.  <br /></td></tr>
 <tr class="separator:aa01456215f2947d1cbfec83686aa747d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
 <tr class="memitem:ac9a306ed083f382403851017b163a644 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_ac9a306ed083f382403851017b163a644"><td class="memItemLeft" align="right" valign="top">Set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#ac9a306ed083f382403851017b163a644">_outcomes</a> = set()</td></tr>
@@ -193,12 +195,6 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
 <tr class="memdesc:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag indicating whether the state has been canceled.  <br /></td></tr>
 <tr class="separator:a8ae105dcc637e63fd20a8bfa21f9b06a inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
-Static Protected Attributes</h2></td></tr>
-<tr class="memitem:aca5bd8d0b5d718c5d8bc25e584aeb7ca" id="r_aca5bd8d0b5d718c5d8bc25e584aeb7ca"><td class="memItemLeft" align="right" valign="top">Callable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca5bd8d0b5d718c5d8bc25e584aeb7ca">_monitor_handler</a> [[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>, Any], None]</td></tr>
-<tr class="memdesc:aca5bd8d0b5d718c5d8bc25e584aeb7ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">The ROS 2 node instance used for subscriptions.  <br /></td></tr>
-<tr class="separator:aca5bd8d0b5d718c5d8bc25e584aeb7ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
@@ -275,8 +271,6 @@ Exceptions:
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Timeout duration for monitoring. </p>
 <pre class="fragment">Initializes the MonitorState.
 
 Parameters:
@@ -375,8 +369,8 @@ Exceptions:
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="aca5bd8d0b5d718c5d8bc25e584aeb7ca" name="aca5bd8d0b5d718c5d8bc25e584aeb7ca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca5bd8d0b5d718c5d8bc25e584aeb7ca">&#9670;&#160;</a></span>_monitor_handler</h2>
+<a id="afd2d762bee3cfcba8b22fda8b2509e45" name="afd2d762bee3cfcba8b22fda8b2509e45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd2d762bee3cfcba8b22fda8b2509e45">&#9670;&#160;</a></span>_monitor_handler</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -385,18 +379,16 @@ Exceptions:
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Callable yasmin_ros.monitor_state.MonitorState._monitor_handler [[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>, Any], None]</td>
+          <td class="memname">Callable[[<a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a>, Any], None] yasmin_ros.monitor_state.MonitorState._monitor_handler = monitor_handler</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>The ROS 2 node instance used for subscriptions. </p>
-<p>Subscription object for the specified topic.</p>
 <p>Function to handle incoming messages. </p>
 
 </div>
@@ -420,6 +412,8 @@ Exceptions:
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>The ROS 2 node instance used for subscriptions. </p>
 
 </div>
 </div>
@@ -446,6 +440,8 @@ Exceptions:
 <div class="line">            msg_type, topic_name, self.__callback, qos</div>
 <div class="line">        )</div>
 </div><!-- fragment -->
+<p>Subscription object for the specified topic. </p>
+
 </div>
 </div>
 <a id="ac012bd29f882f5bd5cfa8296c4c56aa5" name="ac012bd29f882f5bd5cfa8296c4c56aa5"></a>
@@ -467,6 +463,8 @@ Exceptions:
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Timeout duration for monitoring. </p>
 
 </div>
 </div>
@@ -490,6 +488,8 @@ Exceptions:
 </table>
 </div><div class="memdoc">
 
+<p>The name of the topic to monitor. </p>
+
 </div>
 </div>
 <a id="ac70babaefc209b687de4fbbd19666b9f" name="ac70babaefc209b687de4fbbd19666b9f"></a>
@@ -497,19 +497,11 @@ Exceptions:
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">bool yasmin_ros.monitor_state.MonitorState.monitoring = False</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Flag indicating if monitoring is active. </p>
@@ -521,22 +513,13 @@ Exceptions:
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">list yasmin_ros.monitor_state.MonitorState.msg_list = []</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p>The name of the topic to monitor. </p>
 <p>A set of messages received from the topic. </p>
 
 </div>
@@ -553,6 +536,8 @@ Exceptions:
       </table>
 </div><div class="memdoc">
 
+<p>The maximum number of messages to retain. </p>
+
 </div>
 </div>
 <a id="ae55608c606add1997bc503b49dc50a1a" name="ae55608c606add1997bc503b49dc50a1a"></a>
@@ -560,22 +545,13 @@ Exceptions:
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">yasmin_ros.monitor_state.MonitorState.time_to_wait = 0.001</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p>The maximum number of messages to retain. </p>
 <p>Time to wait between checks for messages. </p>
 
 </div>

@@ -1,17 +1,17 @@
 <map id="yasmin_demos.service_client_demo.AddTwoIntsState" name="yasmin_demos.service_client_demo.AddTwoIntsState">
-<area shape="rect" id="Node000001" title=" " alt="" coords="178,288,380,328"/>
-<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1service__state_1_1ServiceState.html" title=" " alt="" coords="211,198,346,238"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="282,254,282,287,276,287,276,254"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="160,273,363,313"/>
+<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1service__state_1_1ServiceState.html" title=" " alt="" coords="194,183,329,223"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="264,239,264,272,259,272,259,239"/>
 <area shape="rect" id="Node000003" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="5,94,134,120"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="102,126,181,171,232,195,229,199,179,176,99,130"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,124,222,180,220,184,107,129"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="11,5,59,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="48,44,67,93,62,95,43,46"/>
 <area shape="rect" id="Node000005" title=" " alt="" coords="84,5,125,31"/>
 <area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="96,46,77,95,72,93,91,44"/>
 <area shape="rect" id="Node000006" title=" " alt="" coords="157,94,224,120"/>
-<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="188,135,188,154,195,172,206,185,220,195,217,199,202,189,190,175,183,155,183,135"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="341,94,393,120"/>
-<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="361,136,352,156,340,175,314,199,310,195,335,172,347,153,356,134"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="417,94,471,120"/>
-<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="433,135,419,156,399,176,375,191,348,202,346,197,372,186,396,172,415,153,429,132"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="189,135,195,158,204,170,217,180,214,184,201,174,190,160,184,136"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="307,94,360,120"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="323,134,306,160,285,184,281,180,302,157,319,132"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="384,94,438,120"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="392,133,359,161,315,185,312,180,356,156,388,129"/>
 </map>
