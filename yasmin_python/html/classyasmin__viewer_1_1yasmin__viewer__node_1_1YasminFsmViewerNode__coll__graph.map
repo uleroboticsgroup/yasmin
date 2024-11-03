@@ -1,7 +1,9 @@
 <map id="yasmin_viewer.yasmin_viewer_node.YasminFsmViewerNode" name="yasmin_viewer.yasmin_viewer_node.YasminFsmViewerNode">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,94,251,135"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="66,5,118,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,45,123,92,118,94,100,46"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="142,5,186,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="156,46,138,94,133,92,152,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="30,5,82,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,41,115,92,111,95,72,45"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="106,5,150,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,46,131,93,125,93,125,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="174,5,263,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="209,46,191,72,163,96,160,91,187,68,205,43"/>
 </map>

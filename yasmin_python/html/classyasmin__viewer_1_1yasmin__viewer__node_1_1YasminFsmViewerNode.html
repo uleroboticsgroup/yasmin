@@ -92,7 +92,6 @@ $(function(){ initResizable(false); });
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classyasmin__viewer_1_1yasmin__viewer__node_1_1YasminFsmViewerNode-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin_viewer.yasmin_viewer_node.YasminFsmViewerNode Class Reference</div></div>
@@ -114,10 +113,12 @@ Collaboration diagram for yasmin_viewer.yasmin_viewer_node.YasminFsmViewerNode:<
 <div class="center"><img src="classyasmin__viewer_1_1yasmin__viewer__node_1_1YasminFsmViewerNode__coll__graph.png" border="0" usemap="#ayasmin__viewer_8yasmin__viewer__node_8YasminFsmViewerNode_coll__map" alt="Collaboration graph"/></div>
 <map name="ayasmin__viewer_8yasmin__viewer__node_8YasminFsmViewerNode_coll__map" id="ayasmin__viewer_8yasmin__viewer__node_8YasminFsmViewerNode_coll__map">
 <area shape="rect" title=" " alt="" coords="5,94,251,135"/>
-<area shape="rect" title=" " alt="" coords="66,5,118,31"/>
-<area shape="poly" title=" " alt="" coords="104,45,123,92,118,94,100,46"/>
-<area shape="rect" title=" " alt="" coords="142,5,186,31"/>
-<area shape="poly" title=" " alt="" coords="156,46,138,94,133,92,152,45"/>
+<area shape="rect" title=" " alt="" coords="30,5,82,31"/>
+<area shape="poly" title=" " alt="" coords="76,41,115,92,111,95,72,45"/>
+<area shape="rect" title=" " alt="" coords="106,5,150,31"/>
+<area shape="poly" title=" " alt="" coords="131,46,131,93,125,93,125,46"/>
+<area shape="rect" title=" " alt="" coords="174,5,263,31"/>
+<area shape="poly" title=" " alt="" coords="209,46,191,72,163,96,160,91,187,68,205,43"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -145,15 +146,13 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a09cabbbe726a4977247580dba9521f9f" id="r_a09cabbbe726a4977247580dba9521f9f"><td class="memItemLeft" align="right" valign="top">Dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09cabbbe726a4977247580dba9521f9f">__started</a> = self.msg_to_dict(msg)</td></tr>
 <tr class="separator:a09cabbbe726a4977247580dba9521f9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
-Private Attributes</h2></td></tr>
-<tr class="memitem:a0e68be632aa2c0ac515a3cb3c5f944e7" id="r_a0e68be632aa2c0ac515a3cb3c5f944e7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e68be632aa2c0ac515a3cb3c5f944e7">__started</a> = False</td></tr>
-<tr class="separator:a0e68be632aa2c0ac515a3cb3c5f944e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
 Static Private Attributes</h2></td></tr>
-<tr class="memitem:a8316484e7e47c69548b5dab6db00a732" id="r_a8316484e7e47c69548b5dab6db00a732"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8316484e7e47c69548b5dab6db00a732">__fsm_dict</a></td></tr>
-<tr class="memdesc:a8316484e7e47c69548b5dab6db00a732"><td class="mdescLeft">&#160;</td><td class="mdescRight">ndicates whether the server has started.  <br /></td></tr>
+<tr class="memitem:a0e68be632aa2c0ac515a3cb3c5f944e7" id="r_a0e68be632aa2c0ac515a3cb3c5f944e7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e68be632aa2c0ac515a3cb3c5f944e7">__started</a> = False</td></tr>
+<tr class="memdesc:a0e68be632aa2c0ac515a3cb3c5f944e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">ndicates whether the server has started.  <br /></td></tr>
+<tr class="separator:a0e68be632aa2c0ac515a3cb3c5f944e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8316484e7e47c69548b5dab6db00a732" id="r_a8316484e7e47c69548b5dab6db00a732"><td class="memItemLeft" align="right" valign="top">ExpiringDict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8316484e7e47c69548b5dab6db00a732">__fsm_dict</a> = ExpiringDict(max_len=300, max_age_seconds=3)</td></tr>
+<tr class="memdesc:a8316484e7e47c69548b5dab6db00a732"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dictionary that stores FSM data with automatic expiration.  <br /></td></tr>
 <tr class="separator:a8316484e7e47c69548b5dab6db00a732"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -355,7 +354,7 @@ processes incoming messages.
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">yasmin_viewer.yasmin_viewer_node.YasminFsmViewerNode.__fsm_dict</td>
+          <td class="memname">yasmin_viewer.yasmin_viewer_node.YasminFsmViewerNode.__fsm_dict = ExpiringDict(max_len=300, max_age_seconds=3)</td>
         </tr>
       </table>
   </td>
@@ -364,11 +363,8 @@ processes incoming messages.
   </tr>
 </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">  : (</div>
-<div class="line">        ExpiringDict  </div>
-<div class="line">    )</div>
-</div><!-- fragment -->
-<p>ndicates whether the server has started. </p>
+
+<p>A dictionary that stores FSM data with automatic expiration. </p>
 
 </div>
 </div>
@@ -387,10 +383,12 @@ processes incoming messages.
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>ndicates whether the server has started. </p>
 
 </div>
 </div>

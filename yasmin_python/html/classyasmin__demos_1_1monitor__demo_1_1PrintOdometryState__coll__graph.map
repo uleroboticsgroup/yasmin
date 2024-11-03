@@ -1,9 +1,17 @@
 <map id="yasmin_demos.monitor_demo.PrintOdometryState" name="yasmin_demos.monitor_demo.PrintOdometryState">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,241,183,282"/>
-<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1monitor__state_1_1MonitorState.html" title=" " alt="" coords="27,153,161,193"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,209,97,241,91,241,91,209"/>
-<area shape="rect" id="Node000003" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="30,79,158,105"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,120,97,152,91,152,91,120"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="70,5,118,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="97,46,97,79,91,79,91,46"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="169,273,346,313"/>
+<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1monitor__state_1_1MonitorState.html" title=" " alt="" coords="190,183,325,223"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="260,239,260,272,255,272,255,239"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="5,94,134,120"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,125,219,180,217,184,106,129"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="11,5,59,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="48,44,67,93,62,95,43,46"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="84,5,125,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="96,46,77,95,72,93,91,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="157,94,224,120"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="190,135,195,158,205,170,217,180,214,184,201,174,190,160,185,136"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="298,94,350,120"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="313,134,297,160,278,184,274,181,293,157,309,132"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="375,94,468,120"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="395,131,350,161,304,184,301,180,347,156,392,127"/>
 </map>

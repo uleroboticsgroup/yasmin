@@ -186,10 +186,10 @@ Protected Attributes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a4f1f28bef76d7d2a81bf31e076a9dff0" id="r_a4f1f28bef76d7d2a81bf31e076a9dff0"><td class="memItemLeft" align="right" valign="top">std::atomic_bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4f1f28bef76d7d2a81bf31e076a9dff0">canceled</a></td></tr>
+<tr class="memitem:a4f1f28bef76d7d2a81bf31e076a9dff0" id="r_a4f1f28bef76d7d2a81bf31e076a9dff0"><td class="memItemLeft" align="right" valign="top">std::atomic_bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4f1f28bef76d7d2a81bf31e076a9dff0">canceled</a> {false}</td></tr>
 <tr class="memdesc:a4f1f28bef76d7d2a81bf31e076a9dff0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates if the state has been canceled.  <br /></td></tr>
 <tr class="separator:a4f1f28bef76d7d2a81bf31e076a9dff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f88762eb8246b6076a42c910eb02fd7" id="r_a3f88762eb8246b6076a42c910eb02fd7"><td class="memItemLeft" align="right" valign="top">std::atomic_bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f88762eb8246b6076a42c910eb02fd7">running</a></td></tr>
+<tr class="memitem:a3f88762eb8246b6076a42c910eb02fd7" id="r_a3f88762eb8246b6076a42c910eb02fd7"><td class="memItemLeft" align="right" valign="top">std::atomic_bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f88762eb8246b6076a42c910eb02fd7">running</a> {false}</td></tr>
 <tr class="memdesc:a3f88762eb8246b6076a42c910eb02fd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates if the state is currently running.  <br /></td></tr>
 <tr class="separator:a3f88762eb8246b6076a42c910eb02fd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -424,7 +424,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::atomic_bool yasmin::State::canceled</td>
+          <td class="memname">std::atomic_bool yasmin::State::canceled {false}</td>
         </tr>
       </table>
   </td>
@@ -433,9 +433,7 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">{</div>
-<div class="line">      <span class="keyword">false</span>}</div>
-</div><!-- fragment -->
+
 <p>Indicates if the state has been canceled. </p>
 
 </div>
@@ -474,7 +472,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::atomic_bool yasmin::State::running</td>
+          <td class="memname">std::atomic_bool yasmin::State::running {false}</td>
         </tr>
       </table>
   </td>
@@ -483,9 +481,7 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">{</div>
-<div class="line">      <span class="keyword">false</span>}</div>
-</div><!-- fragment -->
+
 <p>Indicates if the state is currently running. </p>
 
 </div>

@@ -92,6 +92,7 @@ $(function(){ initResizable(false); });
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classyasmin_1_1state_1_1State-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin.state.State Class Reference</div></div>
 </div><!--header-->
@@ -133,16 +134,17 @@ Collaboration diagram for yasmin.state.State:</div>
 <div class="dyncontent">
 <div class="center"><img src="classyasmin_1_1state_1_1State__coll__graph.png" border="0" usemap="#ayasmin_8state_8State_coll__map" alt="Collaboration graph"/></div>
 <map name="ayasmin_8state_8State_coll__map" id="ayasmin_8state_8State_coll__map">
-<area shape="rect" title=" " alt="" coords="5,79,134,105"/>
-<area shape="rect" title=" " alt="" coords="45,5,94,31"/>
-<area shape="poly" title=" " alt="" coords="72,46,72,79,67,79,67,46"/>
+<area shape="rect" title=" " alt="" coords="5,94,134,120"/>
+<area shape="rect" title=" " alt="" coords="11,5,59,31"/>
+<area shape="poly" title=" " alt="" coords="48,44,67,93,62,95,43,46"/>
+<area shape="rect" title=" " alt="" coords="84,5,125,31"/>
+<area shape="poly" title=" " alt="" coords="96,46,77,95,72,93,91,44"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a5f3f8a8f6e7fd2de1b30057606271a5a" id="r_a5f3f8a8f6e7fd2de1b30057606271a5a"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f3f8a8f6e7fd2de1b30057606271a5a">__init__</a> (self, Set[str] outcomes)</td></tr>
-<tr class="memdesc:a5f3f8a8f6e7fd2de1b30057606271a5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A set of valid outcomes for this state.  <br /></td></tr>
 <tr class="separator:a5f3f8a8f6e7fd2de1b30057606271a5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a88f75a24d2bc048d0eb6941410039212" id="r_a88f75a24d2bc048d0eb6941410039212"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a88f75a24d2bc048d0eb6941410039212">__call__</a> (self, <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a> blackboard=None)</td></tr>
 <tr class="separator:a88f75a24d2bc048d0eb6941410039212"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,11 +163,16 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a6a5b0960e11722eaa5f1a975a2b2f222" id="r_a6a5b0960e11722eaa5f1a975a2b2f222"><td class="memItemLeft" align="right" valign="top">set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6a5b0960e11722eaa5f1a975a2b2f222">_outcomes</a> = set()</td></tr>
-<tr class="separator:a6a5b0960e11722eaa5f1a975a2b2f222"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9a306ed083f382403851017b163a644" id="r_ac9a306ed083f382403851017b163a644"><td class="memItemLeft" align="right" valign="top">Set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac9a306ed083f382403851017b163a644">_outcomes</a> = set()</td></tr>
+<tr class="separator:ac9a306ed083f382403851017b163a644"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
+Static Protected Attributes</h2></td></tr>
 <tr class="memitem:aed635b4d7a38f282ac74f415f969f783" id="r_aed635b4d7a38f282ac74f415f969f783"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aed635b4d7a38f282ac74f415f969f783">_running</a> = False</td></tr>
+<tr class="memdesc:aed635b4d7a38f282ac74f415f969f783"><td class="mdescLeft">&#160;</td><td class="mdescRight">A set of valid outcomes for this state.  <br /></td></tr>
 <tr class="separator:aed635b4d7a38f282ac74f415f969f783"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ae105dcc637e63fd20a8bfa21f9b06a" id="r_a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ae105dcc637e63fd20a8bfa21f9b06a">_canceled</a> = False</td></tr>
+<tr class="memdesc:a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag indicating whether the state has been canceled.  <br /></td></tr>
 <tr class="separator:a8ae105dcc637e63fd20a8bfa21f9b06a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -197,10 +204,6 @@ Attributes:
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>A set of valid outcomes for this state. </p>
-<p>A flag indicating whether the state is currently running.</p>
-<p>A flag indicating whether the state has been canceled.</p>
 <pre class="fragment">Initializes the State instance.
 
 :param outcomes: A set of valid outcomes for this state.
@@ -393,15 +396,17 @@ when the state is executed.
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
+<p>A flag indicating whether the state has been canceled. </p>
+
 </div>
 </div>
-<a id="a6a5b0960e11722eaa5f1a975a2b2f222" name="a6a5b0960e11722eaa5f1a975a2b2f222"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a5b0960e11722eaa5f1a975a2b2f222">&#9670;&#160;</a></span>_outcomes</h2>
+<a id="ac9a306ed083f382403851017b163a644" name="ac9a306ed083f382403851017b163a644"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9a306ed083f382403851017b163a644">&#9670;&#160;</a></span>_outcomes</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -410,7 +415,7 @@ when the state is executed.
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">set yasmin.state.State._outcomes = set()</td>
+          <td class="memname">Set yasmin.state.State._outcomes = set()</td>
         </tr>
       </table>
   </td>
@@ -437,10 +442,13 @@ when the state is executed.
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>A set of valid outcomes for this state. </p>
+<p>A flag indicating whether the state is currently running. </p>
 
 </div>
 </div>

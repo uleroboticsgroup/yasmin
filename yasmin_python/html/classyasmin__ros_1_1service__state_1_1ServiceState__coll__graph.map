@@ -1,7 +1,15 @@
 <map id="yasmin_ros.service_state.ServiceState" name="yasmin_ros.service_state.ServiceState">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,141,193"/>
-<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="9,79,137,105"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,120,76,152,70,152,70,120"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="49,5,97,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,46,76,79,70,79,70,46"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="211,198,346,238"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="5,94,134,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,126,181,171,232,195,229,199,179,176,99,130"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="11,5,59,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="48,44,67,93,62,95,43,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="84,5,125,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="96,46,77,95,72,93,91,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="157,94,224,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="188,135,188,154,195,172,206,185,220,195,217,199,202,189,190,175,183,155,183,135"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="341,94,393,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="361,136,352,156,340,175,314,199,310,195,335,172,347,153,356,134"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="417,94,471,120"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="433,135,419,156,399,176,375,191,348,202,346,197,372,186,396,172,415,153,429,132"/>
 </map>

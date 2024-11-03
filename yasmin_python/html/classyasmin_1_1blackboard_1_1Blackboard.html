@@ -92,7 +92,7 @@ $(function(){ initResizable(false); });
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
-<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classyasmin_1_1blackboard_1_1Blackboard-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin.blackboard.Blackboard Class Reference</div></div>
 </div><!--header-->
@@ -112,9 +112,11 @@ Collaboration diagram for yasmin.blackboard.Blackboard:</div>
 <div class="dyncontent">
 <div class="center"><img src="classyasmin_1_1blackboard_1_1Blackboard__coll__graph.png" border="0" usemap="#ayasmin_8blackboard_8Blackboard_coll__map" alt="Collaboration graph"/></div>
 <map name="ayasmin_8blackboard_8Blackboard_coll__map" id="ayasmin_8blackboard_8Blackboard_coll__map">
-<area shape="rect" title=" " alt="" coords="5,79,202,105"/>
-<area shape="rect" title=" " alt="" coords="75,5,132,31"/>
-<area shape="poly" title=" " alt="" coords="106,46,106,79,101,79,101,46"/>
+<area shape="rect" title=" " alt="" coords="5,94,202,120"/>
+<area shape="rect" title=" " alt="" coords="37,5,93,31"/>
+<area shape="poly" title=" " alt="" coords="79,44,101,93,96,95,74,46"/>
+<area shape="rect" title=" " alt="" coords="117,5,167,31"/>
+<area shape="poly" title=" " alt="" coords="133,46,111,95,106,93,128,44"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -138,11 +140,13 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a3193169ffb432d61ca04df99b0522c83" id="r_a3193169ffb432d61ca04df99b0522c83"><td class="memItemLeft" align="right" valign="top">dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3193169ffb432d61ca04df99b0522c83">_data</a> = {}</td></tr>
+<tr class="memdesc:a3193169ffb432d61ca04df99b0522c83"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dictionary holding the data stored in the blackboard.  <br /></td></tr>
 <tr class="separator:a3193169ffb432d61ca04df99b0522c83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
-Private Attributes</h2></td></tr>
-<tr class="memitem:a70225b6a782fc04f11b3168651c1a5cc" id="r_a70225b6a782fc04f11b3168651c1a5cc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a70225b6a782fc04f11b3168651c1a5cc">__lock</a> = Lock()</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a70225b6a782fc04f11b3168651c1a5cc" id="r_a70225b6a782fc04f11b3168651c1a5cc"><td class="memItemLeft" align="right" valign="top">Lock&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a70225b6a782fc04f11b3168651c1a5cc">__lock</a> = Lock()</td></tr>
+<tr class="memdesc:a70225b6a782fc04f11b3168651c1a5cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">A threading lock to ensure thread-safe access to the _data attribute.  <br /></td></tr>
 <tr class="separator:a70225b6a782fc04f11b3168651c1a5cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -387,10 +391,12 @@ Raises:
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>A threading lock to ensure thread-safe access to the _data attribute. </p>
 
 </div>
 </div>
@@ -413,6 +419,8 @@ Raises:
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>A dictionary holding the data stored in the blackboard. </p>
 
 </div>
 </div>
