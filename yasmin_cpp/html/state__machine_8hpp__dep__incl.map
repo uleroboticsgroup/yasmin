@@ -1,0 +1,9 @@
+<map id="yasmin/include/yasmin/state_machine.hpp" name="yasmin/include/yasmin/state_machine.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="102,5,255,46"/>
+<area shape="rect" id="Node000002" href="$state__machine_8cpp.html" title=" " alt="" coords="5,102,168,142"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,59,107,103,104,99,147,55"/>
+<area shape="rect" id="Node000003" href="$yasmin__viewer__pub_8hpp.html" title=" " alt="" coords="192,94,349,150"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="210,55,246,91,242,95,206,59"/>
+<area shape="rect" id="Node000004" href="$yasmin__viewer__pub_8cpp.html" title=" " alt="" coords="166,198,375,238"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="273,165,273,197,268,197,268,165"/>
+</map>

@@ -1,0 +1,26 @@
+<map id="yasmin_ros/include/yasmin_ros/basic_outcomes.hpp" name="yasmin_ros/include/yasmin_ros/basic_outcomes.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="207,5,421,46"/>
+<area shape="rect" id="Node000002" href="$action__state_8hpp.html" title=" " alt="" coords="5,190,196,231"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="281,58,125,192,121,188,278,54"/>
+<area shape="rect" id="Node000004" href="$monitor__state_8hpp.html" title=" " alt="" coords="219,183,358,238"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="312,62,295,183,290,182,306,61"/>
+<area shape="rect" id="Node000006" href="$service__state_8hpp.html" title=" " alt="" coords="381,183,519,238"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="328,60,344,96,367,133,389,158,414,180,410,184,385,162,362,136,340,99,323,62"/>
+<area shape="rect" id="Node000008" href="$yasmin__node_8hpp.html" title=" " alt="" coords="376,94,572,135"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="365,51,439,91,436,96,362,56"/>
+<area shape="rect" id="Node000003" href="$action__state_8cpp.html" title=" " alt="" coords="23,286,178,327"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,246,103,286,98,286,98,246"/>
+<area shape="rect" id="Node000005" href="$monitor__state_8cpp.html" title=" " alt="" coords="206,286,360,327"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="289,254,287,286,282,286,283,254"/>
+<area shape="rect" id="Node000007" href="$service__state_8cpp.html" title=" " alt="" coords="385,286,539,327"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="458,253,462,286,457,286,453,254"/>
+<area shape="poly" id="edge8_Node000008_Node000002" title=" " alt="" coords="382,142,179,192,178,187,380,136"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="423,145,343,185,341,180,420,140"/>
+<area shape="poly" id="edge10_Node000008_Node000006" title=" " alt="" coords="468,150,459,183,454,181,463,149"/>
+<area shape="rect" id="Node000009" href="$ros__logs_8cpp.html" title=" " alt="" coords="542,190,696,231"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="518,141,590,187,587,192,515,145"/>
+<area shape="rect" id="Node000010" href="$yasmin__node_8cpp.html" title=" " alt="" coords="721,190,875,231"/>
+<area shape="poly" id="edge12_Node000008_Node000010" title=" " alt="" coords="559,137,709,180,733,187,731,192,708,185,557,142"/>
+<area shape="rect" id="Node000011" href="$yasmin__viewer__pub_8cpp.html" title=" " alt="" coords="899,190,1107,231"/>
+<area shape="poly" id="edge13_Node000008_Node000011" title=" " alt="" coords="587,129,888,180,921,187,920,192,887,185,587,135"/>
+</map>
