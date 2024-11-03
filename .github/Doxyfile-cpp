@@ -866,7 +866,8 @@ WARN_LOGFILE           =
 
 INPUT                  = yasmin \
                          yasmin_ros \
-                         yasmin_viewer
+                         yasmin_viewer \
+                         yasmin_demos
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -932,7 +933,6 @@ EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = */build/*
 EXCLUDE_PATTERNS       += */node_modules/*
 EXCLUDE_PATTERNS       += */tests/*
-EXCLUDE_PATTERNS       += */yasmin_demos/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
