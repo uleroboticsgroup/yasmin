@@ -1,15 +1,15 @@
 // Copyright (C) 2023  Miguel Ángel González Santamarta
-
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -17,7 +17,9 @@
 #define YASMIN_ROS_ACTION_STATE_HPP
 
 #include <condition_variable>
+#include <functional>
 #include <memory>
+#include <set>
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
@@ -32,50 +34,132 @@ using namespace std::placeholders;
 
 namespace yasmin_ros {
 
+/**
+ * @brief A state class for handling ROS2 action client operations.
+ *
+ * This class encapsulates the behavior of a ROS2 action client within a YASMIN
+ * state. It allows the creation and management of goals, feedback, and results
+ * associated with an action server.
+ *
+ * @tparam ActionT The type of the action this state will interface with.
+ */
 template <typename ActionT> class ActionState : public yasmin::State {
+  using Goal = typename ActionT::Goal; ///< Alias for the action goal type.
+  using Result = typename ActionT::Result::SharedPtr; ///< Alias for the action
+                                                      ///< result type.
+  using Feedback =
+      typename ActionT::Feedback; ///< Alias for the action feedback type.
 
-  using Goal = typename ActionT::Goal;
-  using Result = typename ActionT::Result::SharedPtr;
-  using Feedback = typename ActionT::Feedback;
+  using SendGoalOptions = typename rclcpp_action::Client<
+      ActionT>::SendGoalOptions; ///< Options for sending goals.
+  using ActionClient = typename rclcpp_action::Client<
+      ActionT>::SharedPtr; ///< Shared pointer type for the action client.
+  using GoalHandle =
+      rclcpp_action::ClientGoalHandle<ActionT>; ///< Handle for the action goal.
 
-  using SendGoalOptions =
-      typename rclcpp_action::Client<ActionT>::SendGoalOptions;
-  using ActionClient = typename rclcpp_action::Client<ActionT>::SharedPtr;
-  using GoalHandle = rclcpp_action::ClientGoalHandle<ActionT>;
-
-  using CreateGoalHandler =
-      std::function<Goal(std::shared_ptr<yasmin::blackboard::Blackboard>)>;
-  using ResutlHandler = std::function<std::string(
-      std::shared_ptr<yasmin::blackboard::Blackboard>, Result)>;
-  using FeedbackHandler =
-      std::function<void(std::shared_ptr<yasmin::blackboard::Blackboard>,
-                         std::shared_ptr<const Feedback>)>;
+  using CreateGoalHandler = std::function<Goal(
+      std::shared_ptr<yasmin::blackboard::Blackboard>)>; ///< Function type for
+                                                         ///< creating a goal.
+  using ResultHandler = std::function<std::string(
+      std::shared_ptr<yasmin::blackboard::Blackboard>,
+      Result)>; ///< Function type for handling results.
+  using FeedbackHandler = std::function<void(
+      std::shared_ptr<yasmin::blackboard::Blackboard>,
+      std::shared_ptr<const Feedback>)>; ///< Function type for handling
+                                         ///< feedback.
 
 public:
+  /**
+   * @brief Construct an ActionState with a specific action name and goal
+   * handler.
+   *
+   * This constructor initializes the action state with a specified action name,
+   * goal handler, and optional timeout.
+   *
+   * @param action_name The name of the action to communicate with.
+   * @param create_goal_handler A function that creates a goal for the action.
+   * @param outcomes A set of possible outcomes for this action state.
+   * @param timeout (Optional) The maximum time to wait for the action server.
+   *                Default is -1 (no timeout).
+   *
+   * @throws std::invalid_argument if create_goal_handler is nullptr.
+   */
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes, int timeout = -1.0)
       : ActionState(action_name, create_goal_handler, outcomes, nullptr,
                     nullptr, timeout) {}
 
+  /**
+   * @brief Construct an ActionState with result and feedback handlers.
+   *
+   * This constructor allows the specification of result and feedback handlers.
+   *
+   * @param action_name The name of the action to communicate with.
+   * @param create_goal_handler A function that creates a goal for the action.
+   * @param result_handler (Optional) A function to handle the result of the
+   * action.
+   * @param feedback_handler (Optional) A function to handle feedback from the
+   * action.
+   * @param timeout (Optional) The maximum time to wait for the action server.
+   *                Default is -1 (no timeout).
+   *
+   * @throws std::invalid_argument if create_goal_handler is nullptr.
+   */
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
-              ResutlHandler result_handler = nullptr,
+              ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
       : ActionState(action_name, create_goal_handler, {}, result_handler,
                     feedback_handler, timeout) {}
 
+  /**
+   * @brief Construct an ActionState with outcomes and handlers.
+   *
+   * This constructor allows specifying outcomes along with handlers for results
+   * and feedback.
+   *
+   * @param action_name The name of the action to communicate with.
+   * @param create_goal_handler A function that creates a goal for the action.
+   * @param outcomes A set of possible outcomes for this action state.
+   * @param result_handler (Optional) A function to handle the result of the
+   * action.
+   * @param feedback_handler (Optional) A function to handle feedback from the
+   * action.
+   * @param timeout (Optional) The maximum time to wait for the action server.
+   *                Default is -1 (no timeout).
+   *
+   * @throws std::invalid_argument if create_goal_handler is nullptr.
+   */
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes,
-              ResutlHandler result_handler = nullptr,
+              ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
                     result_handler, feedback_handler, timeout) {}
 
+  /**
+   * @brief Construct an ActionState with a specified node and action name.
+   *
+   * This constructor allows specifying a ROS node in addition to the action
+   * name and goal handler.
+   *
+   * @param node A shared pointer to the ROS node.
+   * @param action_name The name of the action to communicate with.
+   * @param create_goal_handler A function that creates a goal for the action.
+   * @param outcomes A set of possible outcomes for this action state.
+   * @param result_handler (Optional) A function to handle the result of the
+   * action.
+   * @param feedback_handler (Optional) A function to handle feedback from the
+   * action.
+   * @param timeout (Optional) The maximum time to wait for the action server.
+   *                Default is -1 (no timeout).
+   *
+   * @throws std::invalid_argument if create_goal_handler is nullptr.
+   */
   ActionState(const rclcpp::Node::SharedPtr &node, std::string action_name,
               CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes,
-              ResutlHandler result_handler = nullptr,
+              ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
-
       : State({}), action_name(action_name),
         create_goal_handler(create_goal_handler),
         result_handler(result_handler), feedback_handler(feedback_handler),
@@ -104,6 +188,12 @@ public:
     }
   }
 
+  /**
+   * @brief Cancel the current action state.
+   *
+   * This function cancels the ongoing action and waits for the cancellation to
+   * complete.
+   */
   void cancel_state() {
     std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
 
@@ -118,8 +208,30 @@ public:
     yasmin::State::cancel_state();
   }
 
+  /**
+   * @brief Notify that the action cancellation has completed.
+   *
+   * This function is called to notify that the action cancellation process
+   * has finished.
+   */
   void cancel_done() { this->action_cancel_cond.notify_all(); }
 
+  /**
+   * @brief Execute the action and return the outcome.
+   *
+   * This function creates a goal using the provided goal handler, sends the
+   * goal to the action server, and waits for the result or feedback.
+   *
+   * @param blackboard A shared pointer to the blackboard used for
+   * communication.
+   * @return A string representing the outcome of the action execution.
+   *
+   * Possible outcomes include:
+   * - `basic_outcomes::SUCCEED`: The action succeeded.
+   * - `basic_outcomes::ABORT`: The action was aborted.
+   * - `basic_outcomes::CANCEL`: The action was canceled.
+   * - `basic_outcomes::TIMEOUT`: The action server was not available in time.
+   */
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
@@ -127,7 +239,7 @@ public:
 
     Goal goal = this->create_goal_handler(blackboard);
 
-    // wait for server
+    // Wait for the action server to be available
     RCLCPP_INFO(this->node_->get_logger(), "Waiting for action '%s'",
                 this->action_name.c_str());
     bool act_available = this->action_client->wait_for_action_server(
@@ -140,78 +252,96 @@ public:
       return basic_outcomes::TIMEOUT;
     }
 
-    // options
-    auto send_goal_options = SendGoalOptions();
+    // Prepare options for sending the goal
+    SendGoalOptions send_goal_options;
     send_goal_options.goal_response_callback =
         std::bind(&ActionState::goal_response_callback, this, _1);
 
     send_goal_options.result_callback =
         std::bind(&ActionState::result_callback, this, _1);
 
-    if (this->feedback_handler != nullptr) {
+    if (this->feedback_handler) {
       send_goal_options.feedback_callback =
           [this, blackboard](typename GoalHandle::SharedPtr,
                              std::shared_ptr<const Feedback> feedback) {
             this->feedback_handler(blackboard, feedback);
           };
-      ;
     }
 
     RCLCPP_INFO(this->node_->get_logger(), "Sending goal to action '%s'",
                 this->action_name.c_str());
     this->action_client->async_send_goal(goal, send_goal_options);
 
-    // wait for results
+    // Wait for the action to complete
     this->action_done_cond.wait(lock);
 
-    if (this->action_status == rclcpp_action::ResultCode::CANCELED) {
+    switch (this->action_status) {
+    case rclcpp_action::ResultCode::CANCELED:
       return basic_outcomes::CANCEL;
 
-    } else if (this->action_status == rclcpp_action::ResultCode::ABORTED) {
+    case rclcpp_action::ResultCode::ABORTED:
       return basic_outcomes::ABORT;
 
-    } else if (this->action_status == rclcpp_action::ResultCode::SUCCEEDED) {
-
-      if (this->result_handler != nullptr) {
+    case rclcpp_action::ResultCode::SUCCEEDED:
+      if (this->result_handler) {
         return this->result_handler(blackboard, this->action_result);
       }
-
       return basic_outcomes::SUCCEED;
-    }
 
-    return basic_outcomes::ABORT;
+    default:
+      return basic_outcomes::ABORT;
+    }
   }
 
 private:
-  rclcpp::Node::SharedPtr node_;
+  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS node.
 
-  std::string action_name;
+  std::string action_name; ///< Name of the action to communicate with.
 
-  ActionClient action_client;
-  std::condition_variable action_done_cond;
-  std::mutex action_done_mutex;
-  std::condition_variable action_cancel_cond;
-  std::mutex action_cancel_mutex;
+  ActionClient action_client; ///< Shared pointer to the action client.
+  std::condition_variable
+      action_done_cond;         ///< Condition variable for action completion.
+  std::mutex action_done_mutex; ///< Mutex for protecting action completion.
+  std::condition_variable
+      action_cancel_cond; ///< Condition variable for action cancellation.
+  std::mutex action_cancel_mutex; ///< Mutex for protecting action cancellation.
 
-  Result action_result;
-  rclcpp_action::ResultCode action_status;
+  Result action_result; ///< Shared pointer to the action result.
+  rclcpp_action::ResultCode action_status; ///< Status of the action execution.
 
-  std::shared_ptr<GoalHandle> goal_handle;
-  std::mutex goal_handle_mutex;
+  std::shared_ptr<GoalHandle> goal_handle; ///< Handle for the current goal.
+  std::mutex
+      goal_handle_mutex; ///< Mutex for protecting access to the goal handle.
 
-  CreateGoalHandler create_goal_handler;
-  ResutlHandler result_handler;
-  FeedbackHandler feedback_handler;
+  CreateGoalHandler
+      create_goal_handler;      ///< Handler function for creating goals.
+  ResultHandler result_handler; ///< Handler function for processing results.
+  FeedbackHandler
+      feedback_handler; ///< Handler function for processing feedback.
 
-  int timeout;
+  int timeout; ///< Maximum time to wait for the action server.
 
 #if defined(FOXY)
+  /**
+   * @brief Callback for handling the goal response.
+   *
+   * This function is called when a response for the goal is received.
+   *
+   * @param future A future that holds the goal handle.
+   */
   void goal_response_callback(
       std::shared_future<typename GoalHandle::SharedPtr> future) {
     std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
     this->goal_handle = future.get();
   }
 #else
+  /**
+   * @brief Callback for handling the goal response.
+   *
+   * This function is called when a response for the goal is received.
+   *
+   * @param goal_handle A shared pointer to the goal handle.
+   */
   void
   goal_response_callback(const typename GoalHandle::SharedPtr &goal_handle) {
     std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
@@ -219,6 +349,13 @@ private:
   }
 #endif
 
+  /**
+   * @brief Callback for handling the result of the action.
+   *
+   * This function is called when the action result is available.
+   *
+   * @param result The wrapped result of the action.
+   */
   void result_callback(const typename GoalHandle::WrappedResult &result) {
     this->action_result = result.result;
     this->action_status = result.code;
@@ -228,4 +365,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif
+#endif // YASMIN_ROS_ACTION_STATE_HPP

@@ -1,22 +1,24 @@
 // Copyright (C) 2023  Miguel Ángel González Santamarta
-
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifndef YASMIN_ROS_SERVICE_STATE_HPP
 #define YASMIN_ROS_SERVICE_STATE_HPP
 
+#include <functional>
 #include <memory>
+#include <set>
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
@@ -28,6 +30,15 @@
 
 namespace yasmin_ros {
 
+/**
+ * @brief A state class that interacts with a ROS service.
+ *
+ * This class manages communication with a specified ROS service,
+ * allowing it to send requests and handle responses. It extends
+ * the base `yasmin::State` class.
+ *
+ * @tparam ServiceT The type of the ROS service this state interacts with.
+ */
 template <typename ServiceT> class ServiceState : public yasmin::State {
 
   using Request = typename ServiceT::Request::SharedPtr;
@@ -38,12 +49,32 @@ template <typename ServiceT> class ServiceState : public yasmin::State {
       std::shared_ptr<yasmin::blackboard::Blackboard>, Response)>;
 
 public:
+  /**
+   * @brief Construct a ServiceState with a request handler and outcomes.
+   *
+   * @param srv_name The name of the service to call.
+   * @param create_request_handler Function to create a service request.
+   * @param outcomes A set of possible outcomes for this state.
+   * @param timeout Maximum time to wait for the service to become available, in
+   * seconds. Default is -1 (wait indefinitely).
+   */
   ServiceState(std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::set<std::string> outcomes, int timeout = -1.0)
       : ServiceState(srv_name, create_request_handler, outcomes, nullptr,
                      timeout) {}
 
+  /**
+   * @brief Construct a ServiceState with a request handler and response
+   * handler.
+   *
+   * @param srv_name The name of the service to call.
+   * @param create_request_handler Function to create a service request.
+   * @param outcomes A set of possible outcomes for this state.
+   * @param response_handler Function to handle the service response.
+   * @param timeout Maximum time to wait for the service to become available, in
+   * seconds. Default is -1 (wait indefinitely).
+   */
   ServiceState(std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::set<std::string> outcomes, ResponseHandler response_handler,
@@ -51,6 +82,19 @@ public:
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
                      response_handler, timeout) {}
 
+  /**
+   * @brief Construct a ServiceState with a ROS node and handlers.
+   *
+   * @param node A shared pointer to the ROS node.
+   * @param srv_name The name of the service to call.
+   * @param create_request_handler Function to create a service request.
+   * @param outcomes A set of possible outcomes for this state.
+   * @param response_handler Function to handle the service response.
+   * @param timeout Maximum time to wait for the service to become available, in
+   * seconds. Default is -1 (wait indefinitely).
+   *
+   * @throws std::invalid_argument if the create_request_handler is nullptr.
+   */
   ServiceState(const rclcpp::Node::SharedPtr &node, std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::set<std::string> outcomes, ResponseHandler response_handler,
@@ -63,35 +107,48 @@ public:
       this->outcomes.insert(basic_outcomes::TIMEOUT);
     }
 
-    if (outcomes.size() > 0) {
-      for (std::string outcome : outcomes) {
-        this->outcomes.insert(outcome);
-      }
+    if (!outcomes.empty()) {
+      this->outcomes.insert(outcomes.begin(), outcomes.end());
     }
 
+    // Assign the appropriate ROS node
     if (node == nullptr) {
       this->node_ = YasminNode::get_instance();
     } else {
       this->node_ = node;
     }
 
+    // Create a service client
     this->service_client =
         this->node_->template create_client<ServiceT>(srv_name);
 
+    // Set the request and response handlers
     this->create_request_handler = create_request_handler;
     this->response_handler = response_handler;
 
+    // Validate request handler
     if (this->create_request_handler == nullptr) {
       throw std::invalid_argument("create_request_handler is needed");
     }
   }
 
+  /**
+   * @brief Execute the service call and handle the response.
+   *
+   * This function creates a request based on the blackboard data, waits for the
+   * service to become available, sends the request, and processes the response.
+   *
+   * @param blackboard A shared pointer to the blackboard containing data for
+   * request creation.
+   * @return std::string The outcome of the service call, which can be SUCCEED,
+   * ABORT, or TIMEOUT.
+   */
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
 
     Request request = this->create_request(blackboard);
 
-    // wait for server
+    // Wait for the service to become available
     RCLCPP_INFO(this->node_->get_logger(), "Waiting for service '%s'",
                 this->srv_name.c_str());
     bool srv_available = this->service_client->wait_for_service(
@@ -104,35 +161,43 @@ public:
       return basic_outcomes::TIMEOUT;
     }
 
+    // Send the service request
     RCLCPP_INFO(this->node_->get_logger(), "Sending request to service '%s'",
                 this->srv_name.c_str());
     auto future = this->service_client->async_send_request(request);
 
+    // Wait for the response
     future.wait();
     Response response = future.get();
 
     if (response) {
-
       if (response_handler != nullptr) {
         std::string outcome = this->response_handler(blackboard, response);
         return outcome;
       }
-
       return basic_outcomes::SUCCEED;
-
     } else {
       return basic_outcomes::ABORT;
     }
   }
 
 private:
-  rclcpp::Node::SharedPtr node_;
-  std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
-  CreateRequestHandler create_request_handler;
-  ResponseHandler response_handler;
-  std::string srv_name;
-  int timeout;
+  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS node.
+  std::shared_ptr<rclcpp::Client<ServiceT>>
+      service_client; ///< Shared pointer to the service client.
+  CreateRequestHandler
+      create_request_handler;       ///< Function to create service requests.
+  ResponseHandler response_handler; ///< Function to handle service responses.
+  std::string srv_name;             ///< Name of the service.
+  int timeout; ///< Maximum wait time for service availability.
 
+  /**
+   * @brief Create a service request based on the blackboard.
+   *
+   * @param blackboard A shared pointer to the blackboard containing data for
+   * request creation.
+   * @return Request The created service request.
+   */
   Request
   create_request(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
     return this->create_request_handler(blackboard);
@@ -141,4 +206,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif
+#endif // YASMIN_ROS_SERVICE_STATE_HPP

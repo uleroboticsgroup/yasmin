@@ -1,15 +1,15 @@
 // Copyright (C) 2023  Miguel Ángel González Santamarta
-
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -69,15 +69,15 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
     }
   }
 
-  std::string transition_string = "";
+  std::ostringstream transitions_oss;
 
   for (auto const &t : transitions) {
-    transition_string += "\n\t" + t.first + " --> " + t.second;
+    transitions_oss << "\n\t" << t.first << " --> " << t.second;
   }
 
   YASMIN_LOG_DEBUG("Adding state '%s' of type '%s' with transitions: %s",
                    name.c_str(), state->to_string().c_str(),
-                   transition_string.c_str());
+                   transitions_oss.str().c_str());
 
   this->states.insert({name, state});
   this->transitions.insert({name, transitions});
@@ -123,7 +123,7 @@ std::string StateMachine::get_current_state() {
   return this->current_state;
 }
 
-void StateMachine::add_start_cb(EndCallbackType cb,
+void StateMachine::add_start_cb(StartCallbackType cb,
                                 std::vector<std::string> args) {
   this->start_cbs.emplace_back(cb, args);
 }
@@ -150,8 +150,8 @@ void StateMachine::call_start_cbs(
     }
 
   } catch (const std::exception &e) {
-    YASMIN_LOG_ERROR("Could not execute start callback: %s"),
-        std::string(e.what());
+    YASMIN_LOG_ERROR("Could not execute start callback: %s",
+                     std::string(e.what()).c_str());
   }
 }
 
@@ -168,8 +168,8 @@ void StateMachine::call_transition_cbs(
     }
 
   } catch (const std::exception &e) {
-    YASMIN_LOG_ERROR("Could not execute transition callback: %s"),
-        std::string(e.what());
+    YASMIN_LOG_ERROR("Could not execute transition callback: %s",
+                     std::string(e.what()).c_str());
   }
 }
 
@@ -185,8 +185,8 @@ void StateMachine::call_end_cbs(
     }
 
   } catch (const std::exception &e) {
-    YASMIN_LOG_ERROR("Could not execute end callback: %s"),
-        std::string(e.what());
+    YASMIN_LOG_ERROR("Could not execute end callback: %s",
+                     std::string(e.what()).c_str());
   }
 }
 
@@ -194,14 +194,14 @@ void StateMachine::validate() {
 
   YASMIN_LOG_DEBUG("Validating state machine '%s'", this->to_string().c_str());
 
-  // check initial state
+  // Check initial state
   if (this->start_state.empty()) {
     throw std::runtime_error("No initial state set");
   }
 
   std::set<std::string> terminal_outcomes;
 
-  // check all states
+  // Check all states
   for (auto it = this->states.begin(); it != this->states.end(); ++it) {
 
     const std::string &state_name = it->first;
@@ -211,7 +211,7 @@ void StateMachine::validate() {
 
     std::set<std::string> outcomes = state->get_outcomes();
 
-    // check if all state outcomes are in transitions
+    // Check if all state outcomes are in transitions
     for (const std::string &o : outcomes) {
 
       if (transitions.find(o) == transitions.end() &&
@@ -228,23 +228,23 @@ void StateMachine::validate() {
       }
     }
 
-    // if state is a state machine, validate it
+    // If state is a state machine, validate it
     if (std::dynamic_pointer_cast<StateMachine>(state)) {
       std::dynamic_pointer_cast<StateMachine>(state)->validate();
     }
 
-    // add terminal outcomes
+    // Add terminal outcomes
     for (auto it = transitions.begin(); it != transitions.end(); ++it) {
       const std::string &value = it->second;
       terminal_outcomes.insert(value);
     }
   }
 
-  // check terminal outcomes for the state machine
+  // Check terminal outcomes for the state machine
   std::set<std::string> sm_outcomes(this->get_outcomes().begin(),
                                     this->get_outcomes().end());
 
-  // check if all state machine outcomes are in the terminal outcomes
+  // Check if all state machine outcomes are in the terminal outcomes
   for (const std::string &o : this->get_outcomes()) {
     if (terminal_outcomes.find(o) == terminal_outcomes.end()) {
       throw std::runtime_error("Target outcome '" + o +
@@ -252,7 +252,7 @@ void StateMachine::validate() {
     }
   }
 
-  // check if all terminal outcomes are states or state machine outcomes
+  // Check if all terminal outcomes are states or state machine outcomes
   for (const std::string &o : terminal_outcomes) {
     if (this->states.find(o) == this->states.end() &&
         sm_outcomes.find(o) == sm_outcomes.end()) {
@@ -290,7 +290,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     outcome = (*state.get())(blackboard);
     old_outcome = std::string(outcome);
 
-    // check outcome belongs to state
+    // Check outcome belongs to state
     if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
                   outcome) == state->get_outcomes().end()) {
       throw std::logic_error("Outcome '" + outcome +
@@ -298,12 +298,12 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
                              this->current_state);
     }
 
-    // translate outcome using transitions
+    // Translate outcome using transitions
     if (transitions.find(outcome) != transitions.end()) {
       outcome = transitions.at(outcome);
     }
 
-    // outcome is an outcome of the sm
+    // Outcome is an outcome of the sm
     if (std::find(this->outcomes.begin(), this->outcomes.end(), outcome) !=
         this->outcomes.end()) {
 
@@ -316,7 +316,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
       return outcome;
 
-      // outcome is a state
+      // Outcome is a state
     } else if (this->states.find(outcome) != this->states.end()) {
 
       YASMIN_LOG_INFO("State machine transitioning '%s' : '%s' --> '%s'",
@@ -329,7 +329,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
       this->current_state = outcome;
       this->current_state_mutex->unlock();
 
-      // outcome is not in the sm
+      // Outcome is not in the sm
     } else {
       throw std::logic_error(
           "Outcome '" + outcome +
@@ -368,19 +368,21 @@ void StateMachine::cancel_state() {
 
 std::string StateMachine::to_string() {
 
-  std::string result = "State Machine [";
+  std::ostringstream oss;
+  oss << "StateMachine [";
+
   const auto &states = this->get_states();
 
   for (auto it = states.begin(); it != states.end(); ++it) {
     const auto &s = *it;
-    result += s.first + " (" + s.second->to_string() + ")";
+    oss << s.first << " (" << s.second->to_string() << ")";
 
     if (std::next(it) != states.end()) {
-      result += ", ";
+      oss << ", ";
     }
   }
 
-  result += "]";
+  oss << "]";
 
-  return result;
+  return oss.str();
 }

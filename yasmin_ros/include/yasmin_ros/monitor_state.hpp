@@ -1,15 +1,15 @@
 // Copyright (C) 2023  Miguel Ángel González Santamarta
-
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -17,8 +17,11 @@
 #define YASMIN_ROS_MONITOR_STATE_HPP
 
 #include <chrono>
+#include <functional>
 #include <memory>
+#include <set>
 #include <string>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -31,27 +34,76 @@ using std::placeholders::_1;
 
 namespace yasmin_ros {
 
+/**
+ * @brief Template class to monitor a ROS topic and process incoming messages.
+ *
+ * This class provides functionality to subscribe to a ROS topic of type `MsgT`,
+ * execute a custom monitoring handler, and return specific outcomes based on
+ * the messages received.
+ *
+ * @tparam MsgT The message type of the topic to subscribe to.
+ */
 template <typename MsgT> class MonitorState : public yasmin::State {
 
   using MonitorHandler = std::function<std::string(
       std::shared_ptr<yasmin::blackboard::Blackboard>, std::shared_ptr<MsgT>)>;
 
 public:
+  /**
+   * @brief Construct a new MonitorState with specific QoS and message queue
+   * settings.
+   *
+   * @param topic_name The name of the topic to monitor.
+   * @param outcomes A set of possible outcomes for this state.
+   * @param monitor_handler A callback handler to process incoming messages.
+   * @param qos Quality of Service settings for the topic.
+   * @param msg_queue The maximum number of messages to queue.
+   */
   MonitorState(std::string topic_name, std::set<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue)
       : MonitorState(topic_name, outcomes, monitor_handler, qos, msg_queue,
                      -1) {}
 
+  /**
+   * @brief Construct a new MonitorState with default QoS and message queue.
+   *
+   * @param topic_name The name of the topic to monitor.
+   * @param outcomes A set of possible outcomes for this state.
+   * @param monitor_handler A callback handler to process incoming messages.
+   */
   MonitorState(std::string topic_name, std::set<std::string> outcomes,
                MonitorHandler monitor_handler)
       : MonitorState(topic_name, outcomes, monitor_handler, 10, 10, -1) {}
 
+  /**
+   * @brief Construct a new MonitorState with specific QoS, message queue, and
+   * timeout.
+   *
+   * @param topic_name The name of the topic to monitor.
+   * @param outcomes A set of possible outcomes for this state.
+   * @param monitor_handler A callback handler to process incoming messages.
+   * @param qos Quality of Service settings for the topic.
+   * @param msg_queue The maximum number of messages to queue.
+   * @param timeout The time in seconds to wait for messages before timing out.
+   */
   MonitorState(std::string topic_name, std::set<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue,
                int timeout)
       : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
                      msg_queue, timeout) {}
 
+  /**
+   * @brief Construct a new MonitorState with ROS 2 node, specific QoS, message
+   * queue, and timeout.
+   *
+   * @param node The ROS 2 node.
+   * @param topic_name The name of the topic to monitor.
+   * @param outcomes A set of possible outcomes for this state.
+   * @param monitor_handler A callback handler to process incoming messages.
+   * @param qos Quality of Service settings for the topic.
+   * @param msg_queue The maximum number of messages to queue.
+   * @param timeout The time in seconds to wait for messages before timing out.
+   */
   MonitorState(const rclcpp::Node::SharedPtr &node, std::string topic_name,
                std::set<std::string> outcomes, MonitorHandler monitor_handler,
                rclcpp::QoS qos, int msg_queue, int timeout)
@@ -83,6 +135,13 @@ public:
         topic_name, qos, std::bind(&MonitorState::callback, this, _1));
   }
 
+  /**
+   * @brief Execute the monitoring operation and process the first received
+   * message.
+   *
+   * @param blackboard A shared pointer to the blackboard for data storage.
+   * @return A string outcome indicating the result of the monitoring operation.
+   */
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
 
@@ -119,17 +178,28 @@ public:
   }
 
 private:
-  rclcpp::Node::SharedPtr node_;
-  std::shared_ptr<rclcpp::Subscription<MsgT>> sub;
-  std::vector<std::shared_ptr<MsgT>> msg_list;
+  rclcpp::Node::SharedPtr node_; /**< ROS node pointer. */
+  std::shared_ptr<rclcpp::Subscription<MsgT>>
+      sub; /**< Subscription to the ROS topic. */
+  std::vector<std::shared_ptr<MsgT>>
+      msg_list; /**< List to store queued messages. */
 
-  std::string topic_name;
-  MonitorHandler monitor_handler;
-  int msg_queue;
-  int timeout;
-  bool monitoring;
-  int time_to_wait;
+  std::string topic_name; /**< Name of the topic to monitor. */
+  MonitorHandler
+      monitor_handler; /**< Callback function to handle incoming messages. */
+  int msg_queue;       /**< Maximum number of messages to queue. */
+  int timeout;         /**< Timeout in seconds for message reception. */
+  bool monitoring;     /**< Flag to control message monitoring state. */
+  int time_to_wait;    /**< Time in microseconds to wait between checks. */
 
+  /**
+   * @brief Callback function for receiving messages from the subscribed topic.
+   *
+   * Adds the message to `msg_list` if monitoring is active, maintaining a
+   * maximum queue size of `msg_queue`.
+   *
+   * @param msg The message received from the topic.
+   */
   void callback(const typename MsgT::SharedPtr msg) {
 
     if (this->monitoring) {

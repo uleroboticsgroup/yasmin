@@ -1,15 +1,15 @@
 // Copyright (C) 2023  Miguel Ángel González Santamarta
-
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -22,8 +22,8 @@
 #include <string>
 #include <vector>
 
-#ifdef __GNUG__     // if using GCC/G++
-#include <cxxabi.h> // for abi::__cxa_demangle
+#ifdef __GNUG__     // If using GCC/G++
+#include <cxxabi.h> // For abi::__cxa_demangle
 #endif
 
 #include "yasmin/blackboard/blackboard.hpp"
@@ -31,41 +31,101 @@
 
 namespace yasmin {
 
+/**
+ * @class State
+ * @brief Represents a state in a state machine.
+ *
+ * The State class defines a state that can execute actions and manage
+ * outcomes. It maintains information about its execution status
+ * (running or canceled) and the possible outcomes of its execution.
+ */
 class State {
 
 protected:
-  std::set<std::string> outcomes;
+  std::set<std::string> outcomes; ///< The possible outcomes of this state.
 
 private:
-  std::atomic_bool canceled{false};
-  std::atomic_bool running{false};
+  std::atomic_bool canceled{
+      false}; ///< Indicates if the state has been canceled.
+  std::atomic_bool running{
+      false}; ///< Indicates if the state is currently running.
 
 public:
+  /**
+   * @brief Constructs a State with a set of possible outcomes.
+   * @param outcomes A set of possible outcomes for this state.
+   */
   State(std::set<std::string> outcomes);
 
+  /**
+   * @brief Executes the state and returns the outcome.
+   * @param blackboard A shared pointer to the Blackboard to use during
+   * execution.
+   * @return A string representing the outcome of the execution.
+   *
+   * This function stores the state as running, invokes the execute method,
+   * and checks if the returned outcome is valid. If the outcome is not
+   * valid, a std::logic_error is thrown.
+   * @throws std::logic_error If the outcome is not in the set of outcomes.
+   */
   std::string operator()(std::shared_ptr<blackboard::Blackboard> blackboard);
 
+  /**
+   * @brief Executes the state's specific logic.
+   * @param blackboard A shared pointer to the Blackboard to use during
+   * execution.
+   * @return A string representing the outcome of the execution.
+   *
+   * This method is intended to be overridden by derived classes to provide
+   * specific execution logic.
+   */
   virtual std::string
   execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
-    (void)blackboard;
+    (void)blackboard; // Suppress unused parameter warning
     return "";
   }
 
+  /**
+   * @brief Cancels the current state execution.
+   *
+   * This method sets the canceled flag to true and logs the action.
+   */
   virtual void cancel_state() {
     YASMIN_LOG_INFO("Canceling state '%s'", this->to_string().c_str());
     this->canceled.store(true);
-  };
+  }
+
+  /**
+   * @brief Checks if the state has been canceled.
+   * @return True if the state is canceled, otherwise false.
+   */
   bool is_canceled() const;
+
+  /**
+   * @brief Checks if the state is currently running.
+   * @return True if the state is running, otherwise false.
+   */
   bool is_running() const;
 
+  /**
+   * @brief Gets the set of possible outcomes for this state.
+   * @return A constant reference to the set of possible outcomes.
+   */
   std::set<std::string> const &get_outcomes();
 
+  /**
+   * @brief Converts the state to a string representation.
+   * @return A string representation of the state.
+   *
+   * This method retrieves the demangled name of the class for a readable
+   * string representation.
+   */
   virtual std::string to_string() {
     std::string name = typeid(*this).name();
 
-#ifdef __GNUG__ // if using GCC/G++
+#ifdef __GNUG__ // If using GCC/G++
     int status;
-    // demangle the name using GCC's demangling function
+    // Demangle the name using GCC's demangling function
     char *demangled =
         abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
     if (status == 0) {
@@ -74,10 +134,10 @@ public:
     free(demangled);
 #endif
 
-    return name;
+    return name; // Return the demangled class name
   }
 };
 
 } // namespace yasmin
 
-#endif
+#endif // YASMIN_STATE_HPP
