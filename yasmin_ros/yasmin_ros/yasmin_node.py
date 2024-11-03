@@ -41,10 +41,6 @@ class YasminNode(Node):
     _instance: "YasminNode" = None
     ## Lock to control access to the instance.
     _lock: RLock = RLock()
-    ## Executor for managing node operations.
-    _executor: MultiThreadedExecutor = None
-    ## Thread to execute the spinning of the node.
-    _spin_thread: Thread = None
 
     @staticmethod
     def get_instance() -> "YasminNode":
@@ -80,10 +76,10 @@ class YasminNode(Node):
 
         super().__init__(f"yasmin_{str(uuid.uuid4()).replace('-', '')[:16]}_node")
 
-        # Initialize the MultiThreadedExecutor
+        ## Executor for managing node operations.
         self._executor: MultiThreadedExecutor = MultiThreadedExecutor()
         self._executor.add_node(self)
 
-        # Start the executor in a separate thread
+        ## Thread to execute the spinning of the node.
         self._spin_thread: Thread = Thread(target=self._executor.spin)
         self._spin_thread.start()

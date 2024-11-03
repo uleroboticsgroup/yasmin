@@ -104,6 +104,7 @@ class StateMachine(State):
                     f"State '{name}' references unregistered outcomes '{key}', available outcomes are {list(state.get_outcomes())}"
                 )
 
+        # Debug state and its transitions
         transition_string = "\n\t" + "\n\t".join(
             f"{key} --> {transitions[key]}" for key in transitions
         )
@@ -278,6 +279,7 @@ class StateMachine(State):
         if not self._start_state:
             raise RuntimeError("No initial state set")
 
+        # terminal outcomes
         terminal_outcomes = []
 
         # Check all states
@@ -346,9 +348,7 @@ class StateMachine(State):
             self.__current_state: str = start_state
 
         while not self.is_canceled():
-            with self.__current_state_lock:
-                state = self._states[self.__current_state]
-
+            state = self._states[self.get_current_state()]
             outcome = state["state"](blackboard)
             old_outcome = outcome
 

@@ -51,31 +51,6 @@ class ActionState(State):
         _timeout (float): Timeout duration for waiting for the action server.
     """
 
-    ## The ROS 2 node instance used to communicate with the action server.
-    _node: Node
-    ## The name of the action to be performed.
-    _action_name: str
-    ## The action client used to send goals.
-    _action_client: ActionClient
-    ## Event used to wait for action completion.
-    _action_done_event: Event = Event()
-    ## The result returned by the action server.
-    _action_result: Any
-    ## The status of the action execution.
-    _action_status: GoalStatus
-    ## Handle for the goal sent to the action server.
-    _goal_handle: ClientGoalHandle
-    ## Lock to manage access to the goal handle.
-    _goal_handle_lock: RLock = RLock()
-    ## Function that creates the goal to send.
-    _create_goal_handler: Callable[[Blackboard], Any]
-    ## Function to handle the result from the action server.
-    _result_handler: Callable[[Blackboard, Any], str]
-    ## Function to handle feedback from the action server.
-    _feedback_handler: Callable[[Blackboard, Any], None]
-    ## Timeout duration for waiting for the action server.
-    _timeout: float
-
     def __init__(
         self,
         action_type: Type,
@@ -105,31 +80,52 @@ class ActionState(State):
         Raises:
             ValueError: If create_goal_handler is None.
         """
-        self._action_name: str = action_name
+
+        ## Event used to wait for action completion.
+        self._action_done_event: Event = Event()
+        ## The result returned by the action server.
+        self._action_result: Any = None
+        ## The status of the action execution.
+        self._action_status: GoalStatus = None
+        ## Handle for the goal sent to the action server.
+        self._goal_handle: ClientGoalHandle = None
+        ## Lock to manage access to the goal handle.
+        self._goal_handle_lock: RLock = RLock()
+
+        ## Function that creates the goal to send.
+        self._create_goal_handler: Callable[[Blackboard], Any] = create_goal_handler
+        ## Function to handle the result from the action server.
+        self._result_handler: Callable[[Blackboard, Any], str] = result_handler
+        ## Function to handle feedback from the action server.
+        self._feedback_handler: Callable[[Blackboard, Any], None] = feedback_handler
+
+        ## Timeout duration for waiting for the action server.
+        self._timeout: float = timeout
+
         _outcomes = [SUCCEED, ABORT, CANCEL]
 
-        self._timeout: float = timeout
         if self._timeout:
             _outcomes.append(TIMEOUT)
 
         if outcomes:
             _outcomes = _outcomes + outcomes
 
-        if node is None:
-            node: Node = YasminNode.get_instance()
-
-        # Create ROS 2 action
+        ## The ROS 2 node instance used to communicate with the action server.
         self._node: Node = node
+
+        if self._node is None:
+            self._node: Node = YasminNode.get_instance()
+
+        ## The name of the action to be performed.
+        self._action_name: str = action_name
+
+        ## The action client used to send goals.
         self._action_client: ActionClient = ActionClient(
-            node,
+            self._node,
             action_type,
             action_name,
             callback_group=ReentrantCallbackGroup(),
         )
-
-        self._create_goal_handler: Callable[[Blackboard], Any] = create_goal_handler
-        self._result_handler: Callable[[Blackboard, Any], str] = result_handler
-        self._feedback_handler: Callable[[Blackboard, Any], None] = feedback_handler
 
         if not self._create_goal_handler:
             raise ValueError("create_goal_handler is needed")

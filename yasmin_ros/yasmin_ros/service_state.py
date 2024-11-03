@@ -41,19 +41,6 @@ class ServiceState(State):
         _timeout (float): Timeout duration for the service call.
     """
 
-    ## The ROS node used to communicate with the service.
-    _node: Node
-    ## The name of the service to call.
-    _srv_name: str
-    ## The client used to call the service.
-    _service_client: Client
-    ## A function that creates the service request.
-    _create_request_handler: Callable[[Blackboard], Any]
-    ## A function that processes the service response.
-    _response_handler: Callable[[Blackboard, Any], str]
-    ## Timeout duration for the service call.
-    _timeout: float
-
     def __init__(
         self,
         srv_type: Type,
@@ -79,27 +66,36 @@ class ServiceState(State):
         Raises:
             ValueError: If the create_request_handler is not provided.
         """
-        self._srv_name: str = srv_name
+
+        ## A function that creates the service request.
+        self._create_request_handler: Callable[[Blackboard], Any] = (
+            create_request_handler
+        )
+        ## A function that processes the service response.
+        self._response_handler: Callable[[Blackboard, Any], str] = response_handler
+
+        ## Timeout duration for the service call.
+        self._timeout: float = timeout
+
         _outcomes = [SUCCEED, ABORT]
 
-        self._timeout: float = timeout
         if self._timeout:
             _outcomes.append(TIMEOUT)
 
         if outcomes:
             _outcomes = _outcomes + outcomes
 
-        # Create ROS 2 service
-        if node is None:
-            node: Node = YasminNode.get_instance()
+        ## The ROS node used to communicate with the service.
+        self._node = node
 
-        self._node: Node = node
+        if self._node is None:
+            self._node: Node = YasminNode.get_instance()
+
+        ## The name of the service to call.
+        self._srv_name: str = srv_name
+
+        ## The client used to call the service.
         self._service_client: Client = self._node.create_client(srv_type, srv_name)
-
-        self._create_request_handler: Callable[[Blackboard], Any] = (
-            create_request_handler
-        )
-        self._response_handler: Callable[[Blackboard, Any], str] = response_handler
 
         if not self._create_request_handler:
             raise ValueError("create_request_handler is needed")

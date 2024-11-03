@@ -42,13 +42,6 @@ class YasminViewerPub:
         _publish_data(): Publishes the current state of the FSM.
     """
 
-    ## The ROS 2 node instance used for publishing.
-    _node: Node
-    ## The finite state machine to be published.
-    _fsm: StateMachine
-    ## The name of the finite state machine.
-    _fsm_name: str
-
     def __init__(
         self,
         fsm_name: str,
@@ -68,18 +61,26 @@ class YasminViewerPub:
         Raises:
             ValueError: If fsm_name is empty.
         """
+
         if not fsm_name:
             raise ValueError("FSM name cannot be empty.")
 
+        ## The finite state machine to be published.
         self._fsm: StateMachine = fsm
+
+        ## The name of the finite state machine.
         self._fsm_name: str = fsm_name
 
-        if node is None:
-            self._node: Node = YasminNode.get_instance()
-        else:
-            self._node: Node = node
+        ## The ROS 2 node instance used for publishing.
+        self._node = node
 
+        if self._node is None:
+            self._node: Node = YasminNode.get_instance()
+
+        ## The publisher for the state machine messages.
         self.pub = self._node.create_publisher(StateMachineMsg, "/fsm_viewer", 10)
+
+        ## A timer to periodically publish the FSM state.
         self._timer = self._node.create_timer(1 / rate, self._publish_data)
 
     def parse_transitions(self, transitions: Dict[str, str]) -> List[TransitionMsg]:

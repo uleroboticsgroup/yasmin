@@ -45,25 +45,6 @@ class MonitorState(State):
         None raised directly; timeout is managed via outcome handling.
     """
 
-    ## The ROS 2 node instance used for subscriptions.
-    _node: Node
-    ## Subscription object for the specified topic.
-    _sub: Subscription
-    ## Function to handle incoming messages.
-    _monitor_handler: Callable[[Blackboard, Any], None]
-    ## The name of the topic to monitor.
-    _topic_name: str
-    ## A set of messages received from the topic.
-    msg_list: List[Any] = []
-    ## The maximum number of messages to retain.
-    msg_queue: int
-    ## Time to wait between checks for messages.
-    time_to_wait: float = 0.001
-    ## Flag indicating if monitoring is active.
-    monitoring: bool = False
-    ## Timeout duration for monitoring.
-    _timeout: int
-
     def __init__(
         self,
         msg_type: Type,
@@ -92,19 +73,33 @@ class MonitorState(State):
             None
         """
 
-        self._topic_name: str = topic_name
+        ## Function to handle incoming messages.
+        self._monitor_handler: Callable[[Blackboard, Any], None] = monitor_handler
+        ## A set of messages received from the topic.
+        self.msg_list: List[Any] = []
+        ## The maximum number of messages to retain.
+        self.msg_queue: int = msg_queue
+        ## Time to wait between checks for messages.
+        self.time_to_wait: float = 0.001
+        ## Flag indicating if monitoring is active.
+        self.monitoring: bool = False
+
+        ## Timeout duration for monitoring.
         self._timeout: int = timeout
+
         if timeout is not None:
             outcomes = [TIMEOUT] + outcomes
 
-        self._monitor_handler: Callable[[Blackboard, Any], None] = monitor_handler
-        self.msg_queue: int = msg_queue
-
-        # Create ROS 2 subscriber
-        if node is None:
-            node = YasminNode.get_instance()
-
+        ## The ROS 2 node instance used for subscriptions.
         self._node: Node = node
+
+        if self._node is None:
+            self._node = YasminNode.get_instance()
+
+        ## The name of the topic to monitor.
+        self._topic_name: str = topic_name
+
+        ## Subscription object for the specified topic.
         self._sub: Subscription = self._node.create_subscription(
             msg_type, topic_name, self.__callback, qos
         )

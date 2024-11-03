@@ -281,11 +281,9 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
   while (!this->is_canceled()) {
 
-    this->current_state_mutex->lock();
-
-    auto state = this->states.at(this->current_state);
-    transitions = this->transitions.at(this->current_state);
-    this->current_state_mutex->unlock();
+    std::string current_state = this->get_current_state();
+    auto state = this->states.at(current_state);
+    transitions = this->transitions.at(current_state);
 
     outcome = (*state.get())(blackboard);
     old_outcome = std::string(outcome);
