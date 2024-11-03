@@ -57,9 +57,9 @@ class ServiceState(State):
         Parameters:
             srv_type (Type): The type of the service.
             srv_name (str): The name of the service to be called.
-            create_request_handler (Callable): A handler to create the request based on the blackboard data.
+            create_request_handler (Callable[[Blackboard], Any]): A handler to create the request based on the blackboard data.
             outcomes (Set[str], optional): A set of additional outcomes for this state.
-            response_handler (Callable, optional): A handler to process the service response.
+            response_handler (Callable[[Blackboard, Any], str], optional): A handler to process the service response.
             node (Node, optional): A ROS node instance; if None, a default instance is used.
             timeout (float, optional): Timeout duration for waiting on the service.
 
@@ -68,9 +68,7 @@ class ServiceState(State):
         """
 
         ## A function that creates the service request.
-        self._create_request_handler: Callable[[Blackboard], Any] = (
-            create_request_handler
-        )
+        self._create_request_handler: Callable[[Blackboard], Any] = create_request_handler
         ## A function that processes the service response.
         self._response_handler: Callable[[Blackboard, Any], str] = response_handler
 
@@ -132,9 +130,7 @@ class ServiceState(State):
             return TIMEOUT
 
         try:
-            self._node.get_logger().info(
-                f"Sending request to service '{self._srv_name}'"
-            )
+            self._node.get_logger().info(f"Sending request to service '{self._srv_name}'")
             response = self._service_client.call(request)
 
         except Exception as e:

@@ -80,9 +80,7 @@ class FibonacciState(ActionState):
         goal.order = blackboard["n"]  # Retrieve the input value 'n' from the blackboard
         return goal
 
-    def response_handler(
-        self, blackboard: Blackboard, response: Fibonacci.Result
-    ) -> str:
+    def response_handler(self, blackboard: Blackboard, response: Fibonacci.Result) -> str:
         """
         Handles the response from the Fibonacci action.
 

@@ -63,7 +63,7 @@ class MonitorState(State):
             msg_type (Type): The type of message to be monitored.
             topic_name (str): The name of the topic to subscribe to.
             outcomes (Set[str]): The set of possible outcomes from the state.
-            monitor_handler (Callable): The function to call with the received messages.
+            monitor_handler (Callable[[Blackboard, Any], None]): The function to call with the received messages.
             qos (Union[QoSProfile, int], optional): Quality of Service profile or depth.
             msg_queue (int, optional): Maximum number of messages to store. Default is 10.
             node (Node, optional): The ROS node to use. If None, a default node is created.

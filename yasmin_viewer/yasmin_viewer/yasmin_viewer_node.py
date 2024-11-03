@@ -95,9 +95,7 @@ class YasminFsmViewerNode(Node):
         """
         app = Flask(
             "yasmin_viewer",
-            static_folder=ament_index_python.get_package_share_directory(
-                "yasmin_viewer"
-            )
+            static_folder=ament_index_python.get_package_share_directory("yasmin_viewer")
             + "/yasmin_viewer_web_client",
             static_url_path="/",
         )

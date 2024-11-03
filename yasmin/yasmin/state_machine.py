@@ -393,9 +393,7 @@ class StateMachine(State):
                     f"Outcome '{outcome}' is not a state nor a state machine outcome"
                 )
 
-        raise RuntimeError(
-            f"Ending canceled state machine '{self}' with bad transition"
-        )
+        raise RuntimeError(f"Ending canceled state machine '{self}' with bad transition")
 
     def cancel_state(self) -> None:
         """

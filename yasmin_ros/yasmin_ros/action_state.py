@@ -70,10 +70,10 @@ class ActionState(State):
         Parameters:
             action_type (Type): The type of the action to be executed.
             action_name (str): The name of the action to be executed.
-            create_goal_handler (Callable): A function that generates the goal.
+            create_goal_handler (Callable[[Blackboard], Any])): A function that generates the goal.
             outcomes (Set[str], optional): Additional outcomes that this state can return.
-            result_handler (Callable, optional): A function to process the result of the action.
-            feedback_handler (Callable, optional): A function to process feedback from the action.
+            result_handler (Callable[[Blackboard, Any], str], optional): A function to process the result of the action.
+            feedback_handler (Callable[[Blackboard, Any], None], optional): A function to process feedback from the action.
             node (Node, optional): The ROS 2 node to use. If None, uses the default YasminNode.
             timeout (float, optional): Timeout duration for waiting for the action server.
 
