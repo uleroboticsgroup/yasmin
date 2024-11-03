@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['notset_0',['NOTSET',['../namespaceyasmin_1_1logs.html#a0d062b60bcb7ff2703eb7a2b9612325f',1,'yasmin::logs']]]
+  ['level_0',['level',['../namespaceyasmin_1_1logs.html#a409247b3492fe518fad66027fe66be9f',1,'yasmin::logs']]]
 ];

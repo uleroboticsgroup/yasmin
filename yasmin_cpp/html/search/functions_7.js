@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['monitorstate_0',['monitorstate',['../classyasmin__ros_1_1MonitorState.html#a8df77197e3a40a3a6229969e1a6da9a5',1,'yasmin_ros::MonitorState::MonitorState(std::string topic_name, std::set&lt; std::string &gt; outcomes, MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue)'],['../classyasmin__ros_1_1MonitorState.html#a9e38e130d57d98b89d02770d37a5a7e8',1,'yasmin_ros::MonitorState::MonitorState(std::string topic_name, std::set&lt; std::string &gt; outcomes, MonitorHandler monitor_handler)'],['../classyasmin__ros_1_1MonitorState.html#a439c0d50f604c597e4dfd23ed694b1e7',1,'yasmin_ros::MonitorState::MonitorState(std::string topic_name, std::set&lt; std::string &gt; outcomes, MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue, int timeout)'],['../classyasmin__ros_1_1MonitorState.html#a2260e2c27ac47a6833b536633939440d',1,'yasmin_ros::MonitorState::MonitorState(const rclcpp::Node::SharedPtr &amp;node, std::string topic_name, std::set&lt; std::string &gt; outcomes, MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue, int timeout)']]]
+  ['is_5fcanceled_0',['is_canceled',['../classyasmin_1_1State.html#a2cf9aa360eb0036d4e20d3aaa0cddcd3',1,'yasmin::State']]],
+  ['is_5frunning_1',['is_running',['../classyasmin_1_1State.html#ac98335d292943beb701c267e93891995',1,'yasmin::State']]]
 ];

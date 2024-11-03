@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['yasminfsmviewer_0',['YasminFsmViewer',['../classyasmin__viewer_1_1yasmin__viewer__node_1_1YasminFsmViewer.html',1,'yasmin_viewer::yasmin_viewer_node']]],
-  ['yasminnode_1',['YasminNode',['../classyasmin__ros_1_1yasmin__node_1_1YasminNode.html',1,'yasmin_ros::yasmin_node']]],
-  ['yasminviewerpub_2',['YasminViewerPub',['../classyasmin__viewer_1_1yasmin__viewer__pub_1_1YasminViewerPub.html',1,'yasmin_viewer::yasmin_viewer_pub']]]
+  ['nav2state_0',['Nav2State',['../classyasmin__demos_1_1nav__demo_1_1Nav2State.html',1,'yasmin_demos::nav_demo']]]
 ];

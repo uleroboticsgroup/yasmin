@@ -4,5 +4,6 @@ var searchData=
   ['add_5fend_5fcb_1',['add_end_cb',['../classyasmin_1_1StateMachine.html#a8b10b2ce1898037fedfc83113ae05078',1,'yasmin::StateMachine']]],
   ['add_5fstart_5fcb_2',['add_start_cb',['../classyasmin_1_1StateMachine.html#a8a9b78423ec112ec833f5fe54ae6c27e',1,'yasmin::StateMachine']]],
   ['add_5fstate_3',['add_state',['../classyasmin_1_1StateMachine.html#a738a0b240069ecaecaae4d7577fbdad9',1,'yasmin::StateMachine::add_state(std::string name, std::shared_ptr&lt; State &gt; state, std::map&lt; std::string, std::string &gt; transitions)'],['../classyasmin_1_1StateMachine.html#ab16f8ab59149459b64984782e24ea6c5',1,'yasmin::StateMachine::add_state(std::string name, std::shared_ptr&lt; State &gt; state)']]],
-  ['add_5ftransition_5fcb_4',['add_transition_cb',['../classyasmin_1_1StateMachine.html#af3b2d4918664815deb8d9e88638a16b4',1,'yasmin::StateMachine']]]
+  ['add_5ftransition_5fcb_4',['add_transition_cb',['../classyasmin_1_1StateMachine.html#af3b2d4918664815deb8d9e88638a16b4',1,'yasmin::StateMachine']]],
+  ['addtwointsstate_5',['AddTwoIntsState',['../classAddTwoIntsState.html#adafe175a2a8667af73abeee9cd0439f0',1,'AddTwoIntsState']]]
 ];

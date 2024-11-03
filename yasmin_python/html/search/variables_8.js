@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['succeed_0',['SUCCEED',['../namespaceyasmin__ros_1_1basic__outcomes.html#af61301abb8214fa901179eea171ee318',1,'yasmin_ros::basic_outcomes']]]
+  ['notset_0',['NOTSET',['../namespaceyasmin_1_1logs.html#a0d062b60bcb7ff2703eb7a2b9612325f',1,'yasmin::logs']]]
 ];

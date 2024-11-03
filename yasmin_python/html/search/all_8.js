@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['level_0',['level',['../namespaceyasmin_1_1logs.html#a409247b3492fe518fad66027fe66be9f',1,'yasmin::logs']]],
-  ['logs_2epy_1',['logs.py',['../logs_8py.html',1,'']]]
+  ['is_5fcanceled_0',['is_canceled',['../classyasmin_1_1state_1_1State.html#ad28c4590a651f80bee99131951dc196a',1,'yasmin::state::State']]],
+  ['is_5frunning_1',['is_running',['../classyasmin_1_1state_1_1State.html#ae904186744d93be595c17b9c9489750d',1,'yasmin::state::State']]]
 ];

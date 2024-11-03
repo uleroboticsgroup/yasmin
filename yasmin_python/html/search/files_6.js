@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ros_5flogs_2epy_0',['ros_logs.py',['../ros__logs_8py.html',1,'']]]
+  ['nav_5fdemo_2epy_0',['nav_demo.py',['../nav__demo_8py.html',1,'']]]
 ];
