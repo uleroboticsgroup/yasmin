@@ -40,11 +40,15 @@ namespace yasmin_ros {
  * @tparam ServiceT The type of the ROS 2 service this state interacts with.
  */
 template <typename ServiceT> class ServiceState : public yasmin::State {
-
+  /// Alias for the service request type.
   using Request = typename ServiceT::Request::SharedPtr;
+  /// Alias for the service response type.
   using Response = typename ServiceT::Response::SharedPtr;
+
+  /// Function type for creating a request.
   using CreateRequestHandler =
       std::function<Request(std::shared_ptr<yasmin::blackboard::Blackboard>)>;
+  /// Function type for handling a response.
   using ResponseHandler = std::function<std::string(
       std::shared_ptr<yasmin::blackboard::Blackboard>, Response)>;
 

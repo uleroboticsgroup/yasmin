@@ -45,6 +45,7 @@ namespace yasmin_ros {
  */
 template <typename MsgT> class MonitorState : public yasmin::State {
 
+  /// Function type for handling messages from topic.
   using MonitorHandler = std::function<std::string(
       std::shared_ptr<yasmin::blackboard::Blackboard>, std::shared_ptr<MsgT>)>;
 

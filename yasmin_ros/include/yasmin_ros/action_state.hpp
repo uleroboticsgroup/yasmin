@@ -44,29 +44,30 @@ namespace yasmin_ros {
  * @tparam ActionT The type of the action this state will interface with.
  */
 template <typename ActionT> class ActionState : public yasmin::State {
-  using Goal = typename ActionT::Goal; ///< Alias for the action goal type.
-  using Result = typename ActionT::Result::SharedPtr; ///< Alias for the action
-                                                      ///< result type.
-  using Feedback =
-      typename ActionT::Feedback; ///< Alias for the action feedback type.
+  /// Alias for the action goal type.
+  using Goal = typename ActionT::Goal;
+  /// Alias for the action result type.
+  using Result = typename ActionT::Result::SharedPtr;
 
-  using SendGoalOptions = typename rclcpp_action::Client<
-      ActionT>::SendGoalOptions; ///< Options for sending goals.
-  using ActionClient = typename rclcpp_action::Client<
-      ActionT>::SharedPtr; ///< Shared pointer type for the action client.
-  using GoalHandle =
-      rclcpp_action::ClientGoalHandle<ActionT>; ///< Handle for the action goal.
-
-  using CreateGoalHandler = std::function<Goal(
-      std::shared_ptr<yasmin::blackboard::Blackboard>)>; ///< Function type for
-                                                         ///< creating a goal.
+  /// Alias for the action feedback type.
+  using Feedback = typename ActionT::Feedback;
+  /// Options for sending goals.
+  using SendGoalOptions =
+      typename rclcpp_action::Client<ActionT>::SendGoalOptions;
+  /// Shared pointer type for the action client.
+  using ActionClient = typename rclcpp_action::Client<ActionT>::SharedPtr;
+  /// Handle for the action goal.
+  using GoalHandle = rclcpp_action::ClientGoalHandle<ActionT>;
+  /// Function type for creating a goal.
+  using CreateGoalHandler =
+      std::function<Goal(std::shared_ptr<yasmin::blackboard::Blackboard>)>;
+  /// Function type for handling results.
   using ResultHandler = std::function<std::string(
-      std::shared_ptr<yasmin::blackboard::Blackboard>,
-      Result)>; ///< Function type for handling results.
-  using FeedbackHandler = std::function<void(
-      std::shared_ptr<yasmin::blackboard::Blackboard>,
-      std::shared_ptr<const Feedback>)>; ///< Function type for handling
-                                         ///< feedback.
+      std::shared_ptr<yasmin::blackboard::Blackboard>, Result)>;
+  /// Function type for handling feedback.
+  using FeedbackHandler =
+      std::function<void(std::shared_ptr<yasmin::blackboard::Blackboard>,
+                         std::shared_ptr<const Feedback>)>;
 
 public:
   /**

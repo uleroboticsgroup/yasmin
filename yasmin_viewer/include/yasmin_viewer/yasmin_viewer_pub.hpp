@@ -89,14 +89,17 @@ public:
   void publish_data();
 
 private:
-  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS 2 node.
-  rclcpp::Publisher<yasmin_msgs::msg::StateMachine>::SharedPtr
-      publisher;                      ///< Publisher for StateMachine messages.
-  rclcpp::TimerBase::SharedPtr timer; ///< Timer for periodic publishing.
+  /// Shared pointer to the ROS 2 node.
+  rclcpp::Node::SharedPtr node_;
+  /// Publisher for StateMachine messages.
+  rclcpp::Publisher<yasmin_msgs::msg::StateMachine>::SharedPtr publisher;
+  /// Timer for periodic publishing.
+  rclcpp::TimerBase::SharedPtr timer;
 
-  std::string fsm_name; ///< Name of the finite state machine.
-  std::shared_ptr<yasmin::StateMachine>
-      fsm; ///< Shared pointer to the state machine.
+  /// Name of the finite state machine.
+  std::string fsm_name;
+  /// Shared pointer to the state machine.
+  std::shared_ptr<yasmin::StateMachine> fsm;
 };
 
 } // namespace yasmin_viewer

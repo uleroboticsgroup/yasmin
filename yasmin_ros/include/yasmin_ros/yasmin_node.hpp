@@ -77,9 +77,10 @@ public:
   }
 
 private:
-  rclcpp::executors::MultiThreadedExecutor
-      executor; ///< Executor for managing multiple threads.
-  std::unique_ptr<std::thread> spin_thread; ///< Thread for spinning the node.
+  /// Executor for managing multiple threads.
+  rclcpp::executors::MultiThreadedExecutor executor;
+  /// Thread for spinning the node.
+  std::unique_ptr<std::thread> spin_thread;
 };
 
 } // namespace yasmin_ros
