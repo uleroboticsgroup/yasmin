@@ -173,12 +173,16 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
 Private Types</h2></td></tr>
 <tr class="memitem:a4e15d43a80f6c981d11bb3ea0968ea04" id="r_a4e15d43a80f6c981d11bb3ea0968ea04"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4e15d43a80f6c981d11bb3ea0968ea04">Request</a> = typename ServiceT::Request::SharedPtr</td></tr>
+<tr class="memdesc:a4e15d43a80f6c981d11bb3ea0968ea04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for the service request type.  <br /></td></tr>
 <tr class="separator:a4e15d43a80f6c981d11bb3ea0968ea04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45dbe94ff21fc31c8eacdbf615573e3c" id="r_a45dbe94ff21fc31c8eacdbf615573e3c"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45dbe94ff21fc31c8eacdbf615573e3c">Response</a> = typename ServiceT::Response::SharedPtr</td></tr>
+<tr class="memdesc:a45dbe94ff21fc31c8eacdbf615573e3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for the service response type.  <br /></td></tr>
 <tr class="separator:a45dbe94ff21fc31c8eacdbf615573e3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a08a67423f44619181a24fc9c800e0d86" id="r_a08a67423f44619181a24fc9c800e0d86"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a08a67423f44619181a24fc9c800e0d86">CreateRequestHandler</a></td></tr>
+<tr class="memdesc:a08a67423f44619181a24fc9c800e0d86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for creating a request.  <br /></td></tr>
 <tr class="separator:a08a67423f44619181a24fc9c800e0d86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace08fdefdf86553c57eaaa717819ce80" id="r_ace08fdefdf86553c57eaaa717819ce80"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ace08fdefdf86553c57eaaa717819ce80">ResponseHandler</a></td></tr>
+<tr class="memdesc:ace08fdefdf86553c57eaaa717819ce80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for handling a response.  <br /></td></tr>
 <tr class="separator:ace08fdefdf86553c57eaaa717819ce80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
@@ -249,8 +253,10 @@ template&lt;typename ServiceT &gt; </div>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line"> </div>
 <div class="line">      std::function&lt;<a class="code hl_typedef" href="#a4e15d43a80f6c981d11bb3ea0968ea04">Request</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt;)&gt;</div>
-<div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_a4e15d43a80f6c981d11bb3ea0968ea04"><div class="ttname"><a href="#a4e15d43a80f6c981d11bb3ea0968ea04">yasmin_ros::ServiceState::Request</a></div><div class="ttdeci">typename ServiceT::Request::SharedPtr Request</div><div class="ttdef"><b>Definition</b> service_state.hpp:44</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_a4e15d43a80f6c981d11bb3ea0968ea04"><div class="ttname"><a href="#a4e15d43a80f6c981d11bb3ea0968ea04">yasmin_ros::ServiceState::Request</a></div><div class="ttdeci">typename ServiceT::Request::SharedPtr Request</div><div class="ttdoc">Alias for the service request type.</div><div class="ttdef"><b>Definition</b> service_state.hpp:44</div></div>
 </div><!-- fragment -->
+<p>Function type for creating a request. </p>
+
 </div>
 </div>
 <a id="a4e15d43a80f6c981d11bb3ea0968ea04" name="a4e15d43a80f6c981d11bb3ea0968ea04"></a>
@@ -275,6 +281,8 @@ template&lt;typename ServiceT &gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>Alias for the service request type. </p>
+
 </div>
 </div>
 <a id="a45dbe94ff21fc31c8eacdbf615573e3c" name="a45dbe94ff21fc31c8eacdbf615573e3c"></a>
@@ -298,6 +306,8 @@ template&lt;typename ServiceT &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Alias for the service response type. </p>
 
 </div>
 </div>
@@ -324,8 +334,10 @@ template&lt;typename ServiceT &gt; </div>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line"> std::function&lt;std::string(</div>
 <div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt;, <a class="code hl_typedef" href="#a45dbe94ff21fc31c8eacdbf615573e3c">Response</a>)&gt;</div>
-<div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_a45dbe94ff21fc31c8eacdbf615573e3c"><div class="ttname"><a href="#a45dbe94ff21fc31c8eacdbf615573e3c">yasmin_ros::ServiceState::Response</a></div><div class="ttdeci">typename ServiceT::Response::SharedPtr Response</div><div class="ttdef"><b>Definition</b> service_state.hpp:45</div></div>
+<div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_a45dbe94ff21fc31c8eacdbf615573e3c"><div class="ttname"><a href="#a45dbe94ff21fc31c8eacdbf615573e3c">yasmin_ros::ServiceState::Response</a></div><div class="ttdeci">typename ServiceT::Response::SharedPtr Response</div><div class="ttdoc">Alias for the service response type.</div><div class="ttdef"><b>Definition</b> service_state.hpp:46</div></div>
 </div><!-- fragment -->
+<p>Function type for handling a response. </p>
+
 </div>
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
