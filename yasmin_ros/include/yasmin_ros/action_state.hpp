@@ -295,32 +295,43 @@ public:
   }
 
 private:
-  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS 2 node.
+  /// Shared pointer to the ROS 2 node.
+  rclcpp::Node::SharedPtr node_;
 
-  std::string action_name; ///< Name of the action to communicate with.
+  /// Name of the action to communicate with.
+  std::string action_name;
 
-  ActionClient action_client; ///< Shared pointer to the action client.
-  std::condition_variable
-      action_done_cond;         ///< Condition variable for action completion.
-  std::mutex action_done_mutex; ///< Mutex for protecting action completion.
-  std::condition_variable
-      action_cancel_cond; ///< Condition variable for action cancellation.
-  std::mutex action_cancel_mutex; ///< Mutex for protecting action cancellation.
+  /// Shared pointer to the action client.
+  ActionClient action_client;
+  /// Condition variable for action completion.
+  std::condition_variable action_done_cond;
 
-  Result action_result; ///< Shared pointer to the action result.
-  rclcpp_action::ResultCode action_status; ///< Status of the action execution.
+  /// Mutex for protecting action completion.
+  std::mutex action_done_mutex;
+  /// Condition variable for action cancellation.
+  std::condition_variable action_cancel_cond;
+  /// Mutex for protecting action cancellation.
+  std::mutex action_cancel_mutex;
 
-  std::shared_ptr<GoalHandle> goal_handle; ///< Handle for the current goal.
-  std::mutex
-      goal_handle_mutex; ///< Mutex for protecting access to the goal handle.
+  /// Shared pointer to the action result.
+  Result action_result;
+  /// Status of the action execution.
+  rclcpp_action::ResultCode action_status;
 
-  CreateGoalHandler
-      create_goal_handler;      ///< Handler function for creating goals.
-  ResultHandler result_handler; ///< Handler function for processing results.
-  FeedbackHandler
-      feedback_handler; ///< Handler function for processing feedback.
+  /// Handle for the current goal.
+  std::shared_ptr<GoalHandle> goal_handle;
+  /// Mutex for protecting access to the goal handle.
+  std::mutex goal_handle_mutex;
 
-  int timeout; ///< Maximum time to wait for the action server.
+  /// Handler function for creating goals.
+  CreateGoalHandler create_goal_handler;
+  /// Handler function for processing results.
+  ResultHandler result_handler;
+  /// Handler function for processing feedback.
+  FeedbackHandler feedback_handler;
+
+  /// Maximum time to wait for the action server.
+  int timeout;
 
 #if defined(FOXY)
   /**

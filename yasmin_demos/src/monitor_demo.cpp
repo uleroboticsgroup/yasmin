@@ -44,8 +44,8 @@ class PrintOdometryState
     : public yasmin_ros::MonitorState<nav_msgs::msg::Odometry> {
 
 public:
-  int times; ///< The number of times the state will print odometry data before
-             ///< transitioning.
+  /// The number of times the state will process messages
+  int times;
 
   /**
    * @brief Constructor for the PrintOdometryState class.

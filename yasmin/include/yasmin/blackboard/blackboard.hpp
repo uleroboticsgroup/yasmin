@@ -40,9 +40,10 @@ namespace blackboard {
  */
 class Blackboard {
 private:
-  std::recursive_mutex mutex; ///< Mutex for thread safety.
-  std::map<std::string, BlackboardValueInterface *>
-      values; ///< Storage for key-value pairs.
+  /// Mutex for thread safety.
+  std::recursive_mutex mutex;
+  /// Storage for key-value pairs.
+  std::map<std::string, BlackboardValueInterface *> values;
 
 public:
   /** @brief Default constructor for Blackboard. */

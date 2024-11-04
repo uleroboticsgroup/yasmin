@@ -42,7 +42,8 @@ namespace yasmin {
 class State {
 
 protected:
-  std::set<std::string> outcomes; ///< The possible outcomes of this state.
+  /// The possible outcomes of this state.
+  std::set<std::string> outcomes;
 
 private:
   /// Indicates if the state has been canceled.

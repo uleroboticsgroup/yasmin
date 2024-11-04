@@ -186,14 +186,18 @@ public:
   }
 
 private:
-  rclcpp::Node::SharedPtr node_; ///< Shared pointer to the ROS 2 node.
-  std::shared_ptr<rclcpp::Client<ServiceT>>
-      service_client; ///< Shared pointer to the service client.
-  CreateRequestHandler
-      create_request_handler;       ///< Function to create service requests.
-  ResponseHandler response_handler; ///< Function to handle service responses.
-  std::string srv_name;             ///< Name of the service.
-  int timeout; ///< Maximum wait time for service availability.
+  /// Shared pointer to the ROS 2 node
+  rclcpp::Node::SharedPtr node_;
+  /// Shared pointer to the service client.
+  std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
+  /// Function to create service requests.
+  CreateRequestHandler create_request_handler;
+  /// Function to handle service responses.
+  ResponseHandler response_handler;
+  /// Name of the service.
+  std::string srv_name;
+  /// Maximum wait time for service availability.
+  int timeout;
 
   /**
    * @brief Create a service request based on the blackboard.

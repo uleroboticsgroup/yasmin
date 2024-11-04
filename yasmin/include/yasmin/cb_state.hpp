@@ -36,7 +36,7 @@ namespace yasmin {
 class CbState : public State {
 
 private:
-  /** Pointer to the callback function to be executed. */
+  /// Pointer to the callback function to be executed.
   std::string (*callback)(std::shared_ptr<blackboard::Blackboard> blackboard);
 
 public:
