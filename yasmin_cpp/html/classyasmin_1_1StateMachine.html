@@ -204,9 +204,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af4664f1eb401366e959dc7c1cadf1ac0" id="r_af4664f1eb401366e959dc7c1cadf1ac0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af4664f1eb401366e959dc7c1cadf1ac0">call_end_cbs</a> (std::shared_ptr&lt; <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">yasmin::blackboard::Blackboard</a> &gt; blackboard, const std::string &amp;outcome)</td></tr>
 <tr class="memdesc:af4664f1eb401366e959dc7c1cadf1ac0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls end callbacks with the given blackboard and outcome.  <br /></td></tr>
 <tr class="separator:af4664f1eb401366e959dc7c1cadf1ac0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a313d2ff62b94d8370614a7cdb41301e9" id="r_a313d2ff62b94d8370614a7cdb41301e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a313d2ff62b94d8370614a7cdb41301e9">validate</a> ()</td></tr>
-<tr class="memdesc:a313d2ff62b94d8370614a7cdb41301e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates the state machine configuration.  <br /></td></tr>
-<tr class="separator:a313d2ff62b94d8370614a7cdb41301e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8944f14bc96dade7c16ab4fdfbbfbad1" id="r_a8944f14bc96dade7c16ab4fdfbbfbad1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8944f14bc96dade7c16ab4fdfbbfbad1">validate</a> (bool strict_mode=false)</td></tr>
+<tr class="memdesc:a8944f14bc96dade7c16ab4fdfbbfbad1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates the state machine configuration.  <br /></td></tr>
+<tr class="separator:a8944f14bc96dade7c16ab4fdfbbfbad1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23c788ba8c7e021ace6bdeabe729f26d" id="r_a23c788ba8c7e021ace6bdeabe729f26d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a23c788ba8c7e021ace6bdeabe729f26d">execute</a> (std::shared_ptr&lt; <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">blackboard::Blackboard</a> &gt; blackboard) override</td></tr>
 <tr class="memdesc:a23c788ba8c7e021ace6bdeabe729f26d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the state machine.  <br /></td></tr>
 <tr class="separator:a23c788ba8c7e021ace6bdeabe729f26d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -918,8 +918,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="a313d2ff62b94d8370614a7cdb41301e9" name="a313d2ff62b94d8370614a7cdb41301e9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a313d2ff62b94d8370614a7cdb41301e9">&#9670;&#160;</a></span>validate()</h2>
+<a id="a8944f14bc96dade7c16ab4fdfbbfbad1" name="a8944f14bc96dade7c16ab4fdfbbfbad1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8944f14bc96dade7c16ab4fdfbbfbad1">&#9670;&#160;</a></span>validate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -927,13 +927,19 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname">void StateMachine::validate </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>strict_mode</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Validates the state machine configuration. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">strict</td><td>Whether the validation is strict, which means checking if all state outcomes are used and all state machine outcomes are reached. </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
     <tr><td class="paramname">std::runtime_error</td><td>If the state machine is misconfigured. </td></tr>

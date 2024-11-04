@@ -91,7 +91,6 @@ $(function(){ initResizable(false); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
@@ -150,8 +149,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:af85ff105f02c9ef4d722965412e39b1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad26b4c87836e89fed5b8667e910c2314" id="r_ad26b4c87836e89fed5b8667e910c2314"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad26b4c87836e89fed5b8667e910c2314">add_end_cb</a> (self, Callable cb, List[Any] args=None)</td></tr>
 <tr class="separator:ad26b4c87836e89fed5b8667e910c2314"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a896b1dea10aca27b49730dd6f2c7886b" id="r_a896b1dea10aca27b49730dd6f2c7886b"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a896b1dea10aca27b49730dd6f2c7886b">validate</a> (self)</td></tr>
-<tr class="separator:a896b1dea10aca27b49730dd6f2c7886b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11997e49aa82d858cb996f57a5fee0dc" id="r_a11997e49aa82d858cb996f57a5fee0dc"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a11997e49aa82d858cb996f57a5fee0dc">validate</a> (self, bool strict_mode=False)</td></tr>
+<tr class="separator:a11997e49aa82d858cb996f57a5fee0dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f1e62d9957a97080a3222c244fd505c" id="r_a2f1e62d9957a97080a3222c244fd505c"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f1e62d9957a97080a3222c244fd505c">execute</a> (self, <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a> blackboard)</td></tr>
 <tr class="separator:a2f1e62d9957a97080a3222c244fd505c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f17fd5d6fbbbc85d8524802c3bbe3b7" id="r_a5f17fd5d6fbbbc85d8524802c3bbe3b7"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f17fd5d6fbbbc85d8524802c3bbe3b7">cancel_state</a> (self)</td></tr>
@@ -167,11 +166,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae904186744d93be595c17b9c9489750d inherit pub_methods_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5631519cc0b56dfa8f8c51bc047cbe4 inherit pub_methods_classyasmin_1_1state_1_1State" id="r_af5631519cc0b56dfa8f8c51bc047cbe4"><td class="memItemLeft" align="right" valign="top">Set[str]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#af5631519cc0b56dfa8f8c51bc047cbe4">get_outcomes</a> (self)</td></tr>
 <tr class="separator:af5631519cc0b56dfa8f8c51bc047cbe4 inherit pub_methods_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a5084760f6e7fd6302cf6152c96c0392e" id="r_a5084760f6e7fd6302cf6152c96c0392e"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5084760f6e7fd6302cf6152c96c0392e">_validated</a> = []</td></tr>
-<tr class="separator:a5084760f6e7fd6302cf6152c96c0392e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -231,6 +225,7 @@ Attributes:
     _start_state (str): The name of the initial state of the state machine.
     __current_state (str): The name of the current state being executed.
     __current_state_lock (Lock): A threading lock to manage access to the current state.
+    _validated (bool): A flag indicating whether the state machine has been validated.
     __start_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call when the state machine starts.
     __transition_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call during state transitions.
     __end_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call when the state machine ends.
@@ -707,8 +702,8 @@ Raises:
 </pre> 
 </div>
 </div>
-<a id="a896b1dea10aca27b49730dd6f2c7886b" name="a896b1dea10aca27b49730dd6f2c7886b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a896b1dea10aca27b49730dd6f2c7886b">&#9670;&#160;</a></span>validate()</h2>
+<a id="a11997e49aa82d858cb996f57a5fee0dc" name="a11997e49aa82d858cb996f57a5fee0dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11997e49aa82d858cb996f57a5fee0dc">&#9670;&#160;</a></span>validate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -716,12 +711,19 @@ Raises:
         <tr>
           <td class="memname"> None yasmin.state_machine.StateMachine.validate </td>
           <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">bool </td>          <td class="paramname"><span class="paramname"><em>strict_mode</em></span><span class="paramdefsep"> = </span><span class="paramdefval">False</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 <pre class="fragment">Validates the state machine to ensure all states and transitions are correct.
+
+Parameters:
+    strict_mode (bool): Whether the validation is strict, which means checking if all state outcomes are used and all state machine outcomes are reached.
 
 Raises:
     RuntimeError: If no initial state is set.
@@ -899,7 +901,7 @@ Raises:
 </div>
 </div>
 <a id="af8653bb2fdbf0cc0d32a0c894ce5b4bc" name="af8653bb2fdbf0cc0d32a0c894ce5b4bc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af8653bb2fdbf0cc0d32a0c894ce5b4bc">&#9670;&#160;</a></span>_validated <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#af8653bb2fdbf0cc0d32a0c894ce5b4bc">&#9670;&#160;</a></span>_validated</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -919,20 +921,6 @@ Raises:
 </div><div class="memdoc">
 
 <p>A flag indicating whether the state machine has been validated. </p>
-
-</div>
-</div>
-<a id="a5084760f6e7fd6302cf6152c96c0392e" name="a5084760f6e7fd6302cf6152c96c0392e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5084760f6e7fd6302cf6152c96c0392e">&#9670;&#160;</a></span>_validated <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">list yasmin.state_machine.StateMachine._validated = []</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
 </div>
 </div>
