@@ -14,8 +14,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import unittest
 import time
+import unittest
 from threading import Thread
 
 from yasmin_ros import ActionState, ServiceState, MonitorState
@@ -109,7 +109,7 @@ class TestYasminRos(unittest.TestCase):
     def tearDownClass(cls):
         rclpy.shutdown()
 
-    def test_yasmin_ros_action_succeed(self):
+    def test_action_succeed(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -119,7 +119,7 @@ class TestYasminRos(unittest.TestCase):
         state = ActionState(Fibonacci, "test", create_goal_cb)
         self.assertEqual(SUCCEED, state())
 
-    def test_yasmin_ros_action_result_handler(self):
+    def test_action_result_handler(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -134,7 +134,7 @@ class TestYasminRos(unittest.TestCase):
         )
         self.assertEqual("new_outcome", state())
 
-    def test_yasmin_ros_action_cancel(self):
+    def test_action_cancel(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -157,7 +157,7 @@ class TestYasminRos(unittest.TestCase):
         self.assertEqual(CANCEL, state())
         thread.join()
 
-    def test_yasmin_ros_action_abort(self):
+    def test_action_abort(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -167,7 +167,7 @@ class TestYasminRos(unittest.TestCase):
         state = ActionState(Fibonacci, "test", create_goal_cb)
         self.assertEqual(ABORT, state())
 
-    def test_yasmin_ros_service(self):
+    def test_service(self):
 
         def create_request_cb(blackboard):
             request = AddTwoInts.Request()
@@ -178,7 +178,7 @@ class TestYasminRos(unittest.TestCase):
         state = ServiceState(AddTwoInts, "test", create_request_cb)
         self.assertEqual(SUCCEED, state())
 
-    def test_yasmin_ros_service_response_handler(self):
+    def test_service_response_handler(self):
 
         def create_request_cb(blackboard):
             request = AddTwoInts.Request()
@@ -194,7 +194,7 @@ class TestYasminRos(unittest.TestCase):
         )
         self.assertEqual("new_outcome", state())
 
-    def test_yasmin_ros_monitor_timeout(self):
+    def test_monitor_timeout(self):
 
         def monitor_handler(blackboard, msg):
             return SUCCEED

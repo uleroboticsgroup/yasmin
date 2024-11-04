@@ -35,7 +35,7 @@ class FooState(State):
 
 class BarState(State):
     def __init__(self):
-        super().__init__(outcomes=["outcome2"])
+        super().__init__(outcomes=["outcome2", "outcome3"])
 
     def execute(self, blackboard):
         return "outcome2"
@@ -46,7 +46,7 @@ class TestStateMachine(unittest.TestCase):
     maxDiff = None
 
     def setUp(self):
-        self.sm = StateMachine(outcomes=["outcome4"])
+        self.sm = StateMachine(outcomes=["outcome4", "outcome5"])
 
         self.sm.add_state(
             "FOO",
@@ -62,19 +62,19 @@ class TestStateMachine(unittest.TestCase):
             transitions={"outcome2": "FOO"},
         )
 
-    def test_state_machine_str(self):
+    def test_str(self):
         self.assertEqual("State Machine [BAR (BarState), FOO (FooState)]", str(self.sm))
 
-    def test_state_machine_get_states(self):
+    def test_get_states(self):
         self.assertTrue(isinstance(self.sm.get_states()["FOO"]["state"], FooState))
         self.assertTrue(isinstance(self.sm.get_states()["BAR"]["state"], BarState))
 
-    def test_state_machine_get_start_state(self):
+    def test_get_start_state(self):
         self.assertEqual("FOO", self.sm.get_start_state())
         self.sm.set_start_state("BAR")
         self.assertEqual("BAR", self.sm.get_start_state())
 
-    def test_state_machine_get_current_state(self):
+    def test_get_current_state(self):
         self.assertEqual("", self.sm.get_current_state())
 
     def test_state_call(self):
@@ -148,7 +148,7 @@ class TestStateMachine(unittest.TestCase):
             str(context.exception), "Transitions with empty target in state 'FOO1'"
         )
 
-    def test_validate_state_machine_outcome_from_fsm_not_used(self):
+    def test_validate_outcome_from_fsm_not_used(self):
 
         sm_1 = StateMachine(outcomes=["outcome4"])
 
@@ -163,14 +163,15 @@ class TestStateMachine(unittest.TestCase):
                 "outcome2": "outcome4",
             },
         )
+
         with self.assertRaises(KeyError) as context:
-            sm_1.validate()
+            sm_1.validate(True)
         self.assertEqual(
             str(context.exception),
             "\"State 'FSM' outcome 'outcome5' not registered in transitions\"",
         )
 
-    def test_validate_state_machine_outcome_from_state_not_used(self):
+    def test_validate_outcome_from_state_not_used(self):
 
         sm_1 = StateMachine(outcomes=["outcome4"])
 
@@ -184,14 +185,15 @@ class TestStateMachine(unittest.TestCase):
                 "outcome1": "outcome4",
             },
         )
+
         with self.assertRaises(KeyError) as context:
-            sm_1.validate()
+            sm_1.validate(True)
         self.assertEqual(
             str(context.exception),
             "\"State 'FOO' outcome 'outcome2' not registered in transitions\"",
         )
 
-    def test_validate_state_machine_fsm_outcome_not_used(self):
+    def test_validate_fsm_outcome_not_used(self):
 
         sm_1 = StateMachine(outcomes=["outcome4"])
 
@@ -212,14 +214,15 @@ class TestStateMachine(unittest.TestCase):
                 "outcome2": "outcome4",
             },
         )
+
         with self.assertRaises(KeyError) as context:
-            sm_1.validate()
+            sm_1.validate(True)
         self.assertEqual(
             str(context.exception),
             "\"Target outcome 'outcome5' not registered in transitions\"",
         )
 
-    def test_validate_state_machine_wrong_state(self):
+    def test_validate_wrong_state(self):
 
         sm_1 = StateMachine(outcomes=["outcome4"])
 
@@ -240,6 +243,7 @@ class TestStateMachine(unittest.TestCase):
                 "outcome2": "outcome4",
             },
         )
+
         with self.assertRaises(KeyError) as context:
             sm_1.validate()
         self.assertEqual(

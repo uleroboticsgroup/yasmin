@@ -32,6 +32,7 @@ class StateMachine(State):
         _start_state (str): The name of the initial state of the state machine.
         __current_state (str): The name of the current state being executed.
         __current_state_lock (Lock): A threading lock to manage access to the current state.
+        _validated (bool): A flag indicating whether the state machine has been validated.
         __start_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call when the state machine starts.
         __transition_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call during state transitions.
         __end_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call when the state machine ends.
@@ -276,9 +277,12 @@ class StateMachine(State):
         except Exception as e:
             yasmin.YASMIN_LOG_ERROR(f"Could not execute end callback: {e}")
 
-    def validate(self) -> None:
+    def validate(self, strict_mode: bool = False) -> None:
         """
         Validates the state machine to ensure all states and transitions are correct.
+
+        Parameters:
+            strict_mode (bool): Whether the validation is strict, which means checking if all state outcomes are used and all state machine outcomes are reached.
 
         Raises:
             RuntimeError: If no initial state is set.
@@ -286,10 +290,10 @@ class StateMachine(State):
         """
         yasmin.YASMIN_LOG_DEBUG(f"Validating state machine '{self}'")
 
-        if self._validated:
+        if self._validated and not strict_mode:
             yasmin.YASMIN_LOG_DEBUG("State machine '{self}' has already been validated")
 
-        # terminal outcomes
+        # Terminal outcomes from all transitions
         terminal_outcomes = []
 
         # Check initial state
@@ -303,20 +307,21 @@ class StateMachine(State):
 
             outcomes = state.get_outcomes()
 
-            # Check if all state outcomes are in transitions
-            for o in outcomes:
-                if o not in set(list(transitions.keys()) + list(self.get_outcomes())):
-                    raise KeyError(
-                        f"State '{state_name}' outcome '{o}' not registered in transitions"
-                    )
+            if strict_mode:
+                # Check if all outcomes of the state are in transitions
+                for o in outcomes:
+                    if o not in set(list(transitions.keys()) + list(self.get_outcomes())):
+                        raise KeyError(
+                            f"State '{state_name}' outcome '{o}' not registered in transitions"
+                        )
 
-                # State outcomes that are in state machine outcomes do not need transitions
-                elif o in self.get_outcomes():
-                    terminal_outcomes.append(o)
+                    # Outcomes of the state that are in outcomes of the state machine do not need transitions
+                    elif o in self.get_outcomes():
+                        terminal_outcomes.append(o)
 
             # If state is a state machine, validate it
             if isinstance(state, StateMachine):
-                state.validate()
+                state.validate(strict_mode)
 
             # Add terminal outcomes
             terminal_outcomes.extend([transitions[key] for key in transitions])
@@ -324,12 +329,13 @@ class StateMachine(State):
         # Check terminal outcomes for the state machine
         terminal_outcomes = set(terminal_outcomes)
 
-        # Check if all state machine outcomes are in the terminal outcomes
-        for o in self.get_outcomes():
-            if o not in terminal_outcomes:
-                raise KeyError(f"Target outcome '{o}' not registered in transitions")
+        if strict_mode:
+            # Check if all outcomes of the state machine are in the terminal outcomes
+            for o in self.get_outcomes():
+                if o not in terminal_outcomes:
+                    raise KeyError(f"Target outcome '{o}' not registered in transitions")
 
-        # Check if all terminal outcomes are states or state machine outcomes
+        # Check if all terminal outcomes are states or outcomes of the state machine
         for o in terminal_outcomes:
             if o not in set(list(self._states.keys()) + list(self.get_outcomes())):
                 raise KeyError(

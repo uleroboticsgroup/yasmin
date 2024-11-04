@@ -184,9 +184,11 @@ public:
   /**
    * @brief Validates the state machine configuration.
    *
+   * @param strict Whether the validation is strict, which means checking if all
+   * state outcomes are used and all state machine outcomes are reached.
    * @throws std::runtime_error If the state machine is misconfigured.
    */
-  void validate();
+  void validate(bool strict_mode = false);
 
   /**
    * @brief Executes the state machine.

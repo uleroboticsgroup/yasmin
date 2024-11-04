@@ -196,11 +196,11 @@ void StateMachine::call_end_cbs(
   }
 }
 
-void StateMachine::validate() {
+void StateMachine::validate(bool strict_mode) {
 
   YASMIN_LOG_DEBUG("Validating state machine '%s'", this->to_string().c_str());
 
-  if (this->validated.load()) {
+  if (this->validated.load() && !strict_mode) {
     YASMIN_LOG_DEBUG("State machine '%s' has already been validated",
                      this->to_string().c_str());
   }
@@ -210,6 +210,7 @@ void StateMachine::validate() {
     throw std::runtime_error("No initial state set");
   }
 
+  // Terminal outcomes from all transitions
   std::set<std::string> terminal_outcomes;
 
   // Check all states
@@ -222,26 +223,30 @@ void StateMachine::validate() {
 
     std::set<std::string> outcomes = state->get_outcomes();
 
-    // Check if all state outcomes are in transitions
-    for (const std::string &o : outcomes) {
+    if (strict_mode) {
+      // Check if all outcomes of the state are in transitions
+      for (const std::string &o : outcomes) {
 
-      if (transitions.find(o) == transitions.end() &&
-          std::find(this->get_outcomes().begin(), this->get_outcomes().end(),
-                    o) == this->get_outcomes().end()) {
+        if (transitions.find(o) == transitions.end() &&
+            std::find(this->get_outcomes().begin(), this->get_outcomes().end(),
+                      o) == this->get_outcomes().end()) {
 
-        throw std::runtime_error("State '" + state_name + "' outcome '" + o +
-                                 "' not registered in transitions");
+          throw std::runtime_error("State '" + state_name + "' outcome '" + o +
+                                   "' not registered in transitions");
 
-      } else if (std::find(this->get_outcomes().begin(),
-                           this->get_outcomes().end(),
-                           o) != this->get_outcomes().end()) {
-        terminal_outcomes.insert(o);
+          // Outcomes of the state that are in outcomes of the state machine
+          // do not need transitions
+        } else if (std::find(this->get_outcomes().begin(),
+                             this->get_outcomes().end(),
+                             o) != this->get_outcomes().end()) {
+          terminal_outcomes.insert(o);
+        }
       }
     }
 
     // If state is a state machine, validate it
     if (std::dynamic_pointer_cast<StateMachine>(state)) {
-      std::dynamic_pointer_cast<StateMachine>(state)->validate();
+      std::dynamic_pointer_cast<StateMachine>(state)->validate(strict_mode);
     }
 
     // Add terminal outcomes
@@ -255,15 +260,17 @@ void StateMachine::validate() {
   std::set<std::string> sm_outcomes(this->get_outcomes().begin(),
                                     this->get_outcomes().end());
 
-  // Check if all state machine outcomes are in the terminal outcomes
-  for (const std::string &o : this->get_outcomes()) {
-    if (terminal_outcomes.find(o) == terminal_outcomes.end()) {
-      throw std::runtime_error("Target outcome '" + o +
-                               "' not registered in transitions");
+  if (strict_mode) {
+    // Check if all outcomes from the state machine are in the terminal outcomes
+    for (const std::string &o : this->get_outcomes()) {
+      if (terminal_outcomes.find(o) == terminal_outcomes.end()) {
+        throw std::runtime_error("Target outcome '" + o +
+                                 "' not registered in transitions");
+      }
     }
   }
 
-  // Check if all terminal outcomes are states or state machine outcomes
+  // Check if all terminal outcomes are states or outcomes of the state machine
   for (const std::string &o : terminal_outcomes) {
     if (this->states.find(o) == this->states.end() &&
         sm_outcomes.find(o) == sm_outcomes.end()) {

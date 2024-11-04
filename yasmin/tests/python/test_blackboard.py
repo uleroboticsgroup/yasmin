@@ -23,19 +23,19 @@ class TestBlackboard(unittest.TestCase):
     def setUp(self):
         self.blackboard = Blackboard()
 
-    def test_blackboard_get(self):
+    def test_get(self):
         self.blackboard["foo"] = "foo"
         self.assertEqual("foo", self.blackboard["foo"])
 
-    def test_blackboard_delete(self):
+    def test_delete(self):
         self.blackboard["foo"] = "foo"
         del self.blackboard["foo"]
         self.assertFalse("foo" in self.blackboard)
 
-    def test_blackboard_contains(self):
+    def test_contains(self):
         self.blackboard["foo"] = "foo"
         self.assertTrue("foo" in self.blackboard)
 
-    def test_blackboard_len(self):
+    def test_len(self):
         self.blackboard["foo"] = "foo"
         self.assertEqual(1, len(self.blackboard))
