@@ -242,10 +242,13 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
 Private Types</h2></td></tr>
 <tr class="memitem:adec291e248ecafa22b66ae7a74a11ae3" id="r_adec291e248ecafa22b66ae7a74a11ae3"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adec291e248ecafa22b66ae7a74a11ae3">StartCallbackType</a></td></tr>
+<tr class="memdesc:adec291e248ecafa22b66ae7a74a11ae3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for a callback function executed before running the state machine.  <br /></td></tr>
 <tr class="separator:adec291e248ecafa22b66ae7a74a11ae3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a19e6b40f2a25c21a707096ed3b7ba481" id="r_a19e6b40f2a25c21a707096ed3b7ba481"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a19e6b40f2a25c21a707096ed3b7ba481">TransitionCallbackType</a></td></tr>
+<tr class="memdesc:a19e6b40f2a25c21a707096ed3b7ba481"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for a callback function executed before changing the state.  <br /></td></tr>
 <tr class="separator:a19e6b40f2a25c21a707096ed3b7ba481"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4972620f374524162cd70f83339eaddf" id="r_a4972620f374524162cd70f83339eaddf"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4972620f374524162cd70f83339eaddf">EndCallbackType</a></td></tr>
+<tr class="memdesc:a4972620f374524162cd70f83339eaddf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for a callback function executed after running the state machine.  <br /></td></tr>
 <tr class="separator:a4972620f374524162cd70f83339eaddf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
@@ -265,14 +268,17 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:a00aa0351ac86ba15f32ec87f53c30229" id="r_a00aa0351ac86ba15f32ec87f53c30229"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; std::mutex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00aa0351ac86ba15f32ec87f53c30229">current_state_mutex</a></td></tr>
 <tr class="memdesc:a00aa0351ac86ba15f32ec87f53c30229"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex for current state access.  <br /></td></tr>
 <tr class="separator:a00aa0351ac86ba15f32ec87f53c30229"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08f56cd6b06ea2bf5cd96a02767d2b54" id="r_a08f56cd6b06ea2bf5cd96a02767d2b54"><td class="memItemLeft" align="right" valign="top">std::atomic_bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a08f56cd6b06ea2bf5cd96a02767d2b54">validated</a> {false}</td></tr>
+<tr class="memdesc:a08f56cd6b06ea2bf5cd96a02767d2b54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to indicate if the state machine has been validated.  <br /></td></tr>
+<tr class="separator:a08f56cd6b06ea2bf5cd96a02767d2b54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9169917ac5f541501bead757fe92a7c" id="r_af9169917ac5f541501bead757fe92a7c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; <a class="el" href="#adec291e248ecafa22b66ae7a74a11ae3">StartCallbackType</a>, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9169917ac5f541501bead757fe92a7c">start_cbs</a></td></tr>
-<tr class="memdesc:af9169917ac5f541501bead757fe92a7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start callbacks.  <br /></td></tr>
+<tr class="memdesc:af9169917ac5f541501bead757fe92a7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start callbacks executed before the state machine.  <br /></td></tr>
 <tr class="separator:af9169917ac5f541501bead757fe92a7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b5d2108a3bbd738201611aa8e098ee1" id="r_a8b5d2108a3bbd738201611aa8e098ee1"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; <a class="el" href="#a19e6b40f2a25c21a707096ed3b7ba481">TransitionCallbackType</a>, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b5d2108a3bbd738201611aa8e098ee1">transition_cbs</a></td></tr>
-<tr class="memdesc:a8b5d2108a3bbd738201611aa8e098ee1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transition callbacks.  <br /></td></tr>
+<tr class="memdesc:a8b5d2108a3bbd738201611aa8e098ee1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transition callbacks executed before changing the state.  <br /></td></tr>
 <tr class="separator:a8b5d2108a3bbd738201611aa8e098ee1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18c3e572cdb26df60dffc474a7b449b1" id="r_a18c3e572cdb26df60dffc474a7b449b1"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; <a class="el" href="#a4972620f374524162cd70f83339eaddf">EndCallbackType</a>, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18c3e572cdb26df60dffc474a7b449b1">end_cbs</a></td></tr>
-<tr class="memdesc:a18c3e572cdb26df60dffc474a7b449b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">End callbacks.  <br /></td></tr>
+<tr class="memdesc:a18c3e572cdb26df60dffc474a7b449b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">End callbacks executed before the state machine.  <br /></td></tr>
 <tr class="separator:a18c3e572cdb26df60dffc474a7b449b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
@@ -309,6 +315,8 @@ Additional Inherited Members</h2></td></tr>
 <div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt;, <span class="keyword">const</span> std::string &amp;,</div>
 <div class="line">      <span class="keyword">const</span> std::vector&lt;std::string&gt; &amp;)&gt;</div>
 </div><!-- fragment -->
+<p>Alias for a callback function executed after running the state machine. </p>
+
 </div>
 </div>
 <a id="adec291e248ecafa22b66ae7a74a11ae3" name="adec291e248ecafa22b66ae7a74a11ae3"></a>
@@ -334,6 +342,8 @@ Additional Inherited Members</h2></td></tr>
 <div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt;, <span class="keyword">const</span> std::string &amp;,</div>
 <div class="line">      <span class="keyword">const</span> std::vector&lt;std::string&gt; &amp;)&gt;</div>
 </div><!-- fragment -->
+<p>Alias for a callback function executed before running the state machine. </p>
+
 </div>
 </div>
 <a id="a19e6b40f2a25c21a707096ed3b7ba481" name="a19e6b40f2a25c21a707096ed3b7ba481"></a>
@@ -360,6 +370,8 @@ Additional Inherited Members</h2></td></tr>
 <div class="line">      <span class="keyword">const</span> std::string &amp;, <span class="keyword">const</span> std::string &amp;,</div>
 <div class="line">      <span class="keyword">const</span> std::vector&lt;std::string&gt; &amp;)&gt;</div>
 </div><!-- fragment -->
+<p>Alias for a callback function executed before changing the state. </p>
+
 </div>
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -1000,7 +1012,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>End callbacks. </p>
+<p>End callbacks executed before the state machine. </p>
 
 </div>
 </div>
@@ -1024,7 +1036,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Start callbacks. </p>
+<p>Start callbacks executed before the state machine. </p>
 
 </div>
 </div>
@@ -1096,7 +1108,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Transition callbacks. </p>
+<p>Transition callbacks executed before changing the state. </p>
 
 </div>
 </div>
@@ -1121,6 +1133,30 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Map of transitions. </p>
+
+</div>
+</div>
+<a id="a08f56cd6b06ea2bf5cd96a02767d2b54" name="a08f56cd6b06ea2bf5cd96a02767d2b54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08f56cd6b06ea2bf5cd96a02767d2b54">&#9670;&#160;</a></span>validated</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::atomic_bool yasmin::StateMachine::validated {false}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Flag to indicate if the state machine has been validated. </p>
 
 </div>
 </div>

@@ -91,6 +91,7 @@ $(function(){ initResizable(false); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
@@ -167,6 +168,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af5631519cc0b56dfa8f8c51bc047cbe4 inherit pub_methods_classyasmin_1_1state_1_1State" id="r_af5631519cc0b56dfa8f8c51bc047cbe4"><td class="memItemLeft" align="right" valign="top">Set[str]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#af5631519cc0b56dfa8f8c51bc047cbe4">get_outcomes</a> (self)</td></tr>
 <tr class="separator:af5631519cc0b56dfa8f8c51bc047cbe4 inherit pub_methods_classyasmin_1_1state_1_1State"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a5084760f6e7fd6302cf6152c96c0392e" id="r_a5084760f6e7fd6302cf6152c96c0392e"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5084760f6e7fd6302cf6152c96c0392e">_validated</a> = []</td></tr>
+<tr class="separator:a5084760f6e7fd6302cf6152c96c0392e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a8392bcd1d8d832dbb58302faad9b3d90" id="r_a8392bcd1d8d832dbb58302faad9b3d90"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8392bcd1d8d832dbb58302faad9b3d90">_call_start_cbs</a> (self, <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html">Blackboard</a> blackboard, str start_state)</td></tr>
@@ -184,6 +190,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:aff1274f3ae60ca1246bba25e81b50ff5" id="r_aff1274f3ae60ca1246bba25e81b50ff5"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff1274f3ae60ca1246bba25e81b50ff5">_start_state</a> = None</td></tr>
 <tr class="memdesc:aff1274f3ae60ca1246bba25e81b50ff5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The name of the initial state of the state machine.  <br /></td></tr>
 <tr class="separator:aff1274f3ae60ca1246bba25e81b50ff5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af8653bb2fdbf0cc0d32a0c894ce5b4bc" id="r_af8653bb2fdbf0cc0d32a0c894ce5b4bc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af8653bb2fdbf0cc0d32a0c894ce5b4bc">_validated</a> = False</td></tr>
+<tr class="memdesc:af8653bb2fdbf0cc0d32a0c894ce5b4bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag indicating whether the state machine has been validated.  <br /></td></tr>
+<tr class="separator:af8653bb2fdbf0cc0d32a0c894ce5b4bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
 <tr class="memitem:ac9a306ed083f382403851017b163a644 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_ac9a306ed083f382403851017b163a644"><td class="memItemLeft" align="right" valign="top">Set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#ac9a306ed083f382403851017b163a644">_outcomes</a> = set()</td></tr>
 <tr class="memdesc:ac9a306ed083f382403851017b163a644 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">A set of valid outcomes for this state.  <br /></td></tr>
@@ -886,6 +895,44 @@ Raises:
 </div><div class="memdoc">
 
 <p>A dictionary mapping state names to their corresponding state objects and transitions. </p>
+
+</div>
+</div>
+<a id="af8653bb2fdbf0cc0d32a0c894ce5b4bc" name="af8653bb2fdbf0cc0d32a0c894ce5b4bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8653bb2fdbf0cc0d32a0c894ce5b4bc">&#9670;&#160;</a></span>_validated <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool yasmin.state_machine.StateMachine._validated = False</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A flag indicating whether the state machine has been validated. </p>
+
+</div>
+</div>
+<a id="a5084760f6e7fd6302cf6152c96c0392e" name="a5084760f6e7fd6302cf6152c96c0392e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5084760f6e7fd6302cf6152c96c0392e">&#9670;&#160;</a></span>_validated <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">list yasmin.state_machine.StateMachine._validated = []</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
