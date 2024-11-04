@@ -85,6 +85,9 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
   if (this->start_state.empty()) {
     this->set_start_state(name);
   }
+
+  // Mark state machine as no validated
+  this->validated.store(false);
 }
 
 void StateMachine::add_state(std::string name, std::shared_ptr<State> state) {
@@ -194,6 +197,11 @@ void StateMachine::validate() {
 
   YASMIN_LOG_DEBUG("Validating state machine '%s'", this->to_string().c_str());
 
+  if (this->validated.load()) {
+    YASMIN_LOG_DEBUG("State machine '%s' has already been validated",
+                     this->to_string().c_str());
+  }
+
   // Check initial state
   if (this->start_state.empty()) {
     throw std::runtime_error("No initial state set");
@@ -260,6 +268,9 @@ void StateMachine::validate() {
                                "' not registered as outcome or state");
     }
   }
+
+  // State machine has been validated
+  this->validated.store(true);
 }
 
 std::string

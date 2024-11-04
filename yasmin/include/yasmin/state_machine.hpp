@@ -16,6 +16,7 @@
 #ifndef YASMIN_STATE_MACHINE_HPP
 #define YASMIN_STATE_MACHINE_HPP
 
+#include <atomic>
 #include <functional>
 #include <map>
 #include <memory>
@@ -40,14 +41,16 @@ namespace yasmin {
  */
 class StateMachine : public State {
 
-  // Type definitions for callback functions
+  /// Alias for a callback function executed before running the state machine.
   using StartCallbackType = std::function<void(
       std::shared_ptr<yasmin::blackboard::Blackboard>, const std::string &,
       const std::vector<std::string> &)>;
+  /// Alias for a callback function executed before changing the state.
   using TransitionCallbackType = std::function<void(
       std::shared_ptr<yasmin::blackboard::Blackboard>, const std::string &,
       const std::string &, const std::string &,
       const std::vector<std::string> &)>;
+  /// Alias for a callback function executed after running the state machine.
   using EndCallbackType = std::function<void(
       std::shared_ptr<yasmin::blackboard::Blackboard>, const std::string &,
       const std::vector<std::string> &)>;
@@ -225,20 +228,27 @@ public:
   std::string to_string();
 
 private:
-  std::map<std::string, std::shared_ptr<State>> states; ///< Map of states
-  std::map<std::string, std::map<std::string, std::string>>
-      transitions;           ///< Map of transitions
-  std::string start_state;   ///< Name of the start state
-  std::string current_state; ///< Name of the current state
-  std::unique_ptr<std::mutex>
-      current_state_mutex; ///< Mutex for current state access
+  /// Map of states
+  std::map<std::string, std::shared_ptr<State>> states;
+  /// Map of transitions
+  std::map<std::string, std::map<std::string, std::string>> transitions;
+  /// Name of the start state
+  std::string start_state;
+  /// Name of the current state
+  std::string current_state;
+  /// Mutex for current state access
+  std::unique_ptr<std::mutex> current_state_mutex;
 
-  std::vector<std::pair<StartCallbackType, std::vector<std::string>>>
-      start_cbs; ///< Start callbacks
+  /// Flag to indicate if the state machine has been validated
+  std::atomic_bool validated{false};
+
+  /// Start callbacks executed before the state machine
+  std::vector<std::pair<StartCallbackType, std::vector<std::string>>> start_cbs;
+  /// Transition callbacks executed before changing the state
   std::vector<std::pair<TransitionCallbackType, std::vector<std::string>>>
-      transition_cbs; ///< Transition callbacks
-  std::vector<std::pair<EndCallbackType, std::vector<std::string>>>
-      end_cbs; ///< End callbacks
+      transition_cbs;
+  /// End callbacks executed before the state machine
+  std::vector<std::pair<EndCallbackType, std::vector<std::string>>> end_cbs;
 };
 
 } // namespace yasmin

@@ -54,6 +54,10 @@ class StateMachine(State):
         self.__current_state: str = None
         ## A threading lock to manage access to the current state.
         self.__current_state_lock: Lock = Lock()
+
+        ## A flag indicating whether the state machine has been validated.
+        self._validated: bool = False
+
         ## A list of callbacks to call when the state machine starts.
         self.__start_cbs: List[
             Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
@@ -118,6 +122,9 @@ class StateMachine(State):
 
         if not self._start_state:
             self.set_start_state(name)
+
+        ## Mark state machine as no validated
+        self._validated = False
 
     def set_start_state(self, state_name: str) -> None:
         """
@@ -276,6 +283,9 @@ class StateMachine(State):
         """
         yasmin.YASMIN_LOG_DEBUG(f"Validating state machine '{self}'")
 
+        if self._validated:
+            yasmin.YASMIN_LOG_DEBUG("State machine '{self}' has already been validated")
+
         # terminal outcomes
         terminal_outcomes = []
 
@@ -322,6 +332,9 @@ class StateMachine(State):
                 raise KeyError(
                     f"State machine outcome '{o}' not registered as outcome neither state"
                 )
+
+        # State machine has been validated
+        self._validated = True
 
     def execute(self, blackboard: Blackboard) -> str:
         """
