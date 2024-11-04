@@ -147,6 +147,9 @@ class StateMachine(State):
 
         self._start_state: str = state_name
 
+        ## Mark state machine as no validated
+        self._validated = False
+
     def get_start_state(self) -> str:
         """
         Retrieves the name of the current starting state.

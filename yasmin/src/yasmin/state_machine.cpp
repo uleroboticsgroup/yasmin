@@ -107,6 +107,9 @@ void StateMachine::set_start_state(std::string state_name) {
   YASMIN_LOG_DEBUG("Setting start state to '%s'", state_name.c_str());
 
   this->start_state = state_name;
+
+  // Mark state machine as no validated
+  this->validated.store(false);
 }
 
 std::string StateMachine::get_start_state() { return this->start_state; }
@@ -354,8 +357,7 @@ std::string StateMachine::execute() {
   std::shared_ptr<blackboard::Blackboard> blackboard =
       std::make_shared<blackboard::Blackboard>();
 
-  std::string outcome = this->operator()(blackboard);
-  return outcome;
+  return this->operator()(blackboard);
 }
 
 std::string StateMachine::operator()() {
