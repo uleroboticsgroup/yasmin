@@ -1,7 +1,0 @@
-flask
-waitress
-expiringdict
-
-pytest
-pytest-cov
-unittest2
