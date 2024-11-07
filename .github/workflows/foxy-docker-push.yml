@@ -1,0 +1,32 @@
+name: Foxy Docker Push
+
+on:
+  workflow_run:
+    workflows: ["foxy_docker_build"]
+    types:
+      - completed
+
+jobs:
+  foxy_docker_push:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main' }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          build-args: ROS_DISTRO=foxy
+          push: true
+          tags: mgons/yasmin:foxy
