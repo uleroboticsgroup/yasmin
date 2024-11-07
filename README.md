@@ -52,8 +52,6 @@ $ git clone https://github.com/uleroboticsgroup/yasmin.git
 # dependencies
 $ cd ~/ros2_ws
 $ rosdep install --from-paths src --ignore-src -r -y
-$ cd src/yasmin
-$ pip3 install -r requirements.txt
 
 # colcon
 $ cd ~/ros2_ws

@@ -9,21 +9,8 @@ COPY . /root/ros2_ws/src
 
 # install dependencies
 RUN source /opt/ros/${ROS_DISTRO}/setup.bash
-RUN apt-get update \
-    && apt-get -y --quiet --no-install-recommends install \
-    gcc \
-    git \
-    python3 \
-    python3-pip
-RUN rosdep install --from-paths src --ignore-src -r -y
-RUN if [ "$ROS_DISTRO" = "jazzy" ] || [ "$ROS_DISTRO" = "rolling" ]; then \
-    pip3 install -r src/requirements.txt --break-system-packages; \
-    else \
-    pip3 install -r src/requirements.txt; \
-    fi
-RUN if [ "$ROS_DISTRO" = "rolling" ]; then \
-    apt install -y ros-rolling-action-tutorials-interfaces; \
-    fi
+RUN apt-get update
+RUN rosdep update && rosdep install --from-paths src --ignore-src -r -y
 
 # colcon the ws
 FROM deps AS builder
