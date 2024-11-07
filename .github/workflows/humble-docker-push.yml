@@ -1,10 +1,9 @@
 name: Humble Docker Push
 
 on:
-  workflow_run:
-    workflows: ["Humble Docker Build"]
-    types:
-      - completed
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   humble_docker_push:

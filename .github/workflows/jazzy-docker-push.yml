@@ -1,10 +1,9 @@
 name: Jazzy Docker Push
 
 on:
-  workflow_run:
-    workflows: ["Jazzy Docker Build"]
-    types:
-      - completed
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   jazzy_docker_push:

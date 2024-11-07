@@ -1,15 +1,12 @@
 name: Foxy Docker Push
 
 on:
-  workflow_run:
-    workflows: ["Foxy Docker Build"]
-    types:
-      - completed
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   foxy_docker_push:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main' }}
-
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
