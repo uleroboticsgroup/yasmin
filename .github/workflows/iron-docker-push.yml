@@ -2,7 +2,7 @@ name: Iron Docker Push
 
 on:
   workflow_run:
-    workflows: ["iron_docker_build"]
+    workflows: ["Iron Docker Build"]
     types:
       - completed
 

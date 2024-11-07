@@ -2,7 +2,7 @@ name: Foxy Docker Push
 
 on:
   workflow_run:
-    workflows: ["foxy_docker_build"]
+    workflows: ["Foxy Docker Build"]
     types:
       - completed
 

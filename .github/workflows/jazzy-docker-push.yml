@@ -2,7 +2,7 @@ name: Jazzy Docker Push
 
 on:
   workflow_run:
-    workflows: ["jazzy_docker_build"]
+    workflows: ["Jazzy Docker Build"]
     types:
       - completed
 

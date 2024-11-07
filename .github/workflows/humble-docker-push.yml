@@ -2,7 +2,7 @@ name: Humble Docker Push
 
 on:
   workflow_run:
-    workflows: ["humble_docker_build"]
+    workflows: ["Humble Docker Build"]
     types:
       - completed
 
