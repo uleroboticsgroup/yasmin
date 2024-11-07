@@ -53,6 +53,12 @@ $ cd ~/ros2_ws
 $ colcon build
 ```
 
+If you are using a deprecated ROS 2 distro (like Foxy or Galactic) or the Rolling distro, you have to install the tutorials and example interfaces:
+
+```shell
+$ sudo apt install -y ros-$ROS_DISTRO-action-tutorials-interfaces ros-$ROS_DISTRO-example-interfaces
+```
+
 ## Docker
 
 If your operating system doesn't support ROS 2, docker is a great alternative. You can use an image from [Dockerhub](https://hub.docker.com/r/mgons/yasmin/) or create your own images. First of all, to build the image you have to use the following command:
