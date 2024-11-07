@@ -136,43 +136,31 @@ Features</h1>
 </ul>
 <h1><a class="anchor" id="autotoc_md3"></a>
 Installation</h1>
-<div class="fragment"><div class="line"># clone</div>
-<div class="line">$ cd ~/ros2_ws/src</div>
+<div class="fragment"><div class="line">$ cd ~/ros2_ws/src</div>
 <div class="line">$ git clone https://github.com/uleroboticsgroup/yasmin.git</div>
-<div class="line"> </div>
-<div class="line"># dependencies</div>
 <div class="line">$ cd ~/ros2_ws</div>
 <div class="line">$ rosdep install --from-paths src --ignore-src -r -y</div>
-<div class="line">$ cd src/yasmin</div>
-<div class="line">$ pip3 install -r requirements.txt</div>
-<div class="line"> </div>
-<div class="line"># colcon</div>
 <div class="line">$ cd ~/ros2_ws</div>
 <div class="line">$ colcon build</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md4"></a>
 Docker</h1>
-<p>If your operating system doesn't support ROS 2 humble, docker is a great alternative. First of all, you have to build the project and create an image like so:</p>
-<div class="fragment"><div class="line">## Assuming you are in the correct project directory</div>
+<p>If your operating system doesn't support ROS 2, docker is a great alternative. You can use an image from <a href="https://hub.docker.com/r/mgons/yasmin/">Dockerhub</a> or create your own images. First of all, to build the image you have to use the following command:</p>
+<div class="fragment"><div class="line">## Assuming you are in the YASMIN project directory</div>
 <div class="line">$ docker build -t yasmin .</div>
-</div><!-- fragment --><p>To use a shortcut, you may use the following command:</p>
-<div class="fragment"><div class="line">## Assuming you are in the correct project directory</div>
+</div><!-- fragment --><p>To use a shortcut the docker build, you may use the following command:</p>
+<div class="fragment"><div class="line">## Assuming you are in the YASMIN project directory</div>
 <div class="line">$ make docker_build</div>
 </div><!-- fragment --><p>After the image is created, run a docker container with the following command:</p>
-<div class="fragment"><div class="line">## Assuming you are in the correct project directory</div>
-<div class="line">$ docker run -it --net=host --ipc=host --privileged --env=&quot;DISPLAY&quot; --env=&quot;QT_X11_NO_MITSHM=1&quot; --volume=&quot;/tmp/.X11-unix:/tmp/.X11-unix:rw&quot; --volume=&quot;${XAUTHORITY}:/root/.Xauthority&quot; --entrypoint /bin/bash yasmin</div>
-</div><!-- fragment --><p>To use a shortcut, you may use following command:</p>
-<div class="fragment"><div class="line">$ make docker_run</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md5"></a>
-Running the docker image</h2>
-<p>If you are in the docker image , this project is already sourced and the demo script can be run as the following command;</p>
-<div class="fragment"><div class="line">$ cd /root/ros2_ws/</div>
-<div class="line">$ ros2 run yasmin_demos yasmin_demo.py</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md6"></a>
+<div class="fragment"><div class="line">$ docker run -it --net=host --ipc=host --privileged --env=&quot;DISPLAY&quot; --env=&quot;QT_X11_NO_MITSHM=1&quot; --volume=&quot;/tmp/.X11-unix:/tmp/.X11-unix:rw&quot; --volume=&quot;${XAUTHORITY}:/root/.Xauthority&quot; --entrypoint /bin/bash yasmin</div>
+</div><!-- fragment --><p>To use a shortcut the docker run, you may use following command:</p>
+<div class="fragment"><div class="line">## Assuming you are in the YASMIN project directory</div>
+<div class="line">$ make docker_run</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md5"></a>
 Demos</h1>
 <p>There are some examples, for both Python and C++, that can be found in <a href="./yasmin_demos/">yasmin_demos</a>.</p>
-<h2><a class="anchor" id="autotoc_md7"></a>
+<h2><a class="anchor" id="autotoc_md6"></a>
 Python</h2>
-<h3><a class="anchor" id="autotoc_md8"></a>
+<h3><a class="anchor" id="autotoc_md7"></a>
 Vanilla Demo (FSM)</h3>
 <div class="fragment"><div class="line">$ ros2 run yasmin_demos yasmin_demo.py</div>
 </div><!-- fragment --><p><img src="./docs/demo.gif" alt="" width="65%" class="inline"/> </p>
@@ -275,7 +263,7 @@ Click to expand</summary>
 <div class="ttc" id="aclassyasmin_1_1State_html_a99401305d1648ff131344229e72cdf35"><div class="ttname"><a href="classyasmin_1_1State.html#a99401305d1648ff131344229e72cdf35">yasmin::State::State</a></div><div class="ttdeci">State(std::set&lt; std::string &gt; outcomes)</div><div class="ttdoc">Constructs a State with a set of possible outcomes.</div><div class="ttdef"><b>Definition</b> state.cpp:27</div></div>
 </div><!-- fragment --><p></p>
 </details>
-<h3><a class="anchor" id="autotoc_md9"></a>
+<h3><a class="anchor" id="autotoc_md8"></a>
 Service Demo (FSM + ROS 2 Service Client)</h3>
 <div class="fragment"><div class="line">$ ros2 run demo_nodes_py add_two_ints_server</div>
 </div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos service_client_demo.py</div>
@@ -393,7 +381,7 @@ Click to expand</summary>
 <div class="ttc" id="aservice__client__demo_8cpp_html_ad7658a89fcb000382a8345891e0dda91"><div class="ttname"><a href="service__client__demo_8cpp.html#ad7658a89fcb000382a8345891e0dda91">print_sum</a></div><div class="ttdeci">std::string print_sum(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard)</div><div class="ttdoc">Prints the sum stored in the blackboard.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:61</div></div>
 </div><!-- fragment --><p></p>
 </details>
-<h3><a class="anchor" id="autotoc_md10"></a>
+<h3><a class="anchor" id="autotoc_md9"></a>
 Action Demo (FSM + ROS 2 Action)</h3>
 <div class="fragment"><div class="line">$ ros2 run action_tutorials_cpp fibonacci_action_server</div>
 </div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos action_client_demo.py</div>
@@ -507,7 +495,7 @@ Click to expand</summary>
 <div class="ttc" id="aclassyasmin__ros_1_1ActionState_html_aa7902878db3392a3e00613a68e23b4d0"><div class="ttname"><a href="classyasmin__ros_1_1ActionState.html#aa7902878db3392a3e00613a68e23b4d0">yasmin_ros::ActionState&lt; Fibonacci &gt;::ActionState</a></div><div class="ttdeci">ActionState(std::string action_name, CreateGoalHandler create_goal_handler, std::set&lt; std::string &gt; outcomes, int timeout=-1.0)</div><div class="ttdef"><b>Definition</b> action_state.hpp:88</div></div>
 </div><!-- fragment --><p></p>
 </details>
-<h3><a class="anchor" id="autotoc_md11"></a>
+<h3><a class="anchor" id="autotoc_md10"></a>
 Monitor Demo (FSM + ROS 2 Subscriber)</h3>
 <div class="fragment"><div class="line">$ ros2 run yasmin_demos monitor_demo.py</div>
 </div><!-- fragment --><details >
@@ -598,7 +586,7 @@ Click to expand</summary>
 <div class="ttc" id="aclassyasmin__ros_1_1MonitorState_html_a8df77197e3a40a3a6229969e1a6da9a5"><div class="ttname"><a href="classyasmin__ros_1_1MonitorState.html#a8df77197e3a40a3a6229969e1a6da9a5">yasmin_ros::MonitorState&lt; nav_msgs::msg::Odometry &gt;::MonitorState</a></div><div class="ttdeci">MonitorState(std::string topic_name, std::set&lt; std::string &gt; outcomes, MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue)</div><div class="ttdef"><b>Definition</b> monitor_state.hpp:63</div></div>
 </div><!-- fragment --><p></p>
 </details>
-<h3><a class="anchor" id="autotoc_md12"></a>
+<h3><a class="anchor" id="autotoc_md11"></a>
 Nav2 Demo (Hierarchical FSM + ROS 2 Action)</h3>
 <div class="fragment"><div class="line">$ ros2 run yasmin_demos nav_demo.py</div>
 </div><!-- fragment --><details >
@@ -752,9 +740,9 @@ Click to expand</summary>
 <div class="line">    <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>()</div>
 </div><!-- fragment --><p></p>
 </details>
-<h2><a class="anchor" id="autotoc_md13"></a>
+<h2><a class="anchor" id="autotoc_md12"></a>
 Cpp</h2>
-<h3><a class="anchor" id="autotoc_md14"></a>
+<h3><a class="anchor" id="autotoc_md13"></a>
 Vanilla Demo</h3>
 <div class="fragment"><div class="line">$ ros2 run yasmin_demos yasmin_demo</div>
 </div><!-- fragment --><details >
@@ -879,7 +867,7 @@ Click to expand</summary>
 <div class="ttc" id="ayasmin__viewer__pub_8hpp_html"><div class="ttname"><a href="yasmin__viewer__pub_8hpp.html">yasmin_viewer_pub.hpp</a></div></div>
 </div><!-- fragment --><p></p>
 </details>
-<h3><a class="anchor" id="autotoc_md15"></a>
+<h3><a class="anchor" id="autotoc_md14"></a>
 Service Demo (FSM + ROS 2 Service Client)</h3>
 <div class="fragment"><div class="line">$ ros2 run demo_nodes_py add_two_ints_server</div>
 </div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos service_client_demo</div>
@@ -1024,7 +1012,7 @@ Click to expand</summary>
 <div class="ttc" id="aservice__state_8hpp_html"><div class="ttname"><a href="service__state_8hpp.html">service_state.hpp</a></div></div>
 </div><!-- fragment --><p></p>
 </details>
-<h3><a class="anchor" id="autotoc_md16"></a>
+<h3><a class="anchor" id="autotoc_md15"></a>
 Action Demo (FSM + ROS 2 Action)</h3>
 <div class="fragment"><div class="line">$ ros2 run action_tutorials_cpp fibonacci_action_server</div>
 </div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos action_client_demo</div>
@@ -1184,7 +1172,7 @@ Click to expand</summary>
 <div class="ttc" id="ayasmin__node_8hpp_html"><div class="ttname"><a href="yasmin__node_8hpp.html">yasmin_node.hpp</a></div></div>
 </div><!-- fragment --><p></p>
 </details>
-<h3><a class="anchor" id="autotoc_md17"></a>
+<h3><a class="anchor" id="autotoc_md16"></a>
 Monitor Demo (FSM + ROS 2 Subscriber)</h3>
 <div class="fragment"><div class="line">$ ros2 run yasmin_demos monitor_demo</div>
 </div><!-- fragment --><details >
@@ -1301,19 +1289,19 @@ Click to expand</summary>
 </div><!-- fragment --><p></p>
 </details>
 <p><a class="anchor" id="#YASMIN-Viewer"></a></p>
-<h1><a class="anchor" id="autotoc_md18"></a>
+<h1><a class="anchor" id="autotoc_md17"></a>
 YASMIN Viewer</h1>
 <p>This viewer allows monitoring YASMIN's FSM. It is implemented with Flask and ReactJS. A filter is provided to show only one FSM.</p>
 <p><img src="./docs/viewer.gif" alt="" class="inline"/></p>
-<h2><a class="anchor" id="autotoc_md19"></a>
+<h2><a class="anchor" id="autotoc_md18"></a>
 Usage</h2>
 <div class="fragment"><div class="line">$ ros2 run yasmin_viewer yasmin_viewer_node</div>
 </div><!-- fragment --><p><a href="http://localhost:5000/">http://localhost:5000/</a></p>
-<h2><a class="anchor" id="autotoc_md20"></a>
+<h2><a class="anchor" id="autotoc_md19"></a>
 Custom host and port</h2>
 <div class="fragment"><div class="line">$ ros2 run yasmin_viewer yasmin_viewer_node --ros-args -p host:=127.0.0.1 -p port:=5032</div>
 </div><!-- fragment --><p><a href="http://127.0.0.1:5032/">http://127.0.0.1:5032/</a></p>
-<h1><a class="anchor" id="autotoc_md21"></a>
+<h1><a class="anchor" id="autotoc_md20"></a>
 Citations</h1>
 <div class="fragment"><div class="line">@InProceedings{10.1007/978-3-031-21062-4_43,</div>
 <div class="line">author=&quot;Gonz{\&#39;a}lez-Santamarta, Miguel {\&#39;A}.</div>
