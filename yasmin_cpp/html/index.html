@@ -142,6 +142,8 @@ Installation</h1>
 <div class="line">$ rosdep install --from-paths src --ignore-src -r -y</div>
 <div class="line">$ cd ~/ros2_ws</div>
 <div class="line">$ colcon build</div>
+</div><!-- fragment --><p>If you are using a deprecated ROS 2 distro (like Foxy or Galactic) or the Rolling distro, you have to install the tutorials and example interfaces:</p>
+<div class="fragment"><div class="line">$ sudo apt install -y ros-$ROS_DISTRO-action-tutorials-interfaces ros-$ROS_DISTRO-example-interfaces</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md4"></a>
 Docker</h1>
 <p>If your operating system doesn't support ROS 2, docker is a great alternative. You can use an image from <a href="https://hub.docker.com/r/mgons/yasmin/">Dockerhub</a> or create your own images. First of all, to build the image you have to use the following command:</p>
