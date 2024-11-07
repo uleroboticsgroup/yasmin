@@ -2,10 +2,7 @@ name: Foxy Docker Push
 
 on:
   workflow_run:
-    workflows:
-      - Foxy Docker Build
-      - C++ Formatting Check
-      - Python Formatting Check
+    workflows: ["Foxy Docker Build"]
     types:
       - completed
 

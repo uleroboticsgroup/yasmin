@@ -2,10 +2,7 @@ name: Iron Docker Push
 
 on:
   workflow_run:
-    workflows:
-      - Foxy Docker Build
-      - C++ Formatting Check
-      - Python Formatting Check
+    workflows: ["Iron Docker Build"]
     types:
       - completed
 

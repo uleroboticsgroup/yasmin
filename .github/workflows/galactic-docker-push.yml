@@ -2,10 +2,7 @@ name: Galactic Docker Push
 
 on:
   workflow_run:
-    workflows:
-      - Foxy Docker Build
-      - C++ Formatting Check
-      - Python Formatting Check
+    workflows: ["Galactic Docker Build"]
     types:
       - completed
 

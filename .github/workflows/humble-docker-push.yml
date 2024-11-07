@@ -2,10 +2,7 @@ name: Humble Docker Push
 
 on:
   workflow_run:
-    workflows:
-      - Foxy Docker Build
-      - C++ Formatting Check
-      - Python Formatting Check
+    workflows: ["Humble Docker Build"]
     types:
       - completed
 

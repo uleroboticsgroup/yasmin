@@ -2,10 +2,7 @@ name: Jazzy Docker Push
 
 on:
   workflow_run:
-    workflows:
-      - Foxy Docker Build
-      - C++ Formatting Check
-      - Python Formatting Check
+    workflows: ["Jazzy Docker Build"]
     types:
       - completed
 
