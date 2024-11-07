@@ -45,55 +45,41 @@ YASMIN is a project focused on implementing robot behaviors using Finite State M
 ## Installation
 
 ```shell
-# clone
 $ cd ~/ros2_ws/src
 $ git clone https://github.com/uleroboticsgroup/yasmin.git
-
-# dependencies
 $ cd ~/ros2_ws
 $ rosdep install --from-paths src --ignore-src -r -y
-
-# colcon
 $ cd ~/ros2_ws
 $ colcon build
 ```
 
 ## Docker
 
-If your operating system doesn't support ROS 2 humble, docker is a great alternative. First of all, you have to build the project and create an image like so:
+If your operating system doesn't support ROS 2, docker is a great alternative. You can use an image from [Dockerhub](https://hub.docker.com/r/mgons/yasmin/) or create your own images. First of all, to build the image you have to use the following command:
 
 ```shell
-## Assuming you are in the correct project directory
+## Assuming you are in the YASMIN project directory
 $ docker build -t yasmin .
 ```
 
-To use a shortcut, you may use the following command:
+To use a shortcut the docker build, you may use the following command:
 
 ```shell
-## Assuming you are in the correct project directory
+## Assuming you are in the YASMIN project directory
 $ make docker_build
 ```
 
 After the image is created, run a docker container with the following command:
 
 ```shell
-## Assuming you are in the correct project directory
 $ docker run -it --net=host --ipc=host --privileged --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --volume="${XAUTHORITY}:/root/.Xauthority" --entrypoint /bin/bash yasmin
 ```
 
-To use a shortcut, you may use following command:
+To use a shortcut the docker run, you may use following command:
 
 ```shell
+## Assuming you are in the YASMIN project directory
 $ make docker_run
-```
-
-### Running the docker image
-
-If you are in the docker image , this project is already sourced and the demo script can be run as the following command;
-
-```shell
-$ cd /root/ros2_ws/
-$ ros2 run yasmin_demos yasmin_demo.py
 ```
 
 ## Demos
