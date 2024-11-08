@@ -187,6 +187,8 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:af8653bb2fdbf0cc0d32a0c894ce5b4bc" id="r_af8653bb2fdbf0cc0d32a0c894ce5b4bc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af8653bb2fdbf0cc0d32a0c894ce5b4bc">_validated</a> = False</td></tr>
 <tr class="memdesc:af8653bb2fdbf0cc0d32a0c894ce5b4bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">A flag indicating whether the state machine has been validated.  <br /></td></tr>
 <tr class="separator:af8653bb2fdbf0cc0d32a0c894ce5b4bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2d0cc22355008f2f01666c14733b547" id="r_ac2d0cc22355008f2f01666c14733b547"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac2d0cc22355008f2f01666c14733b547">_outcomes</a></td></tr>
+<tr class="separator:ac2d0cc22355008f2f01666c14733b547"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classyasmin_1_1state_1_1State"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classyasmin_1_1state_1_1State')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classyasmin_1_1state_1_1State.html">yasmin.state.State</a></td></tr>
 <tr class="memitem:ac9a306ed083f382403851017b163a644 inherit pro_attribs_classyasmin_1_1state_1_1State" id="r_ac9a306ed083f382403851017b163a644"><td class="memItemLeft" align="right" valign="top">Set&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyasmin_1_1state_1_1State.html#ac9a306ed083f382403851017b163a644">_outcomes</a> = set()</td></tr>
 <tr class="memdesc:ac9a306ed083f382403851017b163a644 inherit pro_attribs_classyasmin_1_1state_1_1State"><td class="mdescLeft">&#160;</td><td class="mdescRight">A set of valid outcomes for this state.  <br /></td></tr>
@@ -517,7 +519,7 @@ Parameters:
     transitions (Dict[str, str], optional): A dictionary mapping source outcomes to target states. Defaults to None.
 
 Raises:
-    KeyError: If the state name is already registered.
+    KeyError: If the state name is already registered or is an outcome.
     ValueError: If transitions contain empty keys or values.
     KeyError: If transitions reference unregistered outcomes.
 </pre> 
@@ -849,6 +851,28 @@ Raises:
 </div><div class="memdoc">
 
 <p>A list of callbacks to call during state transitions. </p>
+
+</div>
+</div>
+<a id="ac2d0cc22355008f2f01666c14733b547" name="ac2d0cc22355008f2f01666c14733b547"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2d0cc22355008f2f01666c14733b547">&#9670;&#160;</a></span>_outcomes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">yasmin.state_machine.StateMachine._outcomes</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
