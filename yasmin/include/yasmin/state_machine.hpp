@@ -71,7 +71,8 @@ public:
    * state.
    * @param transitions A map of transitions where the key is the outcome
    *                    and the value is the target state name.
-   * @throws std::logic_error If the state is already registered.
+   * @throws std::logic_error If the state is already registered or is an
+   * outcome.
    * @throws std::invalid_argument If any transition has empty source or target,
    *                               or references unregistered outcomes.
    */

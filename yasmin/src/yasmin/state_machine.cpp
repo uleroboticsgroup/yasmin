@@ -43,6 +43,12 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
                            "' already registered in the state machine");
   }
 
+  if (std::find(this->outcomes.begin(), this->outcomes.end(), name) !=
+      this->outcomes.end()) {
+    throw std::logic_error("State name '" + name +
+                           "' is already registered as an outcome");
+  }
+
   for (auto it = transitions.begin(); it != transitions.end(); ++it) {
     const std::string &key = it->first;
     const std::string &value = it->second;

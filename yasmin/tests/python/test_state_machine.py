@@ -107,6 +107,20 @@ class TestStateMachine(unittest.TestCase):
             "\"State 'FOO' already registered in the state machine\"",
         )
 
+    def test_add_outcome_state(self):
+        with self.assertRaises(KeyError) as context:
+            self.sm.add_state(
+                "outcome4",
+                FooState(),
+                transitions={
+                    "outcome1": "BAR",
+                },
+            )
+        self.assertEqual(
+            str(context.exception),
+            "\"State name 'outcome4' is already registered as an outcome\"",
+        )
+
     def test_add_state_with_wrong_outcome(self):
         with self.assertRaises(KeyError) as context:
             self.sm.add_state(

@@ -87,7 +87,7 @@ class StateMachine(State):
             transitions (Dict[str, str], optional): A dictionary mapping source outcomes to target states. Defaults to None.
 
         Raises:
-            KeyError: If the state name is already registered.
+            KeyError: If the state name is already registered or is an outcome.
             ValueError: If transitions contain empty keys or values.
             KeyError: If transitions reference unregistered outcomes.
         """
@@ -101,6 +101,10 @@ class StateMachine(State):
         # Check if state name is already in the state machine
         if name in self._states:
             raise KeyError(f"State '{name}' already registered in the state machine")
+
+        # Check if state name is an outcome of the state machine
+        if name in self._outcomes:
+            raise KeyError(f"State name '{name}' is already registered as an outcome")
 
         # Check the transitions
         for key in transitions:
