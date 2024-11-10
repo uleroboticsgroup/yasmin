@@ -10,7 +10,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-
 if(NOT DEFINED ENV{ROS_DISTRO})
   message(FATAL_ERROR "ROS_DISTRO is not defined." )
 endif()
@@ -64,7 +63,6 @@ set(DEPENDENCIES
 )
 
 add_library(${LIB} STATIC ${SOURCES})
-
 ament_target_dependencies(${LIB} ${DEPENDENCIES})
 
 install(TARGETS ${LIB}
@@ -80,6 +78,7 @@ install(DIRECTORY include/
 ament_export_include_directories(include)
 ament_export_libraries(${LIB})
 ament_export_dependencies(${DEPENDENCIES})
+
 
 # Python
 ament_python_install_package(${PROJECT_NAME})

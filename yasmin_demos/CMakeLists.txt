@@ -63,12 +63,7 @@ set(DEPENDENCIES
 )
 
 # demo
-add_executable(yasmin_demo
-  src/yasmin_demo.cpp
-)
-set(SOURCES
-  src/yasmin_demo.cpp
-)
+add_executable(yasmin_demo src/yasmin_demo.cpp)
 ament_target_dependencies(yasmin_demo ${DEPENDENCIES})
 install(TARGETS
   yasmin_demo
@@ -76,12 +71,7 @@ install(TARGETS
 )
 
 # monitor demo
-add_executable(monitor_demo
-  src/monitor_demo.cpp
-)
-set(SOURCES
-  src/monitor_demo.cpp
-)
+add_executable(monitor_demo src/monitor_demo.cpp)
 ament_target_dependencies(monitor_demo ${DEPENDENCIES})
 install(TARGETS
   monitor_demo
@@ -89,12 +79,7 @@ install(TARGETS
 )
 
 # service client demo
-add_executable(service_client_demo
-  src/service_client_demo.cpp
-)
-set(SOURCES
-  src/service_client_demo.cpp
-)
+add_executable(service_client_demo src/service_client_demo.cpp)
 ament_target_dependencies(service_client_demo ${DEPENDENCIES})
 install(TARGETS
   service_client_demo
@@ -102,12 +87,7 @@ install(TARGETS
 )
 
 # action client demo
-add_executable(action_client_demo
-  src/action_client_demo.cpp
-)
-set(SOURCES
-  src/action_client_demo.cpp
-)
+add_executable(action_client_demo src/action_client_demo.cpp)
 ament_target_dependencies(action_client_demo ${DEPENDENCIES})
 install(TARGETS
   action_client_demo
@@ -116,6 +96,7 @@ install(TARGETS
 
 ament_export_include_directories(include)
 ament_export_libraries(${LIB})
+
 
 # Python
 ament_python_install_package(${PROJECT_NAME})
