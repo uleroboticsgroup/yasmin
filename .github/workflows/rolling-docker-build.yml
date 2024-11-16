@@ -1,4 +1,4 @@
-name: Rolling Docker Builds
+name: Rolling Docker Build
 
 on: [push, pull_request]
 
@@ -9,15 +9,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           build-args: ROS_DISTRO=rolling
-          push: true
-          tags: mgons/yasmin:rolling
+          push: false
