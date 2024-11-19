@@ -1,6 +1,10 @@
 name: Humble Docker Build
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
 
 jobs:
   humble_docker_build:

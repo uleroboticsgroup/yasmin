@@ -1,6 +1,10 @@
 name: Galactic Docker Build
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
 
 jobs:
   galactic_docker_build:
