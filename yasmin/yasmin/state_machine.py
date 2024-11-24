@@ -295,7 +295,7 @@ class StateMachine(State):
         yasmin.YASMIN_LOG_DEBUG(f"Validating state machine '{self}'")
 
         if self._validated and not strict_mode:
-            yasmin.YASMIN_LOG_DEBUG("State machine '{self}' has already been validated")
+            yasmin.YASMIN_LOG_DEBUG(f"State machine '{self}' has already been validated")
 
         # Terminal outcomes from all transitions
         terminal_outcomes = []
