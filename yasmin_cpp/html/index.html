@@ -142,8 +142,8 @@ Installation</h1>
 <div class="line">$ rosdep install --from-paths src --ignore-src -r -y</div>
 <div class="line">$ cd ~/ros2_ws</div>
 <div class="line">$ colcon build</div>
-</div><!-- fragment --><p>If you are using a deprecated ROS 2 distro (like Foxy or Galactic) or the Rolling distro, you have to install the tutorials and example interfaces:</p>
-<div class="fragment"><div class="line">$ sudo apt install -y ros-$ROS_DISTRO-action-tutorials-interfaces ros-$ROS_DISTRO-example-interfaces</div>
+</div><!-- fragment --><p>If you are using a deprecated ROS 2 distro (like Foxy or Galactic) or the Rolling distro, you may need to install the example interfaces:</p>
+<div class="fragment"><div class="line">$ sudo apt install -y ros-$ROS_DISTRO-example-interfaces</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md4"></a>
 Docker</h1>
 <p>If your operating system doesn't support ROS 2, docker is a great alternative. You can use an image from <a href="https://hub.docker.com/r/mgons/yasmin/">Dockerhub</a> or create your own images. First of all, to build the image you have to use the following command:</p>
@@ -392,7 +392,7 @@ Action Demo (FSM + ROS 2 Action)</h3>
 Click to expand</summary>
 <p></p>
 <div class="fragment"><div class="line"><span class="keyword">import</span> rclpy</div>
-<div class="line"><span class="keyword">from</span> action_tutorials_interfaces.action <span class="keyword">import</span> Fibonacci</div>
+<div class="line"><span class="keyword">from</span> example_interfaces.action <span class="keyword">import</span> Fibonacci</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">import</span> yasmin</div>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> CbState</div>
@@ -1026,7 +1026,7 @@ Click to expand</summary>
 <div class="line"><span class="preprocessor">#include &lt;memory&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor">#include &quot;action_tutorials_interfaces/action/fibonacci.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;example_interfaces/action/fibonacci.hpp&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="cb__state_8hpp.html">yasmin/cb_state.hpp</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="logs_8hpp.html">yasmin/logs.hpp</a>&quot;</span></div>
@@ -1039,7 +1039,7 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line"><span class="keyword">using </span>std::placeholders::_1;</div>
 <div class="line"><span class="keyword">using </span>std::placeholders::_2;</div>
-<div class="line"><span class="keyword">using </span><a class="code hl_typedef" href="action__client__demo_8cpp.html#a1d63ef8c5e1b933c7f0e383f3e18bb08">Fibonacci</a> = action_tutorials_interfaces::action::Fibonacci;</div>
+<div class="line"><span class="keyword">using </span><a class="code hl_typedef" href="action__client__demo_8cpp.html#a6b8442a7f210c0724344924057b54b21">Fibonacci</a> = example_interfaces::action::Fibonacci;</div>
 <div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>;</div>
 <div class="line"> </div>
 <div class="line">std::string</div>
@@ -1062,7 +1062,7 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">  <a class="code hl_function" href="classFibonacciState.html#a80f2a3be8fb203badc608c4ef5410c0e">FibonacciState</a>()</div>
-<div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1ActionState.html#aa7902878db3392a3e00613a68e23b4d0">ActionState</a>&lt;<a class="code hl_typedef" href="action__client__demo_8cpp.html#a1d63ef8c5e1b933c7f0e383f3e18bb08">Fibonacci</a>&gt;(</div>
+<div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1ActionState.html#aa7902878db3392a3e00613a68e23b4d0">ActionState</a>&lt;<a class="code hl_typedef" href="action__client__demo_8cpp.html#a6b8442a7f210c0724344924057b54b21">Fibonacci</a>&gt;(</div>
 <div class="line"> </div>
 <div class="line">            <span class="stringliteral">&quot;/fibonacci&quot;</span>, <span class="comment">// action name</span></div>
 <div class="line"> </div>
@@ -1100,7 +1100,7 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line">    std::stringstream ss;</div>
 <div class="line">    ss &lt;&lt; <span class="stringliteral">&quot;Next number in sequence received: &quot;</span>;</div>
-<div class="line">    <span class="keywordflow">for</span> (<span class="keyword">auto</span> number : feedback-&gt;partial_sequence) {</div>
+<div class="line">    <span class="keywordflow">for</span> (<span class="keyword">auto</span> number : feedback-&gt;sequence) {</div>
 <div class="line">      ss &lt;&lt; number &lt;&lt; <span class="stringliteral">&quot; &quot;</span>;</div>
 <div class="line">    }</div>
 <div class="line"> </div>
@@ -1163,7 +1163,7 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line">  <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="aaction__client__demo_8cpp_html_a1d63ef8c5e1b933c7f0e383f3e18bb08"><div class="ttname"><a href="action__client__demo_8cpp.html#a1d63ef8c5e1b933c7f0e383f3e18bb08">Fibonacci</a></div><div class="ttdeci">action_tutorials_interfaces::action::Fibonacci Fibonacci</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:33</div></div>
+<div class="ttc" id="aaction__client__demo_8cpp_html_a6b8442a7f210c0724344924057b54b21"><div class="ttname"><a href="action__client__demo_8cpp.html#a6b8442a7f210c0724344924057b54b21">Fibonacci</a></div><div class="ttdeci">example_interfaces::action::Fibonacci Fibonacci</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:33</div></div>
 <div class="ttc" id="aaction__state_8hpp_html"><div class="ttname"><a href="action__state_8hpp.html">action_state.hpp</a></div></div>
 <div class="ttc" id="aclassFibonacciState_html_a80f2a3be8fb203badc608c4ef5410c0e"><div class="ttname"><a href="classFibonacciState.html#a80f2a3be8fb203badc608c4ef5410c0e">FibonacciState::FibonacciState</a></div><div class="ttdeci">FibonacciState()</div><div class="ttdoc">Constructs a new FibonacciState object and initializes callbacks.</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:75</div></div>
 <div class="ttc" id="aclassFibonacciState_html_ab7bb07a4a795109bc2cb5032a8d6ce6f"><div class="ttname"><a href="classFibonacciState.html#ab7bb07a4a795109bc2cb5032a8d6ce6f">FibonacciState::print_feedback</a></div><div class="ttdeci">void print_feedback(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard, std::shared_ptr&lt; const Fibonacci::Feedback &gt; feedback)</div><div class="ttdoc">Callback for printing action feedback.</div><div class="ttdef"><b>Definition</b> action_client_demo.cpp:127</div></div>
