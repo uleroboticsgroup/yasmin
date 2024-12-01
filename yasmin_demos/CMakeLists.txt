@@ -45,7 +45,6 @@ find_package(yasmin_ros REQUIRED)
 find_package(yasmin_viewer REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(example_interfaces REQUIRED)
-find_package(action_tutorials_interfaces REQUIRED)
 
 # C++
 include_directories(include)
@@ -59,7 +58,6 @@ set(DEPENDENCIES
   yasmin_viewer
   nav_msgs
   example_interfaces
-  action_tutorials_interfaces
 )
 
 # demo

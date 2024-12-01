@@ -16,7 +16,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import rclpy
-from action_tutorials_interfaces.action import Fibonacci
+from example_interfaces.action import Fibonacci
+
 import yasmin
 from yasmin import CbState, Blackboard, StateMachine
 from yasmin_ros import ActionState

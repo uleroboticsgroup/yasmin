@@ -12,7 +12,7 @@ RUN source /opt/ros/${ROS_DISTRO}/setup.bash
 RUN apt-get update
 RUN rosdep update && rosdep install --from-paths src --ignore-src -r -y
 RUN if [ "$ROS_DISTRO" = "foxy" ] || [ "$ROS_DISTRO" = "galactic" ] || [ "$ROS_DISTRO" = "rolling" ]; then \
-    apt install -y ros-$ROS_DISTRO-action-tutorials-interfaces ros-$ROS_DISTRO-example-interfaces; \
+    apt install -y ros-$ROS_DISTRO-example-interfaces; \
     fi
 
 # colcon the ws

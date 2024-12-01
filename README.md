@@ -53,10 +53,10 @@ $ cd ~/ros2_ws
 $ colcon build
 ```
 
-If you are using a deprecated ROS 2 distro (like Foxy or Galactic) or the Rolling distro, you have to install the tutorials and example interfaces:
+If you are using a deprecated ROS 2 distro (like Foxy or Galactic) or the Rolling distro, you may need to install the example interfaces:
 
 ```shell
-$ sudo apt install -y ros-$ROS_DISTRO-action-tutorials-interfaces ros-$ROS_DISTRO-example-interfaces
+$ sudo apt install -y ros-$ROS_DISTRO-example-interfaces
 ```
 
 ## Docker
@@ -337,7 +337,7 @@ $ ros2 run yasmin_demos action_client_demo.py
 
 ```python
 import rclpy
-from action_tutorials_interfaces.action import Fibonacci
+from example_interfaces.action import Fibonacci
 
 import yasmin
 from yasmin import CbState
@@ -971,7 +971,7 @@ $ ros2 run yasmin_demos action_client_demo
 #include <memory>
 #include <string>
 
-#include "action_tutorials_interfaces/action/fibonacci.hpp"
+#include "example_interfaces/action/fibonacci.hpp"
 
 #include "yasmin/cb_state.hpp"
 #include "yasmin/logs.hpp"
@@ -984,7 +984,7 @@ $ ros2 run yasmin_demos action_client_demo
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using Fibonacci = action_tutorials_interfaces::action::Fibonacci;
+using Fibonacci = example_interfaces::action::Fibonacci;
 using namespace yasmin;
 
 std::string
@@ -1045,7 +1045,7 @@ public:
 
     std::stringstream ss;
     ss << "Next number in sequence received: ";
-    for (auto number : feedback->partial_sequence) {
+    for (auto number : feedback->sequence) {
       ss << number << " ";
     }
 
