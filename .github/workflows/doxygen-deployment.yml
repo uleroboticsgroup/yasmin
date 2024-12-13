@@ -16,14 +16,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate Doxygen
+      - name: Generate Doxygen for C++
         uses: mattnotmitt/doxygen-action@edge
         with:
-          doxyfile-path: ".github/Doxyfile"
+          doxyfile-path: ".github/Doxyfile-cpp"
+
+      - name: Generate Doxygen for Python
+        uses: mattnotmitt/doxygen-action@edge
+        with:
+          doxyfile-path: ".github/Doxyfile-python"
 
       - name: Deploy Doxygen page
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: docs/html
+          publish_dir: docs
