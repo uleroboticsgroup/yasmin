@@ -8,23 +8,22 @@ on:
 jobs:
   doxygen_generation:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate Doxygen for C++
+      - name: Generate Doxygen
         uses: mattnotmitt/doxygen-action@edge
         with:
-          doxyfile-path: ".github/Doxyfile-cpp"
-
-      - name: Generate Doxygen for Python
-        uses: mattnotmitt/doxygen-action@edge
-        with:
-          doxyfile-path: ".github/Doxyfile-python"
+          doxyfile-path: ".github/Doxyfile"
 
       - name: Deploy Doxygen page
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.YASMIN_GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: docs
+          publish_dir: docs/html

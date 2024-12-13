@@ -7,7 +7,12 @@ on:
 jobs:
   create_release:
     if: startsWith(github.event.head_commit.message, 'new version')
+
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,7 +45,7 @@ jobs:
       - name: Create GitHub release
         uses: actions/create-release@latest
         env:
-          GITHUB_TOKEN: ${{ secrets.YASMIN_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: "${{ env.version }}"
           release_name: "${{ env.version }}"
