@@ -10,7 +10,7 @@ COPY . /root/ros2_ws/src
 # install dependencies
 RUN source /opt/ros/${ROS_DISTRO}/setup.bash
 RUN apt-get update
-RUN rosdep update && rosdep install --from-paths src --ignore-src -r -y --include-eol-distros
+RUN rosdep update --include-eol-distros && rosdep install --from-paths src --ignore-src -r -y
 
 # colcon the ws
 FROM deps AS builder
