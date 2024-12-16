@@ -121,7 +121,7 @@ class FibonacciState(ActionState):
         Raises:
             None
         """
-        yasmin.YASMIN_LOG_INFO(f"Received feedback: {list(feedback.partial_sequence)}")
+        yasmin.YASMIN_LOG_INFO(f"Received feedback: {list(feedback.sequence)}")
 
 
 def print_result(blackboard: Blackboard) -> str:

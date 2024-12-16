@@ -204,7 +204,7 @@ if __name__ == "__main__":
 #### Service Demo (FSM + ROS 2 Service Client)
 
 ```shell
-$ ros2 run demo_nodes_py add_two_ints_server
+$ ros2 run yasmin_demos add_two_ints_server
 ```
 
 ```shell
@@ -325,7 +325,7 @@ if __name__ == "__main__":
 #### Action Demo (FSM + ROS 2 Action)
 
 ```shell
-$ ros2 run action_tutorials_cpp fibonacci_action_server
+$ ros2 run yasmin_demos fibonacci_action_server
 ```
 
 ```shell
@@ -376,7 +376,7 @@ class FibonacciState(ActionState):
     def print_feedback(
         self, blackboard: Blackboard, feedback: Fibonacci.Feedback
     ) -> None:
-        yasmin.YASMIN_LOG_INFO(f"Received feedback: {list(feedback.partial_sequence)}")
+        yasmin.YASMIN_LOG_INFO(f"Received feedback: {list(feedback.sequence)}")
 
 
 def print_result(blackboard: Blackboard) -> str:
@@ -813,7 +813,7 @@ int main(int argc, char *argv[]) {
 #### Service Demo (FSM + ROS 2 Service Client)
 
 ```shell
-$ ros2 run demo_nodes_py add_two_ints_server
+$ ros2 run yasmin_demos add_two_ints_server
 ```
 
 ```shell
@@ -956,7 +956,7 @@ int main(int argc, char *argv[]) {
 #### Action Demo (FSM + ROS 2 Action)
 
 ```shell
-$ ros2 run action_tutorials_cpp fibonacci_action_server
+$ ros2 run yasmin_demos fibonacci_action_server
 ```
 
 ```shell

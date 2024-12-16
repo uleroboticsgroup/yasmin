@@ -39,6 +39,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(yasmin REQUIRED)
 find_package(yasmin_ros REQUIRED)
@@ -53,6 +54,7 @@ include_directories(src)
 set(LIB ${CMAKE_PROJECT_NAME}_lib)
 set(DEPENDENCIES
   rclcpp
+  rclcpp_action
   yasmin
   yasmin_ros
   yasmin_viewer
@@ -89,6 +91,22 @@ add_executable(action_client_demo src/action_client_demo.cpp)
 ament_target_dependencies(action_client_demo ${DEPENDENCIES})
 install(TARGETS
   action_client_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# add_two_ints service server
+add_executable(add_two_ints_server src/add_two_ints_server.cpp)
+ament_target_dependencies(add_two_ints_server ${DEPENDENCIES})
+install(TARGETS
+add_two_ints_server
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# fibonacci action server
+add_executable(fibonacci_action_server src/fibonacci_action_server.cpp)
+ament_target_dependencies(fibonacci_action_server ${DEPENDENCIES})
+install(TARGETS
+fibonacci_action_server
   DESTINATION lib/${PROJECT_NAME}
 )
 
