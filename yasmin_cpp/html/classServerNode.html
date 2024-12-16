@@ -127,12 +127,6 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:a8cc8481d26f562959d29de1d09976aab" id="r_a8cc8481d26f562959d29de1d09976aab"><td class="memItemLeft" align="right" valign="top">rclcpp::Service&lt; example_interfaces::srv::AddTwoInts &gt;::SharedPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8cc8481d26f562959d29de1d09976aab">srv_</a></td></tr>
 <tr class="memdesc:a8cc8481d26f562959d29de1d09976aab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shared pointer to the "add_two_ints" service.  <br /></td></tr>
 <tr class="separator:a8cc8481d26f562959d29de1d09976aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05bbe18b37e46a59a3b95bb1f9d6cbb8" id="r_a05bbe18b37e46a59a3b95bb1f9d6cbb8"><td class="memItemLeft" align="right" valign="top">rclcpp::TimerBase::SharedPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a05bbe18b37e46a59a3b95bb1f9d6cbb8">timer_</a></td></tr>
-<tr class="memdesc:a05bbe18b37e46a59a3b95bb1f9d6cbb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timer for one-shot mode to shut down the node after a request.  <br /></td></tr>
-<tr class="separator:a05bbe18b37e46a59a3b95bb1f9d6cbb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8495ea80d07ff60fe0b880b24f7404b0" id="r_a8495ea80d07ff60fe0b880b24f7404b0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8495ea80d07ff60fe0b880b24f7404b0">saw_request_</a> {false}</td></tr>
-<tr class="memdesc:a8495ea80d07ff60fe0b880b24f7404b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag indicating if a request has been received.  <br /></td></tr>
-<tr class="separator:a8495ea80d07ff60fe0b880b24f7404b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A ROS 2 service server node for adding two integers. </p>
@@ -172,30 +166,6 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="a8495ea80d07ff60fe0b880b24f7404b0" name="a8495ea80d07ff60fe0b880b24f7404b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8495ea80d07ff60fe0b880b24f7404b0">&#9670;&#160;</a></span>saw_request_</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ServerNode::saw_request_ {false}</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Flag indicating if a request has been received. </p>
-
-</div>
-</div>
 <a id="a8cc8481d26f562959d29de1d09976aab" name="a8cc8481d26f562959d29de1d09976aab"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8cc8481d26f562959d29de1d09976aab">&#9670;&#160;</a></span>srv_</h2>
 
@@ -217,30 +187,6 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Shared pointer to the "add_two_ints" service. </p>
-
-</div>
-</div>
-<a id="a05bbe18b37e46a59a3b95bb1f9d6cbb8" name="a05bbe18b37e46a59a3b95bb1f9d6cbb8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05bbe18b37e46a59a3b95bb1f9d6cbb8">&#9670;&#160;</a></span>timer_</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">rclcpp::TimerBase::SharedPtr ServerNode::timer_</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Timer for one-shot mode to shut down the node after a request. </p>
 
 </div>
 </div>
