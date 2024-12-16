@@ -91,7 +91,7 @@ $(function(){ initResizable(false); });
 <div class="textblock"><p><a class="anchor" id="md_README"></a></p>
 <p align="center"></p>
 <p><img src="./docs/logo.png" alt="" width="50%" class="inline"/> </p>
-<p>YASMIN is a project focused on implementing robot behaviors using Finite State Machines (FSM). It is available for ROS 2, Python and C++.</p>
+<p><b>YASMIN</b> is a project focused on implementing robot behaviors using Finite State Machines (FSM). It is available for ROS 2, Python and C++.</p>
 <p><a href="https://opensource.org/license/gpl-3-0"><img src="https://img.shields.io/badge/GitHub-GPL--3.0-informational" alt="License: MIT" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/releases"><img src="https://img.shields.io/github/release/uleroboticsgroup/yasmin.svg" alt="GitHub release" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin?branch=main"><img src="https://img.shields.io/github/languages/code-size/uleroboticsgroup/yasmin.svg?branch=main" alt="Code Size" style="pointer-events: none;" class="inline"/></a> <a href="https://libraries.io/github/uleroboticsgroup/yasmin?branch=main"><img src="https://img.shields.io/librariesio/github/uleroboticsgroup/yasmin?branch=main" alt="Dependencies" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/commits/main"><img src="https://img.shields.io/github/last-commit/uleroboticsgroup/yasmin.svg" alt="Last Commit" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/issues"><img src="https://img.shields.io/github/issues/uleroboticsgroup/yasmin" alt="GitHub issues" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/pulls"><img src="https://img.shields.io/github/issues-pr/uleroboticsgroup/yasmin" alt="GitHub pull requests" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/graphs/contributors"><img src="https://img.shields.io/github/contributors/uleroboticsgroup/yasmin.svg" alt="Contributors" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/python-formatter.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/python-formatter.yml/badge.svg?branch=main" alt="Python Formatter Check" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/cpp-formatter.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/cpp-formatter.yml/badge.svg?branch=main" alt="C++ Formatter Check" style="pointer-events: none;" class="inline"/></a></p>
 <div align="center"></div><div align="center"><table class="markdownTable">
 <tr class="markdownTableHead">
@@ -124,15 +124,15 @@ Table of Contents</h1>
 <li>Citations</li>
 </ol>
 <h1><a class="anchor" id="autotoc_md2"></a>
-Features</h1>
+Key Features</h1>
 <ul>
-<li>Fully integrated into ROS 2.</li>
-<li>Available for Python and C++.</li>
-<li>Fast prototyping.</li>
-<li>Default states for ROS 2 action and service clients.</li>
-<li>Blackboards are used to share data between states and state machines.</li>
-<li>State machines can be canceled and stopped, which means stopping the current executing state.</li>
-<li>A web viewer is included, which allows monitoring of the execution of the state machines.</li>
+<li><b>ROS 2 Integration</b>: Integrates with ROS 2 for easy deployment and interaction.</li>
+<li><b>Support for Python and C++</b>: Available for both Python and C++, making it flexible for a variety of use cases.</li>
+<li><b>Rapid Prototyping</b>: Designed for fast prototyping, allowing quick iteration of state machine behaviors.</li>
+<li><b>Predefined States</b>: Includes states for interacting with ROS 2 action clients, service clients, and topics.</li>
+<li><b>Data Sharing with Blackboards</b>: Utilizes blackboards for data sharing between states and state machines.</li>
+<li><b>State Management</b>: Supports cancellation and stopping of state machines, including halting the current executing state.</li>
+<li><b>Web Viewer</b>: Features an integrated web viewer for real-time monitoring of state machine execution.</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md3"></a>
 Installation</h1>
@@ -181,15 +181,41 @@ Click to expand</summary>
 <div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
 <div class="line"> </div>
 <div class="line"> </div>
-<div class="line"><span class="comment"># define state Foo</span></div>
+<div class="line"><span class="comment"># Define the FooState class, inheriting from the State class</span></div>
 <div class="line"><span class="keyword">class </span><a class="code hl_class" href="classFooState.html">FooState</a>(<a class="code hl_function" href="classyasmin_1_1State.html#a99401305d1648ff131344229e72cdf35">State</a>):</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Represents the Foo state in the state machine.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Attributes:</span></div>
+<div class="line"><span class="stringliteral">        counter (int): Counter to track the number of executions of this state.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Initializes the FooState instance, setting up the outcomes.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Outcomes:</span></div>
+<div class="line"><span class="stringliteral">            outcome1: Indicates the state should continue to the Bar state.</span></div>
+<div class="line"><span class="stringliteral">            outcome2: Indicates the state should finish execution and return.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        super().__init__([<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>])</div>
 <div class="line">        self.counter = 0</div>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>execute(self, blackboard: Blackboard) -&gt; str:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Executes the logic for the Foo state.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Args:</span></div>
+<div class="line"><span class="stringliteral">            blackboard (Blackboard): The shared data structure for states.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            str: The outcome of the execution, which can be &quot;outcome1&quot; or &quot;outcome2&quot;.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Raises:</span></div>
+<div class="line"><span class="stringliteral">            Exception: May raise exceptions related to state execution.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;Executing state FOO&quot;</span>)</div>
-<div class="line">        time.sleep(3)</div>
+<div class="line">        time.sleep(3)  <span class="comment"># Simulate work by sleeping</span></div>
 <div class="line"> </div>
 <div class="line">        <span class="keywordflow">if</span> self.counter &lt; 3:</div>
 <div class="line">            self.counter += 1</div>
@@ -199,34 +225,64 @@ Click to expand</summary>
 <div class="line">            <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome2&quot;</span></div>
 <div class="line"> </div>
 <div class="line"> </div>
-<div class="line"><span class="comment"># define state Bar</span></div>
+<div class="line"><span class="comment"># Define the BarState class, inheriting from the State class</span></div>
 <div class="line"><span class="keyword">class </span><a class="code hl_class" href="classBarState.html">BarState</a>(<a class="code hl_function" href="classyasmin_1_1State.html#a99401305d1648ff131344229e72cdf35">State</a>):</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Represents the Bar state in the state machine.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Initializes the BarState instance, setting up the outcome.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Outcomes:</span></div>
+<div class="line"><span class="stringliteral">            outcome3: Indicates the state should transition back to the Foo state.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        super().__init__(outcomes=[<span class="stringliteral">&quot;outcome3&quot;</span>])</div>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>execute(self, blackboard: Blackboard) -&gt; str:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Executes the logic for the Bar state.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Args:</span></div>
+<div class="line"><span class="stringliteral">            blackboard (Blackboard): The shared data structure for states.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            str: The outcome of the execution, which will always be &quot;outcome3&quot;.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Raises:</span></div>
+<div class="line"><span class="stringliteral">            Exception: May raise exceptions related to state execution.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;Executing state BAR&quot;</span>)</div>
-<div class="line">        time.sleep(3)</div>
+<div class="line">        time.sleep(3)  <span class="comment"># Simulate work by sleeping</span></div>
 <div class="line"> </div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(blackboard[<span class="stringliteral">&quot;foo_str&quot;</span>])</div>
 <div class="line">        <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome3&quot;</span></div>
 <div class="line"> </div>
 <div class="line"> </div>
-<div class="line"><span class="comment"># main</span></div>
+<div class="line"><span class="comment"># Main function to initialize and run the state machine</span></div>
 <div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
-<div class="line"> </div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    The main entry point of the application.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Initializes the ROS 2 environment, sets up the state machine,</span></div>
+<div class="line"><span class="stringliteral">    and handles execution and termination.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Raises:</span></div>
+<div class="line"><span class="stringliteral">        KeyboardInterrupt: If the execution is interrupted by the user.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_demo&quot;</span>)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    <span class="comment"># Initialize ROS 2</span></div>
 <div class="line">    rclpy.init()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    <span class="comment"># Set ROS 2 loggers</span></div>
 <div class="line">    set_ros_loggers()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># create a FSM</span></div>
+<div class="line">    <span class="comment"># Create a finite state machine (FSM)</span></div>
 <div class="line">    sm = StateMachine(outcomes=[<span class="stringliteral">&quot;outcome4&quot;</span>])</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    <span class="comment"># Add states to the FSM</span></div>
 <div class="line">    sm.add_state(</div>
 <div class="line">        <span class="stringliteral">&quot;FOO&quot;</span>,</div>
 <div class="line">        <a class="code hl_class" href="classFooState.html">FooState</a>(),</div>
@@ -242,17 +298,19 @@ Click to expand</summary>
 <div class="line">            <span class="stringliteral">&quot;outcome3&quot;</span>: <span class="stringliteral">&quot;FOO&quot;</span>,</div>
 <div class="line">        },</div>
 <div class="line">    )</div>
-<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># Publish FSM information for visualization</span></div>
 <div class="line">    YasminViewerPub(<span class="stringliteral">&quot;yasmin_demo&quot;</span>, sm)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    <span class="comment"># Execute the FSM</span></div>
 <div class="line">    <span class="keywordflow">try</span>:</div>
 <div class="line">        outcome = sm()</div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
 <div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
-<div class="line">        sm.cancel_state()</div>
+<div class="line">        <span class="keywordflow">if</span> sm.is_running():</div>
+<div class="line">            sm.cancel_state()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="comment"># Shutdown ROS 2 if it&#39;s running</span></div>
 <div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
 <div class="line">        rclpy.shutdown()</div>
 <div class="line"> </div>
@@ -287,7 +345,26 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">class </span><a class="code hl_class" href="classAddTwoIntsState.html">AddTwoIntsState</a>(<a class="code hl_function" href="classyasmin__ros_1_1ServiceState.html#ab74e60ff312219ee1033a34842c749a1">ServiceState</a>):</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    A state that calls the AddTwoInts service to add two integers.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    This class is a state in a finite state machine that sends a request</span></div>
+<div class="line"><span class="stringliteral">    to the AddTwoInts service, retrieves the response, and updates the</span></div>
+<div class="line"><span class="stringliteral">    blackboard with the result.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Attributes:</span></div>
+<div class="line"><span class="stringliteral">        service_type (type): The service type being used (AddTwoInts).</span></div>
+<div class="line"><span class="stringliteral">        service_name (str): The name of the service.</span></div>
+<div class="line"><span class="stringliteral">        outcomes (list): The list of possible outcomes for this state.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Initializes the AddTwoIntsState.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Calls the parent constructor with the specific service type,</span></div>
+<div class="line"><span class="stringliteral">        service name, request handler, outcomes, and response handler.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        super().__init__(</div>
 <div class="line">            AddTwoInts,  <span class="comment"># srv type</span></div>
 <div class="line">            <span class="stringliteral">&quot;/add_two_ints&quot;</span>,  <span class="comment"># service name</span></div>
@@ -297,7 +374,15 @@ Click to expand</summary>
 <div class="line">        )</div>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>create_request_handler(self, blackboard: Blackboard) -&gt; AddTwoInts.Request:</div>
-<div class="line"> </div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Creates the service request from the blackboard data.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Args:</span></div>
+<div class="line"><span class="stringliteral">            blackboard (Blackboard): The blackboard containing the input values.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            AddTwoInts.Request: The request object populated with values from the blackboard.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        req = AddTwoInts.Request()</div>
 <div class="line">        req.a = blackboard[<span class="stringliteral">&quot;a&quot;</span>]</div>
 <div class="line">        req.b = blackboard[<span class="stringliteral">&quot;b&quot;</span>]</div>
@@ -306,37 +391,77 @@ Click to expand</summary>
 <div class="line">    <span class="keyword">def </span>response_handler(</div>
 <div class="line">        self, blackboard: Blackboard, response: AddTwoInts.Response</div>
 <div class="line">    ) -&gt; str:</div>
-<div class="line"> </div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Processes the response from the AddTwoInts service.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Updates the blackboard with the sum result from the response.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Args:</span></div>
+<div class="line"><span class="stringliteral">            blackboard (Blackboard): The blackboard to update with the sum.</span></div>
+<div class="line"><span class="stringliteral">            response (AddTwoInts.Response): The response from the service call.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            str: The outcome of the operation, which is &quot;outcome1&quot;.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        blackboard[<span class="stringliteral">&quot;sum&quot;</span>] = response.sum</div>
 <div class="line">        <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span></div>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">def </span><a class="code hl_function" href="service__client__demo_8cpp.html#a5a773e3074e84e335d0e87393eb53cb1">set_ints</a>(blackboard: Blackboard) -&gt; str:</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Sets the integer values in the blackboard.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    This function initializes the blackboard with two integer values to be added.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Args:</span></div>
+<div class="line"><span class="stringliteral">        blackboard (Blackboard): The blackboard to update with integer values.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Returns:</span></div>
+<div class="line"><span class="stringliteral">        str: The outcome of the operation, which is SUCCEED.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    blackboard[<span class="stringliteral">&quot;a&quot;</span>] = 10</div>
 <div class="line">    blackboard[<span class="stringliteral">&quot;b&quot;</span>] = 5</div>
 <div class="line">    <span class="keywordflow">return</span> SUCCEED</div>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">def </span><a class="code hl_function" href="service__client__demo_8cpp.html#ad7658a89fcb000382a8345891e0dda91">print_sum</a>(blackboard: Blackboard) -&gt; str:</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Logs the sum value from the blackboard.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    This function retrieves the sum from the blackboard and logs it.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Args:</span></div>
+<div class="line"><span class="stringliteral">        blackboard (Blackboard): The blackboard from which to retrieve the sum.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Returns:</span></div>
+<div class="line"><span class="stringliteral">        str: The outcome of the operation, which is SUCCEED.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    yasmin.YASMIN_LOG_INFO(f<span class="stringliteral">&quot;Sum: {blackboard[&#39;sum&#39;]}&quot;</span>)</div>
 <div class="line">    <span class="keywordflow">return</span> SUCCEED</div>
 <div class="line"> </div>
 <div class="line"> </div>
-<div class="line"><span class="comment"># main</span></div>
 <div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
-<div class="line"> </div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    The main function to execute the finite state machine (FSM).</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    This function initializes the ROS 2 environment, sets up logging,</span></div>
+<div class="line"><span class="stringliteral">    creates the FSM with defined states, and executes the FSM.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Raises:</span></div>
+<div class="line"><span class="stringliteral">        KeyboardInterrupt: If the user interrupts the program.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_service_client_demo&quot;</span>)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    <span class="comment"># Init ROS 2</span></div>
 <div class="line">    rclpy.init()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    <span class="comment"># Set ROS 2 logs</span></div>
 <div class="line">    set_ros_loggers()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># create a FSM</span></div>
+<div class="line">    <span class="comment"># Create a FSM</span></div>
 <div class="line">    sm = StateMachine(outcomes=[<span class="stringliteral">&quot;outcome4&quot;</span>])</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    <span class="comment"># Add states</span></div>
 <div class="line">    sm.add_state(</div>
 <div class="line">        <span class="stringliteral">&quot;SETTING_INTS&quot;</span>,</div>
 <div class="line">        CbState([SUCCEED], set_ints),</div>
@@ -359,28 +484,29 @@ Click to expand</summary>
 <div class="line">        },</div>
 <div class="line">    )</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line">    <span class="comment"># Publish FSM info</span></div>
 <div class="line">    YasminViewerPub(<span class="stringliteral">&quot;YASMIN_SERVICE_CLIENT_DEMO&quot;</span>, sm)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    <span class="comment"># Execute FSM</span></div>
 <div class="line">    <span class="keywordflow">try</span>:</div>
 <div class="line">        outcome = sm()</div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
 <div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
-<div class="line">        sm.cancel_state()</div>
+<div class="line">        <span class="keywordflow">if</span> sm.is_running():</div>
+<div class="line">            sm.cancel_state()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="comment"># Shutdown ROS 2</span></div>
 <div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
 <div class="line">        rclpy.shutdown()</div>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">if</span> __name__ == <span class="stringliteral">&quot;__main__&quot;</span>:</div>
 <div class="line">    <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>()</div>
-<div class="ttc" id="aclassAddTwoIntsState_html"><div class="ttname"><a href="classAddTwoIntsState.html">AddTwoIntsState</a></div><div class="ttdoc">State for calling the AddTwoInts service in ROS 2.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:74</div></div>
+<div class="ttc" id="aclassAddTwoIntsState_html"><div class="ttname"><a href="classAddTwoIntsState.html">AddTwoIntsState</a></div><div class="ttdoc">State for calling the AddTwoInts service in ROS 2.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:73</div></div>
 <div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_ab74e60ff312219ee1033a34842c749a1"><div class="ttname"><a href="classyasmin__ros_1_1ServiceState.html#ab74e60ff312219ee1033a34842c749a1">yasmin_ros::ServiceState&lt; example_interfaces::srv::AddTwoInts &gt;::ServiceState</a></div><div class="ttdeci">ServiceState(std::string srv_name, CreateRequestHandler create_request_handler, std::set&lt; std::string &gt; outcomes, int timeout=-1.0)</div><div class="ttdef"><b>Definition</b> service_state.hpp:65</div></div>
 <div class="ttc" id="anamespaceyasmin__ros_1_1basic__outcomes_html"><div class="ttname"><a href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros::basic_outcomes</a></div><div class="ttdoc">Provides common outcome constants for ROS 2.</div></div>
-<div class="ttc" id="aservice__client__demo_8cpp_html_a5a773e3074e84e335d0e87393eb53cb1"><div class="ttname"><a href="service__client__demo_8cpp.html#a5a773e3074e84e335d0e87393eb53cb1">set_ints</a></div><div class="ttdeci">std::string set_ints(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard)</div><div class="ttdoc">Sets two integer values in the blackboard.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:46</div></div>
-<div class="ttc" id="aservice__client__demo_8cpp_html_ad7658a89fcb000382a8345891e0dda91"><div class="ttname"><a href="service__client__demo_8cpp.html#ad7658a89fcb000382a8345891e0dda91">print_sum</a></div><div class="ttdeci">std::string print_sum(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard)</div><div class="ttdoc">Prints the sum stored in the blackboard.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:61</div></div>
+<div class="ttc" id="aservice__client__demo_8cpp_html_a5a773e3074e84e335d0e87393eb53cb1"><div class="ttname"><a href="service__client__demo_8cpp.html#a5a773e3074e84e335d0e87393eb53cb1">set_ints</a></div><div class="ttdeci">std::string set_ints(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard)</div><div class="ttdoc">Sets two integer values in the blackboard.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:45</div></div>
+<div class="ttc" id="aservice__client__demo_8cpp_html_ad7658a89fcb000382a8345891e0dda91"><div class="ttname"><a href="service__client__demo_8cpp.html#ad7658a89fcb000382a8345891e0dda91">print_sum</a></div><div class="ttdeci">std::string print_sum(std::shared_ptr&lt; yasmin::blackboard::Blackboard &gt; blackboard)</div><div class="ttdoc">Prints the sum stored in the blackboard.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:60</div></div>
 </div><!-- fragment --><p></p>
 </details>
 <h3><a class="anchor" id="autotoc_md9"></a>
@@ -395,9 +521,7 @@ Click to expand</summary>
 <div class="line"><span class="keyword">from</span> example_interfaces.action <span class="keyword">import</span> Fibonacci</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">import</span> yasmin</div>
-<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> CbState</div>
-<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
-<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
+<div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> CbState, Blackboard, StateMachine</div>
 <div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> ActionState</div>
 <div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
 <div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> SUCCEED, ABORT, CANCEL</div>
@@ -405,55 +529,150 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">class </span><a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>(<a class="code hl_function" href="classyasmin__ros_1_1ActionState.html#aa7902878db3392a3e00613a68e23b4d0">ActionState</a>):</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Class representing the state of the Fibonacci action.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Inherits from ActionState and implements methods to handle the</span></div>
+<div class="line"><span class="stringliteral">    Fibonacci action in a finite state machine.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Attributes:</span></div>
+<div class="line"><span class="stringliteral">        None</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Initializes the FibonacciState.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Sets up the action type and the action name for the Fibonacci</span></div>
+<div class="line"><span class="stringliteral">        action. Initializes goal, response handler, and feedback</span></div>
+<div class="line"><span class="stringliteral">        processing callbacks.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Parameters:</span></div>
+<div class="line"><span class="stringliteral">            None</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            None</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        super().__init__(</div>
 <div class="line">            Fibonacci,  <span class="comment"># action type</span></div>
 <div class="line">            <span class="stringliteral">&quot;/fibonacci&quot;</span>,  <span class="comment"># action name</span></div>
-<div class="line">            self.create_goal_handler,  <span class="comment"># cb to create the goal</span></div>
+<div class="line">            self.create_goal_handler,  <span class="comment"># callback to create the goal</span></div>
 <div class="line">            <span class="keywordtype">None</span>,  <span class="comment"># outcomes. Includes (SUCCEED, ABORT, CANCEL)</span></div>
-<div class="line">            self.response_handler,  <span class="comment"># cb to process the response</span></div>
-<div class="line">            self.print_feedback,  <span class="comment"># cb to process the feedback</span></div>
+<div class="line">            self.response_handler,  <span class="comment"># callback to process the response</span></div>
+<div class="line">            self.print_feedback,  <span class="comment"># callback to process the feedback</span></div>
 <div class="line">        )</div>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>create_goal_handler(self, blackboard: Blackboard) -&gt; Fibonacci.Goal:</div>
-<div class="line"> </div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Creates the goal for the Fibonacci action.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        This method retrieves the input value from the blackboard and</span></div>
+<div class="line"><span class="stringliteral">        populates the Fibonacci goal.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Parameters:</span></div>
+<div class="line"><span class="stringliteral">            blackboard (Blackboard): The blackboard containing the state</span></div>
+<div class="line"><span class="stringliteral">            information.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            Fibonacci.Goal: The populated goal object for the Fibonacci action.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Raises:</span></div>
+<div class="line"><span class="stringliteral">            KeyError: If the expected key is not present in the blackboard.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        goal = Fibonacci.Goal()</div>
-<div class="line">        goal.order = blackboard[<span class="stringliteral">&quot;n&quot;</span>]</div>
+<div class="line">        goal.order = blackboard[<span class="stringliteral">&quot;n&quot;</span>]  <span class="comment"># Retrieve the input value &#39;n&#39; from the blackboard</span></div>
 <div class="line">        <span class="keywordflow">return</span> goal</div>
 <div class="line"> </div>
-<div class="line">    <span class="keyword">def </span>response_handler(</div>
-<div class="line">        self, blackboard: Blackboard, response: Fibonacci.Result</div>
-<div class="line">    ) -&gt; str:</div>
-<div class="line"> </div>
-<div class="line">        blackboard[<span class="stringliteral">&quot;fibo_res&quot;</span>] = response.sequence</div>
+<div class="line">    <span class="keyword">def </span>response_handler(self, blackboard: Blackboard, response: Fibonacci.Result) -&gt; str:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Handles the response from the Fibonacci action.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        This method processes the result of the Fibonacci action and</span></div>
+<div class="line"><span class="stringliteral">        stores it in the blackboard.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Parameters:</span></div>
+<div class="line"><span class="stringliteral">            blackboard (Blackboard): The blackboard to store the result.</span></div>
+<div class="line"><span class="stringliteral">            response (Fibonacci.Result): The result object from the Fibonacci action.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            str: Outcome of the operation, typically SUCCEED.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Raises:</span></div>
+<div class="line"><span class="stringliteral">            None</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line">        blackboard[<span class="stringliteral">&quot;fibo_res&quot;</span>] = (</div>
+<div class="line">            response.sequence</div>
+<div class="line">        )  <span class="comment"># Store the result sequence in the blackboard</span></div>
 <div class="line">        <span class="keywordflow">return</span> SUCCEED</div>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>print_feedback(</div>
 <div class="line">        self, blackboard: Blackboard, feedback: Fibonacci.Feedback</div>
 <div class="line">    ) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Prints feedback from the Fibonacci action.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        This method logs the partial sequence received during the action.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Parameters:</span></div>
+<div class="line"><span class="stringliteral">            blackboard (Blackboard): The blackboard (not used in this method).</span></div>
+<div class="line"><span class="stringliteral">            feedback (Fibonacci.Feedback): The feedback object from the Fibonacci action.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            None</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Raises:</span></div>
+<div class="line"><span class="stringliteral">            None</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(f<span class="stringliteral">&quot;Received feedback: {list(feedback.sequence)}&quot;</span>)</div>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#ac1846bfe6ea5494fa8a7d56f7bc96a09">print_result</a>(blackboard: Blackboard) -&gt; str:</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Prints the result of the Fibonacci action.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    This function logs the final result stored in the blackboard.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Parameters:</span></div>
+<div class="line"><span class="stringliteral">        blackboard (Blackboard): The blackboard containing the result.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Returns:</span></div>
+<div class="line"><span class="stringliteral">        str: Outcome of the operation, typically SUCCEED.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Raises:</span></div>
+<div class="line"><span class="stringliteral">        None</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    yasmin.YASMIN_LOG_INFO(f<span class="stringliteral">&quot;Result: {blackboard[&#39;fibo_res&#39;]}&quot;</span>)</div>
 <div class="line">    <span class="keywordflow">return</span> SUCCEED</div>
 <div class="line"> </div>
 <div class="line"> </div>
-<div class="line"><span class="comment"># main</span></div>
 <div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
-<div class="line"> </div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Main function to execute the ROS 2 action client demo.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    This function initializes the ROS 2 client, sets up the finite state</span></div>
+<div class="line"><span class="stringliteral">    machine, adds the states, and starts the action processing.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Parameters:</span></div>
+<div class="line"><span class="stringliteral">        None</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Returns:</span></div>
+<div class="line"><span class="stringliteral">        None</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Raises:</span></div>
+<div class="line"><span class="stringliteral">        KeyboardInterrupt: If the user interrupts the execution.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_action_client_demo&quot;</span>)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    <span class="comment"># Initialize ROS 2</span></div>
 <div class="line">    rclpy.init()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    <span class="comment"># Set up ROS 2 logs</span></div>
 <div class="line">    set_ros_loggers()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># create a FSM</span></div>
+<div class="line">    <span class="comment"># Create a finite state machine (FSM)</span></div>
 <div class="line">    sm = StateMachine(outcomes=[<span class="stringliteral">&quot;outcome4&quot;</span>])</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    <span class="comment"># Add states to the FSM</span></div>
 <div class="line">    sm.add_state(</div>
 <div class="line">        <span class="stringliteral">&quot;CALLING_FIBONACCI&quot;</span>,</div>
 <div class="line">        <a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>(),</div>
@@ -471,21 +690,22 @@ Click to expand</summary>
 <div class="line">        },</div>
 <div class="line">    )</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line">    <span class="comment"># Publish FSM information</span></div>
 <div class="line">    YasminViewerPub(<span class="stringliteral">&quot;YASMIN_ACTION_CLIENT_DEMO&quot;</span>, sm)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># create an initial blackoard</span></div>
+<div class="line">    <span class="comment"># Create an initial blackboard with the input value</span></div>
 <div class="line">    blackboard = Blackboard()</div>
-<div class="line">    blackboard[<span class="stringliteral">&quot;n&quot;</span>] = 10</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;n&quot;</span>] = 10  <span class="comment"># Set the Fibonacci order to 10</span></div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    <span class="comment"># Execute the FSM</span></div>
 <div class="line">    <span class="keywordflow">try</span>:</div>
 <div class="line">        outcome = sm(blackboard)</div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
 <div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
-<div class="line">        sm.cancel_state()</div>
+<div class="line">        <span class="keywordflow">if</span> sm.is_running():</div>
+<div class="line">            sm.cancel_state()  <span class="comment"># Cancel the state if interrupted</span></div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="comment"># Shutdown ROS 2</span></div>
 <div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
 <div class="line">        rclpy.shutdown()</div>
 <div class="line"> </div>
@@ -518,20 +738,64 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">class </span><a class="code hl_class" href="classPrintOdometryState.html">PrintOdometryState</a>(<a class="code hl_function" href="classyasmin__ros_1_1MonitorState.html#a8df77197e3a40a3a6229969e1a6da9a5">MonitorState</a>):</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    MonitorState subclass to handle Odometry messages.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    This state monitors Odometry messages from the specified ROS topic,</span></div>
+<div class="line"><span class="stringliteral">    logging them and transitioning based on the number of messages received.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Attributes:</span></div>
+<div class="line"><span class="stringliteral">        times (int): The number of messages to monitor before transitioning</span></div>
+<div class="line"><span class="stringliteral">                     to the next outcome.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Parameters:</span></div>
+<div class="line"><span class="stringliteral">        times (int): The initial count of how many Odometry messages to</span></div>
+<div class="line"><span class="stringliteral">                     process before changing state.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Methods:</span></div>
+<div class="line"><span class="stringliteral">        monitor_handler(blackboard: Blackboard, msg: Odometry) -&gt; str:</span></div>
+<div class="line"><span class="stringliteral">            Handles incoming Odometry messages, logging the message and</span></div>
+<div class="line"><span class="stringliteral">            returning the appropriate outcome based on the remaining count.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>__init__(self, times: int) -&gt; <span class="keywordtype">None</span>:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Initializes the PrintOdometryState.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Parameters:</span></div>
+<div class="line"><span class="stringliteral">            times (int): The number of Odometry messages to monitor before</span></div>
+<div class="line"><span class="stringliteral">                         transitioning to the next outcome.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        super().__init__(</div>
 <div class="line">            Odometry,  <span class="comment"># msg type</span></div>
 <div class="line">            <span class="stringliteral">&quot;odom&quot;</span>,  <span class="comment"># topic name</span></div>
 <div class="line">            [<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>],  <span class="comment"># outcomes</span></div>
 <div class="line">            self.monitor_handler,  <span class="comment"># monitor handler callback</span></div>
-<div class="line">            qos=qos_profile_sensor_data,  <span class="comment"># qos for the topic sbscription</span></div>
-<div class="line">            msg_queue=10,  <span class="comment"># queue of the monitor handler callback</span></div>
-<div class="line">            timeout=10,  <span class="comment"># timeout to wait for msgs in seconds</span></div>
-<div class="line">            <span class="comment"># if not None, CANCEL outcome is added</span></div>
+<div class="line">            qos=qos_profile_sensor_data,  <span class="comment"># qos for the topic subscription</span></div>
+<div class="line">            msg_queue=10,  <span class="comment"># queue for the monitor handler callback</span></div>
+<div class="line">            timeout=10,  <span class="comment"># timeout to wait for messages in seconds</span></div>
 <div class="line">        )</div>
 <div class="line">        self.times = times</div>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>monitor_handler(self, blackboard: Blackboard, msg: Odometry) -&gt; str:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Handles incoming Odometry messages.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        This method is called whenever a new Odometry message is received.</span></div>
+<div class="line"><span class="stringliteral">        It logs the message, decrements the count of messages to process,</span></div>
+<div class="line"><span class="stringliteral">        and determines the next state outcome.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Parameters:</span></div>
+<div class="line"><span class="stringliteral">            blackboard (Blackboard): The shared data storage for states.</span></div>
+<div class="line"><span class="stringliteral">            msg (Odometry): The incoming Odometry message.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            str: The next state outcome, either &quot;outcome1&quot; to continue</span></div>
+<div class="line"><span class="stringliteral">                 monitoring or &quot;outcome2&quot; to transition to the next state.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Exceptions:</span></div>
+<div class="line"><span class="stringliteral">            None</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(msg)</div>
 <div class="line"> </div>
 <div class="line">        self.times -= 1</div>
@@ -542,21 +806,30 @@ Click to expand</summary>
 <div class="line">        <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span></div>
 <div class="line"> </div>
 <div class="line"> </div>
-<div class="line"><span class="comment"># main</span></div>
 <div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
-<div class="line"> </div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Main function to initialize and run the ROS 2 state machine.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    This function initializes ROS 2, sets up logging, creates a finite state</span></div>
+<div class="line"><span class="stringliteral">    machine (FSM), adds states to the FSM, and executes the FSM. It handles</span></div>
+<div class="line"><span class="stringliteral">    cleanup and shutdown of ROS 2 gracefully.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Exceptions:</span></div>
+<div class="line"><span class="stringliteral">        KeyboardInterrupt: Caught to allow graceful cancellation of the</span></div>
+<div class="line"><span class="stringliteral">                          state machine during execution.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_monitor_demo&quot;</span>)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    <span class="comment"># Initialize ROS 2</span></div>
 <div class="line">    rclpy.init()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    <span class="comment"># Set ROS 2 logs</span></div>
 <div class="line">    set_ros_loggers()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># create a FSM</span></div>
+<div class="line">    <span class="comment"># Create a finite state machine (FSM)</span></div>
 <div class="line">    sm = StateMachine(outcomes=[<span class="stringliteral">&quot;outcome4&quot;</span>])</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    <span class="comment"># Add states to the FSM</span></div>
 <div class="line">    sm.add_state(</div>
 <div class="line">        <span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>,</div>
 <div class="line">        <a class="code hl_class" href="classPrintOdometryState.html">PrintOdometryState</a>(5),</div>
@@ -567,17 +840,18 @@ Click to expand</summary>
 <div class="line">        },</div>
 <div class="line">    )</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line">    <span class="comment"># Publish FSM information</span></div>
 <div class="line">    YasminViewerPub(<span class="stringliteral">&quot;YASMIN_MONITOR_DEMO&quot;</span>, sm)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    <span class="comment"># Execute FSM</span></div>
 <div class="line">    <span class="keywordflow">try</span>:</div>
 <div class="line">        outcome = sm()</div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
 <div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
-<div class="line">        sm.cancel_state()</div>
+<div class="line">        <span class="keywordflow">if</span> sm.is_running():</div>
+<div class="line">            sm.cancel_state()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="comment"># Shutdown ROS 2</span></div>
 <div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
 <div class="line">        rclpy.shutdown()</div>
 <div class="line"> </div>
@@ -596,7 +870,6 @@ Nav2 Demo (Hierarchical FSM + ROS 2 Action)</h3>
 Click to expand</summary>
 <p></p>
 <div class="fragment"><div class="line"><span class="keyword">import</span> random</div>
-<div class="line"> </div>
 <div class="line"><span class="keyword">import</span> rclpy</div>
 <div class="line"><span class="keyword">from</span> geometry_msgs.msg <span class="keyword">import</span> Pose</div>
 <div class="line"><span class="keyword">from</span> nav2_msgs.action <span class="keyword">import</span> NavigateToPose</div>
@@ -610,29 +883,67 @@ Click to expand</summary>
 <div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> SUCCEED, ABORT, CANCEL</div>
 <div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
 <div class="line"> </div>
-<div class="line">HAS_NEXT = <span class="stringliteral">&quot;has_next&quot;</span></div>
-<div class="line">END = <span class="stringliteral">&quot;end&quot;</span></div>
+<div class="line"><span class="comment"># Constants for state outcomes</span></div>
+<div class="line">HAS_NEXT = <span class="stringliteral">&quot;has_next&quot;</span>  </div>
+<div class="line">END = <span class="stringliteral">&quot;end&quot;</span>  </div>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">class </span>Nav2State(ActionState):</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    ActionState for navigating to a specified pose using ROS 2 Navigation.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Attributes:</span></div>
+<div class="line"><span class="stringliteral">        None</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Methods:</span></div>
+<div class="line"><span class="stringliteral">        create_goal_handler(blackboard: Blackboard) -&gt; NavigateToPose.Goal:</span></div>
+<div class="line"><span class="stringliteral">            Creates the navigation goal from the blackboard.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
+<div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>__init__(self) -&gt; None:</div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Initializes the Nav2State.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Calls the parent constructor to set up the action with:</span></div>
+<div class="line"><span class="stringliteral">        - Action type: NavigateToPose</span></div>
+<div class="line"><span class="stringliteral">        - Action name: /navigate_to_pose</span></div>
+<div class="line"><span class="stringliteral">        - Callback for goal creation: create_goal_handler</span></div>
+<div class="line"><span class="stringliteral">        - Outcomes: None, since it will use default outcomes (SUCCEED, ABORT, CANCEL)</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        super().__init__(</div>
 <div class="line">            NavigateToPose,  <span class="comment"># action type</span></div>
 <div class="line">            <span class="stringliteral">&quot;/navigate_to_pose&quot;</span>,  <span class="comment"># action name</span></div>
-<div class="line">            self.create_goal_handler,  <span class="comment"># cb to create the goal</span></div>
-<div class="line">            <span class="keywordtype">None</span>,  <span class="comment"># outcomes. Includes (SUCCEED, ABORT, CANCEL)</span></div>
-<div class="line">            <span class="keywordtype">None</span>,  <span class="comment"># cb to process the response</span></div>
+<div class="line">            self.create_goal_handler,  <span class="comment"># callback to create the goal</span></div>
+<div class="line">            <span class="keywordtype">None</span>,  <span class="comment"># outcomes</span></div>
+<div class="line">            <span class="keywordtype">None</span>,  <span class="comment"># callback to process the response</span></div>
 <div class="line">        )</div>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">def </span>create_goal_handler(self, blackboard: Blackboard) -&gt; NavigateToPose.Goal:</div>
-<div class="line"> </div>
+<div class="line">        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">        Creates a goal for navigation based on the current pose in the blackboard.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Args:</span></div>
+<div class="line"><span class="stringliteral">            blackboard (Blackboard): The blackboard instance holding current state data.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">        Returns:</span></div>
+<div class="line"><span class="stringliteral">            NavigateToPose.Goal: The constructed goal for the navigation action.</span></div>
+<div class="line"><span class="stringliteral">        &quot;&quot;&quot;</span></div>
 <div class="line">        goal = NavigateToPose.Goal()</div>
 <div class="line">        goal.pose.pose = blackboard[<span class="stringliteral">&quot;pose&quot;</span>]</div>
-<div class="line">        goal.pose.header.frame_id = <span class="stringliteral">&quot;map&quot;</span></div>
+<div class="line">        goal.pose.header.frame_id = <span class="stringliteral">&quot;map&quot;</span>  <span class="comment"># Set the reference frame to &#39;map&#39;</span></div>
 <div class="line">        <span class="keywordflow">return</span> goal</div>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">def </span>create_waypoints(blackboard: Blackboard) -&gt; str:</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Initializes waypoints in the blackboard for navigation.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Args:</span></div>
+<div class="line"><span class="stringliteral">        blackboard (Blackboard): The blackboard instance to store waypoints.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Returns:</span></div>
+<div class="line"><span class="stringliteral">        str: Outcome indicating success (SUCCEED).</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    blackboard[<span class="stringliteral">&quot;waypoints&quot;</span>] = {</div>
 <div class="line">        <span class="stringliteral">&quot;entrance&quot;</span>: [1.25, 6.30, -0.78, 0.67],</div>
 <div class="line">        <span class="stringliteral">&quot;bathroom&quot;</span>: [4.89, 1.64, 0.0, 1.0],</div>
@@ -643,7 +954,16 @@ Click to expand</summary>
 <div class="line">    <span class="keywordflow">return</span> SUCCEED</div>
 <div class="line"> </div>
 <div class="line"> </div>
-<div class="line"><span class="keyword">def </span>take_random_waypoint(blackboard) -&gt; str:</div>
+<div class="line"><span class="keyword">def </span>take_random_waypoint(blackboard: Blackboard) -&gt; str:</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Selects a random set of waypoints from the available waypoints.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Args:</span></div>
+<div class="line"><span class="stringliteral">        blackboard (Blackboard): The blackboard instance to store random waypoints.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Returns:</span></div>
+<div class="line"><span class="stringliteral">        str: Outcome indicating success (SUCCEED).</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    blackboard[<span class="stringliteral">&quot;random_waypoints&quot;</span>] = random.sample(</div>
 <div class="line">        list(blackboard[<span class="stringliteral">&quot;waypoints&quot;</span>].keys()), blackboard[<span class="stringliteral">&quot;waypoints_num&quot;</span>]</div>
 <div class="line">    )</div>
@@ -651,42 +971,56 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">def </span>get_next_waypoint(blackboard: Blackboard) -&gt; str:</div>
-<div class="line"> </div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Retrieves the next waypoint from the list of random waypoints.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Updates the blackboard with the pose of the next waypoint.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Args:</span></div>
+<div class="line"><span class="stringliteral">        blackboard (Blackboard): The blackboard instance holding current state data.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Returns:</span></div>
+<div class="line"><span class="stringliteral">        str: Outcome indicating whether there is a next waypoint (HAS_NEXT) or if</span></div>
+<div class="line"><span class="stringliteral">             navigation is complete (END).</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    <span class="keywordflow">if</span> <span class="keywordflow">not</span> blackboard[<span class="stringliteral">&quot;random_waypoints&quot;</span>]:</div>
 <div class="line">        <span class="keywordflow">return</span> END</div>
 <div class="line"> </div>
-<div class="line">    wp_name = blackboard[<span class="stringliteral">&quot;random_waypoints&quot;</span>].pop(0)</div>
-<div class="line">    wp = blackboard[<span class="stringliteral">&quot;waypoints&quot;</span>][wp_name]</div>
+<div class="line">    wp_name = blackboard[<span class="stringliteral">&quot;random_waypoints&quot;</span>].pop(0)  <span class="comment"># Get the next waypoint name</span></div>
+<div class="line">    wp = blackboard[<span class="stringliteral">&quot;waypoints&quot;</span>][wp_name]  <span class="comment"># Get the waypoint coordinates</span></div>
 <div class="line"> </div>
 <div class="line">    pose = Pose()</div>
 <div class="line">    pose.position.x = wp[0]</div>
 <div class="line">    pose.position.y = wp[1]</div>
-<div class="line"> </div>
 <div class="line">    pose.orientation.z = wp[2]</div>
 <div class="line">    pose.orientation.w = wp[3]</div>
 <div class="line"> </div>
-<div class="line">    blackboard[<span class="stringliteral">&quot;pose&quot;</span>] = pose</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;pose&quot;</span>] = pose  <span class="comment"># Update blackboard with new pose</span></div>
 <div class="line">    blackboard[<span class="stringliteral">&quot;text&quot;</span>] = f<span class="stringliteral">&quot;I have reached waypoint {wp_name}&quot;</span></div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> HAS_NEXT</div>
 <div class="line"> </div>
 <div class="line"> </div>
-<div class="line"><span class="comment"># main</span></div>
-<div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>():</div>
-<div class="line"> </div>
+<div class="line"><span class="comment"># main function</span></div>
+<div class="line"><span class="keyword">def </span><a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>() -&gt; None:</div>
+<div class="line">    <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="stringliteral">    Initializes the ROS 2 node, sets up state machines for navigation, and executes the FSM.</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    Handles cleanup and shutdown of the ROS 2 node upon completion.</span></div>
+<div class="line"><span class="stringliteral">    &quot;&quot;&quot;</span></div>
 <div class="line">    yasmin.YASMIN_LOG_INFO(<span class="stringliteral">&quot;yasmin_nav2_demo&quot;</span>)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># init ROS 2</span></div>
+<div class="line">    <span class="comment"># Initialize ROS 2</span></div>
 <div class="line">    rclpy.init()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># set ROS 2 logs</span></div>
+<div class="line">    <span class="comment"># Set ROS 2 loggers for debugging</span></div>
 <div class="line">    set_ros_loggers()</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># create state machines</span></div>
+<div class="line">    <span class="comment"># Create state machines</span></div>
 <div class="line">    sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])</div>
 <div class="line">    nav_sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># add states</span></div>
+<div class="line">    <span class="comment"># Add states to the state machine</span></div>
 <div class="line">    sm.add_state(</div>
 <div class="line">        <span class="stringliteral">&quot;CREATING_WAYPOINTS&quot;</span>,</div>
 <div class="line">        CbState([SUCCEED], create_waypoints),</div>
@@ -720,22 +1054,33 @@ Click to expand</summary>
 <div class="line">        },</div>
 <div class="line">    )</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># pub FSM info</span></div>
+<div class="line">    sm.add_state(</div>
+<div class="line">        <span class="stringliteral">&quot;NAVIGATING&quot;</span>,</div>
+<div class="line">        nav_sm,</div>
+<div class="line">        transitions={</div>
+<div class="line">            SUCCEED: SUCCEED,</div>
+<div class="line">            CANCEL: CANCEL,</div>
+<div class="line">            ABORT: ABORT,</div>
+<div class="line">        },</div>
+<div class="line">    )</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment"># Publish FSM information for visualization</span></div>
 <div class="line">    YasminViewerPub(<span class="stringliteral">&quot;YASMIN_NAV_DEMO&quot;</span>, sm)</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># execute FSM</span></div>
+<div class="line">    <span class="comment"># Execute the state machine</span></div>
 <div class="line">    blackboard = Blackboard()</div>
-<div class="line">    blackboard[<span class="stringliteral">&quot;waypoints_num&quot;</span>] = 2</div>
+<div class="line">    blackboard[<span class="stringliteral">&quot;waypoints_num&quot;</span>] = 2  <span class="comment"># Set the number of waypoints to navigate</span></div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">try</span>:</div>
-<div class="line">        outcome = sm(blackboard)</div>
+<div class="line">        outcome = sm(blackboard)  <span class="comment"># Run the state machine with the blackboard</span></div>
 <div class="line">        yasmin.YASMIN_LOG_INFO(outcome)</div>
 <div class="line">    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
-<div class="line">        sm.cancel_state()</div>
+<div class="line">        sm.cancel_state()  <span class="comment"># Handle manual interruption</span></div>
 <div class="line"> </div>
-<div class="line">    <span class="comment"># shutdown ROS 2</span></div>
+<div class="line">    <span class="comment"># Shutdown ROS 2</span></div>
 <div class="line">    <span class="keywordflow">if</span> rclpy.ok():</div>
-<div class="line">        rclpy.shutdown()</div>
+<div class="line">        <span class="keywordflow">if</span> sm.is_running():</div>
+<div class="line">            rclpy.shutdown()</div>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">if</span> __name__ == <span class="stringliteral">&quot;__main__&quot;</span>:</div>
@@ -757,7 +1102,6 @@ Click to expand</summary>
 <div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor">#include &quot;rclcpp/rclcpp.hpp&quot;</span></div>
-<div class="line"> </div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="logs_8hpp.html">yasmin/logs.hpp</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="state_8hpp.html">yasmin/state.hpp</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="state__machine_8hpp.html">yasmin/state_machine.hpp</a>&quot;</span></div>
@@ -766,15 +1110,14 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>;</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// define state Foo</span></div>
 <div class="line"><span class="keyword">class </span><a class="code hl_class" href="classFooState.html">FooState</a> : <span class="keyword">public</span> <a class="code hl_class" href="classyasmin_1_1State.html">yasmin::State</a> {</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">  <span class="keywordtype">int</span> <a class="code hl_variable" href="classFooState.html#a9c41a04e25dfd44c4e7fe32cb3cad467">counter</a>;</div>
 <div class="line"> </div>
-<div class="line">  <a class="code hl_function" href="classFooState.html#a6ae85df2d67293997c452444c2e0b6a4">FooState</a>() : <a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>::<a class="code hl_class" href="classyasmin_1_1State.html">State</a>({<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>}) { this-&gt;counter = 0; };</div>
+<div class="line">  <a class="code hl_function" href="classFooState.html#a6ae85df2d67293997c452444c2e0b6a4">FooState</a>() : <a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>::<a class="code hl_class" href="classyasmin_1_1State.html">State</a>({<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>}), <a class="code hl_variable" href="classFooState.html#a9c41a04e25dfd44c4e7fe32cb3cad467">counter</a>(0){};</div>
 <div class="line"> </div>
 <div class="line">  std::string</div>
-<div class="line">  <a class="code hl_function" href="classFooState.html#acddc8f367d86d5f79a8ce8fc1ded0b8d">execute</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {</div>
+<div class="line">  <a class="code hl_function" href="classFooState.html#acddc8f367d86d5f79a8ce8fc1ded0b8d">execute</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard)<span class="keyword"> override </span>{</div>
 <div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;Executing state FOO&quot;</span>);</div>
 <div class="line">    std::this_thread::sleep_for(std::chrono::seconds(3));</div>
 <div class="line"> </div>
@@ -787,16 +1130,15 @@ Click to expand</summary>
 <div class="line">    } <span class="keywordflow">else</span> {</div>
 <div class="line">      <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome2&quot;</span>;</div>
 <div class="line">    }</div>
-<div class="line">  }</div>
+<div class="line">  };</div>
 <div class="line">};</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// define state Bar</span></div>
 <div class="line"><span class="keyword">class </span><a class="code hl_class" href="classBarState.html">BarState</a> : <span class="keyword">public</span> <a class="code hl_class" href="classyasmin_1_1State.html">yasmin::State</a> {</div>
 <div class="line"><span class="keyword">public</span>:</div>
-<div class="line">  <a class="code hl_function" href="classBarState.html#afc590f0fcaaea12f89f14582ad60d866">BarState</a>() : <a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>::<a class="code hl_class" href="classyasmin_1_1State.html">State</a>({<span class="stringliteral">&quot;outcome3&quot;</span>}){};</div>
+<div class="line">  <a class="code hl_function" href="classBarState.html#afc590f0fcaaea12f89f14582ad60d866">BarState</a>() : <a class="code hl_namespace" href="namespaceyasmin.html">yasmin</a>::<a class="code hl_class" href="classyasmin_1_1State.html">State</a>({<span class="stringliteral">&quot;outcome3&quot;</span>}) {}</div>
 <div class="line"> </div>
 <div class="line">  std::string</div>
-<div class="line">  <a class="code hl_function" href="classBarState.html#af393c4602c588eb13a620ef02a187925">execute</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {</div>
+<div class="line">  <a class="code hl_function" href="classBarState.html#af393c4602c588eb13a620ef02a187925">execute</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard)<span class="keyword"> override </span>{</div>
 <div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;Executing state BAR&quot;</span>);</div>
 <div class="line">    std::this_thread::sleep_for(std::chrono::seconds(3));</div>
 <div class="line"> </div>
@@ -807,25 +1149,24 @@ Click to expand</summary>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]) {</div>
-<div class="line"> </div>
 <div class="line">  <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;yasmin_demo&quot;</span>);</div>
 <div class="line">  rclcpp::init(argc, argv);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// set ROS 2 logs</span></div>
+<div class="line">  <span class="comment">// Set ROS 2 logs</span></div>
 <div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// create a state machine</span></div>
+<div class="line">  <span class="comment">// Create a state machine</span></div>
 <div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
 <div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// cancel state machine on ROS 2 shutdown</span></div>
+<div class="line">  <span class="comment">// Cancel state machine on ROS 2 shutdown</span></div>
 <div class="line">  rclcpp::on_shutdown([sm]() {</div>
 <div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
 <div class="line">      sm-&gt;cancel_state();</div>
 <div class="line">    }</div>
 <div class="line">  });</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// add states</span></div>
+<div class="line">  <span class="comment">// Add states to the state machine</span></div>
 <div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;FOO&quot;</span>, std::make_shared&lt;FooState&gt;(),</div>
 <div class="line">                {</div>
 <div class="line">                    {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;BAR&quot;</span>},</div>
@@ -836,10 +1177,10 @@ Click to expand</summary>
 <div class="line">                    {<span class="stringliteral">&quot;outcome3&quot;</span>, <span class="stringliteral">&quot;FOO&quot;</span>},</div>
 <div class="line">                });</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// pub</span></div>
+<div class="line">  <span class="comment">// Publish state machine updates</span></div>
 <div class="line">  <a class="code hl_class" href="classyasmin__viewer_1_1YasminViewerPub.html">yasmin_viewer::YasminViewerPub</a> yasmin_pub(<span class="stringliteral">&quot;yasmin_demo&quot;</span>, sm);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// execute</span></div>
+<div class="line">  <span class="comment">// Execute the state machine</span></div>
 <div class="line">  <span class="keywordflow">try</span> {</div>
 <div class="line">    std::string outcome = (*sm.get())();</div>
 <div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
@@ -911,12 +1252,10 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line"><span class="keyword">class </span><a class="code hl_class" href="classAddTwoIntsState.html">AddTwoIntsState</a></div>
 <div class="line">    : <span class="keyword">public</span> <a class="code hl_class" href="classyasmin__ros_1_1ServiceState.html">yasmin_ros::ServiceState</a>&lt;example_interfaces::srv::AddTwoInts&gt; {</div>
-<div class="line"> </div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">  <a class="code hl_function" href="classAddTwoIntsState.html#adafe175a2a8667af73abeee9cd0439f0">AddTwoIntsState</a>()</div>
-<div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1ServiceState.html#ab74e60ff312219ee1033a34842c749a1">ServiceState</a>&lt;example_interfaces::srv::AddTwoInts&gt; <span class="comment">// msg</span></div>
-<div class="line">        (                                                             <span class="comment">// node</span></div>
-<div class="line">            <span class="stringliteral">&quot;/add_two_ints&quot;</span>, <span class="comment">// srv name</span></div>
+<div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1ServiceState.html#ab74e60ff312219ee1033a34842c749a1">ServiceState</a>&lt;example_interfaces::srv::AddTwoInts&gt;(</div>
+<div class="line">            <span class="stringliteral">&quot;/add_two_ints&quot;</span>,</div>
 <div class="line">            std::bind(&amp;<a class="code hl_class" href="classAddTwoIntsState.html">AddTwoIntsState</a>::<a class="code hl_variable" href="classyasmin__ros_1_1ServiceState.html#a089345db165d860c0b84a755b6cf49e0">create_request_handler</a>, this, _1),</div>
 <div class="line">            {<span class="stringliteral">&quot;outcome1&quot;</span>},</div>
 <div class="line">            std::bind(&amp;<a class="code hl_variable" href="classyasmin__ros_1_1ServiceState.html#a250abf3c365cd36e63170b35db29b62c">AddTwoIntsState::response_handler</a>, <span class="keyword">this</span>, _1, _2)){};</div>
@@ -927,43 +1266,39 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">auto</span> request =</div>
 <div class="line">        std::make_shared&lt;example_interfaces::srv::AddTwoInts::Request&gt;();</div>
-<div class="line"> </div>
 <div class="line">    request-&gt;a = blackboard-&gt;get&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;a&quot;</span>);</div>
 <div class="line">    request-&gt;b = blackboard-&gt;get&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;b&quot;</span>);</div>
-<div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> request;</div>
-<div class="line">  }</div>
+<div class="line">  };</div>
 <div class="line"> </div>
 <div class="line">  std::string <a class="code hl_variable" href="classyasmin__ros_1_1ServiceState.html#a250abf3c365cd36e63170b35db29b62c">response_handler</a>(</div>
 <div class="line">      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,</div>
 <div class="line">      example_interfaces::srv::AddTwoInts::Response::SharedPtr response) {</div>
 <div class="line"> </div>
 <div class="line">    blackboard-&gt;set&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;sum&quot;</span>, response-&gt;sum);</div>
-<div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span>;</div>
-<div class="line">  }</div>
+<div class="line">  };</div>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]) {</div>
-<div class="line"> </div>
 <div class="line">  <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;yasmin_service_client_demo&quot;</span>);</div>
 <div class="line">  rclcpp::init(argc, argv);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// set ROS 2 logs</span></div>
+<div class="line">  <span class="comment">// Set up ROS 2 logging.</span></div>
 <div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// create a state machine</span></div>
+<div class="line">  <span class="comment">// Create a state machine with a specified outcome.</span></div>
 <div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
 <div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// cancel state machine on ROS 2 shutdown</span></div>
+<div class="line">  <span class="comment">// Cancel the state machine on ROS 2 shutdown.</span></div>
 <div class="line">  rclcpp::on_shutdown([sm]() {</div>
 <div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
 <div class="line">      sm-&gt;cancel_state();</div>
 <div class="line">    }</div>
 <div class="line">  });</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// add states</span></div>
+<div class="line">  <span class="comment">// Add states to the state machine.</span></div>
 <div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;SETTING_INTS&quot;</span>,</div>
 <div class="line">                std::make_shared&lt;yasmin::CbState&gt;(</div>
 <div class="line">                    std::initializer_list&lt;std::string&gt;{</div>
@@ -987,10 +1322,10 @@ Click to expand</summary>
 <div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
 <div class="line">                });</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// pub</span></div>
+<div class="line">  <span class="comment">// Publish state machine visualization.</span></div>
 <div class="line">  <a class="code hl_class" href="classyasmin__viewer_1_1YasminViewerPub.html">yasmin_viewer::YasminViewerPub</a> yasmin_pub(<span class="stringliteral">&quot;YASMIN_ACTION_CLIENT_DEMO&quot;</span>, sm);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// execute</span></div>
+<div class="line">  <span class="comment">// Execute the state machine.</span></div>
 <div class="line">  <span class="keywordflow">try</span> {</div>
 <div class="line">    std::string outcome = (*sm.get())();</div>
 <div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
@@ -1004,7 +1339,7 @@ Click to expand</summary>
 <div class="line">}</div>
 <div class="ttc" id="abasic__outcomes_8hpp_html"><div class="ttname"><a href="basic__outcomes_8hpp.html">basic_outcomes.hpp</a></div></div>
 <div class="ttc" id="acb__state_8hpp_html"><div class="ttname"><a href="cb__state_8hpp.html">cb_state.hpp</a></div></div>
-<div class="ttc" id="aclassAddTwoIntsState_html_adafe175a2a8667af73abeee9cd0439f0"><div class="ttname"><a href="classAddTwoIntsState.html#adafe175a2a8667af73abeee9cd0439f0">AddTwoIntsState::AddTwoIntsState</a></div><div class="ttdeci">AddTwoIntsState()</div><div class="ttdoc">Constructor for AddTwoIntsState.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:82</div></div>
+<div class="ttc" id="aclassAddTwoIntsState_html_adafe175a2a8667af73abeee9cd0439f0"><div class="ttname"><a href="classAddTwoIntsState.html#adafe175a2a8667af73abeee9cd0439f0">AddTwoIntsState::AddTwoIntsState</a></div><div class="ttdeci">AddTwoIntsState()</div><div class="ttdoc">Constructor for AddTwoIntsState.</div><div class="ttdef"><b>Definition</b> service_client_demo.cpp:81</div></div>
 <div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html"><div class="ttname"><a href="classyasmin__ros_1_1ServiceState.html">yasmin_ros::ServiceState</a></div><div class="ttdoc">A state class that interacts with a ROS 2 service.</div><div class="ttdef"><b>Definition</b> service_state.hpp:42</div></div>
 <div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_a089345db165d860c0b84a755b6cf49e0"><div class="ttname"><a href="classyasmin__ros_1_1ServiceState.html#a089345db165d860c0b84a755b6cf49e0">yasmin_ros::ServiceState&lt; example_interfaces::srv::AddTwoInts &gt;::create_request_handler</a></div><div class="ttdeci">CreateRequestHandler create_request_handler</div><div class="ttdef"><b>Definition</b> service_state.hpp:194</div></div>
 <div class="ttc" id="aclassyasmin__ros_1_1ServiceState_html_a250abf3c365cd36e63170b35db29b62c"><div class="ttname"><a href="classyasmin__ros_1_1ServiceState.html#a250abf3c365cd36e63170b35db29b62c">yasmin_ros::ServiceState&lt; example_interfaces::srv::AddTwoInts &gt;::response_handler</a></div><div class="ttdeci">ResponseHandler response_handler</div><div class="ttdef"><b>Definition</b> service_state.hpp:196</div></div>
@@ -1063,16 +1398,9 @@ Click to expand</summary>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">  <a class="code hl_function" href="classFibonacciState.html#a80f2a3be8fb203badc608c4ef5410c0e">FibonacciState</a>()</div>
 <div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1ActionState.html#aa7902878db3392a3e00613a68e23b4d0">ActionState</a>&lt;<a class="code hl_typedef" href="action__client__demo_8cpp.html#a6b8442a7f210c0724344924057b54b21">Fibonacci</a>&gt;(</div>
-<div class="line"> </div>
-<div class="line">            <span class="stringliteral">&quot;/fibonacci&quot;</span>, <span class="comment">// action name</span></div>
-<div class="line"> </div>
-<div class="line">            <span class="comment">// # cb to create the goal</span></div>
+<div class="line">            <span class="stringliteral">&quot;/fibonacci&quot;</span>,</div>
 <div class="line">            std::bind(&amp;<a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>::<a class="code hl_variable" href="classyasmin__ros_1_1ActionState.html#ac1dcef8cc246e1d77bee45d4594f607b">create_goal_handler</a>, this, _1),</div>
-<div class="line">            <span class="comment">// # cb to process the response</span></div>
-<div class="line"> </div>
 <div class="line">            std::bind(&amp;<a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>::<a class="code hl_function" href="classFibonacciState.html#ae6733a8e4b4dfd8fdd1341862b5386f8">response_handler</a>, this, _1, _2),</div>
-<div class="line"> </div>
-<div class="line">            <span class="comment">// cb to process the feedback</span></div>
 <div class="line">            std::bind(&amp;<a class="code hl_class" href="classFibonacciState.html">FibonacciState</a>::<a class="code hl_function" href="classFibonacciState.html#ab7bb07a4a795109bc2cb5032a8d6ce6f">print_feedback</a>, this, _1, _2)){};</div>
 <div class="line"> </div>
 <div class="line">  Fibonacci::Goal <a class="code hl_variable" href="classyasmin__ros_1_1ActionState.html#ac1dcef8cc246e1d77bee45d4594f607b">create_goal_handler</a>(</div>
@@ -1080,18 +1408,16 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">auto</span> goal = Fibonacci::Goal();</div>
 <div class="line">    goal.order = blackboard-&gt;get&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;n&quot;</span>);</div>
-<div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> goal;</div>
-<div class="line">  }</div>
+<div class="line">  };</div>
 <div class="line"> </div>
 <div class="line">  std::string</div>
 <div class="line">  <a class="code hl_function" href="classFibonacciState.html#ae6733a8e4b4dfd8fdd1341862b5386f8">response_handler</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,</div>
 <div class="line">                   Fibonacci::Result::SharedPtr response) {</div>
 <div class="line"> </div>
 <div class="line">    blackboard-&gt;set&lt;std::vector&lt;int&gt;&gt;(<span class="stringliteral">&quot;sum&quot;</span>, response-&gt;sequence);</div>
-<div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>;</div>
-<div class="line">  }</div>
+<div class="line">  };</div>
 <div class="line"> </div>
 <div class="line">  <span class="keywordtype">void</span></div>
 <div class="line">  <a class="code hl_function" href="classFibonacciState.html#ab7bb07a4a795109bc2cb5032a8d6ce6f">print_feedback</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,</div>
@@ -1105,7 +1431,7 @@ Click to expand</summary>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    fprintf(stderr, <span class="stringliteral">&quot;%s\n&quot;</span>, ss.str().c_str());</div>
-<div class="line">  }</div>
+<div class="line">  };</div>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]) {</div>
@@ -1113,21 +1439,21 @@ Click to expand</summary>
 <div class="line">  <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;yasmin_action_client_demo&quot;</span>);</div>
 <div class="line">  rclcpp::init(argc, argv);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// set ROS 2 logs</span></div>
+<div class="line">  <span class="comment">// Set ROS 2 logging</span></div>
 <div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// create a state machine</span></div>
+<div class="line">  <span class="comment">// Create the state machine</span></div>
 <div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
 <div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// cancel state machine on ROS 2 shutdown</span></div>
+<div class="line">  <span class="comment">// Cancel state machine on ROS 2 shutdown</span></div>
 <div class="line">  rclcpp::on_shutdown([sm]() {</div>
 <div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
 <div class="line">      sm-&gt;cancel_state();</div>
 <div class="line">    }</div>
 <div class="line">  });</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// add states</span></div>
+<div class="line">  <span class="comment">// Add states to the state machine</span></div>
 <div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;CALLING_FIBONACCI&quot;</span>, std::make_shared&lt;FibonacciState&gt;(),</div>
 <div class="line">                {</div>
 <div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;PRINTING_RESULT&quot;</span>},</div>
@@ -1143,15 +1469,15 @@ Click to expand</summary>
 <div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#a5573f527607429f73c199d683f78a6a7">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
 <div class="line">                });</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// pub</span></div>
+<div class="line">  <span class="comment">// Publisher for visualizing the state machine</span></div>
 <div class="line">  <a class="code hl_class" href="classyasmin__viewer_1_1YasminViewerPub.html">yasmin_viewer::YasminViewerPub</a> yasmin_pub(<span class="stringliteral">&quot;YASMIN_ACTION_CLIENT_DEMO&quot;</span>, sm);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// create an initial blackboard</span></div>
+<div class="line">  <span class="comment">// Create an initial blackboard and set the Fibonacci order</span></div>
 <div class="line">  std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard =</div>
 <div class="line">      std::make_shared&lt;yasmin::blackboard::Blackboard&gt;();</div>
 <div class="line">  blackboard-&gt;set&lt;<span class="keywordtype">int</span>&gt;(<span class="stringliteral">&quot;n&quot;</span>, 10);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// execute</span></div>
+<div class="line">  <span class="comment">// Execute the state machine</span></div>
 <div class="line">  <span class="keywordflow">try</span> {</div>
 <div class="line">    std::string outcome = (*sm.get())(blackboard);</div>
 <div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
@@ -1185,9 +1511,8 @@ Click to expand</summary>
 <div class="line"><span class="preprocessor">#include &lt;memory&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor">#include &quot;rclcpp/rclcpp.hpp&quot;</span></div>
-<div class="line"> </div>
 <div class="line"><span class="preprocessor">#include &quot;nav_msgs/msg/odometry.hpp&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;rclcpp/rclcpp.hpp&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="logs_8hpp.html">yasmin/logs.hpp</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="state__machine_8hpp.html">yasmin/state_machine.hpp</a>&quot;</span></div>
@@ -1207,15 +1532,14 @@ Click to expand</summary>
 <div class="line">  <span class="keywordtype">int</span> <a class="code hl_variable" href="classPrintOdometryState.html#ac26fa7c2dc61ebd7ee0a12026fa7c1ec">times</a>;</div>
 <div class="line"> </div>
 <div class="line">  <a class="code hl_function" href="classPrintOdometryState.html#a7077bc7b49ec1036a47409a37fae84e2">PrintOdometryState</a>(<span class="keywordtype">int</span> <a class="code hl_variable" href="classPrintOdometryState.html#ac26fa7c2dc61ebd7ee0a12026fa7c1ec">times</a>)</div>
-<div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1MonitorState.html#a8df77197e3a40a3a6229969e1a6da9a5">MonitorState</a>&lt;nav_msgs::msg::Odometry&gt; <span class="comment">// msg type</span></div>
-<div class="line">        (<span class="stringliteral">&quot;odom&quot;</span>,                                          <span class="comment">// topic name</span></div>
-<div class="line">         {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>},                        <span class="comment">// outcomes</span></div>
-<div class="line">         std::bind(&amp;<a class="code hl_variable" href="classyasmin__ros_1_1MonitorState.html#a49277a171d35159f716f5605b185df4b">PrintOdometryState::monitor_handler</a>, <span class="keyword">this</span>, _1,</div>
-<div class="line">                   _2), <span class="comment">// monitor handler callback</span></div>
-<div class="line">         10,            <span class="comment">// qos for the topic sbscription</span></div>
-<div class="line">         10,            <span class="comment">// queue of the monitor handler callback</span></div>
-<div class="line">         10             <span class="comment">// timeout to wait for msgs in seconds</span></div>
-<div class="line">                        <span class="comment">// if &gt;0, CANCEL outcome is added</span></div>
+<div class="line">      : <a class="code hl_namespace" href="namespaceyasmin__ros.html">yasmin_ros</a>::<a class="code hl_function" href="classyasmin__ros_1_1MonitorState.html#a8df77197e3a40a3a6229969e1a6da9a5">MonitorState</a>&lt;nav_msgs::msg::Odometry&gt;(</div>
+<div class="line">            <span class="stringliteral">&quot;odom&quot;</span>,                   <span class="comment">// topic name</span></div>
+<div class="line">            {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;outcome2&quot;</span>}, <span class="comment">// possible outcomes</span></div>
+<div class="line">            std::bind(&amp;<a class="code hl_variable" href="classyasmin__ros_1_1MonitorState.html#a49277a171d35159f716f5605b185df4b">PrintOdometryState::monitor_handler</a>, <span class="keyword">this</span>, _1,</div>
+<div class="line">                      _2), <span class="comment">// monitor handler callback</span></div>
+<div class="line">            10,            <span class="comment">// QoS for the topic subscription</span></div>
+<div class="line">            10,            <span class="comment">// queue size for the callback</span></div>
+<div class="line">            10             <span class="comment">// timeout for receiving messages</span></div>
 <div class="line">        ) {</div>
 <div class="line">    this-&gt;times = <a class="code hl_variable" href="classPrintOdometryState.html#ac26fa7c2dc61ebd7ee0a12026fa7c1ec">times</a>;</div>
 <div class="line">  };</div>
@@ -1224,20 +1548,21 @@ Click to expand</summary>
 <div class="line">  <a class="code hl_variable" href="classyasmin__ros_1_1MonitorState.html#a49277a171d35159f716f5605b185df4b">monitor_handler</a>(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,</div>
 <div class="line">                  std::shared_ptr&lt;nav_msgs::msg::Odometry&gt; msg) {</div>
 <div class="line"> </div>
-<div class="line">    (void)blackboard;</div>
+<div class="line">    (void)blackboard; <span class="comment">// blackboard is not used in this implementation</span></div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;x: %d&quot;</span>, msg-&gt;pose.pose.position.x);</div>
-<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;y: %d&quot;</span>, msg-&gt;pose.pose.position.y);</div>
-<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;z: %d&quot;</span>, msg-&gt;pose.pose.position.z);</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;x: %f&quot;</span>, msg-&gt;pose.pose.position.x);</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;y: %f&quot;</span>, msg-&gt;pose.pose.position.y);</div>
+<div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;z: %f&quot;</span>, msg-&gt;pose.pose.position.z);</div>
 <div class="line"> </div>
 <div class="line">    this-&gt;times--;</div>
 <div class="line"> </div>
+<div class="line">    <span class="comment">// Transition based on remaining times</span></div>
 <div class="line">    <span class="keywordflow">if</span> (this-&gt;times &lt;= 0) {</div>
 <div class="line">      <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome2&quot;</span>;</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> <span class="stringliteral">&quot;outcome1&quot;</span>;</div>
-<div class="line">  }</div>
+<div class="line">  };</div>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="action__client__demo_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]) {</div>
@@ -1245,32 +1570,35 @@ Click to expand</summary>
 <div class="line">  <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(<span class="stringliteral">&quot;yasmin_monitor_demo&quot;</span>);</div>
 <div class="line">  rclcpp::init(argc, argv);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// set ROS 2 logs</span></div>
+<div class="line">  <span class="comment">// Set up ROS 2 loggers</span></div>
 <div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// create a state machine</span></div>
+<div class="line">  <span class="comment">// Create a state machine with a final outcome</span></div>
 <div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
 <div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// cancel state machine on ROS 2 shutdown</span></div>
+<div class="line">  <span class="comment">// Cancel state machine on ROS 2 shutdown</span></div>
 <div class="line">  rclcpp::on_shutdown([sm]() {</div>
 <div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
 <div class="line">      sm-&gt;cancel_state();</div>
 <div class="line">    }</div>
 <div class="line">  });</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// add states</span></div>
-<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>, std::make_shared&lt;PrintOdometryState&gt;(5),</div>
-<div class="line">                {</div>
-<div class="line">                    {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>},</div>
-<div class="line">                    {<span class="stringliteral">&quot;outcome2&quot;</span>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
-<div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#aa1e861086a64adb5672adec78f7c3316">yasmin_ros::basic_outcomes::TIMEOUT</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
-<div class="line">                });</div>
+<div class="line">  <span class="comment">// Add states to the state machine</span></div>
+<div class="line">  sm-&gt;add_state(</div>
+<div class="line">      <span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>, std::make_shared&lt;PrintOdometryState&gt;(5),</div>
+<div class="line">      {</div>
+<div class="line">          {<span class="stringliteral">&quot;outcome1&quot;</span>,</div>
+<div class="line">           <span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>},        <span class="comment">// Transition back to itself on outcome1</span></div>
+<div class="line">          {<span class="stringliteral">&quot;outcome2&quot;</span>, <span class="stringliteral">&quot;outcome4&quot;</span>}, <span class="comment">// Transition to outcome4 on outcome2</span></div>
+<div class="line">          {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#aa1e861086a64adb5672adec78f7c3316">yasmin_ros::basic_outcomes::TIMEOUT</a>,</div>
+<div class="line">           <span class="stringliteral">&quot;outcome4&quot;</span>}, <span class="comment">// Timeout transition</span></div>
+<div class="line">      });</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// pub</span></div>
+<div class="line">  <span class="comment">// Publisher for visualizing the state machine&#39;s status</span></div>
 <div class="line">  <a class="code hl_class" href="classyasmin__viewer_1_1YasminViewerPub.html">yasmin_viewer::YasminViewerPub</a> yasmin_pub(<span class="stringliteral">&quot;YASMIN_MONITOR_DEMO&quot;</span>, sm);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// execute</span></div>
+<div class="line">  <span class="comment">// Execute the state machine</span></div>
 <div class="line">  <span class="keywordflow">try</span> {</div>
 <div class="line">    std::string outcome = (*sm.get())();</div>
 <div class="line">    <a class="code hl_define" href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
@@ -1293,16 +1621,17 @@ Click to expand</summary>
 <p><a class="anchor" id="#YASMIN-Viewer"></a></p>
 <h1><a class="anchor" id="autotoc_md17"></a>
 YASMIN Viewer</h1>
-<p>This viewer allows monitoring YASMIN's FSM. It is implemented with Flask and ReactJS. A filter is provided to show only one FSM.</p>
+<p>The <b>YASMIN Viewer</b> provides a convenient way to monitor <b>YASMIN</b>'s Finite State Machines (FSM). It is built using <b>Flask</b> and <b>ReactJS</b> and includes a filter to focus on a single FSM at a time.</p>
 <p><img src="./docs/viewer.gif" alt="" class="inline"/></p>
 <h2><a class="anchor" id="autotoc_md18"></a>
-Usage</h2>
+Getting Started</h2>
 <div class="fragment"><div class="line">$ ros2 run yasmin_viewer yasmin_viewer_node</div>
-</div><!-- fragment --><p><a href="http://localhost:5000/">http://localhost:5000/</a></p>
+</div><!-- fragment --><p>Once started, open <a href="http://localhost:5000/">http://localhost:5000/</a> in your browser to view your state machines.</p>
 <h2><a class="anchor" id="autotoc_md19"></a>
 Custom host and port</h2>
+<p>You can specify a custom host and port by using the following command:</p>
 <div class="fragment"><div class="line">$ ros2 run yasmin_viewer yasmin_viewer_node --ros-args -p host:=127.0.0.1 -p port:=5032</div>
-</div><!-- fragment --><p><a href="http://127.0.0.1:5032/">http://127.0.0.1:5032/</a></p>
+</div><!-- fragment --><p>After running the command, access your state machines at <a href="http://127.0.0.1:5032/">http://127.0.0.1:5032/</a>.</p>
 <h1><a class="anchor" id="autotoc_md20"></a>
 Citations</h1>
 <div class="fragment"><div class="line">@InProceedings{10.1007/978-3-031-21062-4_43,</div>

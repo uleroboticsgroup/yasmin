@@ -1,7 +1,7 @@
 var searchData=
 [
   ['fails_20to_20minify_0',['&lt;tt&gt;npm run build&lt;/tt&gt; fails to minify',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md33',1,'']]],
-  ['features_1',['Features',['../index.html#autotoc_md2',1,'']]],
+  ['features_1',['Key Features',['../index.html#autotoc_md2',1,'']]],
   ['fibonaccistate_2',['FibonacciState',['../classyasmin__demos_1_1action__client__demo_1_1FibonacciState.html',1,'yasmin_demos::action_client_demo']]],
   ['foostate_3',['FooState',['../classyasmin__demos_1_1yasmin__demo_1_1FooState.html',1,'yasmin_demos::yasmin_demo']]],
   ['format_4',['format',['../namespaceyasmin_1_1logs.html#aadb7cca5ef33eaf7f7073f3b0dae594f',1,'yasmin::logs']]],
