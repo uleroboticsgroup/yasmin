@@ -1,18 +1,17 @@
-/**
- * @file main.cpp
- * @brief Demonstrates a state machine that adds two integers using ROS 2
- * services.
- *
- * This example shows how to set up a state machine in ROS 2 to call a service
- * that adds two integers, retrieves the result, and prints it.
- *
- * The state machine consists of three states:
- * - SETTING_INTS: Initializes two integers on a blackboard.
- * - ADD_TWO_INTS: Calls a service to add the integers.
- * - PRINTING_SUM: Prints the result of the addition.
- *
- * This program is distributed under the GNU General Public License, version 3.
- */
+// Copyright (C) 2023  Miguel Ángel González Santamarta
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <memory>
