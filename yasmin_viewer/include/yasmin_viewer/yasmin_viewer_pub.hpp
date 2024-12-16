@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_VIEWER_PUB_HPP
-#define YASMIN_VIEWER_PUB_HPP
+#ifndef YASMIN_VIEWER__YASMIN_VIEWER_PUB_HPP
+#define YASMIN_VIEWER__YASMIN_VIEWER_PUB_HPP
 
 #include <map>
 #include <memory>
@@ -104,4 +104,4 @@ private:
 
 } // namespace yasmin_viewer
 
-#endif
+#endif // YASMIN_VIEWER__YASMIN_VIEWER_PUB_HPP

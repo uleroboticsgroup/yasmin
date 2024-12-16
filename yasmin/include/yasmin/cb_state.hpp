@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_CB_STATE_HPP
-#define YASMIN_CB_STATE_HPP
+#ifndef YASMIN__CB_STATE_HPP
+#define YASMIN__CB_STATE_HPP
 
 #include <memory>
 #include <set>
@@ -72,4 +72,4 @@ public:
 
 } // namespace yasmin
 
-#endif // YASMIN_CB_STATE_HPP
+#endif // YASMIN__CB_STATE_HPP

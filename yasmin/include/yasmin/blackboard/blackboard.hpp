@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_BLACKBOARD_HPP
-#define YASMIN_BLACKBOARD_HPP
+#ifndef YASMIN__BLACKBOARD__BLACKBOARD_HPP
+#define YASMIN__BLACKBOARD__BLACKBOARD_HPP
 
 #include <exception>
 #include <map>
@@ -129,4 +129,4 @@ public:
 } // namespace blackboard
 } // namespace yasmin
 
-#endif // YASMIN_BLACKBOARD_HPP
+#endif // YASMIN__BLACKBOARD_HPP
