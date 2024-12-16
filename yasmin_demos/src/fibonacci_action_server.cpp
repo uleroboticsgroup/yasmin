@@ -44,9 +44,7 @@ public:
    * callbacks.
    * @param options Node options for initialization.
    */
-  explicit FibonacciActionServer(
-      const rclcpp::NodeOptions &options = rclcpp::NodeOptions())
-      : Node("fibonacci_action_server", options) {
+  explicit FibonacciActionServer() : Node("fibonacci_action_server") {
 
     // Callback to handle goal requests.
     auto handle_goal = [this](const rclcpp_action::GoalUUID &uuid,
@@ -115,6 +113,7 @@ private:
 
     // Generate the Fibonacci sequence up to the requested order.
     for (int i = 1; (i < goal->order) && rclcpp::ok(); ++i) {
+
       // Check if there is a cancel request.
       if (goal_handle->is_canceling()) {
         result->sequence = sequence;
@@ -122,8 +121,10 @@ private:
         RCLCPP_INFO(this->get_logger(), "Goal canceled");
         return;
       }
+
       // Update the sequence with the next number.
       sequence.push_back(sequence[i] + sequence[i - 1]);
+
       // Publish feedback to the client.
       goal_handle->publish_feedback(feedback);
       RCLCPP_INFO(this->get_logger(), "Publish feedback");

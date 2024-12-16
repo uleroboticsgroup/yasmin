@@ -65,16 +65,6 @@ private:
    * @brief Shared pointer to the "add_two_ints" service.
    */
   rclcpp::Service<example_interfaces::srv::AddTwoInts>::SharedPtr srv_;
-
-  /**
-   * @brief Timer for one-shot mode to shut down the node after a request.
-   */
-  rclcpp::TimerBase::SharedPtr timer_;
-
-  /**
-   * @brief Flag indicating if a request has been received.
-   */
-  bool saw_request_{false};
 };
 
 /**
