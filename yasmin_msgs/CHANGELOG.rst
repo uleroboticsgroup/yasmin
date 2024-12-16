@@ -2,7 +2,7 @@
 Changelog for package yasmin_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
+3.0.1 (2024-12-01)
 -----------
 * fixing msgs package.xml
 * Contributors: Miguel Ángel González Santamarta

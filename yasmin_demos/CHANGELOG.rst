@@ -2,7 +2,7 @@
 Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
+3.0.1 (2024-12-01)
 -----------
 * adding servers for demos
 * build_depend for ros_environment
