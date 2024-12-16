@@ -2,7 +2,7 @@
 Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3.0.1 (2024-12-01)
+3.0.2 (2024-12-16)
 -----------
 * fixing dependencies in package.xml files
 * Contributors: Miguel Ángel González Santamarta

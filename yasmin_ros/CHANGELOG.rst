@@ -2,7 +2,7 @@
 Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3.0.1 (2024-12-01)
+3.0.2 (2024-12-16)
 -----------
 * build_depend for ros_environment
 * adding ros-environment dependency
