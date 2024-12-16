@@ -264,7 +264,7 @@ Click to expand</summary>
 </details>
 <h3><a class="anchor" id="autotoc_md8"></a>
 Service Demo (FSM + ROS 2 Service Client)</h3>
-<div class="fragment"><div class="line">$ ros2 run demo_nodes_py add_two_ints_server</div>
+<div class="fragment"><div class="line">$ ros2 run yasmin_demos add_two_ints_server</div>
 </div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos service_client_demo.py</div>
 </div><!-- fragment --><details >
 <summary >
@@ -378,7 +378,7 @@ Click to expand</summary>
 </details>
 <h3><a class="anchor" id="autotoc_md9"></a>
 Action Demo (FSM + ROS 2 Action)</h3>
-<div class="fragment"><div class="line">$ ros2 run action_tutorials_cpp fibonacci_action_server</div>
+<div class="fragment"><div class="line">$ ros2 run yasmin_demos fibonacci_action_server</div>
 </div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos action_client_demo.py</div>
 </div><!-- fragment --><details >
 <summary >
@@ -424,7 +424,7 @@ Click to expand</summary>
 <div class="line">    <span class="keyword">def </span>print_feedback(</div>
 <div class="line">        self, blackboard: Blackboard, feedback: Fibonacci.Feedback</div>
 <div class="line">    ) -&gt; <span class="keywordtype">None</span>:</div>
-<div class="line">        yasmin.YASMIN_LOG_INFO(f<span class="stringliteral">&quot;Received feedback: {list(feedback.partial_sequence)}&quot;</span>)</div>
+<div class="line">        yasmin.YASMIN_LOG_INFO(f<span class="stringliteral">&quot;Received feedback: {list(feedback.sequence)}&quot;</span>)</div>
 <div class="line"> </div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">def </span>print_result(blackboard: Blackboard) -&gt; str:</div>
@@ -848,7 +848,7 @@ Click to expand</summary>
 </details>
 <h3><a class="anchor" id="autotoc_md14"></a>
 Service Demo (FSM + ROS 2 Service Client)</h3>
-<div class="fragment"><div class="line">$ ros2 run demo_nodes_py add_two_ints_server</div>
+<div class="fragment"><div class="line">$ ros2 run yasmin_demos add_two_ints_server</div>
 </div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos service_client_demo</div>
 </div><!-- fragment --><details >
 <summary >
@@ -989,7 +989,7 @@ Click to expand</summary>
 </details>
 <h3><a class="anchor" id="autotoc_md15"></a>
 Action Demo (FSM + ROS 2 Action)</h3>
-<div class="fragment"><div class="line">$ ros2 run action_tutorials_cpp fibonacci_action_server</div>
+<div class="fragment"><div class="line">$ ros2 run yasmin_demos fibonacci_action_server</div>
 </div><!-- fragment --><div class="fragment"><div class="line">$ ros2 run yasmin_demos action_client_demo</div>
 </div><!-- fragment --><details >
 <summary >
