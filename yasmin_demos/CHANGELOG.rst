@@ -2,6 +2,12 @@
 Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fixing license in c++ service client demo
+* removing unused params in demo servers
+* Contributors: Miguel Ángel González Santamarta
+
 3.0.2 (2024-12-16)
 -----------
 * adding servers for demos

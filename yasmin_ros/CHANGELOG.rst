@@ -2,6 +2,12 @@
 Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* hpp ifndef guards fixed
+* fixing run_pytests install in CMakeLists.txt
+* Contributors: Miguel Ángel González Santamarta
+
 3.0.2 (2024-12-16)
 -----------
 * build_depend for ros_environment

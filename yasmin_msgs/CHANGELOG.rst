@@ -2,6 +2,9 @@
 Changelog for package yasmin_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.0.2 (2024-12-16)
 -----------
 * fixing msgs package.xml
