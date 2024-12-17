@@ -2,8 +2,8 @@
 Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.3 (2024-12-17)
+------------------
 * hpp ifndef guards fixed
 * Contributors: Miguel Ángel González Santamarta
 

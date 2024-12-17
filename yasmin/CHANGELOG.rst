@@ -2,8 +2,8 @@
 Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.3 (2024-12-17)
+------------------
 * hpp ifndef guards fixed
 * fixing run_pytests install in CMakeLists.txt
 * Contributors: Miguel Ángel González Santamarta
