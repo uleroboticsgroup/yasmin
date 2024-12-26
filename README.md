@@ -44,19 +44,33 @@
 
 ## Installation
 
+### Debian Packages
+
+To install YASMIN and its packages, use the following command:
+
 ```shell
-$ cd ~/ros2_ws/src
-$ git clone https://github.com/uleroboticsgroup/yasmin.git
-$ cd ~/ros2_ws
-$ rosdep install --from-paths src --ignore-src -r -y
-$ cd ~/ros2_ws
-$ colcon build
+sudo apt install ros-$ROS_DISTRO-yasmin ros-$ROS_DISTRO-yasmin-*
 ```
 
-If you are using a deprecated ROS 2 distro (like Foxy or Galactic) or the Rolling distro, you may need to install the example interfaces:
+### Building from Source
+
+Follow these steps to build the source code from this repository:
 
 ```shell
-$ sudo apt install -y ros-$ROS_DISTRO-example-interfaces
+cd ~/ros2_ws/src
+git clone https://github.com/uleroboticsgroup/yasmin.git
+cd ~/ros2_ws
+rosdep install --from-paths src --ignore-src -r -y
+cd ~/ros2_ws
+colcon build
+```
+
+#### Note for Deprecated or Rolling ROS 2 Distros
+
+If you are using a deprecated ROS 2 distribution (e.g., Foxy or Galactic) or the Rolling distribution, install the example interfaces:
+
+```shell
+sudo apt install -y ros-$ROS_DISTRO-example-interfaces
 ```
 
 ## Docker
@@ -65,27 +79,27 @@ If your operating system doesn't support ROS 2, docker is a great alternative. Y
 
 ```shell
 ## Assuming you are in the YASMIN project directory
-$ docker build -t yasmin .
+docker build -t yasmin .
 ```
 
 To use a shortcut the docker build, you may use the following command:
 
 ```shell
 ## Assuming you are in the YASMIN project directory
-$ make docker_build
+make docker_build
 ```
 
 After the image is created, run a docker container with the following command:
 
 ```shell
-$ docker run -it --net=host --ipc=host --privileged --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --volume="${XAUTHORITY}:/root/.Xauthority" --entrypoint /bin/bash yasmin
+docker run -it --net=host --ipc=host --privileged --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --volume="${XAUTHORITY}:/root/.Xauthority" --entrypoint /bin/bash yasmin
 ```
 
 To use a shortcut the docker run, you may use following command:
 
 ```shell
 ## Assuming you are in the YASMIN project directory
-$ make docker_run
+make docker_run
 ```
 
 ## Demos
@@ -97,7 +111,7 @@ There are some examples, for both Python and C++, that can be found in [yasmin_d
 #### Vanilla Demo (FSM)
 
 ```shell
-$ ros2 run yasmin_demos yasmin_demo.py
+ros2 run yasmin_demos yasmin_demo.py
 ```
 
 <p align="center">
@@ -262,11 +276,11 @@ if __name__ == "__main__":
 #### Service Demo (FSM + ROS 2 Service Client)
 
 ```shell
-$ ros2 run yasmin_demos add_two_ints_server
+ros2 run yasmin_demos add_two_ints_server
 ```
 
 ```shell
-$ ros2 run yasmin_demos service_client_demo.py
+ros2 run yasmin_demos service_client_demo.py
 ```
 
 <details>
@@ -451,11 +465,11 @@ if __name__ == "__main__":
 #### Action Demo (FSM + ROS 2 Action)
 
 ```shell
-$ ros2 run yasmin_demos fibonacci_action_server
+ros2 run yasmin_demos fibonacci_action_server
 ```
 
 ```shell
-$ ros2 run yasmin_demos action_client_demo.py
+ros2 run yasmin_demos action_client_demo.py
 ```
 
 <details>
@@ -664,7 +678,7 @@ if __name__ == "__main__":
 #### Monitor Demo (FSM + ROS 2 Subscriber)
 
 ```shell
-$ ros2 run yasmin_demos monitor_demo.py
+ros2 run yasmin_demos monitor_demo.py
 ```
 
 <details>
@@ -812,7 +826,7 @@ if __name__ == "__main__":
 #### Nav2 Demo (Hierarchical FSM + ROS 2 Action)
 
 ```shell
-$ ros2 run yasmin_demos nav_demo.py
+ros2 run yasmin_demos nav_demo.py
 ```
 
 <details>
@@ -1044,7 +1058,7 @@ if __name__ == "__main__":
 #### Vanilla Demo
 
 ```shell
-$ ros2 run yasmin_demos yasmin_demo
+ros2 run yasmin_demos yasmin_demo
 ```
 
 <details>
@@ -1205,11 +1219,11 @@ int main(int argc, char *argv[]) {
 #### Service Demo (FSM + ROS 2 Service Client)
 
 ```shell
-$ ros2 run yasmin_demos add_two_ints_server
+ros2 run yasmin_demos add_two_ints_server
 ```
 
 ```shell
-$ ros2 run yasmin_demos service_client_demo
+ros2 run yasmin_demos service_client_demo
 ```
 
 <details>
@@ -1403,11 +1417,11 @@ int main(int argc, char *argv[]) {
 #### Action Demo (FSM + ROS 2 Action)
 
 ```shell
-$ ros2 run yasmin_demos fibonacci_action_server
+ros2 run yasmin_demos fibonacci_action_server
 ```
 
 ```shell
-$ ros2 run yasmin_demos action_client_demo
+ros2 run yasmin_demos action_client_demo
 ```
 
 <details>
@@ -1612,7 +1626,7 @@ int main(int argc, char *argv[]) {
 #### Monitor Demo (FSM + ROS 2 Subscriber)
 
 ```shell
-$ ros2 run yasmin_demos monitor_demo
+ros2 run yasmin_demos monitor_demo
 ```
 
 <details>
@@ -1779,7 +1793,7 @@ The **YASMIN Viewer** provides a convenient way to monitor **YASMIN**'s Finite S
 ### Getting Started
 
 ```shell
-$ ros2 run yasmin_viewer yasmin_viewer_node
+ros2 run yasmin_viewer yasmin_viewer_node
 ```
 
 Once started, open http://localhost:5000/ in your browser to view your state machines.
@@ -1789,7 +1803,7 @@ Once started, open http://localhost:5000/ in your browser to view your state mac
 You can specify a custom host and port by using the following command:
 
 ```shell
-$ ros2 run yasmin_viewer yasmin_viewer_node --ros-args -p host:=127.0.0.1 -p port:=5032
+ros2 run yasmin_viewer yasmin_viewer_node --ros-args -p host:=127.0.0.1 -p port:=5032
 ```
 
 After running the command, access your state machines at http://127.0.0.1:5032/.
