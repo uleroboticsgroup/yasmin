@@ -7,5 +7,5 @@ var searchData=
   ['get_5foutcomes_4',['get_outcomes',['../classyasmin_1_1state_1_1State.html#af5631519cc0b56dfa8f8c51bc047cbe4',1,'yasmin::state::State']]],
   ['get_5fstart_5fstate_5',['get_start_state',['../classyasmin_1_1state__machine_1_1StateMachine.html#a11db8bc8a845f6f4a14f127be7005a68',1,'yasmin::state_machine::StateMachine']]],
   ['get_5fstates_6',['get_states',['../classyasmin_1_1state__machine_1_1StateMachine.html#af7027e239c2eada2ff4d18ba719cc12d',1,'yasmin::state_machine::StateMachine']]],
-  ['getting_20started_7',['Getting Started',['../index.html#autotoc_md18',1,'']]]
+  ['getting_20started_7',['Getting Started',['../index.html#autotoc_md21',1,'']]]
 ];
