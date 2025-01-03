@@ -99,7 +99,7 @@ class ServiceServer(State):
                 outcome = SUCCEED
                 self.__transition = False
             if self._is_canceled(): 
-                self.__abort_event()
+                if self.__abort_event: self.__abort_event()
                 return ABORT
             if outcome != WAITING: break
         return outcome
