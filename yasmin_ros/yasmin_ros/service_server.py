@@ -92,16 +92,15 @@ class ServiceServer(State):
         return response
 
     def execute(self, blackboard: Blackboard) -> str:
-        while True:
-            if self._execute_handler: 
-                outcome = self._execute_handler(blackboard)
-            if self.__transition:
-                outcome = SUCCEED
-                self.__transition = False
-            if self._is_canceled(): 
-                if self.__abort_event: self.__abort_event()
-                return ABORT
-            if outcome != WAITING: break
+        if self._execute_handler: 
+            outcome = self._execute_handler(blackboard)
+        if self.__transition:
+            outcome = SUCCEED
+            self.__transition = False
+        if self._is_canceled(): 
+            if self.__abort_event: self.__abort_event()
+            return ABORT
+        # if outcome != WAITING: break
         return outcome
     
     def _is_canceled(self):

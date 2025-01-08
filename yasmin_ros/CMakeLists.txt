@@ -42,40 +42,40 @@ find_package(rclpy REQUIRED)
 find_package(yasmin REQUIRED)
 
 # C++
-include_directories(include)
-include_directories(src)
+# include_directories(include)
+# include_directories(src)
 
-set(LIB ${CMAKE_PROJECT_NAME}_lib)
-set(SOURCES
-  src/yasmin_ros/yasmin_node.cpp
-  src/yasmin_ros/action_state.cpp
-  src/yasmin_ros/service_state.cpp
-  src/yasmin_ros/monitor_state.cpp
-)
+# set(LIB ${CMAKE_PROJECT_NAME}_lib)
+# set(SOURCES
+#   src/yasmin_ros/yasmin_node.cpp
+#   src/yasmin_ros/action_state.cpp
+#   src/yasmin_ros/service_state.cpp
+#   src/yasmin_ros/monitor_state.cpp
+# )
 
-set(DEPENDENCIES
-  rclcpp
-  rclcpp_action
-  yasmin
-)
+# set(DEPENDENCIES
+#   rclcpp
+#   rclcpp_action
+#   yasmin
+# )
 
-add_library(${LIB} STATIC ${SOURCES})
+# add_library(${LIB} STATIC ${SOURCES})
 
-ament_target_dependencies(${LIB} ${DEPENDENCIES})
+# ament_target_dependencies(${LIB} ${DEPENDENCIES})
 
-install(TARGETS ${LIB}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
+# install(TARGETS ${LIB}
+#   ARCHIVE DESTINATION lib
+#   LIBRARY DESTINATION lib
+#   RUNTIME DESTINATION bin
+# )
 
-install(DIRECTORY include/
-  DESTINATION include/
-)
+# install(DIRECTORY include/
+#   DESTINATION include/
+# )
 
-ament_export_include_directories(include)
-ament_export_libraries(${LIB})
-ament_export_dependencies(${DEPENDENCIES})
+# ament_export_include_directories(include)
+# ament_export_libraries(${LIB})
+# ament_export_dependencies(${DEPENDENCIES})
 
 # Python
 ament_python_install_package(${PROJECT_NAME})
