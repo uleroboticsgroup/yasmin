@@ -1,4 +1,5 @@
 from yasmin.state import State
+from yasmin.concurrence import Concurrence
 from yasmin.cb_state import CbState
 from yasmin.blackboard import Blackboard
 from yasmin.state_machine import StateMachine
