@@ -64,3 +64,21 @@ class Concurrence(State):
             state.cancel_state()
 
         super().cancel_state()
+
+    def __str__(self) -> str:
+        """
+        Returns a string representation of the concurrence state, listing all states.
+
+        Returns:
+            str: A string representation of the state machine.
+        """
+        result = "State Machine ["
+
+        for i, state in enumerate(self._states):
+            result += f"{state.__str__()}"
+
+            if i < len(self._states) - 1:
+                result += ", "
+
+        result += "]"
+        return result
