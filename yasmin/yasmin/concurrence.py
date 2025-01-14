@@ -20,7 +20,7 @@ class Concurrence(State):
         _mutex (Lock): A mutex to ensure thread safety of _intermediate_outcomes. 
     """
 
-    def __init__(self, default_outcome: str, outcome_map: Dict[str, Dict[State, str]], states: List[State]) -> None:
+    def __init__(self, states: List[State], default_outcome: str, outcome_map: Dict[str, Dict[State, str]] = {}) -> None:
         """
         Initializes the Concurrence instance.
 
@@ -29,18 +29,27 @@ class Concurrence(State):
         :param states: A list of states that will be run in parallel by this state.
 
         :raises ValueError: If either the provided outcomes set or states set are empty.
+        :raises ValueError: If the same instance of a state is listed to run concurrently with itself.
         """
 
-        outcomes = list(set(outcome_map.keys()) | set([default_outcome]))
+        if len(outcome_map.keys()) > 0:
+            outcomes = list(set(outcome_map.keys()) | set([default_outcome]))
+        else:
+            outcomes = [default_outcome]
 
         super().__init__(outcomes)
-
-        self._default_outcome: str = default_outcome
 
         if not states:
             raise ValueError("There must be at least one state")
 
+        for state in states:
+            if states.count(state) > 1:
+                raise ValueError("An instance of a state cannot be run concurrently with itself; create a new \
+                                  instance instead.")
+
         self._states: List[State] = states
+
+        self._default_outcome: str = default_outcome
 
         self._outcome_map: Dict[str, Dict[int, str]] = {}
         for outcome, requirements in outcome_map.items():

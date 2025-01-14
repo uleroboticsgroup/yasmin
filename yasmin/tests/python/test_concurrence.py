@@ -49,15 +49,19 @@ class TestState(unittest.TestCase):
 
     def setUp(self):
         self.foo_state = FooState()
+        self.foo2_state = FooState()
         self.bar_state = BarState()
         self.state = Concurrence(
+            states=[self.foo_state, self.foo2_state, self.bar_state],
             default_outcome="default",
             outcome_map={
                 "outcome1": {self.foo_state: "outcome1"},
                 "outcome2": {self.bar_state: "outcome1", self.bar_state: "outcome1"},
-            },
-            states=[self.foo_state, self.bar_state]
+            }
         )
+
+    def instance_exception(self):
+        self.concurrent_state = Concurrence(states=[self.foo_state, self.foo_state], default_outcome="foo")
 
     def test_call(self):
         self.assertEqual("outcome1", self.state())
@@ -68,4 +72,7 @@ class TestState(unittest.TestCase):
         self.assertTrue(self.state.is_canceled())
 
     def test_str(self):
-        self.assertEqual("Concurrence [FooState, BarState]", str(self.state))
+        self.assertEqual("Concurrence [FooState, FooState, BarState]", str(self.state))
+
+    def test_instance_exception(self):
+        self.assertRaises(Exception, self.instance_exception)
