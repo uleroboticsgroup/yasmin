@@ -24,8 +24,10 @@ class Concurrence(State):
         """
         Initializes the Concurrence instance.
 
-        :param outcomes: A set of valid outcomes for this state.
-                         Must contain at least one outcome.
+        :param default_outcome: A default outcome in case none of the correlations in outcome_map are satisfied.
+        :param outcome_map: A dictionary correlating the outcomes of the concurrent states to outcomes of this state.
+        :param states: A list of states that will be run in parallel by this state.
+
         :raises ValueError: If either the provided outcomes set or states set are empty.
         """
 
