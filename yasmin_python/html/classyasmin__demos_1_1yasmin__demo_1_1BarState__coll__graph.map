@@ -1,9 +1,7 @@
 <map id="yasmin_demos.yasmin_demo.BarState" name="yasmin_demos.yasmin_demo.BarState">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,169,158,210"/>
-<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="17,94,146,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,135,84,169,79,169,79,135"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="23,5,71,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="60,44,79,93,74,95,55,46"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="96,5,137,31"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="108,46,89,95,84,93,103,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,158,193"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="17,79,146,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,120,84,152,79,152,79,120"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="57,5,106,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="84,46,84,79,79,79,79,46"/>
 </map>

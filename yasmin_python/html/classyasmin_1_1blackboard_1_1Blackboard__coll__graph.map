@@ -1,7 +1,5 @@
 <map id="yasmin.blackboard.Blackboard" name="yasmin.blackboard.Blackboard">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,94,202,120"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="37,5,93,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,44,101,93,96,95,74,46"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="117,5,167,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="133,46,111,95,106,93,128,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,202,105"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="75,5,132,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,46,106,79,101,79,101,46"/>
 </map>
