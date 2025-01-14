@@ -15,21 +15,21 @@ class Concurrence(State):
 
         super().__init__(outcomes)
 
-        self.states = states
-        self.outcome_map = outcome_map
-        self.default_outcome = default_outcome
+        self._states = states
+        self._outcome_map = outcome_map
+        self._default_outcome = default_outcome
 
-        self.intermediate_outcomes: Dict[str, Optional[str]] = {}
-        for state in self.states:
-            self.intermediate_outcomes[state.__str__()] = None
+        self._intermediate_outcomes: Dict[str, Optional[str]] = {}
+        for state in self._states:
+            self._intermediate_outcomes[state.__str__()] = None
 
-        self.mutex = Lock()
+        self._mutex = Lock()
 
     def execute(self, blackboard: Blackboard) -> str:
 
         state_threads = []
 
-        for s in self.states:
+        for s in self._states:
             state_threads.append(Thread(target=self.execute_and_save_state, args=(s,blackboard,)))
             state_threads[-1].start()
 
@@ -37,17 +37,17 @@ class Concurrence(State):
             t.join()
 
         satisfied_outcomes = []
-        for i, (outcome, requirements) in enumerate(self.outcome_map.items()):
+        for i, (outcome, requirements) in enumerate(self._outcome_map.items()):
             satisfied = True
             
             for state_name, state_outcome in requirements.items():
-                satisfied = satisfied and (self.intermediate_outcomes[state_name] == state_outcome)
+                satisfied = satisfied and (self._intermediate_outcomes[state_name] == state_outcome)
 
             if satisfied:
                 satisfied_outcomes.append(outcome)
 
         if len(satisfied_outcomes) == 0:
-            return self.default_outcome
+            return self._default_outcome
 
         if len(satisfied_outcomes) > 1:
             yasmin.YASMIN_LOG_WARN(f"More than one satisfied outcome after concurrent state execution; returning the first one.")        
@@ -56,11 +56,11 @@ class Concurrence(State):
 
     def execute_and_save_state(self, state: State, blackboard: Blackboard) -> None:
         outcome = state(blackboard)
-        with self.mutex:
-            self.intermediate_outcomes[state.__str__()] = outcome
+        with self._mutex:
+            self._intermediate_outcomes[state.__str__()] = outcome
 
     def cancel_state(self) -> None:
-        for state in self.states:
+        for state in self._states:
             state.cancel_state()
 
         super().cancel_state()
