@@ -111,7 +111,7 @@ class Concurrence(State):
         Returns:
             str: A string representation of the state machine.
         """
-        result = "State Machine ["
+        result = "Concurrence ["
 
         for i, state in enumerate(self._states):
             result += f"{state.__str__()}"
