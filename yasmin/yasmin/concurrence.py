@@ -13,14 +13,14 @@ class Concurrence(State):
 
     Attributes:
         _states (List[State]): A list of states that will be run in parallel by this state.
-        _outcome_map (Dict[str, Dict[str, str]]): A dictionary correlating the outcomes of the concurrent states to
+        _outcome_map (Dict[str, Dict[int, str]]): A dictionary correlating the outcomes of the concurrent states to
                                                   outcomes of this state.
         _default_outcome (str): A default outcome in case none of the correlations in _outcome_map are satisfied.
         _intermediate_outcomes (Dict[str, Optional[str]]): A temporary storage of the parallel states's outcomes.
         _mutex (Lock): A mutex to ensure thread safety of _intermediate_outcomes. 
     """
 
-    def __init__(self, default_outcome: str, outcome_map: Dict[str, Dict[str, str]], states: List[State]) -> None:
+    def __init__(self, default_outcome: str, outcome_map: Dict[str, Dict[State, str]], states: List[State]) -> None:
         """
         Initializes the Concurrence instance.
 
@@ -35,16 +35,23 @@ class Concurrence(State):
 
         super().__init__(outcomes)
 
+        self._default_outcome: str = default_outcome
+
         if not states:
             raise ValueError("There must be at least one state")
 
         self._states: List[State] = states
-        self._outcome_map: Dict[str, Dict[str, str]] = outcome_map
-        self._default_outcome: str = default_outcome
 
-        self._intermediate_outcomes: Dict[str, Optional[str]] = {}
-        for state in self._states:
-            self._intermediate_outcomes[state.__str__()] = None
+        self._outcome_map: Dict[str, Dict[int, str]] = {}
+        for outcome, requirements in outcome_map.items():
+            self._outcome_map[outcome] = {}
+            for state, state_outcome in requirements.items():
+                state_id = self._states.index(state)
+                self._outcome_map[outcome][state_id] = state_outcome
+
+        self._intermediate_outcomes: Dict[int, Optional[str]] = {}
+        for state_id, _ in enumerate(self._states):
+            self._intermediate_outcomes[state_id] = None
 
         self._mutex = Lock()
 
@@ -58,8 +65,8 @@ class Concurrence(State):
         
         state_threads = []
 
-        for s in self._states:
-            state_threads.append(Thread(target=self.execute_and_save_state, args=(s,blackboard,)))
+        for i, s in enumerate(self._states):
+            state_threads.append(Thread(target=self.execute_and_save_state, args=(s,i,blackboard,)))
             state_threads[-1].start()
 
         for t in state_threads:
@@ -83,17 +90,18 @@ class Concurrence(State):
 
         return satisfied_outcomes[0]
 
-    def execute_and_save_state(self, state: State, blackboard: Blackboard) -> None:
+    def execute_and_save_state(self, state: State, state_id: int, blackboard: Blackboard) -> None:
         """
         Executes a state and saves its outcome to the intermediate map.
 
         :param state: A state to execute.
+        :param state_id: The internal state ID associated with the state to execute.
         :param blackboard: An instance of Blackboard that provides the context for execution.
         :return: None
         """
         outcome = state(blackboard)
         with self._mutex:
-            self._intermediate_outcomes[state.__str__()] = outcome
+            self._intermediate_outcomes[state_id] = outcome
 
     def cancel_state(self) -> None:
         """

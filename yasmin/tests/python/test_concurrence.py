@@ -53,8 +53,8 @@ class TestState(unittest.TestCase):
         self.state = Concurrence(
             default_outcome="default",
             outcome_map={
-                "outcome1": {"FooState": "outcome1"},
-                "outcome2": {"FooState": "outcome1", "BarState": "outcome1"},
+                "outcome1": {self.foo_state: "outcome1"},
+                "outcome2": {self.bar_state: "outcome1", self.bar_state: "outcome1"},
             },
             states=[self.foo_state, self.bar_state]
         )
@@ -68,4 +68,4 @@ class TestState(unittest.TestCase):
         self.assertTrue(self.state.is_canceled())
 
     def test_str(self):
-        self.assertEqual("Concurrence", str(self.state))
+        self.assertEqual("Concurrence [FooState, BarState]", str(self.state))
