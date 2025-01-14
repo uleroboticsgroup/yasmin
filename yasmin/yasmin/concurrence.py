@@ -1,5 +1,5 @@
 
-from threading import Thread
+from threading import Thread, Lock
 from typing import List, Dict, Optional
 
 import yasmin
@@ -22,6 +22,8 @@ class Concurrence(State):
         self.intermediate_outcomes: Dict[str, Optional[str]] = {}
         for state in self.states:
             self.intermediate_outcomes[state.__str__()] = None
+
+        self.mutex = Lock()
 
     def execute(self, blackboard: Blackboard) -> str:
 
@@ -54,7 +56,8 @@ class Concurrence(State):
 
     def execute_and_save_state(self, state: State, blackboard: Blackboard) -> None:
         outcome = state(blackboard)
-        self.intermediate_outcomes[state.__str__()] = outcome
+        with self.mutex:
+            self.intermediate_outcomes[state.__str__()] = outcome
 
     def cancel_state(self) -> None:
         for state in self.states:
