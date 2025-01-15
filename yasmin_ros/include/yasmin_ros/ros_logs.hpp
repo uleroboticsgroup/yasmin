@@ -1,4 +1,4 @@
-// Copyright (C) 2024  Miguel Ángel González Santamarta
+// Copyright (C) 2024 Miguel Ángel González Santamarta
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS_LOGS_HPP
-#define YASMIN_ROS_LOGS_HPP
+#ifndef YASMIN_ROS__LOGS_HPP
+#define YASMIN_ROS__LOGS_HPP
 
 namespace yasmin_ros {
 
@@ -33,4 +33,4 @@ void set_ros_loggers();
 
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS_LOGS_HPP
+#endif // YASMIN_ROS__LOGS_HPP

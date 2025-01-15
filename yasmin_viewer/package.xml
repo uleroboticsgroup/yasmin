@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>yasmin_viewer</name>
-  <version>2.4.2</version>
+  <version>3.0.3</version>
   <description>TODO: Package description</description>
   <maintainer email="mgons@unileon.es">miguel</maintainer>
   <license>TODO: License declaration</license>
@@ -14,8 +14,8 @@
   <exec_depend>python3-flask</exec_depend>
   <exec_depend>python3-waitress</exec_depend>
   
-  <depend>rclcpp</depend>
   <depend>rclpy</depend>
+  <depend>rclcpp</depend>
   <depend>yasmin</depend>
   <depend>yasmin_ros</depend>
   <depend>yasmin_msgs</depend>

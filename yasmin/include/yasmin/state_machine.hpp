@@ -1,4 +1,4 @@
-// Copyright (C) 2023  Miguel Ángel González Santamarta
+// Copyright (C) 2023 Miguel Ángel González Santamarta
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_STATE_MACHINE_HPP
-#define YASMIN_STATE_MACHINE_HPP
+#ifndef YASMIN__STATE_MACHINE_HPP
+#define YASMIN__STATE_MACHINE_HPP
 
 #include <atomic>
 #include <functional>
@@ -256,4 +256,4 @@ private:
 
 } // namespace yasmin
 
-#endif
+#endif // YASMIN__STATE_MACHINE_HPP

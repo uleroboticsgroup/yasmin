@@ -40,7 +40,6 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
-find_package(rclpy REQUIRED)
 find_package(yasmin REQUIRED)
 
 # C++
@@ -86,11 +85,11 @@ ament_python_install_package(${PROJECT_NAME})
 # Tests
 install(
   DIRECTORY tests/python/
-  DESTINATION pytests/
+  DESTINATION pytests/${PROJECT_NAME}
 )
 
 install(
-  PROGRAMS tests/python/run_pytests.sh
+  PROGRAMS tests/run_pytests.sh
   DESTINATION lib/${PROJECT_NAME}
 )
 

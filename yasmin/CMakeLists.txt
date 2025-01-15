@@ -51,11 +51,11 @@ ament_python_install_package(${PROJECT_NAME})
 # Tests
 install(
   DIRECTORY tests/python/
-  DESTINATION pytests/
+  DESTINATION pytests/${PROJECT_NAME}
 )
 
 install(
-  PROGRAMS tests/python/run_pytests.sh
+  PROGRAMS tests/run_pytests.sh
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2023  Miguel Ángel González Santamarta
+// Copyright (C) 2023 Miguel Ángel González Santamarta
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS_MONITOR_STATE_HPP
-#define YASMIN_ROS_MONITOR_STATE_HPP
+#ifndef YASMIN_ROS__MONITOR_STATE_HPP
+#define YASMIN_ROS__MONITOR_STATE_HPP
 
 #include <chrono>
 #include <functional>
@@ -215,4 +215,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif
+#endif // YASMIN_ROS__MONITOR_STATE_HPP

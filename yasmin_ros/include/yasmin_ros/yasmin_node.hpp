@@ -1,4 +1,4 @@
-// Copyright (C) 2024  Miguel Ángel González Santamarta
+// Copyright (C) 2024 Miguel Ángel González Santamarta
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS_YASMIN_NODE_HPP
-#define YASMIN_ROS_YASMIN_NODE_HPP
+#ifndef YASMIN_ROS__YASMIN_NODE_HPP
+#define YASMIN_ROS__YASMIN_NODE_HPP
 
 #include <memory>
 #include <string>
@@ -85,4 +85,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS_YASMIN_NODE_HPP
+#endif // YASMIN_ROS__YASMIN_NODE_HPP

@@ -1,4 +1,4 @@
-// Copyright (C) 2023  Miguel Ángel González Santamarta
+// Copyright (C) 2023 Miguel Ángel González Santamarta
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,12 +28,14 @@ class Viewer extends React.Component {
       current_fsm: "ALL",
       hide_nested_fsm: false,
       show_only_active_fsms: false,
+      layout: "dagre",
     };
 
     this.handle_current_fsm = this.handle_current_fsm.bind(this);
     this.handle_hide_nested_fsm = this.handle_hide_nested_fsm.bind(this);
     this.handle_show_only_active_fsms =
       this.handle_show_only_active_fsms.bind(this);
+    this.handle_change_layout = this.handle_change_layout.bind(this);
   }
 
   get_fsms() {
@@ -92,6 +94,10 @@ class Viewer extends React.Component {
     }
   }
 
+  handle_change_layout(layout) {
+    this.setState({ layout: layout });
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
     return (
       JSON.stringify(this.state) !== JSON.stringify(nextState) ||
@@ -108,6 +114,7 @@ class Viewer extends React.Component {
           handle_current_fsm={this.handle_current_fsm}
           handle_hide_nested_fsm={this.handle_hide_nested_fsm}
           handle_show_only_active_fsms={this.handle_show_only_active_fsms}
+          handle_change_layout={this.handle_change_layout}
         />
 
         <div
@@ -141,6 +148,7 @@ class Viewer extends React.Component {
                       fsm_data={fsm}
                       alone={false}
                       hide_nested_fsm={this.state.hide_nested_fsm}
+                      layout_type={this.state.layout}
                     />
                   </Grid>
                 );

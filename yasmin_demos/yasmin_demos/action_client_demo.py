@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2023  Miguel Ángel González Santamarta
+# Copyright (C) 2023 Miguel Ángel González Santamarta
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import rclpy
-from action_tutorials_interfaces.action import Fibonacci
+from example_interfaces.action import Fibonacci
+
 import yasmin
 from yasmin import CbState, Blackboard, StateMachine
 from yasmin_ros import ActionState
@@ -120,7 +121,7 @@ class FibonacciState(ActionState):
         Raises:
             None
         """
-        yasmin.YASMIN_LOG_INFO(f"Received feedback: {list(feedback.partial_sequence)}")
+        yasmin.YASMIN_LOG_INFO(f"Received feedback: {list(feedback.sequence)}")
 
 
 def print_result(blackboard: Blackboard) -> str:

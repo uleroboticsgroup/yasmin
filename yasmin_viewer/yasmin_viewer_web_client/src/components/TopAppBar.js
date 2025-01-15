@@ -1,4 +1,4 @@
-// Copyright (C) 2023  Miguel Ángel González Santamarta
+// Copyright (C) 2023 Miguel Ángel González Santamarta
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,10 +30,20 @@ export default function TopAppBar({
   handle_current_fsm,
   handle_hide_nested_fsm,
   handle_show_only_active_fsms,
+  handle_change_layout,
 }) {
   const [currentFSM, setCurrentFSM] = React.useState("ALL");
   const [hideNestedFSM, setHideNestedFSM] = React.useState(false);
   const [showOnlyActiveFSMs, setShowOnlyActiveFSMs] = React.useState(false);
+  const layouts = [
+    "breadthfirst",
+    "circle",
+    "concentric",
+    "cose",
+    "dagre",
+    "grid",
+    "klay",
+  ];
 
   const handleChangeHideNestedFSM = (event) => {
     setHideNestedFSM(event.target.checked);
@@ -55,11 +65,11 @@ export default function TopAppBar({
 
   React.useEffect(() => {
     handle_hide_nested_fsm(hideNestedFSM);
-  }, [hideNestedFSM]);
+  }, [hideNestedFSM, handle_hide_nested_fsm]);
 
   React.useEffect(() => {
     handle_show_only_active_fsms(showOnlyActiveFSMs);
-  }, [showOnlyActiveFSMs]);
+  }, [showOnlyActiveFSMs, handle_show_only_active_fsms]);
 
   return (
     <Box sx={{ flexGrow: 1 }} style={{ width: "100%", height: "6.75vh" }}>
@@ -176,6 +186,48 @@ export default function TopAppBar({
                 }}
               />
             }
+          />
+
+          <Divider
+            orientation="vertical"
+            variant="middle"
+            flexItem
+            color="white"
+            style={{ marginLeft: 30, marginRight: 30 }}
+          />
+
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              display: { xs: "none", md: "flex" },
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".2rem",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          >
+            Layout:
+          </Typography>
+
+          <Autocomplete
+            id="combo-box"
+            disableClearable={true}
+            options={layouts}
+            getOptionLabel={(option) => option}
+            isOptionEqualToValue={(option, value) => option === value}
+            defaultValue={"dagre"}
+            onChange={(event, value) => {
+              handle_change_layout(value);
+            }}
+            style={{
+              width: 150,
+              backgroundColor: "#d1e7fa",
+            }}
+            renderInput={(params) => (
+              <TextField {...params} variant="outlined" />
+            )}
           />
         </Toolbar>
       </AppBar>

@@ -1,4 +1,4 @@
-// Copyright (C) 2023  Miguel Ángel González Santamarta
+// Copyright (C) 2023 Miguel Ángel González Santamarta
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,12 +16,16 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import cytoscape from "cytoscape";
+import dagre from "cytoscape-dagre";
 import klay from "cytoscape-klay";
+import cose from "cytoscape-cose-bilkent";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 
+cytoscape.use(dagre);
 cytoscape.use(klay);
+cytoscape.use(cose);
 
 const Graph = React.memo(({ nodes, edges, layout, height }) => {
   const cyRef = useRef(null);
@@ -98,9 +102,11 @@ const Graph = React.memo(({ nodes, edges, layout, height }) => {
           style: {
             label: "data(label)",
             targetArrowShape: "triangle",
-            curveStyle: "bezier",
-            loopDirection: "-30deg",
-            loopSweep: "-30deg",
+            curveStyle: "unbundled-bezier",
+            controlPointDistances: [20, -20],
+            controlPointWeights: [0.25, 0.75],
+            loopDirection: "0deg",
+            loopSweep: "-20deg",
             events: "no",
           },
         },
@@ -117,9 +123,64 @@ const Graph = React.memo(({ nodes, edges, layout, height }) => {
   );
 });
 
-const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm }) => {
-  const layout = useMemo(
-    () => ({
+const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm, layout_type }) => {
+  const layouts = {
+    dagre: {
+      name: "dagre",
+      nodeSep: 50,
+      edgeSep: 25,
+      rankSep: 100,
+      rankDir: "TB",
+      align: "UL",
+    },
+    grid: {
+      name: "grid",
+      rows: undefined, // Automatically calculate rows
+      cols: undefined, // Automatically calculate columns
+      position: (node) => ({
+        row: node.data("row"),
+        col: node.data("col"),
+      }),
+      avoidOverlap: true,
+    },
+    circle: {
+      name: "circle",
+      fit: true, // Fit to container
+      padding: 10, // Padding around nodes
+      avoidOverlap: true, // Avoid node overlap
+      radius: undefined, // Automatically calculate radius
+      spacingFactor: 1.5, // Adjust spacing
+    },
+    concentric: {
+      name: "concentric",
+      fit: true,
+      padding: 10,
+      startAngle: (3 / 2) * Math.PI, // Start from top
+      minNodeSpacing: 10, // Space between nodes
+      concentric: (node) => node.degree(), // Concentric level based on degree
+      levelWidth: (nodes) => 2, // Level width
+    },
+    breadthfirst: {
+      name: "breadthfirst",
+      fit: true,
+      directed: true, // Directed layout
+      padding: 10,
+      circle: true, // Default to hierarchical
+      spacingFactor: 1.25, // Adjust spacing
+      avoidOverlap: true,
+    },
+    cose: {
+      name: "cose",
+      fit: true,
+      padding: 10,
+      idealEdgeLength: 50, // Length of edges
+      nodeRepulsion: 10000, // Repulsion between nodes
+      edgeElasticity: 100, // Elasticity of edges
+      gravity: 0.25, // Gravity factor
+      numIter: 1000, // Iterations for stabilization
+      animate: false,
+    },
+    klay: {
       name: "klay",
       klay: {
         spacing: 40,
@@ -130,9 +191,10 @@ const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm }) => {
         layoutHierarchy: true,
         mergeHierarchyCrossingEdges: false,
       },
-    }),
-    []
-  );
+    },
+  };
+
+  const selectedLayout = layouts[layout_type] || layouts.dagre;
 
   const height = alone ? "80vh" : "40vh";
 
@@ -265,6 +327,7 @@ const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm }) => {
           !node_names.includes(e.data.source) ||
           !node_names.includes(e.data.target)
         ) {
+          console.error(`Invalid edge: ${JSON.stringify(e)}`);
           return { nodes: undefined, edges: undefined };
         }
       }
@@ -322,7 +385,7 @@ const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm }) => {
               <Graph
                 nodes={nodes}
                 edges={edges}
-                layout={layout}
+                layout={selectedLayout}
                 height={height}
               />
             </Box>

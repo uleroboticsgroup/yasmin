@@ -1,4 +1,4 @@
-// Copyright (C) 2023  Miguel Ángel González Santamarta
+// Copyright (C) 2023 Miguel Ángel González Santamarta
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #include <memory>
 #include <string>
 
-#include "action_tutorials_interfaces/action/fibonacci.hpp"
+#include "example_interfaces/action/fibonacci.hpp"
 
 #include "yasmin/cb_state.hpp"
 #include "yasmin/logs.hpp"
@@ -30,7 +30,7 @@
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using Fibonacci = action_tutorials_interfaces::action::Fibonacci;
+using Fibonacci = example_interfaces::action::Fibonacci;
 using namespace yasmin;
 
 /**
@@ -130,7 +130,7 @@ public:
 
     std::stringstream ss;
     ss << "Next number in sequence received: ";
-    for (auto number : feedback->partial_sequence) {
+    for (auto number : feedback->sequence) {
       ss << number << " ";
     }
 

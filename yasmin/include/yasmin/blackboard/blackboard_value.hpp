@@ -1,4 +1,4 @@
-// Copyright (C) 2023  Miguel Ángel González Santamarta
+// Copyright (C) 2023 Miguel Ángel González Santamarta
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_BLACKBOARD_VAL_HPP
-#define YASMIN_BLACKBOARD_VAL_HPP
+#ifndef YASMIN__BLACKBOARD__BLACKBOARD_VALUE_HPP
+#define YASMIN__BLACKBOARD__BLACKBOARD_VALUE_HPP
 
 #include <string>
 #include <typeinfo>
@@ -98,4 +98,4 @@ public:
 } // namespace blackboard
 } // namespace yasmin
 
-#endif // YASMIN_BLACKBOARD_VAL_HPP
+#endif // YASMIN__BLACKBOARD__BLACKBOARD_VALUE_HPP
