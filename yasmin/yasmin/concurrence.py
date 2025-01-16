@@ -30,6 +30,7 @@ class Concurrence(State):
 
         :raises ValueError: If either the provided outcomes set or states set are empty.
         :raises ValueError: If the same instance of a state is listed to run concurrently with itself.
+        :raises KeyError: If an intermediate outcome is not registered with the correlated state.
         """
 
         if len(outcome_map.keys()) > 0:
@@ -55,6 +56,11 @@ class Concurrence(State):
         for outcome, requirements in outcome_map.items():
             self._outcome_map[outcome] = {}
             for state, state_outcome in requirements.items():
+                # Check if intermediate outcome belongs to state
+                if state_outcome not in state.get_outcomes():
+                    raise KeyError(
+                        f"Outcome '{state_outcome}' is not registered in state {state}"
+                    )
                 state_id = self._states.index(state)
                 self._outcome_map[outcome][state_id] = state_outcome
 

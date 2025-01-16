@@ -34,7 +34,7 @@ class FooState(State):
 
 class BarState(State):
     def __init__(self):
-        super().__init__(["outcome2"])
+        super().__init__(["outcome1", "outcome2"])
 
     def execute(self, blackboard):
         time.sleep(0.2)
@@ -63,6 +63,13 @@ class TestState(unittest.TestCase):
     def instance_exception(self):
         self.concurrent_state = Concurrence(states=[self.foo_state, self.foo_state], default_outcome="foo")
 
+    def key_exception(self):
+        self.concurrent_state = Concurrence(
+            states=[self.foo_state],
+            outcome_map={"outcome1": {self.foo_state: "non_outcome"}},
+            default_outcome="foo"
+        )
+
     def test_call(self):
         self.assertEqual("outcome1", self.state())
 
@@ -76,3 +83,6 @@ class TestState(unittest.TestCase):
 
     def test_instance_exception(self):
         self.assertRaises(Exception, self.instance_exception)
+
+    def test_key_exception(self):
+        self.assertRaises(Exception, self.key_exception)
