@@ -57,7 +57,7 @@ class LogLevel(IntEnum):
 
 
 ## The current log level for the application.
-log_level = LogLevel.DEBUG
+log_level = LogLevel.INFO
 
 
 ## Sets the log level for the logs.
