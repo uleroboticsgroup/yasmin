@@ -14,8 +14,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
-This module defines a set of status codes that can be used to represent 
-the outcome of various operations within the application. These codes can 
+This module defines a set of status codes that can be used to represent
+the outcome of various operations within the application. These codes can
 be utilized for error handling, logging, and user feedback.
 """
 
