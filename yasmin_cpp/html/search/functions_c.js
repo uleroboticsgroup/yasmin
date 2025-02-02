@@ -5,10 +5,11 @@ var searchData=
   ['set_2',['set',['../classyasmin_1_1blackboard_1_1Blackboard.html#a64db86d298db6460f53a30caba89e2cc',1,'yasmin::blackboard::Blackboard::set()'],['../classyasmin_1_1blackboard_1_1BlackboardValue.html#a08aa946a0abed7900cddaf68100cfe5d',1,'yasmin::blackboard::BlackboardValue::set()']]],
   ['set_5fdefault_5floggers_3',['set_default_loggers',['../namespaceyasmin.html#acfeb0bbddeafd3881c2ad929d540cfcf',1,'yasmin']]],
   ['set_5fints_4',['set_ints',['../service__client__demo_8cpp.html#a5a773e3074e84e335d0e87393eb53cb1',1,'service_client_demo.cpp']]],
-  ['set_5floggers_5',['set_loggers',['../namespaceyasmin.html#afa32b69eee23f39441ace98686f28bbc',1,'yasmin']]],
-  ['set_5fros_5floggers_6',['set_ros_loggers',['../namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74',1,'yasmin_ros']]],
-  ['set_5fstart_5fstate_7',['set_start_state',['../classyasmin_1_1StateMachine.html#acf2bc07558dfa102b24c2a6a6dbc360c',1,'yasmin::StateMachine']]],
-  ['size_8',['size',['../classyasmin_1_1blackboard_1_1Blackboard.html#a6a1eceebc117e55aa4029d4cb86c7124',1,'yasmin::blackboard::Blackboard']]],
-  ['state_9',['State',['../classyasmin_1_1State.html#a99401305d1648ff131344229e72cdf35',1,'yasmin::State']]],
-  ['statemachine_10',['StateMachine',['../classyasmin_1_1StateMachine.html#af17cb6c6a44ef5b725b5e32107296dba',1,'yasmin::StateMachine']]]
+  ['set_5flog_5flevel_5',['set_log_level',['../namespaceyasmin.html#af6e3b8432db4d6449adcb0e4dd7c2911',1,'yasmin']]],
+  ['set_5floggers_6',['set_loggers',['../namespaceyasmin.html#afa32b69eee23f39441ace98686f28bbc',1,'yasmin']]],
+  ['set_5fros_5floggers_7',['set_ros_loggers',['../namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74',1,'yasmin_ros']]],
+  ['set_5fstart_5fstate_8',['set_start_state',['../classyasmin_1_1StateMachine.html#acf2bc07558dfa102b24c2a6a6dbc360c',1,'yasmin::StateMachine']]],
+  ['size_9',['size',['../classyasmin_1_1blackboard_1_1Blackboard.html#a6a1eceebc117e55aa4029d4cb86c7124',1,'yasmin::blackboard::Blackboard']]],
+  ['state_10',['State',['../classyasmin_1_1State.html#a99401305d1648ff131344229e72cdf35',1,'yasmin::State']]],
+  ['statemachine_11',['StateMachine',['../classyasmin_1_1StateMachine.html#af17cb6c6a44ef5b725b5e32107296dba',1,'yasmin::StateMachine']]]
 ];

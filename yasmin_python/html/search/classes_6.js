@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['printodometrystate_0',['PrintOdometryState',['../classyasmin__demos_1_1monitor__demo_1_1PrintOdometryState.html',1,'yasmin_demos::monitor_demo']]]
+  ['nav2state_0',['Nav2State',['../classyasmin__demos_1_1nav__demo_1_1Nav2State.html',1,'yasmin_demos::nav_demo']]]
 ];

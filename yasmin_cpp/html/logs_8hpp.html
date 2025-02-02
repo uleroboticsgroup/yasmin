@@ -93,6 +93,7 @@ $(function(){ initResizable(false); });
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">logs.hpp File Reference</div></div>
@@ -229,6 +230,16 @@ Typedefs</h2></td></tr>
 <tr class="memdesc:a866a0df2f805efdc06b88de08f4b56f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type definition for a logging function.  <br /></td></tr>
 <tr class="separator:a866a0df2f805efdc06b88de08f4b56f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:afc54fa92c8ece7ebc27712bb9ec2392a" id="r_afc54fa92c8ece7ebc27712bb9ec2392a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a">yasmin::LogLevel</a> { <a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aae9eb8075a55b92f6692849afeca17c55">yasmin::ERROR</a> = 0
+, <a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aab0f69e3ec70f2fc8c441869d193b106d">yasmin::WARN</a>
+, <a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aa6a07b161afc950ebe97277aaa616aba2">yasmin::INFO</a>
+, <a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aab9a3c7398fb98a292d007ced7ea2372b">yasmin::DEBUG</a>
+ }</td></tr>
+<tr class="memdesc:afc54fa92c8ece7ebc27712bb9ec2392a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum representing different log levels for controlling log verbosity.  <a href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a">More...</a><br /></td></tr>
+<tr class="separator:afc54fa92c8ece7ebc27712bb9ec2392a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ac4c3670c31fc1412360a3cb293c54299" id="r_ac4c3670c31fc1412360a3cb293c54299"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyasmin.html#ac4c3670c31fc1412360a3cb293c54299">yasmin::extract_filename</a> (const char *path)</td></tr>
@@ -240,6 +251,9 @@ Functions</h2></td></tr>
 <tr class="memitem:acfeb0bbddeafd3881c2ad929d540cfcf" id="r_acfeb0bbddeafd3881c2ad929d540cfcf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyasmin.html#acfeb0bbddeafd3881c2ad929d540cfcf">yasmin::set_default_loggers</a> ()</td></tr>
 <tr class="memdesc:acfeb0bbddeafd3881c2ad929d540cfcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the default logging functions for all log levels.  <br /></td></tr>
 <tr class="separator:acfeb0bbddeafd3881c2ad929d540cfcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6e3b8432db4d6449adcb0e4dd7c2911" id="r_af6e3b8432db4d6449adcb0e4dd7c2911"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyasmin.html#af6e3b8432db4d6449adcb0e4dd7c2911">yasmin::set_log_level</a> (<a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a> <a class="el" href="namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4">log_level</a>)</td></tr>
+<tr class="memdesc:af6e3b8432db4d6449adcb0e4dd7c2911"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the log level for the logs.  <br /></td></tr>
+<tr class="separator:af6e3b8432db4d6449adcb0e4dd7c2911"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -255,6 +269,9 @@ Variables</h2></td></tr>
 <tr class="memitem:a9184407adbc84d4d95e2c8719e9208b4" id="r_a9184407adbc84d4d95e2c8719e9208b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceyasmin.html#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyasmin.html#a9184407adbc84d4d95e2c8719e9208b4">yasmin::log_debug</a> = <a class="el" href="namespaceyasmin.html#a7afeb9a611449ffcf59d3d5d154dfefa">default_log_debug</a></td></tr>
 <tr class="memdesc:a9184407adbc84d4d95e2c8719e9208b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the debug logging function.  <br /></td></tr>
 <tr class="separator:a9184407adbc84d4d95e2c8719e9208b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a940395fffc9b6f9a318e0c56f30369f4" id="r_a940395fffc9b6f9a318e0c56f30369f4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4">yasmin::log_level</a> = <a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aa6a07b161afc950ebe97277aaa616aba2">INFO</a></td></tr>
+<tr class="memdesc:a940395fffc9b6f9a318e0c56f30369f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current log level for the application.  <br /></td></tr>
+<tr class="separator:a940395fffc9b6f9a318e0c56f30369f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a0ead9ee1ac276365c02976d09daa2817" name="a0ead9ee1ac276365c02976d09daa2817"></a>
@@ -275,9 +292,11 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">  <a class="code hl_variable" href="namespaceyasmin.html#a9184407adbc84d4d95e2c8719e9208b4">yasmin::log_debug</a>(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,  \</div>
+<b>Value:</b><div class="fragment"><div class="line">  <span class="keywordflow">if</span> (<a class="code hl_variable" href="namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4">yasmin::log_level</a> &gt;= <a class="code hl_enumvalue" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aab9a3c7398fb98a292d007ced7ea2372b">yasmin::DEBUG</a>)                                      \</div>
+<div class="line">  yasmin::log_debug(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,  \</div>
 <div class="line">                    ##__VA_ARGS__)</div>
-<div class="ttc" id="anamespaceyasmin_html_a9184407adbc84d4d95e2c8719e9208b4"><div class="ttname"><a href="namespaceyasmin.html#a9184407adbc84d4d95e2c8719e9208b4">yasmin::log_debug</a></div><div class="ttdeci">LogFunction log_debug</div><div class="ttdoc">Pointer to the debug logging function.</div><div class="ttdef"><b>Definition</b> logs.cpp:116</div></div>
+<div class="ttc" id="anamespaceyasmin_html_a940395fffc9b6f9a318e0c56f30369f4"><div class="ttname"><a href="namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4">yasmin::log_level</a></div><div class="ttdeci">LogLevel log_level</div><div class="ttdoc">The current log level for the application.</div><div class="ttdef"><b>Definition</b> logs.cpp:132</div></div>
+<div class="ttc" id="anamespaceyasmin_html_afc54fa92c8ece7ebc27712bb9ec2392aab9a3c7398fb98a292d007ced7ea2372b"><div class="ttname"><a href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aab9a3c7398fb98a292d007ced7ea2372b">yasmin::DEBUG</a></div><div class="ttdeci">@ DEBUG</div><div class="ttdef"><b>Definition</b> logs.hpp:67</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -299,9 +318,10 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">  <a class="code hl_variable" href="namespaceyasmin.html#adb1305adc16f36e9ae7ea7d887d5040b">yasmin::log_error</a>(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,  \</div>
+<b>Value:</b><div class="fragment"><div class="line">  <span class="keywordflow">if</span> (<a class="code hl_variable" href="namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4">yasmin::log_level</a> &gt;= <a class="code hl_enumvalue" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aae9eb8075a55b92f6692849afeca17c55">yasmin::ERROR</a>)                                      \</div>
+<div class="line">  yasmin::log_error(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,  \</div>
 <div class="line">                    ##__VA_ARGS__)</div>
-<div class="ttc" id="anamespaceyasmin_html_adb1305adc16f36e9ae7ea7d887d5040b"><div class="ttname"><a href="namespaceyasmin.html#adb1305adc16f36e9ae7ea7d887d5040b">yasmin::log_error</a></div><div class="ttdeci">LogFunction log_error</div><div class="ttdoc">Pointer to the error logging function.</div><div class="ttdef"><b>Definition</b> logs.cpp:113</div></div>
+<div class="ttc" id="anamespaceyasmin_html_afc54fa92c8ece7ebc27712bb9ec2392aae9eb8075a55b92f6692849afeca17c55"><div class="ttname"><a href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aae9eb8075a55b92f6692849afeca17c55">yasmin::ERROR</a></div><div class="ttdeci">@ ERROR</div><div class="ttdoc">Log level for error messages. Only critical errors should be logged.</div><div class="ttdef"><b>Definition</b> logs.hpp:58</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -323,9 +343,10 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">  <a class="code hl_variable" href="namespaceyasmin.html#a57f86f2f42912a6d1ed0a88c3387a5f3">yasmin::log_info</a>(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,   \</div>
+<b>Value:</b><div class="fragment"><div class="line">  <span class="keywordflow">if</span> (<a class="code hl_variable" href="namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4">yasmin::log_level</a> &gt;= <a class="code hl_enumvalue" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aa6a07b161afc950ebe97277aaa616aba2">yasmin::INFO</a>)                                       \</div>
+<div class="line">  yasmin::log_info(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,   \</div>
 <div class="line">                   ##__VA_ARGS__)</div>
-<div class="ttc" id="anamespaceyasmin_html_a57f86f2f42912a6d1ed0a88c3387a5f3"><div class="ttname"><a href="namespaceyasmin.html#a57f86f2f42912a6d1ed0a88c3387a5f3">yasmin::log_info</a></div><div class="ttdeci">LogFunction log_info</div><div class="ttdoc">Pointer to the info logging function.</div><div class="ttdef"><b>Definition</b> logs.cpp:115</div></div>
+<div class="ttc" id="anamespaceyasmin_html_afc54fa92c8ece7ebc27712bb9ec2392aa6a07b161afc950ebe97277aaa616aba2"><div class="ttname"><a href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aa6a07b161afc950ebe97277aaa616aba2">yasmin::INFO</a></div><div class="ttdeci">@ INFO</div><div class="ttdef"><b>Definition</b> logs.hpp:64</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -347,9 +368,10 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">  <a class="code hl_variable" href="namespaceyasmin.html#a53f366428638fdd68ed9d6293f4aec97">yasmin::log_warn</a>(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,   \</div>
+<b>Value:</b><div class="fragment"><div class="line">  <span class="keywordflow">if</span> (<a class="code hl_variable" href="namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4">yasmin::log_level</a> &gt;= <a class="code hl_enumvalue" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aab0f69e3ec70f2fc8c441869d193b106d">yasmin::WARN</a>)                                       \</div>
+<div class="line">  yasmin::log_warn(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,   \</div>
 <div class="line">                   ##__VA_ARGS__)</div>
-<div class="ttc" id="anamespaceyasmin_html_a53f366428638fdd68ed9d6293f4aec97"><div class="ttname"><a href="namespaceyasmin.html#a53f366428638fdd68ed9d6293f4aec97">yasmin::log_warn</a></div><div class="ttdeci">LogFunction log_warn</div><div class="ttdoc">Pointer to the warning logging function.</div><div class="ttdef"><b>Definition</b> logs.cpp:114</div></div>
+<div class="ttc" id="anamespaceyasmin_html_afc54fa92c8ece7ebc27712bb9ec2392aab0f69e3ec70f2fc8c441869d193b106d"><div class="ttname"><a href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aab0f69e3ec70f2fc8c441869d193b106d">yasmin::WARN</a></div><div class="ttdeci">@ WARN</div><div class="ttdef"><b>Definition</b> logs.hpp:61</div></div>
 </div><!-- fragment -->
 </div>
 </div>

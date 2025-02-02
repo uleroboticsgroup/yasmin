@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['end_0',['END',['../namespaceyasmin__demos_1_1nav__demo.html#a78d6bb53106c319ce42240d9432da877',1,'yasmin_demos::nav_demo']]]
+  ['debug_0',['DEBUG',['../classyasmin_1_1logs_1_1LogLevel.html#a397a71d8fae5cab3a671c961cf34f9bf',1,'yasmin::logs::LogLevel']]]
 ];
