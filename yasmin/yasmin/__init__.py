@@ -4,6 +4,9 @@ from yasmin.blackboard import Blackboard
 from yasmin.state_machine import StateMachine
 
 from yasmin.logs import (
+    LogLevel,
+    set_log_level,
+    log_level,
     set_loggers,
     YASMIN_LOG_ERROR,
     YASMIN_LOG_WARN,

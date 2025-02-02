@@ -128,4 +128,9 @@ void set_default_loggers() {
               default_log_debug);
 }
 
+// Initialize the log level to INFO
+LogLevel log_level = INFO;
+
+void set_log_level(LogLevel log_level) { log_level = log_level; }
+
 } // namespace yasmin

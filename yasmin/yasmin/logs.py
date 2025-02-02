@@ -16,11 +16,15 @@
 import os
 import inspect
 import logging
+from enum import IntEnum
 from typing import Callable
 
 import yasmin
 
 __all__ = [
+    "LogLevel",
+    "set_log_level",
+    "log_level",
     "set_loggers",
     "YASMIN_LOG_ERROR",
     "YASMIN_LOG_WARN",
@@ -31,6 +35,41 @@ __all__ = [
 
 # Configure logging with a custom format to include location data
 logging.basicConfig(level=logging.NOTSET, format="%(message)s")
+
+
+class LogLevel(IntEnum):
+    """
+    @enum LogLevel
+    @brief Enumeration for different log levels.
+
+    Defines the available log levels for controlling verbosity in the
+    logging system.
+    """
+
+    ## Log level for error messages. Only critical errors should be logged.
+    ERROR = 0
+    ## Log level for warning messages. Indicate potential issues that are not critical.
+    WARN = 1
+    ## Log level for informational messages. General runtime information about the system's state.
+    INFO = 2
+    ## Log level for debug messages. Used for detailed information, mainly for developers.
+    DEBUG = 3
+
+
+## The current log level for the application.
+log_level = LogLevel.DEBUG
+
+
+## Sets the log level for the logs.
+def set_log_level(level: LogLevel) -> None:
+    """
+    @brief Set the log level for the YASMIN framework.
+
+    Adjusts the log level to control the verbosity of logged messages.
+
+    @param level The new log level to be set.
+    """
+    yasmin.log_level = level
 
 
 def get_caller_info():
@@ -62,8 +101,9 @@ def YASMIN_LOG_ERROR(text: str) -> None:
 
     @return: None
     """
-    file, function, line = get_caller_info()
-    logging.error(f"[ERROR] [{file}:{function}:{line}] {text}")
+    if yasmin.log_level >= LogLevel.ERROR:
+        file, function, line = get_caller_info()
+        logging.error(f"[ERROR] [{file}:{function}:{line}] {text}")
 
 
 def YASMIN_LOG_WARN(text: str) -> None:
@@ -78,8 +118,9 @@ def YASMIN_LOG_WARN(text: str) -> None:
 
     @return: None
     """
-    file, function, line = get_caller_info()
-    logging.warning(f"[WARN] [{file}:{function}:{line}] {text}")
+    if yasmin.log_level >= LogLevel.WARN:
+        file, function, line = get_caller_info()
+        logging.warning(f"[WARN] [{file}:{function}:{line}] {text}")
 
 
 def YASMIN_LOG_INFO(text: str) -> None:
@@ -94,8 +135,9 @@ def YASMIN_LOG_INFO(text: str) -> None:
 
     @return: None
     """
-    file, function, line = get_caller_info()
-    logging.info(f"[INFO] [{file}:{function}:{line}] {text}")
+    if yasmin.log_level >= LogLevel.INFO:
+        file, function, line = get_caller_info()
+        logging.info(f"[INFO] [{file}:{function}:{line}] {text}")
 
 
 def YASMIN_LOG_DEBUG(text: str) -> None:
@@ -110,8 +152,9 @@ def YASMIN_LOG_DEBUG(text: str) -> None:
 
     @return: None
     """
-    file, function, line = get_caller_info()
-    logging.debug(f"[DEBUG] [{file}:{function}:{line}] {text}")
+    if yasmin.log_level >= LogLevel.DEBUG:
+        file, function, line = get_caller_info()
+        logging.debug(f"[DEBUG] [{file}:{function}:{line}] {text}")
 
 
 def set_loggers(
