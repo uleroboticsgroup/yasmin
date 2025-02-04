@@ -22,6 +22,9 @@
 
 namespace yasmin_ros {
 
+// Initialize logger ROS 2 node
+rclcpp::Node *logger_node = nullptr;
+
 /**
  * @brief Logs an error message with formatted text to the ROS logger.
  *
@@ -47,8 +50,8 @@ void ros_log_error(const char *file, const char *function, int line,
   va_end(args);
 
   // Log the formatted error message
-  RCLCPP_ERROR(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
-               function, line, buffer.c_str());
+  RCLCPP_ERROR(logger_node->get_logger(), "[%s:%s:%d] %s", file, function, line,
+               buffer.c_str());
 }
 
 /**
@@ -75,8 +78,8 @@ void ros_log_warn(const char *file, const char *function, int line,
   va_end(args);
 
   // Log the formatted warning message
-  RCLCPP_WARN(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
-              function, line, buffer.c_str());
+  RCLCPP_WARN(logger_node->get_logger(), "[%s:%s:%d] %s", file, function, line,
+              buffer.c_str());
 }
 
 /**
@@ -103,8 +106,8 @@ void ros_log_info(const char *file, const char *function, int line,
   va_end(args);
 
   // Log the formatted informational message
-  RCLCPP_INFO(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
-              function, line, buffer.c_str());
+  RCLCPP_INFO(logger_node->get_logger(), "[%s:%s:%d] %s", file, function, line,
+              buffer.c_str());
 }
 
 /**
@@ -118,6 +121,7 @@ void ros_log_info(const char *file, const char *function, int line,
  */
 void ros_log_debug(const char *file, const char *function, int line,
                    const char *text, ...) {
+
   va_list args;
   va_start(args, text);
 
@@ -131,11 +135,18 @@ void ros_log_debug(const char *file, const char *function, int line,
   va_end(args);
 
   // Log the formatted debug message
-  RCLCPP_DEBUG(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
-               function, line, buffer.c_str());
+  RCLCPP_DEBUG(logger_node->get_logger(), "[%s:%s:%d] %s", file, function, line,
+               buffer.c_str());
 }
 
-void set_ros_loggers() {
+void set_ros_loggers(rclcpp::Node::SharedPtr node) {
+
+  if (node == nullptr) {
+    logger_node = YasminNode::get_instance().get();
+  } else {
+    logger_node = node.get();
+  }
+
   yasmin::set_loggers(ros_log_error, ros_log_warn, ros_log_info, ros_log_debug);
 }
 

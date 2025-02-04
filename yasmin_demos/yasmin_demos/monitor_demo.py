@@ -23,7 +23,7 @@ import yasmin
 from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import MonitorState
-from yasmin_ros.ros_logs import set_ros_loggers
+from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import TIMEOUT
 from yasmin_viewer import YasminViewerPub
 

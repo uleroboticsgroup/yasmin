@@ -16,7 +16,12 @@
 #ifndef YASMIN_ROS__LOGS_HPP
 #define YASMIN_ROS__LOGS_HPP
 
+#include "rclcpp/rclcpp.hpp"
+
 namespace yasmin_ros {
+
+/// Node used in the YASMIN ROS 2 logs
+extern rclcpp::Node *logger_node;
 
 /**
  * @brief Sets the logging functions for ROS, linking ROS 2 log levels to YASMIN
@@ -26,10 +31,12 @@ namespace yasmin_ros {
  * warning, info, and debug levels, ensuring messages from YASMIN are routed
  * through ROS 2 loggers.
  *
+ * @param node ROS 2 node to use as logger node. If null, use YasminNode.
+ *
  * @note This function should be called once to set up the loggers before any
  * logging occurs within YASMIN components.
  */
-void set_ros_loggers();
+void set_ros_loggers(rclcpp::Node::SharedPtr node = nullptr);
 
 } // namespace yasmin_ros
 
