@@ -185,7 +185,7 @@ Click to expand</summary>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> State</div>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
-<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> set_ros_loggers</div>
 <div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
 <div class="line"> </div>
 <div class="line"> </div>
@@ -347,7 +347,7 @@ Click to expand</summary>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
 <div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> ServiceState</div>
-<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> set_ros_loggers</div>
 <div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> SUCCEED, ABORT</div>
 <div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
 <div class="line"> </div>
@@ -531,7 +531,7 @@ Click to expand</summary>
 <div class="line"><span class="keyword">import</span> yasmin</div>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> CbState, Blackboard, StateMachine</div>
 <div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> ActionState</div>
-<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> set_ros_loggers</div>
 <div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> SUCCEED, ABORT, CANCEL</div>
 <div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
 <div class="line"> </div>
@@ -740,7 +740,7 @@ Click to expand</summary>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
 <div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> MonitorState</div>
-<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> set_ros_loggers</div>
 <div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> TIMEOUT</div>
 <div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
 <div class="line"> </div>
@@ -887,7 +887,7 @@ Click to expand</summary>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> Blackboard</div>
 <div class="line"><span class="keyword">from</span> yasmin <span class="keyword">import</span> StateMachine</div>
 <div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> ActionState</div>
-<div class="line"><span class="keyword">from</span> yasmin_ros.ros_logs <span class="keyword">import</span> set_ros_loggers</div>
+<div class="line"><span class="keyword">from</span> yasmin_ros <span class="keyword">import</span> set_ros_loggers</div>
 <div class="line"><span class="keyword">from</span> <a class="code hl_namespace" href="namespaceyasmin__ros_1_1basic__outcomes.html">yasmin_ros.basic_outcomes</a> <span class="keyword">import</span> SUCCEED, ABORT, CANCEL</div>
 <div class="line"><span class="keyword">from</span> yasmin_viewer <span class="keyword">import</span> YasminViewerPub</div>
 <div class="line"> </div>
@@ -1161,7 +1161,7 @@ Click to expand</summary>
 <div class="line">  rclcpp::init(argc, argv);</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Set ROS 2 logs</span></div>
-<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
+<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#aa2ab874c02c82fd169c8b3d066ddb106">yasmin_ros::set_ros_loggers</a>();</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Create a state machine</span></div>
 <div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
@@ -1210,7 +1210,7 @@ Click to expand</summary>
 <div class="ttc" id="alogs_8hpp_html"><div class="ttname"><a href="logs_8hpp.html">logs.hpp</a></div></div>
 <div class="ttc" id="alogs_8hpp_html_a054be408d85e8c53f3265107512555bd"><div class="ttname"><a href="logs_8hpp.html#a054be408d85e8c53f3265107512555bd">YASMIN_LOG_INFO</a></div><div class="ttdeci">#define YASMIN_LOG_INFO(text,...)</div><div class="ttdef"><b>Definition</b> logs.hpp:104</div></div>
 <div class="ttc" id="alogs_8hpp_html_ae06a2a3a4eaa2d0fc4d4cc807e7d9d72"><div class="ttname"><a href="logs_8hpp.html#ae06a2a3a4eaa2d0fc4d4cc807e7d9d72">YASMIN_LOG_WARN</a></div><div class="ttdeci">#define YASMIN_LOG_WARN(text,...)</div><div class="ttdef"><b>Definition</b> logs.hpp:100</div></div>
-<div class="ttc" id="anamespaceyasmin__ros_html_a53edaeca0ab52253d940c0da47bffd74"><div class="ttname"><a href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a></div><div class="ttdeci">void set_ros_loggers()</div><div class="ttdoc">Sets the logging functions for ROS, linking ROS 2 log levels to YASMIN loggers.</div><div class="ttdef"><b>Definition</b> ros_logs.cpp:138</div></div>
+<div class="ttc" id="anamespaceyasmin__ros_html_aa2ab874c02c82fd169c8b3d066ddb106"><div class="ttname"><a href="namespaceyasmin__ros.html#aa2ab874c02c82fd169c8b3d066ddb106">yasmin_ros::set_ros_loggers</a></div><div class="ttdeci">void set_ros_loggers(rclcpp::Node::SharedPtr node=nullptr)</div><div class="ttdoc">Sets the logging functions for ROS, linking ROS 2 log levels to YASMIN loggers.</div><div class="ttdef"><b>Definition</b> ros_logs.cpp:142</div></div>
 <div class="ttc" id="anamespaceyasmin_html"><div class="ttname"><a href="namespaceyasmin.html">yasmin</a></div><div class="ttdef"><b>Definition</b> blackboard.hpp:29</div></div>
 <div class="ttc" id="aros__logs_8hpp_html"><div class="ttname"><a href="ros__logs_8hpp.html">ros_logs.hpp</a></div></div>
 <div class="ttc" id="astate_8hpp_html"><div class="ttname"><a href="state_8hpp.html">state.hpp</a></div></div>
@@ -1293,7 +1293,7 @@ Click to expand</summary>
 <div class="line">  rclcpp::init(argc, argv);</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Set up ROS 2 logging.</span></div>
-<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
+<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#aa2ab874c02c82fd169c8b3d066ddb106">yasmin_ros::set_ros_loggers</a>();</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Create a state machine with a specified outcome.</span></div>
 <div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
@@ -1449,7 +1449,7 @@ Click to expand</summary>
 <div class="line">  rclcpp::init(argc, argv);</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Set ROS 2 logging</span></div>
-<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
+<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#aa2ab874c02c82fd169c8b3d066ddb106">yasmin_ros::set_ros_loggers</a>();</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Create the state machine</span></div>
 <div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
@@ -1581,7 +1581,7 @@ Click to expand</summary>
 <div class="line">  rclcpp::init(argc, argv);</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Set up ROS 2 loggers</span></div>
-<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#a53edaeca0ab52253d940c0da47bffd74">yasmin_ros::set_ros_loggers</a>();</div>
+<div class="line">  <a class="code hl_function" href="namespaceyasmin__ros.html#aa2ab874c02c82fd169c8b3d066ddb106">yasmin_ros::set_ros_loggers</a>();</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Create a state machine with a final outcome</span></div>
 <div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>

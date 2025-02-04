@@ -106,13 +106,16 @@ Functions</h2></td></tr>
 <tr class="separator:a746b43af9c76ed15bd875a80e139f4b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac28585eec07c5478c5b6bdd2d3ac550b" id="r_ac28585eec07c5478c5b6bdd2d3ac550b"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac28585eec07c5478c5b6bdd2d3ac550b">ros_log_debug</a> (str text)</td></tr>
 <tr class="separator:ac28585eec07c5478c5b6bdd2d3ac550b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd4d70ae668a98f78466c09b1a49022b" id="r_afd4d70ae668a98f78466c09b1a49022b"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afd4d70ae668a98f78466c09b1a49022b">set_ros_loggers</a> ()</td></tr>
-<tr class="separator:afd4d70ae668a98f78466c09b1a49022b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37817b86eab74ae246f363227f4ad5b8" id="r_a37817b86eab74ae246f363227f4ad5b8"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a37817b86eab74ae246f363227f4ad5b8">set_ros_loggers</a> (Node node=None)</td></tr>
+<tr class="separator:a37817b86eab74ae246f363227f4ad5b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a211bb3ad6c9b533a3d690128d6b86712" id="r_a211bb3ad6c9b533a3d690128d6b86712"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a211bb3ad6c9b533a3d690128d6b86712">__all__</a> = [&quot;set_ros_loggers&quot;]</td></tr>
+<tr class="memitem:a211bb3ad6c9b533a3d690128d6b86712" id="r_a211bb3ad6c9b533a3d690128d6b86712"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a211bb3ad6c9b533a3d690128d6b86712">__all__</a></td></tr>
 <tr class="separator:a211bb3ad6c9b533a3d690128d6b86712"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c75e3ca1389df848a9ab1002fd28096" id="r_a3c75e3ca1389df848a9ab1002fd28096"><td class="memItemLeft" align="right" valign="top">Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c75e3ca1389df848a9ab1002fd28096">logger_node</a> = None</td></tr>
+<tr class="memdesc:a3c75e3ca1389df848a9ab1002fd28096"><td class="mdescLeft">&#160;</td><td class="mdescRight">Node used in the YASMIN ROS 2 logs.  <br /></td></tr>
+<tr class="separator:a3c75e3ca1389df848a9ab1002fd28096"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ac28585eec07c5478c5b6bdd2d3ac550b" name="ac28585eec07c5478c5b6bdd2d3ac550b"></a>
@@ -227,8 +230,8 @@ and line number and logs a warning message with that context.
 </pre> 
 </div>
 </div>
-<a id="afd4d70ae668a98f78466c09b1a49022b" name="afd4d70ae668a98f78466c09b1a49022b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afd4d70ae668a98f78466c09b1a49022b">&#9670;&#160;</a></span>set_ros_loggers()</h2>
+<a id="a37817b86eab74ae246f363227f4ad5b8" name="a37817b86eab74ae246f363227f4ad5b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37817b86eab74ae246f363227f4ad5b8">&#9670;&#160;</a></span>set_ros_loggers()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -236,7 +239,7 @@ and line number and logs a warning message with that context.
         <tr>
           <td class="memname"> None yasmin_ros.ros_logs.set_ros_loggers </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype">Node </td>          <td class="paramname"><span class="paramname"><em>node</em></span><span class="paramdefsep"> = </span><span class="paramdefval">None</span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -245,6 +248,9 @@ and line number and logs a warning message with that context.
 
 This function assigns the logging functions for info, warning,
 debug, and error messages to the Yasmin logging framework.
+
+@param node: ROS 2 node to use as logger node. If None, use YasminNode.
+@type node: Node
 
 @raises: None
 
@@ -263,7 +269,7 @@ debug, and error messages to the Yasmin logging framework.
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">list yasmin_ros.ros_logs.__all__ = [&quot;set_ros_loggers&quot;]</td>
+          <td class="memname">list yasmin_ros.ros_logs.__all__</td>
         </tr>
       </table>
   </td>
@@ -272,6 +278,26 @@ debug, and error messages to the Yasmin logging framework.
   </tr>
 </table>
 </div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line"><span class="lineno">    1</span>=  [</div>
+<div class="line"><span class="lineno">    2</span>    <span class="stringliteral">&quot;set_ros_loggers&quot;</span>,</div>
+<div class="line"><span class="lineno">    3</span>    <span class="stringliteral">&quot;logger_node&quot;</span>,</div>
+<div class="line"><span class="lineno">    4</span>]</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a3c75e3ca1389df848a9ab1002fd28096" name="a3c75e3ca1389df848a9ab1002fd28096"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c75e3ca1389df848a9ab1002fd28096">&#9670;&#160;</a></span>logger_node</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Node yasmin_ros.ros_logs.logger_node = None</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Node used in the YASMIN ROS 2 logs. </p>
 
 </div>
 </div>

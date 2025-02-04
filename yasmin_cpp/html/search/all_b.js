@@ -7,7 +7,8 @@ var searchData=
   ['log_5flevel_4',['log_level',['../namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4',1,'yasmin']]],
   ['log_5fwarn_5',['log_warn',['../namespaceyasmin.html#a53f366428638fdd68ed9d6293f4aec97',1,'yasmin']]],
   ['logfunction_6',['LogFunction',['../namespaceyasmin.html#a866a0df2f805efdc06b88de08f4b56f4',1,'yasmin']]],
-  ['loglevel_7',['LogLevel',['../namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a',1,'yasmin']]],
-  ['logs_2ecpp_8',['logs.cpp',['../logs_8cpp.html',1,'']]],
-  ['logs_2ehpp_9',['logs.hpp',['../logs_8hpp.html',1,'']]]
+  ['logger_5fnode_7',['logger_node',['../namespaceyasmin__ros.html#a082e05844f00dc203a5f8a8406015e06',1,'yasmin_ros']]],
+  ['loglevel_8',['LogLevel',['../namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a',1,'yasmin']]],
+  ['logs_2ecpp_9',['logs.cpp',['../logs_8cpp.html',1,'']]],
+  ['logs_2ehpp_10',['logs.hpp',['../logs_8hpp.html',1,'']]]
 ];

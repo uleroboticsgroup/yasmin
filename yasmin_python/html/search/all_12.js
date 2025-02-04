@@ -9,7 +9,7 @@ var searchData=
   ['set_5fints_6',['set_ints',['../namespaceyasmin__demos_1_1service__client__demo.html#a522dc92d336019a6dd464206b9744011',1,'yasmin_demos::service_client_demo']]],
   ['set_5flog_5flevel_7',['set_log_level',['../namespaceyasmin_1_1logs.html#a868454127ecf7e1c49581f0dc5d5ab8d',1,'yasmin::logs']]],
   ['set_5floggers_8',['set_loggers',['../namespaceyasmin_1_1logs.html#a11f10889445a601e2883264f37164a8a',1,'yasmin::logs']]],
-  ['set_5fros_5floggers_9',['set_ros_loggers',['../namespaceyasmin__ros_1_1ros__logs.html#afd4d70ae668a98f78466c09b1a49022b',1,'yasmin_ros::ros_logs']]],
+  ['set_5fros_5floggers_9',['set_ros_loggers',['../namespaceyasmin__ros_1_1ros__logs.html#a37817b86eab74ae246f363227f4ad5b8',1,'yasmin_ros::ros_logs']]],
   ['set_5fstart_5fstate_10',['set_start_state',['../classyasmin_1_1state__machine_1_1StateMachine.html#a91a4ed13326774118815c1d502771cb2',1,'yasmin::state_machine::StateMachine']]],
   ['size_11',['Analyzing the Bundle Size',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md32',1,'']]],
   ['source_12',['Building from Source',['../index.html#autotoc_md5',1,'']]],
