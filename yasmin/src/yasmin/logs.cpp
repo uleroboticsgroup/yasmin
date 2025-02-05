@@ -18,114 +18,87 @@
 namespace yasmin {
 
 /**
- * @brief Default error logging function.
+ * @brief Generalized logging function.
  *
- * This function logs an error message to stderr with the format:
- * [ERROR] [file:function:line] message.
+ * @param level The log level as a string (e.g., "ERROR", "WARN", "INFO",
+ * "DEBUG").
+ * @param file The source file where the log function is called.
+ * @param function The function where the log function is called.
+ * @param line The line number in the source file.
+ * @param text The format string for the log message.
+ * @param args Additional arguments for the format string.
+ */
+void log_message(const char *level, const char *file, const char *function,
+                 int line, const char *text, va_list args) {
+  fprintf(stderr, "[%s] [%s:%s:%d] ", level, file, function, line);
+  vfprintf(stderr, text, args);
+  fprintf(stderr, "\n");
+}
+
+/**
+ * @brief Variadic template function to log messages at different levels.
  *
- * @param file The name of the source file where the log function is called.
- * @param function The name of the function where the log function is called.
- * @param line The line number in the source file where the log function is
- * called.
+ * This function wraps log_message and allows logging messages with different
+ * log levels while reducing redundant code. It provides a consistent logging
+ * format across all levels.
+ *
+ * @tparam LEVEL The log level string (e.g., "ERROR", "WARN", "INFO", "DEBUG").
+ * @param file The source file where the log function is called.
+ * @param function The function where the log function is called.
+ * @param line The line number in the source file.
  * @param text The format string for the log message.
  * @param ... Additional arguments for the format string.
  */
-void default_log_error(const char *file, const char *function, int line,
-                       const char *text, ...) {
+template <const char *LEVEL>
+void log_helper(const char *file, const char *function, int line,
+                const char *text, ...) {
   va_list args;
   va_start(args, text);
-  fprintf(stderr, "[ERROR] [%s:%s:%d] ", file, function, line);
-  vfprintf(stderr, text, args);
-  fprintf(stderr, "\n");
+  log_message(LEVEL, file, function, line, text, args);
   va_end(args);
 }
 
 /**
- * @brief Default warning logging function.
- *
- * This function logs a warning message to stderr with the format:
- * [WARN] [file:function:line] message.
- *
- * @param file The name of the source file where the log function is called.
- * @param function The name of the function where the log function is called.
- * @param line The line number in the source file where the log function is
- * called.
- * @param text The format string for the log message.
- * @param ... Additional arguments for the format string.
+ * @brief Log level strings used in logging functions.
  */
-void default_log_warn(const char *file, const char *function, int line,
-                      const char *text, ...) {
-  va_list args;
-  va_start(args, text);
-  fprintf(stderr, "[WARN] [%s:%s:%d] ", file, function, line);
-  vfprintf(stderr, text, args);
-  fprintf(stderr, "\n");
-  va_end(args);
-}
+constexpr const char ERROR_LEVEL[] = "ERROR"; ///< Error log level
+constexpr const char WARN_LEVEL[] = "WARN";   ///< Warning log level
+constexpr const char INFO_LEVEL[] = "INFO";   ///< Info log level
+constexpr const char DEBUG_LEVEL[] = "DEBUG"; ///< Debug log level
 
 /**
- * @brief Default info logging function.
+ * @brief Explicit template instantiations for log_helper with different log
+ * levels.
  *
- * This function logs an informational message to stderr with the format:
- * [INFO] [file:function:line] message.
- *
- * @param file The name of the source file where the log function is called.
- * @param function The name of the function where the log function is called.
- * @param line The line number in the source file where the log function is
- * called.
- * @param text The format string for the log message.
- * @param ... Additional arguments for the format string.
+ * These instantiations ensure that log_helper functions for each log level are
+ * available.
  */
-void default_log_info(const char *file, const char *function, int line,
-                      const char *text, ...) {
-  va_list args;
-  va_start(args, text);
-  fprintf(stderr, "[INFO] [%s:%s:%d] ", file, function, line);
-  vfprintf(stderr, text, args);
-  fprintf(stderr, "\n");
-  va_end(args);
-}
+template void log_helper<ERROR_LEVEL>(const char *, const char *, int,
+                                      const char *, ...);
+template void log_helper<WARN_LEVEL>(const char *, const char *, int,
+                                     const char *, ...);
+template void log_helper<INFO_LEVEL>(const char *, const char *, int,
+                                     const char *, ...);
+template void log_helper<DEBUG_LEVEL>(const char *, const char *, int,
+                                      const char *, ...);
 
-/**
- * @brief Default debug logging function.
- *
- * This function logs a debug message to stderr with the format:
- * [DEBUG] [file:function:line] message.
- *
- * @param file The name of the source file where the log function is called.
- * @param function The name of the function where the log function is called.
- * @param line The line number in the source file where the log function is
- * called.
- * @param text The format string for the log message.
- * @param ... Additional arguments for the format string.
- */
-void default_log_debug(const char *file, const char *function, int line,
-                       const char *text, ...) {
-  va_list args;
-  va_start(args, text);
-  fprintf(stderr, "[DEBUG] [%s:%s:%d] ", file, function, line);
-  vfprintf(stderr, text, args);
-  fprintf(stderr, "\n");
-  va_end(args);
-}
-
-// Initialize the function pointers with default log functions
-LogFunction log_error = default_log_error;
-LogFunction log_warn = default_log_warn;
-LogFunction log_info = default_log_info;
-LogFunction log_debug = default_log_debug;
+// Assign default logging functions
+LogFunction log_error = log_helper<ERROR_LEVEL>;
+LogFunction log_warn = log_helper<WARN_LEVEL>;
+LogFunction log_info = log_helper<INFO_LEVEL>;
+LogFunction log_debug = log_helper<DEBUG_LEVEL>;
 
 void set_loggers(LogFunction error, LogFunction warn, LogFunction info,
                  LogFunction debug) {
-  log_error = error ? error : default_log_error;
-  log_warn = warn ? warn : default_log_warn;
-  log_info = info ? info : default_log_info;
-  log_debug = debug ? debug : default_log_debug;
+  log_error = error ? error : log_helper<ERROR_LEVEL>;
+  log_warn = warn ? warn : log_helper<WARN_LEVEL>;
+  log_info = info ? info : log_helper<INFO_LEVEL>;
+  log_debug = debug ? debug : log_helper<DEBUG_LEVEL>;
 }
 
 void set_default_loggers() {
-  set_loggers(default_log_error, default_log_warn, default_log_info,
-              default_log_debug);
+  set_loggers(log_helper<ERROR_LEVEL>, log_helper<WARN_LEVEL>,
+              log_helper<INFO_LEVEL>, log_helper<DEBUG_LEVEL>);
 }
 
 // Initialize the log level to INFO
