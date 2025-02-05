@@ -2,6 +2,15 @@
 Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.0 (2025-02-05)
+------------------
+* new yasmin logs
+* improving c++ logs code
+* setting default log level of python yasmin to info
+* log levels added to yasmin logs
+* fixing license comments
+* Contributors: Miguel Ángel González Santamarta
+
 3.0.3 (2024-12-17)
 ------------------
 * hpp ifndef guards fixed
@@ -9,7 +18,7 @@ Changelog for package yasmin
 * Contributors: Miguel Ángel González Santamarta
 
 3.0.2 (2024-12-16)
------------
+------------------
 
 3.0.1 (2024-12-01)
 ------------------

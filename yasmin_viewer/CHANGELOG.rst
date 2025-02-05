@@ -2,13 +2,23 @@
 Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.0 (2025-02-05)
+------------------
+* updating yasmin viewer dependencies
+* new viewer build
+* adding package-lock.json to gitignore
+* package-lock.json removed
+* adding layouts to toolbar
+* fixing license comments
+* Contributors: Miguel Ángel González Santamarta
+
 3.0.3 (2024-12-17)
 ------------------
 * hpp ifndef guards fixed
 * Contributors: Miguel Ángel González Santamarta
 
 3.0.2 (2024-12-16)
------------
+------------------
 * fixing dependencies in package.xml files
 * Contributors: Miguel Ángel González Santamarta
 

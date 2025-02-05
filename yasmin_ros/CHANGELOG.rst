@@ -2,6 +2,15 @@
 Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.0 (2025-02-05)
+------------------
+* new yasmin logs
+* improving ros_logs
+* set_ros_loggers allows setting node to log
+* fixing format
+* fixing license comments
+* Contributors: Miguel Ángel González Santamarta
+
 3.0.3 (2024-12-17)
 ------------------
 * hpp ifndef guards fixed
@@ -9,7 +18,7 @@ Changelog for package yasmin_ros
 * Contributors: Miguel Ángel González Santamarta
 
 3.0.2 (2024-12-16)
------------
+------------------
 * build_depend for ros_environment
 * adding ros-environment dependency
 * fixing dependencies in package.xml files

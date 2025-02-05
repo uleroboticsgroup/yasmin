@@ -1,6 +1,6 @@
 {
   "name": "yasmin_viewer_web_client",
-  "version": "3.0.3",
+  "version": "3.1.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.7.1",
