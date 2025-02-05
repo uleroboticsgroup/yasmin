@@ -15,10 +15,11 @@ var searchData=
   ['ros_202_20distros_12',['Note for Deprecated or Rolling ROS 2 Distros',['../index.html#autotoc_md6',1,'']]],
   ['ros_202_20service_20client_13',['ROS 2 Service Client',['../index.html#autotoc_md11',1,'Service Demo (FSM + ROS 2 Service Client)'],['../index.html#autotoc_md17',1,'Service Demo (FSM + ROS 2 Service Client)']]],
   ['ros_202_20subscriber_14',['ROS 2 Subscriber',['../index.html#autotoc_md13',1,'Monitor Demo (FSM + ROS 2 Subscriber)'],['../index.html#autotoc_md19',1,'Monitor Demo (FSM + ROS 2 Subscriber)']]],
-  ['ros_5flogs_2ecpp_15',['ros_logs.cpp',['../ros__logs_8cpp.html',1,'']]],
-  ['ros_5flogs_2ehpp_16',['ros_logs.hpp',['../ros__logs_8hpp.html',1,'']]],
-  ['run_20build_20tt_17',['&lt;tt&gt;npm run build&lt;/tt&gt;',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md28',1,'']]],
-  ['run_20build_20tt_20fails_20to_20minify_18',['&lt;tt&gt;npm run build&lt;/tt&gt; fails to minify',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md36',1,'']]],
-  ['run_20eject_20tt_19',['&lt;tt&gt;npm run eject&lt;/tt&gt;',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md29',1,'']]],
-  ['running_20',['running',['../classyasmin_1_1State.html#a3f88762eb8246b6076a42c910eb02fd7',1,'yasmin::State']]]
+  ['ros_5flog_5fmessage_15',['ros_log_message',['../namespaceyasmin__ros.html#a7f87cb8177c521106783cbef652fc0a9',1,'yasmin_ros']]],
+  ['ros_5flogs_2ecpp_16',['ros_logs.cpp',['../ros__logs_8cpp.html',1,'']]],
+  ['ros_5flogs_2ehpp_17',['ros_logs.hpp',['../ros__logs_8hpp.html',1,'']]],
+  ['run_20build_20tt_18',['&lt;tt&gt;npm run build&lt;/tt&gt;',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md28',1,'']]],
+  ['run_20build_20tt_20fails_20to_20minify_19',['&lt;tt&gt;npm run build&lt;/tt&gt; fails to minify',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md36',1,'']]],
+  ['run_20eject_20tt_20',['&lt;tt&gt;npm run eject&lt;/tt&gt;',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md29',1,'']]],
+  ['running_21',['running',['../classyasmin_1_1State.html#a3f88762eb8246b6076a42c910eb02fd7',1,'yasmin::State']]]
 ];

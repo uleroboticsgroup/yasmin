@@ -120,13 +120,9 @@ Functions</h2></td></tr>
 <tr class="memitem:aa2ab874c02c82fd169c8b3d066ddb106" id="r_aa2ab874c02c82fd169c8b3d066ddb106"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa2ab874c02c82fd169c8b3d066ddb106">set_ros_loggers</a> (rclcpp::Node::SharedPtr node=nullptr)</td></tr>
 <tr class="memdesc:aa2ab874c02c82fd169c8b3d066ddb106"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the logging functions for ROS, linking ROS 2 log levels to YASMIN loggers.  <br /></td></tr>
 <tr class="separator:aa2ab874c02c82fd169c8b3d066ddb106"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad9111cadc2a8e20e48a469183d577c5a" id="r_ad9111cadc2a8e20e48a469183d577c5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad9111cadc2a8e20e48a469183d577c5a">log_message</a> (<a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a">yasmin::LogLevel</a> level, const char *file, const char *function, int line, const char *text)</td></tr>
-<tr class="memdesc:ad9111cadc2a8e20e48a469183d577c5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generalized logging function.  <br /></td></tr>
-<tr class="separator:ad9111cadc2a8e20e48a469183d577c5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d195b5654e168c04bdcb5a8339bd4d1" id="r_a1d195b5654e168c04bdcb5a8339bd4d1"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a">yasmin::LogLevel</a> LEVEL&gt; </td></tr>
-<tr class="memitem:a1d195b5654e168c04bdcb5a8339bd4d1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a1d195b5654e168c04bdcb5a8339bd4d1">log_helper</a> (const char *file, const char *function, int line, const char *text,...)</td></tr>
-<tr class="memdesc:a1d195b5654e168c04bdcb5a8339bd4d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Variadic template function to log messages at different levels.  <br /></td></tr>
-<tr class="separator:a1d195b5654e168c04bdcb5a8339bd4d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f87cb8177c521106783cbef652fc0a9" id="r_a7f87cb8177c521106783cbef652fc0a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7f87cb8177c521106783cbef652fc0a9">ros_log_message</a> (<a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a">yasmin::LogLevel</a> level, const char *file, const char *function, int line, const char *text)</td></tr>
+<tr class="memdesc:a7f87cb8177c521106783cbef652fc0a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generalized logging function.  <br /></td></tr>
+<tr class="separator:a7f87cb8177c521106783cbef652fc0a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -135,72 +131,14 @@ Variables</h2></td></tr>
 <tr class="separator:a082e05844f00dc203a5f8a8406015e06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a1d195b5654e168c04bdcb5a8339bd4d1" name="a1d195b5654e168c04bdcb5a8339bd4d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d195b5654e168c04bdcb5a8339bd4d1">&#9670;&#160;</a></span>log_helper()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a">yasmin::LogLevel</a> LEVEL&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">void yasmin_ros::log_helper </td>
-          <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>file</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>function</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>line</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>text</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>...</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Variadic template function to log messages at different levels. </p>
-<p>This function wraps log_message and allows logging messages with different log levels while reducing redundant code. It provides a consistent logging format across all levels.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">LEVEL</td><td>The log level LogLevel (e.g., 0 -&gt; "ERROR", 1 -&gt; "WARN", 2 -&gt; "INFO", 3 -&gt; "DEBUG"). </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">log_message</td><td>Function to create the logs </td></tr>
-    <tr><td class="paramname">file</td><td>The source file where the log function is called. </td></tr>
-    <tr><td class="paramname">function</td><td>The function where the log function is called. </td></tr>
-    <tr><td class="paramname">line</td><td>The line number in the source file. </td></tr>
-    <tr><td class="paramname">text</td><td>The format string for the log message. </td></tr>
-    <tr><td class="paramname">...</td><td>Additional arguments for the format string. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ad9111cadc2a8e20e48a469183d577c5a" name="ad9111cadc2a8e20e48a469183d577c5a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad9111cadc2a8e20e48a469183d577c5a">&#9670;&#160;</a></span>log_message()</h2>
+<a id="a7f87cb8177c521106783cbef652fc0a9" name="a7f87cb8177c521106783cbef652fc0a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f87cb8177c521106783cbef652fc0a9">&#9670;&#160;</a></span>ros_log_message()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void yasmin_ros::log_message </td>
+          <td class="memname">void yasmin_ros::ros_log_message </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392a">yasmin::LogLevel</a></td>          <td class="paramname"><span class="paramname"><em>level</em></span>, </td>
         </tr>

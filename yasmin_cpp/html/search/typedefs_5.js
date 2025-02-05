@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['logfunction_0',['LogFunction',['../namespaceyasmin.html#a866a0df2f805efdc06b88de08f4b56f4',1,'yasmin']]]
+  ['logfunction_0',['LogFunction',['../namespaceyasmin.html#a69e3cad55230a936fcc33cce97aed54d',1,'yasmin']]]
 ];

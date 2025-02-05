@@ -2,7 +2,7 @@ var searchData=
 [
   ['debian_20packages_0',['Debian Packages',['../index.html#autotoc_md4',1,'']]],
   ['debug_1',['DEBUG',['../namespaceyasmin.html#afc54fa92c8ece7ebc27712bb9ec2392aab9a3c7398fb98a292d007ced7ea2372b',1,'yasmin']]],
-  ['debug_5flevel_2',['DEBUG_LEVEL',['../namespaceyasmin.html#a0d360dc7d1669c5b8ac9a18c69d6867c',1,'yasmin']]],
+  ['default_5flog_5fmessage_2',['default_log_message',['../namespaceyasmin.html#a60dda5af3bef0cebf30e238a93aa2dc4',1,'yasmin']]],
   ['demo_3',['Vanilla Demo',['../index.html#autotoc_md16',1,'']]],
   ['demo_20fsm_4',['Vanilla Demo (FSM)',['../index.html#autotoc_md10',1,'']]],
   ['demo_20fsm_20ros_202_20action_5',['Demo FSM ROS 2 Action',['../index.html#autotoc_md12',1,'Action Demo (FSM + ROS 2 Action)'],['../index.html#autotoc_md18',1,'Action Demo (FSM + ROS 2 Action)']]],

@@ -7,12 +7,9 @@ var searchData=
   ['ros_202_20distros_4',['Note for Deprecated or Rolling ROS 2 Distros',['../index.html#autotoc_md6',1,'']]],
   ['ros_202_20service_20client_5',['ROS 2 Service Client',['../index.html#autotoc_md11',1,'Service Demo (FSM + ROS 2 Service Client)'],['../index.html#autotoc_md17',1,'Service Demo (FSM + ROS 2 Service Client)']]],
   ['ros_202_20subscriber_6',['ROS 2 Subscriber',['../index.html#autotoc_md13',1,'Monitor Demo (FSM + ROS 2 Subscriber)'],['../index.html#autotoc_md19',1,'Monitor Demo (FSM + ROS 2 Subscriber)']]],
-  ['ros_5flog_5fdebug_7',['ros_log_debug',['../namespaceyasmin__ros_1_1ros__logs.html#ac28585eec07c5478c5b6bdd2d3ac550b',1,'yasmin_ros::ros_logs']]],
-  ['ros_5flog_5ferror_8',['ros_log_error',['../namespaceyasmin__ros_1_1ros__logs.html#affc8f18dd04c28969ee8759a105a8ac4',1,'yasmin_ros::ros_logs']]],
-  ['ros_5flog_5finfo_9',['ros_log_info',['../namespaceyasmin__ros_1_1ros__logs.html#a746b43af9c76ed15bd875a80e139f4b7',1,'yasmin_ros::ros_logs']]],
-  ['ros_5flog_5fwarn_10',['ros_log_warn',['../namespaceyasmin__ros_1_1ros__logs.html#ac0745c88ede6a1ac3af8762f1ed21e2e',1,'yasmin_ros::ros_logs']]],
-  ['ros_5flogs_2epy_11',['ros_logs.py',['../ros__logs_8py.html',1,'']]],
-  ['run_20build_20tt_12',['&lt;tt&gt;npm run build&lt;/tt&gt;',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md28',1,'']]],
-  ['run_20build_20tt_20fails_20to_20minify_13',['&lt;tt&gt;npm run build&lt;/tt&gt; fails to minify',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md36',1,'']]],
-  ['run_20eject_20tt_14',['&lt;tt&gt;npm run eject&lt;/tt&gt;',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md29',1,'']]]
+  ['ros_5flog_5fmessage_7',['ros_log_message',['../namespaceyasmin__ros_1_1ros__logs.html#aadccdac766b788f19cc94d9ed244ded5',1,'yasmin_ros::ros_logs']]],
+  ['ros_5flogs_2epy_8',['ros_logs.py',['../ros__logs_8py.html',1,'']]],
+  ['run_20build_20tt_9',['&lt;tt&gt;npm run build&lt;/tt&gt;',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md28',1,'']]],
+  ['run_20build_20tt_20fails_20to_20minify_10',['&lt;tt&gt;npm run build&lt;/tt&gt; fails to minify',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md36',1,'']]],
+  ['run_20eject_20tt_11',['&lt;tt&gt;npm run eject&lt;/tt&gt;',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md29',1,'']]]
 ];

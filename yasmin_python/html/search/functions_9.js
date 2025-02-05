@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['response_5fhandler_0',['response_handler',['../classyasmin__demos_1_1action__client__demo_1_1FibonacciState.html#ab0ab446a55066101e6cd20c9e8c6aefd',1,'yasmin_demos.action_client_demo.FibonacciState.response_handler()'],['../classyasmin__demos_1_1service__client__demo_1_1AddTwoIntsState.html#a498cdab71df1476d0fa6e5b633b9df02',1,'yasmin_demos.service_client_demo.AddTwoIntsState.response_handler()']]],
-  ['ros_5flog_5fdebug_1',['ros_log_debug',['../namespaceyasmin__ros_1_1ros__logs.html#ac28585eec07c5478c5b6bdd2d3ac550b',1,'yasmin_ros::ros_logs']]],
-  ['ros_5flog_5ferror_2',['ros_log_error',['../namespaceyasmin__ros_1_1ros__logs.html#affc8f18dd04c28969ee8759a105a8ac4',1,'yasmin_ros::ros_logs']]],
-  ['ros_5flog_5finfo_3',['ros_log_info',['../namespaceyasmin__ros_1_1ros__logs.html#a746b43af9c76ed15bd875a80e139f4b7',1,'yasmin_ros::ros_logs']]],
-  ['ros_5flog_5fwarn_4',['ros_log_warn',['../namespaceyasmin__ros_1_1ros__logs.html#ac0745c88ede6a1ac3af8762f1ed21e2e',1,'yasmin_ros::ros_logs']]]
+  ['main_0',['main',['../namespaceyasmin__viewer_1_1yasmin__viewer__node.html#aa5aebdb9275eede1a284bc242182d026',1,'yasmin_viewer.yasmin_viewer_node.main()'],['../namespaceyasmin__demos_1_1action__client__demo.html#a1c89f92c2662053d0d7272394df17c72',1,'yasmin_demos.action_client_demo.main()'],['../namespaceyasmin__demos_1_1monitor__demo.html#a5e5c184c465aaebff6f4cc1d0e030659',1,'yasmin_demos.monitor_demo.main()'],['../namespaceyasmin__demos_1_1nav__demo.html#a561d38313d3382c1120c0274e9cfcade',1,'yasmin_demos.nav_demo.main()'],['../namespaceyasmin__demos_1_1service__client__demo.html#a4446f52b9359b41dbfba37eab43dce0d',1,'yasmin_demos.service_client_demo.main()'],['../namespaceyasmin__demos_1_1yasmin__demo.html#ac12fb5298017cbe3fff7a50132e3ead3',1,'yasmin_demos.yasmin_demo.main()']]],
+  ['monitor_5fhandler_1',['monitor_handler',['../classyasmin__demos_1_1monitor__demo_1_1PrintOdometryState.html#a860cc341139422f19b763c7688b7b7d7',1,'yasmin_demos::monitor_demo::PrintOdometryState']]],
+  ['msg_5fto_5fdict_2',['msg_to_dict',['../classyasmin__viewer_1_1yasmin__viewer__node_1_1YasminFsmViewerNode.html#a8aeb1403fc8f3dedecbad39f2d5acc92',1,'yasmin_viewer::yasmin_viewer_node::YasminFsmViewerNode']]]
 ];

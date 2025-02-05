@@ -115,9 +115,9 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a866a0df2f805efdc06b88de08f4b56f4" id="r_a866a0df2f805efdc06b88de08f4b56f4"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>) (const char *file, const char *function, int line, const char *text,...)</td></tr>
-<tr class="memdesc:a866a0df2f805efdc06b88de08f4b56f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type definition for a logging function.  <br /></td></tr>
-<tr class="separator:a866a0df2f805efdc06b88de08f4b56f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69e3cad55230a936fcc33cce97aed54d" id="r_a69e3cad55230a936fcc33cce97aed54d"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a69e3cad55230a936fcc33cce97aed54d">LogFunction</a>) (<a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a> level, const char *file, const char *function, int line, const char *text)</td></tr>
+<tr class="memdesc:a69e3cad55230a936fcc33cce97aed54d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type definition for a logging function.  <br /></td></tr>
+<tr class="separator:a69e3cad55230a936fcc33cce97aed54d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -131,74 +131,47 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ac4c3670c31fc1412360a3cb293c54299" id="r_ac4c3670c31fc1412360a3cb293c54299"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac4c3670c31fc1412360a3cb293c54299">extract_filename</a> (const char *path)</td></tr>
-<tr class="memdesc:ac4c3670c31fc1412360a3cb293c54299"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts the filename from a given file path.  <br /></td></tr>
-<tr class="separator:ac4c3670c31fc1412360a3cb293c54299"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa32b69eee23f39441ace98686f28bbc" id="r_afa32b69eee23f39441ace98686f28bbc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa32b69eee23f39441ace98686f28bbc">set_loggers</a> (<a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> error, <a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> warn, <a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> info, <a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> debug)</td></tr>
-<tr class="memdesc:afa32b69eee23f39441ace98686f28bbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets custom logging functions for different log levels.  <br /></td></tr>
-<tr class="separator:afa32b69eee23f39441ace98686f28bbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acfeb0bbddeafd3881c2ad929d540cfcf" id="r_acfeb0bbddeafd3881c2ad929d540cfcf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acfeb0bbddeafd3881c2ad929d540cfcf">set_default_loggers</a> ()</td></tr>
-<tr class="memdesc:acfeb0bbddeafd3881c2ad929d540cfcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the default logging functions for all log levels.  <br /></td></tr>
-<tr class="separator:acfeb0bbddeafd3881c2ad929d540cfcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af6e3b8432db4d6449adcb0e4dd7c2911" id="r_af6e3b8432db4d6449adcb0e4dd7c2911"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6e3b8432db4d6449adcb0e4dd7c2911">set_log_level</a> (<a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a> <a class="el" href="#a940395fffc9b6f9a318e0c56f30369f4">log_level</a>)</td></tr>
-<tr class="memdesc:af6e3b8432db4d6449adcb0e4dd7c2911"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the log level for the logs.  <br /></td></tr>
-<tr class="separator:af6e3b8432db4d6449adcb0e4dd7c2911"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8212d6d43e5dde3760698d9bfbda18cc" id="r_a8212d6d43e5dde3760698d9bfbda18cc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8212d6d43e5dde3760698d9bfbda18cc">log_message</a> (const char *level, const char *file, const char *function, int line, const char *text, va_list args)</td></tr>
-<tr class="memdesc:a8212d6d43e5dde3760698d9bfbda18cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generalized logging function.  <br /></td></tr>
-<tr class="separator:a8212d6d43e5dde3760698d9bfbda18cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6f7026c7c1b96b2a680278f84f84a519" id="r_a6f7026c7c1b96b2a680278f84f84a519"><td class="memTemplParams" colspan="2">template&lt;const char * LEVEL&gt; </td></tr>
+<tr class="memitem:a3e068dec83a649a2937446946a7ea775" id="r_a3e068dec83a649a2937446946a7ea775"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3e068dec83a649a2937446946a7ea775">set_log_level</a> (<a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a> level)</td></tr>
+<tr class="memdesc:a3e068dec83a649a2937446946a7ea775"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the log level for the logs.  <br /></td></tr>
+<tr class="separator:a3e068dec83a649a2937446946a7ea775"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe605b92db719755127ff13e7c681364" id="r_abe605b92db719755127ff13e7c681364"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abe605b92db719755127ff13e7c681364">log_level_to_name</a> (<a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a> level)</td></tr>
+<tr class="memdesc:abe605b92db719755127ff13e7c681364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse <a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a" title="Enum representing different log levels for controlling log verbosity.">LogLevel</a> to string.  <br /></td></tr>
+<tr class="separator:abe605b92db719755127ff13e7c681364"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f7026c7c1b96b2a680278f84f84a519" id="r_a6f7026c7c1b96b2a680278f84f84a519"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">yasmin::LogLevel</a> LEVEL&gt; </td></tr>
 <tr class="memitem:a6f7026c7c1b96b2a680278f84f84a519"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">log_helper</a> (const char *file, const char *function, int line, const char *text,...)</td></tr>
 <tr class="memdesc:a6f7026c7c1b96b2a680278f84f84a519"><td class="mdescLeft">&#160;</td><td class="mdescRight">Variadic template function to log messages at different levels.  <br /></td></tr>
 <tr class="separator:a6f7026c7c1b96b2a680278f84f84a519"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef61c4cd464ff71075813308b3bba620" id="r_aef61c4cd464ff71075813308b3bba620"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef61c4cd464ff71075813308b3bba620">log_helper&lt; ERROR_LEVEL &gt;</a> (const char *, const char *, int, const char *,...)</td></tr>
-<tr class="memdesc:aef61c4cd464ff71075813308b3bba620"><td class="mdescLeft">&#160;</td><td class="mdescRight">Explicit template instantiations for log_helper with different log levels.  <br /></td></tr>
-<tr class="separator:aef61c4cd464ff71075813308b3bba620"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea924f1058d2a528344298032c241aee" id="r_aea924f1058d2a528344298032c241aee"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea924f1058d2a528344298032c241aee">log_helper&lt; WARN_LEVEL &gt;</a> (const char *, const char *, int, const char *,...)</td></tr>
-<tr class="separator:aea924f1058d2a528344298032c241aee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac907c5cdc89754dbf0eeee7cb5ddb325" id="r_ac907c5cdc89754dbf0eeee7cb5ddb325"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac907c5cdc89754dbf0eeee7cb5ddb325">log_helper&lt; INFO_LEVEL &gt;</a> (const char *, const char *, int, const char *,...)</td></tr>
-<tr class="separator:ac907c5cdc89754dbf0eeee7cb5ddb325"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef32f269803dd02fa8602de6d13e2e6c" id="r_aef32f269803dd02fa8602de6d13e2e6c"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef32f269803dd02fa8602de6d13e2e6c">log_helper&lt; DEBUG_LEVEL &gt;</a> (const char *, const char *, int, const char *,...)</td></tr>
-<tr class="separator:aef32f269803dd02fa8602de6d13e2e6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4c3670c31fc1412360a3cb293c54299" id="r_ac4c3670c31fc1412360a3cb293c54299"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac4c3670c31fc1412360a3cb293c54299">extract_filename</a> (const char *path)</td></tr>
+<tr class="memdesc:ac4c3670c31fc1412360a3cb293c54299"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts the filename from a given file path.  <br /></td></tr>
+<tr class="separator:ac4c3670c31fc1412360a3cb293c54299"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a688d28168020f50f1339469c2b94274c" id="r_a688d28168020f50f1339469c2b94274c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a688d28168020f50f1339469c2b94274c">set_loggers</a> (<a class="el" href="#a69e3cad55230a936fcc33cce97aed54d">LogFunction</a> <a class="el" href="#aa4611638a4d00a42a7a4f57bcec52023">log_message</a>)</td></tr>
+<tr class="memdesc:a688d28168020f50f1339469c2b94274c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets custom logging functions for different log levels.  <br /></td></tr>
+<tr class="separator:a688d28168020f50f1339469c2b94274c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfeb0bbddeafd3881c2ad929d540cfcf" id="r_acfeb0bbddeafd3881c2ad929d540cfcf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acfeb0bbddeafd3881c2ad929d540cfcf">set_default_loggers</a> ()</td></tr>
+<tr class="memdesc:acfeb0bbddeafd3881c2ad929d540cfcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the default logging function for all log levels.  <br /></td></tr>
+<tr class="separator:acfeb0bbddeafd3881c2ad929d540cfcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60dda5af3bef0cebf30e238a93aa2dc4" id="r_a60dda5af3bef0cebf30e238a93aa2dc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a60dda5af3bef0cebf30e238a93aa2dc4">default_log_message</a> (<a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a> level, const char *file, const char *function, int line, const char *text)</td></tr>
+<tr class="memdesc:a60dda5af3bef0cebf30e238a93aa2dc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default logging function.  <br /></td></tr>
+<tr class="separator:a60dda5af3bef0cebf30e238a93aa2dc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:adb1305adc16f36e9ae7ea7d887d5040b" id="r_adb1305adc16f36e9ae7ea7d887d5040b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adb1305adc16f36e9ae7ea7d887d5040b">log_error</a> = <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">log_helper</a>&lt;<a class="el" href="#a06f5e4c00f4b1199f5a43a9da162470b">ERROR_LEVEL</a>&gt;</td></tr>
-<tr class="memdesc:adb1305adc16f36e9ae7ea7d887d5040b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the error logging function.  <br /></td></tr>
-<tr class="separator:adb1305adc16f36e9ae7ea7d887d5040b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53f366428638fdd68ed9d6293f4aec97" id="r_a53f366428638fdd68ed9d6293f4aec97"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a53f366428638fdd68ed9d6293f4aec97">log_warn</a> = <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">log_helper</a>&lt;<a class="el" href="#af97ae1bcb87344c4132f582728c39e7a">WARN_LEVEL</a>&gt;</td></tr>
-<tr class="memdesc:a53f366428638fdd68ed9d6293f4aec97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the warning logging function.  <br /></td></tr>
-<tr class="separator:a53f366428638fdd68ed9d6293f4aec97"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a57f86f2f42912a6d1ed0a88c3387a5f3" id="r_a57f86f2f42912a6d1ed0a88c3387a5f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57f86f2f42912a6d1ed0a88c3387a5f3">log_info</a> = <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">log_helper</a>&lt;<a class="el" href="#a5395add39dbb53bed2144c6a2d7107c7">INFO_LEVEL</a>&gt;</td></tr>
-<tr class="memdesc:a57f86f2f42912a6d1ed0a88c3387a5f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the info logging function.  <br /></td></tr>
-<tr class="separator:a57f86f2f42912a6d1ed0a88c3387a5f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9184407adbc84d4d95e2c8719e9208b4" id="r_a9184407adbc84d4d95e2c8719e9208b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9184407adbc84d4d95e2c8719e9208b4">log_debug</a> = <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">log_helper</a>&lt;<a class="el" href="#a0d360dc7d1669c5b8ac9a18c69d6867c">DEBUG_LEVEL</a>&gt;</td></tr>
-<tr class="memdesc:a9184407adbc84d4d95e2c8719e9208b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the debug logging function.  <br /></td></tr>
-<tr class="separator:a9184407adbc84d4d95e2c8719e9208b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a940395fffc9b6f9a318e0c56f30369f4" id="r_a940395fffc9b6f9a318e0c56f30369f4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a940395fffc9b6f9a318e0c56f30369f4">log_level</a> = <a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392aa6a07b161afc950ebe97277aaa616aba2">INFO</a></td></tr>
 <tr class="memdesc:a940395fffc9b6f9a318e0c56f30369f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current log level for the application.  <br /></td></tr>
 <tr class="separator:a940395fffc9b6f9a318e0c56f30369f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a06f5e4c00f4b1199f5a43a9da162470b" id="r_a06f5e4c00f4b1199f5a43a9da162470b"><td class="memItemLeft" align="right" valign="top">constexpr const char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a06f5e4c00f4b1199f5a43a9da162470b">ERROR_LEVEL</a> [] = &quot;ERROR&quot;</td></tr>
-<tr class="memdesc:a06f5e4c00f4b1199f5a43a9da162470b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log level strings used in logging functions.  <br /></td></tr>
-<tr class="separator:a06f5e4c00f4b1199f5a43a9da162470b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af97ae1bcb87344c4132f582728c39e7a" id="r_af97ae1bcb87344c4132f582728c39e7a"><td class="memItemLeft" align="right" valign="top">constexpr const char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af97ae1bcb87344c4132f582728c39e7a">WARN_LEVEL</a> [] = &quot;WARN&quot;</td></tr>
-<tr class="memdesc:af97ae1bcb87344c4132f582728c39e7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Warning log level.  <br /></td></tr>
-<tr class="separator:af97ae1bcb87344c4132f582728c39e7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5395add39dbb53bed2144c6a2d7107c7" id="r_a5395add39dbb53bed2144c6a2d7107c7"><td class="memItemLeft" align="right" valign="top">constexpr const char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5395add39dbb53bed2144c6a2d7107c7">INFO_LEVEL</a> [] = &quot;INFO&quot;</td></tr>
-<tr class="memdesc:a5395add39dbb53bed2144c6a2d7107c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Info log level.  <br /></td></tr>
-<tr class="separator:a5395add39dbb53bed2144c6a2d7107c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d360dc7d1669c5b8ac9a18c69d6867c" id="r_a0d360dc7d1669c5b8ac9a18c69d6867c"><td class="memItemLeft" align="right" valign="top">constexpr const char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0d360dc7d1669c5b8ac9a18c69d6867c">DEBUG_LEVEL</a> [] = &quot;DEBUG&quot;</td></tr>
-<tr class="memdesc:a0d360dc7d1669c5b8ac9a18c69d6867c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Debug log level.  <br /></td></tr>
-<tr class="separator:a0d360dc7d1669c5b8ac9a18c69d6867c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4611638a4d00a42a7a4f57bcec52023" id="r_aa4611638a4d00a42a7a4f57bcec52023"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a69e3cad55230a936fcc33cce97aed54d">LogFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa4611638a4d00a42a7a4f57bcec52023">log_message</a> = <a class="el" href="#a60dda5af3bef0cebf30e238a93aa2dc4">default_log_message</a></td></tr>
+<tr class="memdesc:aa4611638a4d00a42a7a4f57bcec52023"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the logging function.  <br /></td></tr>
+<tr class="separator:aa4611638a4d00a42a7a4f57bcec52023"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
-<a id="a866a0df2f805efdc06b88de08f4b56f4" name="a866a0df2f805efdc06b88de08f4b56f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a866a0df2f805efdc06b88de08f4b56f4">&#9670;&#160;</a></span>LogFunction</h2>
+<a id="a69e3cad55230a936fcc33cce97aed54d" name="a69e3cad55230a936fcc33cce97aed54d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69e3cad55230a936fcc33cce97aed54d">&#9670;&#160;</a></span>LogFunction</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef void(* yasmin::LogFunction) (const char *file, const char *function, int line, const char *text,...)</td>
+          <td class="memname">typedef void(* yasmin::LogFunction) (<a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a> level, const char *file, const char *function, int line, const char *text)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -207,6 +180,7 @@ Variables</h2></td></tr>
 <p>This type represents a function pointer that takes a file name, function name, line number, log message, and a variable number of additional arguments for formatting the log message.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">level</td><td>The log level of the message </td></tr>
     <tr><td class="paramname">file</td><td>The name of the source file where the log function is called. </td></tr>
     <tr><td class="paramname">function</td><td>The name of the function where the log function is called. </td></tr>
     <tr><td class="paramname">line</td><td>The line number in the source file where the log function is called. </td></tr>
@@ -247,6 +221,55 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="a60dda5af3bef0cebf30e238a93aa2dc4" name="a60dda5af3bef0cebf30e238a93aa2dc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60dda5af3bef0cebf30e238a93aa2dc4">&#9670;&#160;</a></span>default_log_message()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yasmin::default_log_message </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a></td>          <td class="paramname"><span class="paramname"><em>level</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>file</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>function</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>line</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>text</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Default logging function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">level</td><td>The log level as a string (e.g., "ERROR", "WARN", "INFO", "DEBUG"). </td></tr>
+    <tr><td class="paramname">file</td><td>The source file where the log function is called. </td></tr>
+    <tr><td class="paramname">function</td><td>The function where the log function is called. </td></tr>
+    <tr><td class="paramname">line</td><td>The line number in the source file. </td></tr>
+    <tr><td class="paramname">text</td><td>The format string for the log message. </td></tr>
+    <tr><td class="paramname">args</td><td>Additional arguments for the format string. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ac4c3670c31fc1412360a3cb293c54299" name="ac4c3670c31fc1412360a3cb293c54299"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac4c3670c31fc1412360a3cb293c54299">&#9670;&#160;</a></span>extract_filename()</h2>
 
@@ -288,7 +311,7 @@ Variables</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;const char * LEVEL&gt; </div>
+template&lt;<a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">yasmin::LogLevel</a> LEVEL&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">void yasmin::log_helper </td>
@@ -322,12 +345,13 @@ template&lt;const char * LEVEL&gt; </div>
 <p>This function wraps log_message and allows logging messages with different log levels while reducing redundant code. It provides a consistent logging format across all levels.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">LEVEL</td><td>The log level string (e.g., "ERROR", "WARN", "INFO", "DEBUG"). </td></tr>
+    <tr><td class="paramname">LEVEL</td><td>The log level <a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a" title="Enum representing different log levels for controlling log verbosity.">LogLevel</a> (e.g., 0 -&gt; "ERROR", 1 -&gt; "WARN", 2 -&gt; "INFO", 3 -&gt; "DEBUG"). </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">log_message</td><td>Function to create the logs </td></tr>
     <tr><td class="paramname">file</td><td>The source file where the log function is called. </td></tr>
     <tr><td class="paramname">function</td><td>The function where the log function is called. </td></tr>
     <tr><td class="paramname">line</td><td>The line number in the source file. </td></tr>
@@ -339,201 +363,26 @@ template&lt;const char * LEVEL&gt; </div>
 
 </div>
 </div>
-<a id="aef32f269803dd02fa8602de6d13e2e6c" name="aef32f269803dd02fa8602de6d13e2e6c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef32f269803dd02fa8602de6d13e2e6c">&#9670;&#160;</a></span>log_helper&lt; DEBUG_LEVEL &gt;()</h2>
+<a id="abe605b92db719755127ff13e7c681364" name="abe605b92db719755127ff13e7c681364"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe605b92db719755127ff13e7c681364">&#9670;&#160;</a></span>log_level_to_name()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">template void <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">yasmin::log_helper</a>&lt; <a class="el" href="#a0d360dc7d1669c5b8ac9a18c69d6867c">DEBUG_LEVEL</a> &gt; </td>
+          <td class="memname">const char * yasmin::log_level_to_name </td>
           <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype"><a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a></td>          <td class="paramname"><span class="paramname"><em>level</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>...</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-</div>
-</div>
-<a id="aef61c4cd464ff71075813308b3bba620" name="aef61c4cd464ff71075813308b3bba620"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef61c4cd464ff71075813308b3bba620">&#9670;&#160;</a></span>log_helper&lt; ERROR_LEVEL &gt;()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">template void <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">yasmin::log_helper</a>&lt; <a class="el" href="#a06f5e4c00f4b1199f5a43a9da162470b">ERROR_LEVEL</a> &gt; </td>
-          <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>...</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Explicit template instantiations for log_helper with different log levels. </p>
-<p>These instantiations ensure that log_helper functions for each log level are available. </p>
-
-</div>
-</div>
-<a id="ac907c5cdc89754dbf0eeee7cb5ddb325" name="ac907c5cdc89754dbf0eeee7cb5ddb325"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac907c5cdc89754dbf0eeee7cb5ddb325">&#9670;&#160;</a></span>log_helper&lt; INFO_LEVEL &gt;()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">template void <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">yasmin::log_helper</a>&lt; <a class="el" href="#a5395add39dbb53bed2144c6a2d7107c7">INFO_LEVEL</a> &gt; </td>
-          <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>...</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aea924f1058d2a528344298032c241aee" name="aea924f1058d2a528344298032c241aee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aea924f1058d2a528344298032c241aee">&#9670;&#160;</a></span>log_helper&lt; WARN_LEVEL &gt;()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">template void <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">yasmin::log_helper</a>&lt; <a class="el" href="#af97ae1bcb87344c4132f582728c39e7a">WARN_LEVEL</a> &gt; </td>
-          <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>...</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a8212d6d43e5dde3760698d9bfbda18cc" name="a8212d6d43e5dde3760698d9bfbda18cc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8212d6d43e5dde3760698d9bfbda18cc">&#9670;&#160;</a></span>log_message()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void yasmin::log_message </td>
-          <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>level</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>file</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>function</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>line</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>text</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">va_list</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Generalized logging function. </p>
+<p>Parse <a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a" title="Enum representing different log levels for controlling log verbosity.">LogLevel</a> to string. </p>
+<p>This function returns the name of a given log level.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">level</td><td>The log level as a string (e.g., "ERROR", "WARN", "INFO", "DEBUG"). </td></tr>
-    <tr><td class="paramname">file</td><td>The source file where the log function is called. </td></tr>
-    <tr><td class="paramname">function</td><td>The function where the log function is called. </td></tr>
-    <tr><td class="paramname">line</td><td>The line number in the source file. </td></tr>
-    <tr><td class="paramname">text</td><td>The format string for the log message. </td></tr>
-    <tr><td class="paramname">args</td><td>Additional arguments for the format string. </td></tr>
+    <tr><td class="paramname">level</td><td>Log level. </td></tr>
   </table>
   </dd>
 </dl>
@@ -555,13 +404,13 @@ template&lt;const char * LEVEL&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Sets the default logging functions for all log levels. </p>
-<p>This function initializes the logging functions to the default implementations. </p>
+<p>Sets the default logging function for all log levels. </p>
+<p>This function initializes the logging function to the default implementations. </p>
 
 </div>
 </div>
-<a id="af6e3b8432db4d6449adcb0e4dd7c2911" name="af6e3b8432db4d6449adcb0e4dd7c2911"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af6e3b8432db4d6449adcb0e4dd7c2911">&#9670;&#160;</a></span>set_log_level()</h2>
+<a id="a3e068dec83a649a2937446946a7ea775" name="a3e068dec83a649a2937446946a7ea775"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e068dec83a649a2937446946a7ea775">&#9670;&#160;</a></span>set_log_level()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -569,7 +418,7 @@ template&lt;const char * LEVEL&gt; </div>
         <tr>
           <td class="memname">void yasmin::set_log_level </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a></td>          <td class="paramname"><span class="paramname"><em>log_level</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="#afc54fa92c8ece7ebc27712bb9ec2392a">LogLevel</a></td>          <td class="paramname"><span class="paramname"><em>level</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -586,8 +435,8 @@ template&lt;const char * LEVEL&gt; </div>
 
 </div>
 </div>
-<a id="afa32b69eee23f39441ace98686f28bbc" name="afa32b69eee23f39441ace98686f28bbc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afa32b69eee23f39441ace98686f28bbc">&#9670;&#160;</a></span>set_loggers()</h2>
+<a id="a688d28168020f50f1339469c2b94274c" name="a688d28168020f50f1339469c2b94274c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a688d28168020f50f1339469c2b94274c">&#9670;&#160;</a></span>set_loggers()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -595,22 +444,8 @@ template&lt;const char * LEVEL&gt; </div>
         <tr>
           <td class="memname">void yasmin::set_loggers </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>error</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype"><a class="el" href="#a69e3cad55230a936fcc33cce97aed54d">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>log_message</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>warn</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>info</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a></td>          <td class="paramname"><span class="paramname"><em>debug</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -630,127 +465,6 @@ template&lt;const char * LEVEL&gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a id="a0d360dc7d1669c5b8ac9a18c69d6867c" name="a0d360dc7d1669c5b8ac9a18c69d6867c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d360dc7d1669c5b8ac9a18c69d6867c">&#9670;&#160;</a></span>DEBUG_LEVEL</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char yasmin::DEBUG_LEVEL[] = &quot;DEBUG&quot;</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Debug log level. </p>
-
-</div>
-</div>
-<a id="a06f5e4c00f4b1199f5a43a9da162470b" name="a06f5e4c00f4b1199f5a43a9da162470b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a06f5e4c00f4b1199f5a43a9da162470b">&#9670;&#160;</a></span>ERROR_LEVEL</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char yasmin::ERROR_LEVEL[] = &quot;ERROR&quot;</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Log level strings used in logging functions. </p>
-<p>Error log level </p>
-
-</div>
-</div>
-<a id="a5395add39dbb53bed2144c6a2d7107c7" name="a5395add39dbb53bed2144c6a2d7107c7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5395add39dbb53bed2144c6a2d7107c7">&#9670;&#160;</a></span>INFO_LEVEL</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char yasmin::INFO_LEVEL[] = &quot;INFO&quot;</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Info log level. </p>
-
-</div>
-</div>
-<a id="a9184407adbc84d4d95e2c8719e9208b4" name="a9184407adbc84d4d95e2c8719e9208b4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9184407adbc84d4d95e2c8719e9208b4">&#9670;&#160;</a></span>log_debug</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> yasmin::log_debug = <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">log_helper</a>&lt;<a class="el" href="#a0d360dc7d1669c5b8ac9a18c69d6867c">DEBUG_LEVEL</a>&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Pointer to the debug logging function. </p>
-
-</div>
-</div>
-<a id="adb1305adc16f36e9ae7ea7d887d5040b" name="adb1305adc16f36e9ae7ea7d887d5040b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adb1305adc16f36e9ae7ea7d887d5040b">&#9670;&#160;</a></span>log_error</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> yasmin::log_error = <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">log_helper</a>&lt;<a class="el" href="#a06f5e4c00f4b1199f5a43a9da162470b">ERROR_LEVEL</a>&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Pointer to the error logging function. </p>
-
-</div>
-</div>
-<a id="a57f86f2f42912a6d1ed0a88c3387a5f3" name="a57f86f2f42912a6d1ed0a88c3387a5f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57f86f2f42912a6d1ed0a88c3387a5f3">&#9670;&#160;</a></span>log_info</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> yasmin::log_info = <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">log_helper</a>&lt;<a class="el" href="#a5395add39dbb53bed2144c6a2d7107c7">INFO_LEVEL</a>&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Pointer to the info logging function. </p>
-
-</div>
-</div>
 <a id="a940395fffc9b6f9a318e0c56f30369f4" name="a940395fffc9b6f9a318e0c56f30369f4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a940395fffc9b6f9a318e0c56f30369f4">&#9670;&#160;</a></span>log_level</h2>
 
@@ -768,43 +482,19 @@ template&lt;const char * LEVEL&gt; </div>
 
 </div>
 </div>
-<a id="a53f366428638fdd68ed9d6293f4aec97" name="a53f366428638fdd68ed9d6293f4aec97"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a53f366428638fdd68ed9d6293f4aec97">&#9670;&#160;</a></span>log_warn</h2>
+<a id="aa4611638a4d00a42a7a4f57bcec52023" name="aa4611638a4d00a42a7a4f57bcec52023"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4611638a4d00a42a7a4f57bcec52023">&#9670;&#160;</a></span>log_message</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="#a866a0df2f805efdc06b88de08f4b56f4">LogFunction</a> yasmin::log_warn = <a class="el" href="#a6f7026c7c1b96b2a680278f84f84a519">log_helper</a>&lt;<a class="el" href="#af97ae1bcb87344c4132f582728c39e7a">WARN_LEVEL</a>&gt;</td>
+          <td class="memname"><a class="el" href="#a69e3cad55230a936fcc33cce97aed54d">LogFunction</a> yasmin::log_message = <a class="el" href="#a60dda5af3bef0cebf30e238a93aa2dc4">default_log_message</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Pointer to the warning logging function. </p>
-
-</div>
-</div>
-<a id="af97ae1bcb87344c4132f582728c39e7a" name="af97ae1bcb87344c4132f582728c39e7a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af97ae1bcb87344c4132f582728c39e7a">&#9670;&#160;</a></span>WARN_LEVEL</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char yasmin::WARN_LEVEL[] = &quot;WARN&quot;</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Warning log level. </p>
+<p>Pointer to the logging function. </p>
 
 </div>
 </div>

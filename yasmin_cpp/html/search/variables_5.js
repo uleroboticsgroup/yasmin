@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['goal_5fhandle_0',['goal_handle',['../classyasmin__ros_1_1ActionState.html#ab7e4a02a0b0528bfd9430709f5f18307',1,'yasmin_ros::ActionState']]],
-  ['goal_5fhandle_5fmutex_1',['goal_handle_mutex',['../classyasmin__ros_1_1ActionState.html#ab571fac6c6d89d060af9d6432787bda2',1,'yasmin_ros::ActionState']]]
+  ['log_5flevel_0',['log_level',['../namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4',1,'yasmin']]],
+  ['log_5fmessage_1',['log_message',['../namespaceyasmin.html#aa4611638a4d00a42a7a4f57bcec52023',1,'yasmin']]],
+  ['logger_5fnode_2',['logger_node',['../namespaceyasmin__ros.html#a082e05844f00dc203a5f8a8406015e06',1,'yasmin_ros']]]
 ];
