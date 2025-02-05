@@ -26,16 +26,57 @@ namespace yasmin_ros {
 rclcpp::Node *logger_node = nullptr;
 
 /**
- * @brief Logs an error message with formatted text to the ROS logger.
+ * @brief Generalized logging function.
  *
- * @param file The name of the source file where the log call is made.
- * @param function The name of the function where the log call is made.
- * @param line The line number in the source file where the log call is made.
- * @param text The format string for the message to be logged, followed by any
- * format arguments.
+ * @param level The log level as a yasmin::LogLevel (e.g., "ERROR", "WARN",
+ * "INFO", "DEBUG").
+ * @param file The source file where the log function is called.
+ * @param function The function where the log function is called.
+ * @param line The line number in the source file.
+ * @param text The format string for the log message.
+ * @param args Additional arguments for the format string.
  */
-void ros_log_error(const char *file, const char *function, int line,
-                   const char *text, ...) {
+void log_message(yasmin::LogLevel level, const char *file, const char *function,
+                 int line, const char *text) {
+  switch (level) {
+  case yasmin::LogLevel::ERROR:
+    RCLCPP_ERROR(logger_node->get_logger(), "[%s:%s:%d] %s", file, function,
+                 line, text);
+    break;
+  case yasmin::LogLevel::WARN:
+    RCLCPP_WARN(logger_node->get_logger(), "[%s:%s:%d] %s", file, function,
+                line, text);
+    break;
+  case yasmin::LogLevel::INFO:
+    RCLCPP_INFO(logger_node->get_logger(), "[%s:%s:%d] %s", file, function,
+                line, text);
+    break;
+  case yasmin::LogLevel::DEBUG:
+    RCLCPP_DEBUG(logger_node->get_logger(), "[%s:%s:%d] %s", file, function,
+                 line, text);
+    break;
+  }
+}
+
+/**
+ * @brief Variadic template function to log messages at different levels.
+ *
+ * This function wraps log_message and allows logging messages with different
+ * log levels while reducing redundant code. It provides a consistent logging
+ * format across all levels.
+ *
+ * @tparam LEVEL The log level LogLevel (e.g., 0 -> "ERROR", 1 -> "WARN", 2 ->
+ * "INFO", 3 -> "DEBUG").
+ * @param log_message Function to create the logs
+ * @param file The source file where the log function is called.
+ * @param function The function where the log function is called.
+ * @param line The line number in the source file.
+ * @param text The format string for the log message.
+ * @param ... Additional arguments for the format string.
+ */
+template <yasmin::LogLevel LEVEL>
+void log_helper(const char *file, const char *function, int line,
+                const char *text, ...) {
   va_list args;
   va_start(args, text);
 
@@ -44,110 +85,23 @@ void ros_log_error(const char *file, const char *function, int line,
   va_end(args);
 
   std::string buffer(size, '\0');
-
   va_start(args, text);
   vsnprintf(&buffer[0], buffer.size(), text, args);
+
   va_end(args);
 
-  // Log the formatted error message
-  RCLCPP_ERROR(logger_node->get_logger(), "[%s:%s:%d] %s", file, function, line,
-               buffer.c_str());
-}
-
-/**
- * @brief Logs a warning message with formatted text to the ROS logger.
- *
- * @param file The name of the source file where the log call is made.
- * @param function The name of the function where the log call is made.
- * @param line The line number in the source file where the log call is made.
- * @param text The format string for the message to be logged, followed by any
- * format arguments.
- */
-void ros_log_warn(const char *file, const char *function, int line,
-                  const char *text, ...) {
-  va_list args;
-  va_start(args, text);
-
-  int size = vsnprintf(nullptr, 0, text, args) + 1;
-  va_end(args);
-
-  std::string buffer(size, '\0');
-
-  va_start(args, text);
-  vsnprintf(&buffer[0], buffer.size(), text, args);
-  va_end(args);
-
-  // Log the formatted warning message
-  RCLCPP_WARN(logger_node->get_logger(), "[%s:%s:%d] %s", file, function, line,
-              buffer.c_str());
-}
-
-/**
- * @brief Logs an informational message with formatted text to the ROS logger.
- *
- * @param file The name of the source file where the log call is made.
- * @param function The name of the function where the log call is made.
- * @param line The line number in the source file where the log call is made.
- * @param text The format string for the message to be logged, followed by any
- * format arguments.
- */
-void ros_log_info(const char *file, const char *function, int line,
-                  const char *text, ...) {
-  va_list args;
-  va_start(args, text);
-
-  int size = vsnprintf(nullptr, 0, text, args) + 1;
-  va_end(args);
-
-  std::string buffer(size, '\0');
-
-  va_start(args, text);
-  vsnprintf(&buffer[0], buffer.size(), text, args);
-  va_end(args);
-
-  // Log the formatted informational message
-  RCLCPP_INFO(logger_node->get_logger(), "[%s:%s:%d] %s", file, function, line,
-              buffer.c_str());
-}
-
-/**
- * @brief Logs a debug message with formatted text to the ROS logger.
- *
- * @param file The name of the source file where the log call is made.
- * @param function The name of the function where the log call is made.
- * @param line The line number in the source file where the log call is made.
- * @param text The format string for the message to be logged, followed by any
- * format arguments.
- */
-void ros_log_debug(const char *file, const char *function, int line,
-                   const char *text, ...) {
-
-  va_list args;
-  va_start(args, text);
-
-  int size = vsnprintf(nullptr, 0, text, args) + 1;
-  va_end(args);
-
-  std::string buffer(size, '\0');
-
-  va_start(args, text);
-  vsnprintf(&buffer[0], buffer.size(), text, args);
-  va_end(args);
-
-  // Log the formatted debug message
-  RCLCPP_DEBUG(logger_node->get_logger(), "[%s:%s:%d] %s", file, function, line,
-               buffer.c_str());
+  log_message(LEVEL, file, function, line, buffer.c_str());
 }
 
 void set_ros_loggers(rclcpp::Node::SharedPtr node) {
-
   if (node == nullptr) {
     logger_node = YasminNode::get_instance().get();
   } else {
     logger_node = node.get();
   }
-
-  yasmin::set_loggers(ros_log_error, ros_log_warn, ros_log_info, ros_log_debug);
+  yasmin::set_loggers(
+      log_helper<yasmin::LogLevel::ERROR>, log_helper<yasmin::LogLevel::WARN>,
+      log_helper<yasmin::LogLevel::INFO>, log_helper<yasmin::LogLevel::DEBUG>);
 }
 
 } // namespace yasmin_ros
