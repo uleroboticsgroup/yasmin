@@ -154,6 +154,11 @@ public:
       std::this_thread::sleep_for(
           std::chrono::microseconds(this->time_to_wait));
 
+      if (is_canceled()) {
+        this->monitoring = false;
+        return basic_outcomes::CANCEL;
+      }
+
       if (this->timeout > 0) {
 
         if (elapsed_time / 1e6 >= this->timeout) {
