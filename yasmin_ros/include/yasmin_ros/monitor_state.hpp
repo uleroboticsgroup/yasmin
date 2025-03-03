@@ -118,6 +118,7 @@ public:
     } else {
       this->outcomes = {};
     }
+    this->outcomes.insert(basic_outcomes::CANCEL);
 
     if (outcomes.size() > 0) {
       for (std::string outcome : outcomes) {
