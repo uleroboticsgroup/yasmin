@@ -23,7 +23,7 @@ from rclpy.qos import QoSProfile
 from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
-from yasmin_ros.basic_outcomes import TIMEOUT
+from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
 
 
 class MonitorState(State):
@@ -89,6 +89,7 @@ class MonitorState(State):
 
         if timeout is not None:
             outcomes = [TIMEOUT] + outcomes
+        outcomes = [CANCEL] + outcomes
 
         ## The ROS 2 node instance used for subscriptions.
         self._node: Node = node
@@ -149,6 +150,10 @@ class MonitorState(State):
         # Wait until a message is received or timeout is reached
         while not self.msg_list:
             time.sleep(self.time_to_wait)
+
+            if self.is_canceled():
+                self.monitoring: bool = False
+                return CANCEL
 
             if self._timeout is not None:
                 if elapsed_time >= self._timeout:

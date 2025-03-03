@@ -24,7 +24,7 @@ from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import MonitorState
 from yasmin_ros import set_ros_loggers
-from yasmin_ros.basic_outcomes import TIMEOUT
+from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
 from yasmin_viewer import YasminViewerPub
 
 
@@ -128,6 +128,7 @@ def main():
             "outcome1": "PRINTING_ODOM",
             "outcome2": "outcome4",
             TIMEOUT: "outcome4",
+            CANCEL: "outcome4",
         },
     )
 

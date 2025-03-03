@@ -118,6 +118,7 @@ public:
     } else {
       this->outcomes = {};
     }
+    this->outcomes.insert(basic_outcomes::CANCEL);
 
     if (outcomes.size() > 0) {
       for (std::string outcome : outcomes) {
@@ -153,6 +154,11 @@ public:
     while (this->msg_list.empty()) {
       std::this_thread::sleep_for(
           std::chrono::microseconds(this->time_to_wait));
+
+      if (is_canceled()) {
+        this->monitoring = false;
+        return basic_outcomes::CANCEL;
+      }
 
       if (this->timeout > 0) {
 
