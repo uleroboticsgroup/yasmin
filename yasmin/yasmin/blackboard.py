@@ -55,6 +55,7 @@ class Blackboard(object):
         self.__lock: Lock = Lock()
         ## A dictionary holding the data stored in the blackboard.
         self._data: Dict[str, Any] = {}
+        self.__remmapings : dict = {}
 
         if init is not None:
             self._data.update(init)  # Initialize with provided data
@@ -75,7 +76,7 @@ class Blackboard(object):
         yasmin.YASMIN_LOG_DEBUG(f"Getting '{key}' from the blackboard")
 
         with self.__lock:
-            return self._data[key]
+            return self._data[self.__remap(key)]
 
     def __setitem__(self, key: str, value: Any) -> None:
         """
@@ -112,7 +113,7 @@ class Blackboard(object):
         yasmin.YASMIN_LOG_DEBUG(f"Removing '{key}' from the blackboard")
 
         with self.__lock:
-            del self._data[key]
+            del self._data[self.__remap(key)]
 
     def __contains__(self, key: str) -> bool:
         """
@@ -130,7 +131,7 @@ class Blackboard(object):
         yasmin.YASMIN_LOG_DEBUG(f"Checking if '{key}' is in the blackboard")
 
         with self.__lock:
-            return key in self._data
+            return self.__remap(key) in self._data
 
     def __len__(self) -> int:
         """
@@ -157,3 +158,14 @@ class Blackboard(object):
         """
         with self.__lock:
             return repr(self._data)
+    
+    @property
+    def remmapings(self) -> dict:
+        return self.__remmapings
+    
+    @remmapings.setter
+    def remmmaping(self, remmapings : dict) -> None:
+        self.__remmapings = remmapings
+    
+    def __remap(self, key: str) -> str:
+        return self.remmapings[key] if key in self.remmapings.keys() else key

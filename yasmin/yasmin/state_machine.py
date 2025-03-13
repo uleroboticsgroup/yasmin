@@ -72,11 +72,15 @@ class StateMachine(State):
             Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
         ] = []
 
+        ## A dictionary of remmapings to set in the blackboard in each transition
+        self.__remmapings : Dict[str, Dict[str,str]] = {}
+
     def add_state(
         self,
         name: str,
         state: State,
         transitions: Dict[str, str] = None,
+        remmapings: Dict[str, Dict[str,str]] = None
     ) -> None:
         """
         Adds a new state to the state machine.
@@ -124,6 +128,8 @@ class StateMachine(State):
         )
 
         self._states[name] = {"state": state, "transitions": transitions}
+        if remmapings != None:
+            self.__remmapings[name] = remmapings
 
         if not self._start_state:
             self.set_start_state(name)
@@ -376,9 +382,12 @@ class StateMachine(State):
 
         while not self.is_canceled():
             state = self._states[self.get_current_state()]
+            if self.get_current_state() in self.__remmapings:
+                blackboard.remmapings = self.__remmapings[self.get_current_state()]
+            else:
+                blackboard.remmapings = None
             outcome = state["state"](blackboard)
             old_outcome = outcome
-
             # Check if outcome belongs to state
             if outcome not in state["state"].get_outcomes():
                 raise KeyError(
