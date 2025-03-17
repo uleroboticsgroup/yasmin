@@ -160,11 +160,11 @@ class Blackboard(object):
             return repr(self._data)
     
     @property
-    def remmapings(self) -> dict:
+    def remmapings(self):
         return self.__remmapings
     
     @remmapings.setter
-    def remmmaping(self, remmapings : dict) -> None:
+    def remmapings(self, remmapings):
         self.__remmapings = remmapings
     
     def __remap(self, key: str) -> str:
