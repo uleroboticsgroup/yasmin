@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from typing import Any, Dict
-from threading import Lock
+from threading import RLock as Lock
 
 import yasmin
 
@@ -55,7 +55,8 @@ class Blackboard(object):
         self.__lock: Lock = Lock()
         ## A dictionary holding the data stored in the blackboard.
         self._data: Dict[str, Any] = {}
-        self.__remapping: dict = {}
+        ## A dictionary containing all remappings
+        self.__remapping: Dict[str, str] = {}
 
         if init is not None:
             self._data.update(init)  # Initialize with provided data
@@ -76,6 +77,9 @@ class Blackboard(object):
         yasmin.YASMIN_LOG_DEBUG(f"Getting '{key}' from the blackboard")
 
         with self.__lock:
+            if not self.__contains__(key):
+                raise KeyError(f"Element '{key}' does not exist in the blackboard")
+
             return self._data[self.__remap(key)]
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -160,7 +164,7 @@ class Blackboard(object):
             return repr(self._data)
 
     @property
-    def remapings(self) -> Dict:
+    def remapings(self) -> Dict[str, str]:
         """
         Property getter of a dict of remappings of the blackboard keys.
 
@@ -173,7 +177,7 @@ class Blackboard(object):
         return self.__remapping
 
     @remapings.setter
-    def remappings(self, remapping):
+    def remappings(self, remapping: Dict[str, str]) -> None:
         """
         Property setter of the remapping of the blackboard keys.
 

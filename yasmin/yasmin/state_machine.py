@@ -128,6 +128,7 @@ class StateMachine(State):
         )
 
         self._states[name] = {"state": state, "transitions": transitions}
+
         if remappings != None:
             self.__remappings[name] = remappings
 

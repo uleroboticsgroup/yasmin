@@ -35,19 +35,22 @@ Blackboard::~Blackboard() {
   }
 }
 
-void Blackboard::remove(std::string name) {
-  YASMIN_LOG_DEBUG("Removing '%s' from the blackboard", name.c_str());
+void Blackboard::remove(const std::string &key) {
+  YASMIN_LOG_DEBUG("Removing '%s' from the blackboard", key.c_str());
 
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
-  delete this->values.at(name); // Free memory of the value
-  this->values.erase(name);     // Remove the entry from the map
+  auto remapped_key = this->remap(key);
+  delete this->values.at(remapped_key); // Free memory of the value
+  this->values.erase(remapped_key);     // Remove the entry from the map
 }
 
-bool Blackboard::contains(std::string name) {
-  YASMIN_LOG_DEBUG("Checking if '%s' is in the blackboard", name.c_str());
+bool Blackboard::contains(const std::string &key) {
+  YASMIN_LOG_DEBUG("Checking if '%s' is in the blackboard", key.c_str());
 
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
-  return (this->values.find(name) != this->values.end()); // Check if key exists
+  auto remapped_key = this->remap(key);
+  return (this->values.find(remapped_key) !=
+          this->values.end()); // Check if key exists
 }
 
 int Blackboard::size() {
@@ -66,4 +69,21 @@ std::string Blackboard::to_string() {
   }
 
   return result; // Return the complete string representation
+}
+
+const std::string &Blackboard::remap(const std::string &key) {
+  if (this->remapping.find(key) != this->remapping.end()) {
+    return this->remapping.at(key);
+  }
+
+  return key;
+}
+
+void Blackboard::set_remapping(
+    const std::map<std::string, std::string> &remapping) {
+  this->remapping = remapping;
+}
+
+const std::map<std::string, std::string> &Blackboard::get_remapping() {
+  return this->remapping;
 }

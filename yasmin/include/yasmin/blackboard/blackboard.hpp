@@ -44,6 +44,14 @@ private:
   std::recursive_mutex mutex;
   /// Storage for key-value pairs.
   std::map<std::string, BlackboardValueInterface *> values;
+  /// Storage for key-value pairs.
+  std::map<std::string, std::string> remapping;
+
+  /** @brief Internal method that acquires the maped key. In the case the key is
+   * not remaped, retruns the arg key.
+   *  @param other The instance to copy from.
+   */
+  const std::string &remap(const std::string &key);
 
 public:
   /** @brief Default constructor for Blackboard. */
@@ -64,18 +72,19 @@ public:
    * @return The value associated with the specified key.
    * @throws std::runtime_error if the key does not exist.
    */
-  template <class T> T get(std::string name) {
+  template <class T> T get(const std::string &key) {
 
-    YASMIN_LOG_DEBUG("Getting '%s' from the blackboard", name.c_str());
+    YASMIN_LOG_DEBUG("Getting '%s' from the blackboard", key.c_str());
 
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
-    if (!this->contains(name)) {
-      throw std::runtime_error("Element " + name +
+    if (!this->contains(key)) {
+      throw std::runtime_error("Element " + key +
                                " does not exist in the blackboard");
     }
 
-    BlackboardValue<T> *b_value = (BlackboardValue<T> *)this->values.at(name);
+    BlackboardValue<T> *b_value =
+        (BlackboardValue<T> *)this->values.at(this->remap(key));
     return b_value->get();
   }
 
@@ -102,16 +111,16 @@ public:
 
   /**
    * @brief Remove a value from the blackboard.
-   * @param name The key associated with the value to remove.
+   * @param key The key associated with the value to remove.
    */
-  void remove(std::string name);
+  void remove(const std::string &key);
 
   /**
    * @brief Check if a key exists in the blackboard.
-   * @param name The key to check.
+   * @param key The key to check.
    * @return True if the key exists, false otherwise.
    */
-  bool contains(std::string name);
+  bool contains(const std::string &key);
 
   /**
    * @brief Get the number of key-value pairs in the blackboard.
@@ -124,6 +133,18 @@ public:
    * @return A string representation of the blackboard.
    */
   std::string to_string();
+
+  /**
+   * @brief Set the remapping of the blackboard.
+   * @param remapping The remapping to set.
+   */
+  void set_remapping(const std::map<std::string, std::string> &remapping);
+
+  /**
+   * @brief Get the remapping of the blackboard.
+   * @return The remapping of the blackboard.
+   */
+  const std::map<std::string, std::string> &get_remapping();
 };
 
 } // namespace blackboard

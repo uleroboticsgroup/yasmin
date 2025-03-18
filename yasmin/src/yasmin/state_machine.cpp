@@ -36,7 +36,8 @@ StateMachine::StateMachine(std::set<std::string> outcomes) : State(outcomes) {
 }
 
 void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
-                             std::map<std::string, std::string> transitions) {
+                             std::map<std::string, std::string> transitions,
+                             std::map<std::string, std::string> remapping) {
 
   if (this->states.find(name) != this->states.end()) {
     throw std::logic_error("State '" + name +
@@ -87,6 +88,7 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
 
   this->states.insert({name, state});
   this->transitions.insert({name, transitions});
+  this->remappings.insert({name, remapping});
 
   if (this->start_state.empty()) {
     this->set_start_state(name);
@@ -94,10 +96,6 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
 
   // Mark state machine as no validated
   this->validated.store(false);
-}
-
-void StateMachine::add_state(std::string name, std::shared_ptr<State> state) {
-  this->add_state(name, state, {});
 }
 
 void StateMachine::set_start_state(std::string state_name) {
@@ -303,6 +301,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   this->current_state_mutex->unlock();
 
   std::map<std::string, std::string> transitions;
+  std::map<std::string, std::string> remapping;
   std::string outcome;
   std::string old_outcome;
 
@@ -311,6 +310,8 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     std::string current_state = this->get_current_state();
     auto state = this->states.at(current_state);
     transitions = this->transitions.at(current_state);
+    remapping = this->remappings.at(current_state);
+    blackboard->set_remapping(remapping);
 
     outcome = (*state.get())(blackboard);
     old_outcome = std::string(outcome);

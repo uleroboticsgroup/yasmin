@@ -70,6 +70,14 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# remap demo
+add_executable(remap_demo src/remap_demo.cpp)
+ament_target_dependencies(remap_demo ${DEPENDENCIES})
+install(TARGETS
+remap_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # monitor demo
 add_executable(monitor_demo src/monitor_demo.cpp)
 ament_target_dependencies(monitor_demo ${DEPENDENCIES})
@@ -123,6 +131,11 @@ install(PROGRAMS
 )
 
 install(PROGRAMS
+  yasmin_demos/remap_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
   yasmin_demos/monitor_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
@@ -139,11 +152,6 @@ install(PROGRAMS
 
 install(PROGRAMS
   yasmin_demos/nav_demo.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(PROGRAMS
-  yasmin_demos/remap_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
