@@ -301,9 +301,7 @@ class StateMachine(State):
         yasmin.YASMIN_LOG_DEBUG(f"Validating state machine '{self}'")
 
         if self._validated and not strict_mode:
-            yasmin.YASMIN_LOG_DEBUG(
-                f"State machine '{self}' has already been validated"
-            )
+            yasmin.YASMIN_LOG_DEBUG(f"State machine '{self}' has already been validated")
 
         # Terminal outcomes from all transitions
         terminal_outcomes = []
@@ -322,9 +320,7 @@ class StateMachine(State):
             if strict_mode:
                 # Check if all outcomes of the state are in transitions
                 for o in outcomes:
-                    if o not in set(
-                        list(transitions.keys()) + list(self.get_outcomes())
-                    ):
+                    if o not in set(list(transitions.keys()) + list(self.get_outcomes())):
                         raise KeyError(
                             f"State '{state_name}' outcome '{o}' not registered in transitions"
                         )
@@ -347,9 +343,7 @@ class StateMachine(State):
             # Check if all outcomes of the state machine are in the terminal outcomes
             for o in self.get_outcomes():
                 if o not in terminal_outcomes:
-                    raise KeyError(
-                        f"Target outcome '{o}' not registered in transitions"
-                    )
+                    raise KeyError(f"Target outcome '{o}' not registered in transitions")
 
         # Check if all terminal outcomes are states or outcomes of the state machine
         for o in terminal_outcomes:
@@ -435,9 +429,7 @@ class StateMachine(State):
                     f"Outcome '{outcome}' is not a state nor a state machine outcome"
                 )
 
-        raise RuntimeError(
-            f"Ending canceled state machine '{self}' with bad transition"
-        )
+        raise RuntimeError(f"Ending canceled state machine '{self}' with bad transition")
 
     def cancel_state(self) -> None:
         """
