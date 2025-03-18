@@ -142,4 +142,9 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  yasmin_demos/remap_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
