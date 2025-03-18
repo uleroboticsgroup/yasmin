@@ -91,6 +91,7 @@ $(function(){ initResizable(false); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classyasmin_1_1blackboard_1_1Blackboard-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin::blackboard::Blackboard Class Reference</div></div>
@@ -106,17 +107,20 @@ Collaboration diagram for yasmin::blackboard::Blackboard:</div>
 <div class="dyncontent">
 <div class="center"><img src="classyasmin_1_1blackboard_1_1Blackboard__coll__graph.png" border="0" usemap="#ayasmin_1_1blackboard_1_1Blackboard_coll__map" alt="Collaboration graph"/></div>
 <map name="ayasmin_1_1blackboard_1_1Blackboard_coll__map" id="ayasmin_1_1blackboard_1_1Blackboard_coll__map">
-<area shape="rect" title="A thread&#45;safe storage for key&#45;value pairs of varying types." alt="" coords="737,30,868,70"/>
+<area shape="rect" title="A thread&#45;safe storage for key&#45;value pairs of varying types." alt="" coords="759,55,890,96"/>
 <area shape="rect" title=" " alt="" coords="483,5,623,31"/>
-<area shape="poly" title=" " alt="" coords="639,26,737,39,736,44,638,32"/>
-<area shape="rect" title=" " alt="" coords="458,56,648,111"/>
-<area shape="poly" title=" " alt="" coords="663,66,736,56,736,62,664,71"/>
-<area shape="rect" title=" " alt="" coords="228,36,305,62"/>
-<area shape="poly" title=" " alt="" coords="321,53,458,69,458,75,320,58"/>
-<area shape="rect" title=" " alt="" coords="5,28,129,69"/>
-<area shape="poly" title=" " alt="" coords="144,46,227,46,227,52,144,52"/>
-<area shape="rect" href="classyasmin_1_1blackboard_1_1BlackboardValueInterface.html" title="Interface for blackboard value types." alt="" coords="178,86,354,126"/>
-<area shape="poly" title=" " alt="" coords="370,101,434,97,458,95,459,100,435,102,370,107"/>
+<area shape="poly" title=" " alt="" coords="636,32,735,53,759,58,758,63,734,58,635,37"/>
+<area shape="rect" title=" " alt="" coords="458,120,648,175"/>
+<area shape="poly" title=" " alt="" coords="662,116,758,90,759,95,664,121"/>
+<area shape="rect" title=" " alt="" coords="228,80,305,106"/>
+<area shape="poly" title=" " alt="" coords="321,100,459,127,458,132,320,106"/>
+<area shape="rect" title=" " alt="" coords="482,55,624,96"/>
+<area shape="poly" title=" " alt="" coords="320,87,482,77,482,82,321,92"/>
+<area shape="rect" title=" " alt="" coords="5,72,129,113"/>
+<area shape="poly" title=" " alt="" coords="144,90,227,90,227,96,144,96"/>
+<area shape="rect" href="classyasmin_1_1blackboard_1_1BlackboardValueInterface.html" title="Interface for blackboard value types." alt="" coords="178,146,354,186"/>
+<area shape="poly" title=" " alt="" coords="370,165,434,163,458,160,459,165,435,168,370,171"/>
+<area shape="poly" title=" " alt="" coords="639,73,758,73,758,78,639,78"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -131,26 +135,38 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad0c7a3c8f1d8074679b178631c262298" id="r_ad0c7a3c8f1d8074679b178631c262298"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad0c7a3c8f1d8074679b178631c262298">~Blackboard</a> ()</td></tr>
 <tr class="memdesc:ad0c7a3c8f1d8074679b178631c262298"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor for <a class="el" href="classyasmin_1_1blackboard_1_1Blackboard.html" title="A thread-safe storage for key-value pairs of varying types.">Blackboard</a>.  <br /></td></tr>
 <tr class="separator:ad0c7a3c8f1d8074679b178631c262298"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a796fd89d57249a3fa4c1e2cf6b3db60a" id="r_a796fd89d57249a3fa4c1e2cf6b3db60a"><td class="memTemplParams" colspan="2">template&lt;class T&gt; </td></tr>
-<tr class="memitem:a796fd89d57249a3fa4c1e2cf6b3db60a"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a796fd89d57249a3fa4c1e2cf6b3db60a">get</a> (std::string name)</td></tr>
-<tr class="memdesc:a796fd89d57249a3fa4c1e2cf6b3db60a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve a value from the blackboard.  <br /></td></tr>
-<tr class="separator:a796fd89d57249a3fa4c1e2cf6b3db60a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3710e3f2f43f6631b2164398a8b476c2" id="r_a3710e3f2f43f6631b2164398a8b476c2"><td class="memTemplParams" colspan="2">template&lt;class T&gt; </td></tr>
+<tr class="memitem:a3710e3f2f43f6631b2164398a8b476c2"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a3710e3f2f43f6631b2164398a8b476c2">get</a> (const std::string &amp;key)</td></tr>
+<tr class="memdesc:a3710e3f2f43f6631b2164398a8b476c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve a value from the blackboard.  <br /></td></tr>
+<tr class="separator:a3710e3f2f43f6631b2164398a8b476c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64db86d298db6460f53a30caba89e2cc" id="r_a64db86d298db6460f53a30caba89e2cc"><td class="memTemplParams" colspan="2">template&lt;class T&gt; </td></tr>
 <tr class="memitem:a64db86d298db6460f53a30caba89e2cc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a64db86d298db6460f53a30caba89e2cc">set</a> (std::string name, T value)</td></tr>
 <tr class="memdesc:a64db86d298db6460f53a30caba89e2cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a value in the blackboard.  <br /></td></tr>
 <tr class="separator:a64db86d298db6460f53a30caba89e2cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af083917aa9f4a8684df7e31e2f7e0168" id="r_af083917aa9f4a8684df7e31e2f7e0168"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af083917aa9f4a8684df7e31e2f7e0168">remove</a> (std::string name)</td></tr>
-<tr class="memdesc:af083917aa9f4a8684df7e31e2f7e0168"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a value from the blackboard.  <br /></td></tr>
-<tr class="separator:af083917aa9f4a8684df7e31e2f7e0168"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a846cfed8ff895e8b8a72437c144b0fad" id="r_a846cfed8ff895e8b8a72437c144b0fad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a846cfed8ff895e8b8a72437c144b0fad">contains</a> (std::string name)</td></tr>
-<tr class="memdesc:a846cfed8ff895e8b8a72437c144b0fad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a key exists in the blackboard.  <br /></td></tr>
-<tr class="separator:a846cfed8ff895e8b8a72437c144b0fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:accc651540d074a426eb3a6aa0314ef33" id="r_accc651540d074a426eb3a6aa0314ef33"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#accc651540d074a426eb3a6aa0314ef33">remove</a> (const std::string &amp;key)</td></tr>
+<tr class="memdesc:accc651540d074a426eb3a6aa0314ef33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a value from the blackboard.  <br /></td></tr>
+<tr class="separator:accc651540d074a426eb3a6aa0314ef33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade9e05600aef9a6e33bde68a90fe9162" id="r_ade9e05600aef9a6e33bde68a90fe9162"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade9e05600aef9a6e33bde68a90fe9162">contains</a> (const std::string &amp;key)</td></tr>
+<tr class="memdesc:ade9e05600aef9a6e33bde68a90fe9162"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a key exists in the blackboard.  <br /></td></tr>
+<tr class="separator:ade9e05600aef9a6e33bde68a90fe9162"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a1eceebc117e55aa4029d4cb86c7124" id="r_a6a1eceebc117e55aa4029d4cb86c7124"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6a1eceebc117e55aa4029d4cb86c7124">size</a> ()</td></tr>
 <tr class="memdesc:a6a1eceebc117e55aa4029d4cb86c7124"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of key-value pairs in the blackboard.  <br /></td></tr>
 <tr class="separator:a6a1eceebc117e55aa4029d4cb86c7124"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff72ba45c84919cfc9d90fbdde3c9bba" id="r_aff72ba45c84919cfc9d90fbdde3c9bba"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff72ba45c84919cfc9d90fbdde3c9bba">to_string</a> ()</td></tr>
 <tr class="memdesc:aff72ba45c84919cfc9d90fbdde3c9bba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert the contents of the blackboard to a string.  <br /></td></tr>
 <tr class="separator:aff72ba45c84919cfc9d90fbdde3c9bba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab033ed23517acbcfc44058edf167ccd8" id="r_ab033ed23517acbcfc44058edf167ccd8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab033ed23517acbcfc44058edf167ccd8">set_remapping</a> (const std::map&lt; std::string, std::string &gt; &amp;<a class="el" href="#a50e537cff767d9a7924a699ee4e73d0e">remapping</a>)</td></tr>
+<tr class="memdesc:ab033ed23517acbcfc44058edf167ccd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the remapping of the blackboard.  <br /></td></tr>
+<tr class="separator:ab033ed23517acbcfc44058edf167ccd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9d7a4dd05478e4ceda4e257bd637223" id="r_ac9d7a4dd05478e4ceda4e257bd637223"><td class="memItemLeft" align="right" valign="top">const std::map&lt; std::string, std::string &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac9d7a4dd05478e4ceda4e257bd637223">get_remapping</a> ()</td></tr>
+<tr class="memdesc:ac9d7a4dd05478e4ceda4e257bd637223"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the remapping of the blackboard.  <br /></td></tr>
+<tr class="separator:ac9d7a4dd05478e4ceda4e257bd637223"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a16c28187475510661e51a20d0a31a5fe" id="r_a16c28187475510661e51a20d0a31a5fe"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a16c28187475510661e51a20d0a31a5fe">remap</a> (const std::string &amp;key)</td></tr>
+<tr class="memdesc:a16c28187475510661e51a20d0a31a5fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal method that acquires the maped key. In the case the key is not remaped, retruns the arg key.  <br /></td></tr>
+<tr class="separator:a16c28187475510661e51a20d0a31a5fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -160,6 +176,9 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:a5c5d5efbd5f67a00956893179e42a525" id="r_a5c5d5efbd5f67a00956893179e42a525"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::string, <a class="el" href="classyasmin_1_1blackboard_1_1BlackboardValueInterface.html">BlackboardValueInterface</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5c5d5efbd5f67a00956893179e42a525">values</a></td></tr>
 <tr class="memdesc:a5c5d5efbd5f67a00956893179e42a525"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for key-value pairs.  <br /></td></tr>
 <tr class="separator:a5c5d5efbd5f67a00956893179e42a525"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50e537cff767d9a7924a699ee4e73d0e" id="r_a50e537cff767d9a7924a699ee4e73d0e"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a50e537cff767d9a7924a699ee4e73d0e">remapping</a></td></tr>
+<tr class="memdesc:a50e537cff767d9a7924a699ee4e73d0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for key-value pairs.  <br /></td></tr>
+<tr class="separator:a50e537cff767d9a7924a699ee4e73d0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A thread-safe storage for key-value pairs of varying types. </p>
@@ -229,8 +248,8 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a846cfed8ff895e8b8a72437c144b0fad" name="a846cfed8ff895e8b8a72437c144b0fad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a846cfed8ff895e8b8a72437c144b0fad">&#9670;&#160;</a></span>contains()</h2>
+<a id="ade9e05600aef9a6e33bde68a90fe9162" name="ade9e05600aef9a6e33bde68a90fe9162"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade9e05600aef9a6e33bde68a90fe9162">&#9670;&#160;</a></span>contains()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -238,7 +257,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname">bool Blackboard::contains </td>
           <td>(</td>
-          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>key</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -247,7 +266,7 @@ Private Attributes</h2></td></tr>
 <p>Check if a key exists in the blackboard. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>The key to check. </td></tr>
+    <tr><td class="paramname">key</td><td>The key to check. </td></tr>
   </table>
   </dd>
 </dl>
@@ -255,8 +274,8 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a796fd89d57249a3fa4c1e2cf6b3db60a" name="a796fd89d57249a3fa4c1e2cf6b3db60a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a796fd89d57249a3fa4c1e2cf6b3db60a">&#9670;&#160;</a></span>get()</h2>
+<a id="a3710e3f2f43f6631b2164398a8b476c2" name="a3710e3f2f43f6631b2164398a8b476c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3710e3f2f43f6631b2164398a8b476c2">&#9670;&#160;</a></span>get()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -269,7 +288,7 @@ template&lt;class T&gt; </div>
         <tr>
           <td class="memname">T yasmin::blackboard::Blackboard::get </td>
           <td>(</td>
-          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>key</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -303,8 +322,61 @@ template&lt;class T&gt; </div>
 
 </div>
 </div>
-<a id="af083917aa9f4a8684df7e31e2f7e0168" name="af083917aa9f4a8684df7e31e2f7e0168"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af083917aa9f4a8684df7e31e2f7e0168">&#9670;&#160;</a></span>remove()</h2>
+<a id="ac9d7a4dd05478e4ceda4e257bd637223" name="ac9d7a4dd05478e4ceda4e257bd637223"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9d7a4dd05478e4ceda4e257bd637223">&#9670;&#160;</a></span>get_remapping()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::map&lt; std::string, std::string &gt; &amp; Blackboard::get_remapping </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the remapping of the blackboard. </p>
+<dl class="section return"><dt>Returns</dt><dd>The remapping of the blackboard. </dd></dl>
+
+</div>
+</div>
+<a id="a16c28187475510661e51a20d0a31a5fe" name="a16c28187475510661e51a20d0a31a5fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16c28187475510661e51a20d0a31a5fe">&#9670;&#160;</a></span>remap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::string &amp; Blackboard::remap </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>key</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel private">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Internal method that acquires the maped key. In the case the key is not remaped, retruns the arg key. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td>The instance to copy from. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="accc651540d074a426eb3a6aa0314ef33" name="accc651540d074a426eb3a6aa0314ef33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accc651540d074a426eb3a6aa0314ef33">&#9670;&#160;</a></span>remove()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -312,7 +384,7 @@ template&lt;class T&gt; </div>
         <tr>
           <td class="memname">void Blackboard::remove </td>
           <td>(</td>
-          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>key</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -321,7 +393,7 @@ template&lt;class T&gt; </div>
 <p>Remove a value from the blackboard. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>The key associated with the value to remove. </td></tr>
+    <tr><td class="paramname">key</td><td>The key associated with the value to remove. </td></tr>
   </table>
   </dd>
 </dl>
@@ -368,6 +440,31 @@ template&lt;class T&gt; </div>
   <table class="params">
     <tr><td class="paramname">name</td><td>The key to associate with the value. </td></tr>
     <tr><td class="paramname">value</td><td>The value to store. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab033ed23517acbcfc44058edf167ccd8" name="ab033ed23517acbcfc44058edf167ccd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab033ed23517acbcfc44058edf167ccd8">&#9670;&#160;</a></span>set_remapping()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Blackboard::set_remapping </td>
+          <td>(</td>
+          <td class="paramtype">const std::map&lt; std::string, std::string &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>remapping</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the remapping of the blackboard. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">remapping</td><td>The remapping to set. </td></tr>
   </table>
   </dd>
 </dl>
@@ -436,6 +533,30 @@ template&lt;class T&gt; </div>
 </div><div class="memdoc">
 
 <p>Mutex for thread safety. </p>
+
+</div>
+</div>
+<a id="a50e537cff767d9a7924a699ee4e73d0e" name="a50e537cff767d9a7924a699ee4e73d0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50e537cff767d9a7924a699ee4e73d0e">&#9670;&#160;</a></span>remapping</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::string, std::string&gt; yasmin::blackboard::Blackboard::remapping</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel private">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Storage for key-value pairs. </p>
 
 </div>
 </div>

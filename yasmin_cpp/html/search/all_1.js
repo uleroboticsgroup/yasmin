@@ -21,7 +21,7 @@ var searchData=
   ['actionstate_3c_20fibonacci_20_3e_18',['ActionState&lt; Fibonacci &gt;',['../classyasmin__ros_1_1ActionState.html',1,'yasmin_ros']]],
   ['add_5fend_5fcb_19',['add_end_cb',['../classyasmin_1_1StateMachine.html#a8b10b2ce1898037fedfc83113ae05078',1,'yasmin::StateMachine']]],
   ['add_5fstart_5fcb_20',['add_start_cb',['../classyasmin_1_1StateMachine.html#a8a9b78423ec112ec833f5fe54ae6c27e',1,'yasmin::StateMachine']]],
-  ['add_5fstate_21',['add_state',['../classyasmin_1_1StateMachine.html#a738a0b240069ecaecaae4d7577fbdad9',1,'yasmin::StateMachine::add_state(std::string name, std::shared_ptr&lt; State &gt; state, std::map&lt; std::string, std::string &gt; transitions)'],['../classyasmin_1_1StateMachine.html#ab16f8ab59149459b64984782e24ea6c5',1,'yasmin::StateMachine::add_state(std::string name, std::shared_ptr&lt; State &gt; state)']]],
+  ['add_5fstate_21',['add_state',['../classyasmin_1_1StateMachine.html#abb7cfe0a7f8dfadb453b6faca678739b',1,'yasmin::StateMachine']]],
   ['add_5ftransition_5fcb_22',['add_transition_cb',['../classyasmin_1_1StateMachine.html#af3b2d4918664815deb8d9e88638a16b4',1,'yasmin::StateMachine']]],
   ['add_5ftwo_5fints_5fserver_2ecpp_23',['add_two_ints_server.cpp',['../add__two__ints__server_8cpp.html',1,'']]],
   ['addtwointsstate_24',['AddTwoIntsState',['../classAddTwoIntsState.html',1,'AddTwoIntsState'],['../classAddTwoIntsState.html#adafe175a2a8667af73abeee9cd0439f0',1,'AddTwoIntsState::AddTwoIntsState()']]],

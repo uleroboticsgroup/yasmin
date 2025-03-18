@@ -135,10 +135,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a97005c40256f46ea6a55f1c746ea18d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e81c317894c67bbcee9ff15dd31dccf" id="r_a4e81c317894c67bbcee9ff15dd31dccf"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4e81c317894c67bbcee9ff15dd31dccf">__repr__</a> (self)</td></tr>
 <tr class="separator:a4e81c317894c67bbcee9ff15dd31dccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa88bc1024faaacd9c36f771f0e8fafd4" id="r_aa88bc1024faaacd9c36f771f0e8fafd4"><td class="memItemLeft" align="right" valign="top">Dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa88bc1024faaacd9c36f771f0e8fafd4">remapings</a> (self)</td></tr>
-<tr class="separator:aa88bc1024faaacd9c36f771f0e8fafd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad05d9e49de4c8dc1b0def60d3937a188" id="r_ad05d9e49de4c8dc1b0def60d3937a188"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad05d9e49de4c8dc1b0def60d3937a188">remappings</a> (self, remapping)</td></tr>
-<tr class="separator:ad05d9e49de4c8dc1b0def60d3937a188"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a867e921e95cfe1747aea56ab6c42a7ae" id="r_a867e921e95cfe1747aea56ab6c42a7ae"><td class="memItemLeft" align="right" valign="top">Dict[str, str]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a867e921e95cfe1747aea56ab6c42a7ae">remapings</a> (self)</td></tr>
+<tr class="separator:a867e921e95cfe1747aea56ab6c42a7ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86c9d0baa852111f78c134a417920a65" id="r_a86c9d0baa852111f78c134a417920a65"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a86c9d0baa852111f78c134a417920a65">remappings</a> (self, Dict[str, str] remapping)</td></tr>
+<tr class="separator:a86c9d0baa852111f78c134a417920a65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -157,6 +157,7 @@ Private Attributes</h2></td></tr>
 <tr class="memdesc:ae8614b00b5491c0c50dcf4ed5622a1a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">A threading lock to ensure thread-safe access to the _data attribute.  <br /></td></tr>
 <tr class="separator:ae8614b00b5491c0c50dcf4ed5622a1a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0992b66fbe9bb07b5575c3bf6f4f839c" id="r_a0992b66fbe9bb07b5575c3bf6f4f839c"><td class="memItemLeft" align="right" valign="top">dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0992b66fbe9bb07b5575c3bf6f4f839c">__remapping</a> = {}</td></tr>
+<tr class="memdesc:a0992b66fbe9bb07b5575c3bf6f4f839c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dictionary containing all remappings.  <br /></td></tr>
 <tr class="separator:a0992b66fbe9bb07b5575c3bf6f4f839c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -422,14 +423,14 @@ Raises:
 </pre> 
 </div>
 </div>
-<a id="aa88bc1024faaacd9c36f771f0e8fafd4" name="aa88bc1024faaacd9c36f771f0e8fafd4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa88bc1024faaacd9c36f771f0e8fafd4">&#9670;&#160;</a></span>remapings()</h2>
+<a id="a867e921e95cfe1747aea56ab6c42a7ae" name="a867e921e95cfe1747aea56ab6c42a7ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a867e921e95cfe1747aea56ab6c42a7ae">&#9670;&#160;</a></span>remapings()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"> Dict yasmin.blackboard.Blackboard.remapings </td>
+          <td class="memname"> Dict[str, str] yasmin.blackboard.Blackboard.remapings </td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
           <td></td>
@@ -446,21 +447,21 @@ Raises:
 </pre> 
 </div>
 </div>
-<a id="ad05d9e49de4c8dc1b0def60d3937a188" name="ad05d9e49de4c8dc1b0def60d3937a188"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad05d9e49de4c8dc1b0def60d3937a188">&#9670;&#160;</a></span>remappings()</h2>
+<a id="a86c9d0baa852111f78c134a417920a65" name="a86c9d0baa852111f78c134a417920a65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86c9d0baa852111f78c134a417920a65">&#9670;&#160;</a></span>remappings()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">yasmin.blackboard.Blackboard.remappings </td>
+          <td class="memname"> None yasmin.blackboard.Blackboard.remappings </td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>remapping</em></span>&#160;)</td>
+          <td class="paramtype">Dict[str, str]</td>          <td class="paramname"><span class="paramname"><em>remapping</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -521,6 +522,8 @@ Raises:
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>A dictionary containing all remappings. </p>
 
 </div>
 </div>
