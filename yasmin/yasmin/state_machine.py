@@ -72,15 +72,15 @@ class StateMachine(State):
             Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]
         ] = []
 
-        ## A dictionary of remmapings to set in the blackboard in each transition
-        self.__remmapings : Dict[str, Dict[str,str]] = {}
+        ## A dictionary of remappings to set in the blackboard in each transition
+        self.__remappings: Dict[str, Dict[str, str]] = {}
 
     def add_state(
         self,
         name: str,
         state: State,
         transitions: Dict[str, str] = None,
-        remmapings: Dict[str, Dict[str,str]] = None
+        remappings: Dict[str, Dict[str, str]] = None,
     ) -> None:
         """
         Adds a new state to the state machine.
@@ -128,8 +128,8 @@ class StateMachine(State):
         )
 
         self._states[name] = {"state": state, "transitions": transitions}
-        if remmapings != None:
-            self.__remmapings[name] = remmapings
+        if remappings != None:
+            self.__remappings[name] = remappings
 
         if not self._start_state:
             self.set_start_state(name)
@@ -301,7 +301,9 @@ class StateMachine(State):
         yasmin.YASMIN_LOG_DEBUG(f"Validating state machine '{self}'")
 
         if self._validated and not strict_mode:
-            yasmin.YASMIN_LOG_DEBUG(f"State machine '{self}' has already been validated")
+            yasmin.YASMIN_LOG_DEBUG(
+                f"State machine '{self}' has already been validated"
+            )
 
         # Terminal outcomes from all transitions
         terminal_outcomes = []
@@ -320,7 +322,9 @@ class StateMachine(State):
             if strict_mode:
                 # Check if all outcomes of the state are in transitions
                 for o in outcomes:
-                    if o not in set(list(transitions.keys()) + list(self.get_outcomes())):
+                    if o not in set(
+                        list(transitions.keys()) + list(self.get_outcomes())
+                    ):
                         raise KeyError(
                             f"State '{state_name}' outcome '{o}' not registered in transitions"
                         )
@@ -343,7 +347,9 @@ class StateMachine(State):
             # Check if all outcomes of the state machine are in the terminal outcomes
             for o in self.get_outcomes():
                 if o not in terminal_outcomes:
-                    raise KeyError(f"Target outcome '{o}' not registered in transitions")
+                    raise KeyError(
+                        f"Target outcome '{o}' not registered in transitions"
+                    )
 
         # Check if all terminal outcomes are states or outcomes of the state machine
         for o in terminal_outcomes:
@@ -382,10 +388,10 @@ class StateMachine(State):
 
         while not self.is_canceled():
             state = self._states[self.get_current_state()]
-            if self.get_current_state() in self.__remmapings:
-                blackboard.remmapings = self.__remmapings[self.get_current_state()]
+            if self.get_current_state() in self.__remappings:
+                blackboard.remappings = self.__remappings[self.get_current_state()]
             else:
-                blackboard.remmapings = None
+                blackboard.remappings = None
             outcome = state["state"](blackboard)
             old_outcome = outcome
             # Check if outcome belongs to state
@@ -429,7 +435,9 @@ class StateMachine(State):
                     f"Outcome '{outcome}' is not a state nor a state machine outcome"
                 )
 
-        raise RuntimeError(f"Ending canceled state machine '{self}' with bad transition")
+        raise RuntimeError(
+            f"Ending canceled state machine '{self}' with bad transition"
+        )
 
     def cancel_state(self) -> None:
         """

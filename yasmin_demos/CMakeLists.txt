@@ -143,7 +143,7 @@ install(PROGRAMS
 )
 
 install(PROGRAMS
-  yasmin_demos/remmap_demo.py
+  yasmin_demos/remap_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

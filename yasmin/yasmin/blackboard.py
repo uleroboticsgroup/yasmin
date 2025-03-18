@@ -55,7 +55,7 @@ class Blackboard(object):
         self.__lock: Lock = Lock()
         ## A dictionary holding the data stored in the blackboard.
         self._data: Dict[str, Any] = {}
-        self.__remmapings : dict = {}
+        self.__remapping: dict = {}
 
         if init is not None:
             self._data.update(init)  # Initialize with provided data
@@ -158,14 +158,14 @@ class Blackboard(object):
         """
         with self.__lock:
             return repr(self._data)
-    
+
     @property
-    def remmapings(self):
-        return self.__remmapings
-    
-    @remmapings.setter
-    def remmapings(self, remmapings):
-        self.__remmapings = remmapings
-    
+    def remapings(self):
+        return self.__remapping
+
+    @remapings.setter
+    def remappings(self, remapping):
+        self.__remapping = remapping
+
     def __remap(self, key: str) -> str:
-        return self.remmapings[key] if key in self.remmapings.keys() else key
+        return self.remappings[key] if key in self.remappings.keys() else key
