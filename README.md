@@ -798,6 +798,7 @@ def main():
             "outcome1": "PRINTING_ODOM",
             "outcome2": "outcome4",
             TIMEOUT: "outcome4",
+            CANCEL: "outcome4",
         },
     )
 
