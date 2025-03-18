@@ -1,27 +1,31 @@
 <map id="yasmin.state.State" name="yasmin.state.State">
-<area shape="rect" id="Node000001" title=" " alt="" coords="102,193,230,219"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="102,259,230,284"/>
 <area shape="rect" id="Node000003" href="$classyasmin_1_1cb__state_1_1CbState.html" title=" " alt="" coords="288,5,453,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,178,214,109,242,73,276,41,299,29,302,34,280,46,246,76,218,112,181,180"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,243,183,199,203,144,234,89,254,64,276,41,296,29,299,34,280,46,258,67,238,92,208,147,188,200,175,244"/>
 <area shape="rect" id="Node000004" href="$classyasmin_1_1state__machine_1_1StateMachine.html" title=" " alt="" coords="278,55,462,96"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="188,180,227,143,277,107,302,94,304,99,279,111,231,147,191,184"/>
-<area shape="rect" id="Node000005" href="$classyasmin__demos_1_1yasmin__demo_1_1BarState.html" title=" " alt="" coords="294,120,446,161"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="222,186,303,159,305,164,224,191"/>
-<area shape="rect" id="Node000006" href="$classyasmin__demos_1_1yasmin__demo_1_1FooState.html" title=" " alt="" coords="294,186,446,226"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="245,204,293,204,293,209,245,209"/>
-<area shape="rect" id="Node000007" href="$classyasmin__ros_1_1action__state_1_1ActionState.html" title=" " alt="" coords="288,251,452,292"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="224,222,305,248,303,253,222,227"/>
-<area shape="rect" id="Node000010" href="$classyasmin__ros_1_1monitor__state_1_1MonitorState.html" title=" " alt="" coords="303,316,437,357"/>
-<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="191,229,231,265,279,301,304,314,302,318,277,306,227,270,188,232"/>
-<area shape="rect" id="Node000012" href="$classyasmin__ros_1_1service__state_1_1ServiceState.html" title=" " alt="" coords="302,382,438,422"/>
-<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="181,232,219,299,247,335,280,367,304,381,301,386,276,371,243,339,215,302,177,234"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,193,54,219"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,204,101,204,101,209,69,209"/>
-<area shape="rect" id="Node000008" href="$classyasmin__demos_1_1action__client__demo_1_1FibonacciState.html" title=" " alt="" coords="519,186,707,226"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="462,244,534,225,535,230,463,249"/>
-<area shape="rect" id="Node000009" href="$classyasmin__demos_1_1nav__demo_1_1Nav2State.html" title=" " alt="" coords="510,251,716,292"/>
-<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="468,269,510,269,510,274,468,274"/>
-<area shape="rect" id="Node000011" href="$classyasmin__demos_1_1monitor__demo_1_1PrintOdometryState.html" title=" " alt="" coords="524,316,702,357"/>
-<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="453,334,524,334,524,340,453,340"/>
-<area shape="rect" id="Node000013" href="$classyasmin__demos_1_1service__client__demo_1_1AddTwoIntsState.html" title=" " alt="" coords="512,382,714,422"/>
-<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="454,400,511,400,511,405,454,405"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="177,243,215,176,243,139,276,107,297,94,299,99,280,111,247,142,219,179,181,246"/>
+<area shape="rect" id="Node000005" href="$classyasmin__demos_1_1remap__demo_1_1BarState.html" title=" " alt="" coords="296,120,444,161"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="188,245,227,208,277,172,302,159,304,164,279,176,231,212,191,249"/>
+<area shape="rect" id="Node000006" href="$classyasmin__demos_1_1remap__demo_1_1Foo.html" title=" " alt="" coords="296,186,444,226"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="222,251,303,225,305,230,224,256"/>
+<area shape="rect" id="Node000007" href="$classyasmin__demos_1_1yasmin__demo_1_1BarState.html" title=" " alt="" coords="294,251,446,292"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="245,269,293,269,293,274,245,274"/>
+<area shape="rect" id="Node000008" href="$classyasmin__demos_1_1yasmin__demo_1_1FooState.html" title=" " alt="" coords="294,316,446,357"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="224,287,305,313,303,318,222,292"/>
+<area shape="rect" id="Node000009" href="$classyasmin__ros_1_1action__state_1_1ActionState.html" title=" " alt="" coords="288,382,452,422"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="191,294,231,331,279,367,304,379,302,384,277,371,227,335,188,298"/>
+<area shape="rect" id="Node000012" href="$classyasmin__ros_1_1monitor__state_1_1MonitorState.html" title=" " alt="" coords="303,447,437,488"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="181,297,219,364,247,401,280,432,304,447,301,451,276,436,243,404,215,367,177,300"/>
+<area shape="rect" id="Node000014" href="$classyasmin__ros_1_1service__state_1_1ServiceState.html" title=" " alt="" coords="302,512,438,553"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="176,299,189,342,210,395,240,450,258,475,280,497,303,513,300,517,276,502,254,479,235,453,205,398,184,344,171,300"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,259,54,284"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,269,101,269,101,274,69,274"/>
+<area shape="rect" id="Node000010" href="$classyasmin__demos_1_1action__client__demo_1_1FibonacciState.html" title=" " alt="" coords="519,316,707,357"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="462,375,534,355,535,360,463,380"/>
+<area shape="rect" id="Node000011" href="$classyasmin__demos_1_1nav__demo_1_1Nav2State.html" title=" " alt="" coords="510,382,716,422"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="468,400,510,400,510,405,468,405"/>
+<area shape="rect" id="Node000013" href="$classyasmin__demos_1_1monitor__demo_1_1PrintOdometryState.html" title=" " alt="" coords="524,447,702,488"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="453,465,524,465,524,470,453,470"/>
+<area shape="rect" id="Node000015" href="$classyasmin__demos_1_1service__client__demo_1_1AddTwoIntsState.html" title=" " alt="" coords="512,512,714,553"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="454,530,511,530,511,536,454,536"/>
 </map>

@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['monitor_5fhandler_0',['monitor_handler',['../classyasmin__demos_1_1monitor__demo_1_1PrintOdometryState.html#a59b02507bc87384666cd6611dc8f332f',1,'yasmin_demos::monitor_demo::PrintOdometryState']]],
-  ['monitoring_1',['monitoring',['../classyasmin__ros_1_1monitor__state_1_1MonitorState.html#ac70babaefc209b687de4fbbd19666b9f',1,'yasmin_ros::monitor_state::MonitorState']]],
-  ['msg_5flist_2',['msg_list',['../classyasmin__ros_1_1monitor__state_1_1MonitorState.html#a017deeb2ab4f4254a455fa80d50a5cc3',1,'yasmin_ros::monitor_state::MonitorState']]],
-  ['msg_5fqueue_3',['msg_queue',['../classyasmin__ros_1_1monitor__state_1_1MonitorState.html#a156629b1fc94a5e92bae4e058be2bb73',1,'yasmin_ros::monitor_state::MonitorState']]]
+  ['level_0',['level',['../namespaceyasmin_1_1logs.html#a409247b3492fe518fad66027fe66be9f',1,'yasmin::logs']]],
+  ['log_5flevel_1',['log_level',['../namespaceyasmin_1_1logs.html#ae2ff4597746c940cd454e8b5b0b791bd',1,'yasmin::logs']]],
+  ['log_5fmessage_2',['log_message',['../namespaceyasmin_1_1logs.html#ae9e6360f238b71d33a804dcb77013bdf',1,'yasmin::logs']]],
+  ['logger_5fnode_3',['logger_node',['../namespaceyasmin__ros_1_1ros__logs.html#a3c75e3ca1389df848a9ab1002fd28096',1,'yasmin_ros::ros_logs']]]
 ];

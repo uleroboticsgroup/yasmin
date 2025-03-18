@@ -92,6 +92,7 @@ $(function(){ initResizable(false); });
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classyasmin_1_1blackboard_1_1Blackboard-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yasmin.blackboard.Blackboard Class Reference</div></div>
@@ -134,6 +135,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a97005c40256f46ea6a55f1c746ea18d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e81c317894c67bbcee9ff15dd31dccf" id="r_a4e81c317894c67bbcee9ff15dd31dccf"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4e81c317894c67bbcee9ff15dd31dccf">__repr__</a> (self)</td></tr>
 <tr class="separator:a4e81c317894c67bbcee9ff15dd31dccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa88bc1024faaacd9c36f771f0e8fafd4" id="r_aa88bc1024faaacd9c36f771f0e8fafd4"><td class="memItemLeft" align="right" valign="top">Dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa88bc1024faaacd9c36f771f0e8fafd4">remapings</a> (self)</td></tr>
+<tr class="separator:aa88bc1024faaacd9c36f771f0e8fafd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad05d9e49de4c8dc1b0def60d3937a188" id="r_ad05d9e49de4c8dc1b0def60d3937a188"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad05d9e49de4c8dc1b0def60d3937a188">remappings</a> (self, remapping)</td></tr>
+<tr class="separator:ad05d9e49de4c8dc1b0def60d3937a188"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -141,11 +146,18 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:a3193169ffb432d61ca04df99b0522c83"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dictionary holding the data stored in the blackboard.  <br /></td></tr>
 <tr class="separator:a3193169ffb432d61ca04df99b0522c83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a188712bd7872a9316deb54bcef5f8eb1" id="r_a188712bd7872a9316deb54bcef5f8eb1"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a188712bd7872a9316deb54bcef5f8eb1">__remap</a> (self, str key)</td></tr>
+<tr class="separator:a188712bd7872a9316deb54bcef5f8eb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:ae8614b00b5491c0c50dcf4ed5622a1a6" id="r_ae8614b00b5491c0c50dcf4ed5622a1a6"><td class="memItemLeft" align="right" valign="top">Lock&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae8614b00b5491c0c50dcf4ed5622a1a6">__lock</a> = Lock()</td></tr>
 <tr class="memdesc:ae8614b00b5491c0c50dcf4ed5622a1a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">A threading lock to ensure thread-safe access to the _data attribute.  <br /></td></tr>
 <tr class="separator:ae8614b00b5491c0c50dcf4ed5622a1a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0992b66fbe9bb07b5575c3bf6f4f839c" id="r_a0992b66fbe9bb07b5575c3bf6f4f839c"><td class="memItemLeft" align="right" valign="top">dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0992b66fbe9bb07b5575c3bf6f4f839c">__remapping</a> = {}</td></tr>
+<tr class="separator:a0992b66fbe9bb07b5575c3bf6f4f839c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">A thread-safe blackboard for storing key-value pairs.
@@ -312,6 +324,43 @@ Raises:
 </pre> 
 </div>
 </div>
+<a id="a188712bd7872a9316deb54bcef5f8eb1" name="a188712bd7872a9316deb54bcef5f8eb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a188712bd7872a9316deb54bcef5f8eb1">&#9670;&#160;</a></span>__remap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str yasmin.blackboard.Blackboard.__remap </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str</td>          <td class="paramname"><span class="paramname"><em>key</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel private">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">internal method that acquires the maped key. In the case the key is not remaped, retruns the arg key.
+
+Args:
+    key (str): The key to be remaped.
+Returns:
+    str: The remaped key or if is not remaped, the own key.
+Raises:
+    None
+</pre> 
+</div>
+</div>
 <a id="a4e81c317894c67bbcee9ff15dd31dccf" name="a4e81c317894c67bbcee9ff15dd31dccf"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4e81c317894c67bbcee9ff15dd31dccf">&#9670;&#160;</a></span>__repr__()</h2>
 
@@ -373,6 +422,61 @@ Raises:
 </pre> 
 </div>
 </div>
+<a id="aa88bc1024faaacd9c36f771f0e8fafd4" name="aa88bc1024faaacd9c36f771f0e8fafd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa88bc1024faaacd9c36f771f0e8fafd4">&#9670;&#160;</a></span>remapings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> Dict yasmin.blackboard.Blackboard.remapings </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">Property getter of a dict of remappings of the blackboard keys.
+
+Return:
+    Dict: A dict with the current key remappings of the blackboard.
+
+Raises:
+    None
+</pre> 
+</div>
+</div>
+<a id="ad05d9e49de4c8dc1b0def60d3937a188" name="ad05d9e49de4c8dc1b0def60d3937a188"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad05d9e49de4c8dc1b0def60d3937a188">&#9670;&#160;</a></span>remappings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">yasmin.blackboard.Blackboard.remappings </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>remapping</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">Property setter of the remapping of the blackboard keys.
+
+Args:
+    remapping (Dict): The new remap of the blackboard.
+
+Returns:
+    None
+
+Raises:
+    None
+</pre> 
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="ae8614b00b5491c0c50dcf4ed5622a1a6" name="ae8614b00b5491c0c50dcf4ed5622a1a6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae8614b00b5491c0c50dcf4ed5622a1a6">&#9670;&#160;</a></span>__lock</h2>
@@ -395,6 +499,28 @@ Raises:
 </div><div class="memdoc">
 
 <p>A threading lock to ensure thread-safe access to the _data attribute. </p>
+
+</div>
+</div>
+<a id="a0992b66fbe9bb07b5575c3bf6f4f839c" name="a0992b66fbe9bb07b5575c3bf6f4f839c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0992b66fbe9bb07b5575c3bf6f4f839c">&#9670;&#160;</a></span>__remapping</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">dict yasmin.blackboard.Blackboard.__remapping = {}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel private">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

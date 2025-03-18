@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['info_0',['INFO',['../classyasmin_1_1logs_1_1LogLevel.html#a5408f1b3c131af81cfc65a037c2b9181',1,'yasmin::logs::LogLevel']]]
+  ['has_5fnext_0',['HAS_NEXT',['../namespaceyasmin__demos_1_1nav__demo.html#ae23cd38cbb88c854d3a8a7651aaccdd3',1,'yasmin_demos::nav_demo']]]
 ];

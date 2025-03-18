@@ -1151,23 +1151,23 @@ Click to expand</summary>
 <div class="line">  yasmin_ros::set_ros_loggers();</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Create a state machine</span></div>
-<div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
+<div class="line">  <span class="keyword">auto</span> <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a> = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
 <div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Cancel state machine on ROS 2 shutdown</span></div>
 <div class="line">  rclcpp::on_shutdown([sm]() {</div>
-<div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
-<div class="line">      sm-&gt;cancel_state();</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;is_running()) {</div>
+<div class="line">      <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;cancel_state();</div>
 <div class="line">    }</div>
 <div class="line">  });</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Add states to the state machine</span></div>
-<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;FOO&quot;</span>, std::make_shared&lt;FooState&gt;(),</div>
+<div class="line">  <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;add_state(<span class="stringliteral">&quot;FOO&quot;</span>, std::make_shared&lt;FooState&gt;(),</div>
 <div class="line">                {</div>
 <div class="line">                    {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;BAR&quot;</span>},</div>
 <div class="line">                    {<span class="stringliteral">&quot;outcome2&quot;</span>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
 <div class="line">                });</div>
-<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;BAR&quot;</span>, std::make_shared&lt;BarState&gt;(),</div>
+<div class="line">  <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;add_state(<span class="stringliteral">&quot;BAR&quot;</span>, std::make_shared&lt;BarState&gt;(),</div>
 <div class="line">                {</div>
 <div class="line">                    {<span class="stringliteral">&quot;outcome3&quot;</span>, <span class="stringliteral">&quot;FOO&quot;</span>},</div>
 <div class="line">                });</div>
@@ -1177,7 +1177,7 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Execute the state machine</span></div>
 <div class="line">  <span class="keywordflow">try</span> {</div>
-<div class="line">    std::string outcome = (*sm.get())();</div>
+<div class="line">    std::string outcome = (*<a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>.get())();</div>
 <div class="line">    <a class="code hl_function" href="namespaceyasmin_1_1logs.html#a4cd463e66fad9e3b3c2685f4fb2d2347">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
 <div class="line">  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception &amp;e) {</div>
 <div class="line">    <a class="code hl_function" href="namespaceyasmin_1_1logs.html#afe81e5c7410c7f42a1b92726ba8e667e">YASMIN_LOG_WARN</a>(e.what());</div>
@@ -1192,6 +1192,7 @@ Click to expand</summary>
 <div class="ttc" id="aclassyasmin__viewer_1_1yasmin__viewer__pub_1_1YasminViewerPub_html"><div class="ttname"><a href="classyasmin__viewer_1_1yasmin__viewer__pub_1_1YasminViewerPub.html">yasmin_viewer.yasmin_viewer_pub.YasminViewerPub</a></div><div class="ttdef"><b>Definition</b> yasmin_viewer_pub.py:28</div></div>
 <div class="ttc" id="anamespaceyasmin_1_1logs_html_a4cd463e66fad9e3b3c2685f4fb2d2347"><div class="ttname"><a href="namespaceyasmin_1_1logs.html#a4cd463e66fad9e3b3c2685f4fb2d2347">yasmin.logs.YASMIN_LOG_INFO</a></div><div class="ttdeci">None YASMIN_LOG_INFO(str text)</div><div class="ttdef"><b>Definition</b> logs.py:196</div></div>
 <div class="ttc" id="anamespaceyasmin_1_1logs_html_afe81e5c7410c7f42a1b92726ba8e667e"><div class="ttname"><a href="namespaceyasmin_1_1logs.html#afe81e5c7410c7f42a1b92726ba8e667e">yasmin.logs.YASMIN_LOG_WARN</a></div><div class="ttdeci">None YASMIN_LOG_WARN(str text)</div><div class="ttdef"><b>Definition</b> logs.py:180</div></div>
+<div class="ttc" id="anamespaceyasmin__demos_1_1remap__demo_html_a1e9e4e1fb01a9338a78619dc6a38bd3b"><div class="ttname"><a href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">yasmin_demos.remap_demo.sm</a></div><div class="ttdeci">sm</div><div class="ttdef"><b>Definition</b> remap_demo.py:92</div></div>
 <div class="ttc" id="anamespaceyasmin__viewer_1_1yasmin__viewer__node_html_aa5aebdb9275eede1a284bc242182d026"><div class="ttname"><a href="namespaceyasmin__viewer_1_1yasmin__viewer__node.html#aa5aebdb9275eede1a284bc242182d026">yasmin_viewer.yasmin_viewer_node.main</a></div><div class="ttdeci">None main()</div><div class="ttdef"><b>Definition</b> yasmin_viewer_node.py:199</div></div>
 <div class="ttc" id="anamespaceyasmin_html"><div class="ttname"><a href="namespaceyasmin.html">yasmin</a></div><div class="ttdef"><b>Definition</b> __init__.py:1</div></div>
 </div><!-- fragment --><p></p>
@@ -1274,18 +1275,18 @@ Click to expand</summary>
 <div class="line">  yasmin_ros::set_ros_loggers();</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Create a state machine with a specified outcome.</span></div>
-<div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
+<div class="line">  <span class="keyword">auto</span> <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a> = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
 <div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Cancel the state machine on ROS 2 shutdown.</span></div>
 <div class="line">  rclcpp::on_shutdown([sm]() {</div>
-<div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
-<div class="line">      sm-&gt;cancel_state();</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;is_running()) {</div>
+<div class="line">      <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;cancel_state();</div>
 <div class="line">    }</div>
 <div class="line">  });</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Add states to the state machine.</span></div>
-<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;SETTING_INTS&quot;</span>,</div>
+<div class="line">  <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;add_state(<span class="stringliteral">&quot;SETTING_INTS&quot;</span>,</div>
 <div class="line">                std::make_shared&lt;yasmin::CbState&gt;(</div>
 <div class="line">                    std::initializer_list&lt;std::string&gt;{</div>
 <div class="line">                        <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#af61301abb8214fa901179eea171ee318">yasmin_ros::basic_outcomes::SUCCEED</a>},</div>
@@ -1293,13 +1294,13 @@ Click to expand</summary>
 <div class="line">                {</div>
 <div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#af61301abb8214fa901179eea171ee318">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;ADD_TWO_INTS&quot;</span>},</div>
 <div class="line">                });</div>
-<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;ADD_TWO_INTS&quot;</span>, std::make_shared&lt;AddTwoIntsState&gt;(),</div>
+<div class="line">  <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;add_state(<span class="stringliteral">&quot;ADD_TWO_INTS&quot;</span>, std::make_shared&lt;AddTwoIntsState&gt;(),</div>
 <div class="line">                {</div>
 <div class="line">                    {<span class="stringliteral">&quot;outcome1&quot;</span>, <span class="stringliteral">&quot;PRINTING_SUM&quot;</span>},</div>
 <div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#af61301abb8214fa901179eea171ee318">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
 <div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#aab7808b49a690522da9b7d1922f718b0">yasmin_ros::basic_outcomes::ABORT</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
 <div class="line">                });</div>
-<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;PRINTING_SUM&quot;</span>,</div>
+<div class="line">  <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;add_state(<span class="stringliteral">&quot;PRINTING_SUM&quot;</span>,</div>
 <div class="line">                std::make_shared&lt;yasmin::CbState&gt;(</div>
 <div class="line">                    std::initializer_list&lt;std::string&gt;{</div>
 <div class="line">                        <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#af61301abb8214fa901179eea171ee318">yasmin_ros::basic_outcomes::SUCCEED</a>},</div>
@@ -1313,7 +1314,7 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Execute the state machine.</span></div>
 <div class="line">  <span class="keywordflow">try</span> {</div>
-<div class="line">    std::string outcome = (*sm.get())();</div>
+<div class="line">    std::string outcome = (*<a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>.get())();</div>
 <div class="line">    <a class="code hl_function" href="namespaceyasmin_1_1logs.html#a4cd463e66fad9e3b3c2685f4fb2d2347">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
 <div class="line">  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception &amp;e) {</div>
 <div class="line">    <a class="code hl_function" href="namespaceyasmin_1_1logs.html#afe81e5c7410c7f42a1b92726ba8e667e">YASMIN_LOG_WARN</a>(e.what());</div>
@@ -1425,24 +1426,24 @@ Click to expand</summary>
 <div class="line">  yasmin_ros::set_ros_loggers();</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Create the state machine</span></div>
-<div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
+<div class="line">  <span class="keyword">auto</span> <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a> = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
 <div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Cancel state machine on ROS 2 shutdown</span></div>
 <div class="line">  rclcpp::on_shutdown([sm]() {</div>
-<div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
-<div class="line">      sm-&gt;cancel_state();</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;is_running()) {</div>
+<div class="line">      <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;cancel_state();</div>
 <div class="line">    }</div>
 <div class="line">  });</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Add states to the state machine</span></div>
-<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;CALLING_FIBONACCI&quot;</span>, std::make_shared&lt;FibonacciState&gt;(),</div>
+<div class="line">  <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;add_state(<span class="stringliteral">&quot;CALLING_FIBONACCI&quot;</span>, std::make_shared&lt;FibonacciState&gt;(),</div>
 <div class="line">                {</div>
 <div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#af61301abb8214fa901179eea171ee318">yasmin_ros::basic_outcomes::SUCCEED</a>, <span class="stringliteral">&quot;PRINTING_RESULT&quot;</span>},</div>
 <div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#aef344807a5c01c65ef6e81cfa1d395c6">yasmin_ros::basic_outcomes::CANCEL</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
 <div class="line">                    {<a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#aab7808b49a690522da9b7d1922f718b0">yasmin_ros::basic_outcomes::ABORT</a>, <span class="stringliteral">&quot;outcome4&quot;</span>},</div>
 <div class="line">                });</div>
-<div class="line">  sm-&gt;add_state(<span class="stringliteral">&quot;PRINTING_RESULT&quot;</span>,</div>
+<div class="line">  <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;add_state(<span class="stringliteral">&quot;PRINTING_RESULT&quot;</span>,</div>
 <div class="line">                std::make_shared&lt;yasmin::CbState&gt;(</div>
 <div class="line">                    std::initializer_list&lt;std::string&gt;{</div>
 <div class="line">                        <a class="code hl_variable" href="namespaceyasmin__ros_1_1basic__outcomes.html#af61301abb8214fa901179eea171ee318">yasmin_ros::basic_outcomes::SUCCEED</a>},</div>
@@ -1461,7 +1462,7 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Execute the state machine</span></div>
 <div class="line">  <span class="keywordflow">try</span> {</div>
-<div class="line">    std::string outcome = (*sm.get())(<a class="code hl_namespace" href="namespaceyasmin_1_1blackboard.html">blackboard</a>);</div>
+<div class="line">    std::string outcome = (*<a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>.get())(<a class="code hl_namespace" href="namespaceyasmin_1_1blackboard.html">blackboard</a>);</div>
 <div class="line">    <a class="code hl_function" href="namespaceyasmin_1_1logs.html#a4cd463e66fad9e3b3c2685f4fb2d2347">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
 <div class="line">  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception &amp;e) {</div>
 <div class="line">    <a class="code hl_function" href="namespaceyasmin_1_1logs.html#afe81e5c7410c7f42a1b92726ba8e667e">YASMIN_LOG_WARN</a>(e.what());</div>
@@ -1550,18 +1551,18 @@ Click to expand</summary>
 <div class="line">  yasmin_ros::set_ros_loggers();</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Create a state machine with a final outcome</span></div>
-<div class="line">  <span class="keyword">auto</span> sm = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
+<div class="line">  <span class="keyword">auto</span> <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a> = std::make_shared&lt;yasmin::StateMachine&gt;(</div>
 <div class="line">      std::initializer_list&lt;std::string&gt;{<span class="stringliteral">&quot;outcome4&quot;</span>});</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Cancel state machine on ROS 2 shutdown</span></div>
 <div class="line">  rclcpp::on_shutdown([sm]() {</div>
-<div class="line">    <span class="keywordflow">if</span> (sm-&gt;is_running()) {</div>
-<div class="line">      sm-&gt;cancel_state();</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;is_running()) {</div>
+<div class="line">      <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;cancel_state();</div>
 <div class="line">    }</div>
 <div class="line">  });</div>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Add states to the state machine</span></div>
-<div class="line">  sm-&gt;add_state(</div>
+<div class="line">  <a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>-&gt;add_state(</div>
 <div class="line">      <span class="stringliteral">&quot;PRINTING_ODOM&quot;</span>, std::make_shared&lt;PrintOdometryState&gt;(5),</div>
 <div class="line">      {</div>
 <div class="line">          {<span class="stringliteral">&quot;outcome1&quot;</span>,</div>
@@ -1576,7 +1577,7 @@ Click to expand</summary>
 <div class="line"> </div>
 <div class="line">  <span class="comment">// Execute the state machine</span></div>
 <div class="line">  <span class="keywordflow">try</span> {</div>
-<div class="line">    std::string outcome = (*sm.get())();</div>
+<div class="line">    std::string outcome = (*<a class="code hl_variable" href="namespaceyasmin__demos_1_1remap__demo.html#a1e9e4e1fb01a9338a78619dc6a38bd3b">sm</a>.get())();</div>
 <div class="line">    <a class="code hl_function" href="namespaceyasmin_1_1logs.html#a4cd463e66fad9e3b3c2685f4fb2d2347">YASMIN_LOG_INFO</a>(outcome.c_str());</div>
 <div class="line">  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception &amp;e) {</div>
 <div class="line">    <a class="code hl_function" href="namespaceyasmin_1_1logs.html#afe81e5c7410c7f42a1b92726ba8e667e">YASMIN_LOG_WARN</a>(e.what());</div>

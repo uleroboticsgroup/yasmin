@@ -127,8 +127,8 @@ Collaboration diagram for yasmin.state_machine.StateMachine:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a7f15946b9d1ac10fc7f177953185a903" id="r_a7f15946b9d1ac10fc7f177953185a903"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7f15946b9d1ac10fc7f177953185a903">__init__</a> (self, Set[str] outcomes)</td></tr>
 <tr class="separator:a7f15946b9d1ac10fc7f177953185a903"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca39dc53115f3f2b291447b775357046" id="r_aca39dc53115f3f2b291447b775357046"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca39dc53115f3f2b291447b775357046">add_state</a> (self, str name, <a class="el" href="classyasmin_1_1state_1_1State.html">State</a> state, Dict[str, str] transitions=None)</td></tr>
-<tr class="separator:aca39dc53115f3f2b291447b775357046"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e44d5baf2b4a262df5d922328b843c0" id="r_a7e44d5baf2b4a262df5d922328b843c0"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e44d5baf2b4a262df5d922328b843c0">add_state</a> (self, str name, <a class="el" href="classyasmin_1_1state_1_1State.html">State</a> state, Dict[str, str] transitions=None, Dict[str, Dict[str, str]] remappings=None)</td></tr>
+<tr class="separator:a7e44d5baf2b4a262df5d922328b843c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a91a4ed13326774118815c1d502771cb2" id="r_a91a4ed13326774118815c1d502771cb2"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a91a4ed13326774118815c1d502771cb2">set_start_state</a> (self, str state_name)</td></tr>
 <tr class="separator:a91a4ed13326774118815c1d502771cb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11db8bc8a845f6f4a14f127be7005a68" id="r_a11db8bc8a845f6f4a14f127be7005a68"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a11db8bc8a845f6f4a14f127be7005a68">get_start_state</a> (self)</td></tr>
@@ -213,6 +213,9 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:a7040bf732fde0d1b624917d7b81d7a5f" id="r_a7040bf732fde0d1b624917d7b81d7a5f"><td class="memItemLeft" align="right" valign="top">List[&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7040bf732fde0d1b624917d7b81d7a5f">__end_cbs</a> = []</td></tr>
 <tr class="memdesc:a7040bf732fde0d1b624917d7b81d7a5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of callbacks to call when the state machine ends.  <br /></td></tr>
 <tr class="separator:a7040bf732fde0d1b624917d7b81d7a5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b86b9d87c495f63c598ddb26b6c1511" id="r_a9b86b9d87c495f63c598ddb26b6c1511"><td class="memItemLeft" align="right" valign="top">dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b86b9d87c495f63c598ddb26b6c1511">__remappings</a> = {}</td></tr>
+<tr class="memdesc:a9b86b9d87c495f63c598ddb26b6c1511"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dictionary of remappings to set in the blackboard in each transition.  <br /></td></tr>
+<tr class="separator:a9b86b9d87c495f63c598ddb26b6c1511"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">Represents a state machine that can manage states and transitions
@@ -475,8 +478,8 @@ Parameters:
 </pre> 
 </div>
 </div>
-<a id="aca39dc53115f3f2b291447b775357046" name="aca39dc53115f3f2b291447b775357046"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca39dc53115f3f2b291447b775357046">&#9670;&#160;</a></span>add_state()</h2>
+<a id="a7e44d5baf2b4a262df5d922328b843c0" name="a7e44d5baf2b4a262df5d922328b843c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e44d5baf2b4a262df5d922328b843c0">&#9670;&#160;</a></span>add_state()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -499,7 +502,12 @@ Parameters:
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Dict[str, str] </td>          <td class="paramname"><span class="paramname"><em>transitions</em></span><span class="paramdefsep"> = </span><span class="paramdefval">None</span>&#160;)</td>
+          <td class="paramtype">Dict[str, str] </td>          <td class="paramname"><span class="paramname"><em>transitions</em></span><span class="paramdefsep"> = </span><span class="paramdefval">None</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Dict[str, Dict[str, str]] </td>          <td class="paramname"><span class="paramname"><em>remappings</em></span><span class="paramdefsep"> = </span><span class="paramdefval">None</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -795,6 +803,30 @@ Raises:
 </div><div class="memdoc">
 
 <p>A list of callbacks to call when the state machine ends. </p>
+
+</div>
+</div>
+<a id="a9b86b9d87c495f63c598ddb26b6c1511" name="a9b86b9d87c495f63c598ddb26b6c1511"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b86b9d87c495f63c598ddb26b6c1511">&#9670;&#160;</a></span>__remappings</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">dict yasmin.state_machine.StateMachine.__remappings = {}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel private">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A dictionary of remappings to set in the blackboard in each transition. </p>
 
 </div>
 </div>
