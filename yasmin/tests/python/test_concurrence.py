@@ -1,5 +1,6 @@
-# Copyright (C) 2023  Miguel Ángel González Santamarta
-
+# Copyright (C) 2025 Georgia Tech Research Institute
+# Supported by USDA-NIFA CSIAPP Grant. No. 2023-70442-39232
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
