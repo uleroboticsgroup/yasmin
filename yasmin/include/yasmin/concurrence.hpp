@@ -25,6 +25,7 @@
 #include <map>
 #include <thread>
 #include <mutex>
+#include <iostream>
 
 #ifdef __GNUG__     // If using GCC/G++
 #include <cxxabi.h> // For abi::__cxa_demangle
@@ -46,7 +47,8 @@ namespace yasmin {
 class Concurrence : public State {
 
 public:
-  typedef std::map<std::string, std::map<std::shared_ptr<State>, std::string>> OutcomeMap;
+  typedef std::map<std::shared_ptr<State>, std::string> StateMap;
+  typedef std::map<std::string, StateMap> OutcomeMap;
 
 protected:  
   /// The states to run concurrently

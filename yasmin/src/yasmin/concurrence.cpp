@@ -25,8 +25,7 @@
 
 using namespace yasmin;
 
-Concurrence::Concurrence(std::set<std::shared_ptr<State>> states,
-    std::string default_outcome, OutcomeMap outcome_map)
+Concurrence::Concurrence(std::set<std::shared_ptr<State>> states, std::string default_outcome, OutcomeMap outcome_map)
     : State(generate_possible_outcomes(outcome_map, default_outcome)), states(states), default_outcome(default_outcome), outcome_map(outcome_map) {
 
   // Require at least one state
@@ -35,11 +34,11 @@ Concurrence::Concurrence(std::set<std::shared_ptr<State>> states,
   }
 
   // Validate outcome map and prepare intemedaite outcomes map
-  for (const auto [outcome, requirements] : outcome_map) {
+  for (const auto & [outcome, requirements] : outcome_map) {
     if (requirements.empty()) {
       throw std::invalid_argument("Outcome '" + outcome + "' in the outcome map must have at least one requirement");
     }
-    for (const auto [state, intermediate_outcome] : requirements) {
+    for (const auto & [state, intermediate_outcome] : requirements) {
       if (state->get_outcomes().find(intermediate_outcome) == state->get_outcomes().end()) {
         throw std::invalid_argument("Intemedaite outcome '" + intermediate_outcome + "' under outcome '" + outcome +
           "' of the outcome map is not a valid outcome of state '" + state->to_string() + "'");
@@ -56,7 +55,7 @@ Concurrence::Concurrence(std::set<std::shared_ptr<State>> states,
 std::string Concurrence::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   std::vector<std::thread> state_threads;
   
-  // Initialize the parallel execution of all the states
+  // Initialize the parallel execution of all the states  
   for (std::shared_ptr<State> state : states) {
     state_threads.push_back(
       std::thread ([this, state, blackboard](){
@@ -81,9 +80,9 @@ std::string Concurrence::execute(std::shared_ptr<blackboard::Blackboard> blackbo
 
   // Build final outcome
   std::set<std::string> satisfied_outcomes;
-  for (const auto [outcome, requirements] : outcome_map) {
+  for (const auto & [outcome, requirements] : outcome_map) {
     bool satisfied = true;
-    for (const auto [state, expected_intermediate_outcome] : requirements) {
+    for (const auto & [state, expected_intermediate_outcome] : requirements) {
       std::shared_ptr<std::string> actual_intermediate_outcome = intermediate_outcome_map.find(state)->second;
       if (actual_intermediate_outcome == nullptr) {
         throw std::runtime_error("An intermediate outcome for state '" + state->to_string() + "' was not received.");

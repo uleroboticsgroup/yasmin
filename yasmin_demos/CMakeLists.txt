@@ -110,6 +110,14 @@ fibonacci_action_server
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# concurrent states demo
+add_executable(concurrence_demo src/concurrence_demo.cpp)
+ament_target_dependencies(concurrence_demo ${DEPENDENCIES})
+install(TARGETS
+concurrence_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_export_include_directories(include)
 ament_export_libraries(${LIB})
 
