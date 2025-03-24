@@ -16,24 +16,79 @@
 import os
 import inspect
 import logging
-from typing import Callable
+from enum import IntEnum
+from typing import Callable, List, Union
 
 import yasmin
 
 __all__ = [
-    "set_loggers",
+    "LogLevel",
+    "log_level",
+    "set_log_level",
+    "log_level_to_name",
+    "log_message",
     "YASMIN_LOG_ERROR",
     "YASMIN_LOG_WARN",
     "YASMIN_LOG_INFO",
     "YASMIN_LOG_DEBUG",
-    "get_caller_info",
+    "set_loggers",
+    "set_default_loggers",
 ]
 
 # Configure logging with a custom format to include location data
 logging.basicConfig(level=logging.NOTSET, format="%(message)s")
 
 
-def get_caller_info():
+class LogLevel(IntEnum):
+    """
+    @enum LogLevel
+    @brief Enumeration for different log levels.
+
+    Defines the available log levels for controlling verbosity in the
+    logging system.
+    """
+
+    ## Log level for error messages. Only critical errors should be logged.
+    ERROR = 0
+    ## Log level for warning messages. Indicate potential issues that are not critical.
+    WARN = 1
+    ## Log level for informational messages. General runtime information about the system's state.
+    INFO = 2
+    ## Log level for debug messages. Used for detailed information, mainly for developers.
+    DEBUG = 3
+
+
+## The current log level for the application.
+log_level = LogLevel.INFO
+
+
+## Sets the log level for the logs.
+def set_log_level(level: LogLevel) -> None:
+    """
+    @brief Set the log level for the YASMIN framework.
+
+    Adjusts the log level to control the verbosity of logged messages.
+
+    @param level The new log level to be set.
+    """
+    yasmin.log_level = level
+
+
+def log_level_to_name(level: LogLevel) -> str:
+
+    if level == LogLevel.ERROR:
+        return "ERROR"
+    elif level == LogLevel.WARN:
+        return "WARN"
+    elif level == LogLevel.INFO:
+        return "INFO"
+    elif level == LogLevel.DEBUG:
+        return "DEBUG"
+
+    return ""
+
+
+def get_caller_info() -> List[Union[str, int]]:
     """
     Retrieve information about the caller of the current function.
 
@@ -50,6 +105,63 @@ def get_caller_info():
     return file, function, line
 
 
+def default_log_message(
+    level: LogLevel, file: str, function: str, line: int, text: str
+) -> None:
+    """
+    Default logging function.
+
+    This function is the default logging function of YASMIN.
+
+    @param level The log level as a string (e.g., "ERROR", "WARN", "INFO",
+    "DEBUG").
+    @param file The source file where the log function is called.
+    @param function The function where the log function is called.
+    @param line The line number in the source file.
+    @param text The format string for the log message.
+    @param args Additional arguments for the format string.
+    """
+
+    message = f"[{log_level_to_name(level)}] [{file}:{function}:{line}] {text}"
+
+    if level == LogLevel.ERROR:
+        logging.error(message)
+
+    elif level == LogLevel.WARN:
+        logging.warning(message)
+
+    elif level == LogLevel.INFO:
+        logging.info(message)
+
+    elif level == LogLevel.DEBUG:
+        logging.debug(message)
+
+
+log_message = default_log_message
+
+
+def log_helper(level: LogLevel, file: str, function: str, line: int, text: str) -> None:
+    """
+    @brief Variadic template function to log messages at different levels.
+
+    This function wraps log_message and allows logging messages with different
+    log levels while reducing redundant code. It provides a consistent logging
+    format across all levels.
+
+    @tparam LEVEL The log level LogLevel (e.g., 0 -> "ERROR", 1 -> "WARN", 2 ->
+    "INFO", 3 -> "DEBUG").
+    @param log_message Function to create the logs
+    @param file The source file where the log function is called.
+    @param function The function where the log function is called.
+    @param line The line number in the source file.
+    @param text The format string for the log message.
+    @param ... Additional arguments for the format string.
+    """
+
+    if yasmin.log_level >= level:
+        yasmin.log_message(level, file, function, line, text)
+
+
 def YASMIN_LOG_ERROR(text: str) -> None:
     """
     Log an error message with the caller's information.
@@ -62,8 +174,7 @@ def YASMIN_LOG_ERROR(text: str) -> None:
 
     @return: None
     """
-    file, function, line = get_caller_info()
-    logging.error(f"[ERROR] [{file}:{function}:{line}] {text}")
+    log_helper(LogLevel.ERROR, text)
 
 
 def YASMIN_LOG_WARN(text: str) -> None:
@@ -79,7 +190,7 @@ def YASMIN_LOG_WARN(text: str) -> None:
     @return: None
     """
     file, function, line = get_caller_info()
-    logging.warning(f"[WARN] [{file}:{function}:{line}] {text}")
+    log_helper(LogLevel.WARN, file, function, line, text)
 
 
 def YASMIN_LOG_INFO(text: str) -> None:
@@ -95,7 +206,7 @@ def YASMIN_LOG_INFO(text: str) -> None:
     @return: None
     """
     file, function, line = get_caller_info()
-    logging.info(f"[INFO] [{file}:{function}:{line}] {text}")
+    log_helper(LogLevel.INFO, file, function, line, text)
 
 
 def YASMIN_LOG_DEBUG(text: str) -> None:
@@ -111,41 +222,35 @@ def YASMIN_LOG_DEBUG(text: str) -> None:
     @return: None
     """
     file, function, line = get_caller_info()
-    logging.debug(f"[DEBUG] [{file}:{function}:{line}] {text}")
+    log_helper(LogLevel.DEBUG, file, function, line, text)
 
 
-def set_loggers(
-    info: Callable[[str], None],
-    warn: Callable[[str], None],
-    debug: Callable[[str], None],
-    error: Callable[[str], None],
-) -> None:
+def set_loggers(new_log_message: Callable[[LogLevel, str], None]) -> None:
     """
     Set custom logger functions for YASMIN logging.
 
-    This function assigns user-defined logging functions for different log
+    This function assigns user-defined logging function for different log
     levels: info, warning, debug, and error.
 
-    @param info: A callable function for logging informational messages.
-    @type info: Callable[[str], None]
-
-    @param warn: A callable function for logging warning messages.
-    @type warn: Callable[[str], None]
-
-    @param debug: A callable function for logging debug messages.
-    @type debug: Callable[[str], None]
-
-    @param error: A callable function for logging error messages.
-    @type error: Callable[[str], None]
+    @param log_message: A callable function for logging messages.
+    @type info: Callable[[LogLevel, str], None]
 
     @return: None
 
     @raises TypeError: If any of the parameters are not callable.
     """
-    if not all(callable(func) for func in [info, warn, debug, error]):
-        raise TypeError("All logger parameters must be callable.")
 
-    yasmin.YASMIN_LOG_ERROR = error
-    yasmin.YASMIN_LOG_WARN = warn
-    yasmin.YASMIN_LOG_INFO = info
-    yasmin.YASMIN_LOG_DEBUG = debug
+    if not callable(new_log_message):
+        raise TypeError("log_message must be callable.")
+
+    yasmin.log_message = new_log_message
+
+
+def set_default_loggers() -> None:
+    """
+    Sets the default logging function for all log levels.
+
+    This function initializes the logging function to the default
+    implementations.
+    """
+    set_loggers(log_message)

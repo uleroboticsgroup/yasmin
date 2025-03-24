@@ -17,10 +17,60 @@
 #define YASMIN__LOGS_HPP
 
 #include <cstdarg>
-#include <cstdio>
 #include <cstring>
+#include <string>
 
 namespace yasmin {
+
+/**
+ * @brief Enum representing different log levels for controlling log verbosity.
+ *
+ * This enum defines the severity levels of logs that can be used to control
+ * which log messages should be displayed. The levels are ordered from most
+ * severe to least severe. Only logs at or above the current log level will be
+ * shown.
+ */
+enum LogLevel {
+  /// Log level for error messages. Only critical errors should be logged.
+  ERROR = 0,
+  /// Log level for warning messages. Indicate potential issues that are not
+  /// critical.
+  WARN,
+  /// Log level for informational messages. General runtime information about
+  /// the system's state.
+  INFO,
+  /// Log level for debug messages. Used for detailed information, mainly for
+  /// developers.
+  DEBUG
+};
+
+/**
+ * @brief The current log level for the application.
+ *
+ * This global variable holds the current log level, which determines the
+ * verbosity of the logs. Logs at or above this level will be displayed. The
+ * default level is set to INFO.
+ */
+extern LogLevel log_level;
+
+/**
+ * @brief Sets the log level for the logs.
+ *
+ * This function allows the user to specify the log level error, warning, info,
+ * or debug.
+ *
+ * @param log_level Log level.
+ */
+void set_log_level(LogLevel level);
+
+/**
+ * @brief Parse LogLevel to string.
+ *
+ * This function returns the name of a given log level.
+ *
+ * @param level Log level.
+ */
+const char *log_level_to_name(LogLevel level);
 
 /**
  * @brief Type definition for a logging function.
@@ -29,6 +79,7 @@ namespace yasmin {
  * function name, line number, log message, and a variable number of
  * additional arguments for formatting the log message.
  *
+ * @param level The log level of the message
  * @param file The name of the source file where the log function is called.
  * @param function The name of the function where the log function is called.
  * @param line The line number in the source file where the log function is
@@ -36,14 +87,45 @@ namespace yasmin {
  * @param text The format string for the log message, similar to printf.
  * @param ... Additional arguments for the format string.
  */
-typedef void (*LogFunction)(const char *file, const char *function, int line,
-                            const char *text, ...);
+typedef void (*LogFunction)(LogLevel level, const char *file,
+                            const char *function, int line, const char *text);
 
-// Declare function pointers for logging at different severity levels
-extern LogFunction log_error; ///< Pointer to the error logging function
-extern LogFunction log_warn;  ///< Pointer to the warning logging function
-extern LogFunction log_info;  ///< Pointer to the info logging function
-extern LogFunction log_debug; ///< Pointer to the debug logging function
+extern LogFunction log_message; ///< Pointer to the logging function
+
+/**
+ * @brief Variadic template function to log messages at different levels.
+ *
+ * This function wraps log_message and allows logging messages with different
+ * log levels while reducing redundant code. It provides a consistent logging
+ * format across all levels.
+ *
+ * @tparam LEVEL The log level LogLevel (e.g., 0 -> "ERROR", 1 -> "WARN", 2 ->
+ * "INFO", 3 -> "DEBUG").
+ * @param log_message Function to create the logs
+ * @param file The source file where the log function is called.
+ * @param function The function where the log function is called.
+ * @param line The line number in the source file.
+ * @param text The format string for the log message.
+ * @param ... Additional arguments for the format string.
+ */
+template <yasmin::LogLevel LEVEL>
+void log_helper(const char *file, const char *function, int line,
+                const char *text, ...) {
+  va_list args;
+  va_start(args, text);
+
+  // Calculate the required buffer size
+  int size = vsnprintf(nullptr, 0, text, args) + 1;
+  va_end(args);
+
+  std::string buffer(size, '\0');
+  va_start(args, text);
+  vsnprintf(&buffer[0], buffer.size(), text, args);
+
+  va_end(args);
+
+  yasmin::log_message(LEVEL, file, function, line, buffer.c_str());
+}
 
 /**
  * @brief Extracts the filename from a given file path.
@@ -63,17 +145,21 @@ inline const char *extract_filename(const char *path) {
 
 // Macros for logging with automatic file and function information
 #define YASMIN_LOG_ERROR(text, ...)                                            \
-  yasmin::log_error(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,  \
-                    ##__VA_ARGS__)
+  if (yasmin::log_level >= yasmin::ERROR)                                      \
+  yasmin::log_helper<yasmin::ERROR>(extract_filename(__FILE__), __FUNCTION__,  \
+                                    __LINE__, text, ##__VA_ARGS__)
 #define YASMIN_LOG_WARN(text, ...)                                             \
-  yasmin::log_warn(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,   \
-                   ##__VA_ARGS__)
+  if (yasmin::log_level >= yasmin::WARN)                                       \
+  yasmin::log_helper<yasmin::WARN>(extract_filename(__FILE__), __FUNCTION__,   \
+                                   __LINE__, text, ##__VA_ARGS__)
 #define YASMIN_LOG_INFO(text, ...)                                             \
-  yasmin::log_info(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,   \
-                   ##__VA_ARGS__)
+  if (yasmin::log_level >= yasmin::INFO)                                       \
+  yasmin::log_helper<yasmin::INFO>(extract_filename(__FILE__), __FUNCTION__,   \
+                                   __LINE__, text, ##__VA_ARGS__)
 #define YASMIN_LOG_DEBUG(text, ...)                                            \
-  yasmin::log_debug(extract_filename(__FILE__), __FUNCTION__, __LINE__, text,  \
-                    ##__VA_ARGS__)
+  if (yasmin::log_level >= yasmin::DEBUG)                                      \
+  yasmin::log_helper<yasmin::DEBUG>(extract_filename(__FILE__), __FUNCTION__,  \
+                                    __LINE__, text, ##__VA_ARGS__)
 
 /**
  * @brief Sets custom logging functions for different log levels.
@@ -87,13 +173,12 @@ inline const char *extract_filename(const char *path) {
  * @param info Pointer to the custom info logging function.
  * @param debug Pointer to the custom debug logging function.
  */
-void set_loggers(LogFunction error, LogFunction warn, LogFunction info,
-                 LogFunction debug);
+void set_loggers(LogFunction log_message);
 
 /**
- * @brief Sets the default logging functions for all log levels.
+ * @brief Sets the default logging function for all log levels.
  *
- * This function initializes the logging functions to the default
+ * This function initializes the logging function to the default
  * implementations.
  */
 void set_default_loggers();

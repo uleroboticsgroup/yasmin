@@ -14,76 +14,29 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from rclpy.node import Node
+
 import yasmin
 import yasmin.logs
+import yasmin_ros
 from yasmin_ros.yasmin_node import YasminNode
 
-__all__ = ["set_ros_loggers"]
+__all__ = [
+    "set_ros_loggers",
+    "logger_node",
+]
+
+## Node used in the YASMIN ROS 2 logs
+logger_node: Node = None
 
 
-def ros_log_error(text: str) -> None:
+def ros_log_message(
+    level: yasmin.logs.LogLevel, file: str, function: str, line: int, text: str
+) -> None:
     """
-    Logs an error message to the ROS logger.
+    Logs a message to the ROS 2 logger.
 
-    This function retrieves the caller's file name, function name,
-    and line number and logs an error message with that context.
-
-    @param text: The error message to log.
-    @type text: str
-
-    @raises: None
-
-    @return: None
-    """
-    file, function, line = yasmin.logs.get_caller_info()  # Retrieve caller info
-    node = YasminNode.get_instance()  # Get the instance of YasminNode
-    node.get_logger().error(f"[{file}:{function}:{line}] {text}")  # Log the error
-
-
-def ros_log_warn(text: str) -> None:
-    """
-    Logs a warning message to the ROS logger.
-
-    This function retrieves the caller's file name, function name,
-    and line number and logs a warning message with that context.
-
-    @param text: The warning message to log.
-    @type text: str
-
-    @raises: None
-
-    @return: None
-    """
-    file, function, line = yasmin.logs.get_caller_info()  # Retrieve caller info
-    node = YasminNode.get_instance()  # Get the instance of YasminNode
-    node.get_logger().warn(f"[{file}:{function}:{line}] {text}")  # Log the warning
-
-
-def ros_log_info(text: str) -> None:
-    """
-    Logs an informational message to the ROS logger.
-
-    This function retrieves the caller's file name, function name,
-    and line number and logs an informational message with that context.
-
-    @param text: The informational message to log.
-    @type text: str
-
-    @raises: None
-
-    @return: None
-    """
-    file, function, line = yasmin.logs.get_caller_info()  # Retrieve caller info
-    node = YasminNode.get_instance()  # Get the instance of YasminNode
-    node.get_logger().info(f"[{file}:{function}:{line}] {text}")  # Log the info
-
-
-def ros_log_debug(text: str) -> None:
-    """
-    Logs a debug message to the ROS logger.
-
-    This function retrieves the caller's file name, function name,
-    and line number and logs a debug message with that context.
+    This function logs a message using a ROS 2 logger.
 
     @param text: The debug message to log.
     @type text: str
@@ -92,25 +45,40 @@ def ros_log_debug(text: str) -> None:
 
     @return: None
     """
-    file, function, line = yasmin.logs.get_caller_info()  # Retrieve caller info
-    node = YasminNode.get_instance()  # Get the instance of YasminNode
-    node.get_logger().debug(f"[{file}:{function}:{line}] {text}")  # Log the debug info
+
+    message = f"[{file}:{function}:{line}] {text}"
+
+    if level == yasmin.logs.LogLevel.ERROR:
+        yasmin_ros.logger_node.get_logger().error(message)
+
+    elif level == yasmin.logs.LogLevel.WARN:
+        yasmin_ros.logger_node.get_logger().warn(message)
+
+    elif level == yasmin.logs.LogLevel.INFO:
+        yasmin_ros.logger_node.get_logger().info(message)
+
+    elif level == yasmin.logs.LogLevel.DEBUG:
+        yasmin_ros.logger_node.get_logger().debug(message)
 
 
-def set_ros_loggers() -> None:
+def set_ros_loggers(node: Node = None) -> None:
     """
     Sets the ROS loggers for various logging levels.
 
     This function assigns the logging functions for info, warning,
     debug, and error messages to the Yasmin logging framework.
 
+    @param node: ROS 2 node to use as logger node. If None, use YasminNode.
+    @type node: Node
+
     @raises: None
 
     @return: None
     """
-    yasmin.set_loggers(
-        ros_log_info,  # Set info logger
-        ros_log_warn,  # Set warning logger
-        ros_log_debug,  # Set debug logger
-        ros_log_error,  # Set error logger
-    )
+
+    if node is None:
+        yasmin_ros.logger_node = YasminNode.get_instance()
+    else:
+        yasmin_ros.logger_node = node
+
+    yasmin.set_loggers(ros_log_message)

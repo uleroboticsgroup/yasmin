@@ -7,14 +7,15 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program. If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdarg>
 #include <rclcpp/rclcpp.hpp>
+#include <sstream>
 #include <string>
 
 #include "yasmin/logs.hpp"
@@ -22,121 +23,51 @@
 
 namespace yasmin_ros {
 
-/**
- * @brief Logs an error message with formatted text to the ROS logger.
- *
- * @param file The name of the source file where the log call is made.
- * @param function The name of the function where the log call is made.
- * @param line The line number in the source file where the log call is made.
- * @param text The format string for the message to be logged, followed by any
- * format arguments.
- */
-void ros_log_error(const char *file, const char *function, int line,
-                   const char *text, ...) {
-  va_list args;
-  va_start(args, text);
-
-  // Calculate the required buffer size
-  int size = vsnprintf(nullptr, 0, text, args) + 1;
-  va_end(args);
-
-  std::string buffer(size, '\0');
-
-  va_start(args, text);
-  vsnprintf(&buffer[0], buffer.size(), text, args);
-  va_end(args);
-
-  // Log the formatted error message
-  RCLCPP_ERROR(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
-               function, line, buffer.c_str());
-}
+// Initialize logger ROS 2 node
+rclcpp::Node *logger_node = nullptr;
 
 /**
- * @brief Logs a warning message with formatted text to the ROS logger.
+ * @brief Generalized logging function.
  *
- * @param file The name of the source file where the log call is made.
- * @param function The name of the function where the log call is made.
- * @param line The line number in the source file where the log call is made.
- * @param text The format string for the message to be logged, followed by any
- * format arguments.
+ * @param level The log level as a yasmin::LogLevel (e.g., "ERROR", "WARN",
+ * "INFO", "DEBUG").
+ * @param file The source file where the log function is called.
+ * @param function The function where the log function is called.
+ * @param line The line number in the source file.
+ * @param text The format string for the log message.
+ * @param args Additional arguments for the format string.
  */
-void ros_log_warn(const char *file, const char *function, int line,
-                  const char *text, ...) {
-  va_list args;
-  va_start(args, text);
+void ros_log_message(yasmin::LogLevel level, const char *file,
+                     const char *function, int line, const char *text) {
 
-  int size = vsnprintf(nullptr, 0, text, args) + 1;
-  va_end(args);
+  std::ostringstream oss;
+  oss << "[ " << file << " : " << function << " : " << line << " ] " << text;
 
-  std::string buffer(size, '\0');
-
-  va_start(args, text);
-  vsnprintf(&buffer[0], buffer.size(), text, args);
-  va_end(args);
-
-  // Log the formatted warning message
-  RCLCPP_WARN(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
-              function, line, buffer.c_str());
+  switch (level) {
+  case yasmin::LogLevel::ERROR:
+    RCLCPP_ERROR(logger_node->get_logger(), oss.str().c_str());
+    break;
+  case yasmin::LogLevel::WARN:
+    RCLCPP_WARN(logger_node->get_logger(), oss.str().c_str());
+    break;
+  case yasmin::LogLevel::INFO:
+    RCLCPP_INFO(logger_node->get_logger(), oss.str().c_str());
+    break;
+  case yasmin::LogLevel::DEBUG:
+    RCLCPP_DEBUG(logger_node->get_logger(), oss.str().c_str());
+    break;
+  }
 }
 
-/**
- * @brief Logs an informational message with formatted text to the ROS logger.
- *
- * @param file The name of the source file where the log call is made.
- * @param function The name of the function where the log call is made.
- * @param line The line number in the source file where the log call is made.
- * @param text The format string for the message to be logged, followed by any
- * format arguments.
- */
-void ros_log_info(const char *file, const char *function, int line,
-                  const char *text, ...) {
-  va_list args;
-  va_start(args, text);
+void set_ros_loggers(rclcpp::Node::SharedPtr node) {
 
-  int size = vsnprintf(nullptr, 0, text, args) + 1;
-  va_end(args);
+  if (node == nullptr) {
+    logger_node = YasminNode::get_instance().get();
+  } else {
+    logger_node = node.get();
+  }
 
-  std::string buffer(size, '\0');
-
-  va_start(args, text);
-  vsnprintf(&buffer[0], buffer.size(), text, args);
-  va_end(args);
-
-  // Log the formatted informational message
-  RCLCPP_INFO(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
-              function, line, buffer.c_str());
-}
-
-/**
- * @brief Logs a debug message with formatted text to the ROS logger.
- *
- * @param file The name of the source file where the log call is made.
- * @param function The name of the function where the log call is made.
- * @param line The line number in the source file where the log call is made.
- * @param text The format string for the message to be logged, followed by any
- * format arguments.
- */
-void ros_log_debug(const char *file, const char *function, int line,
-                   const char *text, ...) {
-  va_list args;
-  va_start(args, text);
-
-  int size = vsnprintf(nullptr, 0, text, args) + 1;
-  va_end(args);
-
-  std::string buffer(size, '\0');
-
-  va_start(args, text);
-  vsnprintf(&buffer[0], buffer.size(), text, args);
-  va_end(args);
-
-  // Log the formatted debug message
-  RCLCPP_DEBUG(YasminNode::get_instance()->get_logger(), "[%s:%s:%d] %s", file,
-               function, line, buffer.c_str());
-}
-
-void set_ros_loggers() {
-  yasmin::set_loggers(ros_log_error, ros_log_warn, ros_log_info, ros_log_debug);
+  yasmin::set_loggers(ros_log_message);
 }
 
 } // namespace yasmin_ros

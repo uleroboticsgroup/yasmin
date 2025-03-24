@@ -102,11 +102,11 @@ const Graph = React.memo(({ nodes, edges, layout, height }) => {
           style: {
             label: "data(label)",
             targetArrowShape: "triangle",
-            curveStyle: "unbundled-bezier",
-            controlPointDistances: [20, -20],
-            controlPointWeights: [0.25, 0.75],
+            curveStyle: "bezier",
+            controlPointDistances: [30, -30],
+            // controlPointWeights: [0.25, 0.75],
             loopDirection: "0deg",
-            loopSweep: "-20deg",
+            loopSweep: "30deg",
             events: "no",
           },
         },
@@ -196,7 +196,7 @@ const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm, layout_type }) => {
 
   const selectedLayout = layouts[layout_type] || layouts.dagre;
 
-  const height = alone ? "80vh" : "40vh";
+  const height = "80vh";
 
   // Memoize nodes and edges to avoid recomputation unless `fsm_data` changes
   const { nodes, edges } = useMemo(() => {

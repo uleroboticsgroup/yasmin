@@ -141,6 +141,7 @@ int main(int argc, char *argv[]) {
           {"outcome2", "outcome4"}, // Transition to outcome4 on outcome2
           {yasmin_ros::basic_outcomes::TIMEOUT,
            "outcome4"}, // Timeout transition
+          {yasmin_ros::basic_outcomes::CANCEL, "outcome4"}, // Cancel transition
       });
 
   // Publisher for visualizing the state machine's status

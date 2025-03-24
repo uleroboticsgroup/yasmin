@@ -2,6 +2,13 @@
 Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.0 (2025-02-05)
+------------------
+* set_ros_loggers allows setting node to log
+* fixing license comments
+* updating changelog files
+* Contributors: Miguel Ángel González Santamarta
+
 3.0.3 (2024-12-17)
 ------------------
 * fixing license in c++ service client demo
@@ -9,7 +16,7 @@ Changelog for package yasmin_demos
 * Contributors: Miguel Ángel González Santamarta
 
 3.0.2 (2024-12-16)
------------
+------------------
 * adding servers for demos
 * build_depend for ros_environment
 * adding ros-environment dependency
