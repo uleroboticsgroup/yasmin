@@ -32,10 +32,15 @@ class Concurrence(State):
                                                   outcomes of this state.
         _default_outcome (str): A default outcome in case none of the correlations in _outcome_map are satisfied.
         _intermediate_outcomes (Dict[str, Optional[str]]): A temporary storage of the parallel states's outcomes.
-        _mutex (Lock): A mutex to ensure thread safety of _intermediate_outcomes. 
+        _mutex (Lock): A mutex to ensure thread safety of _intermediate_outcomes.
     """
 
-    def __init__(self, states: List[State], default_outcome: str, outcome_map: Dict[str, Dict[State, str]] = {}) -> None:
+    def __init__(
+        self,
+        states: List[State],
+        default_outcome: str,
+        outcome_map: Dict[str, Dict[State, str]] = {},
+    ) -> None:
         """
         Initializes the Concurrence instance.
 
@@ -60,8 +65,10 @@ class Concurrence(State):
 
         for state in states:
             if states.count(state) > 1:
-                raise ValueError("An instance of a state cannot be run concurrently with itself; create a new \
-                                  instance instead.")
+                raise ValueError(
+                    "An instance of a state cannot be run concurrently with itself; create a new \
+                                  instance instead."
+                )
 
         self._states: List[State] = states
 
@@ -92,11 +99,20 @@ class Concurrence(State):
         :param blackboard: An instance of Blackboard that provides the context for execution.
         :return: The outcome of the execution as a string.
         """
-        
+
         state_threads = []
 
         for i, s in enumerate(self._states):
-            state_threads.append(Thread(target=self.execute_and_save_state, args=(s,i,blackboard,)))
+            state_threads.append(
+                Thread(
+                    target=self.execute_and_save_state,
+                    args=(
+                        s,
+                        i,
+                        blackboard,
+                    ),
+                )
+            )
             state_threads[-1].start()
 
         for t in state_threads:
@@ -105,9 +121,11 @@ class Concurrence(State):
         satisfied_outcomes = []
         for i, (outcome, requirements) in enumerate(self._outcome_map.items()):
             satisfied = True
-            
+
             for state_name, state_outcome in requirements.items():
-                satisfied = satisfied and (self._intermediate_outcomes[state_name] == state_outcome)
+                satisfied = satisfied and (
+                    self._intermediate_outcomes[state_name] == state_outcome
+                )
 
             if satisfied:
                 satisfied_outcomes.append(outcome)
@@ -116,11 +134,15 @@ class Concurrence(State):
             return self._default_outcome
 
         if len(satisfied_outcomes) > 1:
-            yasmin.YASMIN_LOG_WARN(f"More than one satisfied outcome after concurrent state execution.")        
+            yasmin.YASMIN_LOG_WARN(
+                f"More than one satisfied outcome after concurrent state execution."
+            )
 
         return satisfied_outcomes[0]
 
-    def execute_and_save_state(self, state: State, state_id: int, blackboard: Blackboard) -> None:
+    def execute_and_save_state(
+        self, state: State, state_id: int, blackboard: Blackboard
+    ) -> None:
         """
         Executes a state and saves its outcome to the intermediate map.
 

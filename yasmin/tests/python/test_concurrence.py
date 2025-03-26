@@ -26,9 +26,9 @@ class FooState(State):
 
     def execute(self, blackboard):
         time.sleep(0.1)
-        print('Foo state ticked.')
+        print("Foo state ticked.")
         time.sleep(0.2)
-        print('Foo state ended.')
+        print("Foo state ended.")
 
         return "outcome1"
 
@@ -39,9 +39,9 @@ class BarState(State):
 
     def execute(self, blackboard):
         time.sleep(0.2)
-        print('Bar state ticked.')
+        print("Bar state ticked.")
         time.sleep(0.1)
-        print('Bar state ended.')
+        print("Bar state ended.")
 
         return "outcome2"
 
@@ -58,17 +58,19 @@ class TestState(unittest.TestCase):
             outcome_map={
                 "outcome1": {self.foo_state: "outcome1"},
                 "outcome2": {self.bar_state: "outcome1", self.bar_state: "outcome1"},
-            }
+            },
         )
 
     def instance_exception(self):
-        self.concurrent_state = Concurrence(states=[self.foo_state, self.foo_state], default_outcome="foo")
+        self.concurrent_state = Concurrence(
+            states=[self.foo_state, self.foo_state], default_outcome="foo"
+        )
 
     def key_exception(self):
         self.concurrent_state = Concurrence(
             states=[self.foo_state],
             outcome_map={"outcome1": {self.foo_state: "non_outcome"}},
-            default_outcome="foo"
+            default_outcome="foo",
         )
 
     def test_call(self):
