@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['learn_20more_0',['Learn More',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md30',1,'']]],
+  ['learn_20more_0',['Learn More',['..//github/workspace/yasmin_viewer/yasmin_viewer_web_client/README.md#autotoc_md34',1,'']]],
   ['log_5fhelper_1',['log_helper',['../namespaceyasmin.html#a6f7026c7c1b96b2a680278f84f84a519',1,'yasmin']]],
   ['log_5flevel_2',['log_level',['../namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4',1,'yasmin']]],
   ['log_5flevel_5fto_5fname_3',['log_level_to_name',['../namespaceyasmin.html#abe605b92db719755127ff13e7c681364',1,'yasmin']]],
