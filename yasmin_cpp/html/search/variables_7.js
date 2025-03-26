@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['node_5f_0',['node_',['../classyasmin__ros_1_1ActionState.html#ac6db44ad15800f4bdac06674e861f4ec',1,'yasmin_ros::ActionState::node_'],['../classyasmin__ros_1_1MonitorState.html#a0e1e09feacdbf7adeb88024f9eb595bf',1,'yasmin_ros::MonitorState::node_'],['../classyasmin__ros_1_1ServiceState.html#a80f88e851fa36c92110785a35ff443cc',1,'yasmin_ros::ServiceState::node_'],['../classyasmin__viewer_1_1YasminViewerPub.html#ad374c1794f35bd661d7f5da7ccb38745',1,'yasmin_viewer::YasminViewerPub::node_']]]
+  ['log_5flevel_0',['log_level',['../namespaceyasmin.html#a940395fffc9b6f9a318e0c56f30369f4',1,'yasmin']]],
+  ['log_5fmessage_1',['log_message',['../namespaceyasmin.html#aa4611638a4d00a42a7a4f57bcec52023',1,'yasmin']]],
+  ['logger_5fnode_2',['logger_node',['../namespaceyasmin__ros.html#a082e05844f00dc203a5f8a8406015e06',1,'yasmin_ros']]]
 ];
