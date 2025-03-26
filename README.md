@@ -273,6 +273,313 @@ if __name__ == "__main__":
 
 </details>
 
+#### Blackboard Remapping Demo
+
+```shell
+ros2 run yasmin_demos remap_demo.py
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```python
+import yasmin
+from yasmin import State
+from yasmin import Blackboard
+from yasmin import StateMachine
+from yasmin_ros.basic_outcomes import SUCCEED
+
+
+class Foo(State):
+    """
+    Represents the Foo state in the state machine.
+    """
+
+    def __init__(self):
+        """
+        Initializes the FooState instance, setting up the outcomes.
+
+        Outcomes:
+            SUCCEED: Indicates the state should continue to the next state.
+        """
+        super().__init__(outcomes=[SUCCEED])
+
+    def execute(self, blackboard: Blackboard):
+        """
+        Executes the logic for the Foo state.
+
+        Args:
+            blackboard (Blackboard): The shared data structure for states.
+
+        Returns:
+            str: The outcome of the execution, which can be SUCCEED.
+
+        Raises:
+            Exception: May raise exceptions related to state execution.
+        """
+        data = blackboard["foo_data"]
+        yasmin.YASMIN_LOG_INFO(f"{data}")
+        blackboard["foo_out_data"] = data
+        return SUCCEED
+
+
+class BarState(State):
+    """
+    Represents the Bar state in the state machine.
+
+    """
+
+    def __init__(self):
+        """
+        Initializes the BarState instance, setting up the outcomes.
+
+        Outcomes:
+            SUCCEDED: Indicates the state should continue to the next state.
+        """
+        super().__init__(outcomes=[SUCCEED])
+
+    def execute(self, blackboard: Blackboard):
+        """
+        Executes the logic for the Bar state.
+
+        Args:
+            blackboard (Blackboard): The shared data structure for states.
+
+        Returns:
+            str: The outcome of the execution, which can be SUCCEED.
+
+        Raises:
+            Exception: May raise exceptions related to state execution.
+        """
+        data = blackboard["bar_data"]
+        yasmin.YASMIN_LOG_INFO(f"{data}")
+        return SUCCEED
+
+
+if __name__ == "__main__":
+    """
+    The main entry point of the application.
+
+    Initializes the ROS 2 environment, sets up the state machine,
+    and handles execution and termination.
+
+    Raises:
+        KeyboardInterrupt: If the execution is interrupted by the user.
+    """
+    bb = Blackboard()
+    bb["msg1"] = "test1"
+    bb["msg2"] = "test2"
+
+    sm = StateMachine(outcomes=[SUCCEED])
+    sm.add_state(
+        "STATE1",
+        Foo(),
+        transitions={SUCCEED: "STATE2"},
+        remappings={"foo_data": "msg1"},
+    )
+    sm.add_state(
+        "STATE2",
+        Foo(),
+        transitions={SUCCEED: "STATE3"},
+        remappings={"foo_data": "msg2"},
+    )
+    sm.add_state(
+        "STATE3",
+        BarState(),
+        transitions={SUCCEED: SUCCEED},
+        remappings={"bar_data": "foo_out_data"},
+    )
+
+    sm.execute(bb)
+```
+
+</details>
+
+#### Concurrence Demo
+
+```shell
+ros2 run yasmin_demos concurrence_demo.py
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```python
+import time
+import rclpy
+
+import yasmin
+from yasmin import State
+from yasmin import Concurrence
+from yasmin import Blackboard
+from yasmin import StateMachine
+from yasmin_ros import set_ros_loggers
+from yasmin_viewer import YasminViewerPub
+
+
+# Define the FooState class, inheriting from the State class
+class FooState(State):
+    """
+    Represents the Foo state in the state machine.
+
+    Attributes:
+        counter (int): Counter to track the number of executions of this state.
+    """
+
+    def __init__(self) -> None:
+        """
+        Initializes the FooState instance, setting up the outcomes.
+
+        Outcomes:
+            outcome1: Indicates the state should continue.
+            outcome2: Indicates the state should cotninue.
+            outcome3: Indicates the state should finish execution and return.
+        """
+        super().__init__(["outcome1", "outcome2", "outcome3"])
+        self.counter = 0
+
+    def execute(self, blackboard: Blackboard) -> str:
+        """
+        Executes the logic for the Foo state.
+
+        Args:
+            blackboard (Blackboard): The shared data structure for states.
+
+        Returns:
+            str: The outcome of the execution.
+
+        Raises:
+            Exception: May raise exceptions related to state execution.
+        """
+        yasmin.YASMIN_LOG_INFO("Executing state FOO")
+        time.sleep(2)  # Simulate work by sleeping
+
+        outcome = ""
+
+        blackboard["foo_str"] = f"Counter: {self.counter}"
+
+        if self.counter < 3:
+            outcome = "outcome1"
+        elif self.counter < 5:
+            outcome = "outcome2"
+        else:
+            outcome = "outcome3"
+
+        yasmin.YASMIN_LOG_INFO("Finishing state FOO")
+        self.counter += 1
+        return outcome
+
+
+# Define the BarState class, inheriting from the State class
+class BarState(State):
+    """
+    Represents the Bar state in the state machine.
+    """
+
+    def __init__(self) -> None:
+        """
+        Initializes the BarState instance, setting up the outcome.
+
+        Outcomes:
+            outcome3: This state will always return this outcome
+        """
+        super().__init__(outcomes=["outcome3"])
+
+    def execute(self, blackboard: Blackboard) -> str:
+        """
+        Executes the logic for the Bar state.
+
+        Args:
+            blackboard (Blackboard): The shared data structure for states.
+
+        Returns:
+            str: The outcome of the execution, which will always be "outcome3".
+
+        Raises:
+            Exception: May raise exceptions related to state execution.
+        """
+        yasmin.YASMIN_LOG_INFO("Executing state BAR")
+        time.sleep(4)  # Simulate work by sleeping
+
+        if "foo_str" in blackboard:
+            yasmin.YASMIN_LOG_INFO(blackboard["foo_str"])
+        else:
+            yasmin.YASMIN_LOG_INFO("Blackboard does not yet contain 'foo_str'")
+
+        yasmin.YASMIN_LOG_INFO("Finishing state BAR")
+
+        return "outcome3"
+
+
+# Main function to initialize and run the state machine
+def main():
+    """
+    The main entry point of the application.
+
+    Initializes the ROS 2 environment, sets up the state machine,
+    and handles execution and termination.
+
+    Raises:
+        KeyboardInterrupt: If the execution is interrupted by the user.
+    """
+    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+
+    # Initialize ROS 2
+    rclpy.init()
+
+    # Set ROS 2 loggers
+    set_ros_loggers()
+
+    # Create a finite state machine (FSM)
+    sm = StateMachine(outcomes=["outcome4"])
+
+    # Create states to run concurrently
+    foo_state: State = FooState()
+    bar_state: State = BarState()
+
+    # Add concurrence state
+    concurrence_state = Concurrence(
+        states=[foo_state, bar_state],
+        default_outcome="defaulted",
+        outcome_map={
+            "outcome1": {foo_state: "outcome1", bar_state: "outcome3"},
+            "outcome2": {foo_state: "outcome2", bar_state: "outcome3"},
+        },
+    )
+
+    # Add concurrent state to the FSM
+    sm.add_state(
+        "CONCURRENCE",
+        concurrence_state,
+        transitions={
+            "outcome1": "CONCURRENCE",
+            "outcome2": "CONCURRENCE",
+            "defaulted": "outcome4",
+        },
+    )
+
+    # Publish FSM information for visualization
+    YasminViewerPub("yasmin_demo", sm)
+
+    # Execute the FSM
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        if sm.is_running():
+            sm.cancel_state()
+
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+</details>
+
 #### Service Demo (FSM + ROS 2 Service Client)
 
 ```shell
@@ -1196,6 +1503,348 @@ int main(int argc, char *argv[]) {
   sm->add_state("BAR", std::make_shared<BarState>(),
                 {
                     {"outcome3", "FOO"},
+                });
+
+  // Publish state machine updates
+  yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);
+
+  // Execute the state machine
+  try {
+    std::string outcome = (*sm.get())();
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  rclcpp::shutdown();
+
+  return 0;
+}
+```
+
+</details>
+
+#### Blackboard Remapping Demo
+
+```shell
+ros2 run yasmin_demos remap_demo
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```cpp
+#include <chrono>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include "rclcpp/rclcpp.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using namespace yasmin;
+
+/**
+ * @brief Represents the "Foo" state in the state machine.
+ */
+class FooState : public yasmin::State {
+public:
+  /**
+   * @brief Constructs a FooState object, initializing the counter.
+   */
+  FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}){};
+
+  /**
+   * @brief Executes the Foo state logic.
+   *
+   * Executes the logic for the Foo state.
+   *
+   * @param blackboard Shared pointer to the blackboard for state communication.
+   * @return std::string The outcome of the execution, which can be SUCCEED.
+   */
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    std::string data = blackboard->get<std::string>("foo_data");
+    YASMIN_LOG_INFO("%s", data.c_str());
+    blackboard->set<std::string>("foo_out_data", data);
+    return yasmin_ros::basic_outcomes::SUCCEED;
+  };
+};
+
+/**
+ * @brief Represents the "Bar" state in the state machine.
+ */
+class BarState : public yasmin::State {
+public:
+  /**
+   * @brief Constructs a BarState object.
+   */
+  BarState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {}
+
+  /**
+   * @brief Executes the Bar state logic.
+   *
+   * Executes the logic for the Bar state.
+   *
+   * @param blackboard Shared pointer to the blackboard for state communication.
+   * @return std::string The outcome of the execution: "outcome3".
+   */
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    std::string datga = blackboard->get<std::string>("bar_data");
+    YASMIN_LOG_INFO("%s", datga.c_str());
+    return yasmin_ros::basic_outcomes::SUCCEED;
+  }
+};
+
+/**
+ * @brief Main function that initializes the ROS 2 node and state machine.
+ *
+ * This function sets up the state machine, adds states, and handles
+ * the execution flow, including logging and cleanup.
+ *
+ * @param argc Argument count from the command line.
+ * @param argv Argument vector from the command line.
+ * @return int Exit status of the program. Returns 0 on success.
+ *
+ * @throws std::exception If there is an error during state machine execution.
+ */
+int main(int argc, char *argv[]) {
+  YASMIN_LOG_INFO("yasmin_demo");
+  rclcpp::init(argc, argv);
+
+  // Set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
+
+  // Create blackboard
+  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  blackboard->set<std::string>("msg1", "test1");
+  blackboard->set<std::string>("msg2", "test2");
+
+  // Create a state machine
+  auto sm = std::make_shared<yasmin::StateMachine>(
+      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED});
+
+  // Cancel state machine on ROS 2 shutdown
+  rclcpp::on_shutdown([sm]() {
+    if (sm->is_running()) {
+      sm->cancel_state();
+    }
+  });
+
+  // Add states to the state machine
+  sm->add_state("STATE1", std::make_shared<FooState>(),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "STATE2"},
+                },
+                {
+                    {"foo_data", "msg1"},
+                });
+  sm->add_state("STATE2", std::make_shared<FooState>(),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "STATE3"},
+                },
+                {
+                    {"foo_data", "msg2"},
+                });
+  sm->add_state("STATE3", std::make_shared<BarState>(),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED,
+                     yasmin_ros::basic_outcomes::SUCCEED},
+                },
+                {
+                    {"bar_data", "foo_out_data"},
+                });
+
+  // Publish state machine updates
+  yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);
+
+  // Execute the state machine
+  try {
+    std::string outcome = (*sm.get())(blackboard);
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  rclcpp::shutdown();
+
+  return 0;
+}
+```
+
+</details>
+
+#### Concurrence Demo
+
+```shell
+ros2 run yasmin_demos concurrence_demo
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```cpp
+#include <chrono>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include "rclcpp/rclcpp.hpp"
+#include "yasmin/concurrence.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using namespace yasmin;
+
+/**
+ * @brief Represents the "Foo" state in the state machine.
+ *
+ * This state increments a counter each time it is executed and
+ * communicates the current count via the blackboard.
+ */
+class FooState : public yasmin::State {
+public:
+  /// Counter to track the number of executions.
+  int counter;
+
+  /**
+   * @brief Constructs a FooState object, initializing the counter.
+   */
+  FooState()
+      : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0){};
+
+  /**
+   * @brief Executes the Foo state logic.
+   *
+   * This method logs the execution, waits for 3 seconds,
+   * increments the counter, and sets a string in the blackboard.
+   * The state will transition to either "outcome1" or "outcome2"
+   * based on the current value of the counter.
+   *
+   * @param blackboard Shared pointer to the blackboard for state communication.
+   * @return std::string The outcome of the execution: "outcome1" or "outcome2".
+   */
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    YASMIN_LOG_INFO("Executing state FOO");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    std::string outcome;
+
+    blackboard->set<std::string>("foo_str",
+                                 "Counter: " + std::to_string(this->counter));
+
+    if (this->counter < 3) {
+      outcome = "outcome1";
+    } else if (this->counter < 5) {
+      outcome = "outcome2";
+    } else {
+      outcome = "outcome3";
+    }
+
+    YASMIN_LOG_INFO("Finishing state FOO");
+    this->counter += 1;
+    return outcome;
+  };
+};
+
+/**
+ * @brief Represents the "Bar" state in the state machine.
+ *
+ * This state logs the value from the blackboard and provides
+ * a single outcome to transition.
+ */
+class BarState : public yasmin::State {
+public:
+  /**
+   * @brief Constructs a BarState object.
+   */
+  BarState() : yasmin::State({"outcome3"}) {}
+
+  /**
+   * @brief Executes the Bar state logic.
+   *
+   * This method logs the execution, waits for 3 seconds,
+   * retrieves a string from the blackboard, and logs it.
+   *
+   * @param blackboard Shared pointer to the blackboard for state communication.
+   * @return std::string The outcome of the execution: "outcome3".
+   */
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    YASMIN_LOG_INFO("Executing state BAR");
+    std::this_thread::sleep_for(std::chrono::seconds(4));
+
+    if (blackboard->contains("foo_str")) {
+      YASMIN_LOG_INFO(blackboard->get<std::string>("foo_str").c_str());
+    } else {
+      YASMIN_LOG_INFO("blackboard does not yet contains 'foo_str'");
+    }
+
+    YASMIN_LOG_INFO("Finishing state BAR");
+
+    return "outcome3";
+  }
+};
+
+/**
+ * @brief Main function that initializes the ROS 2 node and state machine.
+ *
+ * This function sets up the state machine, adds states, and handles
+ * the execution flow, including logging and cleanup.
+ *
+ * @param argc Argument count from the command line.
+ * @param argv Argument vector from the command line.
+ * @return int Exit status of the program. Returns 0 on success.
+ *
+ * @throws std::exception If there is an error during state machine execution.
+ */
+int main(int argc, char *argv[]) {
+  YASMIN_LOG_INFO("yasmin_demo");
+  rclcpp::init(argc, argv);
+
+  // Set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
+
+  // Create a state machine
+  auto sm = std::make_shared<yasmin::StateMachine>(
+      std::initializer_list<std::string>{"outcome4"});
+
+  // Cancel state machine on ROS 2 shutdown
+  rclcpp::on_shutdown([sm]() {
+    if (sm->is_running()) {
+      sm->cancel_state();
+    }
+  });
+
+  // Create states to run concurrently
+  auto foo_state = std::make_shared<FooState>();
+  auto bar_state = std::make_shared<BarState>();
+
+  // Create concurrent state
+  auto concurrent_state = std::make_shared<Concurrence>(
+      std::set<std::shared_ptr<State>>{foo_state, bar_state}, "defaulted",
+      Concurrence::OutcomeMap{
+          {"outcome1", Concurrence::StateMap{{foo_state, "outcome1"},
+                                             {bar_state, "outcome3"}}},
+          {"outcome2", Concurrence::StateMap{{foo_state, "outcome2"},
+                                             {bar_state, "outcome3"}}}});
+
+  // Add concurrent state to the state machine
+  sm->add_state("CONCURRENCE", concurrent_state,
+                {
+                    {"outcome1", "CONCURRENCE"},
+                    {"outcome2", "CONCURRENCE"},
+                    {"defaulted", "outcome4"},
                 });
 
   // Publish state machine updates
