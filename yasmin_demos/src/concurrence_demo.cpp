@@ -20,10 +20,10 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
-#include "yasmin/concurrence.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
@@ -43,7 +43,8 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState() : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0){};
+  FooState()
+      : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0){};
 
   /**
    * @brief Executes the Foo state logic.
@@ -64,7 +65,7 @@ public:
     std::string outcome;
 
     blackboard->set<std::string>("foo_str",
-        "Counter: " + std::to_string(this->counter));
+                                 "Counter: " + std::to_string(this->counter));
 
     if (this->counter < 3) {
       outcome = "outcome1";
@@ -155,13 +156,12 @@ int main(int argc, char *argv[]) {
 
   // Create concurrent state
   auto concurrent_state = std::make_shared<Concurrence>(
-    std::set<std::shared_ptr<State>>{foo_state, bar_state},
-    "default_outcome",
-    Concurrence::OutcomeMap{
-        {"outcome1", Concurrence::StateMap{{foo_state, "outcome1"}, {bar_state, "outcome3"}}},
-        {"outcome2", Concurrence::StateMap{{foo_state, "outcome2"}, {bar_state, "outcome3"}}}
-    }
-  );
+      std::set<std::shared_ptr<State>>{foo_state, bar_state}, "default_outcome",
+      Concurrence::OutcomeMap{
+          {"outcome1", Concurrence::StateMap{{foo_state, "outcome1"},
+                                             {bar_state, "outcome3"}}},
+          {"outcome2", Concurrence::StateMap{{foo_state, "outcome2"},
+                                             {bar_state, "outcome3"}}}});
 
   // Add concurrent state to the state machine
   sm->add_state("FOO", concurrent_state,

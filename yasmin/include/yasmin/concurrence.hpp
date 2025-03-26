@@ -18,14 +18,14 @@
 #define YASMIN__CONCURRENCE_HPP
 
 #include <atomic>
+#include <iostream>
+#include <map>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
-#include <vector>
-#include <map>
 #include <thread>
-#include <mutex>
-#include <iostream>
+#include <vector>
 
 #ifdef __GNUG__     // If using GCC/G++
 #include <cxxabi.h> // For abi::__cxa_demangle
@@ -42,7 +42,8 @@ namespace yasmin {
  *
  * The Concurrence class runs a set of states concurrently, waiting
  * for the termination of each, and then returns a single output
- * according to a provided rule map, or a default outcome if no rule is satisfied.
+ * according to a provided rule map, or a default outcome if no rule is
+ * satisfied.
  */
 class Concurrence : public State {
 
@@ -50,18 +51,20 @@ public:
   typedef std::map<std::shared_ptr<State>, std::string> StateMap;
   typedef std::map<std::string, StateMap> OutcomeMap;
 
-protected:  
+protected:
   /// The states to run concurrently
   const std::set<std::shared_ptr<State>> states;
 
   /// Default outcome
   const std::string default_outcome;
 
-  /// Specifies which combination of state outputs should produce a given overall output
+  /// Specifies which combination of state outputs should produce a given
+  /// overall output
   OutcomeMap outcome_map;
 
   /// Stores the intermedaite outcomes of the concurrent states
-  std::map<std::shared_ptr<State>, std::shared_ptr<std::string>> intermediate_outcome_map;
+  std::map<std::shared_ptr<State>, std::shared_ptr<std::string>>
+      intermediate_outcome_map;
 
   /// The set of possible outcomes
   std::set<std::string> possible_outcomes;
@@ -75,21 +78,22 @@ private:
   /// Mutex for intermediate outcome map
   std::mutex intermediate_outcome_mutex;
 
-  /// @brief Helper function to generate a set of possible outcomes from an outcome map
-  /// @param outcome_map 
+  /// @brief Helper function to generate a set of possible outcomes from an
+  /// outcome map
+  /// @param outcome_map
   /// @param default_outcome
   /// @return The set of possible outcomes
-  static std::set<std::string> generate_possible_outcomes(const OutcomeMap & outcome_map, const std::string & default_outcome);
+  static std::set<std::string>
+  generate_possible_outcomes(const OutcomeMap &outcome_map,
+                             const std::string &default_outcome);
 
 public:
   /**
    * @brief Constructs a State with a set of possible outcomes.
    * @param outcomes A set of possible outcomes for this state.
    */
-  Concurrence(
-    std::set<std::shared_ptr<State>> states,
-    std::string default_outcome,
-    OutcomeMap outcome_map);
+  Concurrence(std::set<std::shared_ptr<State>> states,
+              std::string default_outcome, OutcomeMap outcome_map);
 
   /**
    * @brief Executes the state's specific logic.
@@ -100,7 +104,8 @@ public:
    * This method is intended to be overridden by derived classes to provide
    * specific execution logic.
    */
-  std::string execute(std::shared_ptr<blackboard::Blackboard> blackboard) override;
+  std::string
+  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override;
 
   /**
    * @brief Cancels the current state execution.
