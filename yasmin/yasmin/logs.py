@@ -174,7 +174,8 @@ def YASMIN_LOG_ERROR(text: str) -> None:
 
     @return: None
     """
-    log_helper(LogLevel.ERROR, text)
+    file, function, line = get_caller_info()
+    log_helper(LogLevel.ERROR, file, function, line, text)
 
 
 def YASMIN_LOG_WARN(text: str) -> None:
