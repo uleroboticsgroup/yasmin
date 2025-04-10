@@ -1,9 +1,8 @@
 name: Foxy Docker Push
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   foxy_docker_push:
@@ -11,6 +10,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get tag name
+        run: |
+          tag_name=$(git describe --tags --abbrev=0 HEAD^)
+          echo "tag_name=$tag_name" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -26,4 +32,4 @@ jobs:
         with:
           build-args: ROS_DISTRO=foxy
           push: true
-          tags: mgons/yasmin:foxy
+          tags: mgons/yasmin:foxy-${{ github.event.release.tag_name }}

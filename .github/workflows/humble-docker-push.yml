@@ -1,9 +1,8 @@
 name: Humble Docker Push
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   humble_docker_push:
@@ -11,6 +10,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -26,4 +27,4 @@ jobs:
         with:
           build-args: ROS_DISTRO=humble
           push: true
-          tags: mgons/yasmin:humble
+          tags: mgons/yasmin:humble-${{ github.event.release.tag_name }}

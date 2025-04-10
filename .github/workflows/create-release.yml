@@ -10,9 +10,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,7 +18,6 @@ jobs:
 
       - name: Extract version from commit message
         run: |
-          # Get the version from the commit message using a regex
           if [[ "${{ github.event.head_commit.message }}" =~ new\ version\ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             echo "version=${BASH_REMATCH[1]}" >> $GITHUB_ENV
           else
@@ -45,7 +41,7 @@ jobs:
       - name: Create GitHub release
         uses: actions/create-release@latest
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         with:
           tag_name: "${{ env.version }}"
           release_name: "${{ env.version }}"

@@ -1,9 +1,8 @@
 name: Doxygen Deployment
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   doxygen_generation:
@@ -15,6 +14,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Generate Doxygen for C++
         uses: mattnotmitt/doxygen-action@edge
@@ -26,9 +27,24 @@ jobs:
         with:
           doxyfile-path: ".github/Doxyfile-python"
 
+      - name: Create redirect for /latest/
+        run: |
+          mkdir -p redirect
+          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=../${{ github.event.release.tag_name }}/"/></head></html>' > redirect/index.html
+
       - name: Deploy Doxygen page
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: docs
+          destination_dir: ${{ github.event.release.tag_name }}
+          keep_files: true
+
+      - name: Deploy redirect to /latest/
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: redirect
+          destination_dir: latest
