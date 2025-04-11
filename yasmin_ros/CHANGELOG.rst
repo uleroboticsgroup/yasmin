@@ -2,6 +2,16 @@
 Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+3.2.0 (2025-04-11)
+------------------
+* fixing c++ version in CMakeLists
+* Preempt monitor state on cancel request (`#46 <https://github.com/uleroboticsgroup/yasmin/issues/46>`_)
+  * Preempt monitor state on cancel request
+  * Add canceled outcome to monitor_state and monitor_demo
+  * Implement monitor_state cancel check in Python
+* Contributors: Miguel Ángel González Santamarta, Paul Verhoeckx
+
 3.1.0 (2025-02-05)
 ------------------
 * new yasmin logs

@@ -2,6 +2,44 @@
 Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+3.2.0 (2025-04-11)
+------------------
+* fixing c++ version in CMakeLists
+* Add Concurrence - Running Parallel/Concurrent States (`#50 <https://github.com/uleroboticsgroup/yasmin/issues/50>`_)
+  * add concurrence state
+  * add mutex for intermedaite state dict
+  * prefix self vars with underscore
+  * add concurrence str definition
+  * add comment docs conform 120 character limit
+  * fix init comment on concurrence
+  * fix str gen for concurrence
+  * replace state string representation as outcome map key with an integer alternative
+  * add logic and tests to protect against running a state instance concurrently with itself
+  * add newlines at end of files
+  * verify intermedaite state outcome registration
+  * add untested cpp implementation
+  * fix compile warnings and add a demo
+  * add licensing
+  * run clang format on c files
+  * run black format on py files
+  * add python demo for concurrence
+  * adjust to match python demo better
+  ---------
+  Co-authored-by: William Freidank <william.freidank@gtri.gatech.edu>
+* adding remapping to C++ version
+* Preempt monitor state on cancel request (`#46 <https://github.com/uleroboticsgroup/yasmin/issues/46>`_)
+  * Preempt monitor state on cancel request
+  * Add canceled outcome to monitor_state and monitor_demo
+  * Implement monitor_state cancel check in Python
+* Feat/remmaping (`#47 <https://github.com/uleroboticsgroup/yasmin/issues/47>`_)
+  * started remmaping
+  * remmaping working with demo
+  * reformated with black
+  * formated again with --line-length 90
+  * added remap documentation to the code
+* Contributors: LuisMilczarek, Miguel Ángel González Santamarta, Paul Verhoeckx, William Freidank
+
 3.1.0 (2025-02-05)
 ------------------
 * set_ros_loggers allows setting node to log

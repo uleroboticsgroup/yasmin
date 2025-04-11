@@ -2,6 +2,12 @@
 Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+3.2.0 (2025-04-11)
+------------------
+* fixing c++ version in CMakeLists
+* Contributors: Miguel Ángel González Santamarta
+
 3.1.0 (2025-02-05)
 ------------------
 * updating yasmin viewer dependencies
