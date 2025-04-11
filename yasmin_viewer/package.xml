@@ -3,9 +3,9 @@
 <package format="3">
   <name>yasmin_viewer</name>
   <version>3.2.0</version>
-  <description>TODO: Package description</description>
+  <description>YASMIN viewer for FSM</description>
   <maintainer email="mgons@unileon.es">miguel</maintainer>
-  <license>TODO: License declaration</license>
+  <license>GPL-3</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
   <exec_depend>python3-expiringdict</exec_depend>
