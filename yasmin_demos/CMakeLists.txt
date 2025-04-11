@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(yasmin_demos)
 
-# Default to C++14
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -138,6 +138,14 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# concurrent states demo
+add_executable(concurrence_demo src/concurrence_demo.cpp)
+ament_target_dependencies(concurrence_demo ${DEPENDENCIES})
+install(TARGETS
+concurrence_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_export_include_directories(include)
 ament_export_libraries(${LIB})
 ament_export_dependencies(${DEPENDENCIES})
@@ -172,6 +180,11 @@ install(PROGRAMS
 
 install(PROGRAMS
   yasmin_demos/nav_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  yasmin_demos/concurrence_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
