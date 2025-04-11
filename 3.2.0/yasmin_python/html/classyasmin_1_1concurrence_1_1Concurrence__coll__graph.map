@@ -1,0 +1,8 @@
+<map id="yasmin.concurrence.Concurrence" name="yasmin.concurrence.Concurrence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,169,218,195"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="47,80,176,106"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,122,111,145,113,169,108,169,106,145,107,122"/>
+<area shape="poly" id="edge3_Node000001_Node000002" title=" " alt="" coords="114,122,114,169,109,169,109,122"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="87,5,136,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="114,46,114,80,109,80,109,46"/>
+</map>
