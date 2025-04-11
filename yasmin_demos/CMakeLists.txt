@@ -52,6 +52,10 @@ include_directories(include)
 include_directories(src)
 
 set(LIB ${CMAKE_PROJECT_NAME}_lib)
+set(SOURCES
+  src/foo_state.cpp
+  src/bar_state.cpp
+)
 set(DEPENDENCIES
   rclcpp
   rclcpp_action
@@ -60,6 +64,13 @@ set(DEPENDENCIES
   yasmin_viewer
   nav_msgs
   example_interfaces
+)
+
+add_library(${LIB} STATIC ${SOURCES})
+ament_target_dependencies(${LIB} ${DEPENDENCIES})
+
+install(DIRECTORY include/
+  DESTINATION include/
 )
 
 # demo
@@ -118,9 +129,18 @@ fibonacci_action_server
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# multiple_states_demos
+add_executable(multiple_states_demo src/multiple_states_demo.cpp)
+ament_target_dependencies(multiple_states_demo ${DEPENDENCIES})
+target_link_libraries(multiple_states_demo ${LIB})
+install(TARGETS
+  multiple_states_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_export_include_directories(include)
 ament_export_libraries(${LIB})
-
+ament_export_dependencies(${DEPENDENCIES})
 
 # Python
 ament_python_install_package(${PROJECT_NAME})
