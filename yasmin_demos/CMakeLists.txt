@@ -184,6 +184,11 @@ install(PROGRAMS
 )
 
 install(PROGRAMS
+  yasmin_demos/multiple_states_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
   yasmin_demos/concurrence_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
