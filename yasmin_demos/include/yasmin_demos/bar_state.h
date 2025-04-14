@@ -3,12 +3,13 @@
 #ifndef BAR_STATE_H
 #define BAR_STATE_H
 
-class BarState: public yasmin::State {
+class BarState : public yasmin::State {
 public:
-    BarState();
-    ~BarState();
+  BarState();
+  ~BarState();
 
-    std::string execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard);
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard);
 
 };
 

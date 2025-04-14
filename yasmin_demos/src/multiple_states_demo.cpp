@@ -4,9 +4,9 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
-#include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_demos/bar_state.h"
 #include "yasmin_demos/foo_state.h"
+#include "yasmin_ros/ros_logs.hpp"
 
 using namespace yasmin;
 

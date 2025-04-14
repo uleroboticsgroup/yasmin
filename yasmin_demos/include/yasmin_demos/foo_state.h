@@ -3,13 +3,14 @@
 #ifndef YASMIN_DEMOS_FOO_STATE_H
 #define YASMIN_DEMOS_FOO_STATE_H
 
-class FooState: public yasmin::State {
+class FooState : public yasmin::State {
 public:
-    FooState();
-    ~FooState();
+  FooState();
+  ~FooState();
 
-    std::string execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard);
-    int counter;
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard);
+  int counter;
 
 };
 
