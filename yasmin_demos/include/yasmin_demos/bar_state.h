@@ -10,7 +10,6 @@ public:
 
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard);
-
 };
 
 #endif // BAR_STATE_H
