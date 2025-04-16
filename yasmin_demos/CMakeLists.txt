@@ -52,6 +52,10 @@ include_directories(include)
 include_directories(src)
 
 set(LIB ${CMAKE_PROJECT_NAME}_lib)
+set(SOURCES
+  src/foo_state.cpp
+  src/bar_state.cpp
+)
 set(DEPENDENCIES
   rclcpp
   rclcpp_action
@@ -60,6 +64,13 @@ set(DEPENDENCIES
   yasmin_viewer
   nav_msgs
   example_interfaces
+)
+
+add_library(${LIB} STATIC ${SOURCES})
+ament_target_dependencies(${LIB} ${DEPENDENCIES})
+
+install(DIRECTORY include/
+  DESTINATION include/
 )
 
 # demo
@@ -118,6 +129,15 @@ fibonacci_action_server
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# multiple_states_demos
+add_executable(multiple_states_demo src/multiple_states_demo.cpp)
+ament_target_dependencies(multiple_states_demo ${DEPENDENCIES})
+target_link_libraries(multiple_states_demo ${LIB})
+install(TARGETS
+  multiple_states_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # concurrent states demo
 add_executable(concurrence_demo src/concurrence_demo.cpp)
 ament_target_dependencies(concurrence_demo ${DEPENDENCIES})
@@ -128,7 +148,7 @@ concurrence_demo
 
 ament_export_include_directories(include)
 ament_export_libraries(${LIB})
-
+ament_export_dependencies(${DEPENDENCIES})
 
 # Python
 ament_python_install_package(${PROJECT_NAME})
@@ -160,6 +180,11 @@ install(PROGRAMS
 
 install(PROGRAMS
   yasmin_demos/nav_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  yasmin_demos/multiple_states_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
