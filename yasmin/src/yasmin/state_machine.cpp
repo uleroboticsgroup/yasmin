@@ -294,7 +294,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
   YASMIN_LOG_INFO("Executing state machine with initial state '%s'",
                   this->start_state.c_str());
-  this->call_start_cbs(blackboard, this->get_start_state());
+  this->call_start_cbs(blackboard, this->start_state);
 
   this->current_state_mutex->lock();
   this->current_state = this->start_state;

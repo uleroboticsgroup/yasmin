@@ -372,14 +372,13 @@ class StateMachine(State):
         """
         self.validate()
 
-        start_state = self._start_state
         yasmin.YASMIN_LOG_INFO(
-            f"Executing state machine with initial state '{start_state}'"
+            f"Executing state machine with initial state '{self._start_state}'"
         )
-        self._call_start_cbs(blackboard, start_state)
+        self._call_start_cbs(blackboard, self._start_state)
 
         with self.__current_state_lock:
-            self.__current_state: str = start_state
+            self.__current_state: str = self._start_state
 
         while not self.is_canceled():
             state = self._states[self.get_current_state()]
