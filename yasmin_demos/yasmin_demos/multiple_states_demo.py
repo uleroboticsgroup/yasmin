@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#coding: utf-8
+# coding: utf-8
 
 # Copyright (C) 2025 Pedro Edom Nunes
 #
@@ -16,16 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import time
 import rclpy
-
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
 from yasmin import StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 from yasmin_demos import FooState, BarState
+
 
 # Main function to initialize and run the state machine
 def main():

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#coding: utf-8
+# coding: utf-8
 
 # Copyright (C) 2025 Pedro Edom Nunes
 #
@@ -17,11 +17,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
-import rclpy
-
 import yasmin
 from yasmin import State
 from yasmin import Blackboard
+
 
 # Define the FooState class, inheriting from the State class
 class FooState(State):

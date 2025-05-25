@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#coding: utf-8
+# coding: utf-8
 
 # Copyright (C) 2025 Pedro Edom Nunes
 #
@@ -22,6 +22,7 @@ import rclpy
 import yasmin
 from yasmin import State
 from yasmin import Blackboard
+
 
 # Define the BarState class, inheriting from the State class
 class BarState(State):
