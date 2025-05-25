@@ -6,10 +6,6 @@ if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
 if(NOT DEFINED ENV{ROS_DISTRO})
   message(FATAL_ERROR "ROS_DISTRO is not defined." )
 endif()
@@ -43,10 +39,9 @@ find_package(rclcpp_action REQUIRED)
 find_package(yasmin REQUIRED)
 
 # C++
-include_directories(include)
 include_directories(src)
+include_directories(include)
 
-set(LIB ${CMAKE_PROJECT_NAME}_lib)
 set(SOURCES
   src/yasmin_ros/yasmin_node.cpp
   src/yasmin_ros/ros_logs.cpp
@@ -54,29 +49,39 @@ set(SOURCES
   src/yasmin_ros/service_state.cpp
   src/yasmin_ros/monitor_state.cpp
 )
-
 set(DEPENDENCIES
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  yasmin::yasmin
+)
+set(DEPENDENCIES_PACKAGE
   rclcpp
   rclcpp_action
   yasmin
 )
 
-add_library(${LIB} STATIC ${SOURCES})
-ament_target_dependencies(${LIB} ${DEPENDENCIES})
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
+target_include_directories(${PROJECT_NAME} PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(${PROJECT_NAME} PUBLIC ${DEPENDENCIES})
 
-install(TARGETS ${LIB}
+install(TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
 install(DIRECTORY include/
-  DESTINATION include/
+  DESTINATION include/${PROJECT_NAME}
 )
 
-ament_export_include_directories(include)
-ament_export_libraries(${LIB})
-ament_export_dependencies(${DEPENDENCIES})
+ament_export_include_directories("include/${PROJECT_NAME}")
+ament_export_libraries(${PROJECT_NAME})
+ament_export_targets(${PROJECT_NAME})
+ament_export_dependencies(${DEPENDENCIES_PACKAGE})
 
 
 # Python

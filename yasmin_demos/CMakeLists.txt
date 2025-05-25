@@ -48,15 +48,19 @@ find_package(nav_msgs REQUIRED)
 find_package(example_interfaces REQUIRED)
 
 # C++
-include_directories(include)
 include_directories(src)
+include_directories(include)
 
-set(LIB ${CMAKE_PROJECT_NAME}_lib)
-set(SOURCES
-  src/foo_state.cpp
-  src/bar_state.cpp
-)
 set(DEPENDENCIES
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  yasmin::yasmin
+  yasmin_ros::yasmin_ros
+  yasmin_viewer::yasmin_viewer
+  ${nav_msgs_TARGETS}
+  ${example_interfaces_TARGETS}
+)
+set(DEPENDENCIES_PACKAGE
   rclcpp
   rclcpp_action
   yasmin
@@ -66,16 +70,13 @@ set(DEPENDENCIES
   example_interfaces
 )
 
-add_library(${LIB} STATIC ${SOURCES})
-ament_target_dependencies(${LIB} ${DEPENDENCIES})
-
 install(DIRECTORY include/
-  DESTINATION include/
+  DESTINATION include/${PROJECT_NAME}
 )
 
 # demo
 add_executable(yasmin_demo src/yasmin_demo.cpp)
-ament_target_dependencies(yasmin_demo ${DEPENDENCIES})
+target_link_libraries(yasmin_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   yasmin_demo
   DESTINATION lib/${PROJECT_NAME}
@@ -83,15 +84,15 @@ install(TARGETS
 
 # remap demo
 add_executable(remap_demo src/remap_demo.cpp)
-ament_target_dependencies(remap_demo ${DEPENDENCIES})
+target_link_libraries(remap_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
-remap_demo
+  remap_demo
   DESTINATION lib/${PROJECT_NAME}
 )
 
 # monitor demo
 add_executable(monitor_demo src/monitor_demo.cpp)
-ament_target_dependencies(monitor_demo ${DEPENDENCIES})
+target_link_libraries(monitor_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   monitor_demo
   DESTINATION lib/${PROJECT_NAME}
@@ -99,7 +100,7 @@ install(TARGETS
 
 # service client demo
 add_executable(service_client_demo src/service_client_demo.cpp)
-ament_target_dependencies(service_client_demo ${DEPENDENCIES})
+target_link_libraries(service_client_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   service_client_demo
   DESTINATION lib/${PROJECT_NAME}
@@ -107,7 +108,7 @@ install(TARGETS
 
 # action client demo
 add_executable(action_client_demo src/action_client_demo.cpp)
-ament_target_dependencies(action_client_demo ${DEPENDENCIES})
+target_link_libraries(action_client_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   action_client_demo
   DESTINATION lib/${PROJECT_NAME}
@@ -115,24 +116,23 @@ install(TARGETS
 
 # add_two_ints service server
 add_executable(add_two_ints_server src/add_two_ints_server.cpp)
-ament_target_dependencies(add_two_ints_server ${DEPENDENCIES})
+target_link_libraries(add_two_ints_server PUBLIC ${DEPENDENCIES})
 install(TARGETS
-add_two_ints_server
+  add_two_ints_server
   DESTINATION lib/${PROJECT_NAME}
 )
 
 # fibonacci action server
 add_executable(fibonacci_action_server src/fibonacci_action_server.cpp)
-ament_target_dependencies(fibonacci_action_server ${DEPENDENCIES})
+target_link_libraries(fibonacci_action_server PUBLIC ${DEPENDENCIES})
 install(TARGETS
-fibonacci_action_server
+  fibonacci_action_server
   DESTINATION lib/${PROJECT_NAME}
 )
 
 # multiple_states_demos
-add_executable(multiple_states_demo src/multiple_states_demo.cpp)
-ament_target_dependencies(multiple_states_demo ${DEPENDENCIES})
-target_link_libraries(multiple_states_demo ${LIB})
+add_executable(multiple_states_demo src/multiple_states_demo.cpp src/foo_state.cpp src/bar_state.cpp)
+target_link_libraries(multiple_states_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   multiple_states_demo
   DESTINATION lib/${PROJECT_NAME}
@@ -140,15 +140,15 @@ install(TARGETS
 
 # concurrent states demo
 add_executable(concurrence_demo src/concurrence_demo.cpp)
-ament_target_dependencies(concurrence_demo ${DEPENDENCIES})
+target_link_libraries(concurrence_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
-concurrence_demo
+  concurrence_demo
   DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_export_include_directories(include)
-ament_export_libraries(${LIB})
-ament_export_dependencies(${DEPENDENCIES})
+ament_export_dependencies(${DEPENDENCIES_PACKAGE})
+
 
 # Python
 ament_python_install_package(${PROJECT_NAME})
