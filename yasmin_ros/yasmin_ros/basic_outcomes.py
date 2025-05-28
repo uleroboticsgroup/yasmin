@@ -22,5 +22,6 @@ be utilized for error handling, logging, and user feedback.
 # Constants representing the various status codes
 SUCCEED = "succeeded"  ##< Indicates that an operation has completed successfully.
 ABORT = "aborted"  ##< Indicates that an operation was aborted before completion.
+FAIL = "failed"  ##< Indicates that an operation has not achieved its intended result.
 CANCEL = "canceled"  ##< Indicates that an operation was canceled by the user or system.
 TIMEOUT = "timeout"  ##< Indicates that an operation has timed out and did not complete in a timely manner.
