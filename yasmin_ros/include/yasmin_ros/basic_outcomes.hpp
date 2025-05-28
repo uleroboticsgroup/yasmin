@@ -52,7 +52,7 @@ constexpr char ABORT[] = "aborted";
  * This string constant is used to indicate that an action has completed
  * but resulted in failure, meaning it did not achieve its intended result.
  */
- constexpr char FAIL[] = "failed";
+constexpr char FAIL[] = "failed";
 
 /**
  * @brief Constant representing a canceled action outcome.
