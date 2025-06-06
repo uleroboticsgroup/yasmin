@@ -33,11 +33,11 @@ namespace yasmin {
  * execute a user-defined callback function, utilizing a shared pointer
  * to a Blackboard object to obtain necessary data.
  */
-class CbState : public State {
+class CbState : public State { 
 
 private:
   /// Pointer to the callback function to be executed.
-  std::string (*callback)(std::shared_ptr<blackboard::Blackboard> blackboard);
+    std::function<std::string(std::shared_ptr<blackboard::Blackboard>)> callback;
 
 public:
   /**
@@ -50,8 +50,8 @@ public:
    * @throw std::invalid_argument If the outcomes set is empty.
    */
   CbState(std::set<std::string> outcomes,
-          std::string (*callback)(
-              std::shared_ptr<blackboard::Blackboard> blackboard));
+          std::function<std::string(
+          std::shared_ptr<blackboard::Blackboard>)> callback);
 
   /**
    * @brief Executes the callback function.
