@@ -122,7 +122,7 @@ class MonitorState(State):
         if self.monitoring:
             self.msg_list.append(msg)
 
-            if len(self.msg_list) >= self.msg_queue:
+            if len(self.msg_list) > self.msg_queue:
                 self.msg_list.pop(0)
 
     def execute(self, blackboard: Blackboard) -> str:

@@ -212,7 +212,7 @@ private:
     if (this->monitoring) {
       this->msg_list.push_back(msg);
 
-      if ((int)this->msg_list.size() >= this->msg_queue) {
+      if ((int)this->msg_list.size() > this->msg_queue) {
         this->msg_list.erase(this->msg_list.begin());
       }
     }
