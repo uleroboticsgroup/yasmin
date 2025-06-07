@@ -66,7 +66,25 @@ public:
                CreateRequestHandler create_request_handler,
                std::set<std::string> outcomes, int timeout = -1.0)
       : ServiceState(srv_name, create_request_handler, outcomes, nullptr,
-                     timeout) {}
+                     nullptr, timeout) {}
+
+  /**
+   * @brief Construct a ServiceState with a request handler and outcomes.
+   *
+   * @param srv_name The name of the service to call.
+   * @param create_request_handler Function to create a service request.
+   * @param outcomes A set of possible outcomes for this state.
+   * @param callback_group (Optional) The callback group for the subscription.
+   * @param timeout Maximum time to wait for the service to become available, in
+   * seconds. Default is -1 (wait indefinitely).
+   */
+  ServiceState(std::string srv_name,
+               CreateRequestHandler create_request_handler,
+               std::set<std::string> outcomes,
+               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
+               int timeout = -1.0)
+      : ServiceState(srv_name, create_request_handler, outcomes, nullptr,
+                     callback_group, timeout) {}
 
   /**
    * @brief Construct a ServiceState with a request handler and response
@@ -75,7 +93,7 @@ public:
    * @param srv_name The name of the service to call.
    * @param create_request_handler Function to create a service request.
    * @param outcomes A set of possible outcomes for this state.
-   * @param response_handler Function to handle the service response.
+   * @param response_handler (Optional) Function to handle the service response.
    * @param timeout Maximum time to wait for the service to become available, in
    * seconds. Default is -1 (wait indefinitely).
    */
@@ -84,7 +102,7 @@ public:
                std::set<std::string> outcomes, ResponseHandler response_handler,
                int timeout = -1.0)
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
-                     response_handler, timeout) {}
+                     response_handler, nullptr, timeout) {}
 
   /**
    * @brief Construct a ServiceState with a ROS 2 node and handlers.
@@ -93,7 +111,8 @@ public:
    * @param srv_name The name of the service to call.
    * @param create_request_handler Function to create a service request.
    * @param outcomes A set of possible outcomes for this state.
-   * @param response_handler Function to handle the service response.
+   * @param response_handler (Optional) Function to handle the service response.
+   * @param callback_group (Optional) The callback group for the subscription.
    * @param timeout Maximum time to wait for the service to become available, in
    * seconds. Default is -1 (wait indefinitely).
    *
@@ -102,6 +121,7 @@ public:
   ServiceState(const rclcpp::Node::SharedPtr &node, std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::set<std::string> outcomes, ResponseHandler response_handler,
+               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int timeout = -1.0)
       : State({}), srv_name(srv_name), timeout(timeout) {
 
@@ -123,8 +143,8 @@ public:
     }
 
     // Create a service client
-    this->service_client =
-        this->node_->template create_client<ServiceT>(srv_name);
+    this->service_client = this->node_->template create_client<ServiceT>(
+        srv_name, rmw_qos_profile_services_default, callback_group);
 
     // Set the request and response handlers
     this->create_request_handler = create_request_handler;

@@ -20,7 +20,7 @@ from rclpy.node import Node
 from rclpy.task import Future
 from rclpy.action import ActionClient
 from rclpy.action.client import ClientGoalHandle
-from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.callback_groups import CallbackGroup
 from action_msgs.msg import GoalStatus
 
 from yasmin import State
@@ -59,6 +59,7 @@ class ActionState(State):
         outcomes: Set[str] = None,
         result_handler: Callable = None,
         feedback_handler: Callable = None,
+        callback_group: CallbackGroup = None,
         node: Node = None,
         timeout: float = None,
     ) -> None:
@@ -74,6 +75,7 @@ class ActionState(State):
             outcomes (Set[str], optional): Additional outcomes that this state can return.
             result_handler (Callable[[Blackboard, Any], str], optional): A function to process the result of the action.
             feedback_handler (Callable[[Blackboard, Any], None], optional): A function to process feedback from the action.
+            callback_group (CallbackGroup, optional): The callback group for the action client.
             node (Node, optional): The ROS 2 node to use. If None, uses the default YasminNode.
             timeout (float, optional): Timeout duration for waiting for the action server.
 
@@ -124,7 +126,7 @@ class ActionState(State):
             self._node,
             action_type,
             action_name,
-            callback_group=ReentrantCallbackGroup(),
+            callback_group=callback_group,
         )
 
         if not self._create_goal_handler:

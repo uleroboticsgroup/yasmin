@@ -51,32 +51,6 @@ template <typename MsgT> class MonitorState : public yasmin::State {
 
 public:
   /**
-   * @brief Construct a new MonitorState with specific QoS and message queue
-   * settings.
-   *
-   * @param topic_name The name of the topic to monitor.
-   * @param outcomes A set of possible outcomes for this state.
-   * @param monitor_handler A callback handler to process incoming messages.
-   * @param qos Quality of Service settings for the topic.
-   * @param msg_queue The maximum number of messages to queue.
-   */
-  MonitorState(std::string topic_name, std::set<std::string> outcomes,
-               MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue)
-      : MonitorState(topic_name, outcomes, monitor_handler, qos, msg_queue,
-                     -1) {}
-
-  /**
-   * @brief Construct a new MonitorState with default QoS and message queue.
-   *
-   * @param topic_name The name of the topic to monitor.
-   * @param outcomes A set of possible outcomes for this state.
-   * @param monitor_handler A callback handler to process incoming messages.
-   */
-  MonitorState(std::string topic_name, std::set<std::string> outcomes,
-               MonitorHandler monitor_handler)
-      : MonitorState(topic_name, outcomes, monitor_handler, 10, 10, -1) {}
-
-  /**
    * @brief Construct a new MonitorState with specific QoS, message queue, and
    * timeout.
    *
@@ -88,10 +62,29 @@ public:
    * @param timeout The time in seconds to wait for messages before timing out.
    */
   MonitorState(std::string topic_name, std::set<std::string> outcomes,
-               MonitorHandler monitor_handler, rclcpp::QoS qos, int msg_queue,
-               int timeout)
+               MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
+               int msg_queue = 10, int timeout = -1)
       : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
-                     msg_queue, timeout) {}
+                     nullptr, msg_queue, timeout) {}
+
+  /**
+   * @brief Construct a new MonitorState with specific QoS, message queue, and
+   * timeout.
+   *
+   * @param topic_name The name of the topic to monitor.
+   * @param outcomes A set of possible outcomes for this state.
+   * @param monitor_handler A callback handler to process incoming messages.
+   * @param qos Quality of Service settings for the topic.
+   * @param callback_group The callback group for the subscription.
+   * @param msg_queue The maximum number of messages to queue.
+   * @param timeout The time in seconds to wait for messages before timing out.
+   */
+  MonitorState(std::string topic_name, std::set<std::string> outcomes,
+               MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
+               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
+               int msg_queue = 10, int timeout = -1)
+      : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
+                     callback_group, msg_queue, timeout) {}
 
   /**
    * @brief Construct a new MonitorState with ROS 2 node, specific QoS, message
@@ -107,7 +100,9 @@ public:
    */
   MonitorState(const rclcpp::Node::SharedPtr &node, std::string topic_name,
                std::set<std::string> outcomes, MonitorHandler monitor_handler,
-               rclcpp::QoS qos, int msg_queue, int timeout)
+               rclcpp::QoS qos = 10,
+               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
+               int msg_queue = 10, int timeout = -1)
       : State({}), topic_name(topic_name), monitor_handler(monitor_handler),
         msg_queue(msg_queue), timeout(timeout), monitoring(false),
         time_to_wait(1000) {
@@ -133,8 +128,11 @@ public:
     }
 
     // create subscriber
+    rclcpp::SubscriptionOptions options;
+    options.callback_group = callback_group;
+
     this->sub = this->node_->template create_subscription<MsgT>(
-        topic_name, qos, std::bind(&MonitorState::callback, this, _1));
+        topic_name, qos, std::bind(&MonitorState::callback, this, _1), options);
   }
 
   /**

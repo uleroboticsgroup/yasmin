@@ -19,6 +19,7 @@ from typing import List, Set, Callable, Union, Type, Any
 from rclpy.node import Node
 from rclpy.subscription import Subscription
 from rclpy.qos import QoSProfile
+from rclpy.callback_groups import CallbackGroup
 
 from yasmin import State
 from yasmin import Blackboard
@@ -52,6 +53,7 @@ class MonitorState(State):
         outcomes: Set[str],
         monitor_handler: Callable,
         qos: Union[QoSProfile, int] = 10,
+        callback_group: CallbackGroup = None,
         msg_queue: int = 10,
         node: Node = None,
         timeout: int = None,
@@ -65,6 +67,7 @@ class MonitorState(State):
             outcomes (Set[str]): The set of possible outcomes from the state.
             monitor_handler (Callable[[Blackboard, Any], None]): The function to call with the received messages.
             qos (Union[QoSProfile, int], optional): Quality of Service profile or depth.
+            callback_group (CallbackGroup, optional): The callback group for the subscription.
             msg_queue (int, optional): Maximum number of messages to store. Default is 10.
             node (Node, optional): The ROS node to use. If None, a default node is created.
             timeout (int, optional): Timeout in seconds for monitoring before giving up.
@@ -102,7 +105,11 @@ class MonitorState(State):
 
         ## Subscription object for the specified topic.
         self._sub: Subscription = self._node.create_subscription(
-            msg_type, topic_name, self.__callback, qos
+            msg_type,
+            topic_name,
+            self.__callback,
+            qos,
+            callback_group=callback_group,
         )
 
         super().__init__(outcomes)

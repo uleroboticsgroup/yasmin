@@ -87,8 +87,31 @@ public:
    */
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes, int timeout = -1.0)
-      : ActionState(action_name, create_goal_handler, outcomes, nullptr,
-                    nullptr, timeout) {}
+      : ActionState(nullptr, action_name, create_goal_handler, outcomes,
+                    nullptr, nullptr, nullptr, timeout) {}
+
+  /**
+   * @brief Construct an ActionState with a specific action name and goal
+   * handler.
+   *
+   * This constructor initializes the action state with a specified action name,
+   * goal handler, and optional timeout.
+   *
+   * @param action_name The name of the action to communicate with.
+   * @param create_goal_handler A function that creates a goal for the action.
+   * @param outcomes A set of possible outcomes for this action state.
+   * @param callback_group (Optional) The callback group for the action client.
+   * @param timeout (Optional) The maximum time to wait for the action server.
+   *                Default is -1 (no timeout).
+   *
+   * @throws std::invalid_argument if create_goal_handler is nullptr.
+   */
+  ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
+              std::set<std::string> outcomes,
+              rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
+              int timeout = -1.0)
+      : ActionState(nullptr, action_name, create_goal_handler, outcomes,
+                    nullptr, nullptr, callback_group, timeout) {}
 
   /**
    * @brief Construct an ActionState with result and feedback handlers.
@@ -109,8 +132,8 @@ public:
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
-      : ActionState(action_name, create_goal_handler, {}, result_handler,
-                    feedback_handler, timeout) {}
+      : ActionState(nullptr, action_name, create_goal_handler, {},
+                    result_handler, feedback_handler, nullptr, timeout) {}
 
   /**
    * @brief Construct an ActionState with outcomes and handlers.
@@ -135,7 +158,8 @@ public:
               ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
-                    result_handler, feedback_handler, timeout) {}
+                    result_handler, feedback_handler, nullptr, nullptr,
+                    timeout) {}
 
   /**
    * @brief Construct an ActionState with a specified node and action name.
@@ -151,6 +175,7 @@ public:
    * action.
    * @param feedback_handler (Optional) A function to handle feedback from the
    * action.
+   * @param callback_group (Optional) The callback group for the action client.
    * @param timeout (Optional) The maximum time to wait for the action server.
    *                Default is -1 (no timeout).
    *
@@ -160,7 +185,9 @@ public:
               CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes,
               ResultHandler result_handler = nullptr,
-              FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
+              FeedbackHandler feedback_handler = nullptr,
+              rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
+              int timeout = -1.0)
       : State({}), action_name(action_name),
         create_goal_handler(create_goal_handler),
         result_handler(result_handler), feedback_handler(feedback_handler),
@@ -181,8 +208,8 @@ public:
       this->node_ = node;
     }
 
-    this->action_client =
-        rclcpp_action::create_client<ActionT>(this->node_, action_name);
+    this->action_client = rclcpp_action::create_client<ActionT>(
+        this->node_, action_name, callback_group);
 
     if (this->create_goal_handler == nullptr) {
       throw std::invalid_argument("create_goal_handler is needed");

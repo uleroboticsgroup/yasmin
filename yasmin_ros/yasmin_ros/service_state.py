@@ -17,6 +17,7 @@ from typing import Set, Callable, Type, Any
 
 from rclpy.node import Node
 from rclpy.client import Client
+from rclpy.callback_groups import CallbackGroup
 
 import yasmin
 from yasmin import State
@@ -48,6 +49,7 @@ class ServiceState(State):
         create_request_handler: Callable,
         outcomes: Set[str] = None,
         response_handler: Callable = None,
+        callback_group: CallbackGroup = None,
         node: Node = None,
         timeout: float = None,
     ) -> None:
@@ -60,6 +62,7 @@ class ServiceState(State):
             create_request_handler (Callable[[Blackboard], Any]): A handler to create the request based on the blackboard data.
             outcomes (Set[str], optional): A set of additional outcomes for this state.
             response_handler (Callable[[Blackboard, Any], str], optional): A handler to process the service response.
+            callback_group (CallbackGroup, optional): The callback group for the client.
             node (Node, optional): A ROS node instance; if None, a default instance is used.
             timeout (float, optional): Timeout duration for waiting on the service.
 
@@ -93,7 +96,9 @@ class ServiceState(State):
         self._srv_name: str = srv_name
 
         ## The client used to call the service.
-        self._service_client: Client = self._node.create_client(srv_type, srv_name)
+        self._service_client: Client = self._node.create_client(
+            srv_type, srv_name, callback_group=callback_group
+        )
 
         if not self._create_request_handler:
             raise ValueError("create_request_handler is needed")
