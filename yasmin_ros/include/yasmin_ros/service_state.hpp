@@ -22,7 +22,6 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp/version.h"
 
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/state.hpp"
@@ -144,9 +143,14 @@ public:
     }
 
     // Create a service client (compatible with different rclcpp versions)
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
 #if RCLCPP_VERSION_GTE(28, 1, 9)
     auto qos = rclcpp::QoS(
         rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default));
+#else
+    auto qos = rmw_qos_profile_services_default;
+#endif
 #else
     auto qos = rmw_qos_profile_services_default;
 #endif
