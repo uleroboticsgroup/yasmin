@@ -23,6 +23,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp/version.h"
 #include "rclcpp_action/rclcpp_action.hpp"
 
 #include "yasmin/blackboard/blackboard.hpp"
@@ -360,20 +361,7 @@ private:
   /// Maximum time to wait for the action server.
   int timeout;
 
-#if defined(FOXY)
-  /**
-   * @brief Callback for handling the goal response.
-   *
-   * This function is called when a response for the goal is received.
-   *
-   * @param future A future that holds the goal handle.
-   */
-  void goal_response_callback(
-      std::shared_future<typename GoalHandle::SharedPtr> future) {
-    std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
-    this->goal_handle = future.get();
-  }
-#else
+#if RCLCPP_VERSION_GTE(2, 4, 3)
   /**
    * @brief Callback for handling the goal response.
    *
@@ -385,6 +373,19 @@ private:
   goal_response_callback(const typename GoalHandle::SharedPtr &goal_handle) {
     std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
     this->goal_handle = goal_handle;
+  }
+#else
+  /**
+   * @brief Callback for handling the goal response.
+   *
+   * This function is called when a response for the goal is received.
+   *
+   * @param future A future that holds the goal handle.
+   */
+  void goal_response_callback(
+      std::shared_future<typename GoalHandle::SharedPtr> future) {
+    std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
+    this->goal_handle = future.get();
   }
 #endif
 

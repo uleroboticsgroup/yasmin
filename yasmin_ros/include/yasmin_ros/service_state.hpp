@@ -22,6 +22,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp/version.h"
 
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/state.hpp"
@@ -142,9 +143,16 @@ public:
       this->node_ = node;
     }
 
-    // Create a service client
+    // Create a service client (compatible with different rclcpp versions)
+#if RCLCPP_VERSION_GTE(28, 1, 9)
+    auto qos = rclcpp::QoS(
+        rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default));
+#else
+    auto qos = rmw_qos_profile_services_default;
+#endif
+
     this->service_client = this->node_->template create_client<ServiceT>(
-        srv_name, rmw_qos_profile_services_default, callback_group);
+        srv_name, qos, callback_group);
 
     // Set the request and response handlers
     this->create_request_handler = create_request_handler;
