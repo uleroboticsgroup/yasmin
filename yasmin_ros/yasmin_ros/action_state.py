@@ -23,6 +23,7 @@ from rclpy.action.client import ClientGoalHandle
 from rclpy.callback_groups import CallbackGroup
 from action_msgs.msg import GoalStatus
 
+import yasmin
 from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
@@ -164,18 +165,18 @@ class ActionState(State):
         """
         goal = self._create_goal_handler(blackboard)
 
-        self._node.get_logger().info(f"Waiting for action '{self._action_name}'")
+        yasmin.YASMIN_LOG_INFO(f"Waiting for action '{self._action_name}'")
         act_available = self._action_client.wait_for_server(self._timeout)
 
         if not act_available:
-            self._node.get_logger().warn(
+            yasmin.YASMIN_LOG_WARN(
                 f"Timeout reached, action '{self._action_name}' is not available"
             )
             return TIMEOUT
 
         self._action_done_event.clear()
 
-        self._node.get_logger().info(f"Sending goal to action '{self._action_name}'")
+        yasmin.YASMIN_LOG_INFO(f"Sending goal to action '{self._action_name}'")
 
         def feedback_handler(feedback):
             if self._feedback_handler is not None:

@@ -26,6 +26,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -162,9 +163,8 @@ public:
 
         if (elapsed_time / 1e6 >= this->timeout) {
           this->monitoring = false;
-          RCLCPP_WARN(this->node_->get_logger(),
-                      "Timeout reached, topic '%s' is not available",
-                      this->topic_name.c_str());
+          YASMIN_LOG_WARN("Timeout reached, topic '%s' is not available",
+                          this->topic_name.c_str());
           return basic_outcomes::TIMEOUT;
         }
 
@@ -172,8 +172,7 @@ public:
       }
     }
 
-    RCLCPP_INFO(this->node_->get_logger(), "Processing msg from topic '%s'",
-                this->topic_name.c_str());
+    YASMIN_LOG_INFO("Processing msg from topic '%s'", this->topic_name.c_str());
     std::string outcome =
         this->monitor_handler(blackboard, this->msg_list.at(0));
     this->msg_list.erase(this->msg_list.begin());

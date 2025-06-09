@@ -21,6 +21,7 @@ from rclpy.subscription import Subscription
 from rclpy.qos import QoSProfile
 from rclpy.callback_groups import CallbackGroup
 
+import yasmin
 from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
@@ -165,13 +166,13 @@ class MonitorState(State):
             if self._timeout is not None:
                 if elapsed_time >= self._timeout:
                     self.monitoring: bool = False
-                    self._node.get_logger().warn(
+                    yasmin.YASMIN_LOG_WARN(
                         f"Timeout reached, topic '{self._topic_name}' is not available"
                     )
                     return TIMEOUT
                 elapsed_time += self.time_to_wait
 
-        self._node.get_logger().info(f"Processing msg from topic '{self._topic_name}'")
+        yasmin.YASMIN_LOG_INFO(f"Processing msg from topic '{self._topic_name}'")
         outcome = self._monitor_handler(blackboard, self.msg_list.pop(0))
 
         self.monitoring: bool = False

@@ -26,6 +26,7 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 
 #include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -268,15 +269,13 @@ public:
     Goal goal = this->create_goal_handler(blackboard);
 
     // Wait for the action server to be available
-    RCLCPP_INFO(this->node_->get_logger(), "Waiting for action '%s'",
-                this->action_name.c_str());
+    YASMIN_LOG_INFO("Waiting for action '%s'", this->action_name.c_str());
     bool act_available = this->action_client->wait_for_action_server(
         std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
 
     if (!act_available) {
-      RCLCPP_WARN(this->node_->get_logger(),
-                  "Timeout reached, action '%s' is not available",
-                  this->action_name.c_str());
+      YASMIN_LOG_WARN("Timeout reached, action '%s' is not available",
+                      this->action_name.c_str());
       return basic_outcomes::TIMEOUT;
     }
 
@@ -296,8 +295,7 @@ public:
           };
     }
 
-    RCLCPP_INFO(this->node_->get_logger(), "Sending goal to action '%s'",
-                this->action_name.c_str());
+    YASMIN_LOG_INFO("Sending goal to action '%s'", this->action_name.c_str());
     this->action_client->async_send_goal(goal, send_goal_options);
 
     // Wait for the action to complete

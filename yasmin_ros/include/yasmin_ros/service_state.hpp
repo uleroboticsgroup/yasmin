@@ -24,6 +24,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -185,21 +186,18 @@ public:
     Request request = this->create_request(blackboard);
 
     // Wait for the service to become available
-    RCLCPP_INFO(this->node_->get_logger(), "Waiting for service '%s'",
-                this->srv_name.c_str());
+    YASMIN_LOG_INFO("Waiting for service '%s'", this->srv_name.c_str());
     bool srv_available = this->service_client->wait_for_service(
         std::chrono::duration<int64_t, std::ratio<1>>(this->timeout));
 
     if (!srv_available) {
-      RCLCPP_WARN(this->node_->get_logger(),
-                  "Timeout reached, service '%s' is not available",
-                  this->srv_name.c_str());
+      YASMIN_LOG_WARN("Timeout reached, service '%s' is not available",
+                      this->srv_name.c_str());
       return basic_outcomes::TIMEOUT;
     }
 
     // Send the service request
-    RCLCPP_INFO(this->node_->get_logger(), "Sending request to service '%s'",
-                this->srv_name.c_str());
+    YASMIN_LOG_INFO("Sending request to service '%s'", this->srv_name.c_str());
     auto future = this->service_client->async_send_request(request);
 
     // Wait for the response

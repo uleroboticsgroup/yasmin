@@ -146,20 +146,24 @@ inline const char *extract_filename(const char *path) {
 // Macros for logging with automatic file and function information
 #define YASMIN_LOG_ERROR(text, ...)                                            \
   if (yasmin::log_level >= yasmin::ERROR)                                      \
-  yasmin::log_helper<yasmin::ERROR>(extract_filename(__FILE__), __FUNCTION__,  \
-                                    __LINE__, text, ##__VA_ARGS__)
+  yasmin::log_helper<yasmin::ERROR>(::yasmin::extract_filename(__FILE__),      \
+                                    __FUNCTION__, __LINE__, text,              \
+                                    ##__VA_ARGS__)
 #define YASMIN_LOG_WARN(text, ...)                                             \
   if (yasmin::log_level >= yasmin::WARN)                                       \
-  yasmin::log_helper<yasmin::WARN>(extract_filename(__FILE__), __FUNCTION__,   \
-                                   __LINE__, text, ##__VA_ARGS__)
+  yasmin::log_helper<yasmin::WARN>(::yasmin::extract_filename(__FILE__),       \
+                                   __FUNCTION__, __LINE__, text,               \
+                                   ##__VA_ARGS__)
 #define YASMIN_LOG_INFO(text, ...)                                             \
   if (yasmin::log_level >= yasmin::INFO)                                       \
-  yasmin::log_helper<yasmin::INFO>(extract_filename(__FILE__), __FUNCTION__,   \
-                                   __LINE__, text, ##__VA_ARGS__)
+  yasmin::log_helper<yasmin::INFO>(::yasmin::extract_filename(__FILE__),       \
+                                   __FUNCTION__, __LINE__, text,               \
+                                   ##__VA_ARGS__)
 #define YASMIN_LOG_DEBUG(text, ...)                                            \
   if (yasmin::log_level >= yasmin::DEBUG)                                      \
-  yasmin::log_helper<yasmin::DEBUG>(extract_filename(__FILE__), __FUNCTION__,  \
-                                    __LINE__, text, ##__VA_ARGS__)
+  yasmin::log_helper<yasmin::DEBUG>(::yasmin::extract_filename(__FILE__),      \
+                                    __FUNCTION__, __LINE__, text,              \
+                                    ##__VA_ARGS__)
 
 /**
  * @brief Sets custom logging functions for different log levels.

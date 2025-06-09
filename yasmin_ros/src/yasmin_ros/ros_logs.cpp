@@ -41,7 +41,7 @@ void ros_log_message(yasmin::LogLevel level, const char *file,
                      const char *function, int line, const char *text) {
 
   std::ostringstream oss;
-  oss << "[ " << file << " : " << function << " : " << line << " ] " << text;
+  oss << "[" << file << ":" << function << ":" << line << "] " << text;
 
   switch (level) {
   case yasmin::LogLevel::ERROR:
