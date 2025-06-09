@@ -73,6 +73,14 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# publisher demo
+add_executable(publisher_demo src/publisher_demo.cpp)
+target_link_libraries(publisher_demo PUBLIC ${DEPENDENCIES})
+install(TARGETS
+  publisher_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # service client demo
 add_executable(service_client_demo src/service_client_demo.cpp)
 target_link_libraries(service_client_demo PUBLIC ${DEPENDENCIES})

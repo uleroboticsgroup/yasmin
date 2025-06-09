@@ -23,6 +23,7 @@ set(SOURCES
   src/yasmin_ros/action_state.cpp
   src/yasmin_ros/service_state.cpp
   src/yasmin_ros/monitor_state.cpp
+  src/yasmin_ros/publisher_state.cpp
 )
 set(DEPENDENCIES
   rclcpp::rclcpp
