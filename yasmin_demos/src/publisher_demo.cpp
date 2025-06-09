@@ -20,6 +20,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/int32.hpp"
 
+#include "yasmin/cb_state.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
@@ -42,9 +43,6 @@ class PublishIntState
     : public yasmin_ros::PublisherState<std_msgs::msg::Int32> {
 
 public:
-  /// Counter to keep track of how many times the message has been published
-  int counter;
-
   /**
    * @brief Constructor for the PublishIntState class.
    */
@@ -53,9 +51,7 @@ public:
             "count", // topic name
             std::bind(&PublishIntState::create_int_msg, this,
                       _1) // create msg handler callback
-        ) {
-    this->counter = 0;
-  };
+        ){};
 
   /**
    * @brief Create a new Int message.
@@ -68,15 +64,40 @@ public:
   std_msgs::msg::Int32
   create_int_msg(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
-    (void)blackboard; // blackboard is not used in this implementation
+    int counter = blackboard->get<int>("counter");
+    counter++;
+    blackboard->set<int>("counter", counter);
 
-    this->counter++;
-    YASMIN_LOG_INFO("Creating message %d", this->counter);
+    YASMIN_LOG_INFO("Creating message %d", counter);
     std_msgs::msg::Int32 msg;
-    msg.data = this->counter;
+    msg.data = counter;
     return msg;
   };
 };
+
+/**
+ * @brief Check the count in the blackboard and return an outcome based on it.
+ *
+ * This function checks the value of "counter" in the blackboard and compares it
+ * with "max_count". If "counter" exceeds "max_count", it returns "outcome1",
+ * otherwise it returns "outcome2".
+ *
+ * @param blackboard Shared pointer to the blackboard.
+ * @return A string representing the outcome.
+ */
+std::string
+check_count(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+
+  // Sleep for 1 second to simulate some processing time
+  rclcpp::sleep_for(std::chrono::seconds(1));
+  YASMIN_LOG_INFO("Checking count: %d", blackboard->get<int>("counter"));
+
+  if (blackboard->get<int>("counter") >= blackboard->get<int>("max_count")) {
+    return "outcome1";
+  } else {
+    return "outcome2";
+  }
+}
 
 /**
  * @brief Main function initializing ROS 2 and setting up the state machine.
@@ -115,15 +136,25 @@ int main(int argc, char *argv[]) {
   sm->add_state("PUBLISHING_INT", std::make_shared<PublishIntState>(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
-                     "PUBLISHING_INT"}, // Transition back to itself
+                     "CHECKINNG_COUNTS"}, // Transition back to itself
                 });
+  sm->add_state("CHECKINNG_COUNTS",
+                std::make_shared<yasmin::CbState>(
+                    std::initializer_list<std::string>{"outcome1", "outcome2"},
+                    check_count),
+                {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
+                 {"outcome2", "PUBLISHING_INT"}});
 
   // Publisher for visualizing the state machine's status
   yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PUBLISHER_DEMO", sm);
 
   // Execute the state machine
+  std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =
+      std::make_shared<yasmin::blackboard::Blackboard>();
+  blackboard->set<int>("counter", 0);
+  blackboard->set<int>("max_count", 10);
   try {
-    std::string outcome = (*sm.get())();
+    std::string outcome = (*sm.get())(blackboard);
     YASMIN_LOG_INFO(outcome.c_str());
   } catch (const std::exception &e) {
     YASMIN_LOG_WARN(e.what());
