@@ -49,14 +49,14 @@ public:
    * @brief Construct a new PublisherState with ROS 2 node and specific QoS.
    *
    * @param topic_name The name of the topic to monitor.
-   * @param crate_message_handler A callback handler to create messages.
+   * @param create_message_handler A callback handler to create messages.
    * @param qos Quality of Service settings for the topic.
    */
   PublisherState(std::string topic_name,
-                 CreateMessageHandler crate_message_handler,
+                 CreateMessageHandler create_message_handler,
                  rclcpp::QoS qos = 10,
                  rclcpp::CallbackGroup::SharedPtr callback_group = nullptr)
-      : PublisherState(nullptr, topic_name, crate_message_handler, qos,
+      : PublisherState(nullptr, topic_name, create_message_handler, qos,
                        callback_group) {}
 
   /**
@@ -64,15 +64,15 @@ public:
    *
    * @param node The ROS 2 node.
    * @param topic_name The name of the topic to monitor.
-   * @param crate_message_handler A callback handler to create messages.
+   * @param create_message_handler A callback handler to create messages.
    * @param qos Quality of Service settings for the topic.
    */
   PublisherState(const rclcpp::Node::SharedPtr &node, std::string topic_name,
-                 CreateMessageHandler crate_message_handler,
+                 CreateMessageHandler create_message_handler,
                  rclcpp::QoS qos = 10,
                  rclcpp::CallbackGroup::SharedPtr callback_group = nullptr)
       : State({}), topic_name(topic_name),
-        crate_message_handler(crate_message_handler) {
+        create_message_handler(create_message_handler) {
 
     // set outcomes
     this->outcomes = {basic_outcomes::SUCCEED};
@@ -90,8 +90,8 @@ public:
     this->pub =
         this->node_->template create_publisher<MsgT>(topic_name, qos, options);
 
-    if (this->crate_message_handler == nullptr) {
-      throw std::invalid_argument("crate_message_handler is needed");
+    if (this->create_message_handler == nullptr) {
+      throw std::invalid_argument("create_message_handler is needed");
     }
   }
 
@@ -104,7 +104,8 @@ public:
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
 
-    MsgT msg = this->crate_message_handler(blackboard);
+    YASMIN_LOG_DEBUG("Publishing to topic '%s'", this->topic_name.c_str());
+    MsgT msg = this->create_message_handler(blackboard);
     this->pub->publish(msg);
     return basic_outcomes::SUCCEED;
   }
@@ -116,7 +117,7 @@ private:
 
   std::string topic_name; /**< Name of the topic to monitor. */
   CreateMessageHandler
-      crate_message_handler; /**< Callback handler to create messages. */
+      create_message_handler; /**< Callback handler to create messages. */
 };
 
 } // namespace yasmin_ros

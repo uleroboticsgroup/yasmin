@@ -152,6 +152,11 @@ install(PROGRAMS
 )
 
 install(PROGRAMS
+  yasmin_demos/publisher_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
   yasmin_demos/service_client_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
