@@ -35,7 +35,9 @@ class CbState(State):
         cb (Callable): A callable that will be invoked when the state is executed.
     """
 
-    def __init__(self, outcomes: Set[str], cb: Callable, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, outcomes: Set[str], cb: Callable, *args: Any, **kwargs: Any
+    ) -> None:
         """
         Initializes a new instance of CbState.
 
@@ -55,6 +57,7 @@ class CbState(State):
         self._cb: Callable = cb
         self._args = args
         self._kwargs = kwargs
+        
     def execute(self, blackboard: Blackboard) -> str:
         """
         Executes the callback function with the blackboard and provided arguments.
