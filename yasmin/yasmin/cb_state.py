@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Set, Callable
+from typing import Set, Callable, Any
 
 from yasmin.state import State
 from yasmin.blackboard import Blackboard
@@ -27,13 +27,17 @@ class CbState(State):
     Attributes:
         _cb (Callable): A callback function that defines the action to take
                         when the state is executed.
+        _args (tuple): Positional arguments passed to the callback.
+        _kwargs (dict): Keyword arguments passed to the callback.
 
     Parameters:
         outcomes (Set[str]): A set of possible outcomes for this state.
         cb (Callable): A callable that will be invoked when the state is executed.
     """
 
-    def __init__(self, outcomes: Set[str], cb: Callable) -> None:
+    def __init__(
+        self, outcomes: Set[str], cb: Callable, *args: Any, **kwargs: Any
+    ) -> None:
         """
         Initializes a new instance of CbState.
 
@@ -41,6 +45,8 @@ class CbState(State):
             outcomes (Set[str]): A set of possible outcomes for this state.
             cb (Callable): A callable that defines the action to take when
                            the state is executed.
+            *args (Any): Positional arguments for the callback.
+            **kwargs (Any): Keyword arguments for the callback.
 
         Raises:
             TypeError: If 'outcomes' is not a set or 'cb' is not callable.
@@ -49,10 +55,12 @@ class CbState(State):
 
         ## A callable that will be invoked when the state is executed.
         self._cb: Callable = cb
+        self._args = args
+        self._kwargs = kwargs
 
     def execute(self, blackboard: Blackboard) -> str:
         """
-        Executes the callback function with the provided blackboard context.
+        Executes the callback function with the blackboard and provided arguments.
 
         Args:
             blackboard: The context in which the callback will be executed.
@@ -65,4 +73,4 @@ class CbState(State):
         Raises:
             Exception: Propagates any exceptions raised by the callback function.
         """
-        return self._cb(blackboard)
+        return self._cb(blackboard, *self._args, **self._kwargs)

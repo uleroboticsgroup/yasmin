@@ -16,6 +16,7 @@
 #ifndef YASMIN__CB_STATE_HPP
 #define YASMIN__CB_STATE_HPP
 
+#include <functional>
 #include <memory>
 #include <set>
 #include <string>
@@ -37,7 +38,7 @@ class CbState : public State {
 
 private:
   /// Pointer to the callback function to be executed.
-  std::string (*callback)(std::shared_ptr<blackboard::Blackboard> blackboard);
+  std::function<std::string(std::shared_ptr<blackboard::Blackboard>)> callback;
 
 public:
   /**
@@ -50,8 +51,8 @@ public:
    * @throw std::invalid_argument If the outcomes set is empty.
    */
   CbState(std::set<std::string> outcomes,
-          std::string (*callback)(
-              std::shared_ptr<blackboard::Blackboard> blackboard));
+          std::function<std::string(std::shared_ptr<blackboard::Blackboard>)>
+              callback);
 
   /**
    * @brief Executes the callback function.
