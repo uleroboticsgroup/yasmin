@@ -19,6 +19,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <functional>
 
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/state.hpp"

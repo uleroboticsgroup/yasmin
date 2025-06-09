@@ -57,7 +57,7 @@ class CbState(State):
         self._cb: Callable = cb
         self._args = args
         self._kwargs = kwargs
-        
+
     def execute(self, blackboard: Blackboard) -> str:
         """
         Executes the callback function with the blackboard and provided arguments.
