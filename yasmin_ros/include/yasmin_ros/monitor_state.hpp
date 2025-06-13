@@ -105,8 +105,7 @@ public:
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int msg_queue = 10, int timeout = -1)
       : State({}), topic_name(topic_name), monitor_handler(monitor_handler),
-        msg_queue(msg_queue), timeout(timeout), monitoring(false),
-        time_to_wait(1000) {
+        qos(qos), msg_queue(msg_queue), timeout(timeout), time_to_wait(1000) {
 
     // set outcomes
     if (timeout > 0) {
@@ -128,12 +127,8 @@ public:
       this->node_ = node;
     }
 
-    // create subscriber
-    rclcpp::SubscriptionOptions options;
-    options.callback_group = callback_group;
-
-    this->sub = this->node_->template create_subscription<MsgT>(
-        topic_name, qos, std::bind(&MonitorState::callback, this, _1), options);
+    // Options for the subscription
+    this->options.callback_group = callback_group;
   }
 
   /**
@@ -148,23 +143,29 @@ public:
 
     float elapsed_time = 0;
     this->msg_list.clear();
-    this->monitoring = true;
+
+    // Crate subscription
+    this->sub = this->node_->template create_subscription<MsgT>(
+        this->topic_name, this->qos,
+        std::bind(&MonitorState::callback, this, _1), this->options);
 
     while (this->msg_list.empty()) {
       std::this_thread::sleep_for(
           std::chrono::microseconds(this->time_to_wait));
 
       if (is_canceled()) {
-        this->monitoring = false;
+        this->sub.reset();
+        this->sub = nullptr;
         return basic_outcomes::CANCEL;
       }
 
       if (this->timeout > 0) {
 
         if (elapsed_time / 1e6 >= this->timeout) {
-          this->monitoring = false;
           YASMIN_LOG_WARN("Timeout reached, topic '%s' is not available",
                           this->topic_name.c_str());
+          this->sub.reset();
+          this->sub = nullptr;
           return basic_outcomes::TIMEOUT;
         }
 
@@ -177,7 +178,8 @@ public:
         this->monitor_handler(blackboard, this->msg_list.at(0));
     this->msg_list.erase(this->msg_list.begin());
 
-    this->monitoring = false;
+    this->sub.reset();
+    this->sub = nullptr;
     return outcome;
   }
 
@@ -185,33 +187,33 @@ private:
   rclcpp::Node::SharedPtr node_; /**< ROS 2 node pointer. */
   std::shared_ptr<rclcpp::Subscription<MsgT>>
       sub; /**< Subscription to the ROS 2 topic. */
-  std::vector<std::shared_ptr<MsgT>>
-      msg_list; /**< List to store queued messages. */
 
   std::string topic_name; /**< Name of the topic to monitor. */
+  rclcpp::QoS qos;        /**< Quality of Service settings for the topic. */
+  rclcpp::SubscriptionOptions options; /**< Options for the subscription. */
+
+  std::vector<std::shared_ptr<MsgT>>
+      msg_list; /**< List to store queued messages. */
   MonitorHandler
       monitor_handler; /**< Callback function to handle incoming messages. */
   int msg_queue;       /**< Maximum number of messages to queue. */
   int timeout;         /**< Timeout in seconds for message reception. */
-  bool monitoring;     /**< Flag to control message monitoring state. */
   int time_to_wait;    /**< Time in microseconds to wait between checks. */
 
   /**
    * @brief Callback function for receiving messages from the subscribed topic.
    *
-   * Adds the message to `msg_list` if monitoring is active, maintaining a
-   * maximum queue size of `msg_queue`.
+   * Adds the message to `msg_list` maintaining a maximum queue size of
+   * `msg_queue`.
    *
    * @param msg The message received from the topic.
    */
   void callback(const typename MsgT::SharedPtr msg) {
 
-    if (this->monitoring) {
-      this->msg_list.push_back(msg);
+    this->msg_list.push_back(msg);
 
-      if ((int)this->msg_list.size() > this->msg_queue) {
-        this->msg_list.erase(this->msg_list.begin());
-      }
+    if ((int)this->msg_list.size() > this->msg_queue) {
+      this->msg_list.erase(this->msg_list.begin());
     }
   }
 };

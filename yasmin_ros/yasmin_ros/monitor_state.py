@@ -40,7 +40,6 @@ class MonitorState(State):
         msg_list (List[Any]): A set of messages received from the topic.
         msg_queue (int): The maximum number of messages to retain.
         time_to_wait (float): Time to wait between checks for messages.
-        monitoring (bool): Flag indicating if monitoring is active.
         _timeout (int): Timeout duration for monitoring.
 
     Exceptions:
@@ -85,8 +84,6 @@ class MonitorState(State):
         self.msg_queue: int = msg_queue
         ## Time to wait between checks for messages.
         self.time_to_wait: float = 0.001
-        ## Flag indicating if monitoring is active.
-        self.monitoring: bool = False
 
         ## Timeout duration for monitoring.
         self._timeout: int = timeout
@@ -105,13 +102,10 @@ class MonitorState(State):
         self._topic_name: str = topic_name
 
         ## Subscription object for the specified topic.
-        self._sub: Subscription = self._node.create_subscription(
-            msg_type,
-            topic_name,
-            self.__callback,
-            qos,
-            callback_group=callback_group,
-        )
+        self._sub: Subscription = None
+        self._msg_type: Type = msg_type
+        self._qos: Union[QoSProfile, int] = qos
+        self._callback_group: CallbackGroup = callback_group
 
         super().__init__(outcomes)
 
@@ -127,11 +121,10 @@ class MonitorState(State):
         Returns:
             None
         """
-        if self.monitoring:
-            self.msg_list.append(msg)
+        self.msg_list.append(msg)
 
-            if len(self.msg_list) > self.msg_queue:
-                self.msg_list.pop(0)
+        if len(self.msg_list) > self.msg_queue:
+            self.msg_list.pop(0)
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -153,27 +146,38 @@ class MonitorState(State):
 
         elapsed_time: float = 0.0
         self.msg_list: List[Any] = []
-        self.monitoring: bool = True
+
+        ## Subscription object for the specified topic.
+        self._sub: Subscription = self._node.create_subscription(
+            self._msg_type,
+            self._topic_name,
+            self.__callback,
+            self._qos,
+            callback_group=self._callback_group,
+        )
 
         # Wait until a message is received or timeout is reached
         while not self.msg_list:
             time.sleep(self.time_to_wait)
 
             if self.is_canceled():
-                self.monitoring: bool = False
+                self._node.destroy_subscription(self._sub)
+                self._sub = None
                 return CANCEL
 
             if self._timeout is not None:
                 if elapsed_time >= self._timeout:
-                    self.monitoring: bool = False
                     yasmin.YASMIN_LOG_WARN(
                         f"Timeout reached, topic '{self._topic_name}' is not available"
                     )
+                    self._node.destroy_subscription(self._sub)
+                    self._sub = None
                     return TIMEOUT
                 elapsed_time += self.time_to_wait
 
         yasmin.YASMIN_LOG_INFO(f"Processing msg from topic '{self._topic_name}'")
         outcome = self._monitor_handler(blackboard, self.msg_list.pop(0))
 
-        self.monitoring: bool = False
+        self._node.destroy_subscription(self._sub)
+        self._sub = None
         return outcome
