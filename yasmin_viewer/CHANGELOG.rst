@@ -3,6 +3,12 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.3.0 (2025-06-28)
+------------------
+* fixing yasmin logs and using them in ros versions
+* Fix deprecation of ament_target_dependencies
+* Contributors: Miguel Ángel González Santamarta
+
 3.2.0 (2025-04-11)
 ------------------
 * fixing c++ version in CMakeLists

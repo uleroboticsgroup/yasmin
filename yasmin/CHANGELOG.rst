@@ -3,6 +3,19 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.3.0 (2025-06-28)
+------------------
+* ✨: Allowing that the cb_state receive arguments (`#59 <https://github.com/uleroboticsgroup/yasmin/issues/59>`_)
+  * ⚡️: Allowing that the cb_state receive arguments
+  * ✏️ Fixing typos
+  * 🚨 fixing compilation error
+  * ✏️ Fixing typos
+* fixing yasmin logs and using them in ros versions
+* Fix deprecation of ament_target_dependencies
+* fixing start_state in fsm execute
+* Pass current state instead of start state to transition cb (`#54 <https://github.com/uleroboticsgroup/yasmin/issues/54>`_)
+* Contributors: Jfsslemos, Miguel Ángel González Santamarta, Paul Verhoeckx
+
 3.2.0 (2025-04-11)
 ------------------
 * Fix python YASMIN_LOG_ERROR method (`#51 <https://github.com/uleroboticsgroup/yasmin/issues/51>`_)

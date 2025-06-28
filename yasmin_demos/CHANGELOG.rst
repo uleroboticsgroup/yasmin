@@ -3,6 +3,29 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.3.0 (2025-06-28)
+------------------
+* python version of publisher state
+* improving publisher demo
+* initial version of a publisher state
+* removing FOXY env and fixing service qos for kilted and greater
+* Kilted support (`#56 <https://github.com/uleroboticsgroup/yasmin/issues/56>`_)
+  * Kilted support
+  * Keep only the single Foxy exception
+  * fixup! Keep only the single Foxy exception
+* minor format fixes to multiple_states_demo
+* adding kilted flag to cmakelists
+* Fix deprecation of ament_target_dependencies
+* Declare states outside the state_machine (`#53 <https://github.com/uleroboticsgroup/yasmin/issues/53>`_)
+  * Create .h for foo and bar states
+  * Create foo and bar state and the states handler
+  * feat/multiple_states_demo example
+  * Fix the C++ format
+  * Create python version for multiple states demo
+  * Fix C++ format pt.2
+  * Add license to new files
+* Contributors: Miguel Ángel González Santamarta, Pedro Edom, Tim Clephas
+
 3.2.0 (2025-04-11)
 ------------------
 * fixing c++ version in CMakeLists

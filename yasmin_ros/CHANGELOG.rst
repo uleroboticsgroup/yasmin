@@ -3,6 +3,28 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.3.0 (2025-06-28)
+------------------
+* destroying subscriber in monitor state
+* python version of publisher state
+* initial version of a publisher state
+* fixing yasmin logs and using them in ros versions
+* checking rclcpp/version.h for older versions
+* removing FOXY env and fixing service qos for kilted and greater
+* adding callbackgroup to ros2 states
+* fixing msg_queue in monitor state
+* Kilted support (`#56 <https://github.com/uleroboticsgroup/yasmin/issues/56>`_)
+  * Kilted support
+  * Keep only the single Foxy exception
+  * fixup! Keep only the single Foxy exception
+* Add FAIL to basic outcomes (`#57 <https://github.com/uleroboticsgroup/yasmin/issues/57>`_)
+  * Add FAIL to basic outcomes
+  * add fail outcome to C
+  * fixed for formatter checks
+* adding kilted flag to cmakelists
+* Fix deprecation of ament_target_dependencies
+* Contributors: Gabriel Dorneles, Miguel Ángel González Santamarta, Tim Clephas
+
 3.2.0 (2025-04-11)
 ------------------
 * fixing c++ version in CMakeLists
