@@ -1,0 +1,16 @@
+<map id="yasmin_viewer" name="yasmin_viewer">
+<area shape="rect" id="node2" href="dir_9b3e222de12228068dbaa654648ac1e6.html" title="include" alt="" coords="112,100,174,126"/>
+<area shape="rect" id="node5" href="dir_5ad7b6362c0f5fc4ade5978b52301ccf.html" title="yasmin" alt="" coords="145,174,207,200"/>
+<area shape="poly" id="edge1" href="dir_000004_000009.html" alt="" coords="151,125,166,159,161,161,146,127"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000004_000009.html" title="2" alt="" coords="167,146,174,161"/>
+<area shape="rect" id="node3" href="dir_bde7cfe12026d8dd4a333983aaaa04f5.html" title="src" alt="" coords="158,27,197,52"/>
+<area shape="poly" id="edge4" href="dir_000008_000004.html" alt="" coords="174,54,158,87,153,85,169,51"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000008_000004.html" title="1" alt="" coords="161,80,168,95"/>
+<area shape="poly" id="edge2" href="dir_000008_000009.html" alt="" coords="182,52,187,90,188,137,185,159,179,158,183,136,182,90,177,53"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000008_000009.html" title="1" alt="" coords="187,150,194,165"/>
+<area shape="rect" id="node6" href="dir_3a553b466907e73f6c67c4b4e18878db.html" title="yasmin_ros" alt="" coords="419,100,506,126"/>
+<area shape="poly" id="edge3" href="dir_000008_000013.html" alt="" coords="198,46,210,50,405,96,403,101,209,55,197,51"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000008_000013.html" title="1" alt="" coords="399,82,406,97"/>
+<area shape="rect" id="node4" href="dir_5885c73e2c84a2f246e2c7c20380d49b.html" title="yasmin_viewer_web_client" alt="" coords="221,27,398,52"/>
+<area shape="rect" id="clust1" href="dir_2c6835240ed87414c22937ef44b318da.html" alt="" coords="16,16,408,137"/>
+</map>

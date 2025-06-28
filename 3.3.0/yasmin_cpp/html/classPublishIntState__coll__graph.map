@@ -1,0 +1,16 @@
+<map id="PublishIntState" name="PublishIntState">
+<area shape="rect" id="Node000001" title="A state that publishes ints." alt="" coords="1045,41,1155,67"/>
+<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1PublisherState.html" title=" " alt="" coords="817,34,995,74"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1011,51,1044,51,1044,57,1011,57"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="619,41,718,67"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="734,51,816,51,816,57,734,57"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="333,41,475,67"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="490,51,619,51,619,57,490,57"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="178,16,255,42"/>
+<area shape="poly" id="edge7_Node000002_Node000005" title=" " alt="" coords="270,20,279,19,309,19,527,18,623,19,745,26,817,35,816,40,745,31,623,24,527,23,309,25,279,25,271,25"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="271,33,333,42,332,47,270,39"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,8,129,49"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="144,26,178,26,178,31,144,31"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="593,92,745,147"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="759,92,829,72,830,78,760,97"/>
+</map>

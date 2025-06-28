@@ -1,0 +1,9 @@
+<map id="yasmin_viewer.yasmin_viewer_pub.YasminViewerPub" name="yasmin_viewer.yasmin_viewer_pub.YasminViewerPub">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,259,210,300"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1state__machine_1_1StateMachine.html" title=" " alt="" coords="15,155,200,196"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,212,110,259,105,259,105,212"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="43,80,172,106"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="110,122,110,155,105,155,105,122"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="83,5,132,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="110,46,110,80,105,80,105,46"/>
+</map>
