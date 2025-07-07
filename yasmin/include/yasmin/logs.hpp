@@ -59,9 +59,9 @@ extern LogLevel log_level;
  * This function allows the user to specify the log level error, warning, info,
  * or debug.
  *
- * @param log_level Log level.
+ * @param new_log_level Log level.
  */
-void set_log_level(LogLevel level);
+void set_log_level(LogLevel new_log_level);
 
 /**
  * @brief Parse LogLevel to string.
