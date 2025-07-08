@@ -42,7 +42,7 @@ LogLevel log_level = INFO;
 
 LogFunction log_message = default_log_message;
 
-void set_log_level(LogLevel log_level) { log_level = log_level; }
+void set_log_level(LogLevel new_log_level) { log_level = new_log_level; }
 
 const char *log_level_to_name(LogLevel log_level) {
   switch (log_level) {
