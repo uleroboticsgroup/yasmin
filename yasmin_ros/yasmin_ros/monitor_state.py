@@ -156,6 +156,8 @@ class MonitorState(State):
         """
 
         # Wait until a message is received or timeout is reached
+        self._msg_event.clear()
+
         while not self.msg_list:
             flag = self._msg_event.wait(self._timeout)
 
