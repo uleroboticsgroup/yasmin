@@ -17,6 +17,7 @@
 #define YASMIN_ROS__MONITOR_STATE_HPP
 
 #include <chrono>
+#include <condition_variable>
 #include <functional>
 #include <memory>
 #include <set>
@@ -105,7 +106,7 @@ public:
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int msg_queue = 10, int timeout = -1)
       : State({}), topic_name(topic_name), monitor_handler(monitor_handler),
-        qos(qos), msg_queue(msg_queue), timeout(timeout), time_to_wait(1000) {
+        qos(qos), msg_queue(msg_queue), timeout(timeout) {
 
     // set outcomes
     if (timeout > 0) {
@@ -129,6 +130,11 @@ public:
 
     // Options for the subscription
     this->options.callback_group = callback_group;
+
+    // Crate subscription
+    this->sub = this->node_->template create_subscription<MsgT>(
+        this->topic_name, this->qos,
+        std::bind(&MonitorState::callback, this, _1), this->options);
   }
 
   /**
@@ -141,35 +147,19 @@ public:
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
 
-    float elapsed_time = 0;
-    this->msg_list.clear();
-
-    // Crate subscription
-    this->sub = this->node_->template create_subscription<MsgT>(
-        this->topic_name, this->qos,
-        std::bind(&MonitorState::callback, this, _1), this->options);
-
     while (this->msg_list.empty()) {
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(this->time_to_wait));
+      std::unique_lock<std::mutex> lock(this->msg_mutex);
+      auto status =
+          this->msg_cond.wait_for(lock, std::chrono::seconds(this->timeout));
 
-      if (is_canceled()) {
-        this->sub.reset();
-        this->sub = nullptr;
+      if (this->is_canceled()) {
         return basic_outcomes::CANCEL;
       }
 
-      if (this->timeout > 0) {
-
-        if (elapsed_time / 1e6 >= this->timeout) {
-          YASMIN_LOG_WARN("Timeout reached, topic '%s' is not available",
-                          this->topic_name.c_str());
-          this->sub.reset();
-          this->sub = nullptr;
-          return basic_outcomes::TIMEOUT;
-        }
-
-        elapsed_time += this->time_to_wait;
+      if (this->timeout > 0 && status == std::cv_status::timeout) {
+        YASMIN_LOG_WARN("Timeout reached, topic '%s' is not available",
+                        this->topic_name.c_str());
+        return basic_outcomes::TIMEOUT;
       }
     }
 
@@ -178,9 +168,17 @@ public:
         this->monitor_handler(blackboard, this->msg_list.at(0));
     this->msg_list.erase(this->msg_list.begin());
 
-    this->sub.reset();
-    this->sub = nullptr;
     return outcome;
+  }
+
+  /**
+   * @brief Cancel the current monitor state.
+   *
+   * This function cancels the ongoing monitor.
+   */
+  void cancel_state() {
+    yasmin::State::cancel_state();
+    this->msg_cond.notify_one();
   }
 
 private:
@@ -198,7 +196,11 @@ private:
       monitor_handler; /**< Callback function to handle incoming messages. */
   int msg_queue;       /**< Maximum number of messages to queue. */
   int timeout;         /**< Timeout in seconds for message reception. */
-  int time_to_wait;    /**< Time in microseconds to wait between checks. */
+
+  /// Condition variable for action completion.
+  std::condition_variable msg_cond;
+  /// Mutex for protecting action completion.
+  std::mutex msg_mutex;
 
   /**
    * @brief Callback function for receiving messages from the subscribed topic.
@@ -215,6 +217,8 @@ private:
     if ((int)this->msg_list.size() > this->msg_queue) {
       this->msg_list.erase(this->msg_list.begin());
     }
+
+    this->msg_cond.notify_one();
   }
 };
 

@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import time
 from typing import List, Set, Callable, Union, Type, Any
+from threading import Event
 
 from rclpy.node import Node
 from rclpy.subscription import Subscription
@@ -83,7 +83,7 @@ class MonitorState(State):
         ## The maximum number of messages to retain.
         self.msg_queue: int = msg_queue
         ## Time to wait between checks for messages.
-        self.time_to_wait: float = 0.001
+        self._msg_event: Event = Event()
 
         ## Timeout duration for monitoring.
         self._timeout: int = timeout
@@ -107,9 +107,18 @@ class MonitorState(State):
         self._qos: Union[QoSProfile, int] = qos
         self._callback_group: CallbackGroup = callback_group
 
+        ## Subscription object for the specified topic.
+        self._sub: Subscription = self._node.create_subscription(
+            self._msg_type,
+            self._topic_name,
+            self.__callback,
+            self._qos,
+            callback_group=self._callback_group,
+        )
+
         super().__init__(outcomes)
 
-    def __callback(self, msg) -> None:
+    def __callback(self, msg: Any) -> None:
         """
         Callback function that handles incoming messages.
 
@@ -125,6 +134,8 @@ class MonitorState(State):
 
         if len(self.msg_list) > self.msg_queue:
             self.msg_list.pop(0)
+
+        self._msg_event.set()
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -144,40 +155,30 @@ class MonitorState(State):
             None raised directly; timeouts are handled gracefully.
         """
 
-        elapsed_time: float = 0.0
-        self.msg_list: List[Any] = []
-
-        ## Subscription object for the specified topic.
-        self._sub: Subscription = self._node.create_subscription(
-            self._msg_type,
-            self._topic_name,
-            self.__callback,
-            self._qos,
-            callback_group=self._callback_group,
-        )
-
         # Wait until a message is received or timeout is reached
         while not self.msg_list:
-            time.sleep(self.time_to_wait)
+            flag = self._msg_event.wait(self._timeout)
 
             if self.is_canceled():
-                self._node.destroy_subscription(self._sub)
-                self._sub = None
                 return CANCEL
 
-            if self._timeout is not None:
-                if elapsed_time >= self._timeout:
-                    yasmin.YASMIN_LOG_WARN(
-                        f"Timeout reached, topic '{self._topic_name}' is not available"
-                    )
-                    self._node.destroy_subscription(self._sub)
-                    self._sub = None
-                    return TIMEOUT
-                elapsed_time += self.time_to_wait
+            if self._timeout is not None and not flag:
+                yasmin.YASMIN_LOG_WARN(
+                    f"Timeout reached, topic '{self._topic_name}' is not available"
+                )
+                return TIMEOUT
 
         yasmin.YASMIN_LOG_INFO(f"Processing msg from topic '{self._topic_name}'")
         outcome = self._monitor_handler(blackboard, self.msg_list.pop(0))
 
-        self._node.destroy_subscription(self._sub)
-        self._sub = None
         return outcome
+
+    def cancel_state(self) -> None:
+        """
+        Cancels the current monitor state.
+
+        This method cancels the monitor if waiting for messages.
+        """
+
+        super().cancel_state()
+        self._msg_event.set()

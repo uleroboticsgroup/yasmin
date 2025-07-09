@@ -328,9 +328,9 @@ private:
 
   /// Shared pointer to the action client.
   ActionClient action_client;
+
   /// Condition variable for action completion.
   std::condition_variable action_done_cond;
-
   /// Mutex for protecting action completion.
   std::mutex action_done_mutex;
   /// Condition variable for action cancellation.
