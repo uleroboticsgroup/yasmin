@@ -58,7 +58,7 @@ std::string GetParametersState::execute(
             param_name, std::any_cast<std::vector<bool>>(default_value));
       } else if (default_value.type() == typeid(std::vector<int>)) {
         this->node_->declare_parameter(
-            param_name, std::any_cast<std::vector<int>>(default_value));
+            param_name, std::any_cast<std::vector<int64_t>>(default_value));
       } else if (default_value.type() == typeid(std::vector<double>)) {
         this->node_->declare_parameter(
             param_name, std::any_cast<std::vector<double>>(default_value));
@@ -85,7 +85,7 @@ std::string GetParametersState::execute(
       blackboard->set<bool>(param_name, parameter.as_bool());
       break;
     case rclcpp::ParameterType::PARAMETER_INTEGER:
-      blackboard->set<int>(param_name, parameter.as_int());
+      blackboard->set<int64_t>(param_name, parameter.as_int());
       break;
     case rclcpp::ParameterType::PARAMETER_DOUBLE:
       blackboard->set<double>(param_name, parameter.as_double());
@@ -97,8 +97,8 @@ std::string GetParametersState::execute(
       blackboard->set<std::vector<bool>>(param_name, parameter.as_bool_array());
       break;
     case rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY:
-      blackboard->set<std::vector<long int>>(param_name,
-                                             parameter.as_integer_array());
+      blackboard->set<std::vector<int64_t>>(param_name,
+                                            parameter.as_integer_array());
       break;
     case rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY:
       blackboard->set<std::vector<double>>(param_name,
