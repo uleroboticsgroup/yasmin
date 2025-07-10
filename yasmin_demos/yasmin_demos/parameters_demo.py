@@ -118,7 +118,7 @@ def main():
     Raises:
         KeyboardInterrupt: If the execution is interrupted by the user.
     """
-    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_parameters_demo")
 
     # Initialize ROS 2
     rclpy.init()
@@ -161,7 +161,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("parameters_demo", sm)
+    YasminViewerPub("yasmin_parameters_demo", sm)
 
     # Execute the FSM
     try:

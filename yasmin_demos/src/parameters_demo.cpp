@@ -120,7 +120,7 @@ public:
  * @throws std::exception If there is an error during state machine execution.
  */
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_demo");
+  YASMIN_LOG_INFO("yasmin_parameters_demo");
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PARAMETERS_DEMO", sm);
 
   // Execute the state machine
   try {

@@ -253,7 +253,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("yasmin_demo", sm)
+    YasminViewerPub("YASMIN_DEMO", sm)
 
     # Execute the FSM
     try:
@@ -523,7 +523,7 @@ def main():
     Raises:
         KeyboardInterrupt: If the execution is interrupted by the user.
     """
-    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_concurrence_demo")
 
     # Initialize ROS 2
     rclpy.init()
@@ -560,7 +560,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("yasmin_demo", sm)
+    YasminViewerPub("YASMIN_CONCURRENCE_DEMO", sm)
 
     # Execute the FSM
     try:
@@ -1311,7 +1311,7 @@ if __name__ == "__main__":
 #### Parameters Demo (FSM + ROS 2 Parameters)
 
 ```shell
-ros2 run yasmin_demos parameters_demo.py --ros-args max_counter:=5
+ros2 run yasmin_demos parameters_demo.py --ros-args -p max_counter:=5
 ```
 
 <details>
@@ -1421,7 +1421,7 @@ def main():
     Raises:
         KeyboardInterrupt: If the execution is interrupted by the user.
     """
-    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_parameters_demo")
 
     # Initialize ROS 2
     rclpy.init()
@@ -1464,7 +1464,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("parameters_demo", sm)
+    YasminViewerPub("YASMIN_PARAMETERS_DEMO", sm)
 
     # Execute the FSM
     try:
@@ -1693,7 +1693,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_NAV_DEMO", sm)
+    YasminViewerPub("YASMIN_NAV2_DEMO", sm)
 
     # Execute the state machine
     blackboard = Blackboard()
@@ -1862,7 +1862,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_DEMO", sm);
 
   // Execute the state machine
   try {
@@ -1971,7 +1971,7 @@ public:
  * @throws std::exception If there is an error during state machine execution.
  */
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_demo");
+  YASMIN_LOG_INFO("yasmin_remapping_demo");
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
@@ -2018,7 +2018,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_REMAPPING_DEMO", sm);
 
   // Execute the state machine
   try {
@@ -2165,7 +2165,7 @@ public:
  * @throws std::exception If there is an error during state machine execution.
  */
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_demo");
+  YASMIN_LOG_INFO("yasmin_concurrence_demo");
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
@@ -2204,7 +2204,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_CONCURRENCE_DEMO", sm);
 
   // Execute the state machine
   try {
@@ -2402,7 +2402,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine visualization.
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_SERVICE_CLIENT_DEMO", sm);
 
   // Execute the state machine.
   try {
@@ -2900,7 +2900,7 @@ check_count(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
  */
 int main(int argc, char *argv[]) {
 
-  YASMIN_LOG_INFO("yasmin_monitor_demo");
+  YASMIN_LOG_INFO("yasmin_publisher_demo");
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 loggers
@@ -2956,7 +2956,7 @@ int main(int argc, char *argv[]) {
 #### Parameters Demo (FSM + ROS 2 Parameters)
 
 ```shell
-ros2 run yasmin_demos publisher_demo
+ros2 run yasmin_demos parameters_demo --ros-args -p max_counter:=5
 ```
 
 <details>
@@ -3070,7 +3070,7 @@ public:
  * @throws std::exception If there is an error during state machine execution.
  */
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_demo");
+  YASMIN_LOG_INFO("yasmin_parameters_demo");
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
@@ -3109,7 +3109,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PARAMETERS_DEMO", sm);
 
   // Execute the state machine
   try {

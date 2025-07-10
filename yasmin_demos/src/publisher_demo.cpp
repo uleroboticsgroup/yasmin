@@ -115,7 +115,7 @@ check_count(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
  */
 int main(int argc, char *argv[]) {
 
-  YASMIN_LOG_INFO("yasmin_monitor_demo");
+  YASMIN_LOG_INFO("yasmin_publisher_demo");
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 loggers
