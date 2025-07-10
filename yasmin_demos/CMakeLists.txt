@@ -129,6 +129,14 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# parameters states demo
+add_executable(parameters_demo src/parameters_demo.cpp)
+target_link_libraries(parameters_demo PUBLIC ${DEPENDENCIES})
+install(TARGETS
+  parameters_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_export_include_directories(include)
 ament_export_dependencies(${DEPENDENCIES_PACKAGE})
 
@@ -180,5 +188,11 @@ install(PROGRAMS
   yasmin_demos/concurrence_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
+
+install(PROGRAMS
+  yasmin_demos/parameters_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 
 ament_package()

@@ -1308,6 +1308,185 @@ if __name__ == "__main__":
 </details>
 
 
+#### Parameters Demo (FSM + ROS 2 Parameters)
+
+```shell
+ros2 run yasmin_demos parameters_demo.py --ros-args max_counter:=5
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```python
+import time
+import rclpy
+
+import yasmin
+from yasmin import State
+from yasmin import Blackboard
+from yasmin import StateMachine
+from yasmin_ros import set_ros_loggers
+from yasmin_ros import GetParametersState
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+from yasmin_viewer import YasminViewerPub
+
+
+# Define the FooState class, inheriting from the State class
+class FooState(State):
+    """
+    Represents the Foo state in the state machine.
+
+    Attributes:
+        counter (int): Counter to track the number of executions of this state.
+    """
+
+    def __init__(self) -> None:
+        """
+        Initializes the FooState instance, setting up the outcomes.
+
+        Outcomes:
+            outcome1: Indicates the state should continue to the Bar state.
+            outcome2: Indicates the state should finish execution and return.
+        """
+        super().__init__(["outcome1", "outcome2"])
+        self.counter = 0
+
+    def execute(self, blackboard: Blackboard) -> str:
+        """
+        Executes the logic for the Foo state.
+
+        Args:
+            blackboard (Blackboard): The shared data structure for states.
+
+        Returns:
+            str: The outcome of the execution, which can be "outcome1" or "outcome2".
+
+        Raises:
+            Exception: May raise exceptions related to state execution.
+        """
+        yasmin.YASMIN_LOG_INFO("Executing state FOO")
+        time.sleep(3)  # Simulate work by sleeping
+
+        if self.counter < blackboard["max_counter"]:
+            self.counter += 1
+            blackboard["foo_str"] = f"{blackboard['counter_str']}: {self.counter}"
+            return "outcome1"
+        else:
+            return "outcome2"
+
+
+# Define the BarState class, inheriting from the State class
+class BarState(State):
+    """
+    Represents the Bar state in the state machine.
+    """
+
+    def __init__(self) -> None:
+        """
+        Initializes the BarState instance, setting up the outcome.
+
+        Outcomes:
+            outcome3: Indicates the state should transition back to the Foo state.
+        """
+        super().__init__(outcomes=["outcome3"])
+
+    def execute(self, blackboard: Blackboard) -> str:
+        """
+        Executes the logic for the Bar state.
+
+        Args:
+            blackboard (Blackboard): The shared data structure for states.
+
+        Returns:
+            str: The outcome of the execution, which will always be "outcome3".
+
+        Raises:
+            Exception: May raise exceptions related to state execution.
+        """
+        yasmin.YASMIN_LOG_INFO("Executing state BAR")
+        time.sleep(3)  # Simulate work by sleeping
+
+        yasmin.YASMIN_LOG_INFO(blackboard["foo_str"])
+        return "outcome3"
+
+
+# Main function to initialize and run the state machine
+def main():
+    """
+    The main entry point of the application.
+
+    Initializes the ROS 2 environment, sets up the state machine,
+    and handles execution and termination.
+
+    Raises:
+        KeyboardInterrupt: If the execution is interrupted by the user.
+    """
+    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+
+    # Initialize ROS 2
+    rclpy.init()
+
+    # Set ROS 2 loggers
+    set_ros_loggers()
+
+    # Create a finite state machine (FSM)
+    sm = StateMachine(outcomes=["outcome4"])
+
+    # Add states to the FSM
+    sm.add_state(
+        "GETTING_PARAMETERS",
+        GetParametersState(
+            parameters={
+                "max_counter": 3,
+                "counter_str": "Counter",
+            },
+        ),
+        transitions={
+            SUCCEED: "FOO",
+            ABORT: "outcome4",
+        },
+    )
+
+    sm.add_state(
+        "FOO",
+        FooState(),
+        transitions={
+            "outcome1": "BAR",
+            "outcome2": "outcome4",
+        },
+    )
+    sm.add_state(
+        "BAR",
+        BarState(),
+        transitions={
+            "outcome3": "FOO",
+        },
+    )
+
+    # Publish FSM information for visualization
+    YasminViewerPub("parameters_demo", sm)
+
+    # Execute the FSM
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        if sm.is_running():
+            sm.cancel_state()
+
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+</details>
+
+
 #### Nav2 Demo (Hierarchical FSM + ROS 2 Action)
 
 ```shell
@@ -2450,6 +2629,165 @@ int main(int argc, char *argv[]) {
 
 </details>
 
+#### Monitor Demo (FSM + ROS 2 Subscriber)
+
+```shell
+ros2 run yasmin_demos monitor_demo
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include "nav_msgs/msg/odometry.hpp"
+#include "rclcpp/rclcpp.hpp"
+
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/monitor_state.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using std::placeholders::_1;
+using std::placeholders::_2;
+using namespace yasmin;
+
+/**
+ * @class PrintOdometryState
+ * @brief A state that monitors odometry data and transitions based on a
+ * specified count.
+ *
+ * This class inherits from yasmin_ros::MonitorState and listens to the "odom"
+ * topic for nav_msgs::msg::Odometry messages. The state transitions once a
+ * specified number of messages has been received and processed.
+ */
+class PrintOdometryState
+    : public yasmin_ros::MonitorState<nav_msgs::msg::Odometry> {
+
+public:
+  /// The number of times the state will process messages
+  int times;
+
+  /**
+   * @brief Constructor for the PrintOdometryState class.
+   * @param times Number of times to print odometry data before transitioning.
+   */
+  PrintOdometryState(int times)
+      : yasmin_ros::MonitorState<nav_msgs::msg::Odometry>(
+            "odom",                   // topic name
+            {"outcome1", "outcome2"}, // possible outcomes
+            std::bind(&PrintOdometryState::monitor_handler, this, _1,
+                      _2), // monitor handler callback
+            10,            // QoS for the topic subscription
+            10,            // queue size for the callback
+            10             // timeout for receiving messages
+        ) {
+    this->times = times;
+  };
+
+  /**
+   * @brief Handler for processing odometry data.
+   *
+   * This function logs the x, y, and z positions from the odometry message.
+   * After processing, it decreases the `times` counter. When the counter
+   * reaches zero, the state transitions to "outcome2"; otherwise, it remains in
+   * "outcome1".
+   *
+   * @param blackboard Shared pointer to the blackboard (unused in this
+   * implementation).
+   * @param msg Shared pointer to the received odometry message.
+   * @return A string representing the outcome: "outcome1" to stay in the state,
+   *         or "outcome2" to transition out of the state.
+   */
+  std::string
+  monitor_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+                  std::shared_ptr<nav_msgs::msg::Odometry> msg) {
+
+    (void)blackboard; // blackboard is not used in this implementation
+
+    YASMIN_LOG_INFO("x: %f", msg->pose.pose.position.x);
+    YASMIN_LOG_INFO("y: %f", msg->pose.pose.position.y);
+    YASMIN_LOG_INFO("z: %f", msg->pose.pose.position.z);
+
+    this->times--;
+
+    // Transition based on remaining times
+    if (this->times <= 0) {
+      return "outcome2";
+    }
+
+    return "outcome1";
+  };
+};
+
+/**
+ * @brief Main function initializing ROS 2 and setting up the state machine.
+ *
+ * Initializes ROS 2, configures loggers, sets up the state machine with states
+ * and transitions, and starts monitoring odometry data. The state machine will
+ * cancel upon ROS 2 shutdown.
+ *
+ * @param argc Argument count.
+ * @param argv Argument vector.
+ * @return int Exit code.
+ *
+ * @exception std::exception Catches and logs any exceptions thrown by the state
+ * machine.
+ */
+int main(int argc, char *argv[]) {
+
+  YASMIN_LOG_INFO("yasmin_monitor_demo");
+  rclcpp::init(argc, argv);
+
+  // Set up ROS 2 loggers
+  yasmin_ros::set_ros_loggers();
+
+  // Create a state machine with a final outcome
+  auto sm = std::make_shared<yasmin::StateMachine>(
+      std::initializer_list<std::string>{"outcome4"});
+
+  // Cancel state machine on ROS 2 shutdown
+  rclcpp::on_shutdown([sm]() {
+    if (sm->is_running()) {
+      sm->cancel_state();
+    }
+  });
+
+  // Add states to the state machine
+  sm->add_state(
+      "PRINTING_ODOM", std::make_shared<PrintOdometryState>(5),
+      {
+          {"outcome1",
+           "PRINTING_ODOM"},        // Transition back to itself on outcome1
+          {"outcome2", "outcome4"}, // Transition to outcome4 on outcome2
+          {yasmin_ros::basic_outcomes::TIMEOUT,
+           "outcome4"}, // Timeout transition
+      });
+
+  // Publisher for visualizing the state machine's status
+  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_MONITOR_DEMO", sm);
+
+  // Execute the state machine
+  try {
+    std::string outcome = (*sm.get())();
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  rclcpp::shutdown();
+
+  return 0;
+}
+```
+
+</details>
+
 #### Publisher Demo (FSM + ROS 2 Publisher)
 
 ```shell
@@ -2615,125 +2953,130 @@ int main(int argc, char *argv[]) {
 
 </details>
 
-#### Monitor Demo (FSM + ROS 2 Subscriber)
+#### Parameters Demo (FSM + ROS 2 Parameters)
 
 ```shell
-ros2 run yasmin_demos monitor_demo
+ros2 run yasmin_demos publisher_demo
 ```
 
 <details>
 <summary>Click to expand</summary>
 
 ```cpp
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <string>
 
-#include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
-
 #include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
-#include "yasmin_ros/monitor_state.hpp"
+#include "yasmin_ros/get_parameters_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
-using std::placeholders::_1;
-using std::placeholders::_2;
 using namespace yasmin;
 
 /**
- * @class PrintOdometryState
- * @brief A state that monitors odometry data and transitions based on a
- * specified count.
+ * @brief Represents the "Foo" state in the state machine.
  *
- * This class inherits from yasmin_ros::MonitorState and listens to the "odom"
- * topic for nav_msgs::msg::Odometry messages. The state transitions once a
- * specified number of messages has been received and processed.
+ * This state increments a counter each time it is executed and
+ * communicates the current count via the blackboard.
  */
-class PrintOdometryState
-    : public yasmin_ros::MonitorState<nav_msgs::msg::Odometry> {
-
+class FooState : public yasmin::State {
 public:
-  /// The number of times the state will process messages
-  int times;
+  /// Counter to track the number of executions.
+  int counter;
 
   /**
-   * @brief Constructor for the PrintOdometryState class.
-   * @param times Number of times to print odometry data before transitioning.
+   * @brief Constructs a FooState object, initializing the counter.
    */
-  PrintOdometryState(int times)
-      : yasmin_ros::MonitorState<nav_msgs::msg::Odometry>(
-            "odom",                   // topic name
-            {"outcome1", "outcome2"}, // possible outcomes
-            std::bind(&PrintOdometryState::monitor_handler, this, _1,
-                      _2), // monitor handler callback
-            10,            // QoS for the topic subscription
-            10,            // queue size for the callback
-            10             // timeout for receiving messages
-        ) {
-    this->times = times;
-  };
+  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0){};
 
   /**
-   * @brief Handler for processing odometry data.
+   * @brief Executes the Foo state logic.
    *
-   * This function logs the x, y, and z positions from the odometry message.
-   * After processing, it decreases the `times` counter. When the counter
-   * reaches zero, the state transitions to "outcome2"; otherwise, it remains in
-   * "outcome1".
+   * This method logs the execution, waits for 3 seconds,
+   * increments the counter, and sets a string in the blackboard.
+   * The state will transition to either "outcome1" or "outcome2"
+   * based on the current value of the counter.
    *
-   * @param blackboard Shared pointer to the blackboard (unused in this
-   * implementation).
-   * @param msg Shared pointer to the received odometry message.
-   * @return A string representing the outcome: "outcome1" to stay in the state,
-   *         or "outcome2" to transition out of the state.
+   * @param blackboard Shared pointer to the blackboard for state communication.
+   * @return std::string The outcome of the execution: "outcome1" or "outcome2".
    */
   std::string
-  monitor_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-                  std::shared_ptr<nav_msgs::msg::Odometry> msg) {
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    YASMIN_LOG_INFO("Executing state FOO");
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
-    (void)blackboard; // blackboard is not used in this implementation
+    if (this->counter < blackboard->get<int>("max_counter")) {
+      this->counter += 1;
+      blackboard->set<std::string>("foo_str",
+                                   blackboard->get<std::string>("counter_str") +
+                                       ": " + std::to_string(this->counter));
+      return "outcome1";
 
-    YASMIN_LOG_INFO("x: %f", msg->pose.pose.position.x);
-    YASMIN_LOG_INFO("y: %f", msg->pose.pose.position.y);
-    YASMIN_LOG_INFO("z: %f", msg->pose.pose.position.z);
-
-    this->times--;
-
-    // Transition based on remaining times
-    if (this->times <= 0) {
+    } else {
       return "outcome2";
     }
-
-    return "outcome1";
   };
 };
 
 /**
- * @brief Main function initializing ROS 2 and setting up the state machine.
+ * @brief Represents the "Bar" state in the state machine.
  *
- * Initializes ROS 2, configures loggers, sets up the state machine with states
- * and transitions, and starts monitoring odometry data. The state machine will
- * cancel upon ROS 2 shutdown.
+ * This state logs the value from the blackboard and provides
+ * a single outcome to transition.
+ */
+class BarState : public yasmin::State {
+public:
+  /**
+   * @brief Constructs a BarState object.
+   */
+  BarState() : yasmin::State({"outcome3"}) {}
+
+  /**
+   * @brief Executes the Bar state logic.
+   *
+   * This method logs the execution, waits for 3 seconds,
+   * retrieves a string from the blackboard, and logs it.
+   *
+   * @param blackboard Shared pointer to the blackboard for state communication.
+   * @return std::string The outcome of the execution: "outcome3".
+   */
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    YASMIN_LOG_INFO("Executing state BAR");
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    YASMIN_LOG_INFO(blackboard->get<std::string>("foo_str").c_str());
+
+    return "outcome3";
+  }
+};
+
+/**
+ * @brief Main function that initializes the ROS 2 node and state machine.
  *
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int Exit code.
+ * This function sets up the state machine, adds states, and handles
+ * the execution flow, including logging and cleanup.
  *
- * @exception std::exception Catches and logs any exceptions thrown by the state
- * machine.
+ * @param argc Argument count from the command line.
+ * @param argv Argument vector from the command line.
+ * @return int Exit status of the program. Returns 0 on success.
+ *
+ * @throws std::exception If there is an error during state machine execution.
  */
 int main(int argc, char *argv[]) {
-
-  YASMIN_LOG_INFO("yasmin_monitor_demo");
+  YASMIN_LOG_INFO("yasmin_demo");
   rclcpp::init(argc, argv);
 
-  // Set up ROS 2 loggers
+  // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
 
-  // Create a state machine with a final outcome
+  // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
 
@@ -2745,18 +3088,28 @@ int main(int argc, char *argv[]) {
   });
 
   // Add states to the state machine
-  sm->add_state(
-      "PRINTING_ODOM", std::make_shared<PrintOdometryState>(5),
-      {
-          {"outcome1",
-           "PRINTING_ODOM"},        // Transition back to itself on outcome1
-          {"outcome2", "outcome4"}, // Transition to outcome4 on outcome2
-          {yasmin_ros::basic_outcomes::TIMEOUT,
-           "outcome4"}, // Timeout transition
-      });
+  sm->add_state("GETTING_PARAMETERS",
+                std::make_shared<yasmin_ros::GetParametersState>(
+                    std::map<std::string, std::any>{
+                        {"max_counter", 3},
+                        {"counter_str", std::string("Counter")},
+                    }),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "FOO"},
+                    {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
+                });
+  sm->add_state("FOO", std::make_shared<FooState>(),
+                {
+                    {"outcome1", "BAR"},
+                    {"outcome2", "outcome4"},
+                });
+  sm->add_state("BAR", std::make_shared<BarState>(),
+                {
+                    {"outcome3", "FOO"},
+                });
 
-  // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_MONITOR_DEMO", sm);
+  // Publish state machine updates
+  yasmin_viewer::YasminViewerPub yasmin_pub("yasmin_demo", sm);
 
   // Execute the state machine
   try {
