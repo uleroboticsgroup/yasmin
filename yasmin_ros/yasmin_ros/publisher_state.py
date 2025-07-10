@@ -25,7 +25,6 @@ from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED
-from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
 
 
 class PublisherState(State):

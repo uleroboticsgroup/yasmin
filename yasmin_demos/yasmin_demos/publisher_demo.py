@@ -19,8 +19,8 @@ import time
 import rclpy
 from std_msgs.msg import Int32
 
+import yasmin
 from yasmin.cb_state import CbState
-from yasmin.logs import yasmin_log_info, yasmin_log_warn
 from yasmin.state_machine import StateMachine
 from yasmin.blackboard import Blackboard
 
@@ -61,7 +61,7 @@ class PublishIntState(PublisherState):
         blackboard.set("counter", counter)
 
         # Log the message creation
-        yasmin_log_info(f"Creating message {counter}")
+        yasmin.YASMIN_LOG_INFO(f"Creating message {counter}")
 
         # Create and return the message
         msg = Int32()
@@ -86,7 +86,7 @@ def check_count(blackboard: Blackboard) -> str:
     count = blackboard.get("counter", 0)
     max_count = blackboard.get("max_count", 10)
 
-    yasmin_log_info(f"Checking count: {count}")
+    yasmin.YASMIN_LOG_INFO(f"Checking count: {count}")
 
     # Determine and return the outcome based on the counter value
     if count >= max_count:
@@ -103,7 +103,7 @@ def main(args=None):
     Args:
         args (list, optional): Command-line arguments passed to rclpy.init().
     """
-    yasmin_log_info("yasmin_monitor_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
     rclpy.init(args=args)
 
     # Configure YASMIN to use ROS-based logging
@@ -149,9 +149,9 @@ def main(args=None):
     # Run the state machine and log the outcome
     try:
         outcome = sm(blackboard)
-        yasmin_log_info(outcome)
+        yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
-        yasmin_log_warn(str(e))
+        yasmin.YASMIN_LOG_INFO(str(e))
 
     # Shutdown ROS
     rclpy.shutdown()
