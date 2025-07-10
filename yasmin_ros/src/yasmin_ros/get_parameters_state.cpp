@@ -79,40 +79,38 @@ std::string GetParametersState::execute(
 
     auto parameter = this->node_->get_parameter(param_name);
     auto type = this->node_->get_parameter_types({param_name});
-    auto value = parameter.get_parameter_value();
 
     switch (type[0]) {
     case rclcpp::ParameterType::PARAMETER_BOOL:
-      blackboard->set<bool>(param_name, value.get<bool>());
+      blackboard->set<bool>(param_name, parameter.as_bool());
       break;
     case rclcpp::ParameterType::PARAMETER_INTEGER:
-      blackboard->set<int>(param_name, value.get<int>());
+      blackboard->set<int>(param_name, parameter.as_int());
       break;
     case rclcpp::ParameterType::PARAMETER_DOUBLE:
-      blackboard->set<double>(param_name, value.get<double>());
+      blackboard->set<double>(param_name, parameter.as_double());
       break;
     case rclcpp::ParameterType::PARAMETER_STRING:
-      blackboard->set<std::string>(param_name, value.get<std::string>());
+      blackboard->set<std::string>(param_name, parameter.as_string());
       break;
     case rclcpp::ParameterType::PARAMETER_BOOL_ARRAY:
-      blackboard->set<std::vector<bool>>(param_name,
-                                         value.get<std::vector<bool>>());
+      blackboard->set<std::vector<bool>>(param_name, parameter.as_bool_array());
       break;
     case rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY:
-      blackboard->set<std::vector<long int>>(
-          param_name, value.get<std::vector<long int>>());
+      blackboard->set<std::vector<long int>>(param_name,
+                                             parameter.as_integer_array());
       break;
     case rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY:
       blackboard->set<std::vector<double>>(param_name,
-                                           value.get<std::vector<double>>());
+                                           parameter.as_double_array());
       break;
     case rclcpp::ParameterType::PARAMETER_STRING_ARRAY:
-      blackboard->set<std::vector<std::string>>(
-          param_name, value.get<std::vector<std::string>>());
+      blackboard->set<std::vector<std::string>>(param_name,
+                                                parameter.as_string_array());
       break;
     case rclcpp::ParameterType::PARAMETER_BYTE_ARRAY:
       blackboard->set<std::vector<uint8_t>>(param_name,
-                                            value.get<std::vector<uint8_t>>());
+                                            parameter.as_byte_array());
       break;
     default:
       YASMIN_LOG_ERROR("Unsupported parameter type for '%s'",
