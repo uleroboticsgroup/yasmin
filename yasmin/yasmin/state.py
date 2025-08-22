@@ -15,9 +15,22 @@
 
 from typing import Set
 from abc import ABC, abstractmethod
+from enum import Enum
+from threading import Lock
 
 import yasmin
 from yasmin.blackboard import Blackboard
+
+
+class StateStatus(Enum):
+    """
+    Enumeration representing the current status of a state.
+    """
+
+    IDLE = "idle"  # State is idle and ready to execute
+    RUNNING = "running"  # State is currently executing
+    CANCELED = "canceled"  # State execution has been canceled
+    COMPLETED = "completed"  # State execution has completed successfully
 
 
 class State(ABC):
@@ -29,8 +42,8 @@ class State(ABC):
 
     Attributes:
         _outcomes (Set[str]): A set of valid outcomes for this state.
-        __running (bool): A flag indicating whether the state is currently running.
-        __canceled (bool): A flag indicating whether the state has been canceled.
+        __status (StateStatus): Current status of the state.
+        __status_lock (threading.Lock): Lock for thread-safe status operations.
     """
 
     def __init__(self, outcomes: Set[str]) -> None:
@@ -44,16 +57,66 @@ class State(ABC):
 
         ## A set of valid outcomes for this state.
         self._outcomes: Set = set()
-        ## A flag indicating whether the state is currently running.
-        self.__running: bool = False
-        ## A flag indicating whether the state has been canceled.
-        self.__canceled: bool = False
+        ## Current status of the state
+        self.__status: StateStatus = StateStatus.IDLE
+        ## Lock for thread-safe status operations
+        self.__status_lock: Lock = Lock()
 
         if outcomes:
             self._outcomes.update(outcomes)
             self._outcomes: Set = sorted(self._outcomes)
         else:
             raise ValueError("There must be at least one outcome")
+
+    def get_status(self) -> StateStatus:
+        """
+        Gets the current status of the state.
+
+        :return: The current StateStatus.
+        """
+        with self.__status_lock:
+            return self.__status
+
+    def set_status(self, status: StateStatus) -> None:
+        """
+        Sets the current status of the state.
+
+        :param status: The StateStatus to set.
+        """
+        with self.__status_lock:
+            self.__status = status
+
+    def is_idle(self) -> bool:
+        """
+        Checks if the state is idle.
+
+        :return: True if the state is idle, False otherwise.
+        """
+        return self.get_status() == StateStatus.IDLE
+
+    def is_running(self) -> bool:
+        """
+        Checks if the state is currently running.
+
+        :return: True if the state is running, False otherwise.
+        """
+        return self.get_status() == StateStatus.RUNNING
+
+    def is_canceled(self) -> bool:
+        """
+        Checks if the state has been canceled.
+
+        :return: True if the state is canceled, False otherwise.
+        """
+        return self.get_status() == StateStatus.CANCELED
+
+    def is_completed(self) -> bool:
+        """
+        Checks if the state has completed execution.
+
+        :return: True if the state is completed, False otherwise.
+        """
+        return self.get_status() == StateStatus.COMPLETED
 
     def __call__(self, blackboard: Blackboard = None) -> str:
         """
@@ -69,8 +132,7 @@ class State(ABC):
         """
         yasmin.YASMIN_LOG_DEBUG(f"Executing state '{self}'")
 
-        self.__canceled: bool = False
-        self.__running: bool = True
+        self.set_status(StateStatus.RUNNING)
 
         if blackboard is None:
             blackboard = Blackboard()
@@ -78,12 +140,16 @@ class State(ABC):
         outcome = self.execute(blackboard)
 
         if outcome not in self._outcomes:
+            self.set_status(StateStatus.IDLE)
             raise ValueError(
                 f"Outcome '{outcome}' does not belong to the outcomes of the state '{self}'. "
                 f"The possible outcomes are: {self._outcomes}"
             )
 
-        self.__running: bool = False
+        # Mark as completed if not canceled
+        if self.get_status() != StateStatus.CANCELED:
+            self.set_status(StateStatus.COMPLETED)
+
         return outcome
 
     @abstractmethod
@@ -100,38 +166,14 @@ class State(ABC):
         """
         raise NotImplementedError("Subclasses must implement the execute method")
 
-    def __str__(self) -> str:
-        """
-        Returns the string representation of the state.
-
-        :return: The name of the class representing the state.
-        """
-        return self.__class__.__name__
-
     def cancel_state(self) -> None:
         """
         Cancels the execution of the state.
 
-        Sets the canceled flag to True and logs the cancellation.
+        Sets the status to CANCELED and logs the cancellation.
         """
         yasmin.YASMIN_LOG_INFO(f"Canceling state '{self}'")
-        self.__canceled: bool = True
-
-    def is_canceled(self) -> bool:
-        """
-        Checks if the state has been canceled.
-
-        :return: True if the state is canceled, False otherwise.
-        """
-        return self.__canceled
-
-    def is_running(self) -> bool:
-        """
-        Checks if the state is currently running.
-
-        :return: True if the state is running, False otherwise.
-        """
-        return self.__running
+        self.set_status(StateStatus.CANCELED)
 
     def get_outcomes(self) -> Set[str]:
         """
@@ -140,3 +182,11 @@ class State(ABC):
         :return: A set of valid outcomes as strings.
         """
         return self._outcomes
+
+    def __str__(self) -> str:
+        """
+        Returns the string representation of the state.
+
+        :return: The name of the class representing the state.
+        """
+        return self.__class__.__name__

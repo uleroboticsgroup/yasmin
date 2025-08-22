@@ -32,12 +32,23 @@
 namespace yasmin {
 
 /**
+ * @enum StateStatus
+ * @brief Enumeration representing the current status of a state.
+ */
+enum class StateStatus {
+  IDLE,     ///< State is idle and ready to execute
+  RUNNING,  ///< State is currently executing
+  CANCELED, ///< State execution has been canceled
+  COMPLETED ///< State execution has completed successfully
+};
+
+/**
  * @class State
  * @brief Represents a state in a state machine.
  *
  * The State class defines a state that can execute actions and manage
  * outcomes. It maintains information about its execution status
- * (running or canceled) and the possible outcomes of its execution.
+ * and the possible outcomes of its execution.
  */
 class State {
 
@@ -46,10 +57,8 @@ protected:
   std::set<std::string> outcomes;
 
 private:
-  /// Indicates if the state has been canceled.
-  std::atomic_bool canceled{false};
-  /// Indicates if the state is currently running.
-  std::atomic_bool running{false};
+  /// Current status of the state
+  std::atomic<StateStatus> status{StateStatus::IDLE};
 
 public:
   /**
@@ -57,6 +66,36 @@ public:
    * @param outcomes A set of possible outcomes for this state.
    */
   State(std::set<std::string> outcomes);
+
+  /**
+   * @brief Gets the current status of the state.
+   * @return The current StateStatus.
+   */
+  StateStatus get_status() const;
+
+  /**
+   * @brief Checks if the state is idle.
+   * @return True if the state is idle, otherwise false.
+   */
+  bool is_idle() const;
+
+  /**
+   * @brief Checks if the state is currently running.
+   * @return True if the state is running, otherwise false.
+   */
+  bool is_running() const;
+
+  /**
+   * @brief Checks if the state has been canceled.
+   * @return True if the state is canceled, otherwise false.
+   */
+  bool is_canceled() const;
+
+  /**
+   * @brief Checks if the state has completed execution.
+   * @return True if the state is completed, otherwise false.
+   */
+  bool is_completed() const;
 
   /**
    * @brief Executes the state and returns the outcome.
@@ -89,24 +128,12 @@ public:
   /**
    * @brief Cancels the current state execution.
    *
-   * This method sets the canceled flag to true and logs the action.
+   * This method sets the status to CANCELED and logs the action.
    */
   virtual void cancel_state() {
     YASMIN_LOG_INFO("Canceling state '%s'", this->to_string().c_str());
-    this->canceled.store(true);
+    this->status.store(StateStatus::CANCELED);
   }
-
-  /**
-   * @brief Checks if the state has been canceled.
-   * @return True if the state is canceled, otherwise false.
-   */
-  bool is_canceled() const;
-
-  /**
-   * @brief Checks if the state is currently running.
-   * @return True if the state is running, otherwise false.
-   */
-  bool is_running() const;
 
   /**
    * @brief Gets the set of possible outcomes for this state.

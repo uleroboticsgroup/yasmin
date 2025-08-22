@@ -26,12 +26,27 @@ using namespace yasmin;
 
 State::State(std::set<std::string> outcomes) : outcomes(outcomes) {}
 
+StateStatus State::get_status() const { return this->status.load(); }
+
+bool State::is_idle() const { return this->status.load() == StateStatus::IDLE; }
+
+bool State::is_running() const {
+  return this->status.load() == StateStatus::RUNNING;
+}
+
+bool State::is_canceled() const {
+  return this->status.load() == StateStatus::CANCELED;
+}
+
+bool State::is_completed() const {
+  return this->status.load() == StateStatus::COMPLETED;
+}
+
 std::string
 State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
   YASMIN_LOG_DEBUG("Executing state '%s'", this->to_string().c_str());
 
-  this->canceled.store(false);
-  this->running.store(true);
+  this->status.store(StateStatus::RUNNING);
 
   // Execute the specific logic of the state
   std::string outcome = this->execute(blackboard);
@@ -56,6 +71,9 @@ State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
     outcomes_string += "]";
 
+    // Mark as idle before throwing exception
+    this->status.store(StateStatus::IDLE);
+
     // Throw an exception if the outcome is not valid
     throw std::logic_error("Outcome '" + outcome +
                            "' does not belong to the outcomes of "
@@ -64,12 +82,12 @@ State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
                            "'. The possible outcomes are: " + outcomes_string);
   }
 
-  this->running.store(false); // Mark the state as no longer running
-  return outcome;             // Return the valid outcome
+  // Mark as completed if not canceled
+  if (this->status.load() != StateStatus::CANCELED) {
+    this->status.store(StateStatus::COMPLETED);
+  }
+
+  return outcome; // Return the valid outcome
 }
-
-bool State::is_canceled() const { return this->canceled.load(); }
-
-bool State::is_running() const { return this->running.load(); }
 
 std::set<std::string> const &State::get_outcomes() { return this->outcomes; }
