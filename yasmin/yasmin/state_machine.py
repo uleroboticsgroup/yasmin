@@ -15,7 +15,7 @@
 
 from typing import Set, List, Tuple, Dict, Any
 from typing import Union, Callable
-from threading import Lock
+from threading import Lock, Event
 
 import yasmin
 from yasmin import State
@@ -32,6 +32,7 @@ class StateMachine(State):
         _start_state (str): The name of the initial state of the state machine.
         __current_state (str): The name of the current state being executed.
         __current_state_lock (Lock): A threading lock to manage access to the current state.
+        __current_state_event (Event): An event to signal when the current state changes.
         _validated (bool): A flag indicating whether the state machine has been validated.
         __start_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call when the state machine starts.
         __transition_cbs (List[Tuple[Callable[[Blackboard, str, List[Any]], None], List[Any]]]): A list of callbacks to call during state transitions.
@@ -55,6 +56,8 @@ class StateMachine(State):
         self.__current_state: str = None
         ## A threading lock to manage access to the current state.
         self.__current_state_lock: Lock = Lock()
+        ## An event to signal when the current state changes.
+        self.__current_state_event: Event = Event()
 
         ## A flag indicating whether the state machine has been validated.
         self._validated: bool = False
@@ -202,6 +205,7 @@ class StateMachine(State):
         """
         with self.__current_state_lock:
             self.__current_state = state_name
+            self.__current_state_event.set()
 
     def add_start_cb(self, cb: Callable, args: List[Any] = None) -> None:
         """
@@ -446,9 +450,16 @@ class StateMachine(State):
         """
         super().cancel_state()
 
-        current_state = self.get_current_state()
-        if current_state:
-            self._states[current_state]["state"].cancel_state()
+        if self.is_running():
+            current_state = self.get_current_state()
+
+            while not current_state:
+                self.__current_state_event.clear()
+                self.__current_state_event.wait()
+                current_state = self.get_current_state()
+
+            if current_state:
+                self._states[current_state]["state"].cancel_state()
 
     def __str__(self) -> str:
         """

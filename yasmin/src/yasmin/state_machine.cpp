@@ -135,6 +135,7 @@ std::string StateMachine::get_current_state() {
 void StateMachine::set_current_state(std::string state_name) {
   const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
   this->current_state = state_name;
+  this->current_state_cond.notify_all();
 }
 
 void StateMachine::add_start_cb(StartCallbackType cb,
@@ -381,9 +382,19 @@ std::string StateMachine::operator()() {
 void StateMachine::cancel_state() {
   State::cancel_state();
 
-  auto current_state = this->get_current_state();
-  if (!current_state.empty()) {
-    this->states.at(current_state)->cancel_state();
+  if (this->is_running()) {
+
+    auto current_state = this->get_current_state();
+
+    while (current_state.empty()) {
+      std::unique_lock<std::mutex> lock(*this->current_state_mutex.get());
+      this->current_state_cond.wait(lock);
+      current_state = this->get_current_state();
+    }
+
+    if (!current_state.empty()) {
+      this->states.at(current_state)->cancel_state();
+    }
   }
 }
 

@@ -17,6 +17,7 @@
 #define YASMIN__STATE_MACHINE_HPP
 
 #include <atomic>
+#include <condition_variable>
 #include <functional>
 #include <map>
 #include <memory>
@@ -236,6 +237,8 @@ private:
   std::string current_state;
   /// Mutex for current state access
   std::unique_ptr<std::mutex> current_state_mutex;
+  /// Condition variable for current state changes
+  std::condition_variable current_state_cond;
 
   /// Flag to indicate if the state machine has been validated
   std::atomic_bool validated{false};
