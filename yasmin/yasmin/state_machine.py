@@ -193,6 +193,16 @@ class StateMachine(State):
 
         return ""
 
+    def __set_current_state(self, state_name: str) -> None:
+        """
+        Sets the current state name.
+
+        Parameters:
+            state_name (str): The name of the state to set as the current state.
+        """
+        with self.__current_state_lock:
+            self.__current_state = state_name
+
     def add_start_cb(self, cb: Callable, args: List[Any] = None) -> None:
         """
         Adds a callback to be called when the state machine starts.
@@ -377,8 +387,7 @@ class StateMachine(State):
         )
         self._call_start_cbs(blackboard, self._start_state)
 
-        with self.__current_state_lock:
-            self.__current_state: str = self._start_state
+        self.__set_current_state(self._start_state)
 
         while not self.is_canceled():
             state = self._states[self.get_current_state()]
@@ -400,8 +409,7 @@ class StateMachine(State):
 
             # Outcome is an outcome of the state machine
             if outcome in self.get_outcomes():
-                with self.__current_state_lock:
-                    self.__current_state: str = None
+                self.__set_current_state("")
 
                 yasmin.YASMIN_LOG_INFO(f"State machine ends with outcome '{outcome}'")
                 self._call_end_cbs(blackboard, outcome)
@@ -420,8 +428,7 @@ class StateMachine(State):
                     old_outcome,
                 )
 
-                with self.__current_state_lock:
-                    self.__current_state: str = outcome
+                self.__set_current_state(outcome)
 
             # Outcome is not in the state machine
             else:
@@ -438,9 +445,10 @@ class StateMachine(State):
         Overrides the cancel_state method from the parent State class.
         """
         super().cancel_state()
-        with self.__current_state_lock:
-            if self.__current_state:
-                self._states[self.__current_state]["state"].cancel_state()
+
+        current_state = self.get_current_state()
+        if current_state:
+            self._states[current_state]["state"].cancel_state()
 
     def __str__(self) -> str:
         """

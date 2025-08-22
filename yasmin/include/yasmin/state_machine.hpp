@@ -247,6 +247,13 @@ private:
       transition_cbs;
   /// End callbacks executed before the state machine
   std::vector<std::pair<EndCallbackType, std::vector<std::string>>> end_cbs;
+
+  /**
+   * @brief Sets the current state name.
+   *
+   * @param state_name The name of the state to set as the current state.
+   */
+  void set_current_state(std::string state_name);
 };
 
 } // namespace yasmin

@@ -31,9 +31,8 @@
 
 using namespace yasmin;
 
-StateMachine::StateMachine(std::set<std::string> outcomes) : State(outcomes) {
-  this->current_state_mutex = std::make_unique<std::mutex>();
-}
+StateMachine::StateMachine(std::set<std::string> outcomes)
+    : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()) {}
 
 void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
                              std::map<std::string, std::string> transitions,
@@ -131,6 +130,11 @@ StateMachine::get_transitions() {
 std::string StateMachine::get_current_state() {
   const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
   return this->current_state;
+}
+
+void StateMachine::set_current_state(std::string state_name) {
+  const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
+  this->current_state = state_name;
 }
 
 void StateMachine::add_start_cb(StartCallbackType cb,
@@ -296,9 +300,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
                   this->start_state.c_str());
   this->call_start_cbs(blackboard, this->start_state);
 
-  this->current_state_mutex->lock();
-  this->current_state = this->start_state;
-  this->current_state_mutex->unlock();
+  this->set_current_state(this->start_state);
 
   std::map<std::string, std::string> transitions;
   std::map<std::string, std::string> remapping;
@@ -333,10 +335,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     if (std::find(this->outcomes.begin(), this->outcomes.end(), outcome) !=
         this->outcomes.end()) {
 
-      this->current_state_mutex->lock();
-      this->current_state.clear();
-      this->current_state_mutex->unlock();
-
+      this->set_current_state("");
       YASMIN_LOG_INFO("State machine ends with outcome '%s'", outcome.c_str());
       this->call_end_cbs(blackboard, outcome);
 
@@ -351,9 +350,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
       this->call_transition_cbs(blackboard, this->current_state, outcome,
                                 old_outcome);
 
-      this->current_state_mutex->lock();
-      this->current_state = outcome;
-      this->current_state_mutex->unlock();
+      this->set_current_state(outcome);
 
       // Outcome is not in the sm
     } else {
@@ -384,9 +381,9 @@ std::string StateMachine::operator()() {
 void StateMachine::cancel_state() {
   State::cancel_state();
 
-  const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
-  if (!this->current_state.empty()) {
-    this->states.at(this->current_state)->cancel_state();
+  auto current_state = this->get_current_state();
+  if (!current_state.empty()) {
+    this->states.at(current_state)->cancel_state();
   }
 }
 
