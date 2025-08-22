@@ -29,8 +29,8 @@ class State(ABC):
 
     Attributes:
         _outcomes (Set[str]): A set of valid outcomes for this state.
-        _running (bool): A flag indicating whether the state is currently running.
-        _canceled (bool): A flag indicating whether the state has been canceled.
+        __running (bool): A flag indicating whether the state is currently running.
+        __canceled (bool): A flag indicating whether the state has been canceled.
     """
 
     def __init__(self, outcomes: Set[str]) -> None:
@@ -45,9 +45,9 @@ class State(ABC):
         ## A set of valid outcomes for this state.
         self._outcomes: Set = set()
         ## A flag indicating whether the state is currently running.
-        self._running: bool = False
+        self.__running: bool = False
         ## A flag indicating whether the state has been canceled.
-        self._canceled: bool = False
+        self.__canceled: bool = False
 
         if outcomes:
             self._outcomes.update(outcomes)
@@ -69,8 +69,8 @@ class State(ABC):
         """
         yasmin.YASMIN_LOG_DEBUG(f"Executing state '{self}'")
 
-        self._canceled: bool = False
-        self._running: bool = True
+        self.__canceled: bool = False
+        self.__running: bool = True
 
         if blackboard is None:
             blackboard = Blackboard()
@@ -83,7 +83,7 @@ class State(ABC):
                 f"The possible outcomes are: {self._outcomes}"
             )
 
-        self._running: bool = False
+        self.__running: bool = False
         return outcome
 
     @abstractmethod
@@ -112,10 +112,10 @@ class State(ABC):
         """
         Cancels the execution of the state.
 
-        Sets the _canceled flag to True and logs the cancellation.
+        Sets the canceled flag to True and logs the cancellation.
         """
         yasmin.YASMIN_LOG_INFO(f"Canceling state '{self}'")
-        self._canceled: bool = True
+        self.__canceled: bool = True
 
     def is_canceled(self) -> bool:
         """
@@ -123,7 +123,7 @@ class State(ABC):
 
         :return: True if the state is canceled, False otherwise.
         """
-        return self._canceled
+        return self.__canceled
 
     def is_running(self) -> bool:
         """
@@ -131,7 +131,7 @@ class State(ABC):
 
         :return: True if the state is running, False otherwise.
         """
-        return self._running
+        return self.__running
 
     def get_outcomes(self) -> Set[str]:
         """
