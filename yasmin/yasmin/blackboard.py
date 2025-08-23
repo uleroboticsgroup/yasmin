@@ -164,7 +164,7 @@ class Blackboard(object):
             return repr(self._data)
 
     @property
-    def remapings(self) -> Dict[str, str]:
+    def remappings(self) -> Dict[str, str]:
         """
         Property getter of a dict of remappings of the blackboard keys.
 
@@ -176,7 +176,7 @@ class Blackboard(object):
         """
         return self.__remapping
 
-    @remapings.setter
+    @remappings.setter
     def remappings(self, remapping: Dict[str, str]) -> None:
         """
         Property setter of the remapping of the blackboard keys.

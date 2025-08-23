@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Set
-from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Set
 from threading import Lock
+from abc import ABC, abstractmethod
 
 import yasmin
 from yasmin.blackboard import Blackboard

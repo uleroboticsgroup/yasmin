@@ -15,11 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import rclpy
 
 import yasmin
 from yasmin import State
 from yasmin import Blackboard
 from yasmin import StateMachine
+from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED
 
 
@@ -99,6 +101,10 @@ if __name__ == "__main__":
     Raises:
         KeyboardInterrupt: If the execution is interrupted by the user.
     """
+
+    rclpy.init()
+    set_ros_loggers()
+
     bb = Blackboard()
     bb["msg1"] = "test1"
     bb["msg2"] = "test2"
@@ -123,4 +129,14 @@ if __name__ == "__main__":
         remappings={"bar_data": "foo_out_data"},
     )
 
-    sm.execute(bb)
+    # Execute the FSM
+    try:
+        outcome = sm(bb)
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        if sm.is_running():
+            sm.cancel_state()
+
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
