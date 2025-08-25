@@ -3,6 +3,17 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.4.0 (2025-08-25)
+------------------
+* fixing python remapping
+* adding status to states
+* wait for a state to cancel the state machine if running
+* fixing flags names in python state
+* set_current_state function for state machine
+* adding publisher demo to README
+* Fixing set log level in Cpp (`#61 <https://github.com/uleroboticsgroup/yasmin/issues/61>`_)
+* Contributors: Miguel Ángel González Santamarta, Simone Morettini
+
 3.3.0 (2025-06-28)
 ------------------
 * ✨: Allowing that the cb_state receive arguments (`#59 <https://github.com/uleroboticsgroup/yasmin/issues/59>`_)

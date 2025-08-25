@@ -3,6 +3,14 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.4.0 (2025-08-25)
+------------------
+* fixing python remapping
+* fixing logs and viewer names in demos and README
+* parameters state added
+* adding publisher demo to README
+* Contributors: Miguel Ángel González Santamarta
+
 3.3.0 (2025-06-28)
 ------------------
 * python version of publisher state

@@ -3,6 +3,16 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.4.0 (2025-08-25)
+------------------
+* fixing int64_t in get paramters state for foxy/galactic
+* fixing get values of C++get parameters state
+* parameters state added
+* adding publisher demo to README
+* adding missing cond.clear to monitor state
+* improving monitor state by replacing sleeps with events and conds
+* Contributors: Miguel Ángel González Santamarta
+
 3.3.0 (2025-06-28)
 ------------------
 * destroying subscriber in monitor state

@@ -3,6 +3,9 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.4.0 (2025-08-25)
+------------------
+
 3.3.0 (2025-06-28)
 ------------------
 * fixing yasmin logs and using them in ros versions
