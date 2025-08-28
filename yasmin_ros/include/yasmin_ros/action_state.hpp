@@ -318,11 +318,11 @@ public:
       return basic_outcomes::ABORT;
     }
   }
-
-private:
+protected:
   /// Shared pointer to the ROS 2 node.
   rclcpp::Node::SharedPtr node_;
 
+private:
   /// Name of the action to communicate with.
   std::string action_name;
 
