@@ -1,4 +1,4 @@
-# Copyright (C) 2023  Miguel Ángel González Santamarta
+# Copyright (C) 2023 Miguel Ángel González Santamarta
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import unittest
 import time
+import unittest
 from threading import Thread
 
 from yasmin_ros import ActionState, ServiceState, MonitorState
@@ -38,16 +38,19 @@ class AuxNode(Node):
         super().__init__("test_node")
 
         self.action_server = ActionServer(
-            self, Fibonacci, "test",
+            self,
+            Fibonacci,
+            "test",
             goal_callback=self.goal_callback,
             handle_accepted_callback=self.handle_accepted_callback,
             execute_callback=self.execute_action,
             cancel_callback=self.cancel_action,
-            callback_group=ReentrantCallbackGroup()
+            callback_group=ReentrantCallbackGroup(),
         )
 
         self.service_server = self.create_service(
-            AddTwoInts, "test", self.execute_service)
+            AddTwoInts, "test", self.execute_service
+        )
 
         self.pub = self.create_publisher(String, "test", 10)
         self.timer = self.create_timer(1, self.publis_msgs)
@@ -106,7 +109,7 @@ class TestYasminRos(unittest.TestCase):
     def tearDownClass(cls):
         rclpy.shutdown()
 
-    def test_yasmin_ros_action_succeed(self):
+    def test_action_succeed(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -116,7 +119,7 @@ class TestYasminRos(unittest.TestCase):
         state = ActionState(Fibonacci, "test", create_goal_cb)
         self.assertEqual(SUCCEED, state())
 
-    def test_yasmin_ros_action_result_handler(self):
+    def test_action_result_handler(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -126,13 +129,12 @@ class TestYasminRos(unittest.TestCase):
         def result_handler(blackboard, result):
             return "new_outcome"
 
-        state = ActionState(Fibonacci, "test",
-                            create_goal_cb,
-                            ["new_outcome"],
-                            result_handler)
+        state = ActionState(
+            Fibonacci, "test", create_goal_cb, ["new_outcome"], result_handler
+        )
         self.assertEqual("new_outcome", state())
 
-    def test_yasmin_ros_action_cancel(self):
+    def test_action_cancel(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -144,12 +146,18 @@ class TestYasminRos(unittest.TestCase):
             state.cancel_state()
 
         state = ActionState(Fibonacci, "test", create_goal_cb)
-        thread = Thread(target=cancel_state, args=(state, 1,))
+        thread = Thread(
+            target=cancel_state,
+            args=(
+                state,
+                1,
+            ),
+        )
         thread.start()
         self.assertEqual(CANCEL, state())
         thread.join()
 
-    def test_yasmin_ros_action_abort(self):
+    def test_action_abort(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -159,7 +167,7 @@ class TestYasminRos(unittest.TestCase):
         state = ActionState(Fibonacci, "test", create_goal_cb)
         self.assertEqual(ABORT, state())
 
-    def test_yasmin_ros_service(self):
+    def test_service(self):
 
         def create_request_cb(blackboard):
             request = AddTwoInts.Request()
@@ -170,7 +178,7 @@ class TestYasminRos(unittest.TestCase):
         state = ServiceState(AddTwoInts, "test", create_request_cb)
         self.assertEqual(SUCCEED, state())
 
-    def test_yasmin_ros_service_response_handler(self):
+    def test_service_response_handler(self):
 
         def create_request_cb(blackboard):
             request = AddTwoInts.Request()
@@ -181,18 +189,17 @@ class TestYasminRos(unittest.TestCase):
         def response_handler(blackboard, response):
             return "new_outcome"
 
-        state = ServiceState(AddTwoInts, "test",
-                             create_request_cb,
-                             ["new_outcome"],
-                             response_handler)
+        state = ServiceState(
+            AddTwoInts, "test", create_request_cb, ["new_outcome"], response_handler
+        )
         self.assertEqual("new_outcome", state())
 
-    def test_yasmin_ros_monitor_timeout(self):
+    def test_monitor_timeout(self):
 
         def monitor_handler(blackboard, msg):
             return SUCCEED
 
-        state = MonitorState(String, "test1", [SUCCEED],
-                             monitor_handler=monitor_handler,
-                             timeout=2)
+        state = MonitorState(
+            String, "test1", [SUCCEED], monitor_handler=monitor_handler, timeout=2
+        )
         self.assertEqual(TIMEOUT, state())

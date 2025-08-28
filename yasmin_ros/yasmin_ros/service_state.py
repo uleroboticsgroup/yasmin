@@ -1,118 +1,168 @@
-# Copyright (C) 2023  Miguel Ángel González Santamarta
-
+# Copyright (C) 2023 Miguel Ángel González Santamarta
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from std_msgs.msg import String
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
-from typing import List, Callable, Type, Any
+from typing import Set, Callable, Type, Any, Union
 
 import time
 from rclpy.node import Node
 from rclpy.client import Client
+from rclpy.qos import QoSProfile
+from rclpy.callback_groups import CallbackGroup
 
+import yasmin
 from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT
 
 class ServiceState(State):
+    """
+    A state representing a service call in a behavior tree.
 
-    _node: Node
-    _srv_name: str
-    _service_client: Client
-    _create_request_handler: Callable
-    _response_handler: Callable
-    _timeout: float
+    This state manages the communication with a ROS service, creating and sending
+    requests, and handling responses. It can handle timeouts and custom outcomes.
+
+    Attributes:
+        _node (Node): The ROS node used to communicate with the service.
+        _srv_name (str): The name of the service to call.
+        _service_client (Client): The client used to call the service.
+        _create_request_handler (Callable[[Blackboard], Any]): A function that creates the service request.
+        _response_handler (Callable[[Blackboard, Any], str]): A function that processes the service response.
+        _timeout (float): Timeout duration for the service call.
+    """
 
     def __init__(
         self,
         srv_type: Type,
         srv_name: str,
         create_request_handler: Callable,
-        outcomes: List[str] = None,
+        outcomes: Set[str] = None,
         response_handler: Callable = None,
+        callback_group: CallbackGroup = None,
         node: Node = None,
         timeout: float = None,
-        pub_topic_name: str = None
+         pub_topic_name: str = None,
+        pub_msg_type: Type = None,
+        pub_qos: Union[QoSProfile, int] = 10,
     ) -> None:
+        """
+        Initializes the ServiceState with the provided parameters.
 
-        self._srv_name = srv_name
+        Parameters:
+            srv_type (Type): The type of the service.
+            srv_name (str): The name of the service to be called.
+            create_request_handler (Callable[[Blackboard], Any]): A handler to create the request based on the blackboard data.
+            outcomes (Set[str], optional): A set of additional outcomes for this state.
+            response_handler (Callable[[Blackboard, Any], str], optional): A handler to process the service response.
+            callback_group (CallbackGroup, optional): The callback group for the client.
+            node (Node, optional): A ROS node instance; if None, a default instance is used.
+            timeout (float, optional): Timeout duration for waiting on the service.
+            pub_topic_name (str, optional): additional ros2 publisher topic_name.
+            pub_msg_type (Type, optional): The type of message to be published.
+            pub_qos (Union[QoSProfile, int], optional): Quality of Service profile or depth.
+            
+        Raises:
+            ValueError: If the create_request_handler is not provided.
+        """
+
+        ## A function that creates the service request.
+        self._create_request_handler: Callable[[Blackboard], Any] = create_request_handler
+        ## A function that processes the service response.
+        self._response_handler: Callable[[Blackboard, Any], str] = response_handler
+
+        ## Timeout duration for the service call.
+        self._timeout: float = timeout
+
         _outcomes = [SUCCEED, ABORT]
 
-        self._timeout = timeout
         if self._timeout:
             _outcomes.append(TIMEOUT)
 
         if outcomes:
             _outcomes = _outcomes + outcomes
 
-        if node is None:
-            self._node = YasminNode.get_instance()
-        else:
-            self._node = node
+        ## The ROS node used to communicate with the service.
+        self._node = node
 
-        self._service_client = self._node.create_client(srv_type, srv_name)
+        if self._node is None:
+            self._node: Node = YasminNode.get_instance()
 
+        ## The name of the service to call.
+        self._srv_name: str = srv_name
+
+        ## The client used to call the service.
+        self._service_client: Client = self._node.create_client(
+            srv_type, srv_name, callback_group=callback_group
+        )
         if pub_topic_name: 
-            pubsub_callback_group = MutuallyExclusiveCallbackGroup()
-            self.__pub_topic = self._node.create_publisher(String, pub_topic_name, 10,
-                                                      callback_group=pubsub_callback_group)
+            self.__pub_topic = self._node.create_publisher(
+                pub_msg_type, 
+                pub_topic_name, 
+                pub_qos, 
+                callback_group=self._callback_group)
         else: self.__pub_topic = None
-            
-        self._create_request_handler = create_request_handler
-        self._response_handler = response_handler
 
         if not self._create_request_handler:
-            raise Exception("create_request_handler is needed")
+            raise ValueError("create_request_handler is needed")
 
         super().__init__(_outcomes)
 
-    def publish_msg(self, msg: str):
+    def publish_msg(self, msg):
         """
         Args:
-            msg: message (string) to publish
+            msg: message to publish
         Raises:
             ros2 publish message to <pub_topic_name>
         """
-        _msg = String()
-        _msg.data = msg
-        if self.__pub_topic: self.__pub_topic.publish(_msg)
+        if self.__pub_topic: self.__pub_topic.publish(msg)
 
     def execute(self, blackboard: Blackboard) -> str:
+        """
+        Executes the service call.
 
+        This method prepares the request using the provided blackboard,
+        waits for the service to become available, and sends the request.
+        It also handles the response and can process outcomes based on the
+        response handler.
+
+        Parameters:
+            blackboard (Blackboard): The blackboard object that holds the data for request creation.
+
+        Returns:
+            str: The outcome of the state execution, which can be SUCCEED, ABORT, or TIMEOUT.
+
+        Exceptions:
+            Exception: Catches all exceptions during the service call and returns ABORT.
+        """
         request = self._create_request_handler(blackboard)
 
-        self._node.get_logger().info(f"Waiting for service '{self._srv_name}' timeout: {self._timeout}")
-        srv_available = self._service_client.wait_for_service(
-            timeout_sec=self._timeout)
+        yasmin.YASMIN_LOG_INFO(f"Waiting for service '{self._srv_name}'")
+        srv_available = self._service_client.wait_for_service(timeout_sec=self._timeout)
+
         if not srv_available:
-            self._node.get_logger().warn(
-                f"Timeout reached, service '{self._srv_name}' is not available")
+            yasmin.YASMIN_LOG_WARN(
+                f"Timeout reached, service '{self._srv_name}' is not available"
+            )
             return TIMEOUT
 
         try:
-            response =  self._service_client.call_async(request)
-            start = time.time()
-            while True:
-                if response.done():break
-                if self._is_canceled(): return ABORT
-                if self._timeout: 
-                    if time.time() - start > self._timeout:
-                        self._node.get_logger().warn(
-                            f"Timeout reached, service '{self._srv_name}' not response.")
-                        return TIMEOUT
-        except:
+            yasmin.YASMIN_LOG_INFO(f"Sending request to service '{self._srv_name}'")
+            response = self._service_client.call(request)
+
+        except Exception as e:
+            yasmin.YASMIN_LOG_WARN(f"Service call failed: {e}")
             return ABORT
 
         if self._response_handler:

@@ -1,3 +1,18 @@
+// Copyright (C) 2023 Miguel Ángel González Santamarta
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -11,14 +26,31 @@ import Divider from "@mui/material/Divider";
 
 export default function TopAppBar({
   fsm_name_list,
+  current_fsm,
   handle_current_fsm,
   handle_hide_nested_fsm,
+  handle_show_only_active_fsms,
+  handle_change_layout,
 }) {
-  const [hideNestedFSM, setHideNestedFSM] = React.useState(false);
   const [currentFSM, setCurrentFSM] = React.useState("ALL");
+  const [hideNestedFSM, setHideNestedFSM] = React.useState(false);
+  const [showOnlyActiveFSMs, setShowOnlyActiveFSMs] = React.useState(false);
+  const layouts = [
+    "breadthfirst",
+    "circle",
+    "concentric",
+    "cose",
+    "dagre",
+    "grid",
+    "klay",
+  ];
 
   const handleChangeHideNestedFSM = (event) => {
     setHideNestedFSM(event.target.checked);
+  };
+
+  const handleShowOnlyActiveFSMs = (event) => {
+    setShowOnlyActiveFSMs(event.target.checked);
   };
 
   React.useEffect(() => {
@@ -26,8 +58,18 @@ export default function TopAppBar({
   }, [currentFSM]);
 
   React.useEffect(() => {
+    if (current_fsm !== currentFSM) {
+      setCurrentFSM(current_fsm);
+    }
+  }, [current_fsm]);
+
+  React.useEffect(() => {
     handle_hide_nested_fsm(hideNestedFSM);
-  }, [hideNestedFSM]);
+  }, [hideNestedFSM, handle_hide_nested_fsm]);
+
+  React.useEffect(() => {
+    handle_show_only_active_fsms(showOnlyActiveFSMs);
+  }, [showOnlyActiveFSMs, handle_show_only_active_fsms]);
 
   return (
     <Box sx={{ flexGrow: 1 }} style={{ width: "100%", height: "6.75vh" }}>
@@ -105,7 +147,7 @@ export default function TopAppBar({
           />
 
           <FormControlLabel
-            label="Hide Nested FSM"
+            label="Hide Nested FSMs"
             control={
               <Checkbox
                 checked={hideNestedFSM}
@@ -119,6 +161,73 @@ export default function TopAppBar({
                 }}
               />
             }
+          />
+
+          <Divider
+            orientation="vertical"
+            variant="middle"
+            flexItem
+            color="white"
+            style={{ marginLeft: 30, marginRight: 30 }}
+          />
+
+          <FormControlLabel
+            label="Show Only Active FSMs"
+            control={
+              <Checkbox
+                checked={showOnlyActiveFSMs}
+                onChange={handleShowOnlyActiveFSMs}
+                inputProps={{ "aria-label": "controlled" }}
+                sx={{
+                  color: "white",
+                  "&.Mui-checked": {
+                    color: "white",
+                  },
+                }}
+              />
+            }
+          />
+
+          <Divider
+            orientation="vertical"
+            variant="middle"
+            flexItem
+            color="white"
+            style={{ marginLeft: 30, marginRight: 30 }}
+          />
+
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              display: { xs: "none", md: "flex" },
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".2rem",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          >
+            Layout:
+          </Typography>
+
+          <Autocomplete
+            id="combo-box"
+            disableClearable={true}
+            options={layouts}
+            getOptionLabel={(option) => option}
+            isOptionEqualToValue={(option, value) => option === value}
+            defaultValue={"dagre"}
+            onChange={(event, value) => {
+              handle_change_layout(value);
+            }}
+            style={{
+              width: 150,
+              backgroundColor: "#d1e7fa",
+            }}
+            renderInput={(params) => (
+              <TextField {...params} variant="outlined" />
+            )}
           />
         </Toolbar>
       </AppBar>

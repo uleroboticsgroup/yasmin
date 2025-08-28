@@ -2,25 +2,24 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>yasmin_viewer</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <version>3.4.0</version>
+  <description>YASMIN viewer for FSM</description>
   <maintainer email="mgons@unileon.es">miguel</maintainer>
-  <license>TODO: License declaration</license>
-
+  <license>GPL-3</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
-  
-  <depend>rclcpp</depend>
+  <exec_depend>python3-expiringdict</exec_depend>
+  <exec_depend>python3-flask</exec_depend>
+  <exec_depend>python3-waitress</exec_depend>
   <depend>rclpy</depend>
+  <depend>rclcpp</depend>
   <depend>yasmin</depend>
   <depend>yasmin_ros</depend>
   <depend>yasmin_msgs</depend>
-
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
-
   <export>
     <build_type>ament_cmake</build_type>
   </export>

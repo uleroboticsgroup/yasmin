@@ -1,3 +1,1 @@
-
-
-from .yasmin_viewer_pub import YasminViewerPub
+from yasmin_viewer.yasmin_viewer_pub import YasminViewerPub

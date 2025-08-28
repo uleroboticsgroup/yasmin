@@ -1,4 +1,4 @@
-# Copyright (C) 2023  Miguel Ángel González Santamarta
+# Copyright (C) 2023 Miguel Ángel González Santamarta
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,22 +37,21 @@ class BarState(State):
 class TestState(unittest.TestCase):
 
     def setUp(self):
-
         self.state = FooState()
 
-    def test_state_call(self):
+    def test_call(self):
         self.assertEqual("outcome1", self.state())
 
-    def test_state_cancel(self):
+    def test_cancel(self):
         self.assertFalse(self.state.is_canceled())
         self.state.cancel_state()
         self.assertTrue(self.state.is_canceled())
 
-    def test_state_get_outcomes(self):
-        self.assertEqual("outcome1", self.state.get_outcomes()[0])
+    def test_get_outcomes(self):
+        self.assertEqual("outcome1", list(self.state.get_outcomes())[0])
 
-    def test_state_str(self):
+    def test_str(self):
         self.assertEqual("FooState", str(self.state))
 
-    def test_state_init_exception(self):
+    def test_init_exception(self):
         self.assertRaises(Exception, BarState)

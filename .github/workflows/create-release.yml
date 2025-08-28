@@ -1,0 +1,50 @@
+name: Create Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  create_release:
+    if: startsWith(github.event.head_commit.message, 'new version')
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from commit message
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" =~ new\ version\ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            echo "version=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+          else
+            echo "Commit message does not match 'new version *.*.*' format."
+            exit 1
+          fi
+
+      - name: Get previous tag
+        run: |
+          previous_tag=$(git describe --tags --abbrev=0 HEAD^)
+          echo "previous_tag=$previous_tag" >> $GITHUB_ENV
+
+      - name: Generate release notes with commit messages
+        run: |
+          commits=$(git log "${{ env.previous_tag }}..HEAD" --oneline)
+          echo "release_body<<EOF" >> $GITHUB_ENV
+          echo "### Changelog from version ${{ env.previous_tag }} to ${{ env.version }}:" >> $GITHUB_ENV
+          echo "$commits" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create GitHub release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        with:
+          tag_name: "${{ env.version }}"
+          release_name: "${{ env.version }}"
+          body: "${{ env.release_body }}"
+          draft: false
+          prerelease: false
