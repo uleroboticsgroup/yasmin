@@ -186,7 +186,6 @@ protected:
   rclcpp::Node::SharedPtr node_;
 
 private:
-  rclcpp::Node::SharedPtr node_; /**< ROS 2 node pointer. */
   std::shared_ptr<rclcpp::Subscription<MsgT>>
       sub; /**< Subscription to the ROS 2 topic. */
 

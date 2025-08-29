@@ -214,10 +214,10 @@ public:
       return basic_outcomes::ABORT;
     }
   }
-
-private:
+protected:
   /// Shared pointer to the ROS 2 node
   rclcpp::Node::SharedPtr node_;
+private:
   /// Shared pointer to the service client.
   std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
   /// Function to create service requests.
