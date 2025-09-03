@@ -70,11 +70,6 @@ protected:
   std::set<std::string> possible_outcomes;
 
 private:
-  /// Indicates if the state has been canceled.
-  std::atomic_bool canceled{false};
-  /// Indicates if the state is currently running.
-  std::atomic_bool running{false};
-
   /// Mutex for intermediate outcome map
   std::mutex intermediate_outcome_mutex;
 
