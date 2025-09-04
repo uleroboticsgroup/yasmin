@@ -448,9 +448,9 @@ class StateMachine(State):
 
         Overrides the cancel_state method from the parent State class.
         """
-        super().cancel_state()
 
         if self.is_running():
+            super().cancel_state()
             current_state = self.get_current_state()
 
             while not current_state:

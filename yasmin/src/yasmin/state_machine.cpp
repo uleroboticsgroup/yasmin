@@ -380,9 +380,9 @@ std::string StateMachine::operator()() {
 }
 
 void StateMachine::cancel_state() {
-  State::cancel_state();
 
   if (this->is_running()) {
+    State::cancel_state();
 
     auto current_state = this->get_current_state();
 
