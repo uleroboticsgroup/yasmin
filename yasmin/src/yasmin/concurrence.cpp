@@ -70,7 +70,7 @@ Concurrence::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   // Initialize the parallel execution of all the states
   for (std::shared_ptr<State> state : states) {
     state_threads.push_back(std::thread([this, state, blackboard]() {
-      std::string outcome = state->execute(blackboard);
+      std::string outcome = (*state.get())(blackboard);
       const std::lock_guard<std::mutex> lock(this->intermediate_outcome_mutex);
       this->intermediate_outcome_map[state] =
           std::make_shared<std::string>(outcome);
