@@ -177,8 +177,8 @@ public:
    * This function cancels the ongoing monitor.
    */
   void cancel_state() {
-    yasmin::State::cancel_state();
     this->msg_cond.notify_one();
+    yasmin::State::cancel_state();
   }
 
 private:
