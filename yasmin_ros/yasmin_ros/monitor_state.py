@@ -182,5 +182,5 @@ class MonitorState(State):
         This method cancels the monitor if waiting for messages.
         """
 
-        super().cancel_state()
         self._msg_event.set()
+        super().cancel_state()

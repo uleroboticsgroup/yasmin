@@ -399,6 +399,7 @@ class StateMachine(State):
                 blackboard.remappings = self.__remappings[self.get_current_state()]
             else:
                 blackboard.remappings = dict()
+
             outcome = state["state"](blackboard)
             old_outcome = outcome
             # Check if outcome belongs to state
@@ -450,7 +451,6 @@ class StateMachine(State):
         """
 
         if self.is_running():
-            super().cancel_state()
             current_state = self.get_current_state()
 
             while not current_state:
@@ -460,6 +460,7 @@ class StateMachine(State):
 
             if current_state:
                 self._states[current_state]["state"].cancel_state()
+                super().cancel_state()
 
     def __str__(self) -> str:
         """
