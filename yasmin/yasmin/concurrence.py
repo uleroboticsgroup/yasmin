@@ -169,6 +169,22 @@ class Concurrence(State):
         """
         return self._states
 
+    def get_outcome_map(self) -> Dict[str, Dict[str, str]]:
+        """
+        Returns the outcome map for this concurrence state.
+
+        :return: A dictionary mapping each outcome to its requirements.
+        """
+        return self._outcome_map
+
+    def get_default_outcome(self) -> str:
+        """
+        Returns the default outcome for this concurrence state.
+
+        :return: The default outcome as a string.
+        """
+        return self._default_outcome
+
     def cancel_state(self) -> None:
         """
         Cancels the execution of all states.

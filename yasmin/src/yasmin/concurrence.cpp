@@ -158,7 +158,15 @@ void Concurrence::cancel_state() {
 }
 
 std::map<std::string, std::shared_ptr<State>> Concurrence::get_states() const {
-  return states;
+  return this->states;
+}
+
+Concurrence::OutcomeMap Concurrence::get_outcome_map() const {
+  return this->outcome_map;
+}
+
+std::string Concurrence::get_default_outcome() const {
+  return this->default_outcome;
 }
 
 std::set<std::string>

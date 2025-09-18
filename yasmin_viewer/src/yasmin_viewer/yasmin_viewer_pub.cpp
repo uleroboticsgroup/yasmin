@@ -15,6 +15,7 @@
 
 #include <chrono>
 
+#include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
@@ -75,6 +76,34 @@ std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
 }
 
 /**
+ * @brief Parses concurrence transitions from outcome map to transition-like
+ * information.
+ * @param concurrence Shared pointer to the Concurrence state.
+ * @return Map of state names to their transition vectors.
+ */
+std::map<std::string, std::vector<yasmin_msgs::msg::Transition>>
+YasminViewerPub::parse_concurrence_transitions(
+    std::shared_ptr<yasmin::Concurrence> concurrence) {
+  std::map<std::string, std::vector<yasmin_msgs::msg::Transition>> transitions;
+  auto outcome_map = concurrence->get_outcome_map();
+
+  // Add transitions for each outcome in the outcome map
+  for (const auto &[outcome, requirements] : outcome_map) {
+    for (const auto &[state_name, state_outcome] : requirements) {
+      if (transitions.find(state_name) == transitions.end()) {
+        transitions[state_name] = std::vector<yasmin_msgs::msg::Transition>();
+      }
+      auto transition_msg = yasmin_msgs::msg::Transition();
+      transition_msg.outcome = state_outcome;
+      transition_msg.state = outcome;
+      transitions[state_name].push_back(transition_msg);
+    }
+  }
+
+  return transitions;
+}
+
+/**
  * @brief Parses a state and its transitions, adding it to the states list and
  * handling nested FSMs if applicable.
  * @param state_name Name of the state.
@@ -101,15 +130,16 @@ void YasminViewerPub::parse_state(
   state_msg.outcomes =
       std::vector<std::string>(outcomes.begin(), outcomes.end());
 
-  // Check if state is a nested FSM
+  // Check if state is a nested FSM or Concurrence
   auto fsm = std::dynamic_pointer_cast<yasmin::StateMachine>(state);
-  state_msg.is_fsm = (fsm != nullptr);
+  auto concurrence = std::dynamic_pointer_cast<yasmin::Concurrence>(state);
+  state_msg.is_fsm = (fsm != nullptr) || (concurrence != nullptr);
 
   // Add the state to the list
   states_list.push_back(state_msg);
 
   // Handle nested FSM states
-  if (state_msg.is_fsm) {
+  if (fsm != nullptr) {
     auto states = fsm->get_states();
     auto aux_transitions = fsm->get_transitions();
 
@@ -126,6 +156,41 @@ void YasminViewerPub::parse_state(
           child_state.parent == state_msg.id) {
         states_list[state_msg.id].current_state = child_state.id;
         break;
+      }
+    }
+  }
+  // Handle concurrence states
+  else if (concurrence != nullptr) {
+    auto concurrent_states = concurrence->get_states();
+    auto transitions = this->parse_concurrence_transitions(concurrence);
+    states_list[state_msg.id].current_state =
+        -2; // Special marker for concurrence
+
+    for (const auto &[child_state_name, child_state] : concurrent_states) {
+      std::map<std::string, std::string> empty_transitions;
+      this->parse_state(child_state_name, child_state, empty_transitions,
+                        states_list, state_msg.id);
+
+      // Set transitions for this child state
+      if (transitions.find(child_state_name) != transitions.end()) {
+        states_list.back().transitions = transitions[child_state_name];
+      }
+
+      // Check if the child_state outcomes are in the transitions
+      auto child_outcomes = child_state->get_outcomes();
+      std::set<std::string> transition_outcomes;
+      for (const auto &transition : states_list.back().transitions) {
+        transition_outcomes.insert(transition.outcome);
+      }
+
+      for (const auto &outcome : child_outcomes) {
+        if (transition_outcomes.find(outcome) == transition_outcomes.end()) {
+          // If not, add a transition to the default outcome of the concurrence
+          auto msg = yasmin_msgs::msg::Transition();
+          msg.outcome = outcome;
+          msg.state = concurrence->get_default_outcome();
+          states_list.back().transitions.push_back(msg);
+        }
       }
     }
   }

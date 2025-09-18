@@ -119,6 +119,18 @@ public:
   std::map<std::string, std::shared_ptr<State>> get_states() const;
 
   /**
+   * @brief Returns the outcome map for this concurrence state.
+   * @return A map of outcome names to their requirements.
+   */
+  OutcomeMap get_outcome_map() const;
+
+  /**
+   * @brief Returns the default outcome for this concurrence state.
+   * @return The default outcome as a string.
+   */
+  std::string get_default_outcome() const;
+
+  /**
    * @brief Converts the state to a string representation.
    * @return A string representation of the state.
    *

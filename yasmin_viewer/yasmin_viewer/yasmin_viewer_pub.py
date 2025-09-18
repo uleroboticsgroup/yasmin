@@ -16,7 +16,7 @@
 from typing import Dict, List
 from rclpy.node import Node
 import yasmin
-from yasmin import StateMachine, State
+from yasmin import StateMachine, State, Concurrence
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_msgs.msg import (
     State as StateMsg,
@@ -39,6 +39,7 @@ class YasminViewerPub:
     Methods:
         parse_transitions(transitions): Converts a dictionary of transitions to a list of TransitionMsg.
         parse_state(state_name, state_info, states_list, parent): Parses a state and its children recursively.
+        parse_concurrence_transitions(concurrence): Converts a concurrence outcome map into transition-like information.
         _publish_data(): Publishes the current state of the FSM.
     """
 
@@ -133,14 +134,16 @@ class YasminViewerPub:
         state_msg.transitions = self.parse_transitions(state_info["transitions"])
         state_msg.outcomes = state.get_outcomes()
 
-        # Check if the state is a FSM
-        state_msg.is_fsm = isinstance(state, StateMachine)
+        # Check if the state is a FSM or Concurrence
+        state_msg.is_fsm = isinstance(state, StateMachine) or isinstance(
+            state, Concurrence
+        )
 
         # Add state to the list
         states_list.append(state_msg)
 
         # Parse child states if this state is a FSM
-        if state_msg.is_fsm:
+        if isinstance(state, StateMachine):
             fsm: StateMachine = state
             states = fsm.get_states()
 
@@ -160,6 +163,63 @@ class YasminViewerPub:
                 ):
                     state_msg.current_state = child_state.id
                     break
+
+        # Parse child states if this state is a Concurrence
+        elif isinstance(state, Concurrence):
+            concurrence: Concurrence = state
+            concurrent_states = concurrence.get_states()
+            transitions = self.parse_concurrence_transitions(concurrence)
+            state_msg.current_state = -2
+
+            for child_state_name, child_state in concurrent_states.items():
+                child_state_info = {
+                    "state": child_state,
+                    "transitions": {},
+                }
+                self.parse_state(
+                    child_state_name, child_state_info, states_list, state_msg.id
+                )
+                states_list[-1].transitions = transitions[child_state_name]
+
+                # Check if the child_state outcomes are in the transitions
+                for outcome in child_state.get_outcomes():
+                    if outcome not in [t.outcome for t in states_list[-1].transitions]:
+                        # If not, add a transition to the default outcome of the concurrence
+                        msg = TransitionMsg()
+                        msg.outcome = outcome
+                        msg.state = concurrence.get_default_outcome()
+                        states_list[-1].transitions.append(msg)
+
+    def parse_concurrence_transitions(
+        self, concurrence: Concurrence
+    ) -> Dict[str, Dict[str, str]]:
+        """
+        Converts a concurrence outcome map into transition-like information for visualization.
+
+        In concurrence, transitions are based on outcome combinations rather than direct state-to-state transitions.
+        This method creates pseudo-transitions that represent the outcome mapping logic.
+
+        Args:
+            concurrence (Concurrence): The concurrence state to parse transitions from.
+
+        Returns:
+            List[TransitionMsg]: A list of TransitionMsg representing the concurrence outcome mappings.
+        """
+        transitions = {}
+        outcome_map = concurrence.get_outcome_map()
+
+        # Add transitions for each outcome in the outcome map
+        for outcome, requirements in outcome_map.items():
+            for state_name, state_outcome in requirements.items():
+
+                if state_name not in transitions:
+                    transitions[state_name] = []
+                msg = TransitionMsg()
+                msg.outcome = state_outcome
+                msg.state = outcome
+                transitions[state_name].append(msg)
+
+        return transitions
 
     def _publish_data(self) -> None:
         """

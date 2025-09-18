@@ -83,6 +83,15 @@ const Graph = React.memo(({ nodes, edges, layout, height }) => {
           },
         },
         {
+          selector: "node[type = 'current_fsm']",
+          style: {
+            textValign: "top",
+            textHalign: "center",
+            backgroundColor: "lightgreen",
+            borderWidth: 3,
+          },
+        },
+        {
           selector: "node[type = 'outcome']",
           style: {
             backgroundColor: "red",
@@ -206,10 +215,12 @@ const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm, layout_type }) => {
       let nodes = [];
       let edges = [];
       let current_state = 0;
+      let current_fsms = [];
 
       if (!hide_nested_fsm) {
         while (current_state >= 0) {
           if (fsm_data[current_state].is_fsm) {
+            current_fsms.push(current_state);
             current_state = fsm_data[current_state].current_state;
           } else {
             break;
@@ -233,7 +244,11 @@ const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm, layout_type }) => {
         }
 
         if (state.is_fsm && !hide_nested_fsm) {
-          type = "fsm";
+          if (current_fsms.includes(state.id)) {
+            type = "current_fsm";
+          } else {
+            type = "fsm";
+          }
         } else {
           if (current_state === state.id) {
             if (state.is_fsm && hide_nested_fsm) {
@@ -272,49 +287,84 @@ const FSM = React.memo(({ fsm_data, alone, hide_nested_fsm, layout_type }) => {
             }
           }
 
-          let target = 0;
+          let targets = [];
           let source = state.id;
 
           if (state.is_fsm && !hide_nested_fsm) {
             source = source + outcome;
           }
 
-          if (state.transitions.hasOwnProperty(outcome)) {
-            let transition = state.transitions[outcome];
-
-            for (let aux_state_id in fsm_data) {
-              let aux_state = fsm_data[aux_state_id];
-              if (
-                aux_state.name === transition &&
-                aux_state.parent === state.parent
-              ) {
-                target = aux_state.id;
-                break;
-              }
-            }
-
-            if (target === 0 && state.parent >= 0) {
-              for (let outcome_id in fsm_data[state.parent].outcomes) {
-                let outcome = fsm_data[state.parent].outcomes[outcome_id];
-                if (outcome === transition) {
-                  target = state.parent + outcome;
-                  break;
+          // Find transitions that match this outcome
+          let matchingTransitions = [];
+          if (Array.isArray(state.transitions)) {
+            // state.transitions is now a list of [outcome, target] pairs
+            for (let transition of state.transitions) {
+              if (Array.isArray(transition) && transition.length >= 2) {
+                let [transitionOutcome, transitionTarget] = transition;
+                if (transitionOutcome === outcome) {
+                  matchingTransitions.push(transitionTarget);
                 }
               }
             }
-          } else {
-            target = state.parent + outcome;
           }
 
+          if (matchingTransitions.length > 0) {
+            // Process each matching transition target
+            for (let transitionName of matchingTransitions) {
+              let target = 0;
+
+              // Look for the target state with the given transition name
+              for (let aux_state_id in fsm_data) {
+                let aux_state = fsm_data[aux_state_id];
+                if (
+                  aux_state.name === transitionName &&
+                  aux_state.parent === state.parent
+                ) {
+                  target = aux_state.id;
+                  break;
+                }
+              }
+
+              // If target not found, look in parent outcomes
+              if (target === 0 && state.parent >= 0) {
+                for (let outcome_id in fsm_data[state.parent].outcomes) {
+                  let parentOutcome =
+                    fsm_data[state.parent].outcomes[outcome_id];
+                  if (parentOutcome === transitionName) {
+                    target = state.parent + parentOutcome;
+                    break;
+                  }
+                }
+              }
+
+              if (target !== 0) {
+                targets.push(target);
+              }
+            }
+          } else {
+            targets.push(state.parent + outcome);
+          }
+
+          // Create edges for all targets
           if (state.parent >= 0) {
-            edges.push({
-              data: {
-                id: fsm_data[0].name + "edge" + state.id + outcome,
-                source: fsm_data[0].name + "node" + source,
-                target: fsm_data[0].name + "node" + target,
-                label: outcome,
-              },
-            });
+            for (let i = 0; i < targets.length; i++) {
+              let target = targets[i];
+              edges.push({
+                data: {
+                  id:
+                    fsm_data[0].name +
+                    "edge" +
+                    state.id +
+                    outcome +
+                    source +
+                    target +
+                    (targets.length > 1 ? "_" + i : ""), // Add index suffix for multiple targets
+                  source: fsm_data[0].name + "node" + source,
+                  target: fsm_data[0].name + "node" + target,
+                  label: outcome,
+                },
+              });
+            }
           }
         }
       }
