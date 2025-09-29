@@ -290,7 +290,7 @@ public:
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
-    retry_count ++;
+    this->retry_count ++;
     std::unique_lock<std::mutex> lock(this->action_done_mutex);
 
     Goal goal = this->create_goal_handler(blackboard);
@@ -303,7 +303,8 @@ public:
     if (!act_available) {
       YASMIN_LOG_WARN("Timeout reached, action '%s' is not available",
                       this->action_name.c_str());
-      if (retry_count < maximum_retry){
+      // Auto retry process
+      if (this->retry_count < maximum_retry){
         return this->execute(blackboard);
       } else {
         return basic_outcomes::TIMEOUT;
@@ -329,15 +330,16 @@ public:
     YASMIN_LOG_INFO("Sending goal to action '%s'", this->action_name.c_str());
     auto future = this->action_client->async_send_goal(goal, send_goal_options);
     if (future.wait_for(std::chrono::seconds(this->timeout)) != std::future_status::ready){
-      if (retry_count < maximum_retry){
-        cancel_state();
+      // Auto retry process
+      if (this->retry_count < this->maximum_retry){
+        this->cancel_state();
         return this->execute(blackboard);
       } else {
-        cancel_state();
+        this->cancel_state();
         return basic_outcomes::TIMEOUT;
       }
     } else {
-      retry_count = 0;
+      this->retry_count = 0;
     }
     if (this->is_canceled()) {
         return basic_outcomes::CANCEL;

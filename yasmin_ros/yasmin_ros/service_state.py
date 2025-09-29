@@ -41,6 +41,7 @@ class ServiceState(State):
         _create_request_handler (Callable[[Blackboard], Any]): A function that creates the service request.
         _response_handler (Callable[[Blackboard, Any], str]): A function that processes the service response.
         _timeout (float): Timeout duration for the service call.
+        _maximum_retry (int): Maximum number of retries for monitoring.
     """
 
     def __init__(
@@ -53,9 +54,8 @@ class ServiceState(State):
         callback_group: CallbackGroup = None,
         node: Node = None,
         timeout: float = None,
-         pub_topic_name: str = None,
-        pub_msg_type: Type = None,
-        pub_qos: Union[QoSProfile, int] = 10,
+        maximum_retry: int = 3,
+        
     ) -> None:
         """
         Initializes the ServiceState with the provided parameters.
@@ -69,10 +69,8 @@ class ServiceState(State):
             callback_group (CallbackGroup, optional): The callback group for the client.
             node (Node, optional): A ROS node instance; if None, a default instance is used.
             timeout (float, optional): Timeout duration for waiting on the service.
-            pub_topic_name (str, optional): additional ros2 publisher topic_name.
-            pub_msg_type (Type, optional): The type of message to be published.
-            pub_qos (Union[QoSProfile, int], optional): Quality of Service profile or depth.
-            
+            maximum_retry (int, optional): Maximum number of retries for monitoring. Default is 3.
+
         Raises:
             ValueError: If the create_request_handler is not provided.
         """
@@ -106,27 +104,15 @@ class ServiceState(State):
         self._service_client: Client = self._node.create_client(
             srv_type, srv_name, callback_group=callback_group
         )
-        if pub_topic_name: 
-            self.__pub_topic = self._node.create_publisher(
-                pub_msg_type, 
-                pub_topic_name, 
-                pub_qos, 
-                callback_group=self._callback_group)
-        else: self.__pub_topic = None
 
         if not self._create_request_handler:
             raise ValueError("create_request_handler is needed")
 
-        super().__init__(_outcomes)
+        ## Maximum number of retries for monitoring.
+        self._maximum_retry: int = maximum_retry
+        self._retry_count: int = 0
 
-    def publish_msg(self, msg):
-        """
-        Args:
-            msg: message to publish
-        Raises:
-            ros2 publish message to <pub_topic_name>
-        """
-        if self.__pub_topic: self.__pub_topic.publish(msg)
+        super().__init__(_outcomes)
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -155,12 +141,38 @@ class ServiceState(State):
             yasmin.YASMIN_LOG_WARN(
                 f"Timeout reached, service '{self._srv_name}' is not available"
             )
+            ## Auto retry process
+            if self._retry_count < self._maximum_retry:
+                self._retry_count += 1
+                yasmin.YASMIN_LOG_WARN(
+                    f"Retry to connect to service '{self._srv_name}'"
+                )
+                return self.execute(blackboard)
+            else:
+                self._retry_count = 0
             return TIMEOUT
 
         try:
             yasmin.YASMIN_LOG_INFO(f"Sending request to service '{self._srv_name}'")
-            response = self._service_client.call(request)
+            future = self._service_client.call_async(request)
+            
+            try:
+                response = future.result(timeout=self._timeout)
+            except TimeoutError:
+                yasmin.YASMIN_LOG_WARN(
+                    f"Timeout reached while waiting for response from service '{self._srv_name}'"
+                )
 
+                ## Auto retry process
+                if self._retry_count < self._maximum_retry:
+                    self._retry_count += 1
+                    yasmin.YASMIN_LOG_WARN(
+                        f"Retry to connect to service '{self._srv_name}'"
+                    )
+                    return self.execute(blackboard)
+                else:
+                    self._retry_count = 0
+                return TIMEOUT
         except Exception as e:
             yasmin.YASMIN_LOG_WARN(f"Service call failed: {e}")
             return ABORT
@@ -174,5 +186,6 @@ class ServiceState(State):
     def _is_canceled(self):
         if self.is_canceled():
             self._canceled = False
+            self._retry_count = 0
             return True
         return False

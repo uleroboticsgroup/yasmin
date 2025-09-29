@@ -153,7 +153,7 @@ public:
    */
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
-    retry_count ++;
+    this->retry_count ++;
     while (this->msg_list.empty()) {
       std::unique_lock<std::mutex> lock(this->msg_mutex);
       auto status =
@@ -166,13 +166,17 @@ public:
       if (this->timeout > 0 && status == std::cv_status::timeout) {
         YASMIN_LOG_WARN("Timeout reached, topic '%s' is not available",
                         this->topic_name.c_str());
-        if (retry_count < maximum_retry){
+
+        // Auto retry process
+        if (this->retry_count < this->maximum_retry){
           YASMIN_LOG_WARN("Retry to connect to topic '%s'", this->topic_name.c_str());
           return this->execute(blackboard);
         } else {
-          retry_count = 0;
+          this->retry_count = 0;
           return basic_outcomes::TIMEOUT;
         }
+      } else {
+        this->retry_count = 0;
       }
     }
 
@@ -191,6 +195,7 @@ public:
    */
   void cancel_state() {
     yasmin::State::cancel_state();
+    this->retry_count = 0;
     this->msg_cond.notify_one();
   }
 

@@ -190,7 +190,7 @@ public:
    */
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
-    retry_count ++;
+    this->retry_count ++;
     Request request = this->create_request(blackboard);
 
     // Wait for the service to become available
@@ -201,7 +201,8 @@ public:
     if (!srv_available) {
       YASMIN_LOG_WARN("Timeout reached, service '%s' is not available",
                       this->srv_name.c_str());
-      if (retry_count < maximum_retry){
+      // Auto retry process
+      if (this->retry_count < this->maximum_retry){
         return this->execute(blackboard);
       } else {
         return basic_outcomes::TIMEOUT;
@@ -214,14 +215,15 @@ public:
 
     // Add waiting timeout 
     if (future.wait_for(std::chrono::seconds(this->timeout)) != std::future_status::ready){
-      if (retry_count < maximum_retry){
+      // Auto retry process
+      if (this->retry_count < this->maximum_retry){
         return this->execute(blackboard);
       } else {
-        retry_count = 0;
+        this->retry_count = 0;
         return basic_outcomes::TIMEOUT;
       }
     } else {
-      retry_count = 0;
+      this->retry_count = 0;
     }
 
     if (this->is_canceled()) {
