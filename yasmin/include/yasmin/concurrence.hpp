@@ -48,12 +48,12 @@ namespace yasmin {
 class Concurrence : public State {
 
 public:
-  typedef std::map<std::shared_ptr<State>, std::string> StateMap;
-  typedef std::map<std::string, StateMap> OutcomeMap;
+  typedef std::map<std::string, std::string> StateOutcomeMap;
+  typedef std::map<std::string, StateOutcomeMap> OutcomeMap;
 
 protected:
-  /// The states to run concurrently
-  const std::set<std::shared_ptr<State>> states;
+  /// The states to run concurrently (name -> state)
+  const std::map<std::string, std::shared_ptr<State>> states;
 
   /// Default outcome
   const std::string default_outcome;
@@ -62,19 +62,13 @@ protected:
   /// overall output
   OutcomeMap outcome_map;
 
-  /// Stores the intermedaite outcomes of the concurrent states
-  std::map<std::shared_ptr<State>, std::shared_ptr<std::string>>
-      intermediate_outcome_map;
+  /// Stores the intermediate outcomes of the concurrent states
+  std::map<std::string, std::shared_ptr<std::string>> intermediate_outcome_map;
 
   /// The set of possible outcomes
   std::set<std::string> possible_outcomes;
 
 private:
-  /// Indicates if the state has been canceled.
-  std::atomic_bool canceled{false};
-  /// Indicates if the state is currently running.
-  std::atomic_bool running{false};
-
   /// Mutex for intermediate outcome map
   std::mutex intermediate_outcome_mutex;
 
@@ -90,9 +84,13 @@ private:
 public:
   /**
    * @brief Constructs a State with a set of possible outcomes.
-   * @param outcomes A set of possible outcomes for this state.
+   * @param states A map of state names to states that will run concurrently.
+   * @param default_outcome The default outcome to return if no outcome map
+   * rules are satisfied.
+   * @param outcome_map A map of outcome names to requirements for achieving
+   * that outcome.
    */
-  Concurrence(std::set<std::shared_ptr<State>> states,
+  Concurrence(std::map<std::string, std::shared_ptr<State>> states,
               std::string default_outcome, OutcomeMap outcome_map);
 
   /**
@@ -113,6 +111,24 @@ public:
    * This method sets the canceled flag to true and logs the action.
    */
   void cancel_state() override;
+
+  /**
+   * @brief Returns the map of states managed by this concurrence state.
+   * @return A map of state names to states.
+   */
+  std::map<std::string, std::shared_ptr<State>> get_states() const;
+
+  /**
+   * @brief Returns the outcome map for this concurrence state.
+   * @return A map of outcome names to their requirements.
+   */
+  OutcomeMap get_outcome_map() const;
+
+  /**
+   * @brief Returns the default outcome for this concurrence state.
+   * @return The default outcome as a string.
+   */
+  std::string get_default_outcome() const;
 
   /**
    * @brief Converts the state to a string representation.
@@ -138,7 +154,7 @@ public:
     name += "[";
 
     for (auto it = states.begin(); it != states.end(); ++it) {
-      name += (*it)->to_string();
+      name += it->first + " (" + it->second->to_string() + ")";
 
       // Add a comma if this is not the last element
       if (std::next(it) != states.end()) {

@@ -25,7 +25,7 @@
 
 using namespace yasmin;
 
-Concurrence::Concurrence(std::set<std::shared_ptr<State>> states,
+Concurrence::Concurrence(std::map<std::string, std::shared_ptr<State>> states,
                          std::string default_outcome, OutcomeMap outcome_map)
     : State(generate_possible_outcomes(outcome_map, default_outcome)),
       states(states), default_outcome(default_outcome),
@@ -33,32 +33,48 @@ Concurrence::Concurrence(std::set<std::shared_ptr<State>> states,
 
   // Require at least one state
   if (states.empty()) {
-    throw std::invalid_argument("Set of concurrent states cannot be empty");
+    throw std::invalid_argument("Map of concurrent states cannot be empty");
   }
 
-  // Validate outcome map and prepare intemedaite outcomes map
+  // Check for duplicate state instances
+  std::set<std::shared_ptr<State>> unique_instances;
+  for (const auto &[state_name, state] : states) {
+    if (unique_instances.find(state) != unique_instances.end()) {
+      throw std::invalid_argument(
+          "There are duplicate state instances in the states");
+    }
+    unique_instances.insert(state);
+  }
+
+  // Validate outcome map and prepare intermediate outcomes map
   for (const auto &[outcome, requirements] : outcome_map) {
     if (requirements.empty()) {
       throw std::invalid_argument(
           "Outcome '" + outcome +
           "' in the outcome map must have at least one requirement");
     }
-    for (const auto &[state, intermediate_outcome] : requirements) {
+    for (const auto &[state_name, intermediate_outcome] : requirements) {
+      // Check if state name exists in the states map
+      auto state_it = states.find(state_name);
+      if (state_it == states.end()) {
+        throw std::invalid_argument(
+            "State name '" + state_name +
+            "' in the outcome map under outcome '" + outcome +
+            "' is not provided in the concurrent set of states to run");
+      }
+
+      // Check if intermediate outcome is valid for the state
+      std::shared_ptr<State> state = state_it->second;
       if (state->get_outcomes().find(intermediate_outcome) ==
           state->get_outcomes().end()) {
         throw std::invalid_argument(
-            "Intemedaite outcome '" + intermediate_outcome +
+            "Intermediate outcome '" + intermediate_outcome +
             "' under outcome '" + outcome +
             "' of the outcome map is not a valid outcome of state '" +
             state->to_string() + "'");
       }
-      if (states.find(state) == states.end()) {
-        throw std::invalid_argument(
-            "State '" + state->to_string() +
-            "' in the outcome map under outcome '" + outcome +
-            "' is not provided in the concurrent set of states to run");
-      }
-      intermediate_outcome_map.insert({state, nullptr});
+
+      intermediate_outcome_map.insert({state_name, nullptr});
     }
   }
 }
@@ -68,11 +84,12 @@ Concurrence::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   std::vector<std::thread> state_threads;
 
   // Initialize the parallel execution of all the states
-  for (std::shared_ptr<State> state : states) {
-    state_threads.push_back(std::thread([this, state, blackboard]() {
-      std::string outcome = state->execute(blackboard);
+  for (const auto &[state_name, state] : states) {
+    state_threads.push_back(std::thread([this, state_name, state,
+                                         blackboard]() {
+      std::string outcome = (*state.get())(blackboard);
       const std::lock_guard<std::mutex> lock(this->intermediate_outcome_mutex);
-      this->intermediate_outcome_map[state] =
+      this->intermediate_outcome_map[state_name] =
           std::make_shared<std::string>(outcome);
     }));
   }
@@ -93,12 +110,13 @@ Concurrence::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   std::set<std::string> satisfied_outcomes;
   for (const auto &[outcome, requirements] : outcome_map) {
     bool satisfied = true;
-    for (const auto &[state, expected_intermediate_outcome] : requirements) {
+    for (const auto &[state_name, expected_intermediate_outcome] :
+         requirements) {
       std::shared_ptr<std::string> actual_intermediate_outcome =
-          intermediate_outcome_map.find(state)->second;
+          intermediate_outcome_map.find(state_name)->second;
       if (actual_intermediate_outcome == nullptr) {
         throw std::runtime_error("An intermediate outcome for state '" +
-                                 state->to_string() + "' was not received.");
+                                 state_name + "' was not received.");
       }
       satisfied &=
           *actual_intermediate_outcome == expected_intermediate_outcome;
@@ -118,7 +136,7 @@ Concurrence::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
       outcomes_string += *it;
 
       // Add a comma if this is not the last element
-      if (std::next(it) != outcomes.end()) {
+      if (std::next(it) != satisfied_outcomes.end()) {
         outcomes_string += ", ";
       }
     }
@@ -133,10 +151,22 @@ Concurrence::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 }
 
 void Concurrence::cancel_state() {
-  for (auto state : states) {
+  for (const auto &[state_name, state] : states) {
     state->cancel_state();
   }
   yasmin::State::cancel_state();
+}
+
+std::map<std::string, std::shared_ptr<State>> Concurrence::get_states() const {
+  return this->states;
+}
+
+Concurrence::OutcomeMap Concurrence::get_outcome_map() const {
+  return this->outcome_map;
+}
+
+std::string Concurrence::get_default_outcome() const {
+  return this->default_outcome;
 }
 
 std::set<std::string>

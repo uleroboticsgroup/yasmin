@@ -194,9 +194,9 @@ public:
    * This function cancels the ongoing monitor.
    */
   void cancel_state() {
-    yasmin::State::cancel_state();
     this->retry_count = 0;
     this->msg_cond.notify_one();
+    yasmin::State::cancel_state();
   }
 
 protected:

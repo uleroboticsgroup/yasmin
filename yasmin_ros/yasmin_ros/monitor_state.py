@@ -201,3 +201,13 @@ class MonitorState(State):
             self._retry_count = 0
             return True
         return False
+
+    def cancel_state(self) -> None:
+        """
+        Cancels the current monitor state.
+
+        This method cancels the monitor if waiting for messages.
+        """
+
+        self._msg_event.set()
+        super().cancel_state()

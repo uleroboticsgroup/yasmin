@@ -23,6 +23,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "yasmin/concurrence.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_msgs/msg/state.hpp"
@@ -66,6 +67,16 @@ public:
    */
   std::vector<yasmin_msgs::msg::Transition>
   parse_transitions(std::map<std::string, std::string> transitions);
+
+  /**
+   * @brief Parses concurrence transitions from outcome map to transition-like
+   * information.
+   * @param concurrence Shared pointer to the Concurrence state.
+   * @return Map of state names to their transition vectors.
+   */
+  std::map<std::string, std::vector<yasmin_msgs::msg::Transition>>
+  parse_concurrence_transitions(
+      std::shared_ptr<yasmin::Concurrence> concurrence);
 
   /**
    * @brief Parses a state and its transitions to add it to the list of state

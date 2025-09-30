@@ -380,7 +380,6 @@ std::string StateMachine::operator()() {
 }
 
 void StateMachine::cancel_state() {
-  State::cancel_state();
 
   if (this->is_running()) {
 
@@ -394,6 +393,7 @@ void StateMachine::cancel_state() {
 
     if (!current_state.empty()) {
       this->states.at(current_state)->cancel_state();
+      State::cancel_state();
     }
   }
 }

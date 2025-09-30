@@ -523,7 +523,7 @@ def main():
     Raises:
         KeyboardInterrupt: If the execution is interrupted by the user.
     """
-    yasmin.YASMIN_LOG_INFO("yasmin_concurrence_demo")
+    yasmin.YASMIN_LOG_INFO("CONCURRENCE_DEMO")
 
     # Initialize ROS 2
     rclpy.init()
@@ -540,11 +540,20 @@ def main():
 
     # Add concurrence state
     concurrence_state = Concurrence(
-        states=[foo_state, bar_state],
+        states={
+            "FOO": foo_state,
+            "BAR": bar_state,
+        },
         default_outcome="defaulted",
         outcome_map={
-            "outcome1": {foo_state: "outcome1", bar_state: "outcome3"},
-            "outcome2": {foo_state: "outcome2", bar_state: "outcome3"},
+            "outcome1": {
+                "FOO": "outcome1",
+                "BAR": "outcome3",
+            },
+            "outcome2": {
+                "FOO": "outcome2",
+                "BAR": "outcome3",
+            },
         },
     )
 
@@ -560,7 +569,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_CONCURRENCE_DEMO", sm)
+    YasminViewerPub("yasmin_demo", sm)
 
     # Execute the FSM
     try:
@@ -1307,7 +1316,6 @@ if __name__ == "__main__":
 
 </details>
 
-
 #### Parameters Demo (FSM + ROS 2 Parameters)
 
 ```shell
@@ -1485,7 +1493,6 @@ if __name__ == "__main__":
 ```
 
 </details>
-
 
 #### Nav2 Demo (Hierarchical FSM + ROS 2 Action)
 
@@ -2188,12 +2195,14 @@ int main(int argc, char *argv[]) {
 
   // Create concurrent state
   auto concurrent_state = std::make_shared<Concurrence>(
-      std::set<std::shared_ptr<State>>{foo_state, bar_state}, "defaulted",
+      std::map<std::string, std::shared_ptr<State>>{{"FOO", foo_state},
+                                                    {"BAR", bar_state}},
+      "defaulted",
       Concurrence::OutcomeMap{
-          {"outcome1", Concurrence::StateMap{{foo_state, "outcome1"},
-                                             {bar_state, "outcome3"}}},
-          {"outcome2", Concurrence::StateMap{{foo_state, "outcome2"},
-                                             {bar_state, "outcome3"}}}});
+          {"outcome1", Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
+                                                    {"BAR", "outcome3"}}},
+          {"outcome2", Concurrence::StateOutcomeMap{{"FOO", "outcome2"},
+                                                    {"BAR", "outcome3"}}}});
 
   // Add concurrent state to the state machine
   sm->add_state("CONCURRENCE", concurrent_state,

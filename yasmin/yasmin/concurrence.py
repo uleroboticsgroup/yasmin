@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from typing import Dict, Optional
 from threading import Thread, Lock
-from typing import List, Dict, Optional
 
 import yasmin
 from yasmin import State
@@ -27,8 +27,8 @@ class Concurrence(State):
     Child class of a State that runs multiple other states in parallel threads.
 
     Attributes:
-        _states (List[State]): A list of states that will be run in parallel by this state.
-        _outcome_map (Dict[str, Dict[int, str]]): A dictionary correlating the outcomes of the concurrent states to
+        _states (Dict[str, State]): A dictionary of states that will be run in parallel by this state.
+        _outcome_map (Dict[str, Dict[str, str]]): A dictionary correlating the outcomes of the concurrent states to
                                                   outcomes of this state.
         _default_outcome (str): A default outcome in case none of the correlations in _outcome_map are satisfied.
         _intermediate_outcomes (Dict[str, Optional[str]]): A temporary storage of the parallel states's outcomes.
@@ -37,7 +37,7 @@ class Concurrence(State):
 
     def __init__(
         self,
-        states: List[State],
+        states: Dict[str, State],
         default_outcome: str,
         outcome_map: Dict[str, Dict[State, str]] = {},
     ) -> None:
@@ -46,7 +46,7 @@ class Concurrence(State):
 
         :param default_outcome: A default outcome in case none of the correlations in outcome_map are satisfied.
         :param outcome_map: A dictionary correlating the outcomes of the concurrent states to outcomes of this state.
-        :param states: A list of states that will be run in parallel by this state.
+        :param states: A dictionary of states that will be run in parallel by this state.
 
         :raises ValueError: If either the provided outcomes set or states set are empty.
         :raises ValueError: If the same instance of a state is listed to run concurrently with itself.
@@ -63,32 +63,38 @@ class Concurrence(State):
         if not states:
             raise ValueError("There must be at least one state")
 
-        for state in states:
-            if states.count(state) > 1:
-                raise ValueError(
-                    "An instance of a state cannot be run concurrently with itself; create a new \
-                                  instance instead."
-                )
+        # Check for duplicate state instances
+        state_instances = list(states.values())
+        unique_instances = set(id(state) for state in state_instances)
+        if len(unique_instances) != len(state_instances):
+            raise ValueError("There are duplicate state names in the states")
 
-        self._states: List[State] = states
-
+        self._states: Dict[str, State] = states
         self._default_outcome: str = default_outcome
+        self._outcome_map: Dict[str, Dict[str, str]] = {}
 
-        self._outcome_map: Dict[str, Dict[int, str]] = {}
         for outcome, requirements in outcome_map.items():
             self._outcome_map[outcome] = {}
-            for state, state_outcome in requirements.items():
+            for state_name, state_outcome in requirements.items():
+
+                if state_name not in self._states:
+                    raise KeyError(
+                        f"State name '{state_name}' not found in states dictionary"
+                    )
+
+                state = self._states[state_name]
+
                 # Check if intermediate outcome belongs to state
                 if state_outcome not in state.get_outcomes():
                     raise KeyError(
-                        f"Outcome '{state_outcome}' is not registered in state {state}"
+                        f"Outcome '{state_outcome}' is not registered in state {state_name}"
                     )
-                state_id = self._states.index(state)
-                self._outcome_map[outcome][state_id] = state_outcome
 
-        self._intermediate_outcomes: Dict[int, Optional[str]] = {}
-        for state_id, _ in enumerate(self._states):
-            self._intermediate_outcomes[state_id] = None
+                self._outcome_map[outcome][state_name] = state_outcome
+
+        self._intermediate_outcomes: Dict[str, Optional[str]] = {}
+        for state_name in self._states.keys():
+            self._intermediate_outcomes[state_name] = None
 
         self._mutex = Lock()
 
@@ -102,13 +108,13 @@ class Concurrence(State):
 
         state_threads = []
 
-        for i, s in enumerate(self._states):
+        for state_name, state in self._states.items():
             state_threads.append(
                 Thread(
                     target=self.execute_and_save_state,
                     args=(
-                        s,
-                        i,
+                        state,
+                        state_name,
                         blackboard,
                     ),
                 )
@@ -119,7 +125,7 @@ class Concurrence(State):
             t.join()
 
         satisfied_outcomes = []
-        for i, (outcome, requirements) in enumerate(self._outcome_map.items()):
+        for _, (outcome, requirements) in enumerate(self._outcome_map.items()):
             satisfied = True
 
             for state_name, state_outcome in requirements.items():
@@ -141,26 +147,50 @@ class Concurrence(State):
         return satisfied_outcomes[0]
 
     def execute_and_save_state(
-        self, state: State, state_id: int, blackboard: Blackboard
+        self, state: State, state_name: str, blackboard: Blackboard
     ) -> None:
         """
         Executes a state and saves its outcome to the intermediate map.
 
         :param state: A state to execute.
-        :param state_id: The internal state ID associated with the state to execute.
+        :param state_name: The name of the state to execute.
         :param blackboard: An instance of Blackboard that provides the context for execution.
         :return: None
         """
         outcome = state(blackboard)
         with self._mutex:
-            self._intermediate_outcomes[state_id] = outcome
+            self._intermediate_outcomes[state_name] = outcome
+
+    def get_states(self) -> Dict[str, State]:
+        """
+        Returns the dictionary of states managed by this concurrence state.
+
+        :return: A dictionary of states.
+        """
+        return self._states
+
+    def get_outcome_map(self) -> Dict[str, Dict[str, str]]:
+        """
+        Returns the outcome map for this concurrence state.
+
+        :return: A dictionary mapping each outcome to its requirements.
+        """
+        return self._outcome_map
+
+    def get_default_outcome(self) -> str:
+        """
+        Returns the default outcome for this concurrence state.
+
+        :return: The default outcome as a string.
+        """
+        return self._default_outcome
 
     def cancel_state(self) -> None:
         """
         Cancels the execution of all states.
         """
-        for state in self._states:
-            state.cancel_state()
+        for key in self._states:
+            self._states[key].cancel_state()
 
         super().cancel_state()
 
@@ -173,8 +203,8 @@ class Concurrence(State):
         """
         result = "Concurrence ["
 
-        for i, state in enumerate(self._states):
-            result += f"{state.__str__()}"
+        for i, key in enumerate(self._states):
+            result += f"{key} ({self._states[key]})"
 
             if i < len(self._states) - 1:
                 result += ", "

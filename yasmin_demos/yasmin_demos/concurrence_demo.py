@@ -133,7 +133,7 @@ def main():
     Raises:
         KeyboardInterrupt: If the execution is interrupted by the user.
     """
-    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_concurrence_demo")
 
     # Initialize ROS 2
     rclpy.init()
@@ -150,11 +150,20 @@ def main():
 
     # Add concurrence state
     concurrence_state = Concurrence(
-        states=[foo_state, bar_state],
+        states={
+            "FOO": foo_state,
+            "BAR": bar_state,
+        },
         default_outcome="defaulted",
         outcome_map={
-            "outcome1": {foo_state: "outcome1", bar_state: "outcome3"},
-            "outcome2": {foo_state: "outcome2", bar_state: "outcome3"},
+            "outcome1": {
+                "FOO": "outcome1",
+                "BAR": "outcome3",
+            },
+            "outcome2": {
+                "FOO": "outcome2",
+                "BAR": "outcome3",
+            },
         },
     )
 

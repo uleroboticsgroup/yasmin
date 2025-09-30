@@ -156,12 +156,14 @@ int main(int argc, char *argv[]) {
 
   // Create concurrent state
   auto concurrent_state = std::make_shared<Concurrence>(
-      std::set<std::shared_ptr<State>>{foo_state, bar_state}, "defaulted",
+      std::map<std::string, std::shared_ptr<State>>{{"FOO", foo_state},
+                                                    {"BAR", bar_state}},
+      "defaulted",
       Concurrence::OutcomeMap{
-          {"outcome1", Concurrence::StateMap{{foo_state, "outcome1"},
-                                             {bar_state, "outcome3"}}},
-          {"outcome2", Concurrence::StateMap{{foo_state, "outcome2"},
-                                             {bar_state, "outcome3"}}}});
+          {"outcome1", Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
+                                                    {"BAR", "outcome3"}}},
+          {"outcome2", Concurrence::StateOutcomeMap{{"FOO", "outcome2"},
+                                                    {"BAR", "outcome3"}}}});
 
   // Add concurrent state to the state machine
   sm->add_state("CONCURRENCE", concurrent_state,

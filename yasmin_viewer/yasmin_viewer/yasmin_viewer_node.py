@@ -46,7 +46,7 @@ class YasminFsmViewerNode(Node):
     Methods:
         start_backend_server(): Initializes and starts the Flask server.
         start_subscriber(): Subscribes to the FSM state updates.
-        transition_msg_to_dict(tansitions): Converts a list of transitions to a dictionary.
+        transition_msg_to_list(tansitions): Converts a list of transitions to a dictionary.
         state_msg_to_dict(msg): Converts a State message to a dictionary.
         msg_to_dict(msg): Converts a StateMachine message to a list of dictionaries.
         fsm_viewer_cb(msg): Callback function for processing FSM updates.
@@ -140,17 +140,14 @@ class YasminFsmViewerNode(Node):
         except ExternalShutdownException:
             pass
 
-    def transition_msg_to_dict(self, transitions: List[Transition]) -> Dict:
+    def transition_msg_to_list(self, transitions: List[Transition]) -> List:
         """
-        Converts a list of Transition messages to a dictionary.
+        Converts a list of Transition messages to a list.
 
         :param transitions: A list of Transition messages to convert.
-        :return: A dictionary mapping outcomes to states.
+        :return: A list mapping outcomes to states.
         """
-        transition_dict = {}
-        for transition in transitions:
-            transition_dict[transition.outcome] = transition.state
-        return transition_dict
+        return [[t.outcome, t.state] for t in transitions]
 
     def state_msg_to_dict(self, msg: State) -> Dict:
         """
@@ -163,7 +160,7 @@ class YasminFsmViewerNode(Node):
             "id": msg.id,
             "parent": msg.parent,
             "name": msg.name,
-            "transitions": self.transition_msg_to_dict(msg.transitions),
+            "transitions": self.transition_msg_to_list(msg.transitions),
             "outcomes": msg.outcomes,
             "is_fsm": msg.is_fsm,
             "current_state": msg.current_state,
