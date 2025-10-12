@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Set, Callable, Type, Any
 from threading import RLock, Event
+from typing import Set, Callable, Type, Any
 
 from rclpy.node import Node
 from rclpy.task import Future
@@ -117,12 +117,10 @@ class ActionState(State):
 
         ## Maximum number of retries.
         self._maximum_retry: int = maximum_retry
-        ## Number of retries.
-        self._retry_count: int = 0
 
         _outcomes = [SUCCEED, ABORT, CANCEL]
 
-        if self._wait_timeout:
+        if self._wait_timeout or self._response_timeout:
             _outcomes.append(TIMEOUT)
 
         if outcomes:
@@ -159,8 +157,6 @@ class ActionState(State):
         with self._goal_handle_lock:
             if self._goal_handle is not None:
                 self._goal_handle.cancel_goal()
-
-        self._retry_count = 0
         super().cancel_state()
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -178,27 +174,24 @@ class ActionState(State):
                 Possible outcomes include SUCCEED, ABORT, CANCEL, or TIMEOUT.
         """
         goal = self._create_goal_handler(blackboard)
+        retry_count = 0
 
         yasmin.YASMIN_LOG_INFO(f"Waiting for action '{self._action_name}'")
-        act_available = self._action_client.wait_for_server(self._wait_timeout)
 
-        if not act_available:
+        while not self._action_client.wait_for_server(self._wait_timeout):
             yasmin.YASMIN_LOG_WARN(
                 f"Timeout reached, action '{self._action_name}' is not available"
             )
-            ## Auto retry process
-            if self._response_timeout and self._maximum_retry > 0:
-                self._retry_count += 1
-                if self._retry_count < self._maximum_retry:
+
+            if self._maximum_retry > 0:
+                if retry_count < self._maximum_retry:
+                    retry_count += 1
                     yasmin.YASMIN_LOG_WARN(
-                        f"Retrying to connect to action '{self._action_name}' ({self._retry_count}/{self._maximum_retry})"
+                        f"Retrying to connect to action '{self._action_name}' ({retry_count}/{self._maximum_retry})"
                     )
-                    return self.execute(blackboard)
                 else:
-                    self._retry_count = 0
                     return TIMEOUT
-        else:
-            self._retry_count = 0
+
         self._action_done_event.clear()
 
         yasmin.YASMIN_LOG_INFO(f"Sending goal to action '{self._action_name}'")
@@ -214,8 +207,21 @@ class ActionState(State):
 
         if self.is_canceled():
             return CANCEL
+
         # Wait for action to be done
-        self._action_done_event.wait()
+        while not self._action_done_event.wait(self._response_timeout):
+            yasmin.YASMIN_LOG_WARN(
+                f"Timeout reached while waiting for response from action '{self._action_name}'"
+            )
+
+            if retry_count < self._maximum_retry:
+                retry_count += 1
+                yasmin.YASMIN_LOG_WARN(
+                    f"Retrying to wait for action '{self._action_name}' response ({retry_count}/{self._maximum_retry})"
+                )
+            else:
+                return TIMEOUT
+
         status = self._action_status
 
         if status == GoalStatus.STATUS_CANCELED:
@@ -244,7 +250,7 @@ class ActionState(State):
 
         with self._goal_handle_lock:
             self._goal_handle: ClientGoalHandle = future.result()
-            get_result_future = self._goal_handle.get_result_async()
+            get_result_future: Future = self._goal_handle.get_result_async()
             get_result_future.add_done_callback(self._get_result_callback)
 
     def _get_result_callback(self, future: Future) -> None:

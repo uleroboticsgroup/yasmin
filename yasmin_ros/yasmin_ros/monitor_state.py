@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import List, Set, Callable, Union, Type, Any
 from threading import Event
+from typing import List, Set, Callable, Union, Type, Any
 
 from rclpy.node import Node
 from rclpy.subscription import Subscription
@@ -24,7 +24,6 @@ from rclpy.callback_groups import CallbackGroup
 import yasmin
 from yasmin import State
 from yasmin import Blackboard
-from yasmin_ros.basic_outcomes import TIMEOUT
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
 
@@ -46,6 +45,7 @@ class MonitorState(State):
         msg_queue (int): Maximum number of messages to queue.
         _timeout (int): Timeout in seconds for message reception.
         _maximum_retry (int): Maximum number of retries.
+        _msg_event (Event): Event for message reception.
     """
 
     def __init__(
@@ -119,8 +119,6 @@ class MonitorState(State):
 
         ## Maximum number of retries.
         self._maximum_retry: int = maximum_retry
-        ## Number of retries.
-        self._retry_count: int = 0
 
         super().__init__(outcomes)
 
@@ -153,42 +151,31 @@ class MonitorState(State):
 
         # Wait until a message is received or timeout is reached
         self._msg_event.clear()
+        retry_count = 0
 
         while not self.msg_list:
-            flag = self._msg_event.wait(self._timeout)
+            timeout_flag = self._msg_event.wait(self._timeout)
 
             if self.is_canceled():
                 return CANCEL
 
-            if self._timeout is not None and not flag:
+            while self._timeout is not None and not timeout_flag:
                 yasmin.YASMIN_LOG_WARN(
                     f"Timeout reached, topic '{self._topic_name}' is not available"
                 )
 
-                ## Auto retry process
-                if self._retry_count < self._maximum_retry:
-                    self._retry_count += 1
+                if retry_count < self._maximum_retry:
+                    retry_count += 1
                     yasmin.YASMIN_LOG_WARN(
-                        f"Retry to connect to topic '{self._topic_name}'"
+                        f"Retrying to wait for topic '{self._topic_name}' ({retry_count}/{self._maximum_retry})"
                     )
-                    return self.execute(blackboard)
                 else:
-                    self._retry_count = 0
                     return TIMEOUT
-            else:
-                self._retry_count = 0
 
         yasmin.YASMIN_LOG_INFO(f"Processing msg from topic '{self._topic_name}'")
         outcome = self._monitor_handler(blackboard, self.msg_list.pop(0))
 
         return outcome
-
-    def _is_canceled(self):
-        if self.is_canceled():
-            self._canceled = False
-            self._retry_count = 0
-            return True
-        return False
 
     def cancel_state(self) -> None:
         """

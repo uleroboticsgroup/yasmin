@@ -16,7 +16,6 @@
 
 import time
 import unittest
-import warnings
 from threading import Thread
 
 from yasmin_ros import ActionState, ServiceState, MonitorState
@@ -54,7 +53,7 @@ class AuxNode(Node):
         )
 
         self.pub = self.create_publisher(String, "test", 10)
-        self.timer = self.create_timer(1, self.publis_msgs)
+        self.timer = self.create_timer(1, self.publish_msgs)
 
     def goal_callback(self, goal_request) -> int:
         return GoalResponse.ACCEPT
@@ -84,10 +83,11 @@ class AuxNode(Node):
         return CancelResponse.ACCEPT
 
     def execute_service(self, request, response):
+        time.sleep(2)
         response.sum = request.a + request.b
         return response
 
-    def publis_msgs(self) -> None:
+    def publish_msgs(self) -> None:
         msg = String()
         msg.data = "data"
         self.pub.publish(msg)
@@ -168,6 +168,60 @@ class TestYasminRos(unittest.TestCase):
         state = ActionState(Fibonacci, "test", create_goal_cb)
         self.assertEqual(ABORT, state())
 
+    def test_action_retry_wait_timeout(self):
+        def create_goal_cb(blackboard):
+            goal = Fibonacci.Goal()
+            goal.order = 3
+            return goal
+
+        retries = 3
+
+        ## Capture the logs
+        with self.assertLogs("root", level="WARNING") as captured:
+            state = ActionState(
+                Fibonacci,
+                "test1",
+                create_goal_cb,
+                wait_timeout=0.1,
+                maximum_retry=retries,
+            )
+            self.assertEqual(TIMEOUT, state())
+
+        ## Check that the number of WARNING logs is correct
+        self.assertEqual(
+            (retries * 2) + 1,
+            len(captured.records),
+            msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
+            f"Captured messages: {[r.getMessage() for r in captured.records]}",
+        )
+
+    def test_action_retry_response_timeout(self):
+        def create_goal_cb(blackboard):
+            goal = Fibonacci.Goal()
+            goal.order = 3
+            return goal
+
+        retries = 3
+
+        ## Capture the logs
+        with self.assertLogs("root", level="WARNING") as captured:
+            state = ActionState(
+                Fibonacci,
+                "test",
+                create_goal_cb,
+                response_timeout=0.1,
+                maximum_retry=retries,
+            )
+            self.assertEqual(TIMEOUT, state())
+
+        ## Check that the number of WARNING logs is correct
+        self.assertEqual(
+            (retries * 2) + 1,
+            len(captured.records),
+            msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
+            f"Captured messages: {[r.getMessage() for r in captured.records]}",
+        )
+
     def test_service(self):
 
         def create_request_cb(blackboard):
@@ -195,6 +249,62 @@ class TestYasminRos(unittest.TestCase):
         )
         self.assertEqual("new_outcome", state())
 
+    def test_service_retry_wait_timeout(self):
+        def create_request_cb(blackboard):
+            request = AddTwoInts.Request()
+            request.a = 2
+            request.b = 3
+            return request
+
+        retries = 3
+
+        ## Capture the logs
+        with self.assertLogs("root", level="WARNING") as captured:
+            state = ServiceState(
+                AddTwoInts,
+                "test_retry",
+                create_request_cb,
+                maximum_retry=retries,
+                wait_timeout=0.1,
+            )
+            self.assertEqual(TIMEOUT, state())
+
+        ## Check that the number of WARNING logs is correct
+        self.assertEqual(
+            (retries * 2) + 1,
+            len(captured.records),
+            msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
+            f"Captured messages: {[r.getMessage() for r in captured.records]}",
+        )
+
+    def test_service_retry_response_timeout(self):
+        def create_request_cb(blackboard):
+            request = AddTwoInts.Request()
+            request.a = 2
+            request.b = 3
+            return request
+
+        retries = 3
+
+        ## Capture the logs
+        with self.assertLogs("root", level="WARNING") as captured:
+            state = ServiceState(
+                AddTwoInts,
+                "test",
+                create_request_cb,
+                maximum_retry=retries,
+                response_timeout=0.1,
+            )
+            self.assertEqual(TIMEOUT, state())
+
+        ## Check that the number of WARNING logs is correct
+        self.assertEqual(
+            (retries * 2) + 1,
+            len(captured.records),
+            msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
+            f"Captured messages: {[r.getMessage() for r in captured.records]}",
+        )
+
     def test_monitor_timeout(self):
 
         def monitor_handler(blackboard, msg):
@@ -205,24 +315,21 @@ class TestYasminRos(unittest.TestCase):
         )
         self.assertEqual(TIMEOUT, state())
 
-    def test_retry_mechanism(self):
-        def create_request_cb(blackboard):
-            request = AddTwoInts.Request()
-            request.a = 2
-            request.b = 3
-            return request
+    def test_monitor_retry_response_timeout(self):
+        def monitor_handler(blackboard, msg):
+            return SUCCEED
 
         retries = 3
-        logger_name = "root"
 
         ## Capture the logs
-        with self.assertLogs(logger_name, level="WARNING") as captured:
-            state = ServiceState(
-                AddTwoInts,
-                "test_retry",
-                create_request_cb,
+        with self.assertLogs("root", level="WARNING") as captured:
+            state = MonitorState(
+                String,
+                "test1",
+                [SUCCEED],
+                monitor_handler=monitor_handler,
+                timeout=0.1,
                 maximum_retry=retries,
-                timeout=1,
             )
             self.assertEqual(TIMEOUT, state())
 

@@ -153,7 +153,8 @@ public:
    */
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
-    this->retry_count++;
+    int retry_count = 0;
+
     while (this->msg_list.empty()) {
       std::unique_lock<std::mutex> lock(this->msg_mutex);
       auto status =
@@ -163,21 +164,18 @@ public:
         return basic_outcomes::CANCEL;
       }
 
-      if (this->timeout > 0 && status == std::cv_status::timeout) {
+      while (this->timeout > 0 && status == std::cv_status::timeout) {
         YASMIN_LOG_WARN("Timeout reached, topic '%s' is not available",
                         this->topic_name.c_str());
 
-        // Auto retry process
-        if (this->retry_count < this->maximum_retry) {
-          YASMIN_LOG_WARN("Retry to connect to topic '%s'",
-                          this->topic_name.c_str());
-          return this->execute(blackboard);
+        if (retry_count < this->maximum_retry) {
+          retry_count++;
+          YASMIN_LOG_WARN("Retrying to wait for topic '%s' (%d/%d)",
+                          this->topic_name.c_str(), retry_count,
+                          this->maximum_retry);
         } else {
-          this->retry_count = 0;
           return basic_outcomes::TIMEOUT;
         }
-      } else {
-        this->retry_count = 0;
       }
     }
 
@@ -195,7 +193,6 @@ public:
    * This function cancels the ongoing monitor.
    */
   void cancel_state() {
-    this->retry_count = 0;
     this->msg_cond.notify_one();
     yasmin::State::cancel_state();
   }
@@ -219,7 +216,6 @@ private:
   int msg_queue;       /**< Maximum number of messages to queue. */
   int timeout;         /**< Timeout in seconds for message reception. */
   int maximum_retry;   /**< Maximum number of retries. */
-  int retry_count = 0; /**< Number of retries. */
 
   /// Condition variable for action completion.
   std::condition_variable msg_cond;

@@ -205,20 +205,22 @@ public:
    */
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
-    this->retry_count++;
     Request request = this->create_request(blackboard);
+    int retry_count = 0;
 
     // Wait for the service to become available
     YASMIN_LOG_INFO("Waiting for service '%s'", this->srv_name.c_str());
-    bool srv_available = this->service_client->wait_for_service(
-        std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout));
 
-    if (!srv_available) {
+    while (!this->service_client->wait_for_service(
+        std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout))) {
       YASMIN_LOG_WARN("Timeout reached, service '%s' is not available",
                       this->srv_name.c_str());
-      // Auto retry process
-      if (this->retry_count < this->maximum_retry) {
-        return this->execute(blackboard);
+      if (retry_count < this->maximum_retry) {
+        retry_count++;
+        YASMIN_LOG_WARN("Retrying to connect to service '%s' "
+                        "(%d/%d)",
+                        this->srv_name.c_str(), retry_count,
+                        this->maximum_retry);
       } else {
         return basic_outcomes::TIMEOUT;
       }
@@ -229,25 +231,26 @@ public:
     auto future = this->service_client->async_send_request(request);
 
     // Add waiting timeout
-    if (future.wait_for(std::chrono::seconds(this->response_timeout)) !=
-        std::future_status::ready) {
-      // Auto retry process
-      if (this->retry_count < this->maximum_retry) {
-        return this->execute(blackboard);
+    while (future.wait_for(std::chrono::seconds(this->response_timeout)) !=
+           std::future_status::ready) {
+      YASMIN_LOG_WARN(
+          "Timeout reached while waiting for response from service '%s'",
+          this->srv_name.c_str());
+      if (retry_count < this->maximum_retry) {
+        retry_count++;
+        YASMIN_LOG_WARN("Retrying to wait for service '%s' response (%d/%d)",
+                        this->srv_name.c_str(), retry_count,
+                        this->maximum_retry);
       } else {
-        this->retry_count = 0;
         return basic_outcomes::TIMEOUT;
       }
-    } else {
-      this->retry_count = 0;
     }
 
     if (this->is_canceled()) {
       return basic_outcomes::CANCEL;
     }
 
-    // Wait for the response
-    future.wait();
+    // Get the service response
     Response response = future.get();
 
     if (response) {
@@ -280,8 +283,6 @@ private:
   int response_timeout;
   /// Maximum number of retries.
   int maximum_retry;
-  /// Number of retries.
-  int retry_count = 0;
 
   /**
    * @brief Create a service request based on the blackboard.

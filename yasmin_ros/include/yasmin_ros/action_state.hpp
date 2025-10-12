@@ -292,22 +292,24 @@ public:
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
-    this->retry_count++;
     std::unique_lock<std::mutex> lock(this->action_done_mutex);
+    int retry_count = 0;
 
     Goal goal = this->create_goal_handler(blackboard);
 
     // Wait for the action server to be available
     YASMIN_LOG_INFO("Waiting for action '%s'", this->action_name.c_str());
-    bool act_available = this->action_client->wait_for_action_server(
-        std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout));
 
-    if (!act_available) {
+    while (!this->action_client->wait_for_action_server(
+        std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout))) {
       YASMIN_LOG_WARN("Timeout reached, action '%s' is not available",
                       this->action_name.c_str());
-      // Auto retry process
-      if (this->retry_count < maximum_retry) {
-        return this->execute(blackboard);
+      if (retry_count < this->maximum_retry) {
+        retry_count++;
+        YASMIN_LOG_WARN("Retrying to connect to action '%s' "
+                        "(%d/%d)",
+                        this->action_name.c_str(), retry_count,
+                        this->maximum_retry);
       } else {
         return basic_outcomes::TIMEOUT;
       }
@@ -331,25 +333,25 @@ public:
 
     YASMIN_LOG_INFO("Sending goal to action '%s'", this->action_name.c_str());
     auto future = this->action_client->async_send_goal(goal, send_goal_options);
-    if (future.wait_for(std::chrono::seconds(this->response_timeout)) !=
-        std::future_status::ready) {
-      // Auto retry process
-      if (this->retry_count < this->maximum_retry) {
-        this->cancel_state();
-        return this->execute(blackboard);
+
+    while (future.wait_for(std::chrono::seconds(this->response_timeout)) !=
+           std::future_status::ready) {
+      YASMIN_LOG_WARN(
+          "Timeout reached while waiting for response from action '%s'",
+          this->action_name.c_str());
+      if (retry_count < this->maximum_retry) {
+        retry_count++;
+        YASMIN_LOG_WARN("Retrying to wait for action '%s' response (%d/%d)",
+                        this->action_name.c_str(), retry_count,
+                        this->maximum_retry);
       } else {
-        this->cancel_state();
         return basic_outcomes::TIMEOUT;
       }
-    } else {
-      this->retry_count = 0;
     }
+
     if (this->is_canceled()) {
       return basic_outcomes::CANCEL;
     }
-
-    // Wait for the action to complete
-    this->action_done_cond.wait(lock);
 
     switch (this->action_status) {
     case rclcpp_action::ResultCode::CANCELED:
@@ -412,8 +414,6 @@ private:
   int response_timeout;
   /// Maximum number of retries.
   int maximum_retry;
-  /// Number of retries.
-  int retry_count = 0;
 
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
