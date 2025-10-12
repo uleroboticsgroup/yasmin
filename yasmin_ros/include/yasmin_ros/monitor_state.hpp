@@ -157,8 +157,13 @@ public:
 
     while (this->msg_list.empty()) {
       std::unique_lock<std::mutex> lock(this->msg_mutex);
-      auto status =
-          this->msg_cond.wait_for(lock, std::chrono::seconds(this->timeout));
+
+      if (this->timeout > 0) {
+        auto status =
+            this->msg_cond.wait_for(lock, std::chrono::seconds(this->timeout));
+      } else {
+        this->msg_cond.wait(lock);
+      }
 
       if (this->is_canceled()) {
         return basic_outcomes::CANCEL;

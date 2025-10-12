@@ -16,8 +16,10 @@
 #ifndef YASMIN_ROS__SERVICE_STATE_HPP
 #define YASMIN_ROS__SERVICE_STATE_HPP
 
+#include <condition_variable>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 
@@ -28,6 +30,8 @@
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
+
+using namespace std::placeholders;
 
 namespace yasmin_ros {
 
@@ -151,7 +155,7 @@ public:
 
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT};
 
-    if (this->wait_timeout >= 0) {
+    if (this->wait_timeout > 0 || this->response_timeout > 0) {
       this->outcomes.insert(basic_outcomes::TIMEOUT);
     }
 
@@ -206,6 +210,7 @@ public:
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
     Request request = this->create_request(blackboard);
+    std::unique_lock<std::mutex> lock(this->response_done_mutex);
     int retry_count = 0;
 
     // Wait for the service to become available
@@ -228,34 +233,41 @@ public:
 
     // Send the service request
     YASMIN_LOG_INFO("Sending request to service '%s'", this->srv_name.c_str());
-    auto future = this->service_client->async_send_request(request);
 
-    // Add waiting timeout
-    while (future.wait_for(std::chrono::seconds(this->response_timeout)) !=
-           std::future_status::ready) {
-      YASMIN_LOG_WARN(
-          "Timeout reached while waiting for response from service '%s'",
-          this->srv_name.c_str());
-      if (retry_count < this->maximum_retry) {
-        retry_count++;
-        YASMIN_LOG_WARN("Retrying to wait for service '%s' response (%d/%d)",
-                        this->srv_name.c_str(), retry_count,
-                        this->maximum_retry);
-      } else {
-        return basic_outcomes::TIMEOUT;
+    // Send request with callback
+    this->service_client->async_send_request(
+        request, std::bind(&ServiceState::response_callback, this, _1));
+
+    // Wait for response with timeout
+    if (this->response_timeout > 0) {
+      while (this->response_done_cond.wait_for(
+                 lock, std::chrono::seconds(this->response_timeout)) ==
+             std::cv_status::timeout) {
+        YASMIN_LOG_WARN(
+            "Timeout reached while waiting for response from service '%s'",
+            this->srv_name.c_str());
+        if (retry_count < this->maximum_retry) {
+          retry_count++;
+          YASMIN_LOG_WARN("Retrying to wait for service '%s' response (%d/%d)",
+                          this->srv_name.c_str(), retry_count,
+                          this->maximum_retry);
+        } else {
+          return basic_outcomes::TIMEOUT;
+        }
       }
+    } else {
+      this->response_done_cond.wait(lock);
     }
 
     if (this->is_canceled()) {
       return basic_outcomes::CANCEL;
     }
 
-    // Get the service response
-    Response response = future.get();
-
-    if (response) {
+    // Process the service response
+    if (this->service_response) {
       if (response_handler != nullptr) {
-        std::string outcome = this->response_handler(blackboard, response);
+        std::string outcome =
+            this->response_handler(blackboard, this->service_response);
         return outcome;
       }
       return basic_outcomes::SUCCEED;
@@ -284,6 +296,13 @@ private:
   /// Maximum number of retries.
   int maximum_retry;
 
+  /// Condition variable for response completion.
+  std::condition_variable response_done_cond;
+  /// Mutex for protecting response completion.
+  std::mutex response_done_mutex;
+  /// Shared pointer to the service response.
+  Response service_response;
+
   /**
    * @brief Create a service request based on the blackboard.
    *
@@ -294,6 +313,21 @@ private:
   Request
   create_request(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
     return this->create_request_handler(blackboard);
+  }
+
+  /**
+   * @brief Callback for handling the service response.
+   *
+   * This function is called when the service response is received.
+   * It stores the response and signals the waiting thread.
+   *
+   * @param response The response received from the service.
+   */
+  void
+  response_callback(typename rclcpp::Client<ServiceT>::SharedFuture response) {
+    std::lock_guard<std::mutex> lock(this->response_done_mutex);
+    this->service_response = response.get();
+    this->response_done_cond.notify_one();
   }
 };
 

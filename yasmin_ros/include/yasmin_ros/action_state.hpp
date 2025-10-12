@@ -225,6 +225,10 @@ public:
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT,
                       basic_outcomes::CANCEL};
 
+    if (this->wait_timeout > 0 || this->response_timeout > 0) {
+      this->outcomes.insert(basic_outcomes::TIMEOUT);
+    }
+
     if (outcomes.size() > 0) {
       for (std::string outcome : outcomes) {
         this->outcomes.insert(outcome);
@@ -332,21 +336,26 @@ public:
     }
 
     YASMIN_LOG_INFO("Sending goal to action '%s'", this->action_name.c_str());
-    auto future = this->action_client->async_send_goal(goal, send_goal_options);
+    this->action_client->async_send_goal(goal, send_goal_options);
 
-    while (future.wait_for(std::chrono::seconds(this->response_timeout)) !=
-           std::future_status::ready) {
-      YASMIN_LOG_WARN(
-          "Timeout reached while waiting for response from action '%s'",
-          this->action_name.c_str());
-      if (retry_count < this->maximum_retry) {
-        retry_count++;
-        YASMIN_LOG_WARN("Retrying to wait for action '%s' response (%d/%d)",
-                        this->action_name.c_str(), retry_count,
-                        this->maximum_retry);
-      } else {
-        return basic_outcomes::TIMEOUT;
+    if (this->response_timeout > 0) {
+      while (this->action_done_cond.wait_for(
+                 lock, std::chrono::seconds(this->response_timeout)) ==
+             std::cv_status::timeout) {
+        YASMIN_LOG_WARN(
+            "Timeout reached while waiting for response from action '%s'",
+            this->action_name.c_str());
+        if (retry_count < this->maximum_retry) {
+          retry_count++;
+          YASMIN_LOG_WARN("Retrying to wait for action '%s' response (%d/%d)",
+                          this->action_name.c_str(), retry_count,
+                          this->maximum_retry);
+        } else {
+          return basic_outcomes::TIMEOUT;
+        }
       }
+    } else {
+      this->action_done_cond.wait(lock);
     }
 
     if (this->is_canceled()) {
