@@ -204,7 +204,7 @@ class TestYasminRos(unittest.TestCase):
             String, "test1", [SUCCEED], monitor_handler=monitor_handler, timeout=2
         )
         self.assertEqual(TIMEOUT, state())
-    
+
     def test_retry_mechanism(self):
         def create_request_cb(blackboard):
             request = AddTwoInts.Request()
@@ -213,17 +213,23 @@ class TestYasminRos(unittest.TestCase):
             return request
 
         retries = 3
-        logger_name = 'root'
+        logger_name = "root"
 
         ## Capture the logs
-        with self.assertLogs(logger_name, level='WARNING') as captured:
-            state = ServiceState(AddTwoInts, "test_retry", create_request_cb,
-                                maximum_retry=retries, timeout=1)
+        with self.assertLogs(logger_name, level="WARNING") as captured:
+            state = ServiceState(
+                AddTwoInts,
+                "test_retry",
+                create_request_cb,
+                maximum_retry=retries,
+                timeout=1,
+            )
             self.assertEqual(TIMEOUT, state())
 
         ## Check that the number of WARNING logs is correct
         self.assertEqual(
-            (retries*2) + 1, len(captured.records),
+            (retries * 2) + 1,
+            len(captured.records),
             msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
-                f"Captured messages: {[r.getMessage() for r in captured.records]}"
+            f"Captured messages: {[r.getMessage() for r in captured.records]}",
         )

@@ -235,7 +235,7 @@ class ActionState(State):
         Parameters:
             future: The future object representing the result of the goal sending operation.
         """
-        
+
         with self._goal_handle_lock:
             self._goal_handle: ClientGoalHandle = future.result()
             get_result_future = self._goal_handle.get_result_async()

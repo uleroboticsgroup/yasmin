@@ -75,7 +75,7 @@ class MonitorState(State):
             node (Node, optional): The ROS node to use. If None, a default node is created.
             timeout (int, optional): Timeout in seconds for monitoring before giving up.
             maximum_retry (int, optional): Maximum number of retries for monitoring. Default is 3.
-        
+
         Returns:
             None
         """
@@ -119,7 +119,7 @@ class MonitorState(State):
             self._qos,
             callback_group=self._callback_group,
         )
-        
+
         ## Maximum number of retries for monitoring.
         self._maximum_retry: int = maximum_retry
         self._retry_count: int = 0
@@ -189,12 +189,12 @@ class MonitorState(State):
                     return TIMEOUT
             else:
                 self._retry_count = 0
-        
+
         yasmin.YASMIN_LOG_INFO(f"Processing msg from topic '{self._topic_name}'")
         outcome = self._monitor_handler(blackboard, self.msg_list.pop(0))
 
         return outcome
-    
+
     def _is_canceled(self):
         if self.is_canceled():
             self._canceled = False

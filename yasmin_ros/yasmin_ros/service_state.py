@@ -27,6 +27,7 @@ from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT, CANCEL
 
+
 class ServiceState(State):
     """
     A state representing a service call in a behavior tree.
@@ -55,7 +56,6 @@ class ServiceState(State):
         node: Node = None,
         timeout: float = None,
         maximum_retry: int = 3,
-        
     ) -> None:
         """
         Initializes the ServiceState with the provided parameters.
@@ -144,9 +144,7 @@ class ServiceState(State):
             ## Auto retry process
             if self._retry_count < self._maximum_retry:
                 self._retry_count += 1
-                yasmin.YASMIN_LOG_WARN(
-                    f"Retry to connect to service '{self._srv_name}'"
-                )
+                yasmin.YASMIN_LOG_WARN(f"Retry to connect to service '{self._srv_name}'")
                 return self.execute(blackboard)
             else:
                 self._retry_count = 0
@@ -155,18 +153,20 @@ class ServiceState(State):
         try:
             yasmin.YASMIN_LOG_INFO(f"Sending request to service '{self._srv_name}'")
             response = self._service_client.call_async(request)
-        
+
             start = time.time()
-            
-            while not response.done() and time.time() - start < (self._timeout or float("inf")):
+
+            while not response.done() and time.time() - start < (
+                self._timeout or float("inf")
+            ):
                 if self._is_canceled():
                     yasmin.YASMIN_LOG_INFO(
                         f"Service call to '{self._srv_name}' has been canceled"
                     )
                     return CANCEL
-            if not response.done(): 
+            if not response.done():
                 yasmin.YASMIN_LOG_WARN(
-                f"Timeout reached while waiting for response from service '{self._srv_name}'"
+                    f"Timeout reached while waiting for response from service '{self._srv_name}'"
                 )
                 ## Auto retry process
                 if self._retry_count < self._maximum_retry:
@@ -178,7 +178,7 @@ class ServiceState(State):
                 else:
                     self._retry_count = 0
                 return TIMEOUT
-            
+
         except Exception as e:
             yasmin.YASMIN_LOG_WARN(f"Service call failed: {e}")
             return ABORT

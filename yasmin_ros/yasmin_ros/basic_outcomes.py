@@ -25,4 +25,4 @@ ABORT = "aborted"  ##< Indicates that an operation was aborted before completion
 FAIL = "failed"  ##< Indicates that an operation has not achieved its intended result.
 CANCEL = "canceled"  ##< Indicates that an operation was canceled by the user or system.
 TIMEOUT = "timeout"  ##< Indicates that an operation has timed out and did not complete in a timely manner.
-RETRY = "retry" ##< Indicates that an operation has not achieved its intended result and the operation is going to restarted.
+RETRY = "retry"  ##< Indicates that an operation has not achieved its intended result and the operation is going to restarted.
