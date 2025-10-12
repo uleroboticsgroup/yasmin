@@ -110,8 +110,11 @@ public:
     return basic_outcomes::SUCCEED;
   }
 
+protected:
+  /// Shared pointer to the ROS 2 node.
+  rclcpp::Node::SharedPtr node_;
+
 private:
-  rclcpp::Node::SharedPtr node_; /**< ROS 2 node pointer. */
   std::shared_ptr<rclcpp::Publisher<MsgT>>
       pub; /**< Publisher to the ROS 2 topic. */
 

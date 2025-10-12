@@ -13,18 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Set, Callable, Type, Any
+from typing import Set, Callable, Type, Any, Union
 
+import time
 from rclpy.node import Node
 from rclpy.client import Client
+from rclpy.qos import QoSProfile
 from rclpy.callback_groups import CallbackGroup
 
 import yasmin
 from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT
-
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT, CANCEL
 
 class ServiceState(State):
     """
@@ -40,6 +41,7 @@ class ServiceState(State):
         _create_request_handler (Callable[[Blackboard], Any]): A function that creates the service request.
         _response_handler (Callable[[Blackboard, Any], str]): A function that processes the service response.
         _timeout (float): Timeout duration for the service call.
+        _maximum_retry (int): Maximum number of retries for monitoring.
     """
 
     def __init__(
@@ -52,6 +54,8 @@ class ServiceState(State):
         callback_group: CallbackGroup = None,
         node: Node = None,
         timeout: float = None,
+        maximum_retry: int = 3,
+        
     ) -> None:
         """
         Initializes the ServiceState with the provided parameters.
@@ -65,6 +69,7 @@ class ServiceState(State):
             callback_group (CallbackGroup, optional): The callback group for the client.
             node (Node, optional): A ROS node instance; if None, a default instance is used.
             timeout (float, optional): Timeout duration for waiting on the service.
+            maximum_retry (int, optional): Maximum number of retries for monitoring. Default is 3.
 
         Raises:
             ValueError: If the create_request_handler is not provided.
@@ -103,6 +108,10 @@ class ServiceState(State):
         if not self._create_request_handler:
             raise ValueError("create_request_handler is needed")
 
+        ## Maximum number of retries for monitoring.
+        self._maximum_retry: int = maximum_retry
+        self._retry_count: int = 0
+
         super().__init__(_outcomes)
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -132,18 +141,57 @@ class ServiceState(State):
             yasmin.YASMIN_LOG_WARN(
                 f"Timeout reached, service '{self._srv_name}' is not available"
             )
+            ## Auto retry process
+            if self._retry_count < self._maximum_retry:
+                self._retry_count += 1
+                yasmin.YASMIN_LOG_WARN(
+                    f"Retry to connect to service '{self._srv_name}'"
+                )
+                return self.execute(blackboard)
+            else:
+                self._retry_count = 0
             return TIMEOUT
 
         try:
             yasmin.YASMIN_LOG_INFO(f"Sending request to service '{self._srv_name}'")
-            response = self._service_client.call(request)
-
+            response = self._service_client.call_async(request)
+        
+            start = time.time()
+            
+            while not response.done() and time.time() - start < (self._timeout or float("inf")):
+                if self._is_canceled():
+                    yasmin.YASMIN_LOG_INFO(
+                        f"Service call to '{self._srv_name}' has been canceled"
+                    )
+                    return CANCEL
+            if not response.done(): 
+                yasmin.YASMIN_LOG_WARN(
+                f"Timeout reached while waiting for response from service '{self._srv_name}'"
+                )
+                ## Auto retry process
+                if self._retry_count < self._maximum_retry:
+                    self._retry_count += 1
+                    yasmin.YASMIN_LOG_WARN(
+                        f"Retry to connect to service '{self._srv_name}'"
+                    )
+                    return self.execute(blackboard)
+                else:
+                    self._retry_count = 0
+                return TIMEOUT
+            
         except Exception as e:
             yasmin.YASMIN_LOG_WARN(f"Service call failed: {e}")
             return ABORT
 
         if self._response_handler:
-            outcome = self._response_handler(blackboard, response)
+            outcome = self._response_handler(blackboard, response.result())
             return outcome
 
         return SUCCEED
+
+    def _is_canceled(self):
+        if self.is_canceled():
+            self._canceled = False
+            self._retry_count = 0
+            return True
+        return False

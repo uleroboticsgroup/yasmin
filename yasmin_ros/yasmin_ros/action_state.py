@@ -50,6 +50,7 @@ class ActionState(State):
         _result_handler (Callable[[Blackboard, Any], str]): Function to handle the result from the action server.
         _feedback_handler (Callable[[Blackboard, Any], None]): Function to handle feedback from the action server.
         _timeout (float): Timeout duration for waiting for the action server.
+        _maximum_retry (int): Maximum number of retries for monitoring.
     """
 
     def __init__(
@@ -63,6 +64,7 @@ class ActionState(State):
         callback_group: CallbackGroup = None,
         node: Node = None,
         timeout: float = None,
+        maximum_retry: int = 3,
     ) -> None:
         """
         Initializes the ActionState instance.
@@ -79,6 +81,7 @@ class ActionState(State):
             callback_group (CallbackGroup, optional): The callback group for the action client.
             node (Node, optional): The ROS 2 node to use. If None, uses the default YasminNode.
             timeout (float, optional): Timeout duration for waiting for the action server.
+            maximum_retry (int, optional): Maximum number of retries for monitoring. Default is 3.
 
         Raises:
             ValueError: If create_goal_handler is None.
@@ -104,6 +107,10 @@ class ActionState(State):
 
         ## Timeout duration for waiting for the action server.
         self._timeout: float = timeout
+
+        ## Maximum number of retries for monitoring.
+        self._maximum_retry: int = maximum_retry
+        self._retry_count: int = 0
 
         _outcomes = [SUCCEED, ABORT, CANCEL]
 
@@ -145,6 +152,7 @@ class ActionState(State):
             if self._goal_handle is not None:
                 self._goal_handle.cancel_goal()
 
+        self._retry_count = 0
         super().cancel_state()
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -172,8 +180,19 @@ class ActionState(State):
             yasmin.YASMIN_LOG_WARN(
                 f"Timeout reached, action '{self._action_name}' is not available"
             )
-            return TIMEOUT
-
+            ## Auto retry process
+            if self._timeout and self._maximum_retry > 0:
+                self._retry_count += 1
+                if self._retry_count < self._maximum_retry:
+                    yasmin.YASMIN_LOG_WARN(
+                        f"Retrying to connect to action '{self._action_name}' ({self._retry_count}/{self._maximum_retry})"
+                    )
+                    return self.execute(blackboard)
+                else:
+                    self._retry_count = 0
+                    return TIMEOUT
+        else:
+            self._retry_count = 0
         self._action_done_event.clear()
 
         yasmin.YASMIN_LOG_INFO(f"Sending goal to action '{self._action_name}'")
@@ -187,6 +206,8 @@ class ActionState(State):
         )
         send_goal_future.add_done_callback(self._goal_response_callback)
 
+        if self.is_canceled():
+            return CANCEL
         # Wait for action to be done
         self._action_done_event.wait()
         status = self._action_status
@@ -214,6 +235,7 @@ class ActionState(State):
         Parameters:
             future: The future object representing the result of the goal sending operation.
         """
+        
         with self._goal_handle_lock:
             self._goal_handle: ClientGoalHandle = future.result()
             get_result_future = self._goal_handle.get_result_async()

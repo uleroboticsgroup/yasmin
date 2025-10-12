@@ -83,13 +83,19 @@ public:
    * @param outcomes A set of possible outcomes for this action state.
    * @param timeout (Optional) The maximum time to wait for the action server.
    *                Default is -1 (no timeout).
+   * @param action_timeout (Optional) The maximum time to wait for the action response.
+   *                Default is 30 minutes or 1800 seconds.
+   * @param maximum_retry (Optional) Maximum retries of the service if it returns timeout.
+   *                Default is 3.
    *
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
-              std::set<std::string> outcomes, int timeout = -1.0)
+              std::set<std::string> outcomes, int timeout = -1.0,
+              int action_timeout = 1800, int maximum_retry = 3)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
-                    nullptr, nullptr, nullptr, timeout) {}
+                    nullptr, nullptr, nullptr, timeout, action_timeout, 
+                    maximum_retry) {}
 
   /**
    * @brief Construct an ActionState with a specific action name and goal
@@ -104,15 +110,20 @@ public:
    * @param callback_group (Optional) The callback group for the action client.
    * @param timeout (Optional) The maximum time to wait for the action server.
    *                Default is -1 (no timeout).
-   *
+   *@param maximum_retry (Optional) Maximum retries of the service if it returns timeout.
+   *                Default is 3.
+   * @param action_timeout (Optional) The maximum time to wait for the action response.
+   *                Default is 30 minutes or 1800 seconds.
+   * 
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes,
               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
-              int timeout = -1.0)
+              int timeout = -1.0, int action_timeout = 1800, int maximum_retry = 3)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
-                    nullptr, nullptr, callback_group, timeout) {}
+                    nullptr, nullptr, callback_group, timeout,
+                    action_timeout, maximum_retry) {}
 
   /**
    * @brief Construct an ActionState with result and feedback handlers.
@@ -127,14 +138,20 @@ public:
    * action.
    * @param timeout (Optional) The maximum time to wait for the action server.
    *                Default is -1 (no timeout).
-   *
+   *@param maximum_retry (Optional) Maximum retries of the service if it returns timeout.
+   *                Default is 3.
+   * @param action_timeout (Optional) The maximum time to wait for the action response.
+   *                Default is 30 minutes or 1800 seconds.
+   * 
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               ResultHandler result_handler = nullptr,
-              FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
+              FeedbackHandler feedback_handler = nullptr, int timeout = -1.0,
+              int action_timeout = 1800, int maximum_retry = 3)
       : ActionState(nullptr, action_name, create_goal_handler, {},
-                    result_handler, feedback_handler, nullptr, timeout) {}
+                    result_handler, feedback_handler, nullptr, timeout,
+                    action_timeout, maximum_retry) {}
 
   /**
    * @brief Construct an ActionState with outcomes and handlers.
@@ -151,16 +168,21 @@ public:
    * action.
    * @param timeout (Optional) The maximum time to wait for the action server.
    *                Default is -1 (no timeout).
-   *
+   *@param maximum_retry (Optional) Maximum retries of the service if it returns timeout.
+   *                Default is 3.
+   * @param action_timeout (Optional) The maximum time to wait for the action response.
+   *                Default is 30 minutes or 1800 seconds.
+   * 
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
   ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes,
               ResultHandler result_handler = nullptr,
-              FeedbackHandler feedback_handler = nullptr, int timeout = -1.0)
+              FeedbackHandler feedback_handler = nullptr, int timeout = -1.0,
+              int action_timeout = 1800, int maximum_retry = 3)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
-                    result_handler, feedback_handler, nullptr, nullptr,
-                    timeout) {}
+                    result_handler, feedback_handler, nullptr,
+                    timeout, action_timeout, maximum_retry) {}
 
   /**
    * @brief Construct an ActionState with a specified node and action name.
@@ -179,7 +201,11 @@ public:
    * @param callback_group (Optional) The callback group for the action client.
    * @param timeout (Optional) The maximum time to wait for the action server.
    *                Default is -1 (no timeout).
-   *
+   *@param maximum_retry (Optional) Maximum retries of the service if it returns timeout.
+   *                Default is 3.
+   * @param action_timeout (Optional) The maximum time to wait for the action response.
+   *                Default is 30 minutes or 1800 seconds.
+   * 
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
   ActionState(const rclcpp::Node::SharedPtr &node, std::string action_name,
@@ -188,12 +214,12 @@ public:
               ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr,
               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
-              int timeout = -1.0)
+              int timeout = -1.0, int action_timeout = 1800, int maximum_retry = 3)
       : State({}), action_name(action_name),
         create_goal_handler(create_goal_handler),
         result_handler(result_handler), feedback_handler(feedback_handler),
-        timeout(timeout) {
-
+        timeout(timeout), action_timeout(action_timeout), maximum_retry(maximum_retry)
+  {
     this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT,
                       basic_outcomes::CANCEL};
 
@@ -264,6 +290,7 @@ public:
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
+    this->retry_count ++;
     std::unique_lock<std::mutex> lock(this->action_done_mutex);
 
     Goal goal = this->create_goal_handler(blackboard);
@@ -276,7 +303,12 @@ public:
     if (!act_available) {
       YASMIN_LOG_WARN("Timeout reached, action '%s' is not available",
                       this->action_name.c_str());
-      return basic_outcomes::TIMEOUT;
+      // Auto retry process
+      if (this->retry_count < maximum_retry){
+        return this->execute(blackboard);
+      } else {
+        return basic_outcomes::TIMEOUT;
+      }
     }
 
     // Prepare options for sending the goal
@@ -296,8 +328,23 @@ public:
     }
 
     YASMIN_LOG_INFO("Sending goal to action '%s'", this->action_name.c_str());
-    this->action_client->async_send_goal(goal, send_goal_options);
-
+    auto future = this->action_client->async_send_goal(goal, send_goal_options);
+    if (future.wait_for(std::chrono::seconds(this->timeout)) != std::future_status::ready){
+      // Auto retry process
+      if (this->retry_count < this->maximum_retry){
+        this->cancel_state();
+        return this->execute(blackboard);
+      } else {
+        this->cancel_state();
+        return basic_outcomes::TIMEOUT;
+      }
+    } else {
+      this->retry_count = 0;
+    }
+    if (this->is_canceled()) {
+        return basic_outcomes::CANCEL;
+      }
+    
     // Wait for the action to complete
     this->action_done_cond.wait(lock);
 
@@ -318,11 +365,11 @@ public:
       return basic_outcomes::ABORT;
     }
   }
-
-private:
+protected:
   /// Shared pointer to the ROS 2 node.
   rclcpp::Node::SharedPtr node_;
 
+private:
   /// Name of the action to communicate with.
   std::string action_name;
 
@@ -357,6 +404,9 @@ private:
 
   /// Maximum time to wait for the action server.
   int timeout;
+  int maximum_retry;   /**< Maximum number of retries. */
+  int retry_count = 0;     /**< Number of retries. */
+  int action_timeout;   /**< Timeout for the action. */
 
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"

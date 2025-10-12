@@ -62,12 +62,14 @@ public:
    * @param qos Quality of Service settings for the topic.
    * @param msg_queue The maximum number of messages to queue.
    * @param timeout The time in seconds to wait for messages before timing out.
+   * @param maximum_retry Maximum retries of the service if it returns timeout.
+   * Default is 3.
    */
   MonitorState(std::string topic_name, std::set<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
-               int msg_queue = 10, int timeout = -1)
+               int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
       : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
-                     nullptr, msg_queue, timeout) {}
+                     nullptr, msg_queue, timeout, maximum_retry) {}
 
   /**
    * @brief Construct a new MonitorState with specific QoS, message queue, and
@@ -80,13 +82,16 @@ public:
    * @param callback_group The callback group for the subscription.
    * @param msg_queue The maximum number of messages to queue.
    * @param timeout The time in seconds to wait for messages before timing out.
+   * @param maximum_retry Maximum retries of the service if it returns timeout.
+   * Default is 3.
+   * 
    */
   MonitorState(std::string topic_name, std::set<std::string> outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
-               int msg_queue = 10, int timeout = -1)
+               int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
       : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
-                     callback_group, msg_queue, timeout) {}
+                     callback_group, msg_queue, timeout, maximum_retry) {}
 
   /**
    * @brief Construct a new MonitorState with ROS 2 node, specific QoS, message
@@ -99,15 +104,17 @@ public:
    * @param qos Quality of Service settings for the topic.
    * @param msg_queue The maximum number of messages to queue.
    * @param timeout The time in seconds to wait for messages before timing out.
+   * @param maximum_retry Maximum retries of the service if it returns timeout.
+   * Default is 3.
    */
   MonitorState(const rclcpp::Node::SharedPtr &node, std::string topic_name,
                std::set<std::string> outcomes, MonitorHandler monitor_handler,
                rclcpp::QoS qos = 10,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
-               int msg_queue = 10, int timeout = -1)
+               int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
       : State({}), topic_name(topic_name), monitor_handler(monitor_handler),
-        qos(qos), msg_queue(msg_queue), timeout(timeout) {
-
+        qos(qos), msg_queue(msg_queue), timeout(timeout), maximum_retry(maximum_retry) 
+  {
     // set outcomes
     if (timeout > 0) {
       this->outcomes = {basic_outcomes::TIMEOUT};
@@ -146,7 +153,7 @@ public:
    */
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
-
+    this->retry_count ++;
     while (this->msg_list.empty()) {
       std::unique_lock<std::mutex> lock(this->msg_mutex);
       auto status =
@@ -159,7 +166,17 @@ public:
       if (this->timeout > 0 && status == std::cv_status::timeout) {
         YASMIN_LOG_WARN("Timeout reached, topic '%s' is not available",
                         this->topic_name.c_str());
-        return basic_outcomes::TIMEOUT;
+
+        // Auto retry process
+        if (this->retry_count < this->maximum_retry){
+          YASMIN_LOG_WARN("Retry to connect to topic '%s'", this->topic_name.c_str());
+          return this->execute(blackboard);
+        } else {
+          this->retry_count = 0;
+          return basic_outcomes::TIMEOUT;
+        }
+      } else {
+        this->retry_count = 0;
       }
     }
 
@@ -177,12 +194,16 @@ public:
    * This function cancels the ongoing monitor.
    */
   void cancel_state() {
+    this->retry_count = 0;
     this->msg_cond.notify_one();
     yasmin::State::cancel_state();
   }
 
+protected:
+  /// Shared pointer to the ROS 2 node.
+  rclcpp::Node::SharedPtr node_;
+
 private:
-  rclcpp::Node::SharedPtr node_; /**< ROS 2 node pointer. */
   std::shared_ptr<rclcpp::Subscription<MsgT>>
       sub; /**< Subscription to the ROS 2 topic. */
 
@@ -196,6 +217,8 @@ private:
       monitor_handler; /**< Callback function to handle incoming messages. */
   int msg_queue;       /**< Maximum number of messages to queue. */
   int timeout;         /**< Timeout in seconds for message reception. */
+  int maximum_retry;   /**< Maximum number of retries. */
+  int retry_count = 0;     /**< Number of retries. */
 
   /// Condition variable for action completion.
   std::condition_variable msg_cond;
