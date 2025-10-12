@@ -21,35 +21,33 @@ from yasmin.blackboard import Blackboard
 
 class CbState(State):
     """
-    CbState is a subclass of State that encapsulates a callback function
-    which can be executed in response to a specific state.
+    Represents a state that executes a callback function.
+
+    The CbState class inherits from the State class and is designed to
+    execute a user-defined callback function, utilizing a shared pointer
+    to a Blackboard object to obtain necessary data.
 
     Attributes:
-        _cb (Callable): A callback function that defines the action to take
-                        when the state is executed.
+        _cb (Callable): Pointer to the callback function to be executed.
         _args (tuple): Positional arguments passed to the callback.
         _kwargs (dict): Keyword arguments passed to the callback.
-
-    Parameters:
-        outcomes (Set[str]): A set of possible outcomes for this state.
-        cb (Callable): A callable that will be invoked when the state is executed.
     """
 
     def __init__(
         self, outcomes: Set[str], cb: Callable, *args: Any, **kwargs: Any
     ) -> None:
         """
-        Initializes a new instance of CbState.
+        Constructs a CbState object.
 
         Args:
             outcomes (Set[str]): A set of possible outcomes for this state.
-            cb (Callable): A callable that defines the action to take when
-                           the state is executed.
+            cb (Callable): A function pointer to the callback function that
+                         will be executed when this state is activated.
             *args (Any): Positional arguments for the callback.
             **kwargs (Any): Keyword arguments for the callback.
 
         Raises:
-            TypeError: If 'outcomes' is not a set or 'cb' is not callable.
+            ValueError: If the outcomes set is empty.
         """
         super().__init__(outcomes)
 
@@ -60,17 +58,19 @@ class CbState(State):
 
     def execute(self, blackboard: Blackboard) -> str:
         """
-        Executes the callback function with the blackboard and provided arguments.
+        Executes the callback function.
+
+        This function is called to execute the callback and retrieve
+        the result. It may use the provided Blackboard for additional data.
 
         Args:
-            blackboard: The context in which the callback will be executed.
-                        This is typically an object that holds the necessary
-                        state or data for the callback.
+            blackboard (Blackboard): A shared pointer to the Blackboard object
+                           used during execution.
 
         Returns:
-            str: The result of the callback function execution.
+            str: The result of the callback function execution as a string.
 
         Raises:
-            Exception: Propagates any exceptions raised by the callback function.
+            RuntimeError: If the callback execution fails.
         """
         return self._cb(blackboard, *self._args, **self._kwargs)

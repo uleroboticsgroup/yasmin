@@ -21,41 +21,32 @@ import yasmin
 
 class Blackboard(object):
     """
-    A thread-safe blackboard for storing key-value pairs.
+    A thread-safe storage for key-value pairs of varying types.
 
-    The Blackboard class provides a mechanism to store data in a dictionary-like format,
-    allowing for concurrent access and modification through thread-safe operations.
+    The Blackboard class allows storing, retrieving, and managing
+    values associated with string keys in a thread-safe manner using
+    a recursive mutex.
 
     Attributes:
-        _data (Dict[str, Any]): A dictionary holding the data stored in the blackboard.
-        __lock (Lock): A threading lock to ensure thread-safe access to the _data attribute.
-
-    Methods:
-        __getitem__(key): Retrieve a value associated with the given key.
-        __setitem__(key, value): Set a value for the given key.
-        __delitem__(key): Remove the value associated with the given key.
-        __contains__(key): Check if a key exists in the blackboard.
-        __len__(): Return the number of items in the blackboard.
-        __repr__(): Return a string representation of the blackboard's data.
+        _data (Dict[str, Any]): Storage for key-value pairs.
+        __lock (Lock): Mutex for thread safety.
+        __remapping (Dict[str, str]): Storage for key remappings.
     """
 
     def __init__(self, init: Dict[str, Any] = None) -> None:
         """
-        Initializes the Blackboard with an optional initial dictionary.
+        Default constructor for Blackboard.
 
         Args:
             init (Dict[str, Any], optional): A dictionary to initialize the blackboard with.
                 If None, the blackboard starts empty.
-
-        Raises:
-            None
         """
 
-        ## A threading lock to ensure thread-safe access to the _data attribute.
+        ## Mutex for thread safety.
         self.__lock: Lock = Lock()
-        ## A dictionary holding the data stored in the blackboard.
+        ## Storage for key-value pairs.
         self._data: Dict[str, Any] = {}
-        ## A dictionary containing all remappings
+        ## Storage for key remappings.
         self.__remapping: Dict[str, str] = {}
 
         if init is not None:
@@ -63,16 +54,16 @@ class Blackboard(object):
 
     def __getitem__(self, key: str) -> Any:
         """
-        Retrieves a value from the blackboard associated with the specified key.
+        Retrieve a value from the blackboard.
 
         Args:
-            key (str): The key whose value needs to be retrieved.
+            key (str): The key associated with the value.
 
         Returns:
-            Any: The value associated with the key.
+            Any: The value associated with the specified key.
 
         Raises:
-            KeyError: If the key is not found in the blackboard.
+            KeyError: If the key does not exist.
         """
         yasmin.YASMIN_LOG_DEBUG(f"Getting '{key}' from the blackboard")
 
@@ -84,17 +75,11 @@ class Blackboard(object):
 
     def __setitem__(self, key: str, value: Any) -> None:
         """
-        Sets a value in the blackboard for the specified key.
+        Set a value in the blackboard.
 
         Args:
             key (str): The key to associate with the value.
-            value (Any): The value to be stored in the blackboard.
-
-        Returns:
-            None
-
-        Raises:
-            None
+            value (Any): The value to store.
         """
         yasmin.YASMIN_LOG_DEBUG(f"Setting '{key}' in the blackboard")
 
@@ -103,13 +88,10 @@ class Blackboard(object):
 
     def __delitem__(self, key: str) -> None:
         """
-        Removes the value associated with the specified key from the blackboard.
+        Remove a value from the blackboard.
 
         Args:
-            key (str): The key to be removed.
-
-        Returns:
-            None
+            key (str): The key associated with the value to remove.
 
         Raises:
             KeyError: If the key is not found in the blackboard.
@@ -121,16 +103,13 @@ class Blackboard(object):
 
     def __contains__(self, key: str) -> bool:
         """
-        Checks if a specified key exists in the blackboard.
+        Check if a key exists in the blackboard.
 
         Args:
-            key (str): The key to check for existence.
+            key (str): The key to check.
 
         Returns:
-            bool: True if the key exists, False otherwise.
-
-        Raises:
-            None
+            bool: True if the key exists, false otherwise.
         """
         yasmin.YASMIN_LOG_DEBUG(f"Checking if '{key}' is in the blackboard")
 
@@ -139,26 +118,20 @@ class Blackboard(object):
 
     def __len__(self) -> int:
         """
-        Returns the number of items stored in the blackboard.
+        Get the number of key-value pairs in the blackboard.
 
         Returns:
-            int: The count of items in the blackboard.
-
-        Raises:
-            None
+            int: The size of the blackboard.
         """
         with self.__lock:
             return len(self._data)
 
     def __repr__(self) -> str:
         """
-        Returns a string representation of the blackboard's data.
+        Convert the contents of the blackboard to a string.
 
         Returns:
-            str: A string representation of the current state of the blackboard.
-
-        Raises:
-            None
+            str: A string representation of the blackboard.
         """
         with self.__lock:
             return repr(self._data)
@@ -166,41 +139,32 @@ class Blackboard(object):
     @property
     def remappings(self) -> Dict[str, str]:
         """
-        Property getter of a dict of remappings of the blackboard keys.
+        Get the remapping of the blackboard.
 
-        Return:
-            Dict: A dict with the current key remappings of the blackboard.
-
-        Raises:
-            None
+        Returns:
+            Dict[str, str]: The remapping of the blackboard.
         """
         return self.__remapping
 
     @remappings.setter
     def remappings(self, remapping: Dict[str, str]) -> None:
         """
-        Property setter of the remapping of the blackboard keys.
+        Set the remapping of the blackboard.
 
         Args:
-            remapping (Dict): The new remap of the blackboard.
-
-        Returns:
-            None
-
-        Raises:
-            None
+            remapping (Dict[str, str]): The remapping to set.
         """
         self.__remapping = remapping
 
     def __remap(self, key: str) -> str:
         """
-        internal method that acquires the maped key. In the case the key is not remaped, retruns the arg key.
+        Internal method that acquires the mapped key. In the case the key is
+        not remapped, returns the arg key.
 
         Args:
-            key (str): The key to be remaped.
+            key (str): The key to be remapped.
+
         Returns:
-            str: The remaped key or if is not remaped, the own key.
-        Raises:
-            None
+            str: The remapped key or if is not remapped, the own key.
         """
         return self.remappings[key] if key in self.remappings.keys() else key

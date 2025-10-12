@@ -823,7 +823,7 @@ class FibonacciState(ActionState):
         action. Initializes goal, response handler, and feedback
         processing callbacks.
 
-        Parameters:
+        Args:
             None
 
         Returns:
@@ -845,7 +845,7 @@ class FibonacciState(ActionState):
         This method retrieves the input value from the blackboard and
         populates the Fibonacci goal.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard containing the state
             information.
 
@@ -866,7 +866,7 @@ class FibonacciState(ActionState):
         This method processes the result of the Fibonacci action and
         stores it in the blackboard.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard to store the result.
             response (Fibonacci.Result): The result object from the Fibonacci action.
 
@@ -889,7 +889,7 @@ class FibonacciState(ActionState):
 
         This method logs the partial sequence received during the action.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard (not used in this method).
             feedback (Fibonacci.Feedback): The feedback object from the Fibonacci action.
 
@@ -908,7 +908,7 @@ def print_result(blackboard: Blackboard) -> str:
 
     This function logs the final result stored in the blackboard.
 
-    Parameters:
+    Args:
         blackboard (Blackboard): The blackboard containing the result.
 
     Returns:
@@ -928,7 +928,7 @@ def main():
     This function initializes the ROS 2 client, sets up the finite state
     machine, adds the states, and starts the action processing.
 
-    Parameters:
+    Args:
         None
 
     Returns:
@@ -1026,7 +1026,7 @@ class PrintOdometryState(MonitorState):
         times (int): The number of messages to monitor before transitioning
                      to the next outcome.
 
-    Parameters:
+    Args:
         times (int): The initial count of how many Odometry messages to
                      process before changing state.
 
@@ -1040,7 +1040,7 @@ class PrintOdometryState(MonitorState):
         """
         Initializes the PrintOdometryState.
 
-        Parameters:
+        Args:
             times (int): The number of Odometry messages to monitor before
                          transitioning to the next outcome.
         """
@@ -1063,7 +1063,7 @@ class PrintOdometryState(MonitorState):
         It logs the message, decrements the count of messages to process,
         and determines the next state outcome.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The shared data storage for states.
             msg (Odometry): The incoming Odometry message.
 
@@ -1202,7 +1202,7 @@ class PublishIntState(PublisherState):
         """
         Generates a std_msgs.msg.Int32 message with an incremented counter value.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The shared data store between states.
 
         Returns:
@@ -1226,7 +1226,7 @@ def check_count(blackboard: Blackboard) -> str:
     """
     Checks the current counter against a max threshold to determine state transition.
 
-    Parameters:
+    Args:
         blackboard (Blackboard): The shared data store between states.
 
     Returns:

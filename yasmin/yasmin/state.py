@@ -35,27 +35,30 @@ class StateStatus(Enum):
 
 class State(ABC):
     """
-    Abstract base class representing a state in a state machine.
+    Represents a state in a state machine.
 
-    This class provides a framework for creating specific states with defined outcomes.
-    Subclasses must implement the `execute` method to define the state-specific behavior.
+    The State class defines a state that can execute actions and manage
+    outcomes. It maintains information about its execution status
+    and the possible outcomes of its execution.
 
     Attributes:
-        _outcomes (Set[str]): A set of valid outcomes for this state.
+        _outcomes (Set[str]): The possible outcomes of this state.
         __status (StateStatus): Current status of the state.
         __status_lock (threading.Lock): Lock for thread-safe status operations.
     """
 
     def __init__(self, outcomes: Set[str]) -> None:
         """
-        Initializes the State instance.
+        Constructs a State with a set of possible outcomes.
 
-        :param outcomes: A set of valid outcomes for this state.
-                         Must contain at least one outcome.
-        :raises ValueError: If the provided outcomes set is empty.
+        Args:
+            outcomes (Set[str]): A set of possible outcomes for this state.
+
+        Raises:
+            ValueError: If the provided outcomes set is empty.
         """
 
-        ## A set of valid outcomes for this state.
+        ## The possible outcomes of this state.
         self._outcomes: Set = set()
         ## Current status of the state
         self.__status: StateStatus = StateStatus.IDLE
@@ -70,65 +73,65 @@ class State(ABC):
 
     def get_status(self) -> StateStatus:
         """
-        Gets the current status of the state.
+        Gets the current status of the State.
 
-        :return: The current StateStatus.
+        Returns:
+            StateStatus: The current status of the state.
         """
         with self.__status_lock:
             return self.__status
 
     def set_status(self, status: StateStatus) -> None:
         """
-        Sets the current status of the state.
+        Sets the status of the State.
 
-        :param status: The StateStatus to set.
+        Args:
+            status (StateStatus): The new status for the state.
         """
         with self.__status_lock:
             self.__status = status
 
     def is_idle(self) -> bool:
         """
-        Checks if the state is idle.
+        Checks if the State is idle.
 
-        :return: True if the state is idle, False otherwise.
+        Returns:
+            bool: True if the state is idle, otherwise False.
         """
-        return self.get_status() == StateStatus.IDLE
 
     def is_running(self) -> bool:
         """
-        Checks if the state is currently running.
+        Checks if the State is running.
 
-        :return: True if the state is running, False otherwise.
+        Returns:
+            bool: True if the state is running, otherwise False.
         """
-        return self.get_status() == StateStatus.RUNNING
 
     def is_canceled(self) -> bool:
         """
-        Checks if the state has been canceled.
+        Checks if the State is canceled.
 
-        :return: True if the state is canceled, False otherwise.
+        Returns:
+            bool: True if the state is canceled, otherwise False.
         """
-        return self.get_status() == StateStatus.CANCELED
 
     def is_completed(self) -> bool:
         """
-        Checks if the state has completed execution.
+        Checks if the State is completed.
 
-        :return: True if the state is completed, False otherwise.
+        Returns:
+            bool: True if the state is completed, otherwise False.
         """
-        return self.get_status() == StateStatus.COMPLETED
 
     def __call__(self, blackboard: Blackboard = None) -> str:
         """
-        Executes the state and returns the outcome.
+        Calls the state, transitioning from idle to running, executing, and then to completed.
 
-        This method sets the state as running, executes the state's behavior,
-        and validates the outcome against the allowed outcomes.
+        Args:
+            blackboard (Blackboard, optional): An optional blackboard to share data with the state.
 
-        :param blackboard: An optional Blackboard instance that can be used during execution.
-                           If None, a new Blackboard instance will be created.
-        :return: The outcome of the state execution.
-        :raises ValueError: If the outcome is not one of the valid outcomes for this state.
+        Returns:
+            str: The outcome of the state execution.
         """
         yasmin.YASMIN_LOG_DEBUG(f"Executing state '{self}'")
 
@@ -155,38 +158,43 @@ class State(ABC):
     @abstractmethod
     def execute(self, blackboard: Blackboard) -> str:
         """
-        Executes the specific behavior of the state.
+        Executes the state's specific logic.
 
-        This method must be implemented by subclasses to define what happens
-        when the state is executed.
+        This method is intended to be overridden by derived classes to provide
+        specific execution logic.
 
-        :param blackboard: An instance of Blackboard that provides the context for execution.
-        :return: The outcome of the execution as a string.
-        :raises NotImplementedError: If not implemented in a subclass.
+        Args:
+            blackboard (Blackboard): A shared pointer to the Blackboard to use during
+            execution.
+
+        Returns:
+            str: A string representing the outcome of the execution.
         """
         raise NotImplementedError("Subclasses must implement the execute method")
 
     def cancel_state(self) -> None:
         """
-        Cancels the execution of the state.
+        Cancels the current state execution.
 
-        Sets the status to CANCELED and logs the cancellation.
+        This method sets the status to CANCELED and logs the action.
         """
         yasmin.YASMIN_LOG_INFO(f"Canceling state '{self}'")
         self.set_status(StateStatus.CANCELED)
 
     def get_outcomes(self) -> Set[str]:
         """
-        Gets the valid outcomes for this state.
+        Gets the set of possible outcomes for this state.
 
-        :return: A set of valid outcomes as strings.
+        Returns:
+            Set[str]: A constant reference to the set of possible outcomes.
         """
         return self._outcomes
 
     def __str__(self) -> str:
         """
-        Returns the string representation of the state.
+        Converts the state to a string representation.
 
-        :return: The name of the class representing the state.
+        Returns:
+            str: A string representation of the state.
         """
         return self.__class__.__name__

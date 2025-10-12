@@ -24,15 +24,20 @@ from yasmin.blackboard import Blackboard
 
 class Concurrence(State):
     """
-    Child class of a State that runs multiple other states in parallel threads.
+    Runs a series of states in parallel
+
+    The Concurrence class runs a set of states concurrently, waiting
+    for the termination of each, and then returns a single output
+    according to a provided rule map, or a default outcome if no rule is
+    satisfied.
 
     Attributes:
-        _states (Dict[str, State]): A dictionary of states that will be run in parallel by this state.
-        _outcome_map (Dict[str, Dict[str, str]]): A dictionary correlating the outcomes of the concurrent states to
-                                                  outcomes of this state.
-        _default_outcome (str): A default outcome in case none of the correlations in _outcome_map are satisfied.
-        _intermediate_outcomes (Dict[str, Optional[str]]): A temporary storage of the parallel states's outcomes.
-        _mutex (Lock): A mutex to ensure thread safety of _intermediate_outcomes.
+        _states (Dict[str, State]): The states to run concurrently (name -> state).
+        _default_outcome (str): Default outcome.
+        _outcome_map (Dict[str, Dict[str, str]]): Specifies which combination of state outputs should produce a given
+                                                  overall output.
+        _intermediate_outcomes (Dict[str, Optional[str]]): Stores the intermediate outcomes of the concurrent states.
+        _mutex (Lock): Mutex for intermediate outcome map.
     """
 
     def __init__(
@@ -42,15 +47,19 @@ class Concurrence(State):
         outcome_map: Dict[str, Dict[State, str]] = {},
     ) -> None:
         """
-        Initializes the Concurrence instance.
+        Constructs a State with a set of possible outcomes.
 
-        :param default_outcome: A default outcome in case none of the correlations in outcome_map are satisfied.
-        :param outcome_map: A dictionary correlating the outcomes of the concurrent states to outcomes of this state.
-        :param states: A dictionary of states that will be run in parallel by this state.
+        Args:
+            states (Dict[str, State]): A map of state names to states that will run concurrently.
+            default_outcome (str): The default outcome to return if no outcome map
+            rules are satisfied.
+            outcome_map (Dict[str, Dict[str, str]]): A map of outcome names to requirements for achieving
+            that outcome.
 
-        :raises ValueError: If either the provided outcomes set or states set are empty.
-        :raises ValueError: If the same instance of a state is listed to run concurrently with itself.
-        :raises KeyError: If an intermediate outcome is not registered with the correlated state.
+        Raises:
+            ValueError: If either the provided outcomes set or states set are empty.
+            ValueError: If the same instance of a state is listed to run concurrently with itself.
+            KeyError: If an intermediate outcome is not registered with the correlated state.
         """
 
         if len(outcome_map.keys()) > 0:
@@ -100,10 +109,14 @@ class Concurrence(State):
 
     def execute(self, blackboard: Blackboard) -> str:
         """
-        Executes the parallel behavior.
+        Executes the state's specific logic.
 
-        :param blackboard: An instance of Blackboard that provides the context for execution.
-        :return: The outcome of the execution as a string.
+        Args:
+            blackboard (Blackboard): A shared pointer to the Blackboard to use during
+            execution.
+
+        Returns:
+            str: A string representing the outcome of the execution.
         """
 
         state_threads = []
@@ -152,10 +165,10 @@ class Concurrence(State):
         """
         Executes a state and saves its outcome to the intermediate map.
 
-        :param state: A state to execute.
-        :param state_name: The name of the state to execute.
-        :param blackboard: An instance of Blackboard that provides the context for execution.
-        :return: None
+        Args:
+            state (State): A state to execute.
+            state_name (str): The name of the state to execute.
+            blackboard (Blackboard): An instance of Blackboard that provides the context for execution.
         """
         outcome = state(blackboard)
         with self._mutex:
@@ -163,9 +176,10 @@ class Concurrence(State):
 
     def get_states(self) -> Dict[str, State]:
         """
-        Returns the dictionary of states managed by this concurrence state.
+        Returns the map of states managed by this concurrence state.
 
-        :return: A dictionary of states.
+        Returns:
+            Dict[str, State]: A map of state names to states.
         """
         return self._states
 
@@ -173,7 +187,8 @@ class Concurrence(State):
         """
         Returns the outcome map for this concurrence state.
 
-        :return: A dictionary mapping each outcome to its requirements.
+        Returns:
+            Dict[str, Dict[str, str]]: A map of outcome names to their requirements.
         """
         return self._outcome_map
 
@@ -181,13 +196,16 @@ class Concurrence(State):
         """
         Returns the default outcome for this concurrence state.
 
-        :return: The default outcome as a string.
+        Returns:
+            str: The default outcome as a string.
         """
         return self._default_outcome
 
     def cancel_state(self) -> None:
         """
-        Cancels the execution of all states.
+        Cancels the current state execution.
+
+        This method sets the canceled flag to true and logs the action.
         """
         for key in self._states:
             self._states[key].cancel_state()
@@ -196,10 +214,10 @@ class Concurrence(State):
 
     def __str__(self) -> str:
         """
-        Returns a string representation of the concurrence state, listing all states.
+        Converts the state to a string representation.
 
         Returns:
-            str: A string representation of the state machine.
+            str: A string representation of the state.
         """
         result = "Concurrence ["
 

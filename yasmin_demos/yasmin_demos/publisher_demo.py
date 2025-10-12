@@ -49,7 +49,7 @@ class PublishIntState(PublisherState):
         """
         Generates a std_msgs.msg.Int32 message with an incremented counter value.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The shared data store between states.
 
         Returns:
@@ -73,7 +73,7 @@ def check_count(blackboard: Blackboard) -> str:
     """
     Checks the current counter against a max threshold to determine state transition.
 
-    Parameters:
+    Args:
         blackboard (Blackboard): The shared data store between states.
 
     Returns:

@@ -29,13 +29,16 @@ from yasmin_ros.basic_outcomes import SUCCEED
 
 class PublisherState(State):
     """
-    PublisherState is a state that publishes messages in a ROS topic.
+    Template class to publish ROS 2 messages.
+
+    This class provides functionality to publish to a ROS 2 topic
+    and create custom messages.
 
     Attributes:
-        _node (Node): The ROS 2 node instance used for subscriptions.
-        _pub (Publisher): Publisher object for the specified topic.
-        _create_message_handler (Callable[[Blackboard], Any]): Function to create new messages.
-        _topic_name (str): The name of the topic to monitor.
+        _node (Node): Shared pointer to the ROS 2 node.
+        _pub (Publisher): Publisher to the ROS 2 topic.
+        _topic_name (str): Name of the topic to publish to.
+        _create_message_handler (Callable[[Blackboard], Any]): Callback handler to create messages.
     """
 
     def __init__(
@@ -48,33 +51,30 @@ class PublisherState(State):
         node: Node = None,
     ) -> None:
         """
-        Initializes the MonitorState.
+        Construct a new PublisherState with ROS 2 node and specific QoS.
 
-        Parameters:
-            msg_type (Type): The type of message to be monitored.
-            topic_name (str): The name of the topic to subscribe to.
-            create_message_handler (Callable[[Blackboard], Any]): The function to call with the received messages.
-            qos (Union[QoSProfile, int], optional): Quality of Service profile or depth.
-            callback_group (CallbackGroup, optional): The callback group for the subscription.
-            node (Node, optional): The ROS node to use. If None, a default node is created.
-
-        Returns:
-            None
+        Args:
+            msg_type (Type): The type of message to be published.
+            topic_name (str): The name of the topic to publish to.
+            create_message_handler (Callable[[Blackboard], Any]): A callback handler to create messages.
+            qos (Union[QoSProfile, int], optional): Quality of Service settings for the topic.
+            callback_group (CallbackGroup, optional): The callback group for the publisher.
+            node (Node, optional): The ROS 2 node to use. If None, a default node is created.
         """
 
-        ## Function to handle incoming messages.
+        ## Callback handler to create messages.
         self._create_message_handler: Callable[[Blackboard], Any] = create_message_handler
 
-        ## The ROS 2 node instance used for subscriptions.
+        ## Shared pointer to the ROS 2 node.
         self._node: Node = node
 
         if self._node is None:
             self._node = YasminNode.get_instance()
 
-        ## The name of the topic to monitor.
+        ## Name of the topic to publish to.
         self._topic_name: str = topic_name
 
-        ## Publisher object for the specified topic.
+        ## Publisher to the ROS 2 topic.
         self._pub: Publisher = self._node.create_publisher(
             msg_type,
             topic_name,
@@ -89,16 +89,13 @@ class PublisherState(State):
 
     def execute(self, blackboard: Blackboard) -> str:
         """
-        Executes the publisher state.
+        Execute the publishing operation.
 
-        This method publishes messages in a topic.
-
-        Parameters:
-            blackboard (Blackboard): The blackboard instance that holds shared data.
+        Args:
+            blackboard (Blackboard): A shared pointer to the blackboard for data storage.
 
         Returns:
-            str: The outcome of the monitoring process. Returns TIMEOUT if the monitoring
-            time exceeds the specified timeout.
+            str: A string outcome indicating the result of the publishing operation.
         """
 
         yasmin.YASMIN_LOG_DEBUG(f"Publishing to topic '{self._topic_name}'")

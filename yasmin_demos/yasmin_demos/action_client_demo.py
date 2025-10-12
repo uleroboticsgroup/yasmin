@@ -45,7 +45,7 @@ class FibonacciState(ActionState):
         action. Initializes goal, response handler, and feedback
         processing callbacks.
 
-        Parameters:
+        Args:
             None
 
         Returns:
@@ -67,7 +67,7 @@ class FibonacciState(ActionState):
         This method retrieves the input value from the blackboard and
         populates the Fibonacci goal.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard containing the state
             information.
 
@@ -88,7 +88,7 @@ class FibonacciState(ActionState):
         This method processes the result of the Fibonacci action and
         stores it in the blackboard.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard to store the result.
             response (Fibonacci.Result): The result object from the Fibonacci action.
 
@@ -111,7 +111,7 @@ class FibonacciState(ActionState):
 
         This method logs the partial sequence received during the action.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard (not used in this method).
             feedback (Fibonacci.Feedback): The feedback object from the Fibonacci action.
 
@@ -130,7 +130,7 @@ def print_result(blackboard: Blackboard) -> str:
 
     This function logs the final result stored in the blackboard.
 
-    Parameters:
+    Args:
         blackboard (Blackboard): The blackboard containing the result.
 
     Returns:
@@ -150,7 +150,7 @@ def main():
     This function initializes the ROS 2 client, sets up the finite state
     machine, adds the states, and starts the action processing.
 
-    Parameters:
+    Args:
         None
 
     Returns:

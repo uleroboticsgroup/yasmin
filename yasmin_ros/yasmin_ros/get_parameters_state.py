@@ -27,10 +27,15 @@ from yasmin_ros.basic_outcomes import SUCCEED, ABORT
 
 class GetParametersState(State):
     """
-    GetParametersState is a state that retrieves ROS 2 parameters.
+    State that retrieves parameters from the ROS 2 parameter server.
+
+    This state retrieves parameters from the ROS 2 parameter server and stores
+    them in the blackboard.
 
     Attributes:
-        _node (Node): The ROS 2 node instance used for subscriptions.
+        _parameters (Dict[str, Any]): Map of parameters to retrieve, where the key is the parameter name
+            and the value is the default value.
+        _node (Node): Shared pointer to the ROS 2 node.
     """
 
     def __init__(
@@ -39,14 +44,11 @@ class GetParametersState(State):
         node: Node = None,
     ) -> None:
         """
-        Initializes the GetParametersState.
+        Constructs a GetParametersState with a map of parameters.
 
-        Parameters:
-            parameters (Dict[str, Any]): The parameters names to retrieve and their default values.
-            node (Node, optional): The ROS node to use. If None, a default node is created.
-
-        Returns:
-            None
+        Args:
+            parameters (Dict[str, Any]): A map of parameter names to their default values.
+            node (Node, optional): A shared pointer to the ROS 2 node.
         """
         self._parameters = parameters
         self._node = node if node else YasminNode.get_instance()
@@ -55,15 +57,13 @@ class GetParametersState(State):
 
     def execute(self, blackboard: Blackboard) -> str:
         """
-        Executes the state.
+        Executes the state to retrieve parameters.
 
-        This method retrieves the specified parameters from the ROS 2 node.
-
-        Parameters:
-            blackboard (Blackboard): The blackboard instance that holds shared data.
+        Args:
+            blackboard (Blackboard): A reference to the Yasmin blackboard.
 
         Returns:
-            str: The outcome of the state execution.
+            str: A string representing the outcome of the execution.
         """
 
         for param_name, param_value in self._parameters.items():

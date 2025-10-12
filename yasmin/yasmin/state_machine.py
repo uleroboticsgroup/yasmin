@@ -24,8 +24,12 @@ from yasmin.blackboard import Blackboard
 
 class StateMachine(State):
     """
-    Represents a state machine that can manage states and transitions
-    between them, including callbacks for different state events.
+    A class that implements a state machine with a set of states,
+    transitions, and callback mechanisms for state changes.
+
+    The StateMachine class inherits from the State class and allows the
+    registration of states with their respective transitions and callbacks
+    for start, transition, and end events.
 
     Attributes:
         _states (Dict[str, Dict[str, Any]]): A dictionary mapping state names to their corresponding state objects and transitions.
@@ -41,9 +45,9 @@ class StateMachine(State):
 
     def __init__(self, outcomes: Set[str]) -> None:
         """
-        Initializes the StateMachine with a set of possible outcomes.
+        Constructs a StateMachine with a set of possible outcomes.
 
-        Parameters:
+        Args:
             outcomes (Set[str]): A set of possible outcomes for the state machine.
         """
         super().__init__(outcomes)
@@ -88,7 +92,7 @@ class StateMachine(State):
         """
         Adds a new state to the state machine.
 
-        Parameters:
+        Args:
             name (str): The name of the state to add.
             state (State): The State object to associate with the name.
             transitions (Dict[str, str], optional): A dictionary mapping source outcomes to target states. Defaults to None.
@@ -145,7 +149,7 @@ class StateMachine(State):
         """
         Sets the initial state for the state machine.
 
-        Parameters:
+        Args:
             state_name (str): The name of the initial state to set.
 
         Raises:
@@ -200,7 +204,7 @@ class StateMachine(State):
         """
         Sets the current state name.
 
-        Parameters:
+        Args:
             state_name (str): The name of the state to set as the current state.
         """
         with self.__current_state_lock:
@@ -211,7 +215,7 @@ class StateMachine(State):
         """
         Adds a callback to be called when the state machine starts.
 
-        Parameters:
+        Args:
             cb (Callable): The callback function to execute.
             args (List[Any], optional): A list of arguments to pass to the callback. Defaults to None.
         """
@@ -223,7 +227,7 @@ class StateMachine(State):
         """
         Adds a callback to be called during state transitions.
 
-        Parameters:
+        Args:
             cb (Callable): The callback function to execute.
             args (List[Any], optional): A list of arguments to pass to the callback. Defaults to None.
         """
@@ -235,7 +239,7 @@ class StateMachine(State):
         """
         Adds a callback to be called when the state machine ends.
 
-        Parameters:
+        Args:
             cb (Callable): The callback function to execute.
             args (List[Any], optional): A list of arguments to pass to the callback. Defaults to None.
         """
@@ -247,7 +251,7 @@ class StateMachine(State):
         """
         Executes all start callbacks.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard instance used for sharing state.
             start_state (str): The name of the state machine's starting state.
 
@@ -270,7 +274,7 @@ class StateMachine(State):
         """
         Executes all transition callbacks.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard instance used for sharing state.
             from_state (str): The state the transition is coming from.
             to_state (str): The state the transition is going to.
@@ -289,7 +293,7 @@ class StateMachine(State):
         """
         Executes all end callbacks.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard instance used for sharing state.
             outcome (str): The outcome of the state machine execution.
 
@@ -306,7 +310,7 @@ class StateMachine(State):
         """
         Validates the state machine to ensure all states and transitions are correct.
 
-        Parameters:
+        Args:
             strict_mode (bool): Whether the validation is strict, which means checking if all state outcomes are used and all state machine outcomes are reached.
 
         Raises:
@@ -374,7 +378,7 @@ class StateMachine(State):
         """
         Executes the state machine starting from the initial state.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The blackboard instance used for sharing state.
 
         Returns:

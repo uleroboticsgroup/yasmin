@@ -30,20 +30,21 @@ from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT, CANCEL
 
 class ServiceState(State):
     """
-    A state representing a service call in a behavior tree.
+    A state class that interacts with a ROS 2 service.
 
-    This state manages the communication with a ROS service, creating and sending
-    requests, and handling responses. It can handle timeouts and custom outcomes.
+    This class manages communication with a specified ROS 2 service,
+    allowing it to send requests and handle responses. It extends
+    the base State class.
 
     Attributes:
-        _node (Node): The ROS node used to communicate with the service.
+        _node (Node): The ROS 2 node used to communicate with the service.
         _srv_name (str): The name of the service to call.
         _service_client (Client): The client used to call the service.
-        _create_request_handler (Callable[[Blackboard], Any]): A function that creates the service request.
-        _response_handler (Callable[[Blackboard, Any], str]): A function that processes the service response.
-        _wait_timeout (float): Timeout duration for the service call.
-        _response_timeout (float): Timeout duration for waiting for the service response.
-        _maximum_retry (int): Maximum number of retries for monitoring.
+        _create_request_handler (Callable[[Blackboard], Any]): Function to create service requests.
+        _response_handler (Callable[[Blackboard, Any], str]): Function to handle service responses.
+        _wait_timeout (float): Maximum wait time for service availability.
+        _response_timeout (float): Timeout for the service response.
+        _maximum_retry (int): Maximum number of retries.
     """
 
     def __init__(
@@ -62,30 +63,30 @@ class ServiceState(State):
         """
         Initializes the ServiceState with the provided parameters.
 
-        Parameters:
+        Args:
             srv_type (Type): The type of the service.
-            srv_name (str): The name of the service to be called.
-            create_request_handler (Callable[[Blackboard], Any]): A handler to create the request based on the blackboard data.
-            outcomes (Set[str], optional): A set of additional outcomes for this state.
-            response_handler (Callable[[Blackboard, Any], str], optional): A handler to process the service response.
-            callback_group (CallbackGroup, optional): The callback group for the client.
-            node (Node, optional): A ROS node instance; if None, a default instance is used.
-            wait_timeout (float, optional): Time to wait for the service to become available. Default is None (wait indefinitely).
-            response_timeout (float, optional): Timeout duration for waiting for the service response. Default is None (wait indefinitely).
-            maximum_retry (int, optional): Maximum number of retries for monitoring. Default is 3.
+            srv_name (str): The name of the service to call.
+            create_request_handler (Callable[[Blackboard], Any]): Function to create a service request.
+            outcomes (Set[str], optional): A set of possible outcomes for this state.
+            response_handler (Callable[[Blackboard, Any], str], optional): Function to handle the service response.
+            callback_group (CallbackGroup, optional): The callback group for the service client.
+            node (Node, optional): A ROS 2 node instance; if None, a default instance is used.
+            wait_timeout (float, optional): Maximum time to wait for the service to become available. Default is None (wait indefinitely).
+            response_timeout (float, optional): Maximum time to wait for the service response. Default is None (wait indefinitely).
+            maximum_retry (int, optional): Maximum retries of the service if it returns timeout. Default is 3.
 
         Raises:
             ValueError: If the create_request_handler is not provided.
         """
 
-        ## A function that creates the service request.
+        ## Function to create service requests.
         self._create_request_handler: Callable[[Blackboard], Any] = create_request_handler
-        ## A function that processes the service response.
+        ## Function to handle service responses.
         self._response_handler: Callable[[Blackboard, Any], str] = response_handler
 
-        ## Wait timeout duration for the service call.
+        ## Maximum wait time for service availability.
         self._wait_timeout: float = wait_timeout
-        ## Timeout duration for the service call.
+        ## Timeout for the service response.
         self._response_timeout: float = response_timeout
 
         _outcomes = [SUCCEED, ABORT]
@@ -96,16 +97,16 @@ class ServiceState(State):
         if outcomes:
             _outcomes = _outcomes + outcomes
 
-        ## The ROS node used to communicate with the service.
+        ## The ROS 2 node used to communicate with the service.
         self._node = node
 
         if self._node is None:
             self._node: Node = YasminNode.get_instance()
 
-        ## The name of the service to call.
+        ## Name of the service.
         self._srv_name: str = srv_name
 
-        ## The client used to call the service.
+        ## Shared pointer to the service client.
         self._service_client: Client = self._node.create_client(
             srv_type, srv_name, callback_group=callback_group
         )
@@ -113,29 +114,26 @@ class ServiceState(State):
         if not self._create_request_handler:
             raise ValueError("create_request_handler is needed")
 
-        ## Maximum number of retries for monitoring.
+        ## Maximum number of retries.
         self._maximum_retry: int = maximum_retry
+        ## Number of retries.
         self._retry_count: int = 0
 
         super().__init__(_outcomes)
 
     def execute(self, blackboard: Blackboard) -> str:
         """
-        Executes the service call.
+        Execute the service call and handle the response.
 
-        This method prepares the request using the provided blackboard,
-        waits for the service to become available, and sends the request.
-        It also handles the response and can process outcomes based on the
-        response handler.
+        This method creates a request based on the blackboard data, waits for the
+        service to become available, sends the request, and processes the response.
 
-        Parameters:
-            blackboard (Blackboard): The blackboard object that holds the data for request creation.
+        Args:
+            blackboard (Blackboard): A shared pointer to the blackboard containing data for
+                request creation.
 
         Returns:
-            str: The outcome of the state execution, which can be SUCCEED, ABORT, or TIMEOUT.
-
-        Exceptions:
-            Exception: Catches all exceptions during the service call and returns ABORT.
+            str: The outcome of the service call, which can be SUCCEED, ABORT, or TIMEOUT.
         """
         request = self._create_request_handler(blackboard)
 

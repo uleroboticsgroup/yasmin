@@ -39,7 +39,7 @@ class PrintOdometryState(MonitorState):
         times (int): The number of messages to monitor before transitioning
                      to the next outcome.
 
-    Parameters:
+    Args:
         times (int): The initial count of how many Odometry messages to
                      process before changing state.
 
@@ -53,7 +53,7 @@ class PrintOdometryState(MonitorState):
         """
         Initializes the PrintOdometryState.
 
-        Parameters:
+        Args:
             times (int): The number of Odometry messages to monitor before
                          transitioning to the next outcome.
         """
@@ -76,7 +76,7 @@ class PrintOdometryState(MonitorState):
         It logs the message, decrements the count of messages to process,
         and determines the next state outcome.
 
-        Parameters:
+        Args:
             blackboard (Blackboard): The shared data storage for states.
             msg (Odometry): The incoming Odometry message.
 

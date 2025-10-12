@@ -22,19 +22,19 @@ from rclpy.executors import MultiThreadedExecutor
 
 class YasminNode(Node):
     """
-    A Singleton ROS 2 Node for the Yasmin application.
+    A ROS 2 node for managing and handling YASMIN-based applications.
 
-    This class implements a Singleton pattern to ensure that only one instance
-    of YasminNode exists throughout the application. It manages a ROS 2 Node
-    and a MultiThreadedExecutor to handle callbacks.
+    YasminNode is a singleton class derived from Node and integrates
+    custom functionalities for executing specific tasks in a ROS 2 environment.
 
-    @section attributes Attributes
-    - _instance: The single instance of YasminNode.
-    - _lock: A reentrant lock for thread safety.
-    - _executor: An instance of MultiThreadedExecutor to manage node execution.
-    - _spin_thread: A thread that runs the executor's spin method.
+    Attributes:
+        _instance (YasminNode): The single instance of YasminNode.
+        _lock (RLock): A reentrant lock for thread safety.
+        _executor (MultiThreadedExecutor): Executor for managing multiple threads.
+        _spin_thread (Thread): Thread for spinning the node.
 
-    @exception RuntimeError Raised when attempting to instantiate the node more than once.
+    Raises:
+        RuntimeError: Raised when attempting to instantiate the node more than once.
     """
 
     ## The single instance of YasminNode.
@@ -45,13 +45,15 @@ class YasminNode(Node):
     @staticmethod
     def get_instance() -> "YasminNode":
         """
-        Retrieves the single instance of YasminNode.
+        Provides access to the singleton instance of YasminNode.
 
-        If the instance does not exist, it creates one in a thread-safe manner.
+        This method ensures there is only one instance of YasminNode running.
 
-        @return A reference to the YasminNode instance.
+        Returns:
+            YasminNode: A reference to the YasminNode instance.
 
-        @exception RuntimeError Raised if the creation of the instance fails.
+        Raises:
+            RuntimeError: Raised if the creation of the instance fails.
         """
         with YasminNode._lock:
             if YasminNode._instance is None:
@@ -61,15 +63,16 @@ class YasminNode(Node):
 
     def __init__(self) -> None:
         """
-        Initializes the YasminNode instance.
+        Default constructor. Initializes the node with a unique name.
 
-        This constructor initializes the ROS 2 Node with a unique name and
+        This constructor initializes the ROS 2 Node and
         starts a MultiThreadedExecutor for handling node callbacks.
         It raises a RuntimeError if an attempt is made to create a second instance
         of this Singleton class.
 
-        @exception RuntimeError Raised when an attempt is made to create
-        more than one instance of YasminNode.
+        Raises:
+            RuntimeError: Raised when an attempt is made to create
+            more than one instance of YasminNode.
         """
         if YasminNode._instance is not None:
             raise RuntimeError("This class is a Singleton")
