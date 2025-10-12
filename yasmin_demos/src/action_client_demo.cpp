@@ -46,15 +46,19 @@ using namespace yasmin;
 std::string
 print_result(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
-  auto fibo_res = blackboard->get<std::vector<int>>("sum");
+  auto fibo_res = blackboard->get<std::vector<int>>("fibo_res");
 
-  fprintf(stderr, "Result received:");
-
-  for (auto ele : fibo_res) {
-    fprintf(stderr, " %d,", ele);
+  std::stringstream ss;
+  ss << "Result: [";
+  for (size_t i = 0; i < fibo_res.size(); i++) {
+    ss << fibo_res[i];
+    if (i < fibo_res.size() - 1) {
+      ss << ", ";
+    }
   }
+  ss << "]";
 
-  fprintf(stderr, "\n");
+  YASMIN_LOG_INFO(ss.str().c_str());
 
   return yasmin_ros::basic_outcomes::SUCCEED;
 }
@@ -109,7 +113,7 @@ public:
   response_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
                    Fibonacci::Result::SharedPtr response) {
 
-    blackboard->set<std::vector<int>>("sum", response->sequence);
+    blackboard->set<std::vector<int>>("fibo_res", response->sequence);
     return yasmin_ros::basic_outcomes::SUCCEED;
   };
 
@@ -129,12 +133,16 @@ public:
     (void)blackboard;
 
     std::stringstream ss;
-    ss << "Next number in sequence received: ";
-    for (auto number : feedback->sequence) {
-      ss << number << " ";
+    ss << "Received feedback: [";
+    for (size_t i = 0; i < feedback->sequence.size(); i++) {
+      ss << feedback->sequence[i];
+      if (i < feedback->sequence.size() - 1) {
+        ss << ", ";
+      }
     }
+    ss << "]";
 
-    fprintf(stderr, "%s\n", ss.str().c_str());
+    YASMIN_LOG_INFO(ss.str().c_str());
   };
 };
 

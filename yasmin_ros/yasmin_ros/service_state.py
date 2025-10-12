@@ -166,7 +166,7 @@ class ServiceState(State):
             self._response_received_event.clear()
 
             future = self._service_client.call_async(request)
-            future.add_done_callback(self.process_response)
+            future.add_done_callback(self.response_callback)
 
             # Wait for the future to complete with optional timeout
             while not self._response_received_event.wait(self._response_timeout):
@@ -192,7 +192,7 @@ class ServiceState(State):
 
         return SUCCEED
 
-    def process_response(self, future: Future) -> None:
+    def response_callback(self, future: Future) -> None:
         """
         Callback function to process the service response.
 

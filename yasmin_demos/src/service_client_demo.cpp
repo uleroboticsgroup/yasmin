@@ -58,7 +58,9 @@ set_ints(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
  */
 std::string
 print_sum(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-  fprintf(stderr, "Sum: %d\n", blackboard->get<int>("sum"));
+  std::stringstream ss;
+  ss << "Sum: " << blackboard->get<int>("sum");
+  YASMIN_LOG_INFO(ss.str().c_str());
   return yasmin_ros::basic_outcomes::SUCCEED;
 }
 
