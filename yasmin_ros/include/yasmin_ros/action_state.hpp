@@ -29,6 +29,7 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_communications_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
 using namespace std::placeholders;
@@ -241,8 +242,9 @@ public:
       this->node_ = node;
     }
 
-    this->action_client = rclcpp_action::create_client<ActionT>(
-        this->node_, action_name, callback_group);
+    this->action_client =
+        ROSCommunicationsCache::get_or_create_action_client<ActionT>(
+            this->node_, action_name, callback_group);
 
     if (this->create_goal_handler == nullptr) {
       throw std::invalid_argument("create_goal_handler is needed");

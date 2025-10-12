@@ -30,6 +30,7 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_communications_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
 using std::placeholders::_1;
@@ -135,13 +136,11 @@ public:
       this->node_ = node;
     }
 
-    // Options for the subscription
-    this->options.callback_group = callback_group;
-
     // Crate subscription
-    this->sub = this->node_->template create_subscription<MsgT>(
-        this->topic_name, this->qos,
-        std::bind(&MonitorState::callback, this, _1), this->options);
+    this->sub = ROSCommunicationsCache::get_or_create_subscription<MsgT>(
+        this->node_, this->topic_name,
+        std::bind(&MonitorState::callback, this, _1), this->qos,
+        callback_group);
   }
 
   /**
@@ -215,7 +214,6 @@ private:
 
   std::string topic_name; /**< Name of the topic to monitor. */
   rclcpp::QoS qos;        /**< Quality of Service settings for the topic. */
-  rclcpp::SubscriptionOptions options; /**< Options for the subscription. */
 
   std::vector<std::shared_ptr<MsgT>>
       msg_list; /**< List to store queued messages. */

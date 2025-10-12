@@ -29,6 +29,7 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_communications_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
 using namespace std::placeholders;
@@ -171,20 +172,9 @@ public:
     }
 
     // Create a service client (compatible with different rclcpp versions)
-#if __has_include("rclcpp/version.h")
-#include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(28, 1, 9)
-    auto qos = rclcpp::QoS(
-        rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default));
-#else
-    auto qos = rmw_qos_profile_services_default;
-#endif
-#else
-    auto qos = rmw_qos_profile_services_default;
-#endif
-
-    this->service_client = this->node_->template create_client<ServiceT>(
-        srv_name, qos, callback_group);
+    this->service_client =
+        ROSCommunicationsCache::get_or_create_service_client<ServiceT>(
+            this->node_, srv_name, callback_group);
 
     // Set the request and response handlers
     this->create_request_handler = create_request_handler;

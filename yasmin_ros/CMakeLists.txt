@@ -20,6 +20,7 @@ include_directories(include)
 set(SOURCES
   src/yasmin_ros/yasmin_node.cpp
   src/yasmin_ros/ros_logs.cpp
+  src/yasmin_ros/ros_communications_cache.cpp
   src/yasmin_ros/action_state.cpp
   src/yasmin_ros/service_state.cpp
   src/yasmin_ros/monitor_state.cpp

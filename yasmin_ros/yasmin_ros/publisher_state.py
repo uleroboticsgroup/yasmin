@@ -25,6 +25,7 @@ from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED
+from yasmin_ros.ros_communications_cache import ROSCommunicationsCache
 
 
 class PublisherState(State):
@@ -75,7 +76,8 @@ class PublisherState(State):
         self._topic_name: str = topic_name
 
         ## Publisher to the ROS 2 topic.
-        self._pub: Publisher = self._node.create_publisher(
+        self._pub: Publisher = ROSCommunicationsCache.get_or_create_publisher(
+            self._node,
             msg_type,
             topic_name,
             qos,

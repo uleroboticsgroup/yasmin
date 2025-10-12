@@ -26,6 +26,7 @@ from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT
+from yasmin_ros.ros_communications_cache import ROSCommunicationsCache
 
 
 class ServiceState(State):
@@ -109,8 +110,13 @@ class ServiceState(State):
         self._srv_name: str = srv_name
 
         ## Shared pointer to the service client.
-        self._service_client: Client = self._node.create_client(
-            srv_type, srv_name, callback_group=callback_group
+        self._service_client: Client = (
+            ROSCommunicationsCache.get_or_create_service_client(
+                self._node,
+                srv_type,
+                srv_name,
+                callback_group=callback_group,
+            )
         )
 
         ## The response received from the service.
