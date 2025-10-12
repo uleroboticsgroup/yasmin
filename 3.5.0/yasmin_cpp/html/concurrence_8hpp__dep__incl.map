@@ -1,0 +1,27 @@
+<map id="yasmin/include/yasmin/concurrence.hpp" name="yasmin/include/yasmin/concurrence.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="812,5,964,46"/>
+<area shape="rect" id="Node000002" href="$concurrence_8cpp.html" title=" " alt="" coords="564,109,793,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="831,55,707,111,705,106,829,50"/>
+<area shape="rect" id="Node000003" href="$concurrence__demo_8cpp.html" title=" " alt="" coords="5,198,211,238"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="873,61,840,114,822,138,807,152,754,172,685,185,606,192,520,195,352,195,280,196,223,200,211,202,211,197,222,195,280,191,352,190,520,190,606,187,685,180,753,167,804,147,819,134,835,111,868,58"/>
+<area shape="rect" id="Node000004" href="$yasmin__viewer__pub_8hpp.html" title=" " alt="" coords="868,94,1025,150"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="910,58,932,92,927,95,906,61"/>
+<area shape="rect" id="Node000012" href="$yasmin__viewer__pub_8cpp.html" title=" " alt="" coords="1658,198,1867,238"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="980,44,1673,194,1671,200,979,49"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="854,152,850,152,755,167,674,175,537,182,399,185,223,200,211,202,211,197,222,195,399,180,537,176,674,170,754,161,849,147,853,146"/>
+<area shape="rect" id="Node000005" href="$action__client__demo_8cpp.html" title=" " alt="" coords="235,198,405,238"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="854,151,850,152,729,171,633,179,538,185,416,200,406,202,405,197,416,195,537,180,633,174,728,166,849,147,853,146"/>
+<area shape="rect" id="Node000006" href="$monitor__demo_8cpp.html" title=" " alt="" coords="429,198,606,238"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="854,151,850,152,607,202,606,197,849,147,853,146"/>
+<area shape="rect" id="Node000007" href="$parameters__demo_8cpp.html" title=" " alt="" coords="630,198,829,238"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="871,159,776,200,774,195,869,154"/>
+<area shape="rect" id="Node000008" href="$publisher__demo_8cpp.html" title=" " alt="" coords="854,198,1040,238"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="949,165,949,197,944,197,944,165"/>
+<area shape="rect" id="Node000009" href="$remap__demo_8cpp.html" title=" " alt="" coords="1064,198,1234,238"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="1020,154,1108,195,1106,200,1018,159"/>
+<area shape="rect" id="Node000010" href="$service__client__demo_8cpp.html" title=" " alt="" coords="1258,198,1435,238"/>
+<area shape="poly" id="edge10_Node000004_Node000010" title=" " alt="" coords="1041,142,1263,194,1262,200,1039,148"/>
+<area shape="rect" id="Node000011" href="$yasmin__demo_8cpp.html" title=" " alt="" coords="1459,198,1634,238"/>
+<area shape="poly" id="edge11_Node000004_Node000011" title=" " alt="" coords="1041,133,1447,195,1459,197,1458,202,1446,200,1040,139"/>
+<area shape="poly" id="edge12_Node000004_Node000012" title=" " alt="" coords="1040,129,1313,156,1647,195,1659,197,1658,202,1646,200,1312,161,1040,134"/>
+</map>
