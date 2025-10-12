@@ -158,8 +158,9 @@ public:
     while (this->msg_list.empty()) {
       std::unique_lock<std::mutex> lock(this->msg_mutex);
 
+      std::cv_status wait_status = std::cv_status::no_timeout;
       if (this->timeout > 0) {
-        auto status =
+        wait_status =
             this->msg_cond.wait_for(lock, std::chrono::seconds(this->timeout));
       } else {
         this->msg_cond.wait(lock);
@@ -169,7 +170,7 @@ public:
         return basic_outcomes::CANCEL;
       }
 
-      while (this->timeout > 0 && status == std::cv_status::timeout) {
+      while (this->timeout > 0 && wait_status == std::cv_status::timeout) {
         YASMIN_LOG_WARN("Timeout reached, topic '%s' is not available",
                         this->topic_name.c_str());
 
@@ -178,6 +179,8 @@ public:
           YASMIN_LOG_WARN("Retrying to wait for topic '%s' (%d/%d)",
                           this->topic_name.c_str(), retry_count,
                           this->maximum_retry);
+          wait_status = this->msg_cond.wait_for(
+              lock, std::chrono::seconds(this->timeout));
         } else {
           return basic_outcomes::TIMEOUT;
         }
