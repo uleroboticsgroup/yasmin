@@ -49,7 +49,8 @@ class ActionState(State):
         _create_goal_handler (Callable[[Blackboard], Any]): Function that creates the goal to send.
         _result_handler (Callable[[Blackboard, Any], str]): Function to handle the result from the action server.
         _feedback_handler (Callable[[Blackboard, Any], None]): Function to handle feedback from the action server.
-        _timeout (float): Timeout duration for waiting for the action server.
+        _wait_timeout (float): Time to wait for the action to become available.
+        _response_timeout (float): Timeout duration for waiting for the action response.
         _maximum_retry (int): Maximum number of retries for monitoring.
     """
 
@@ -63,7 +64,8 @@ class ActionState(State):
         feedback_handler: Callable = None,
         callback_group: CallbackGroup = None,
         node: Node = None,
-        timeout: float = None,
+        wait_timeout: float = None,
+        response_timeout: float = None,
         maximum_retry: int = 3,
     ) -> None:
         """
@@ -80,7 +82,8 @@ class ActionState(State):
             feedback_handler (Callable[[Blackboard, Any], None], optional): A function to process feedback from the action.
             callback_group (CallbackGroup, optional): The callback group for the action client.
             node (Node, optional): The ROS 2 node to use. If None, uses the default YasminNode.
-            timeout (float, optional): Timeout duration for waiting for the action server.
+            wait_timeout (float, optional): Time to wait for the action to become available. Default is None (wait indefinitely).
+            response_timeout (float, optional): Timeout duration for waiting for the action response. Default is None (wait indefinitely).
             maximum_retry (int, optional): Maximum number of retries for monitoring. Default is 3.
 
         Raises:
@@ -105,8 +108,10 @@ class ActionState(State):
         ## Function to handle feedback from the action server.
         self._feedback_handler: Callable[[Blackboard, Any], None] = feedback_handler
 
+        ## Wait timeout duration for the action call.
+        self._wait_timeout: float = wait_timeout
         ## Timeout duration for waiting for the action server.
-        self._timeout: float = timeout
+        self._response_timeout: float = response_timeout
 
         ## Maximum number of retries for monitoring.
         self._maximum_retry: int = maximum_retry
@@ -114,7 +119,7 @@ class ActionState(State):
 
         _outcomes = [SUCCEED, ABORT, CANCEL]
 
-        if self._timeout:
+        if self._wait_timeout:
             _outcomes.append(TIMEOUT)
 
         if outcomes:
@@ -174,14 +179,14 @@ class ActionState(State):
         goal = self._create_goal_handler(blackboard)
 
         yasmin.YASMIN_LOG_INFO(f"Waiting for action '{self._action_name}'")
-        act_available = self._action_client.wait_for_server(self._timeout)
+        act_available = self._action_client.wait_for_server(self._wait_timeout)
 
         if not act_available:
             yasmin.YASMIN_LOG_WARN(
                 f"Timeout reached, action '{self._action_name}' is not available"
             )
             ## Auto retry process
-            if self._timeout and self._maximum_retry > 0:
+            if self._response_timeout and self._maximum_retry > 0:
                 self._retry_count += 1
                 if self._retry_count < self._maximum_retry:
                     yasmin.YASMIN_LOG_WARN(

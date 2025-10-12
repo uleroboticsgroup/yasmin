@@ -41,7 +41,8 @@ class ServiceState(State):
         _service_client (Client): The client used to call the service.
         _create_request_handler (Callable[[Blackboard], Any]): A function that creates the service request.
         _response_handler (Callable[[Blackboard, Any], str]): A function that processes the service response.
-        _timeout (float): Timeout duration for the service call.
+        _wait_timeout (float): Timeout duration for the service call.
+        _response_timeout (float): Timeout duration for waiting for the service response.
         _maximum_retry (int): Maximum number of retries for monitoring.
     """
 
@@ -54,7 +55,8 @@ class ServiceState(State):
         response_handler: Callable = None,
         callback_group: CallbackGroup = None,
         node: Node = None,
-        timeout: float = None,
+        wait_timeout: float = None,
+        response_timeout: float = None,
         maximum_retry: int = 3,
     ) -> None:
         """
@@ -68,7 +70,8 @@ class ServiceState(State):
             response_handler (Callable[[Blackboard, Any], str], optional): A handler to process the service response.
             callback_group (CallbackGroup, optional): The callback group for the client.
             node (Node, optional): A ROS node instance; if None, a default instance is used.
-            timeout (float, optional): Timeout duration for waiting on the service.
+            wait_timeout (float, optional): Time to wait for the service to become available. Default is None (wait indefinitely).
+            response_timeout (float, optional): Timeout duration for waiting for the service response. Default is None (wait indefinitely).
             maximum_retry (int, optional): Maximum number of retries for monitoring. Default is 3.
 
         Raises:
@@ -80,12 +83,14 @@ class ServiceState(State):
         ## A function that processes the service response.
         self._response_handler: Callable[[Blackboard, Any], str] = response_handler
 
+        ## Wait timeout duration for the service call.
+        self._wait_timeout: float = wait_timeout
         ## Timeout duration for the service call.
-        self._timeout: float = timeout
+        self._response_timeout: float = response_timeout
 
         _outcomes = [SUCCEED, ABORT]
 
-        if self._timeout:
+        if self._wait_timeout:
             _outcomes.append(TIMEOUT)
 
         if outcomes:
@@ -135,7 +140,9 @@ class ServiceState(State):
         request = self._create_request_handler(blackboard)
 
         yasmin.YASMIN_LOG_INFO(f"Waiting for service '{self._srv_name}'")
-        srv_available = self._service_client.wait_for_service(timeout_sec=self._timeout)
+        srv_available = self._service_client.wait_for_service(
+            timeout_sec=self._wait_timeout
+        )
 
         if not srv_available:
             yasmin.YASMIN_LOG_WARN(
@@ -157,7 +164,7 @@ class ServiceState(State):
             start = time.time()
 
             while not response.done() and time.time() - start < (
-                self._timeout or float("inf")
+                self._response_timeout or float("inf")
             ):
                 if self._is_canceled():
                     yasmin.YASMIN_LOG_INFO(
