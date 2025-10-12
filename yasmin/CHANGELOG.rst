@@ -3,6 +3,22 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.5.0 (2025-10-12)
+------------------
+* fixing Python comments
+* adding support for concurrence states in the viewer
+* Concurrence: replacing State set for a map of str to State
+* fixing yasmin::State::cancel_state() order
+* fixing cancel_state order
+* Fix StateMachines cancels, waiting for states (`#65 <https://github.com/uleroboticsgroup/yasmin/issues/65>`_)
+  Co-authored-by: Ferry Schoenmakers <ferry.schoenmakers@nobleo.nl>
+* Fix re-entering concurrent states after a cancel by using the () operator instead of execute() function (`#64 <https://github.com/uleroboticsgroup/yasmin/issues/64>`_)
+  * Fix re-entering concurrent states after a cancel by using the () operator instead of execute() function
+  * Cleanup old, unused flags to avoid confusion
+  ---------
+  Co-authored-by: Ferry Schoenmakers <ferry.schoenmakers@nobleo.nl>
+* Contributors: Ferry Schoenmakers, Miguel Ángel González Santamarta
+
 3.4.0 (2025-08-25)
 ------------------
 * fixing python remapping

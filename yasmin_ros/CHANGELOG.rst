@@ -3,6 +3,58 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.5.0 (2025-10-12)
+------------------
+* ros communications cache created
+* fixing timeout in C++ MonitorState
+* fixing C++ demos
+* fixing c++ timeout waits
+* fixing timeout in ros2 states
+* fixing Python comments
+* fixing timeout params names
+* fixing format
+* Add More basic outcome: retry, add publisher into states, and set waiting-response timeout in service state. (`#67 <https://github.com/uleroboticsgroup/yasmin/issues/67>`_)
+  * Add SkippableState for python-lib
+  * Add basic outcome for Skippable State
+  * Init Skippable State
+  * State service server
+  * add publisher to service state node
+  * add publisher to service state node
+  * add publisher to monitoring state
+  * edit bug
+  * fix upper case
+  * add _srv_callback template
+  * fix skipable state multi srv type
+  * fix bug
+  * fix bug wrong line
+  * edit service and skippable state
+  * add cancel features in yasmin-ros
+  * add publisher to skip state
+  * add publisher to all states
+  * edit monitoring node
+  * merege upstream/main
+  * remove test installation + yasmin dep in yasmin-ros.xml
+  * edit bug in skippable state
+  * add abort in monitor_state
+  * debug timeout in service server
+  * add abort handler
+  * edit service server
+  * edit server state
+  * comment cpp builder
+  * update yasmin ros cpp lib
+  * solve bug
+  * (feat): add retries and action timeout in yasmin ros
+  * update c++ code style, remove publisher in monitor state (python), and apply retry mechanism to python version
+  * fix bug in ServiceState timeout, and add retry mechanism in pytest
+  ---------
+  Co-authored-by: PannapatC <PannapatC@arv.co.th>
+  Co-authored-by: Pakapak <PakapakS@arv.co.th>
+  Co-authored-by: Aminballoon <44831071+aminballoon@users.noreply.github.com>
+  Co-authored-by: Miguel Ángel González Santamarta <mgons@unileon.es>
+* fixing yasmin::State::cancel_state() order
+* fixing cancel_state order
+* Contributors: Miguel Ángel González Santamarta, Pakapak Silpapinun
+
 3.4.0 (2025-08-25)
 ------------------
 * fixing int64_t in get paramters state for foxy/galactic

@@ -3,6 +3,13 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.5.0 (2025-10-12)
+------------------
+* fixing C++ demos
+* fixing Python comments
+* Concurrence: replacing State set for a map of str to State
+* Contributors: Miguel Ángel González Santamarta
+
 3.4.0 (2025-08-25)
 ------------------
 * fixing python remapping

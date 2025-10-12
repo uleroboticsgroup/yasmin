@@ -3,6 +3,11 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.5.0 (2025-10-12)
+------------------
+* adding support for concurrence states in the viewer
+* Contributors: Miguel Ángel González Santamarta
+
 3.4.0 (2025-08-25)
 ------------------
 
