@@ -218,13 +218,12 @@ public:
               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
               int wait_timeout = -1, int response_timeout = -1,
               int maximum_retry = 3)
-      : State({}), action_name(action_name),
-        create_goal_handler(create_goal_handler),
+      : State({basic_outcomes::SUCCEED, basic_outcomes::ABORT,
+               basic_outcomes::CANCEL}),
+        action_name(action_name), create_goal_handler(create_goal_handler),
         result_handler(result_handler), feedback_handler(feedback_handler),
         wait_timeout(wait_timeout), response_timeout(response_timeout),
         maximum_retry(maximum_retry) {
-    this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT,
-                      basic_outcomes::CANCEL};
 
     if (this->wait_timeout > 0 || this->response_timeout > 0) {
       this->outcomes.insert(basic_outcomes::TIMEOUT);

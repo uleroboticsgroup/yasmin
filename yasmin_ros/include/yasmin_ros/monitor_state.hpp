@@ -113,16 +113,14 @@ public:
                rclcpp::QoS qos = 10,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
-      : State({}), topic_name(topic_name), monitor_handler(monitor_handler),
-        qos(qos), msg_queue(msg_queue), timeout(timeout),
-        maximum_retry(maximum_retry) {
+      : State({basic_outcomes::CANCEL}), topic_name(topic_name),
+        monitor_handler(monitor_handler), qos(qos), msg_queue(msg_queue),
+        timeout(timeout), maximum_retry(maximum_retry) {
+
     // set outcomes
     if (timeout > 0) {
       this->outcomes = {basic_outcomes::TIMEOUT};
-    } else {
-      this->outcomes = {};
     }
-    this->outcomes.insert(basic_outcomes::CANCEL);
 
     if (outcomes.size() > 0) {
       for (std::string outcome : outcomes) {

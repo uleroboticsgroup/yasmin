@@ -24,7 +24,12 @@
 
 using namespace yasmin;
 
-State::State(std::set<std::string> outcomes) : outcomes(outcomes) {}
+State::State(std::set<std::string> outcomes) : outcomes(outcomes) {
+  if (outcomes.empty()) {
+    throw std::invalid_argument(
+        "A state must have at least one possible outcome.");
+  }
+}
 
 StateStatus State::get_status() const { return this->status.load(); }
 

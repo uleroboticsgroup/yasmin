@@ -72,11 +72,9 @@ public:
                  CreateMessageHandler create_message_handler,
                  rclcpp::QoS qos = 10,
                  rclcpp::CallbackGroup::SharedPtr callback_group = nullptr)
-      : State({}), topic_name(topic_name),
+      : State({basic_outcomes::SUCCEED}), topic_name(topic_name),
         create_message_handler(create_message_handler) {
-
-    // set outcomes
-    this->outcomes = {basic_outcomes::SUCCEED};
+    ;
 
     if (node == nullptr) {
       this->node_ = YasminNode::get_instance();

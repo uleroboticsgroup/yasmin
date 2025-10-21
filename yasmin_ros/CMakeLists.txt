@@ -15,6 +15,9 @@ find_package(yasmin REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(example_interfaces REQUIRED)
+  find_package(std_msgs REQUIRED)
 endif()
 
 # C++
@@ -71,8 +74,19 @@ ament_python_install_package(${PROJECT_NAME})
 
 # Tests
 if(BUILD_TESTING)
-  # Add pytest tests with coverage
+  # Python tests
   ament_add_pytest_test(test_yasmin_ros test/test_yasmin_ros.py)
+
+  # C++ tests
+  ament_add_gtest(test_yasmin_ros_cpp test/test_yasmin_ros.cpp)
+  target_link_libraries(test_yasmin_ros_cpp ${PROJECT_NAME})
+  ament_target_dependencies(test_yasmin_ros_cpp
+    rclcpp
+    rclcpp_action
+    example_interfaces
+    std_msgs
+    yasmin
+  )
 endif()
 
 ament_package()

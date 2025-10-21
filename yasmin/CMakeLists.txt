@@ -12,6 +12,7 @@ find_package(ament_cmake_python REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
 endif()
 
 # C++
@@ -55,7 +56,7 @@ ament_python_install_package(${PROJECT_NAME})
 
 # Tests
 if(BUILD_TESTING)
-  # Add pytest tests with coverage
+  # Python tests
   set(_pytest_tests
     test_blackboard
     test_cb_state
@@ -66,7 +67,10 @@ if(BUILD_TESTING)
   
   foreach(_test_name ${_pytest_tests})
     ament_add_pytest_test(${_test_name} test/${_test_name}.py)
+    ament_add_gtest(${_test_name}_cpp test/${_test_name}.cpp)
+    target_link_libraries(${_test_name}_cpp ${PROJECT_NAME})
   endforeach()
+
 endif()
 
 ament_package()

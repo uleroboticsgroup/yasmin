@@ -369,7 +369,7 @@ class TestYasminRos(unittest.TestCase):
         state3 = MonitorState(String, "test2", [SUCCEED], monitor_handler)
         self.assertEqual(2, ROSCommunicationsCache.get_subscribers_count())
 
-    def test_monitor_retry_response_timeout(self):
+    def test_monitor_retry_timeout(self):
         def monitor_handler(blackboard, msg):
             return SUCCEED
 
@@ -394,6 +394,16 @@ class TestYasminRos(unittest.TestCase):
             msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
             f"Captured messages: {[r.getMessage() for r in captured.records]}",
         )
+
+    def test_publisher(self):
+
+        def create_msg_handler(blackboard):
+            msg = String()
+            msg.data = "data"
+            return msg
+
+        state = PublisherState(String, "test", create_msg_handler)
+        self.assertEqual(SUCCEED, state())
 
     def test_publisher_cache(self):
         ROSCommunicationsCache.clear_all()

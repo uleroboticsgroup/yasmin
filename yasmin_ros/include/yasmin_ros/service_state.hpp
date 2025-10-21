@@ -64,6 +64,25 @@ public:
    *
    * @param srv_name The name of the service to call.
    * @param create_request_handler Function to create a service request.
+   * @param wait_timeout Maximum time to wait for the service to become
+   * available, in seconds. Default is -1 (wait indefinitely).
+   * @param response_timeout Maximum time to wait for the service response, in
+   * seconds. Default is -1 (wait indefinitely).
+   * @param maximum_retry (Optional) Maximum retries of the service if it
+   * returns timeout. Default is 3.
+   */
+  ServiceState(std::string srv_name,
+               CreateRequestHandler create_request_handler,
+               int wait_timeout = -1, int response_timeout = -1,
+               int maximum_retry = 3)
+      : ServiceState(nullptr, srv_name, create_request_handler,
+                     std::set<std::string>(), nullptr, nullptr, wait_timeout,
+                     response_timeout, maximum_retry) {}
+  /**
+   * @brief Construct a ServiceState with a request handler and outcomes.
+   *
+   * @param srv_name The name of the service to call.
+   * @param create_request_handler Function to create a service request.
    * @param outcomes A set of possible outcomes for this state.
    * @param wait_timeout Maximum time to wait for the service to become
    * available, in seconds. Default is -1 (wait indefinitely).
@@ -76,8 +95,9 @@ public:
                CreateRequestHandler create_request_handler,
                std::set<std::string> outcomes, int wait_timeout = -1,
                int response_timeout = -1, int maximum_retry = 3)
-      : ServiceState(srv_name, create_request_handler, outcomes, nullptr,
-                     nullptr, wait_timeout, response_timeout, maximum_retry) {}
+      : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
+                     nullptr, nullptr, wait_timeout, response_timeout,
+                     maximum_retry) {}
 
   /**
    * @brief Construct a ServiceState with a request handler and outcomes.
@@ -99,8 +119,8 @@ public:
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int wait_timeout = -1, int response_timeout = -1,
                int maximum_retry = 3)
-      : ServiceState(srv_name, create_request_handler, outcomes, nullptr,
-                     callback_group, wait_timeout, response_timeout,
+      : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
+                     nullptr, callback_group, wait_timeout, response_timeout,
                      maximum_retry) {}
 
   /**
@@ -148,13 +168,12 @@ public:
   ServiceState(const rclcpp::Node::SharedPtr &node, std::string srv_name,
                CreateRequestHandler create_request_handler,
                std::set<std::string> outcomes, ResponseHandler response_handler,
-               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
+               rclcpp::CallbackGroup::SharedPtr callback_group,
                int wait_timeout = -1, int response_timeout = -1,
                int maximum_retry = 3)
-      : State({}), srv_name(srv_name), wait_timeout(wait_timeout),
+      : State({basic_outcomes::SUCCEED, basic_outcomes::ABORT}),
+        srv_name(srv_name), wait_timeout(wait_timeout),
         response_timeout(response_timeout), maximum_retry(maximum_retry) {
-
-    this->outcomes = {basic_outcomes::SUCCEED, basic_outcomes::ABORT};
 
     if (this->wait_timeout > 0 || this->response_timeout > 0) {
       this->outcomes.insert(basic_outcomes::TIMEOUT);

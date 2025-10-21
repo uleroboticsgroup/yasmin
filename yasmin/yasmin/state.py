@@ -69,7 +69,7 @@ class State(ABC):
             self._outcomes.update(outcomes)
             self._outcomes: Set = sorted(self._outcomes)
         else:
-            raise ValueError("There must be at least one outcome")
+            raise ValueError("A state must have at least one possible outcome.")
 
     def get_status(self) -> StateStatus:
         """
