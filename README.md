@@ -66,12 +66,17 @@ cd ~/ros2_ws
 colcon build
 ```
 
-#### Note for Deprecated or Rolling ROS 2 Distros
-
-If you are using a deprecated ROS 2 distribution (e.g., Foxy or Galactic) or the Rolling distribution, install the example interfaces:
+Then, you can run the tests as follow:
 
 ```shell
-sudo apt install -y ros-$ROS_DISTRO-example-interfaces
+colcon test --packages-select yasmin yasmin_ros
+colcon test-result --verbose
+```
+
+To see the coverage report you have to run the tests with pytest directly:
+
+```shell
+python3 -m pytest ~/ros2_ws/src/yasmin/yasmin/test ~/ros2_ws/src/yasmin/yasmin_ros/test --cov=yasmin --cov=yasmin_ros --cov-report=html --cov-report=term-missing
 ```
 
 ## Docker

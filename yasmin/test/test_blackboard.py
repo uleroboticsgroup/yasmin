@@ -39,3 +39,7 @@ class TestBlackboard(unittest.TestCase):
     def test_len(self):
         self.blackboard["foo"] = "foo"
         self.assertEqual(1, len(self.blackboard))
+
+
+if __name__ == "__main__":
+    unittest.main()

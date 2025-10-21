@@ -13,6 +13,10 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(yasmin REQUIRED)
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
+endif()
+
 # C++
 include_directories(src)
 include_directories(include)
@@ -66,14 +70,9 @@ ament_export_dependencies(${DEPENDENCIES_PACKAGE})
 ament_python_install_package(${PROJECT_NAME})
 
 # Tests
-install(
-  DIRECTORY tests/python/
-  DESTINATION pytests/${PROJECT_NAME}
-)
-
-install(
-  PROGRAMS tests/run_pytests.sh
-  DESTINATION lib/${PROJECT_NAME}
-)
+if(BUILD_TESTING)
+  # Add pytest tests with coverage
+  ament_add_pytest_test(test_yasmin_ros test/test_yasmin_ros.py)
+endif()
 
 ament_package()

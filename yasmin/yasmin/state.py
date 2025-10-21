@@ -98,6 +98,7 @@ class State(ABC):
         Returns:
             bool: True if the state is idle, otherwise False.
         """
+        return self.get_status() == StateStatus.IDLE
 
     def is_running(self) -> bool:
         """
@@ -106,6 +107,7 @@ class State(ABC):
         Returns:
             bool: True if the state is running, otherwise False.
         """
+        return self.get_status() == StateStatus.RUNNING
 
     def is_canceled(self) -> bool:
         """
@@ -114,6 +116,7 @@ class State(ABC):
         Returns:
             bool: True if the state is canceled, otherwise False.
         """
+        return self.get_status() == StateStatus.CANCELED
 
     def is_completed(self) -> bool:
         """
@@ -122,6 +125,7 @@ class State(ABC):
         Returns:
             bool: True if the state is completed, otherwise False.
         """
+        return self.get_status() == StateStatus.COMPLETED
 
     def __call__(self, blackboard: Blackboard = None) -> str:
         """

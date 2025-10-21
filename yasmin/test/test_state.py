@@ -55,3 +55,7 @@ class TestState(unittest.TestCase):
 
     def test_init_exception(self):
         self.assertRaises(Exception, BarState)
+
+
+if __name__ == "__main__":
+    unittest.main()

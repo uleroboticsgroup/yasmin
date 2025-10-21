@@ -96,3 +96,7 @@ class TestState(unittest.TestCase):
 
     def test_key_exception(self):
         self.assertRaises(Exception, self.key_exception)
+
+
+if __name__ == "__main__":
+    unittest.main()

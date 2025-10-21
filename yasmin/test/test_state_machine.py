@@ -264,3 +264,7 @@ class TestStateMachine(unittest.TestCase):
             str(context.exception),
             "\"State machine outcome 'BAR' not registered as outcome neither state\"",
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

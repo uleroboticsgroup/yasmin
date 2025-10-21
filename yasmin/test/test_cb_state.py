@@ -29,3 +29,7 @@ class TestCbState(unittest.TestCase):
 
     def test_cb_state_call(self):
         self.assertEqual("outcome1", self.state())
+
+
+if __name__ == "__main__":
+    unittest.main()

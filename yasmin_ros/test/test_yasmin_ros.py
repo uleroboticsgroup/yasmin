@@ -412,3 +412,7 @@ class TestYasminRos(unittest.TestCase):
 
         state3 = PublisherState(String, "test2", create_msg_handler)
         self.assertEqual(2, ROSCommunicationsCache.get_publishers_count())
+
+
+if __name__ == "__main__":
+    unittest.main()

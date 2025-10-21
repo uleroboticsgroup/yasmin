@@ -1,3 +1,5 @@
 .vscode
 log
 __pycache__
+.coverage
+htmlcov
