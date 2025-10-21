@@ -67,10 +67,14 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
                   key) == state->get_outcomes().end()) {
       std::ostringstream oss;
       oss << "State '" << name << "' references unregistered outcomes '" << key
-          << "', available outcomes are ";
+          << "', available outcomes are [";
       for (const auto &outcome : state->get_outcomes()) {
-        oss << outcome << " ";
+        oss << "'" << outcome << "'";
+        if (outcome != *state->get_outcomes().rbegin()) {
+          oss << ", ";
+        }
       }
+      oss << "]";
       throw std::invalid_argument(oss.str());
     }
   }
@@ -284,7 +288,7 @@ void StateMachine::validate(bool strict_mode) {
     if (this->states.find(o) == this->states.end() &&
         sm_outcomes.find(o) == sm_outcomes.end()) {
       throw std::runtime_error("State machine outcome '" + o +
-                               "' not registered as outcome or state");
+                               "' not registered as outcome neither state");
     }
   }
 
@@ -369,7 +373,7 @@ std::string StateMachine::execute() {
   std::shared_ptr<blackboard::Blackboard> blackboard =
       std::make_shared<blackboard::Blackboard>();
 
-  return this->operator()(blackboard);
+  return this->execute(blackboard);
 }
 
 std::string StateMachine::operator()() {
@@ -401,7 +405,7 @@ void StateMachine::cancel_state() {
 std::string StateMachine::to_string() {
 
   std::ostringstream oss;
-  oss << "StateMachine [";
+  oss << "State Machine [";
 
   const auto &states = this->get_states();
 

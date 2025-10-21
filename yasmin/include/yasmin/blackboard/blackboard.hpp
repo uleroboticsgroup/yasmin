@@ -79,8 +79,8 @@ public:
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
     if (!this->contains(key)) {
-      throw std::runtime_error("Element " + key +
-                               " does not exist in the blackboard");
+      throw std::runtime_error("Element '" + key +
+                               "' does not exist in the blackboard");
     }
 
     BlackboardValue<T> *b_value =
