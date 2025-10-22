@@ -8,7 +8,9 @@ on:
 
 jobs:
   kilted_build_and_test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:24.04
     steps:
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@v0.7

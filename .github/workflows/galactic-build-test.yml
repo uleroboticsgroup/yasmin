@@ -8,7 +8,9 @@ on:
 
 jobs:
   galactic_build_and_test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
     steps:
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@v0.7
