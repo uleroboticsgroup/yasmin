@@ -100,56 +100,76 @@ TEST_F(TestStateMachine, TestStateCall) {
 }
 
 TEST_F(TestStateMachine, TestSetStartStateEmpty) {
-  EXPECT_THROW({ sm->set_start_state(""); }, std::invalid_argument);
+  try {
+    sm->set_start_state("");
+    FAIL() << "Expected std::invalid_argument";
+  } catch (const std::invalid_argument &e) {
+    EXPECT_STREQ("Initial state cannot be empty", e.what());
+  }
 }
 
 TEST_F(TestStateMachine, TestSetStartStateWrongState) {
-  EXPECT_THROW({ sm->set_start_state("FOO1"); }, std::invalid_argument);
+  try {
+    sm->set_start_state("FOO1");
+    FAIL() << "Expected std::invalid_argument";
+  } catch (const std::invalid_argument &e) {
+    EXPECT_STREQ("Initial state 'FOO1' is not in the state machine", e.what());
+  }
 }
 
 TEST_F(TestStateMachine, TestAddRepeatedState) {
-  EXPECT_THROW(
-      {
-        sm->add_state("FOO", std::make_shared<FooState>(),
-                      std::map<std::string, std::string>{{"outcome1", "BAR"}});
-      },
-      std::logic_error);
+  try {
+    sm->add_state("FOO", std::make_shared<FooState>(),
+                  std::map<std::string, std::string>{{"outcome1", "BAR"}});
+    FAIL() << "Expected std::logic_error";
+  } catch (const std::logic_error &e) {
+    EXPECT_STREQ("State 'FOO' already registered in the state machine",
+                 e.what());
+  }
 }
 
 TEST_F(TestStateMachine, TestAddOutcomeState) {
-  EXPECT_THROW(
-      {
-        sm->add_state("outcome4", std::make_shared<FooState>(),
-                      std::map<std::string, std::string>{{"outcome1", "BAR"}});
-      },
-      std::logic_error);
+  try {
+    sm->add_state("outcome4", std::make_shared<FooState>(),
+                  std::map<std::string, std::string>{{"outcome1", "BAR"}});
+    FAIL() << "Expected std::logic_error";
+  } catch (const std::logic_error &e) {
+    EXPECT_STREQ("State name 'outcome4' is already registered as an outcome",
+                 e.what());
+  }
 }
 
 TEST_F(TestStateMachine, TestAddStateWithWrongOutcome) {
-  EXPECT_THROW(
-      {
-        sm->add_state("FOO1", std::make_shared<FooState>(),
-                      std::map<std::string, std::string>{{"outcome9", "BAR"}});
-      },
-      std::invalid_argument);
+  try {
+    sm->add_state("FOO1", std::make_shared<FooState>(),
+                  std::map<std::string, std::string>{{"outcome9", "BAR"}});
+    FAIL() << "Expected std::invalid_argument";
+  } catch (const std::invalid_argument &e) {
+    std::string error_msg = e.what();
+    EXPECT_TRUE(error_msg.find("State 'FOO1' references unregistered outcomes "
+                               "'outcome9'") != std::string::npos);
+    EXPECT_TRUE(error_msg.find("available outcomes are") != std::string::npos);
+  }
 }
 
 TEST_F(TestStateMachine, TestAddWrongSourceTransition) {
-  EXPECT_THROW(
-      {
-        sm->add_state("FOO1", std::make_shared<FooState>(),
-                      std::map<std::string, std::string>{{"", "BAR"}});
-      },
-      std::invalid_argument);
+  try {
+    sm->add_state("FOO1", std::make_shared<FooState>(),
+                  std::map<std::string, std::string>{{"", "BAR"}});
+    FAIL() << "Expected std::invalid_argument";
+  } catch (const std::invalid_argument &e) {
+    EXPECT_STREQ("Transitions with empty source in state 'FOO1'", e.what());
+  }
 }
 
 TEST_F(TestStateMachine, TestAddWrongTargetTransition) {
-  EXPECT_THROW(
-      {
-        sm->add_state("FOO1", std::make_shared<FooState>(),
-                      std::map<std::string, std::string>{{"outcome1", ""}});
-      },
-      std::invalid_argument);
+  try {
+    sm->add_state("FOO1", std::make_shared<FooState>(),
+                  std::map<std::string, std::string>{{"outcome1", ""}});
+    FAIL() << "Expected std::invalid_argument";
+  } catch (const std::invalid_argument &e) {
+    EXPECT_STREQ("Transitions with empty target in state 'FOO1'", e.what());
+  }
 }
 
 TEST_F(TestStateMachine, TestValidateOutcomeFromFsmNotUsed) {
@@ -163,7 +183,13 @@ TEST_F(TestStateMachine, TestValidateOutcomeFromFsmNotUsed) {
                      {"outcome2", "outcome4"},
                  });
 
-  EXPECT_THROW({ sm1->validate(true); }, std::runtime_error);
+  try {
+    sm1->validate(true);
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &e) {
+    EXPECT_STREQ("State 'FSM' outcome 'outcome5' not registered in transitions",
+                 e.what());
+  }
 }
 
 TEST_F(TestStateMachine, TestValidateOutcomeFromStateNotUsed) {
@@ -175,7 +201,13 @@ TEST_F(TestStateMachine, TestValidateOutcomeFromStateNotUsed) {
                      {"outcome1", "outcome4"},
                  });
 
-  EXPECT_THROW({ sm1->validate(true); }, std::runtime_error);
+  try {
+    sm1->validate(true);
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &e) {
+    EXPECT_STREQ("State 'FOO' outcome 'outcome2' not registered in transitions",
+                 e.what());
+  }
 }
 
 TEST_F(TestStateMachine, TestValidateFsmOutcomeNotUsed) {
@@ -192,7 +224,13 @@ TEST_F(TestStateMachine, TestValidateFsmOutcomeNotUsed) {
                      {"outcome2", "outcome4"},
                  });
 
-  EXPECT_THROW({ sm1->validate(true); }, std::runtime_error);
+  try {
+    sm1->validate(true);
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &e) {
+    EXPECT_STREQ("Target outcome 'outcome5' not registered in transitions",
+                 e.what());
+  }
 }
 
 TEST_F(TestStateMachine, TestValidateWrongState) {
@@ -208,7 +246,14 @@ TEST_F(TestStateMachine, TestValidateWrongState) {
                      {"outcome2", "outcome4"},
                  });
 
-  EXPECT_THROW({ sm1->validate(); }, std::runtime_error);
+  try {
+    sm1->validate();
+    FAIL() << "Expected std::runtime_error";
+  } catch (const std::runtime_error &e) {
+    EXPECT_STREQ(
+        "State machine outcome 'BAR' not registered as outcome neither state",
+        e.what());
+  }
 }
 
 int main(int argc, char **argv) {

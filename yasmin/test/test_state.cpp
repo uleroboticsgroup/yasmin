@@ -74,7 +74,12 @@ TEST_F(TestState, TestStr) {
 }
 
 TEST_F(TestState, TestInitException) {
-  EXPECT_THROW(BarState(), std::invalid_argument);
+  try {
+    BarState();
+    FAIL() << "Expected std::invalid_argument";
+  } catch (const std::invalid_argument &e) {
+    EXPECT_STREQ("A state must have at least one possible outcome.", e.what());
+  }
 }
 
 int main(int argc, char **argv) {
