@@ -1,0 +1,36 @@
+name: Foxy Build and Test
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
+
+jobs:
+  foxy_build_and_test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup ROS 2
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: foxy
+      - name: Build and Test
+        uses: ros-tooling/action-ros-ci@v0.3
+        with:
+          package-name: yasmin yasmin_ros
+          target-ros2-distro: foxy
+          colcon-defaults: |
+            {
+              "test": {
+                "parallel-workers" : 1
+              }
+            }
+          colcon-mixin-name: coverage-gcc
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+      - name: Codecov
+        uses: codecov/codecov-action@v1.2.1
+        with:
+          file: ros_ws/lcov/total_coverage.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
