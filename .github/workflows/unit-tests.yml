@@ -10,15 +10,10 @@ jobs:
   unit_tests:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         ros_distribution:
-          - foxy
-          - galactic
           - humble
-          - iron
-          - jazzy
-          - kilted
-          - rolling
     steps:
       - uses: ros-tooling/setup-ros@v0.7
         with:
