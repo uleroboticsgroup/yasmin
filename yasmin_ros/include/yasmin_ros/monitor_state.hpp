@@ -30,7 +30,6 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
-#include "yasmin_ros/ros_communications_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
 using std::placeholders::_1;
@@ -134,11 +133,12 @@ public:
       this->node_ = node;
     }
 
-    // Crate subscription
-    this->sub = ROSCommunicationsCache::get_or_create_subscription<MsgT>(
-        this->node_, this->topic_name,
-        std::bind(&MonitorState::callback, this, _1), this->qos,
-        callback_group);
+    // Create subscription
+    rclcpp::SubscriptionOptions options;
+    options.callback_group = callback_group;
+    this->sub = this->node_->create_subscription<MsgT>(
+        this->topic_name, this->qos,
+        std::bind(&MonitorState::callback, this, _1), options);
   }
 
   /**
@@ -180,6 +180,10 @@ public:
               lock, std::chrono::seconds(this->timeout));
         } else {
           return basic_outcomes::TIMEOUT;
+        }
+
+        if (this->is_canceled()) {
+          return basic_outcomes::CANCEL;
         }
       }
     }

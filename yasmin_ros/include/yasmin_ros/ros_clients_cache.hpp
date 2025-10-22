@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS__ROS_COMMUNICATIONS_CACHE_HPP
-#define YASMIN_ROS__ROS_COMMUNICATIONS_CACHE_HPP
+#ifndef YASMIN_ROS__ROS_CLIENTS_CACHE_HPP
+#define YASMIN_ROS__ROS_CLIENTS_CACHE_HPP
 
 #include <functional>
 #include <map>
@@ -28,27 +28,28 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
+#include "yasmin/logs.hpp"
 
 namespace yasmin_ros {
 
 /**
- * @brief Centralized cache for managing ROS 2 communication objects.
+ * @brief Centralized cache for managing ROS 2 client objects.
  *
  * This class provides a thread-safe cache for storing and reusing ROS 2
- * communication objects such as publishers, subscribers, service clients, and
+ * client objects such as publishers, service clients, and
  * action clients. This helps reduce resource usage and improves performance by
- * avoiding duplicate creation of communication objects.
+ * avoiding duplicate creation of client objects.
  *
- * The cache is organized by communication type and uses unique keys based on:
+ * The cache is organized by client type and uses unique keys based on:
  * - Node name
  * - Message/Service/Action type
  * - Topic/Service/Action name
- * - Callback group name (if applicable)
- * - QoS profile (for publishers and subscribers)
+ * - Callback group name
+ * - QoS profile
  *
  * All methods are thread-safe using internal locking mechanisms.
  */
-class ROSCommunicationsCache {
+class ROSClientsCache {
 public:
   /**
    * @brief Get an existing action client from the cache or create a new one.
@@ -80,17 +81,15 @@ public:
     auto it = action_clients.find(cache_key);
 
     if (it != action_clients.end()) {
-      RCLCPP_INFO(node->get_logger(),
-                  "Reusing existing action client for '%s' of type '%s'",
-                  action_name.c_str(), action_type_name.c_str());
+      YASMIN_LOG_INFO("Reusing existing action client for '%s' of type '%s'",
+                      action_name.c_str(), action_type_name.c_str());
       return std::static_pointer_cast<rclcpp_action::Client<ActionT>>(
           it->second);
     }
 
     // Create new action client if not in cache
-    RCLCPP_INFO(node->get_logger(),
-                "Creating new action client for '%s' of type '%s'",
-                action_name.c_str(), action_type_name.c_str());
+    YASMIN_LOG_INFO("Creating new action client for '%s' of type '%s'",
+                    action_name.c_str(), action_type_name.c_str());
 
     auto action_client = rclcpp_action::create_client<ActionT>(
         node, action_name, callback_group);
@@ -131,16 +130,14 @@ public:
     auto it = service_clients.find(cache_key);
 
     if (it != service_clients.end()) {
-      RCLCPP_INFO(node->get_logger(),
-                  "Reusing existing service client for '%s' of type '%s'",
-                  service_name.c_str(), service_type_name.c_str());
+      YASMIN_LOG_INFO("Reusing existing service client for '%s' of type '%s'",
+                      service_name.c_str(), service_type_name.c_str());
       return std::static_pointer_cast<rclcpp::Client<ServiceT>>(it->second);
     }
 
     // Create new service client if not in cache
-    RCLCPP_INFO(node->get_logger(),
-                "Creating new service client for '%s' of type '%s'",
-                service_name.c_str(), service_type_name.c_str());
+    YASMIN_LOG_INFO("Creating new service client for '%s' of type '%s'",
+                    service_name.c_str(), service_type_name.c_str());
 
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
@@ -193,16 +190,14 @@ public:
     auto it = publishers.find(cache_key);
 
     if (it != publishers.end()) {
-      RCLCPP_INFO(node->get_logger(),
-                  "Reusing existing publisher for topic '%s' of type '%s'",
-                  topic_name.c_str(), msg_type_name.c_str());
+      YASMIN_LOG_INFO("Reusing existing publisher for topic '%s' of type '%s'",
+                      topic_name.c_str(), msg_type_name.c_str());
       return std::static_pointer_cast<rclcpp::Publisher<MsgT>>(it->second);
     }
 
     // Create new publisher if not in cache
-    RCLCPP_INFO(node->get_logger(),
-                "Creating new publisher for topic '%s' of type '%s'",
-                topic_name.c_str(), msg_type_name.c_str());
+    YASMIN_LOG_INFO("Creating new publisher for topic '%s' of type '%s'",
+                    topic_name.c_str(), msg_type_name.c_str());
 
     rclcpp::PublisherOptions options;
     options.callback_group = callback_group;
@@ -214,67 +209,6 @@ public:
     publishers[cache_key] = std::static_pointer_cast<void>(publisher);
 
     return publisher;
-  }
-
-  /**
-   * @brief Get an existing subscription from the cache or create a new one.
-   *
-   * Note: Subscriptions with different callbacks are considered different
-   * and will create separate subscription objects.
-   *
-   * @tparam MsgT The type of the message.
-   * @tparam CallbackT The type of the callback function.
-   * @param node The ROS 2 node to use.
-   * @param topic_name The name of the topic.
-   * @param callback The callback function for incoming messages.
-   * @param qos_profile The QoS profile for the subscription.
-   * @param callback_group The callback group for the subscription (optional).
-   * @return A shared pointer to the cached or newly created subscription.
-   */
-  template <typename MsgT, typename CallbackT>
-  static typename rclcpp::Subscription<MsgT>::SharedPtr
-  get_or_create_subscription(
-      rclcpp::Node::SharedPtr node, const std::string &topic_name,
-      CallbackT &&callback, const rclcpp::QoS &qos_profile = rclcpp::QoS(10),
-      rclcpp::CallbackGroup::SharedPtr callback_group = nullptr) {
-    // Create a unique key (including callback address since different
-    // callbacks need different subscriptions)
-    std::string node_name = node->get_name();
-    std::string msg_type_name = get_type_name<MsgT>();
-    std::string callback_name = get_callback_name(callback);
-    std::string qos_hash = hash_qos_profile(qos_profile);
-    auto cache_key =
-        std::make_tuple(node_name, msg_type_name, topic_name, callback_name,
-                        qos_hash, std::type_index(typeid(MsgT)));
-
-    std::lock_guard<std::recursive_mutex> lock(get_lock());
-
-    // Check if subscription already exists in cache
-    auto &subscribers = get_subscribers();
-    auto it = subscribers.find(cache_key);
-
-    if (it != subscribers.end()) {
-      RCLCPP_INFO(node->get_logger(),
-                  "Reusing existing subscription for topic '%s' of type '%s'",
-                  topic_name.c_str(), msg_type_name.c_str());
-      return std::static_pointer_cast<rclcpp::Subscription<MsgT>>(it->second);
-    }
-
-    // Create new subscription if not in cache
-    RCLCPP_INFO(node->get_logger(),
-                "Creating new subscription for topic '%s' of type '%s'",
-                topic_name.c_str(), msg_type_name.c_str());
-
-    rclcpp::SubscriptionOptions options;
-    options.callback_group = callback_group;
-
-    auto subscription = node->create_subscription<MsgT>(
-        topic_name, qos_profile, std::forward<CallbackT>(callback), options);
-
-    // Store in cache (as void pointer for type erasure)
-    subscribers[cache_key] = std::static_pointer_cast<void>(subscription);
-
-    return subscription;
   }
 
   /**
@@ -293,12 +227,7 @@ public:
   static void clear_publishers();
 
   /**
-   * @brief Clear the subscribers cache.
-   */
-  static void clear_subscribers();
-
-  /**
-   * @brief Clear all communication caches.
+   * @brief Clear all clients caches.
    */
   static void clear_all();
 
@@ -324,13 +253,6 @@ public:
   static size_t get_publishers_count();
 
   /**
-   * @brief Get the number of cached subscribers.
-   *
-   * @return The number of cached subscribers.
-   */
-  static size_t get_subscribers_count();
-
-  /**
    * @brief Get statistics about all caches.
    *
    * @return A map with cache statistics.
@@ -345,15 +267,12 @@ private:
                                       std::string, std::type_index>;
   using PublisherKey = std::tuple<std::string, std::string, std::string,
                                   std::string, std::type_index>;
-  using SubscriberKey = std::tuple<std::string, std::string, std::string,
-                                   std::string, std::string, std::type_index>;
 
   // Static cache maps
   static std::map<ActionClientKey, std::shared_ptr<void>> &get_action_clients();
   static std::map<ServiceClientKey, std::shared_ptr<void>> &
   get_service_clients();
   static std::map<PublisherKey, std::shared_ptr<void>> &get_publishers();
-  static std::map<SubscriberKey, std::shared_ptr<void>> &get_subscribers();
 
   // Static lock for thread-safe access
   static std::recursive_mutex &get_lock();
@@ -404,4 +323,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS__ROS_COMMUNICATIONS_CACHE_HPP
+#endif // YASMIN_ROS__ROS_CLIENTS_CACHE_HPP

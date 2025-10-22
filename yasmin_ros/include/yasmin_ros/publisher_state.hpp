@@ -26,7 +26,7 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
-#include "yasmin_ros/ros_communications_cache.hpp"
+#include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
 namespace yasmin_ros {
@@ -83,7 +83,7 @@ public:
     }
 
     // create subscriber
-    this->pub = ROSCommunicationsCache::get_or_create_publisher<MsgT>(
+    this->pub = ROSClientsCache::get_or_create_publisher<MsgT>(
         this->node_, topic_name, qos, callback_group);
 
     if (this->create_message_handler == nullptr) {

@@ -18,7 +18,7 @@ import time
 import unittest
 from threading import Thread
 
-from yasmin_ros.ros_communications_cache import ROSCommunicationsCache
+from yasmin_ros.ros_clients_cache import ROSClientsCache
 from yasmin_ros import ActionState, ServiceState, MonitorState, PublisherState
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
 
@@ -122,8 +122,8 @@ class TestYasminRos(unittest.TestCase):
         self.assertEqual(SUCCEED, state())
 
     def test_action_client_cache(self):
-        ROSCommunicationsCache.clear_all()
-        self.assertEqual(0, ROSCommunicationsCache.get_action_clients_count())
+        ROSClientsCache.clear_all()
+        self.assertEqual(0, ROSClientsCache.get_action_clients_count())
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -131,13 +131,13 @@ class TestYasminRos(unittest.TestCase):
             return goal
 
         state1 = ActionState(Fibonacci, "test", create_goal_cb)
-        self.assertEqual(1, ROSCommunicationsCache.get_action_clients_count())
+        self.assertEqual(1, ROSClientsCache.get_action_clients_count())
 
         state2 = ActionState(Fibonacci, "test", create_goal_cb)
-        self.assertEqual(1, ROSCommunicationsCache.get_action_clients_count())
+        self.assertEqual(1, ROSClientsCache.get_action_clients_count())
 
         state3 = ActionState(Fibonacci, "test2", create_goal_cb)
-        self.assertEqual(2, ROSCommunicationsCache.get_action_clients_count())
+        self.assertEqual(2, ROSClientsCache.get_action_clients_count())
 
     def test_action_result_handler(self):
 
@@ -253,8 +253,8 @@ class TestYasminRos(unittest.TestCase):
         self.assertEqual(SUCCEED, state())
 
     def test_service_client_cache(self):
-        ROSCommunicationsCache.clear_all()
-        self.assertEqual(0, ROSCommunicationsCache.get_service_clients_count())
+        ROSClientsCache.clear_all()
+        self.assertEqual(0, ROSClientsCache.get_service_clients_count())
 
         def create_request_cb(blackboard):
             request = AddTwoInts.Request()
@@ -263,13 +263,13 @@ class TestYasminRos(unittest.TestCase):
             return request
 
         state1 = ServiceState(AddTwoInts, "test", create_request_cb)
-        self.assertEqual(1, ROSCommunicationsCache.get_service_clients_count())
+        self.assertEqual(1, ROSClientsCache.get_service_clients_count())
 
         state2 = ServiceState(AddTwoInts, "test", create_request_cb)
-        self.assertEqual(1, ROSCommunicationsCache.get_service_clients_count())
+        self.assertEqual(1, ROSClientsCache.get_service_clients_count())
 
         state3 = ServiceState(AddTwoInts, "test2", create_request_cb)
-        self.assertEqual(2, ROSCommunicationsCache.get_service_clients_count())
+        self.assertEqual(2, ROSClientsCache.get_service_clients_count())
 
     def test_service_response_handler(self):
 
@@ -353,22 +353,6 @@ class TestYasminRos(unittest.TestCase):
         )
         self.assertEqual(TIMEOUT, state())
 
-    def test_monitor_cache(self):
-        ROSCommunicationsCache.clear_all()
-        self.assertEqual(0, ROSCommunicationsCache.get_subscribers_count())
-
-        def monitor_handler(blackboard, msg):
-            return SUCCEED
-
-        state1 = MonitorState(String, "test", [SUCCEED], monitor_handler)
-        self.assertEqual(1, ROSCommunicationsCache.get_subscribers_count())
-
-        state2 = MonitorState(String, "test", [SUCCEED], monitor_handler)
-        self.assertEqual(1, ROSCommunicationsCache.get_subscribers_count())
-
-        state3 = MonitorState(String, "test2", [SUCCEED], monitor_handler)
-        self.assertEqual(2, ROSCommunicationsCache.get_subscribers_count())
-
     def test_monitor_retry_timeout(self):
         def monitor_handler(blackboard, msg):
             return SUCCEED
@@ -406,8 +390,8 @@ class TestYasminRos(unittest.TestCase):
         self.assertEqual(SUCCEED, state())
 
     def test_publisher_cache(self):
-        ROSCommunicationsCache.clear_all()
-        self.assertEqual(0, ROSCommunicationsCache.get_publishers_count())
+        ROSClientsCache.clear_all()
+        self.assertEqual(0, ROSClientsCache.get_publishers_count())
 
         def create_msg_handler(blackboard):
             msg = String()
@@ -415,13 +399,13 @@ class TestYasminRos(unittest.TestCase):
             return msg
 
         state1 = PublisherState(String, "test", create_msg_handler)
-        self.assertEqual(1, ROSCommunicationsCache.get_publishers_count())
+        self.assertEqual(1, ROSClientsCache.get_publishers_count())
 
         state2 = PublisherState(String, "test", create_msg_handler)
-        self.assertEqual(1, ROSCommunicationsCache.get_publishers_count())
+        self.assertEqual(1, ROSClientsCache.get_publishers_count())
 
         state3 = PublisherState(String, "test2", create_msg_handler)
-        self.assertEqual(2, ROSCommunicationsCache.get_publishers_count())
+        self.assertEqual(2, ROSClientsCache.get_publishers_count())
 
 
 if __name__ == "__main__":

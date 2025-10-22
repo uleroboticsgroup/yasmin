@@ -18,7 +18,6 @@ from typing import Dict, Tuple, Type, Any
 
 from rclpy.node import Node
 from rclpy.publisher import Publisher
-from rclpy.subscription import Subscription
 from rclpy.client import Client
 from rclpy.action import ActionClient
 from rclpy.callback_groups import CallbackGroup
@@ -27,21 +26,21 @@ from rclpy.qos import QoSProfile
 import yasmin
 
 
-class ROSCommunicationsCache:
+class ROSClientsCache:
     """
-    Centralized cache for managing ROS 2 communication objects.
+    Centralized cache for managing ROS 2 client objects.
 
-    This class provides a thread-safe cache for storing and reusing ROS 2 communication
-    objects such as publishers, subscribers, service clients, and action clients.
+    This class provides a thread-safe cache for storing and reusing ROS 2 client
+    objects such as publishers, service clients, and action clients.
     This helps reduce resource usage and improves performance by avoiding duplicate
-    creation of communication objects.
+    creation of client objects.
 
-    The cache is organized by communication type and uses unique keys based on:
+    The cache is organized by client type and uses unique keys based on:
     - Node name
     - Message/Service/Action type
     - Topic/Service/Action name
-    - Callback group name (if applicable)
-    - QoS profile (for publishers and subscribers)
+    - Callback group name
+    - QoS profile
 
     All methods are thread-safe using internal locking mechanisms.
     """
@@ -60,11 +59,6 @@ class ROSCommunicationsCache:
     ## Key: (node_name, msg_type_name, topic_name, qos_hash)
     ## Value: Publisher instance
     _publishers: Dict[Tuple[str, str, str, str], Publisher] = {}
-
-    ## Cache for subscribers
-    ## Key: (node_name, msg_type_name, topic_name, callback_name, qos_hash)
-    ## Value: Subscription instance
-    _subscribers: Dict[Tuple[str, str, str, str, str], Subscription] = {}
 
     ## Lock for thread-safe access to all caches
     _lock: RLock = RLock()
@@ -218,64 +212,6 @@ class ROSCommunicationsCache:
             return publisher
 
     @classmethod
-    def get_or_create_subscription(
-        cls,
-        node: Node,
-        msg_type: Type,
-        topic_name: str,
-        callback: callable,
-        qos_profile: QoSProfile = 10,
-        callback_group: CallbackGroup = None,
-    ) -> Subscription:
-        """
-        Get an existing subscription from the cache or create a new one.
-
-        Note: Subscriptions with different callbacks are considered different
-        and will create separate subscription objects.
-
-        Args:
-            node (Node): The ROS 2 node to use.
-            msg_type (Type): The type of the message.
-            topic_name (str): The name of the topic.
-            callback (callable): The callback function for incoming messages.
-            qos_profile (QoSProfile, optional): The QoS profile for the subscription.
-            callback_group (CallbackGroup, optional): The callback group for the subscription.
-
-        Returns:
-            Subscription: The cached or newly created subscription.
-        """
-        # Create a unique key (including callback name since different callbacks need different subscriptions)
-        node_name = node.get_name()
-        msg_type_name = f"{msg_type.__module__}.{msg_type.__name__}"
-        callback_name = cls._get_callback_name(callback)
-        qos_hash = str(cls._hash_qos_profile(qos_profile))
-        cache_key = (node_name, msg_type_name, topic_name, callback_name, qos_hash)
-
-        with cls._lock:
-            # Check if subscription already exists in cache
-            if cache_key in cls._subscribers:
-                yasmin.YASMIN_LOG_INFO(
-                    f"Reusing existing subscription for topic '{topic_name}' of type '{msg_type_name}'"
-                )
-                return cls._subscribers[cache_key]
-
-            # Create new subscription if not in cache
-            yasmin.YASMIN_LOG_INFO(
-                f"Creating new subscription for topic '{topic_name}' of type '{msg_type_name}'"
-            )
-            subscription = node.create_subscription(
-                msg_type,
-                topic_name,
-                callback,
-                qos_profile,
-                callback_group=callback_group,
-            )
-
-            # Store in cache
-            cls._subscribers[cache_key] = subscription
-            return subscription
-
-    @classmethod
     def clear_action_clients(cls) -> None:
         """
         Clear the action clients cache.
@@ -303,25 +239,15 @@ class ROSCommunicationsCache:
             yasmin.YASMIN_LOG_INFO("Publishers cache cleared")
 
     @classmethod
-    def clear_subscribers(cls) -> None:
-        """
-        Clear the subscribers cache.
-        """
-        with cls._lock:
-            cls._subscribers.clear()
-            yasmin.YASMIN_LOG_INFO("Subscribers cache cleared")
-
-    @classmethod
     def clear_all(cls) -> None:
         """
-        Clear all communication caches.
+        Clear all client caches.
         """
         with cls._lock:
             cls._action_clients.clear()
             cls._service_clients.clear()
             cls._publishers.clear()
-            cls._subscribers.clear()
-            yasmin.YASMIN_LOG_INFO("All ROS communications caches cleared")
+            yasmin.YASMIN_LOG_INFO("All ROS clients caches cleared")
 
     @classmethod
     def get_action_clients_count(cls) -> int:
@@ -357,17 +283,6 @@ class ROSCommunicationsCache:
             return len(cls._publishers)
 
     @classmethod
-    def get_subscribers_count(cls) -> int:
-        """
-        Get the number of cached subscribers.
-
-        Returns:
-            int: The number of cached subscribers.
-        """
-        with cls._lock:
-            return len(cls._subscribers)
-
-    @classmethod
     def get_cache_stats(cls) -> Dict[str, int]:
         """
         Get statistics about all caches.
@@ -380,11 +295,9 @@ class ROSCommunicationsCache:
                 "action_clients": len(cls._action_clients),
                 "service_clients": len(cls._service_clients),
                 "publishers": len(cls._publishers),
-                "subscribers": len(cls._subscribers),
                 "total": len(cls._action_clients)
                 + len(cls._service_clients)
-                + len(cls._publishers)
-                + len(cls._subscribers),
+                + len(cls._publishers),
             }
 
     @staticmethod

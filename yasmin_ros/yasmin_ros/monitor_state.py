@@ -26,7 +26,7 @@ from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
-from yasmin_ros.ros_communications_cache import ROSCommunicationsCache
+from yasmin_ros.ros_clients_cache import ROSClientsCache
 
 
 class MonitorState(State):
@@ -110,13 +110,12 @@ class MonitorState(State):
         self._callback_group: CallbackGroup = callback_group
 
         ## Subscription to the ROS 2 topic.
-        self._sub: Subscription = ROSCommunicationsCache.get_or_create_subscription(
-            self._node,
-            self._msg_type,
-            self._topic_name,
+        self._sub: Subscription = self._node.create_subscription(
+            msg_type,
+            topic_name,
             self.__callback,
-            self._qos,
-            callback_group=self._callback_group,
+            qos,
+            callback_group=callback_group,
         )
 
         ## Maximum number of retries.

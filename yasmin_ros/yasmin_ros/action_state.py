@@ -28,7 +28,7 @@ from yasmin import State
 from yasmin import Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL, TIMEOUT
-from yasmin_ros.ros_communications_cache import ROSCommunicationsCache
+from yasmin_ros.ros_clients_cache import ROSClientsCache
 
 
 class ActionState(State):
@@ -140,13 +140,11 @@ class ActionState(State):
         self._action_type: Type = action_type
 
         ## Shared pointer to the action client (reused from cache if available).
-        self._action_client: ActionClient = (
-            ROSCommunicationsCache.get_or_create_action_client(
-                self._node,
-                action_type,
-                action_name,
-                callback_group,
-            )
+        self._action_client: ActionClient = ROSClientsCache.get_or_create_action_client(
+            self._node,
+            action_type,
+            action_name,
+            callback_group,
         )
 
         if not self._create_goal_handler:

@@ -29,7 +29,7 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
-#include "yasmin_ros/ros_communications_cache.hpp"
+#include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
 using namespace std::placeholders;
@@ -192,7 +192,7 @@ public:
 
     // Create a service client (compatible with different rclcpp versions)
     this->service_client =
-        ROSCommunicationsCache::get_or_create_service_client<ServiceT>(
+        ROSClientsCache::get_or_create_service_client<ServiceT>(
             this->node_, srv_name, callback_group);
 
     // Set the request and response handlers

@@ -29,7 +29,7 @@
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/monitor_state.hpp"
 #include "yasmin_ros/publisher_state.hpp"
-#include "yasmin_ros/ros_communications_cache.hpp"
+#include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/service_state.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -114,9 +114,11 @@ private:
   }
 
   void publish_message() {
-    auto message = std_msgs::msg::String();
-    message.data = "data";
-    publisher_->publish(message);
+    if (rclcpp::ok()) {
+      auto message = std_msgs::msg::String();
+      message.data = "data";
+      publisher_->publish(message);
+    }
   }
 };
 
@@ -139,6 +141,9 @@ protected:
     if (spin_thread.joinable()) {
       spin_thread.join();
     }
+    ROSClientsCache::clear_all();
+    aux_node.reset();
+    executor.reset();
     rclcpp::shutdown();
   }
 };
@@ -164,8 +169,8 @@ TEST_F(TestYasminRos, TestActionSucceed) {
 }
 
 TEST_F(TestYasminRos, TestActionClientCache) {
-  ROSCommunicationsCache::clear_all();
-  EXPECT_EQ(ROSCommunicationsCache::get_action_clients_count(), 0);
+  ROSClientsCache::clear_all();
+  EXPECT_EQ(ROSClientsCache::get_action_clients_count(), 0);
 
   auto state1 =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
@@ -175,7 +180,7 @@ TEST_F(TestYasminRos, TestActionClientCache) {
             goal.order = 0;
             return goal;
           });
-  EXPECT_EQ(ROSCommunicationsCache::get_action_clients_count(), 1);
+  EXPECT_EQ(ROSClientsCache::get_action_clients_count(), 1);
 
   auto state2 =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
@@ -185,7 +190,7 @@ TEST_F(TestYasminRos, TestActionClientCache) {
             goal.order = 0;
             return goal;
           });
-  EXPECT_EQ(ROSCommunicationsCache::get_action_clients_count(), 1);
+  EXPECT_EQ(ROSClientsCache::get_action_clients_count(), 1);
 
   auto state3 =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
@@ -195,7 +200,7 @@ TEST_F(TestYasminRos, TestActionClientCache) {
             goal.order = 0;
             return goal;
           });
-  EXPECT_EQ(ROSCommunicationsCache::get_action_clients_count(), 2);
+  EXPECT_EQ(ROSClientsCache::get_action_clients_count(), 2);
 }
 
 TEST_F(TestYasminRos, TestActionResultHandler) {
@@ -305,8 +310,8 @@ TEST_F(TestYasminRos, TestService) {
 }
 
 TEST_F(TestYasminRos, TestServiceClientCache) {
-  ROSCommunicationsCache::clear_all();
-  EXPECT_EQ(ROSCommunicationsCache::get_service_clients_count(), 0);
+  ROSClientsCache::clear_all();
+  EXPECT_EQ(ROSClientsCache::get_service_clients_count(), 0);
 
   auto state1 = std::make_shared<
       ServiceState<example_interfaces::srv::AddTwoInts>>(
@@ -317,7 +322,7 @@ TEST_F(TestYasminRos, TestServiceClientCache) {
         request->b = 3;
         return request;
       });
-  EXPECT_EQ(ROSCommunicationsCache::get_service_clients_count(), 1);
+  EXPECT_EQ(ROSClientsCache::get_service_clients_count(), 1);
 
   auto state2 = std::make_shared<
       ServiceState<example_interfaces::srv::AddTwoInts>>(
@@ -328,7 +333,7 @@ TEST_F(TestYasminRos, TestServiceClientCache) {
         request->b = 3;
         return request;
       });
-  EXPECT_EQ(ROSCommunicationsCache::get_service_clients_count(), 1);
+  EXPECT_EQ(ROSClientsCache::get_service_clients_count(), 1);
 
   auto state3 = std::make_shared<
       ServiceState<example_interfaces::srv::AddTwoInts>>(
@@ -339,7 +344,7 @@ TEST_F(TestYasminRos, TestServiceClientCache) {
         request->b = 3;
         return request;
       });
-  EXPECT_EQ(ROSCommunicationsCache::get_service_clients_count(), 2);
+  EXPECT_EQ(ROSClientsCache::get_service_clients_count(), 2);
 }
 
 TEST_F(TestYasminRos, TestServiceResponseHandler) {
@@ -413,38 +418,6 @@ TEST_F(TestYasminRos, TestMonitorTimeout) {
   EXPECT_EQ((*state)(blackboard), std::string(TIMEOUT));
 }
 
-TEST_F(TestYasminRos, TestMonitorCache) {
-  ROSCommunicationsCache::clear_all();
-  EXPECT_EQ(ROSCommunicationsCache::get_subscribers_count(), 0);
-
-  auto state1 = std::make_shared<MonitorState<std_msgs::msg::String>>(
-      "test", std::set<std::string>{std::string(SUCCEED)},
-      [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-         std::shared_ptr<std_msgs::msg::String> msg) {
-        return std::string(SUCCEED);
-      },
-      rclcpp::QoS(10), 10);
-  EXPECT_EQ(ROSCommunicationsCache::get_subscribers_count(), 1);
-
-  auto state2 = std::make_shared<MonitorState<std_msgs::msg::String>>(
-      "test", std::set<std::string>{std::string(SUCCEED)},
-      [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-         std::shared_ptr<std_msgs::msg::String> msg) {
-        return std::string(SUCCEED);
-      },
-      rclcpp::QoS(10), 10);
-  EXPECT_EQ(ROSCommunicationsCache::get_subscribers_count(), 1);
-
-  auto state3 = std::make_shared<MonitorState<std_msgs::msg::String>>(
-      "test2", std::set<std::string>{std::string(SUCCEED)},
-      [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-         std::shared_ptr<std_msgs::msg::String> msg) {
-        return std::string(SUCCEED);
-      },
-      rclcpp::QoS(10), 10);
-  EXPECT_EQ(ROSCommunicationsCache::get_subscribers_count(), 2);
-}
-
 TEST_F(TestYasminRos, TestMonitorRetryTimeout) {
   auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
 
@@ -473,8 +446,8 @@ TEST_F(TestYasminRos, TestPublisher) {
 }
 
 TEST_F(TestYasminRos, TestPublisherCache) {
-  ROSCommunicationsCache::clear_all();
-  EXPECT_EQ(ROSCommunicationsCache::get_publishers_count(), 0);
+  ROSClientsCache::clear_all();
+  EXPECT_EQ(ROSClientsCache::get_publishers_count(), 0);
 
   auto state1 = std::make_shared<PublisherState<std_msgs::msg::String>>(
       "test", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
@@ -482,7 +455,7 @@ TEST_F(TestYasminRos, TestPublisherCache) {
         msg.data = "data";
         return msg;
       });
-  EXPECT_EQ(ROSCommunicationsCache::get_publishers_count(), 1);
+  EXPECT_EQ(ROSClientsCache::get_publishers_count(), 1);
 
   auto state2 = std::make_shared<PublisherState<std_msgs::msg::String>>(
       "test", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
@@ -490,7 +463,7 @@ TEST_F(TestYasminRos, TestPublisherCache) {
         msg.data = "data";
         return msg;
       });
-  EXPECT_EQ(ROSCommunicationsCache::get_publishers_count(), 1);
+  EXPECT_EQ(ROSClientsCache::get_publishers_count(), 1);
 
   auto state3 = std::make_shared<PublisherState<std_msgs::msg::String>>(
       "test2", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
@@ -498,7 +471,7 @@ TEST_F(TestYasminRos, TestPublisherCache) {
         msg.data = "data";
         return msg;
       });
-  EXPECT_EQ(ROSCommunicationsCache::get_publishers_count(), 2);
+  EXPECT_EQ(ROSClientsCache::get_publishers_count(), 2);
 }
 
 int main(int argc, char **argv) {
