@@ -3,6 +3,13 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.5.1 (2025-10-23)
+------------------
+* renaming ROSCommunicationsCache to ROSClientsCache
+* creating C++ tests
+* fixing python tests to run using colcon
+* Contributors: Miguel Ángel González Santamarta
+
 3.5.0 (2025-10-12)
 ------------------
 * ros communications cache created

@@ -3,6 +3,14 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+3.5.1 (2025-10-23)
+------------------
+* test exception messages in C++ tests
+* creating C++ tests
+* fixing python tests to run using colcon
+* fixing exceptions in C++ version
+* Contributors: Miguel Ángel González Santamarta
+
 3.5.0 (2025-10-12)
 ------------------
 * fixing Python comments
