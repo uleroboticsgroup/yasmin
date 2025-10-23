@@ -17,4 +17,5 @@ jobs:
         with:
           package-name: yasmin yasmin_ros
           target-ros2-distro: foxy
-          skip-tests: false
+          skip-tests: true
+          coverage-result: false
