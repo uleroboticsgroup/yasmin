@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,55,58,80"/>
+<area shape="rect" id="Node000001" href="$classtest__yasmin__ros_1_1AuxNode.html" title=" " alt="" coords="142,5,314,31"/>
+<area shape="poly" id="edge33_Node000000_Node000001" title=" " alt="" coords="72,50,105,40,150,29,151,34,106,45,73,55"/>
+<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1yasmin__node_1_1YasminNode.html" title=" " alt="" coords="106,55,350,80"/>
+<area shape="poly" id="edge34_Node000000_Node000002" title=" " alt="" coords="73,65,106,65,106,70,73,70"/>
+<area shape="rect" id="Node000003" href="$classyasmin__viewer_1_1yasmin__viewer__node_1_1YasminFsmViewerNode.html" title=" " alt="" coords="106,104,351,145"/>
+<area shape="poly" id="edge35_Node000000_Node000003" title=" " alt="" coords="73,79,106,90,145,101,144,107,105,95,72,84"/>
+</map>

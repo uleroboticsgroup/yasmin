@@ -1,0 +1,21 @@
+<map id="yasmin_viewer/include/yasmin_viewer/yasmin_viewer_pub.hpp" name="yasmin_viewer/include/yasmin_viewer/yasmin_viewer_pub.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="869,5,1026,61"/>
+<area shape="rect" id="Node000002" href="$action__client__demo_8cpp.html" title=" " alt="" coords="5,109,175,150"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="854,43,556,68,372,88,188,112,175,114,174,108,187,106,372,82,556,63,853,38"/>
+<area shape="rect" id="Node000003" href="$concurrence__demo_8cpp.html" title=" " alt="" coords="199,109,405,150"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="854,50,417,112,406,113,405,108,416,106,853,44"/>
+<area shape="rect" id="Node000004" href="$monitor__demo_8cpp.html" title=" " alt="" coords="429,109,607,150"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="854,57,608,111,606,106,853,52"/>
+<area shape="rect" id="Node000005" href="$parameters__demo_8cpp.html" title=" " alt="" coords="630,109,830,150"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="872,70,777,111,774,106,870,65"/>
+<area shape="rect" id="Node000006" href="$publisher__demo_8cpp.html" title=" " alt="" coords="854,109,1040,150"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="950,77,950,109,945,109,945,77"/>
+<area shape="rect" id="Node000007" href="$remap__demo_8cpp.html" title=" " alt="" coords="1065,109,1235,150"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1021,65,1109,106,1106,111,1019,70"/>
+<area shape="rect" id="Node000008" href="$service__client__demo_8cpp.html" title=" " alt="" coords="1259,109,1436,150"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="1041,54,1264,106,1263,111,1040,59"/>
+<area shape="rect" id="Node000009" href="$yasmin__demo_8cpp.html" title=" " alt="" coords="1460,109,1635,150"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1041,45,1448,106,1459,108,1459,114,1447,112,1040,50"/>
+<area shape="rect" id="Node000010" href="$yasmin__viewer__pub_8cpp.html" title=" " alt="" coords="1659,109,1868,150"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="1041,40,1313,67,1648,106,1659,108,1659,113,1647,112,1313,72,1040,45"/>
+</map>
