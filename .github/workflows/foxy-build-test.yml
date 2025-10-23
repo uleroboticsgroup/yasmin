@@ -12,10 +12,6 @@ jobs:
     container:
       image: ros:foxy
     steps:
-      - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@v0.7
-        with:
-          required-ros-distributions: foxy
       - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.4
         with:
