@@ -10,14 +10,11 @@ jobs:
   galactic_build_and_test:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:20.04
+      image: ros:galactic
     steps:
-      - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@v0.2
-        with:
-          required-ros-distributions: galactic
       - name: Build and Test
-        uses: ros-tooling/action-ros-ci@v0.2
+        uses: ros-tooling/action-ros-ci@v0.4
         with:
           package-name: yasmin yasmin_ros
           target-ros2-distro: galactic
+          skip-tests: false

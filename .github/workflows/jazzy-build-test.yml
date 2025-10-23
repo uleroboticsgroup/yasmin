@@ -10,12 +10,8 @@ jobs:
   jazzy_build_and_test:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:24.04
+      image: ros:jazzy
     steps:
-      - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@v0.7
-        with:
-          required-ros-distributions: jazzy
       - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.4
         with:
