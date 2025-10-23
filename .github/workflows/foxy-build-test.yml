@@ -10,14 +10,14 @@ jobs:
   foxy_build_and_test:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:20.04
+      image: ros:foxy
     steps:
       - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@v0.2
+        uses: ros-tooling/setup-ros@v0.7
         with:
           required-ros-distributions: foxy
       - name: Build and Test
-        uses: ros-tooling/action-ros-ci@v0.2
+        uses: ros-tooling/action-ros-ci@v0.4
         with:
           package-name: yasmin yasmin_ros
           target-ros2-distro: foxy
