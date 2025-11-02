@@ -22,7 +22,6 @@ from yasmin.concurrence import Concurrence
 from yasmin.cb_state import CbState
 from yasmin.blackboard import Blackboard
 from yasmin.state_machine import StateMachine
-
 from yasmin.logs import (
     LogLevel,
     get_log_level,
