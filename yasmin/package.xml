@@ -8,7 +8,7 @@
   <license>GPL-3</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
-  <depend>pybind11-vendor</depend>
+  <buildtool_depend>pybind11-vendor</buildtool_depend>
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>
   <test_depend>ament_copyright</test_depend>
