@@ -26,8 +26,7 @@ using namespace yasmin;
 
 State::State(std::set<std::string> outcomes) : outcomes(outcomes) {
   if (outcomes.empty()) {
-    throw std::invalid_argument(
-        "A state must have at least one possible outcome.");
+    throw std::logic_error("A state must have at least one possible outcome.");
   }
 }
 

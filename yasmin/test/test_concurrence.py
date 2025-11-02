@@ -75,7 +75,7 @@ class TestState(unittest.TestCase):
 
     def test_str(self):
         self.assertEqual(
-            "Concurrence [FOO (FooState), FOO2 (FooState), BAR (BarState)]",
+            "Concurrence [BAR (BarState), FOO (FooState), FOO2 (FooState)]",
             str(self.state),
         )
 

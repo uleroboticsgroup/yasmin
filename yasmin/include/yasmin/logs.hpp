@@ -101,7 +101,6 @@ extern LogFunction log_message; ///< Pointer to the logging function
  *
  * @tparam LEVEL The log level LogLevel (e.g., 0 -> "ERROR", 1 -> "WARN", 2 ->
  * "INFO", 3 -> "DEBUG").
- * @param log_message Function to create the logs
  * @param file The source file where the log function is called.
  * @param function The function where the log function is called.
  * @param line The line number in the source file.

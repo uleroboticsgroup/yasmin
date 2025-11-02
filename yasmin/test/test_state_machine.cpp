@@ -74,8 +74,7 @@ protected:
 
 TEST_F(TestStateMachine, TestStr) {
   std::string sm_str = sm->to_string();
-  EXPECT_TRUE(sm_str.find("StateMachine") != std::string::npos ||
-              sm_str.find("State Machine") != std::string::npos);
+  EXPECT_TRUE(sm_str == "State Machine [BAR (BarState), FOO (FooState)]");
 }
 
 TEST_F(TestStateMachine, TestGetStates) {

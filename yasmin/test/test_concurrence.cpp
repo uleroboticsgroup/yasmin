@@ -91,7 +91,8 @@ TEST_F(TestConcurrence, TestCancel) {
 
 TEST_F(TestConcurrence, TestStr) {
   std::string state_str = state->to_string();
-  EXPECT_TRUE(state_str.find("Concurrence") != std::string::npos);
+  EXPECT_TRUE(state_str ==
+              "Concurrence [BAR (BarState), FOO (FooState), FOO2 (FooState)]");
 }
 
 int main(int argc, char **argv) {

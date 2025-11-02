@@ -54,7 +54,11 @@ class TestState(unittest.TestCase):
         self.assertEqual("FooState", str(self.state))
 
     def test_init_exception(self):
-        self.assertRaises(Exception, BarState)
+        with self.assertRaises(RuntimeError) as context:
+            BarState()
+        self.assertEqual(
+            str(context.exception), "A state must have at least one possible outcome."
+        )
 
 
 if __name__ == "__main__":

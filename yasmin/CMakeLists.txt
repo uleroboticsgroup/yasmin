@@ -10,6 +10,10 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 
+# Find Python and pybind11 for Python bindings
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(pybind11 REQUIRED)
+
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
@@ -49,6 +53,109 @@ ament_export_include_directories("include/${PROJECT_NAME}")
 ament_export_libraries(${PROJECT_NAME})
 ament_export_targets(${PROJECT_NAME})
 ament_export_dependencies(${DEPENDENCIES_PACKAGE})
+
+
+# Python bindings for Blackboard
+pybind11_add_module(blackboard 
+  src/yasmin/blackboard/blackboard_pybind11.cpp
+)
+
+target_link_libraries(blackboard PRIVATE ${PROJECT_NAME})
+
+target_include_directories(blackboard PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+
+# Install the Blackboard Python module
+install(TARGETS blackboard
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+)
+
+# Python bindings for State
+pybind11_add_module(state
+  src/yasmin/state_pybind11.cpp
+)
+
+target_link_libraries(state PRIVATE ${PROJECT_NAME})
+
+target_include_directories(state PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+
+# Install the State Python module
+install(TARGETS state
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+)
+
+# Python bindings for StateMachine
+pybind11_add_module(state_machine
+  src/yasmin/state_machine_pybind11.cpp
+)
+
+target_link_libraries(state_machine PRIVATE ${PROJECT_NAME})
+
+target_include_directories(state_machine PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+
+# Install the StateMachine Python module
+install(TARGETS state_machine
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+)
+
+# Python bindings for Concurrence
+pybind11_add_module(concurrence
+  src/yasmin/concurrence_pybind11.cpp
+)
+
+target_link_libraries(concurrence PRIVATE ${PROJECT_NAME})
+
+target_include_directories(concurrence PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+
+# Install the Concurrence Python module
+install(TARGETS concurrence
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+)
+
+# Python bindings for CbState
+pybind11_add_module(cb_state
+  src/yasmin/cb_state_pybind11.cpp
+)
+
+target_link_libraries(cb_state PRIVATE ${PROJECT_NAME})
+
+target_include_directories(cb_state PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+
+# Install the CbState Python module
+install(TARGETS cb_state
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+)
+
+# Python bindings for Logs
+pybind11_add_module(logs
+  src/yasmin/logs_pybind11.cpp
+)
+
+target_link_libraries(logs PRIVATE ${PROJECT_NAME})
+
+target_include_directories(logs PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+
+# Install the Logs Python module
+install(TARGETS logs
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+)
 
 
 # Python

@@ -86,15 +86,15 @@ class TestStateMachine(unittest.TestCase):
         self.assertEqual(str(context.exception), "Initial state cannot be empty")
 
     def test_set_start_state_wrong_state(self):
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(ValueError) as context:
             self.sm.set_start_state("FOO1")
         self.assertEqual(
             str(context.exception),
-            "\"Initial state 'FOO1' is not in the state machine\"",
+            "Initial state 'FOO1' is not in the state machine",
         )
 
     def test_add_repeated_state(self):
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(RuntimeError) as context:
             self.sm.add_state(
                 "FOO",
                 FooState(),
@@ -104,11 +104,11 @@ class TestStateMachine(unittest.TestCase):
             )
         self.assertEqual(
             str(context.exception),
-            "\"State 'FOO' already registered in the state machine\"",
+            "State 'FOO' already registered in the state machine",
         )
 
     def test_add_outcome_state(self):
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(RuntimeError) as context:
             self.sm.add_state(
                 "outcome4",
                 FooState(),
@@ -118,11 +118,11 @@ class TestStateMachine(unittest.TestCase):
             )
         self.assertEqual(
             str(context.exception),
-            "\"State name 'outcome4' is already registered as an outcome\"",
+            "State name 'outcome4' is already registered as an outcome",
         )
 
     def test_add_state_with_wrong_outcome(self):
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(ValueError) as context:
             self.sm.add_state(
                 "FOO1",
                 FooState(),
@@ -132,7 +132,7 @@ class TestStateMachine(unittest.TestCase):
             )
         self.assertEqual(
             str(context.exception),
-            "\"State 'FOO1' references unregistered outcomes 'outcome9', available outcomes are ['outcome1', 'outcome2']\"",
+            "State 'FOO1' references unregistered outcomes 'outcome9', available outcomes are ['outcome1', 'outcome2']",
         )
 
     def test_add_wrong_source_transition(self):
@@ -178,11 +178,11 @@ class TestStateMachine(unittest.TestCase):
             },
         )
 
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(RuntimeError) as context:
             sm_1.validate(True)
         self.assertEqual(
             str(context.exception),
-            "\"State 'FSM' outcome 'outcome5' not registered in transitions\"",
+            "State 'FSM' outcome 'outcome5' not registered in transitions",
         )
 
     def test_validate_outcome_from_state_not_used(self):
@@ -200,11 +200,11 @@ class TestStateMachine(unittest.TestCase):
             },
         )
 
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(RuntimeError) as context:
             sm_1.validate(True)
         self.assertEqual(
             str(context.exception),
-            "\"State 'FOO' outcome 'outcome2' not registered in transitions\"",
+            "State 'FOO' outcome 'outcome2' not registered in transitions",
         )
 
     def test_validate_fsm_outcome_not_used(self):
@@ -229,11 +229,11 @@ class TestStateMachine(unittest.TestCase):
             },
         )
 
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(RuntimeError) as context:
             sm_1.validate(True)
         self.assertEqual(
             str(context.exception),
-            "\"Target outcome 'outcome5' not registered in transitions\"",
+            "Target outcome 'outcome5' not registered in transitions",
         )
 
     def test_validate_wrong_state(self):
@@ -258,11 +258,11 @@ class TestStateMachine(unittest.TestCase):
             },
         )
 
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(RuntimeError) as context:
             sm_1.validate()
         self.assertEqual(
             str(context.exception),
-            "\"State machine outcome 'BAR' not registered as outcome neither state\"",
+            "State machine outcome 'BAR' not registered as outcome neither state",
         )
 
 

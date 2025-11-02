@@ -133,25 +133,9 @@ public:
   /**
    * @brief Converts the state to a string representation.
    * @return A string representation of the state.
-   *
-   * This method retrieves the demangled name of the class for a readable
-   * string representation.
    */
   std::string to_string() override {
-    std::string name = typeid(*this).name();
-
-#ifdef __GNUG__ // If using GCC/G++
-    int status;
-    // Demangle the name using GCC's demangling function
-    char *demangled =
-        abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
-    if (status == 0) {
-      name = demangled;
-    }
-    free(demangled);
-#endif
-
-    name += "[";
+    std::string name = "Concurrence [";
 
     for (auto it = states.begin(); it != states.end(); ++it) {
       name += it->first + " (" + it->second->to_string() + ")";
@@ -164,7 +148,7 @@ public:
 
     name += "]";
 
-    return name; // Return the demangled class name
+    return name;
   }
 };
 
