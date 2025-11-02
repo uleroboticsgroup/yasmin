@@ -18,6 +18,7 @@ import time
 import unittest
 from threading import Thread
 
+from yasmin import set_py_loggers
 from yasmin_ros.ros_clients_cache import ROSClientsCache
 from yasmin_ros import ActionState, ServiceState, MonitorState, PublisherState
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
@@ -99,6 +100,7 @@ class TestYasminRos(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         rclpy.init()
+        set_py_loggers()
 
         cls.aux_node = AuxNode()
         cls.executor = MultiThreadedExecutor()

@@ -54,6 +54,19 @@ enum LogLevel {
 extern LogLevel log_level;
 
 /**
+ * @brief Default logging function.
+ *
+ * @param level The log level as a string (e.g., "ERROR", "WARN", "INFO",
+ * "DEBUG").
+ * @param file The source file where the log function is called.
+ * @param function The function where the log function is called.
+ * @param line The line number in the source file.
+ * @param text The format string for the log message.
+ */
+void default_log_message(LogLevel level, const char *file, const char *function,
+                         int line, const char *text);
+
+/**
  * @brief Sets the log level for the logs.
  *
  * This function allows the user to specify the log level error, warning, info,

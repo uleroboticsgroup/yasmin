@@ -108,37 +108,28 @@ PYBIND11_MODULE(logs, m) {
   m.def(
       "set_loggers",
       [](py::function py_log_func) {
+        // Store the Python function in a shared_ptr to manage its lifetime
+        static auto py_log_func_ptr =
+            std::make_shared<py::function>(py_log_func);
+        *py_log_func_ptr = py_log_func;
+
         // Create a C++ wrapper for the Python logging function
-        auto cpp_log_func =
-            [py_log_func](yasmin::LogLevel level, const char *file,
-                          const char *function, int line, const char *text) {
-              // Acquire GIL before calling Python
-              py::gil_scoped_acquire acquire;
-              try {
-                py_log_func(level, file, function, line, text);
-              } catch (const py::error_already_set &e) {
-                // If Python callback fails, fall back to stderr
-                fprintf(stderr, "[ERROR] Python logger failed: %s\n", e.what());
-                fprintf(stderr, "[%s] [%s:%s:%d] %s\n",
-                        yasmin::log_level_to_name(level), file, function, line,
-                        text);
-              }
-            };
-
-        // Store the Python function to keep it alive
-        static py::object stored_py_func;
-        stored_py_func = py_log_func;
-
-        // Store the C++ wrapper as a static function pointer
         static std::function<void(yasmin::LogLevel, const char *, const char *,
                                   int, const char *)>
-            stored_cpp_func = cpp_log_func;
+            cpp_log_func = [](yasmin::LogLevel level, const char *file,
+                              const char *function, int line,
+                              const char *text) {
+              py::gil_scoped_acquire acquire;
+              if (py_log_func_ptr && *py_log_func_ptr) {
+                (*py_log_func_ptr)(level, file, function, line, text);
+              }
+            };
 
         // Set the logger using a static C-style function pointer
         yasmin::set_loggers([](yasmin::LogLevel level, const char *file,
                                const char *function, int line,
                                const char *text) {
-          stored_cpp_func(level, file, function, line, text);
+          cpp_log_func(level, file, function, line, text);
         });
       },
       py::arg("log_function"),

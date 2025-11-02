@@ -15,6 +15,7 @@
 
 import os
 import inspect
+import logging
 from typing import List, Union
 
 from yasmin.state import State
@@ -51,6 +52,44 @@ def get_caller_info() -> List[Union[str, int]]:
     line = frame.lineno
     function = frame.function
     return file, function, line
+
+
+def py_default_log_message(
+    level: LogLevel, file: str, function: str, line: int, text: str
+) -> None:
+    """
+    Default python logging function.
+
+
+    @param level The log level as a string (e.g., "ERROR", "WARN", "INFO",
+    "DEBUG").
+    @param file The source file where the log function is called.
+    @param function The function where the log function is called.
+    @param line The line number in the source file.
+    @param text The format string for the log message.
+    """
+
+    message = f"[{log_level_to_name(level)}] [{file}:{function}:{line}] {text}"
+
+    if level == LogLevel.ERROR:
+        logging.error(message)
+    elif level == LogLevel.WARN:
+        logging.warning(message)
+    elif level == LogLevel.INFO:
+        logging.info(message)
+    elif level == LogLevel.DEBUG:
+        logging.debug(message)
+
+
+def set_py_loggers() -> None:
+    """
+    Set the Python logging function for YASMIN.
+
+    @param log_function: The logging function to set.
+    @type log_function: callable
+    """
+    logging.basicConfig(level=logging.NOTSET, format="%(message)s")
+    set_loggers(py_default_log_message)
 
 
 def YASMIN_LOG_ERROR(text: str) -> None:
@@ -115,3 +154,22 @@ def YASMIN_LOG_DEBUG(text: str) -> None:
     """
     file, function, line = get_caller_info()
     log_debug(file, function, line, text)
+
+
+__all__ = [
+    State,
+    Concurrence,
+    CbState,
+    Blackboard,
+    StateMachine,
+    get_log_level,
+    set_log_level,
+    log_level_to_name,
+    set_loggers,
+    set_default_loggers,
+    set_py_loggers,
+    YASMIN_LOG_ERROR,
+    YASMIN_LOG_WARN,
+    YASMIN_LOG_INFO,
+    YASMIN_LOG_DEBUG,
+]
