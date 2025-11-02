@@ -108,10 +108,16 @@ PYBIND11_MODULE(logs, m) {
   m.def(
       "set_loggers",
       [](py::function py_log_func) {
-        // Store the Python function in a shared_ptr to manage its lifetime
-        static auto py_log_func_ptr =
-            std::make_shared<py::function>(py_log_func);
-        *py_log_func_ptr = py_log_func;
+        // Use a raw pointer to avoid static destruction issues
+        static py::function *py_log_func_ptr = nullptr;
+
+        // Clean up old function if it exists
+        if (py_log_func_ptr) {
+          delete py_log_func_ptr;
+        }
+
+        // Create new function pointer
+        py_log_func_ptr = new py::function(py_log_func);
 
         // Create a C++ wrapper for the Python logging function
         static std::function<void(yasmin::LogLevel, const char *, const char *,
@@ -119,9 +125,15 @@ PYBIND11_MODULE(logs, m) {
             cpp_log_func = [](yasmin::LogLevel level, const char *file,
                               const char *function, int line,
                               const char *text) {
-              py::gil_scoped_acquire acquire;
-              if (py_log_func_ptr && *py_log_func_ptr) {
-                (*py_log_func_ptr)(level, file, function, line, text);
+              // Check if Python is still initialized before trying to acquire
+              // GIL This prevents crashes during Python finalization
+              if (Py_IsInitialized() && py_log_func_ptr && *py_log_func_ptr) {
+                try {
+                  py::gil_scoped_acquire acquire;
+                  (*py_log_func_ptr)(level, file, function, line, text);
+                } catch (...) {
+                  // Silently ignore exceptions during finalization
+                }
               }
             };
 
