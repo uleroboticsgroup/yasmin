@@ -63,20 +63,19 @@ class YasminFactory:
 
     def __init__(self) -> None:
         """
-        Initializes the plugin loader, setting up the C++ state factory if
-        pybind is available.
+        Initializes the factory, setting up the C++ state factory
         """
 
         self._cpp_factory = CppStateFactory()
         self._cpp_state_adapters = []  # Track created C++ state adapters
 
-    def build_state(self, state_elem: ET.Element) -> State:
+    def create_state(self, state_elem: ET.Element) -> State:
         """
-        Loads a state from an XML element.
+        Creates a state from an XML element.
         Args:
             state_elem (ET.Element): The XML element defining the state.
         Returns:
-            State: An instance of the loaded state.
+            State: An instance of the created state.
         Raises:
             ValueError: If the state type is unknown or if required attributes
                         are missing.
@@ -106,13 +105,13 @@ class YasminFactory:
         else:
             raise ValueError(f"Unknown state type: {state_type}")
 
-    def build_concurrence(self, conc_elem: ET.Element) -> Concurrence:
+    def create_concurrence(self, conc_elem: ET.Element) -> Concurrence:
         """
-        Loads a concurrence from an XML element.
+        Creates a concurrence from an XML element.
         Args:
             conc_elem (ET.Element): The XML element defining the concurrence.
         Returns:
-            Concurrence: An instance of the loaded concurrence.
+            Concurrence: An instance of the created concurrence.
         Raises:
             ValueError: If required attributes are missing.
         """
@@ -133,13 +132,13 @@ class YasminFactory:
                             ] = ccchild.attrib["outcome"]
 
             if child.tag == "State":
-                states[child.attrib["name"]] = self.build_state(child)
+                states[child.attrib["name"]] = self.create_state(child)
 
             elif child.tag == "Concurrence":
-                states[child.attrib["name"]] = self.build_concurrence(child)
+                states[child.attrib["name"]] = self.create_concurrence(child)
 
             elif child.tag == "StateMachine":
-                states[child.attrib["name"]] = self.build_sm(child)
+                states[child.attrib["name"]] = self.create_sm(child)
 
         concurrence = Concurrence(
             states=list(states.values()),
@@ -149,13 +148,13 @@ class YasminFactory:
 
         return concurrence
 
-    def build_sm(self, root: ET.Element) -> StateMachine:
+    def create_sm(self, root: ET.Element) -> StateMachine:
         """
-        Recursively builds a state machine from an XML element.
+        Recursively creates a state machine from an XML element.
         Args:
             root (ET.Element): The XML element defining the state machine.
         Returns:
-            StateMachine: An instance of the built state machine.
+            StateMachine: An instance of the created state machine.
         Raises:
             ValueError: If the XML structure is invalid.
         """
@@ -170,13 +169,13 @@ class YasminFactory:
                     transitions[cchild.attrib["from"]] = cchild.attrib["to"]
 
             if child.tag == "State":
-                state = self.build_state(child)
+                state = self.create_state(child)
 
             elif child.tag == "Concurrence":
-                state = self.build_concurrence(child)
+                state = self.create_concurrence(child)
 
             elif child.tag == "StateMachine":
-                state = self.build_sm(child)
+                state = self.create_sm(child)
 
             sm.add_state(
                 child.attrib["name"],
@@ -186,13 +185,13 @@ class YasminFactory:
 
         return sm
 
-    def load_sm(self, xml_file: str) -> StateMachine:
+    def create_sm_from_file(self, xml_file: str) -> StateMachine:
         """
-        Loads a state machine from an XML file.
+        Creates a state machine from an XML file.
         Args:
             xml_file (str): Path to the XML file defining the state machine.
         Returns:
-            StateMachine: An instance of the loaded state machine.
+            StateMachine: An instance of the created state machine.
         Raises:
             ValueError: If the XML structure is invalid.
         """
@@ -203,7 +202,7 @@ class YasminFactory:
         if root.tag != "StateMachine":
             raise ValueError("Root element must be 'StateMachine'")
 
-        return self.build_sm(root)
+        return self.create_sm(root)
 
     def cleanup(self) -> None:
         """

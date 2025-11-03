@@ -45,7 +45,7 @@ def main():
 
     # Create a finite state machine (FSM)
     loader = YasminFactory()
-    sm = loader.load_sm(
+    sm = loader.create_sm_from_file(
         os.path.join(
             get_package_share_directory("yasmin_demos"), "state_machines", "demo.xml"
         )
