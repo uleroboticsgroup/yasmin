@@ -1,0 +1,7 @@
+<library path="yasmin_factory_test_states">
+    <class name="yasmin_factory/TestSimpleState" type="TestSimpleState" base_class_type="yasmin::State">
+        <description>
+      A simple test state for unit testing yasmin_factory.
+    </description>
+    </class>
+</library>

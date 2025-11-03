@@ -1,0 +1,6 @@
+<StateMachine outcomes="end">
+    <State name="ParameterState" type="py" module="test.test_simple_state" class="TestParameterState" parameters="value1, value2">
+        <Transition from="success" to="end"/>
+        <Transition from="failure" to="end"/>
+    </State>
+</StateMachine>

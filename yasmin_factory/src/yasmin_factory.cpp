@@ -291,6 +291,8 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
       state = this->create_concurrence(child);
     } else if (child_name == "StateMachine") {
       state = this->create_sm(child);
+    } else {
+      continue;
     }
 
     // Add state to state machine

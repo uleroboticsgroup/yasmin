@@ -134,6 +134,9 @@ class YasminFactory:
             elif child.tag == "StateMachine":
                 state = self.create_sm(child)
 
+            else:
+                continue
+
             sm.add_state(
                 child.attrib["name"],
                 state,

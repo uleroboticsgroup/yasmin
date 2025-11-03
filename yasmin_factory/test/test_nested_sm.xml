@@ -1,0 +1,10 @@
+<StateMachine outcomes="final_outcome">
+    <StateMachine name="NestedSM" outcomes="outcome1 outcome2">
+        <State name="InnerState" type="cpp" class="yasmin_factory/TestSimpleState">
+            <Transition from="outcome1" to="outcome1"/>
+            <Transition from="outcome2" to="outcome2"/>
+        </State>
+        <Transition from="outcome1" to="NestedSM"/>
+        <Transition from="outcome2" to="final_outcome"/>
+    </StateMachine>
+</StateMachine>

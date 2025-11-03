@@ -67,4 +67,63 @@ ament_environment_hooks(PYTHONPATH.sh.in)
 # Install Python loader package
 ament_python_install_package(${PROJECT_NAME})
 
+install(PROGRAMS
+  yasmin_factory/yasmin_factory_node.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Tests
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_pytest REQUIRED)
+
+  # Build test plugin library
+  add_library(yasmin_factory_test_states SHARED
+    test/test_simple_state.cpp
+  )
+  target_link_libraries(yasmin_factory_test_states PUBLIC
+    yasmin::yasmin
+    pluginlib::pluginlib
+  )
+  
+  # Install test plugin library
+  install(TARGETS yasmin_factory_test_states
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+  )
+  
+  # Install test plugin description
+  install(FILES test/test_plugins.xml
+    DESTINATION share/${PROJECT_NAME}
+  )
+  
+  # Install test XML files
+  install(FILES
+    test/test_simple_sm.xml
+    test/test_nested_sm.xml
+    test/test_parameter_state.xml
+    DESTINATION share/${PROJECT_NAME}/test
+  )
+
+  # Export plugin description for tests
+  pluginlib_export_plugin_description_file(yasmin test/test_plugins.xml)
+
+  # Python tests
+  ament_add_pytest_test(test_yasmin_factory test/test_yasmin_factory.py
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+
+  # C++ tests
+  ament_add_gtest(test_yasmin_factory_cpp test/test_yasmin_factory.cpp)
+  target_link_libraries(test_yasmin_factory_cpp
+    ${PROJECT_NAME}
+    yasmin::yasmin
+  )
+  target_include_directories(test_yasmin_factory_cpp PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+
+endif()
+
 ament_package()
