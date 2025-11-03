@@ -16,6 +16,7 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclpy REQUIRED)
+find_package(pluginlib REQUIRED)
 find_package(yasmin REQUIRED)
 find_package(yasmin_ros REQUIRED)
 find_package(yasmin_viewer REQUIRED)
@@ -29,6 +30,7 @@ include_directories(include)
 set(DEPENDENCIES
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
+  pluginlib::pluginlib
   yasmin::yasmin
   yasmin_ros::yasmin_ros
   yasmin_viewer::yasmin_viewer
@@ -38,6 +40,7 @@ set(DEPENDENCIES
 set(DEPENDENCIES_PACKAGE
   rclcpp
   rclcpp_action
+  pluginlib
   yasmin
   yasmin_ros
   yasmin_viewer
@@ -137,6 +140,14 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# plugins
+add_library(foo_state SHARED src/foo_state.cpp)
+target_link_libraries(foo_state PUBLIC ${DEPENDENCIES})
+pluginlib_export_plugin_description_file(yasmin resource/plugins.xml)
+install(TARGETS foo_state
+  LIBRARY DESTINATION lib
+)
+
 ament_export_include_directories(include)
 ament_export_dependencies(${DEPENDENCIES_PACKAGE})
 
@@ -194,5 +205,14 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  yasmin_demos/plugin_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install state_machines directory
+install(DIRECTORY state_machines
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 ament_package()

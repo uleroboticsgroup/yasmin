@@ -105,7 +105,7 @@ def YASMIN_LOG_ERROR(text: str) -> None:
     @return: None
     """
     file, function, line = get_caller_info()
-    log_error(file, function, line, text)
+    log_error(file, function, line, str(text))
 
 
 def YASMIN_LOG_WARN(text: str) -> None:
@@ -121,7 +121,7 @@ def YASMIN_LOG_WARN(text: str) -> None:
     @return: None
     """
     file, function, line = get_caller_info()
-    log_warn(file, function, line, text)
+    log_warn(file, function, line, str(text))
 
 
 def YASMIN_LOG_INFO(text: str) -> None:
@@ -137,7 +137,7 @@ def YASMIN_LOG_INFO(text: str) -> None:
     @return: None
     """
     file, function, line = get_caller_info()
-    log_info(file, function, line, text)
+    log_info(file, function, line, str(text))
 
 
 def YASMIN_LOG_DEBUG(text: str) -> None:
@@ -153,7 +153,7 @@ def YASMIN_LOG_DEBUG(text: str) -> None:
     @return: None
     """
     file, function, line = get_caller_info()
-    log_debug(file, function, line, text)
+    log_debug(file, function, line, str(text))
 
 
 __all__ = [

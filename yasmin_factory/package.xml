@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+    <name>yasmin_factory</name>
+    <version>3.5.1</version>
+    <description>YASMIN factory to create FSMs from XML files</description>
+    <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
+    <license>GPL-3.0</license>
+    <buildtool_depend>ament_cmake</buildtool_depend>
+    <buildtool_depend>ament_python</buildtool_depend>
+    <depend>pluginlib</depend>
+    <depend>class_loader</depend>
+    <depend>rclcpp</depend>
+    <depend>yasmin</depend>
+    <exec_depend>python3</exec_depend>
+    <depend>pybind11-dev</depend>
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
+</package>

@@ -16,11 +16,15 @@
 #ifndef YASMIN__BLACKBOARD__BLACKBOARD_PYWRAPPER_HPP
 #define YASMIN__BLACKBOARD__BLACKBOARD_PYWRAPPER_HPP
 
+#include <list>
 #include <map>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <string>
+#include <vector>
 
 #include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard/blackboard_value.hpp"
 #include "yasmin/blackboard/blackboard_value_pyobject.hpp"
 
 namespace py = pybind11;
@@ -30,11 +34,23 @@ namespace blackboard {
 
 /**
  * @class BlackboardPyWrapper
- * @brief A wrapper around the C++ Blackboard that stores Python objects.
+ * @brief A wrapper around the C++ Blackboard that stores Python objects and
+ * native types.
  *
  * This wrapper provides a Python-friendly interface to the C++ Blackboard,
- * allowing storage and retrieval of arbitrary Python objects while
- * maintaining thread safety and proper memory management.
+ * allowing storage and retrieval of both arbitrary Python objects and native
+ * C++ types (int, float, string, bool, etc.) while maintaining thread safety
+ * and proper memory management.
+ *
+ * Supported types:
+ * - Python int -> C++ int64_t
+ * - Python float -> C++ double
+ * - Python str -> C++ std::string
+ * - Python bool -> C++ bool
+ * - Python list -> C++ std::vector<py::object>
+ * - Python tuple -> C++ std::vector<py::object>
+ * - Python dict -> C++ std::map<std::string, py::object>
+ * - Other Python objects -> Stored as PyObject*
  */
 class BlackboardPyWrapper {
 private:
@@ -57,10 +73,91 @@ public:
 
   /**
    * @brief Set a Python object in the blackboard.
+   *
+   * This method automatically detects the type of the Python object and stores
+   * it in the most appropriate C++ representation:
+   * - Python int -> C++ int64_t
+   * - Python float -> C++ double
+   * - Python str -> C++ std::string
+   * - Python bool -> C++ bool
+   * - Python list -> C++ std::vector<py::object>
+   * - Other Python objects -> Stored as PyObject*
+   *
    * @param key The key to associate with the value.
    * @param value The Python object to store.
    */
   void set(const std::string &key, py::object value) {
+    // Check for None first
+    if (value.is_none()) {
+      this->blackboard->set<BlackboardValuePyObject *>(
+          key, new BlackboardValuePyObject(value.ptr()));
+      return;
+    }
+
+    // Check for bool (must be before int, as bool is a subtype of int in
+    // Python)
+    if (py::isinstance<py::bool_>(value)) {
+      bool cpp_value = value.cast<bool>();
+      this->blackboard->set<bool>(key, cpp_value);
+      return;
+    }
+
+    // Check for int
+    if (py::isinstance<py::int_>(value)) {
+      int64_t cpp_value = value.cast<int64_t>();
+      this->blackboard->set<int64_t>(key, cpp_value);
+      return;
+    }
+
+    // Check for float
+    if (py::isinstance<py::float_>(value)) {
+      double cpp_value = value.cast<double>();
+      this->blackboard->set<double>(key, cpp_value);
+      return;
+    }
+
+    // Check for str
+    if (py::isinstance<py::str>(value)) {
+      std::string cpp_value = value.cast<std::string>();
+      this->blackboard->set<std::string>(key, cpp_value);
+      return;
+    }
+
+    // Check for list
+    if (py::isinstance<py::list>(value)) {
+      py::list py_list = value.cast<py::list>();
+      std::vector<py::object> cpp_vector;
+      for (auto item : py_list) {
+        cpp_vector.push_back(py::reinterpret_borrow<py::object>(item));
+      }
+      this->blackboard->set<std::vector<py::object>>(key, cpp_vector);
+      return;
+    }
+
+    // Check for tuple
+    if (py::isinstance<py::tuple>(value)) {
+      py::tuple py_tuple = value.cast<py::tuple>();
+      std::vector<py::object> cpp_vector;
+      for (auto item : py_tuple) {
+        cpp_vector.push_back(py::reinterpret_borrow<py::object>(item));
+      }
+      this->blackboard->set<std::vector<py::object>>(key, cpp_vector);
+      return;
+    }
+
+    // Check for dict
+    if (py::isinstance<py::dict>(value)) {
+      py::dict py_dict = value.cast<py::dict>();
+      std::map<std::string, py::object> cpp_map;
+      for (auto item : py_dict) {
+        std::string map_key = py::str(item.first).cast<std::string>();
+        cpp_map[map_key] = py::reinterpret_borrow<py::object>(item.second);
+      }
+      this->blackboard->set<std::map<std::string, py::object>>(key, cpp_map);
+      return;
+    }
+
+    // Default: store as PyObject* for other Python objects
     PyObject *py_obj = value.ptr();
 
     if (this->blackboard->contains(key)) {
@@ -75,15 +172,96 @@ public:
 
   /**
    * @brief Get a Python object from the blackboard.
+   *
+   * This method retrieves values from the blackboard and converts them back to
+   * Python objects. It automatically handles:
+   * - C++ int64_t -> Python int
+   * - C++ double -> Python float
+   * - C++ std::string -> Python str
+   * - C++ bool -> Python bool
+   * - C++ std::vector<py::object> -> Python list
+   * - C++ std::map<std::string, py::object> -> Python dict
+   * - PyObject* -> Python object
+   *
    * @param key The key associated with the value.
    * @return The Python object.
    * @throws std::runtime_error if the key does not exist.
    */
   py::object get(const std::string &key) {
-    BlackboardValuePyObject *wrapper =
-        this->blackboard->get<BlackboardValuePyObject *>(key);
-    PyObject *py_obj = wrapper->get();
-    return py::reinterpret_borrow<py::object>(py_obj);
+    if (!this->blackboard->contains(key)) {
+      throw std::runtime_error("Element '" + key +
+                               "' does not exist in the blackboard");
+    }
+
+    // Try string first (most common and avoids false positives with bool)
+    try {
+      std::string value = this->blackboard->get<std::string>(key);
+      return py::cast(value);
+    } catch (...) {
+      // Not a string, continue
+    }
+
+    // Try vector
+    try {
+      std::vector<py::object> value =
+          this->blackboard->get<std::vector<py::object>>(key);
+      py::list py_list;
+      for (const auto &item : value) {
+        py_list.append(item);
+      }
+      return py_list;
+    } catch (...) {
+      // Not a vector, continue
+    }
+
+    // Try map
+    try {
+      std::map<std::string, py::object> value =
+          this->blackboard->get<std::map<std::string, py::object>>(key);
+      py::dict py_dict;
+      for (const auto &item : value) {
+        py_dict[py::str(item.first)] = item.second;
+      }
+      return py_dict;
+    } catch (...) {
+      // Not a map, continue
+    }
+
+    // Try double (before int to preserve floating point precision)
+    try {
+      double value = this->blackboard->get<double>(key);
+      return py::cast(value);
+    } catch (...) {
+      // Not a double, continue
+    }
+
+    // Try int64_t
+    try {
+      int64_t value = this->blackboard->get<int64_t>(key);
+      return py::cast(value);
+    } catch (...) {
+      // Not an int, continue
+    }
+
+    // Try bool (checked after numeric types to avoid false conversions)
+    try {
+      bool value = this->blackboard->get<bool>(key);
+      return py::cast(value);
+    } catch (...) {
+      // Not a bool, continue
+    }
+
+    // Try PyObject* (fallback)
+    try {
+      BlackboardValuePyObject *wrapper =
+          this->blackboard->get<BlackboardValuePyObject *>(key);
+      PyObject *py_obj = wrapper->get();
+      return py::reinterpret_borrow<py::object>(py_obj);
+    } catch (...) {
+      // If we get here, something went wrong
+      throw std::runtime_error("Unable to retrieve value for key '" + key +
+                               "' from blackboard");
+    }
   }
 
   /**

@@ -25,6 +25,8 @@
 #include "yasmin_demos/foo_state.h"
 #include "yasmin_ros/ros_logs.hpp"
 
+#include <pluginlib/class_list_macros.hpp>
+
 using namespace yasmin;
 
 /**
@@ -63,3 +65,5 @@ FooState::execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 };
 
 FooState::~FooState(){};
+
+PLUGINLIB_EXPORT_CLASS(FooState, yasmin::State)
