@@ -5,3 +5,10 @@
         <description>Foo state for YASMIN demos</description>
     </class>
 </library>
+<library path="bar_state">
+    <class name="yasmin_demos/BarState"
+         type="BarState"
+         base_class_type="yasmin::State">
+        <description>Bar state for YASMIN demos</description>
+    </class>
+</library>

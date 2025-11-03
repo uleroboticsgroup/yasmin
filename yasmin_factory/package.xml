@@ -11,6 +11,7 @@
     <depend>class_loader</depend>
     <depend>rclcpp</depend>
     <depend>yasmin</depend>
+    <depend>tinyxml2_vendor</depend>
     <exec_depend>python3</exec_depend>
     <depend>pybind11-dev</depend>
     <export>

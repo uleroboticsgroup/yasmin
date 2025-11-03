@@ -44,8 +44,8 @@ def main():
     set_ros_loggers()
 
     # Create a finite state machine (FSM)
-    loader = YasminFactory()
-    sm = loader.create_sm_from_file(
+    factory = YasminFactory()
+    sm = factory.create_sm_from_file(
         os.path.join(
             get_package_share_directory("yasmin_demos"), "state_machines", "demo.xml"
         )

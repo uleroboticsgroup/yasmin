@@ -20,6 +20,7 @@ find_package(pluginlib REQUIRED)
 find_package(yasmin REQUIRED)
 find_package(yasmin_ros REQUIRED)
 find_package(yasmin_viewer REQUIRED)
+find_package(yasmin_factory REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(example_interfaces REQUIRED)
 
@@ -34,6 +35,7 @@ set(DEPENDENCIES
   yasmin::yasmin
   yasmin_ros::yasmin_ros
   yasmin_viewer::yasmin_viewer
+  yasmin_factory::yasmin_factory
   ${nav_msgs_TARGETS}
   ${example_interfaces_TARGETS}
 )
@@ -44,6 +46,7 @@ set(DEPENDENCIES_PACKAGE
   yasmin
   yasmin_ros
   yasmin_viewer
+  yasmin_factory
   nav_msgs
   example_interfaces
 )
@@ -140,11 +143,25 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# factory demo
+add_executable(factory_demo src/factory_demo.cpp)
+target_link_libraries(factory_demo PUBLIC ${DEPENDENCIES})
+install(TARGETS
+  factory_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # plugins
 add_library(foo_state SHARED src/foo_state.cpp)
 target_link_libraries(foo_state PUBLIC ${DEPENDENCIES})
 pluginlib_export_plugin_description_file(yasmin resource/plugins.xml)
 install(TARGETS foo_state
+  LIBRARY DESTINATION lib
+)
+
+add_library(bar_state SHARED src/bar_state.cpp)
+target_link_libraries(bar_state PUBLIC ${DEPENDENCIES})
+install(TARGETS bar_state
   LIBRARY DESTINATION lib
 )
 
@@ -206,7 +223,7 @@ install(PROGRAMS
 )
 
 install(PROGRAMS
-  yasmin_demos/plugin_demo.py
+  yasmin_demos/factory_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
