@@ -38,40 +38,43 @@ namespace py = pybind11;
 namespace yasmin_factory {
 
 /**
- * @class PythonStateAdapter
- * @brief Adapter class to wrap a Python State and make it usable in C++.
+ * @class PythonStateHolder
+ * @brief Minimal holder to keep Python state objects alive in C++.
  *
- * This class holds a Python state object and forwards execution calls to it.
+ * This class wraps a Python state object and delegates all operations
+ * to the underlying PyState trampoline. Its only purpose is to maintain
+ * the Python object's lifetime.
  */
-class __attribute__((visibility("hidden"))) PythonStateAdapter
+class __attribute__((visibility("hidden"))) PythonStateHolder
     : public yasmin::State {
 public:
   /**
-   * @brief Constructs a PythonStateAdapter with a Python state object.
-   *
-   * @param py_state Python state object.
-   * @param outcomes Set of possible outcomes for this state.
+   * @brief Constructs a holder with a Python state object.
+   * @param cpp_state The C++ state pointer extracted from Python.
+   * @param py_state The Python state object (kept alive).
    */
-  PythonStateAdapter(py::object py_state, std::set<std::string> outcomes);
+  PythonStateHolder(std::shared_ptr<yasmin::State> cpp_state,
+                    py::object py_state);
 
   /**
-   * @brief Executes the Python state.
-   *
-   * @param blackboard Shared pointer to the blackboard.
-   * @return The outcome string returned by the Python state.
+   * @brief Delegates execution to the underlying Python state.
    */
   std::string
   execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override;
 
   /**
-   * @brief Converts the state to a string representation.
-   *
-   * @return A string representation of the Python state.
+   * @brief Delegates cancellation to the underlying Python state.
+   */
+  void cancel_state() override;
+
+  /**
+   * @brief Delegates string conversion to the underlying Python state.
    */
   std::string to_string() override;
 
 private:
-  py::object py_state_; ///< The Python state object
+  std::shared_ptr<yasmin::State> cpp_state_; ///< The C++ state pointer
+  py::object py_state_;                      ///< Python object (kept alive)
 };
 
 /**

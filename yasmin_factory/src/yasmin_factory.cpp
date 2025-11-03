@@ -29,38 +29,21 @@ std::unique_ptr<py::scoped_interpreter> YasminFactory::py_interpreter_ =
     nullptr;
 bool YasminFactory::py_initialized_ = false;
 
-// PythonStateAdapter implementation
-PythonStateAdapter::PythonStateAdapter(py::object py_state,
-                                       std::set<std::string> outcomes)
-    : yasmin::State(outcomes), py_state_(py_state) {}
+// PythonStateHolder implementation
+PythonStateHolder::PythonStateHolder(std::shared_ptr<yasmin::State> cpp_state,
+                                     py::object py_state)
+    : yasmin::State(cpp_state->get_outcomes()), cpp_state_(cpp_state),
+      py_state_(py_state) {}
 
-std::string PythonStateAdapter::execute(
+std::string PythonStateHolder::execute(
     std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-  try {
-    py::gil_scoped_acquire acquire;
-
-    // Wrap the C++ blackboard for Python
-    yasmin::blackboard::BlackboardPyWrapper bb_wrapper(blackboard);
-
-    // Call the Python state's execute method
-    py::object result = py_state_.attr("execute")(bb_wrapper);
-
-    // Convert result to string
-    return result.cast<std::string>();
-  } catch (const py::error_already_set &e) {
-    throw std::runtime_error("Python state execution error: " +
-                             std::string(e.what()));
-  }
+  return this->cpp_state_->execute(blackboard);
 }
 
-std::string PythonStateAdapter::to_string() {
-  try {
-    py::gil_scoped_acquire acquire;
-    py::object str_repr = py_state_.attr("__str__")();
-    return str_repr.cast<std::string>();
-  } catch (const py::error_already_set &e) {
-    return "PythonState(error getting string representation)";
-  }
+void PythonStateHolder::cancel_state() { this->cpp_state_->cancel_state(); }
+
+std::string PythonStateHolder::to_string() {
+  return this->cpp_state_->to_string();
 }
 
 // YasminFactory implementation
@@ -73,8 +56,8 @@ YasminFactory::YasminFactory()
 YasminFactory::~YasminFactory() { this->cleanup(); }
 
 void YasminFactory::cleanup() {
-  if (state_loader_) {
-    state_loader_.reset();
+  if (this->state_loader_) {
+    this->state_loader_.reset();
   }
 }
 
@@ -104,7 +87,10 @@ YasminFactory::create_python_state(const std::string &module_name,
   try {
     py::gil_scoped_acquire acquire;
 
-    // Import the module
+    // Import the yasmin.state module to ensure the State class is registered
+    py::module_::import("yasmin.state");
+
+    // Import the user's module
     py::module_ module = py::module_::import(module_name.c_str());
 
     // Get the class
@@ -122,12 +108,12 @@ YasminFactory::create_python_state(const std::string &module_name,
       py_state = state_class();
     }
 
-    // Get the outcomes from the Python state
-    py::object py_outcomes = py_state.attr("get_outcomes")();
-    std::set<std::string> outcomes = py_outcomes.cast<std::set<std::string>>();
+    // Extract the C++ pointer from the Python object
+    // The Python State object is managed by PyState trampoline
+    auto cpp_state_ptr = py_state.cast<std::shared_ptr<yasmin::State>>();
 
-    // Create and return the adapter
-    return std::make_shared<PythonStateAdapter>(py_state, outcomes);
+    // Wrap it in a holder that keeps the Python object alive
+    return std::make_shared<PythonStateHolder>(cpp_state_ptr, py_state);
 
   } catch (const py::error_already_set &e) {
     throw std::runtime_error("Failed to create Python state '" + module_name +
