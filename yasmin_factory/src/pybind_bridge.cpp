@@ -17,70 +17,23 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "yasmin/blackboard/blackboard.hpp"
-#include "yasmin/blackboard/blackboard_pywrapper.hpp"
 #include "yasmin/state.hpp"
 
 namespace py = pybind11;
 
 /**
- * @class CppStateWrapper
- * @brief A wrapper class to hold a C++ State instance and expose it to Python.
- *
- * This class manages a shared pointer to a yasmin::State instance and provides
- * methods to interact with it from Python.
- */
-class CppStateWrapper {
-public:
-  /**
-   * @brief Constructs a CppStateWrapper with a shared pointer to a
-   * yasmin::State.
-   * @param impl A shared pointer to a yasmin::State instance.
-   */
-  explicit CppStateWrapper(std::shared_ptr<yasmin::State> impl) : impl_(impl) {}
-
-  /**
-   * @brief Retrieves the possible outcomes of the state.
-   * @return A set of strings representing the possible outcomes.
-   */
-  std::set<std::string> get_outcomes() const { return impl_->get_outcomes(); }
-
-  /**
-   * @brief Calls the underlying C++ State instance with a Blackboard.
-   * @param bb A shared pointer to a yasmin::Blackboard instance.
-   * @return The outcome of the state execution as a string.
-   */
-  std::string operator()(std::shared_ptr<yasmin::blackboard::Blackboard> bb) {
-    return (*impl_)(bb);
-  }
-
-  /**
-   * @brief Calls the underlying C++ State instance with a BlackboardPyWrapper.
-   * @param bb_wrapper A reference to a BlackboardPyWrapper instance.
-   * @return The outcome of the state execution as a string.
-   */
-  std::string operator()(yasmin::blackboard::BlackboardPyWrapper &bb_wrapper) {
-    return (*impl_)(bb_wrapper.get_cpp_blackboard());
-  }
-
-  /**
-   * @brief Converts the state to a string representation.
-   * @return A string representation of the state.
-   */
-  std::string to_string() const { return impl_->to_string(); }
-
-private:
-  /// The underlying C++ State instance.
-  std::shared_ptr<yasmin::State> impl_;
-};
-
-/**
  * @class CppStateFactory
- * @brief A factory class to create CppStateWrapper instances from available C++
- * State classes.
+ * @brief A factory class to create C++ State instances from available
+ * State classes using pluginlib.
  *
  * This class uses pluginlib to load and instantiate C++ State classes
- * dynamically.
+ * dynamically. The returned states are pybind11-wrapped yasmin::State
+ * instances that can be used directly in Python.
+ *
+ * The factory maintains strong references to created states and uses
+ * pybind11's keep_alive policy to ensure the ClassLoader outlives all
+ * created objects, preventing class_loader warnings about unloading
+ * libraries while objects still exist.
  */
 class CppStateFactory {
 public:
@@ -88,48 +41,94 @@ public:
    * @brief Constructs a CppStateFactory and initializes the pluginlib
    * ClassLoader.
    */
-  CppStateFactory() : loader_("yasmin", "yasmin::State") {}
+  CppStateFactory()
+      : loader_(std::make_shared<pluginlib::ClassLoader<yasmin::State>>(
+            "yasmin", "yasmin::State")) {}
+
+  /**
+   * @brief Destructor that ensures all created states are destroyed
+   * before the ClassLoader.
+   */
+  ~CppStateFactory() {
+    // Clear all created states before destroying the loader
+    this->created_states_.clear();
+    // The shared_ptr to loader will be destroyed after created_states_
+  }
 
   /**
    * @brief Retrieves a list of available C++ State class names.
    * @return A vector of strings representing the available class names.
    */
   std::vector<std::string> available_classes() {
-    return loader_.getDeclaredClasses();
+    return this->loader_->getDeclaredClasses();
   }
 
   /**
-   * @brief Creates a CppStateWrapper instance for the specified C++ State
-   * class.
+   * @brief Creates a yasmin::State instance for the specified C++ State class.
    * @param class_name The name of the C++ State class to instantiate.
-   * @return A CppStateWrapper instance wrapping the created C++ State instance.
+   * @return A shared pointer to the created yasmin::State instance.
    * @throws pluginlib::LibraryLoadException if the class cannot be loaded.
    * @throws pluginlib::CreateClassException if the class cannot be
    * instantiated.
    */
-  CppStateWrapper create(const std::string &class_name) {
-    auto instance = loader_.createSharedInstance(class_name);
-    return CppStateWrapper(instance);
+  std::shared_ptr<yasmin::State> create(const std::string &class_name) {
+    auto state = this->loader_->createSharedInstance(class_name);
+    // Keep a strong reference to track created states
+    this->created_states_.push_back(state);
+    return state;
   }
 
+  /**
+   * @brief Clears all references to created states.
+   * Call this before destroying the factory to ensure proper cleanup order.
+   * This forces destruction of all C++ states before the ClassLoader is
+   * destroyed.
+   */
+  void clear_states() {
+    // Explicitly reset all shared pointers to trigger destruction
+    this->created_states_.clear();
+  }
+
+  /**
+   * @brief Gets the number of states currently tracked by the factory.
+   * @return The number of tracked states.
+   */
+  size_t state_count() const { return this->created_states_.size(); }
+
 private:
-  /// The pluginlib ClassLoader for yasmin::State classes.
-  pluginlib::ClassLoader<yasmin::State> loader_;
+  /// The pluginlib ClassLoader for yasmin::State classes (as shared_ptr for
+  /// controlled lifetime).
+  std::shared_ptr<pluginlib::ClassLoader<yasmin::State>> loader_;
+
+  /// Track all created states to ensure proper cleanup order
+  std::vector<std::shared_ptr<yasmin::State>> created_states_;
 };
 
 PYBIND11_MODULE(yasmin_pybind_bridge, m) {
-  py::class_<CppStateWrapper>(m, "CppState")
-      .def("__call__",
-           py::overload_cast<yasmin::blackboard::BlackboardPyWrapper &>(
-               &CppStateWrapper::operator()))
-      .def("__call__",
-           py::overload_cast<std::shared_ptr<yasmin::blackboard::Blackboard>>(
-               &CppStateWrapper::operator()))
-      .def("get_outcomes", &CppStateWrapper::get_outcomes)
-      .def("__str__", &CppStateWrapper::to_string);
+  m.doc() = "Python bindings for yasmin factory C++ state loading";
+
+  // Import the State class from yasmin.state module
+  // This ensures pybind11 knows how to handle yasmin::State objects
+  auto state_module = py::module_::import("yasmin.state");
+
+  // Get the State class that's already registered in yasmin.state
+  auto state_class = state_module.attr("State");
 
   py::class_<CppStateFactory>(m, "CppStateFactory")
       .def(py::init<>())
-      .def("available_classes", &CppStateFactory::available_classes)
-      .def("create", &CppStateFactory::create);
+      .def("available_classes", &CppStateFactory::available_classes,
+           "Get list of available C++ State class names")
+      .def("clear_states", &CppStateFactory::clear_states,
+           "Clear all references to created states (call before destruction)")
+      .def("state_count", &CppStateFactory::state_count,
+           "Get the number of states currently tracked by the factory")
+      .def(
+          "create",
+          [state_class](CppStateFactory &self,
+                        const std::string &class_name) -> py::object {
+            auto cpp_state = self.create(class_name);
+            return py::cast(cpp_state);
+          },
+          py::arg("class_name"), py::keep_alive<0, 1>(),
+          "Create a C++ State instance by class name");
 }

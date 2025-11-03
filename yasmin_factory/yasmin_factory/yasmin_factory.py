@@ -16,47 +16,7 @@
 import importlib
 import xml.etree.ElementTree as ET
 from yasmin import State, Blackboard, StateMachine, Concurrence
-from yasmin_pybind_bridge import CppStateFactory, CppState
-
-
-class _CppStateAdapter(State):
-    """
-    Adapter class to convert a C++ State instance into a Python State.
-    """
-
-    def __init__(self, cpp_state: CppState) -> None:
-        """
-        Initializes the adapter with a C++ State instance.
-        """
-
-        super().__init__(cpp_state.get_outcomes())
-        self._cpp_state = cpp_state
-
-    def execute(self, blackboard: Blackboard) -> str:
-        """
-        Executes the C++ State instance with the provided blackboard.
-        Args:
-            blackboard (Blackboard): The blackboard to pass to the C++ state.
-        Returns:
-            str: The outcome returned by the C++ state.
-        """
-        return self._cpp_state(blackboard)
-
-    def cleanup(self) -> None:
-        """
-        Explicitly cleanup the C++ state reference.
-        """
-        self._cpp_state = None
-
-    def __del__(self) -> None:
-        """
-        Destructor that ensures proper cleanup of C++ state reference.
-        """
-        try:
-            self.cleanup()
-        except:
-            # Ignore errors during cleanup in destructor
-            pass
+from yasmin_pybind_bridge import CppStateFactory
 
 
 class YasminFactory:
@@ -67,7 +27,6 @@ class YasminFactory:
         """
 
         self._cpp_factory = CppStateFactory()
-        self._cpp_state_adapters = []  # Track created C++ state adapters
 
     def create_state(self, state_elem: ET.Element) -> State:
         """
@@ -98,9 +57,7 @@ class YasminFactory:
                 return state_class()
 
         elif state_type == "cpp":
-            adapter = _CppStateAdapter(self._cpp_factory.create(class_name))
-            self._cpp_state_adapters.append(adapter)  # Track the adapter
-            return adapter
+            return self._cpp_factory.create(class_name)
 
         else:
             raise ValueError(f"Unknown state type: {state_type}")
@@ -206,19 +163,11 @@ class YasminFactory:
 
     def cleanup(self) -> None:
         """
-        Explicitly cleanup all created C++ state adapters and the factory.
+        Explicitly cleanup all created C++ state states and the factory.
         This should be called before the plugin loader is destroyed to avoid
         class loader warnings.
         """
-        # Cleanup all tracked C++ state adapters
-        for adapter in self._cpp_state_adapters:
-            adapter.cleanup()
-
-        # Clear references to C++ state adapters
-        self._cpp_state_adapters.clear()
-
-        # Explicitly delete the C++ factory to trigger proper cleanup
-        self._cpp_factory = None
+        self._cpp_factory.clear_states()
 
     def __del__(self) -> None:
         """
