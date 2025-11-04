@@ -36,10 +36,7 @@ class TestPublisherState : public ::testing::Test {
 protected:
   static void SetUpTestSuite() { rclcpp::init(0, nullptr); }
 
-  static void TearDownTestSuite() {
-    ROSClientsCache::clear_all();
-    rclcpp::shutdown();
-  }
+  static void TearDownTestSuite() { rclcpp::shutdown(); }
 };
 
 TEST_F(TestPublisherState, TestPublisher) {

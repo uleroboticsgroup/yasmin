@@ -62,9 +62,9 @@ void ROSClientsCache::clear_publishers() {
 
 void ROSClientsCache::clear_all() {
   std::lock_guard<std::recursive_mutex> lock(get_lock());
-  get_action_clients().clear();
-  get_service_clients().clear();
-  get_publishers().clear();
+  clear_action_clients();
+  clear_service_clients();
+  clear_publishers();
   YASMIN_LOG_INFO("All ROS clients caches cleared");
 }
 

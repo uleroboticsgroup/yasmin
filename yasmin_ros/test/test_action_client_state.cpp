@@ -108,7 +108,6 @@ protected:
     if (spin_thread.joinable()) {
       spin_thread.join();
     }
-    ROSClientsCache::clear_all();
     aux_node.reset();
     executor.reset();
     rclcpp::shutdown();
