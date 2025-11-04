@@ -169,26 +169,26 @@ class TestYasminFactory(unittest.TestCase):
         finally:
             os.unlink(temp_file)
 
-    # def test_state_execution(self):
-    #     """Test executing a created state."""
-    #     state_xml = '<State name="TestState" type="py" module="test.test_simple_state" class="TestSimpleState"/>'
-    #     state_elem = ET.fromstring(state_xml)
+    def test_state_execution(self):
+        """Test executing a created state."""
+        state_xml = '<State name="TestState" type="py" module="test.test_simple_state" class="TestSimpleState"/>'
+        state_elem = ET.fromstring(state_xml)
 
-    #     state = self.factory.create_state(state_elem)
-    #     blackboard = Blackboard()
+        state = self.factory.create_state(state_elem)
+        blackboard = Blackboard()
 
-    #     # Execute state multiple times
-    #     outcome1 = state.execute(blackboard)
-    #     self.assertEqual(outcome1, "outcome1")
-    #     self.assertEqual(blackboard["counter"], 1)
+        # Execute state multiple times
+        outcome1 = state.execute(blackboard)
+        self.assertEqual(outcome1, "outcome1")
+        self.assertEqual(blackboard["counter"], 1)
 
-    #     outcome2 = state.execute(blackboard)
-    #     self.assertEqual(outcome2, "outcome1")
-    #     self.assertEqual(blackboard["counter"], 2)
+        outcome2 = state.execute(blackboard)
+        self.assertEqual(outcome2, "outcome1")
+        self.assertEqual(blackboard["counter"], 2)
 
-    #     outcome3 = state.execute(blackboard)
-    #     self.assertEqual(outcome3, "outcome2")
-    #     self.assertEqual(blackboard["counter"], 3)
+        outcome3 = state.execute(blackboard)
+        self.assertEqual(outcome3, "outcome2")
+        self.assertEqual(blackboard["counter"], 3)
 
     def test_nested_state_machine(self):
         """Test creating a nested state machine."""

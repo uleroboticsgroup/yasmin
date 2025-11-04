@@ -80,14 +80,14 @@ colcon build
 Then, you can run the tests as follow:
 
 ```shell
-colcon test --packages-select yasmin yasmin_ros
+colcon test --packages-select yasmin yasmin_ros yasmin_factory
 colcon test-result --verbose
 ```
 
 To see the coverage report you have to run the tests with pytest directly:
 
 ```shell
-python3 -m pytest ~/ros2_ws/src/yasmin/yasmin/test ~/ros2_ws/src/yasmin/yasmin_ros/test --cov=yasmin --cov=yasmin_ros --cov-report=html --cov-report=term-missing
+python3 -m pytest ~/ros2_ws/src/yasmin/yasmin/test ~/ros2_ws/src/yasmin/yasmin_ros/test ~/ros2_ws/src/yasmin/yasmin_factory/test --cov=yasmin --cov=yasmin_ros --cov=yasmin_factory --cov-report=html --cov-report=term-missing
 ```
 
 ## Docker
