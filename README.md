@@ -1740,6 +1740,86 @@ if __name__ == "__main__":
 
 </details>
 
+#### Factory Demo (Plugins)
+
+```shell
+ros2 run yasmin_demos factory_demo.py
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```xml
+<StateMachine outcomes="outcome4">
+    <State name="Foo" type="cpp" class="yasmin_demos/FooState">
+        <Transition from="outcome1" to="Bar"/>
+        <Transition from="outcome2" to="outcome4"/>
+    </State>
+    <State name="Bar" type="py" module="yasmin_demos.bar_state" class="BarState">
+        <Transition from="outcome3" to="Foo"/>
+    </State>
+</StateMachine>
+```
+
+```python
+import os
+import rclpy
+import yasmin
+from yasmin_ros import set_ros_loggers
+from yasmin_viewer import YasminViewerPub
+from yasmin_factory import YasminFactory
+from ament_index_python import get_package_share_directory
+
+
+# Main function to initialize and run the state machine
+def main():
+    """
+    The main entry point of the application.
+
+    Initializes the ROS 2 environment, sets up the state machine,
+    and handles execution and termination.
+
+    Raises:
+        KeyboardInterrupt: If the execution is interrupted by the user.
+    """
+    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+
+    # Initialize ROS 2
+    rclpy.init()
+
+    # Set ROS 2 loggers
+    set_ros_loggers()
+
+    # Create a finite state machine (FSM)
+    factory = YasminFactory()
+    sm = factory.create_sm_from_file(
+        os.path.join(
+            get_package_share_directory("yasmin_demos"), "state_machines", "demo.xml"
+        )
+    )
+
+    # Publish FSM information for visualization
+    YasminViewerPub("plugin_demo", sm)
+
+    # Execute the FSM
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        if sm.is_running():
+            sm.cancel_state()
+
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+</details>
+
 ### Cpp
 
 #### Vanilla Demo
@@ -3156,6 +3236,74 @@ int main(int argc, char *argv[]) {
 
   rclcpp::shutdown();
 
+  return 0;
+}
+```
+
+</details>
+
+#### Factory Demo (Plugins)
+
+```shell
+ros2 run yasmin_demos factory_demo
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```xml
+<StateMachine outcomes="outcome4">
+    <State name="Foo" type="cpp" class="yasmin_demos/FooState">
+        <Transition from="outcome1" to="Bar"/>
+        <Transition from="outcome2" to="outcome4"/>
+    </State>
+    <State name="Bar" type="py" module="yasmin_demos.bar_state" class="BarState">
+        <Transition from="outcome3" to="Foo"/>
+    </State>
+</StateMachine>
+```
+
+```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include "ament_index_cpp/get_package_share_directory.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_factory/yasmin_factory.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+
+int main(int argc, char *argv[]) {
+  YASMIN_LOG_INFO("yasmin_factory_demo");
+  rclcpp::init(argc, argv);
+
+  // Set up ROS 2 loggers
+  yasmin_ros::set_ros_loggers();
+
+  std::string outcome;
+
+  // Create the factory in a scope
+  yasmin_factory::YasminFactory factory;
+
+  // Load state machine from XML file
+  std::string xml_file =
+      ament_index_cpp::get_package_share_directory("yasmin_demos") +
+      "/state_machines/demo.xml";
+
+  // Create the state machine from the XML file
+  auto sm = factory.create_sm_from_file(xml_file);
+
+  // Execute the state machine
+  try {
+    std::string outcome = (*sm.get())();
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  // Shutdown ROS 2
+  rclcpp::shutdown();
   return 0;
 }
 ```
