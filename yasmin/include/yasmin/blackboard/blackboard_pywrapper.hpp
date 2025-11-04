@@ -43,21 +43,19 @@ namespace detail {
  * @brief Type traits for Python to C++ type mapping
  */
 template <typename T> struct PythonTypeChecker {
-  static constexpr bool check(py::handle) { return false; }
+  static bool check(py::handle) { return false; }
   static T extract(py::handle) { throw std::runtime_error("Invalid type"); }
 };
 
 // Specialization for bool (must come before int)
 template <> struct PythonTypeChecker<bool> {
-  static constexpr bool check(py::handle obj) {
-    return PyBool_Check(obj.ptr());
-  }
+  static bool check(py::handle obj) { return PyBool_Check(obj.ptr()); }
   static bool extract(py::handle obj) { return obj.cast<bool>(); }
 };
 
 // Specialization for int64_t
 template <> struct PythonTypeChecker<int64_t> {
-  static constexpr bool check(py::handle obj) {
+  static bool check(py::handle obj) {
     return PyLong_Check(obj.ptr()) && !PyBool_Check(obj.ptr());
   }
   static int64_t extract(py::handle obj) { return obj.cast<int64_t>(); }
@@ -65,23 +63,19 @@ template <> struct PythonTypeChecker<int64_t> {
 
 // Specialization for double
 template <> struct PythonTypeChecker<double> {
-  static constexpr bool check(py::handle obj) {
-    return PyFloat_Check(obj.ptr());
-  }
+  static bool check(py::handle obj) { return PyFloat_Check(obj.ptr()); }
   static double extract(py::handle obj) { return obj.cast<double>(); }
 };
 
 // Specialization for std::string
 template <> struct PythonTypeChecker<std::string> {
-  static constexpr bool check(py::handle obj) {
-    return PyUnicode_Check(obj.ptr());
-  }
+  static bool check(py::handle obj) { return PyUnicode_Check(obj.ptr()); }
   static std::string extract(py::handle obj) { return obj.cast<std::string>(); }
 };
 
 // Specialization for std::vector<py::object>
 template <> struct PythonTypeChecker<std::vector<py::object>> {
-  static constexpr bool check(py::handle obj) {
+  static bool check(py::handle obj) {
     return PyList_Check(obj.ptr()) || PyTuple_Check(obj.ptr());
   }
   static std::vector<py::object> extract(py::handle obj) {
@@ -96,9 +90,7 @@ template <> struct PythonTypeChecker<std::vector<py::object>> {
 
 // Specialization for std::map<std::string, py::object>
 template <> struct PythonTypeChecker<std::map<std::string, py::object>> {
-  static constexpr bool check(py::handle obj) {
-    return PyDict_Check(obj.ptr());
-  }
+  static bool check(py::handle obj) { return PyDict_Check(obj.ptr()); }
   static std::map<std::string, py::object> extract(py::handle obj) {
     std::map<std::string, py::object> result;
     py::dict dict = py::reinterpret_borrow<py::dict>(obj);
