@@ -73,7 +73,66 @@ public:
    * @param value The Python object to store.
    */
   void set(const std::string &key, py::object value) {
-    this->blackboard->set<py::object>(key, value);
+    // Check the type of the Python object and store it with the corresponding C++ type
+    if (py::isinstance<py::bool_>(value)) {
+      // Bool must be checked before int since bool is a subclass of int in Python
+      this->blackboard->set<bool>(key, value.cast<bool>());
+    }
+    else if (py::isinstance<py::int_>(value)) {
+      // Try to determine if it fits in int or needs long
+      try {
+        this->blackboard->set<int>(key, value.cast<int>());
+      } catch (...) {
+        this->blackboard->set<long>(key, value.cast<long>());
+      }
+    }
+    else if (py::isinstance<py::float_>(value)) {
+      this->blackboard->set<double>(key, value.cast<double>());
+    }
+    else if (py::isinstance<py::str>(value)) {
+      this->blackboard->set<std::string>(key, value.cast<std::string>());
+    }
+    else if (py::isinstance<py::list>(value)) {
+      // Try to convert to std::vector if possible, otherwise store as py::object
+      try {
+        auto vec = value.cast<std::vector<py::object>>();
+        this->blackboard->set<std::vector<py::object>>(key, vec);
+      } catch (...) {
+        this->blackboard->set<py::object>(key, value);
+      }
+    }
+    else if (py::isinstance<py::dict>(value)) {
+      // Try to convert to std::map if possible, otherwise store as py::object
+      try {
+        auto map = value.cast<std::map<std::string, py::object>>();
+        this->blackboard->set<std::map<std::string, py::object>>(key, map);
+      } catch (...) {
+        this->blackboard->set<py::object>(key, value);
+      }
+    }
+    else if (py::isinstance<py::tuple>(value)) {
+      // Store tuples as py::object since std::tuple requires compile-time size
+      this->blackboard->set<py::object>(key, value);
+    }
+    else if (py::isinstance<py::set>(value)) {
+      // Try to convert to std::set if possible, otherwise store as py::object
+      try {
+        auto set = value.cast<std::set<py::object>>();
+        this->blackboard->set<std::set<py::object>>(key, set);
+      } catch (...) {
+        this->blackboard->set<py::object>(key, value);
+      }
+    }
+    else if (py::isinstance<py::bytes>(value)) {
+      this->blackboard->set<py::object>(key, value);
+    }
+    else if (value.is_none()) {
+      this->blackboard->set<py::object>(key, value);
+    }
+    else {
+      // For all other types (custom classes, etc.), store as py::object
+      this->blackboard->set<py::object>(key, value);
+    }
   }
 
   /**

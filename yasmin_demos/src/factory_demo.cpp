@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
   // Load state machine from XML file
   std::string xml_file =
       ament_index_cpp::get_package_share_directory("yasmin_demos") +
-      "/state_machines/demo.xml";
+      "/state_machines/demo_2.xml";
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);

@@ -47,7 +47,7 @@ def main():
     factory = YasminFactory()
     sm = factory.create_sm_from_file(
         os.path.join(
-            get_package_share_directory("yasmin_demos"), "state_machines", "demo.xml"
+            get_package_share_directory("yasmin_demos"), "state_machines", "demo_1.xml"
         )
     )
 

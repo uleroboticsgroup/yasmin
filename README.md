@@ -1794,7 +1794,7 @@ def main():
     factory = YasminFactory()
     sm = factory.create_sm_from_file(
         os.path.join(
-            get_package_share_directory("yasmin_demos"), "state_machines", "demo.xml"
+            get_package_share_directory("yasmin_demos"), "state_machines", "demo_1.xml"
         )
     )
 
@@ -3253,11 +3253,11 @@ ros2 run yasmin_demos factory_demo
 
 ```xml
 <StateMachine outcomes="outcome4">
-    <State name="Foo" type="cpp" class="yasmin_demos/FooState">
+    <State name="Foo" type="py" module="yasmin_demos.foo_state" class="FooState">
         <Transition from="outcome1" to="Bar"/>
         <Transition from="outcome2" to="outcome4"/>
     </State>
-    <State name="Bar" type="py" module="yasmin_demos.bar_state" class="BarState">
+    <State name="Bar" type="cpp" class="yasmin_demos/BarState">
         <Transition from="outcome3" to="Foo"/>
     </State>
 </StateMachine>
@@ -3289,7 +3289,7 @@ int main(int argc, char *argv[]) {
   // Load state machine from XML file
   std::string xml_file =
       ament_index_cpp::get_package_share_directory("yasmin_demos") +
-      "/state_machines/demo.xml";
+      "/state_machines/demo_2.xml";
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);
