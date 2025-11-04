@@ -20,12 +20,10 @@ from threading import Thread
 
 from yasmin import set_py_loggers
 from yasmin_ros.ros_clients_cache import ROSClientsCache
-from yasmin_ros import ActionState, ServiceState, MonitorState, PublisherState
+from yasmin_ros import ActionState
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
 
 from example_interfaces.action import Fibonacci
-from example_interfaces.srv import AddTwoInts
-from std_msgs.msg import String
 
 import rclpy
 from rclpy.node import Node
@@ -49,13 +47,6 @@ class AuxNode(Node):
             cancel_callback=self.cancel_action,
             callback_group=ReentrantCallbackGroup(),
         )
-
-        self.service_server = self.create_service(
-            AddTwoInts, "test", self.execute_service
-        )
-
-        self.pub = self.create_publisher(String, "test", 10)
-        self.timer = self.create_timer(1, self.publish_msgs)
 
     def goal_callback(self, goal_request) -> int:
         return GoalResponse.ACCEPT
@@ -84,18 +75,8 @@ class AuxNode(Node):
     def cancel_action(self, goal_handle) -> int:
         return CancelResponse.ACCEPT
 
-    def execute_service(self, request, response):
-        time.sleep(2)
-        response.sum = request.a + request.b
-        return response
 
-    def publish_msgs(self) -> None:
-        msg = String()
-        msg.data = "data"
-        self.pub.publish(msg)
-
-
-class TestYasminRos(unittest.TestCase):
+class TestActionClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -113,7 +94,7 @@ class TestYasminRos(unittest.TestCase):
     def tearDownClass(cls):
         rclpy.shutdown()
 
-    def test_action_succeed(self):
+    def test_action_client_succeed(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -141,7 +122,7 @@ class TestYasminRos(unittest.TestCase):
         state3 = ActionState(Fibonacci, "test2", create_goal_cb)
         self.assertEqual(2, ROSClientsCache.get_action_clients_count())
 
-    def test_action_result_handler(self):
+    def test_action_client_result_handler(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -156,7 +137,7 @@ class TestYasminRos(unittest.TestCase):
         )
         self.assertEqual("new_outcome", state())
 
-    def test_action_cancel(self):
+    def test_action_client_cancel(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -179,7 +160,7 @@ class TestYasminRos(unittest.TestCase):
         self.assertEqual(CANCEL, state())
         thread.join()
 
-    def test_action_abort(self):
+    def test_action_client_abort(self):
 
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
@@ -189,7 +170,7 @@ class TestYasminRos(unittest.TestCase):
         state = ActionState(Fibonacci, "test", create_goal_cb)
         self.assertEqual(ABORT, state())
 
-    def test_action_retry_wait_timeout(self):
+    def test_action_client_retry_wait_timeout(self):
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
             goal.order = 3
@@ -216,7 +197,7 @@ class TestYasminRos(unittest.TestCase):
             f"Captured messages: {[r.getMessage() for r in captured.records]}",
         )
 
-    def test_action_retry_response_timeout(self):
+    def test_action_client_retry_response_timeout(self):
         def create_goal_cb(blackboard):
             goal = Fibonacci.Goal()
             goal.order = 3
@@ -242,172 +223,6 @@ class TestYasminRos(unittest.TestCase):
             msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
             f"Captured messages: {[r.getMessage() for r in captured.records]}",
         )
-
-    def test_service(self):
-
-        def create_request_cb(blackboard):
-            request = AddTwoInts.Request()
-            request.a = 2
-            request.b = 3
-            return request
-
-        state = ServiceState(AddTwoInts, "test", create_request_cb)
-        self.assertEqual(SUCCEED, state())
-
-    def test_service_client_cache(self):
-        ROSClientsCache.clear_all()
-        self.assertEqual(0, ROSClientsCache.get_service_clients_count())
-
-        def create_request_cb(blackboard):
-            request = AddTwoInts.Request()
-            request.a = 2
-            request.b = 3
-            return request
-
-        state1 = ServiceState(AddTwoInts, "test", create_request_cb)
-        self.assertEqual(1, ROSClientsCache.get_service_clients_count())
-
-        state2 = ServiceState(AddTwoInts, "test", create_request_cb)
-        self.assertEqual(1, ROSClientsCache.get_service_clients_count())
-
-        state3 = ServiceState(AddTwoInts, "test2", create_request_cb)
-        self.assertEqual(2, ROSClientsCache.get_service_clients_count())
-
-    def test_service_response_handler(self):
-
-        def create_request_cb(blackboard):
-            request = AddTwoInts.Request()
-            request.a = 2
-            request.b = 3
-            return request
-
-        def response_handler(blackboard, response):
-            return "new_outcome"
-
-        state = ServiceState(
-            AddTwoInts, "test", create_request_cb, ["new_outcome"], response_handler
-        )
-        self.assertEqual("new_outcome", state())
-
-    def test_service_retry_wait_timeout(self):
-        def create_request_cb(blackboard):
-            request = AddTwoInts.Request()
-            request.a = 2
-            request.b = 3
-            return request
-
-        retries = 3
-
-        ## Capture the logs
-        with self.assertLogs("root", level="WARNING") as captured:
-            state = ServiceState(
-                AddTwoInts,
-                "test_retry",
-                create_request_cb,
-                maximum_retry=retries,
-                wait_timeout=0.1,
-            )
-            self.assertEqual(TIMEOUT, state())
-
-        ## Check that the number of WARNING logs is correct
-        self.assertEqual(
-            (retries * 2) + 1,
-            len(captured.records),
-            msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
-            f"Captured messages: {[r.getMessage() for r in captured.records]}",
-        )
-
-    def test_service_retry_response_timeout(self):
-        def create_request_cb(blackboard):
-            request = AddTwoInts.Request()
-            request.a = 2
-            request.b = 3
-            return request
-
-        retries = 3
-
-        ## Capture the logs
-        with self.assertLogs("root", level="WARNING") as captured:
-            state = ServiceState(
-                AddTwoInts,
-                "test",
-                create_request_cb,
-                maximum_retry=retries,
-                response_timeout=0.1,
-            )
-            self.assertEqual(TIMEOUT, state())
-
-        ## Check that the number of WARNING logs is correct
-        self.assertEqual(
-            (retries * 2) + 1,
-            len(captured.records),
-            msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
-            f"Captured messages: {[r.getMessage() for r in captured.records]}",
-        )
-
-    def test_monitor_timeout(self):
-
-        def monitor_handler(blackboard, msg):
-            return SUCCEED
-
-        state = MonitorState(
-            String, "test1", [SUCCEED], monitor_handler=monitor_handler, timeout=2
-        )
-        self.assertEqual(TIMEOUT, state())
-
-    def test_monitor_retry_timeout(self):
-        def monitor_handler(blackboard, msg):
-            return SUCCEED
-
-        retries = 3
-
-        ## Capture the logs
-        with self.assertLogs("root", level="WARNING") as captured:
-            state = MonitorState(
-                String,
-                "test1",
-                [SUCCEED],
-                monitor_handler=monitor_handler,
-                timeout=0.1,
-                maximum_retry=retries,
-            )
-            self.assertEqual(TIMEOUT, state())
-
-        ## Check that the number of WARNING logs is correct
-        self.assertEqual(
-            (retries * 2) + 1,
-            len(captured.records),
-            msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
-            f"Captured messages: {[r.getMessage() for r in captured.records]}",
-        )
-
-    def test_publisher(self):
-
-        def create_msg_handler(blackboard):
-            msg = String()
-            msg.data = "data"
-            return msg
-
-        state = PublisherState(String, "test", create_msg_handler)
-        self.assertEqual(SUCCEED, state())
-
-    def test_publisher_cache(self):
-        ROSClientsCache.clear_all()
-        self.assertEqual(0, ROSClientsCache.get_publishers_count())
-
-        def create_msg_handler(blackboard):
-            msg = String()
-            msg.data = "data"
-            return msg
-
-        state1 = PublisherState(String, "test", create_msg_handler)
-        self.assertEqual(1, ROSClientsCache.get_publishers_count())
-
-        state2 = PublisherState(String, "test", create_msg_handler)
-        self.assertEqual(1, ROSClientsCache.get_publishers_count())
-
-        state3 = PublisherState(String, "test2", create_msg_handler)
-        self.assertEqual(2, ROSClientsCache.get_publishers_count())
 
 
 if __name__ == "__main__":
