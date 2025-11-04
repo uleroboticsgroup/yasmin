@@ -195,19 +195,19 @@ public:
   std::string to_string() { return this->blackboard->to_string(); }
 
   /**
-   * @brief Set the remapping of the blackboard.
-   * @param remapping The remapping to set.
+   * @brief Set the remappings of the blackboard.
+   * @param remappings The remappings to set.
    */
-  void set_remapping(const std::map<std::string, std::string> &remapping) {
-    this->blackboard->set_remapping(remapping);
+  void set_remappings(const std::map<std::string, std::string> &remappings) {
+    this->blackboard->set_remappings(remappings);
   }
 
   /**
-   * @brief Get the remapping of the blackboard.
-   * @return The remapping of the blackboard.
+   * @brief Get the remappings of the blackboard.
+   * @return The remappings of the blackboard.
    */
-  std::map<std::string, std::string> get_remapping() {
-    return this->blackboard->get_remapping();
+  std::map<std::string, std::string> get_remappings() {
+    return this->blackboard->get_remappings();
   }
 
   /**

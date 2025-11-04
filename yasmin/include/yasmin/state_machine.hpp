@@ -72,7 +72,7 @@ public:
    * state.
    * @param transitions A map of transitions where the key is the outcome
    *                    and the value is the target state name.
-   * @param remapping A map of remapping keys for the blackboard.
+   * @param remappings A map of remappings keys for the blackboard.
    * @throws std::logic_error If the state is already registered or is an
    * outcome.
    * @throws std::invalid_argument If any transition has empty source or target,
@@ -80,7 +80,7 @@ public:
    */
   void add_state(std::string name, std::shared_ptr<State> state,
                  std::map<std::string, std::string> transitions = {},
-                 std::map<std::string, std::string> remapping = {});
+                 std::map<std::string, std::string> remappings = {});
 
   /**
    * @brief Sets the start state for the state machine.

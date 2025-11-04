@@ -46,8 +46,8 @@ private:
   std::map<std::string, BlackboardValueInterface *> values;
   /// Storage for type information for each key.
   std::map<std::string, std::string> type_registry;
-  /// Storage for key remapping.
-  std::map<std::string, std::string> remapping;
+  /// Storage for key remappings.
+  std::map<std::string, std::string> remappings;
 
   /** @brief Internal method that acquires the maped key. In the case the key is
    * not remaped, retruns the arg key.
@@ -66,29 +66,6 @@ public:
 
   /** @brief Virtual destructor for Blackboard. */
   virtual ~Blackboard();
-
-  /**
-   * @brief Retrieve a value from the blackboard.
-   * @tparam T The type of the value to retrieve.
-   * @param name The key associated with the value.
-   * @return The value associated with the specified key.
-   * @throws std::runtime_error if the key does not exist.
-   */
-  template <class T> T get(const std::string &key) {
-
-    YASMIN_LOG_DEBUG("Getting '%s' from the blackboard", key.c_str());
-
-    std::lock_guard<std::recursive_mutex> lk(this->mutex);
-
-    if (!this->contains(key)) {
-      throw std::runtime_error("Element '" + key +
-                               "' does not exist in the blackboard");
-    }
-
-    BlackboardValue<T> *b_value =
-        (BlackboardValue<T> *)this->values.at(this->remap(key));
-    return b_value->get();
-  }
 
   /**
    * @brief Set a value in the blackboard.
@@ -112,6 +89,29 @@ public:
       b_value->set(value);
       this->type_registry[name] = b_value->get_type();
     }
+  }
+
+  /**
+   * @brief Retrieve a value from the blackboard.
+   * @tparam T The type of the value to retrieve.
+   * @param name The key associated with the value.
+   * @return The value associated with the specified key.
+   * @throws std::runtime_error if the key does not exist.
+   */
+  template <class T> T get(const std::string &key) {
+
+    YASMIN_LOG_DEBUG("Getting '%s' from the blackboard", key.c_str());
+
+    std::lock_guard<std::recursive_mutex> lk(this->mutex);
+
+    if (!this->contains(key)) {
+      throw std::runtime_error("Element '" + key +
+                               "' does not exist in the blackboard");
+    }
+
+    BlackboardValue<T> *b_value =
+        (BlackboardValue<T> *)this->values.at(this->remap(key));
+    return b_value->get();
   }
 
   /**
@@ -148,16 +148,16 @@ public:
   std::string to_string();
 
   /**
-   * @brief Set the remapping of the blackboard.
-   * @param remapping The remapping to set.
+   * @brief Set the remappings of the blackboard.
+   * @param remappings The remappings to set.
    */
-  void set_remapping(const std::map<std::string, std::string> &remapping);
+  void set_remappings(const std::map<std::string, std::string> &remappings);
 
   /**
-   * @brief Get the remapping of the blackboard.
-   * @return The remapping of the blackboard.
+   * @brief Get the remappings of the blackboard.
+   * @return The remappings of the blackboard.
    */
-  const std::map<std::string, std::string> &get_remapping();
+  const std::map<std::string, std::string> &get_remappings();
 };
 
 } // namespace blackboard

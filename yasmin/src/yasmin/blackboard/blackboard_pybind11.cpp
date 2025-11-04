@@ -49,10 +49,10 @@ PYBIND11_MODULE(blackboard, m) {
            "Convert the blackboard to a string representation")
       .def("__str__", &yasmin::blackboard::BlackboardPyWrapper::to_string,
            "Convert the blackboard to a string representation")
-      .def("set_remapping",
-           &yasmin::blackboard::BlackboardPyWrapper::set_remapping,
-           "Set the key remapping", py::arg("remapping"))
-      .def("get_remapping",
-           &yasmin::blackboard::BlackboardPyWrapper::get_remapping,
-           "Get the key remapping");
+      .def("set_remappings",
+           &yasmin::blackboard::BlackboardPyWrapper::set_remappings,
+           "Set the key remappings", py::arg("remappings"))
+      .def("get_remappings",
+           &yasmin::blackboard::BlackboardPyWrapper::get_remappings,
+           "Get the key remappings");
 }

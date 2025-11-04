@@ -36,7 +36,7 @@ StateMachine::StateMachine(std::set<std::string> outcomes)
 
 void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
                              std::map<std::string, std::string> transitions,
-                             std::map<std::string, std::string> remapping) {
+                             std::map<std::string, std::string> remappings) {
 
   if (this->states.find(name) != this->states.end()) {
     throw std::logic_error("State '" + name +
@@ -91,7 +91,7 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
 
   this->states.insert({name, state});
   this->transitions.insert({name, transitions});
-  this->remappings.insert({name, remapping});
+  this->remappings.insert({name, remappings});
 
   if (this->start_state.empty()) {
     this->set_start_state(name);
@@ -308,7 +308,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   this->set_current_state(this->start_state);
 
   std::map<std::string, std::string> transitions;
-  std::map<std::string, std::string> remapping;
+  std::map<std::string, std::string> remappings;
   std::string outcome;
   std::string old_outcome;
 
@@ -317,8 +317,8 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     std::string current_state = this->get_current_state();
     auto state = this->states.at(current_state);
     transitions = this->transitions.at(current_state);
-    remapping = this->remappings.at(current_state);
-    blackboard->set_remapping(remapping);
+    remappings = this->remappings.at(current_state);
+    blackboard->set_remappings(remappings);
 
     outcome = (*state.get())(blackboard);
     old_outcome = std::string(outcome);

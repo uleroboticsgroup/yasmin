@@ -88,18 +88,18 @@ std::string Blackboard::to_string() {
 }
 
 const std::string &Blackboard::remap(const std::string &key) {
-  if (this->remapping.find(key) != this->remapping.end()) {
-    return this->remapping.at(key);
+  if (this->remappings.find(key) != this->remappings.end()) {
+    return this->remappings.at(key);
   }
 
   return key;
 }
 
-void Blackboard::set_remapping(
-    const std::map<std::string, std::string> &remapping) {
-  this->remapping = remapping;
+void Blackboard::set_remappings(
+    const std::map<std::string, std::string> &remappings) {
+  this->remappings = remappings;
 }
 
-const std::map<std::string, std::string> &Blackboard::get_remapping() {
-  return this->remapping;
+const std::map<std::string, std::string> &Blackboard::get_remappings() {
+  return this->remappings;
 }
