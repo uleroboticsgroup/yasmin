@@ -44,7 +44,9 @@ private:
   std::recursive_mutex mutex;
   /// Storage for key-value pairs.
   std::map<std::string, BlackboardValueInterface *> values;
-  /// Storage for key-value pairs.
+  /// Storage for type information for each key.
+  std::map<std::string, std::string> type_registry;
+  /// Storage for key remapping.
   std::map<std::string, std::string> remapping;
 
   /** @brief Internal method that acquires the maped key. In the case the key is
@@ -62,8 +64,8 @@ public:
    */
   Blackboard(const Blackboard &other);
 
-  /** @brief Destructor for Blackboard. */
-  ~Blackboard();
+  /** @brief Virtual destructor for Blackboard. */
+  virtual ~Blackboard();
 
   /**
    * @brief Retrieve a value from the blackboard.
@@ -103,9 +105,12 @@ public:
     if (!this->contains(name)) {
       BlackboardValue<T> *b_value = new BlackboardValue<T>(value);
       this->values.insert({name, b_value});
+      this->type_registry.insert({name, b_value->get_type()});
 
     } else {
-      ((BlackboardValue<T> *)this->values.at(name))->set(value);
+      BlackboardValue<T> *b_value = (BlackboardValue<T> *)this->values.at(name);
+      b_value->set(value);
+      this->type_registry[name] = b_value->get_type();
     }
   }
 
@@ -127,6 +132,14 @@ public:
    * @return The size of the blackboard.
    */
   int size();
+
+  /**
+   * @brief Get the type of a value stored in the blackboard.
+   * @param key The key associated with the value.
+   * @return A string representation of the type.
+   * @throws std::runtime_error if the key does not exist.
+   */
+  std::string get_type(const std::string &key);
 
   /**
    * @brief Convert the contents of the blackboard to a string.

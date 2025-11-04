@@ -19,7 +19,7 @@ from threading import Thread
 
 from yasmin import set_py_loggers
 from yasmin_ros import MonitorState
-from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
+from yasmin_ros.basic_outcomes import SUCCEED, TIMEOUT
 
 from std_msgs.msg import String
 
@@ -65,7 +65,11 @@ class TestYasminRos(unittest.TestCase):
             return SUCCEED
 
         state = MonitorState(
-            String, "test1", [SUCCEED], monitor_handler=monitor_handler, timeout=2
+            String,
+            "test1",
+            [SUCCEED],
+            monitor_handler=monitor_handler,
+            timeout=2,
         )
         self.assertEqual(TIMEOUT, state())
 

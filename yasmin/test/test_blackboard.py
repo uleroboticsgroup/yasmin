@@ -114,7 +114,7 @@ class TestBlackboard(unittest.TestCase):
         self.blackboard["tuple_key"] = test_tuple
         retrieved_value = self.blackboard["tuple_key"]
         # Tuples are stored as lists internally
-        self.assertIsInstance(retrieved_value, list)
+        self.assertIsInstance(retrieved_value, tuple)
         self.assertEqual(len(test_tuple), len(retrieved_value))
         for i in range(len(test_tuple)):
             self.assertEqual(test_tuple[i], retrieved_value[i])
