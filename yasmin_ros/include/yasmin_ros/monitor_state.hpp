@@ -118,7 +118,7 @@ public:
 
     // set outcomes
     if (timeout > 0) {
-      this->outcomes = {basic_outcomes::TIMEOUT};
+      this->outcomes.insert(basic_outcomes::TIMEOUT);
     }
 
     if (outcomes.size() > 0) {
