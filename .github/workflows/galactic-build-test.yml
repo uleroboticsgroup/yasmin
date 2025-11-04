@@ -1,0 +1,21 @@
+name: Galactic Build and Test
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
+
+jobs:
+  galactic_build_and_test:
+    runs-on: ubuntu-latest
+    container:
+      image: ros:galactic
+    steps:
+      - name: Build and Test
+        uses: ros-tooling/action-ros-ci@v0.4
+        with:
+          package-name: yasmin yasmin_ros
+          target-ros2-distro: galactic
+          skip-tests: true
+          coverage-result: false

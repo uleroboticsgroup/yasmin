@@ -1,0 +1,21 @@
+name: Rolling Build and Test
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
+
+jobs:
+  rolling_build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup ROS 2
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: rolling
+      - name: Build and Test
+        uses: ros-tooling/action-ros-ci@v0.4
+        with:
+          package-name: yasmin yasmin_ros
+          target-ros2-distro: rolling

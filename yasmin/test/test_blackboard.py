@@ -150,9 +150,7 @@ class TestBlackboard(unittest.TestCase):
         nested_dict = {"outer": {"inner": "value", "number": 42}, "list": [1, 2, 3]}
         self.blackboard["nested_dict"] = nested_dict
         retrieved_dict = self.blackboard["nested_dict"]
-        self.assertEqual(
-            nested_dict["outer"]["inner"], retrieved_dict["outer"]["inner"]
-        )
+        self.assertEqual(nested_dict["outer"]["inner"], retrieved_dict["outer"]["inner"])
         self.assertEqual(
             nested_dict["outer"]["number"], retrieved_dict["outer"]["number"]
         )
