@@ -39,6 +39,7 @@ def main():
     # Initialize ROS 2
     rclpy.init()
 
+    # Get the state machine file parameter
     node = YasminNode.get_instance()
     node.declare_parameter("state_machine_file", "")
     sm_file = node.get_parameter("state_machine_file").get_parameter_value().string_value

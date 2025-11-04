@@ -6,6 +6,7 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(yasmin REQUIRED)
+find_package(yasmin_viewer REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(TinyXML2 REQUIRED)
@@ -63,6 +64,21 @@ install(TARGETS yasmin_pybind_bridge
     LIBRARY DESTINATION lib/${PROJECT_NAME}
 )
 ament_environment_hooks(PYTHONPATH.sh.in)
+
+# factory node
+set(DEPENDENCIES
+  rclcpp::rclcpp
+  yasmin::yasmin
+  yasmin_viewer::yasmin_viewer
+  yasmin_factory
+)
+add_executable(yasmin_factory_node src/yasmin_factory_node.cpp)
+target_link_libraries(yasmin_factory_node PUBLIC ${DEPENDENCIES})
+install(TARGETS
+  yasmin_factory_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 
 # Install Python loader package
 ament_python_install_package(${PROJECT_NAME})
