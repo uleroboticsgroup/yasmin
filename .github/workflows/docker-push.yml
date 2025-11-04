@@ -1,22 +1,21 @@
-name: Kilted Docker Push
+name: Docker Push
 
 on:
   release:
     types: [published]
 
 jobs:
-  kilted_docker_push:
+  docker_push:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ros_distro: [foxy, galactic, humble, iron, jazzy, rolling, kilted]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Get tag name
-        run: |
-          tag_name=$(git describe --tags --abbrev=0 HEAD^)
-          echo "tag_name=$tag_name" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -30,6 +29,6 @@ jobs:
       - name: Build and push docker
         uses: docker/build-push-action@v6
         with:
-          build-args: ROS_DISTRO=kilted
+          build-args: ROS_DISTRO=${{ matrix.ros_distro }}
           push: true
-          tags: mgons/yasmin:kilted-${{ github.event.release.tag_name }}
+          tags: mgons/yasmin:${{ matrix.ros_distro }}-${{ github.event.release.tag_name }}

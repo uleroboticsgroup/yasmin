@@ -1,0 +1,47 @@
+name: Build and Test
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ros_distro: [foxy, galactic, humble, iron, jazzy, rolling, kilted]
+        include:
+          - ros_distro: foxy
+            skip_tests: true
+          - ros_distro: galactic
+            skip_tests: true
+          - ros_distro: humble
+            skip_tests: false
+          - ros_distro: iron
+            skip_tests: false
+          - ros_distro: jazzy
+            skip_tests: false
+          - ros_distro: kilted
+            skip_tests: false
+          - ros_distro: rolling
+            skip_tests: false
+            use_setup_ros: true
+    container:
+      image: ros:${{ matrix.ros_distro }}
+    steps:
+      - name: Setup ROS 2
+        if: matrix.use_setup_ros
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: ${{ matrix.ros_distro }}
+      
+      - name: Build and Test
+        uses: ros-tooling/action-ros-ci@v0.4
+        with:
+          package-name: yasmin yasmin_ros
+          target-ros2-distro: ${{ matrix.ros_distro }}
+          skip-tests: ${{ matrix.skip_tests || false }}
+          coverage-result: false
