@@ -84,12 +84,6 @@ colcon test --packages-select yasmin yasmin_ros yasmin_factory
 colcon test-result --verbose
 ```
 
-To see the coverage report you have to run the tests with pytest directly:
-
-```shell
-python3 -m pytest ~/ros2_ws/src/yasmin/yasmin/test ~/ros2_ws/src/yasmin/yasmin_ros/test ~/ros2_ws/src/yasmin/yasmin_factory/test --cov=yasmin --cov=yasmin_ros --cov=yasmin_factory --cov-report=html --cov-report=term-missing
-```
-
 ## Docker
 
 If your operating system doesn't support ROS 2, docker is a great alternative. You can use an image from [Dockerhub](https://hub.docker.com/r/mgons/yasmin/) or create your own images. First of all, to build the image you have to use the following command:

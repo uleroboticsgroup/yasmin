@@ -79,13 +79,21 @@ public:
 
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
+    BlackboardValue<T> *b_value = new BlackboardValue<T>(value);
+
+    // If the type is changing, remove the old entry first
+    if (this->type_registry.find(name) != this->type_registry.end()) {
+      this->values.erase(name);
+      this->type_registry.erase(name);
+    }
+
+    // Insert or update the value
     if (!this->contains(name)) {
-      BlackboardValue<T> *b_value = new BlackboardValue<T>(value);
       this->values.insert({name, b_value});
       this->type_registry.insert({name, b_value->get_type()});
 
     } else {
-      BlackboardValue<T> *b_value = (BlackboardValue<T> *)this->values.at(name);
+      b_value = (BlackboardValue<T> *)this->values.at(name);
       b_value->set(value);
       this->type_registry[name] = b_value->get_type();
     }

@@ -149,8 +149,22 @@ TEST_F(TestYasminFactory, TestCreateStateInvalidType) {
                std::runtime_error);
 }
 
-TEST_F(TestYasminFactory, TestCreateStateFromFile) {
-  std::string xml_file = test_dir + "/test_simple_sm.xml";
+TEST_F(TestYasminFactory, TestCreateStateFromFileCppPy) {
+  std::string xml_file = test_dir + "/test_simple_sm_1.xml";
+
+  try {
+    auto sm = factory->create_sm_from_file(xml_file);
+
+    ASSERT_NE(sm, nullptr);
+    auto outcomes = sm->get_outcomes();
+    EXPECT_NE(outcomes.find("end"), outcomes.end());
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "XML file not available or plugin missing: " << e.what();
+  }
+}
+
+TEST_F(TestYasminFactory, TestCreateStateFromFilePyCpp) {
+  std::string xml_file = test_dir + "/test_simple_sm_2.xml";
 
   try {
     auto sm = factory->create_sm_from_file(xml_file);

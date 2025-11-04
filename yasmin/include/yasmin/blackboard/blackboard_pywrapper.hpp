@@ -73,64 +73,27 @@ public:
    * @param value The Python object to store.
    */
   void set(const std::string &key, py::object value) {
-    // Check the type of the Python object and store it with the corresponding C++ type
     if (py::isinstance<py::bool_>(value)) {
-      // Bool must be checked before int since bool is a subclass of int in Python
       this->blackboard->set<bool>(key, value.cast<bool>());
-    }
-    else if (py::isinstance<py::int_>(value)) {
-      // Try to determine if it fits in int or needs long
+    } else if (py::isinstance<py::int_>(value)) {
       try {
         this->blackboard->set<int>(key, value.cast<int>());
       } catch (...) {
         this->blackboard->set<long>(key, value.cast<long>());
       }
-    }
-    else if (py::isinstance<py::float_>(value)) {
+    } else if (py::isinstance<py::float_>(value)) {
       this->blackboard->set<double>(key, value.cast<double>());
-    }
-    else if (py::isinstance<py::str>(value)) {
+    } else if (py::isinstance<py::str>(value)) {
       this->blackboard->set<std::string>(key, value.cast<std::string>());
-    }
-    else if (py::isinstance<py::list>(value)) {
-      // Try to convert to std::vector if possible, otherwise store as py::object
-      try {
-        auto vec = value.cast<std::vector<py::object>>();
-        this->blackboard->set<std::vector<py::object>>(key, vec);
-      } catch (...) {
-        this->blackboard->set<py::object>(key, value);
-      }
-    }
-    else if (py::isinstance<py::dict>(value)) {
-      // Try to convert to std::map if possible, otherwise store as py::object
-      try {
-        auto map = value.cast<std::map<std::string, py::object>>();
-        this->blackboard->set<std::map<std::string, py::object>>(key, map);
-      } catch (...) {
-        this->blackboard->set<py::object>(key, value);
-      }
-    }
-    else if (py::isinstance<py::tuple>(value)) {
-      // Store tuples as py::object since std::tuple requires compile-time size
+    } else if (py::isinstance<py::list>(value)) {
       this->blackboard->set<py::object>(key, value);
-    }
-    else if (py::isinstance<py::set>(value)) {
-      // Try to convert to std::set if possible, otherwise store as py::object
-      try {
-        auto set = value.cast<std::set<py::object>>();
-        this->blackboard->set<std::set<py::object>>(key, set);
-      } catch (...) {
-        this->blackboard->set<py::object>(key, value);
-      }
-    }
-    else if (py::isinstance<py::bytes>(value)) {
+    } else if (py::isinstance<py::dict>(value)) {
       this->blackboard->set<py::object>(key, value);
-    }
-    else if (value.is_none()) {
+    } else if (py::isinstance<py::tuple>(value)) {
       this->blackboard->set<py::object>(key, value);
-    }
-    else {
-      // For all other types (custom classes, etc.), store as py::object
+    } else if (py::isinstance<py::set>(value)) {
+      this->blackboard->set<py::object>(key, value);
+    } else {
       this->blackboard->set<py::object>(key, value);
     }
   }
@@ -168,34 +131,24 @@ public:
     }
     // Check if it's a std::vector (C++ vector) - convert to Python list
     else if (type.find("std::vector") != std::string::npos) {
-      // For generic vectors, try to get as py::object since pybind11/stl
-      // handles conversion
       return this->blackboard->get<py::object>(key);
     }
     // Check if it's a std::map (C++ map) - convert to Python dict
     else if (type.find("std::map") != std::string::npos ||
              type.find("std::unordered_map") != std::string::npos) {
-      // For generic maps, try to get as py::object since pybind11/stl handles
-      // conversion
       return this->blackboard->get<py::object>(key);
     }
     // Check if it's a std::set (C++ set) - convert to Python set
     else if (type.find("std::set") != std::string::npos ||
              type.find("std::unordered_set") != std::string::npos) {
-      // For generic sets, try to get as py::object since pybind11/stl handles
-      // conversion
       return this->blackboard->get<py::object>(key);
     }
     // Check if it's a std::list (C++ list) - convert to Python list
     else if (type.find("std::list") != std::string::npos) {
-      // For generic lists, try to get as py::object since pybind11/stl handles
-      // conversion
       return this->blackboard->get<py::object>(key);
     }
     // Check if it's a std::tuple (C++ tuple) - convert to Python tuple
     else if (type.find("std::tuple") != std::string::npos) {
-      // For generic tuples, try to get as py::object since pybind11/stl handles
-      // conversion
       return this->blackboard->get<py::object>(key);
     }
     // Check if it's an int (C++ int) - convert to Python int

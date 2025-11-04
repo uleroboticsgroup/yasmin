@@ -114,9 +114,18 @@ class TestYasminFactory(unittest.TestCase):
         self.assertIsInstance(sm, StateMachine)
         self.assertIn("end", sm.get_outcomes())
 
-    def test_create_sm_from_file(self):
+    def test_create_sm_from_file_cpppy(self):
         """Test creating a state machine from XML file."""
-        xml_file = os.path.join(self.test_dir, "test_simple_sm.xml")
+        xml_file = os.path.join(self.test_dir, "test_simple_sm_1.xml")
+        sm = self.factory.create_sm_from_file(xml_file)
+
+        self.assertIsNotNone(sm)
+        self.assertIsInstance(sm, StateMachine)
+        self.assertIn("end", sm.get_outcomes())
+
+    def test_create_sm_from_file_pycpp(self):
+        """Test creating a state machine from XML file."""
+        xml_file = os.path.join(self.test_dir, "test_simple_sm_2.xml")
         sm = self.factory.create_sm_from_file(xml_file)
 
         self.assertIsNotNone(sm)
