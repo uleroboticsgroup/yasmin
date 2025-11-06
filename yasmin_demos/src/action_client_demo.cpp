@@ -31,7 +31,6 @@
 using std::placeholders::_1;
 using std::placeholders::_2;
 using Fibonacci = example_interfaces::action::Fibonacci;
-using namespace yasmin;
 
 /**
  * @brief Prints the result of the Fibonacci action.

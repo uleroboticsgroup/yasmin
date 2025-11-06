@@ -27,8 +27,6 @@
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
-using namespace yasmin;
-
 /**
  * @brief Represents the "Foo" state in the state machine.
  *
@@ -155,15 +153,16 @@ int main(int argc, char *argv[]) {
   auto bar_state = std::make_shared<BarState>();
 
   // Create concurrent state
-  auto concurrent_state = std::make_shared<Concurrence>(
-      std::map<std::string, std::shared_ptr<State>>{{"FOO", foo_state},
-                                                    {"BAR", bar_state}},
+  auto concurrent_state = std::make_shared<yasmin::Concurrence>(
+      std::map<std::string, std::shared_ptr<yasmin::State>>{{"FOO", foo_state},
+                                                            {"BAR", bar_state}},
       "defaulted",
-      Concurrence::OutcomeMap{
-          {"outcome1", Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
-                                                    {"BAR", "outcome3"}}},
-          {"outcome2", Concurrence::StateOutcomeMap{{"FOO", "outcome2"},
-                                                    {"BAR", "outcome3"}}}});
+      yasmin::Concurrence::OutcomeMap{
+          {"outcome1",
+           yasmin::Concurrence::StateOutcomeMap{
+               {"FOO", "outcome1"}, {"BAR", "outcome3"}}},
+          {"outcome2", yasmin::Concurrence::StateOutcomeMap{
+                           {"FOO", "outcome2"}, {"BAR", "outcome3"}}}});
 
   // Add concurrent state to the state machine
   sm->add_state("CONCURRENCE", concurrent_state,

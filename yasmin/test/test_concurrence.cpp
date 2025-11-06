@@ -75,7 +75,8 @@ protected:
         {"outcome1", {{"FOO", "outcome1"}}},
         {"outcome2", {{"BAR", "outcome1"}, {"BAR", "outcome1"}}}};
 
-    state = std::make_shared<Concurrence>(states, "default", outcome_map);
+    state =
+        std::make_shared<yasmin::Concurrence>(states, "default", outcome_map);
   }
 };
 

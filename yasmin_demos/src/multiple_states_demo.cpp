@@ -24,8 +24,6 @@
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
-using namespace yasmin;
-
 /**
  * @brief Main function that initializes the ROS 2 node and state machine.
  *

@@ -30,7 +30,6 @@
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using namespace yasmin;
 
 /**
  * @brief Sets two integer values in the blackboard.

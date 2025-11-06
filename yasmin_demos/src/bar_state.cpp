@@ -27,8 +27,6 @@
 
 #include <pluginlib/class_list_macros.hpp>
 
-using namespace yasmin;
-
 /**
  * @brief Represents the "Bar" state in the state machine.
  *

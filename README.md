@@ -1838,8 +1838,6 @@ ros2 run yasmin_demos yasmin_demo
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
-using namespace yasmin;
-
 /**
  * @brief Represents the "Foo" state in the state machine.
  *
@@ -2000,8 +1998,6 @@ ros2 run yasmin_demos remap_demo
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
-using namespace yasmin;
-
 /**
  * @brief Represents the "Foo" state in the state machine.
  */
@@ -2156,8 +2152,6 @@ ros2 run yasmin_demos concurrence_demo
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
-using namespace yasmin;
-
 /**
  * @brief Represents the "Foo" state in the state machine.
  *
@@ -2284,15 +2278,16 @@ int main(int argc, char *argv[]) {
   auto bar_state = std::make_shared<BarState>();
 
   // Create concurrent state
-  auto concurrent_state = std::make_shared<Concurrence>(
-      std::map<std::string, std::shared_ptr<State>>{{"FOO", foo_state},
-                                                    {"BAR", bar_state}},
+  auto concurrent_state = std::make_shared<yasmin::Concurrence>(
+      std::map<std::string, std::shared_ptr<yasmin::State>>{{"FOO", foo_state},
+                                                            {"BAR", bar_state}},
       "defaulted",
-      Concurrence::OutcomeMap{
-          {"outcome1", Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
-                                                    {"BAR", "outcome3"}}},
-          {"outcome2", Concurrence::StateOutcomeMap{{"FOO", "outcome2"},
-                                                    {"BAR", "outcome3"}}}});
+      yasmin::Concurrence::OutcomeMap{
+          {"outcome1",
+           yasmin::Concurrence::StateOutcomeMap{
+               {"FOO", "outcome1"}, {"BAR", "outcome3"}}},
+          {"outcome2", yasmin::Concurrence::StateOutcomeMap{
+                           {"FOO", "outcome2"}, {"BAR", "outcome3"}}}});
 
   // Add concurrent state to the state machine
   sm->add_state("CONCURRENCE", concurrent_state,
@@ -2352,7 +2347,6 @@ ros2 run yasmin_demos service_client_demo
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using namespace yasmin;
 
 /**
  * @brief Sets two integer values in the blackboard.
@@ -2553,7 +2547,6 @@ ros2 run yasmin_demos action_client_demo
 using std::placeholders::_1;
 using std::placeholders::_2;
 using Fibonacci = example_interfaces::action::Fibonacci;
-using namespace yasmin;
 
 /**
  * @brief Prints the result of the Fibonacci action.
@@ -2764,7 +2757,6 @@ ros2 run yasmin_demos monitor_demo
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using namespace yasmin;
 
 /**
  * @class PrintOdometryState
@@ -2924,7 +2916,6 @@ ros2 run yasmin_demos publisher_demo
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using namespace yasmin;
 
 /**
  * @class PublishIntState
@@ -3085,8 +3076,6 @@ ros2 run yasmin_demos parameters_demo --ros-args -p max_counter:=5
 #include "yasmin_ros/get_parameters_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
-
-using namespace yasmin;
 
 /**
  * @brief Represents the "Foo" state in the state machine.

@@ -26,8 +26,6 @@
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
-using namespace yasmin;
-
 /**
  * @brief Represents the "Foo" state in the state machine.
  */

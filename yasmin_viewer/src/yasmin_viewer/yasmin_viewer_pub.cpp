@@ -20,7 +20,6 @@
 
 using namespace yasmin_viewer;
 using namespace std::chrono_literals;
-using namespace yasmin;
 
 YasminViewerPub::YasminViewerPub(std::shared_ptr<yasmin::StateMachine> fsm)
     : YasminViewerPub(nullptr, fsm, "") {}
