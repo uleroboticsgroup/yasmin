@@ -31,18 +31,18 @@
 
 using namespace yasmin;
 
-StateMachine::StateMachine(std::set<std::string> outcomes)
+StateMachine::StateMachine(const std::set<std::string> &outcomes)
     : StateMachine("", outcomes) {}
 
 StateMachine::StateMachine(const std::string &name,
-                           std::set<std::string> outcomes)
+                           const std::set<std::string> &outcomes)
     : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()),
       name(name) {}
 
 void StateMachine::add_state(const std::string &name,
                              std::shared_ptr<State> state,
-                             std::map<std::string, std::string> transitions,
-                             std::map<std::string, std::string> remappings) {
+                             const std::map<std::string, std::string> &transitions,
+                             const std::map<std::string, std::string> &remappings) {
 
   if (this->states.find(name) != this->states.end()) {
     throw std::logic_error("State '" + name +
@@ -149,17 +149,17 @@ void StateMachine::set_current_state(const std::string &state_name) {
 }
 
 void StateMachine::add_start_cb(StartCallbackType cb,
-                                std::vector<std::string> args) {
+                                const std::vector<std::string> &args) {
   this->start_cbs.emplace_back(cb, args);
 }
 
 void StateMachine::add_transition_cb(TransitionCallbackType cb,
-                                     std::vector<std::string> args) {
+                                     const std::vector<std::string> &args) {
   this->transition_cbs.emplace_back(cb, args);
 }
 
 void StateMachine::add_end_cb(EndCallbackType cb,
-                              std::vector<std::string> args) {
+                              const std::vector<std::string> &args) {
   this->end_cbs.emplace_back(cb, args);
 }
 

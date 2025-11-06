@@ -18,7 +18,7 @@
 namespace yasmin {
 
 CbState::CbState(
-    std::set<std::string> outcomes,
+    const std::set<std::string> &outcomes,
     std::function<std::string(std::shared_ptr<blackboard::Blackboard>)>
         callback)
     : State(outcomes), callback(callback) {

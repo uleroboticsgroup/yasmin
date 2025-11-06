@@ -83,7 +83,7 @@ public:
    * @return Vector of Transition messages.
    */
   std::vector<yasmin_msgs::msg::Transition>
-  parse_transitions(std::map<std::string, std::string> transitions);
+  parse_transitions(const std::map<std::string, std::string> &transitions);
 
   /**
    * @brief Parses concurrence transitions from outcome map to transition-like
@@ -104,8 +104,8 @@ public:
    * @param states_list Vector to which the parsed State message will be added.
    * @param parent ID of the parent state.
    */
-  void parse_state(std::string name, std::shared_ptr<yasmin::State> state,
-                   std::map<std::string, std::string> transitions,
+  void parse_state(const std::string &name, std::shared_ptr<yasmin::State> state,
+                   const std::map<std::string, std::string> &transitions,
                    std::vector<yasmin_msgs::msg::State> &states_list,
                    int parent);
 

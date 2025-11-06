@@ -65,7 +65,7 @@ public:
    * @brief Constructs a State with a set of possible outcomes.
    * @param outcomes A set of possible outcomes for this state.
    */
-  State(std::set<std::string> outcomes);
+  State(const std::set<std::string> &outcomes);
 
   /**
    * @brief Gets the current status of the state.

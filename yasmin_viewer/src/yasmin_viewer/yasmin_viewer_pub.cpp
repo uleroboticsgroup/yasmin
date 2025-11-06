@@ -65,7 +65,7 @@ YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
  * @return Vector of yasmin_msgs::msg::Transition.
  */
 std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
-    std::map<std::string, std::string> transitions) {
+    const std::map<std::string, std::string> &transitions) {
   std::vector<yasmin_msgs::msg::Transition> transitions_list;
 
   for (auto const &transition : transitions) {
@@ -116,8 +116,8 @@ YasminViewerPub::parse_concurrence_transitions(
  * @param parent ID of the parent state; -1 for top-level states.
  */
 void YasminViewerPub::parse_state(
-    std::string state_name, std::shared_ptr<yasmin::State> state,
-    std::map<std::string, std::string> transitions,
+    const std::string &state_name, std::shared_ptr<yasmin::State> state,
+    const std::map<std::string, std::string> &transitions,
     std::vector<yasmin_msgs::msg::State> &states_list, int parent) {
 
   auto state_msg = yasmin_msgs::msg::State();

@@ -62,7 +62,7 @@ public:
    *
    * @param outcomes A set of possible outcomes for the state machine.
    */
-  StateMachine(std::set<std::string> outcomes);
+  StateMachine(const std::set<std::string> &outcomes);
 
   /**
    * @brief Construct a new StateMachine object.
@@ -70,7 +70,7 @@ public:
    * @param name The name of the state machine.
    * @param outcomes A set of possible outcomes for the state machine.
    */
-  StateMachine(const std::string &name, std::set<std::string> outcomes);
+  StateMachine(const std::string &name, const std::set<std::string> &outcomes);
 
   /**
    * @brief Adds a state to the state machine with specified transitions.
@@ -87,8 +87,8 @@ public:
    *                               or references unregistered outcomes.
    */
   void add_state(const std::string &name, std::shared_ptr<State> state,
-                 std::map<std::string, std::string> transitions = {},
-                 std::map<std::string, std::string> remappings = {});
+                 const std::map<std::string, std::string> &transitions = {},
+                 const std::map<std::string, std::string> &remappings = {});
 
   /**
    * @brief Sets the name of the state machine.
@@ -147,7 +147,7 @@ public:
    * @param cb The callback function to execute.
    * @param args Optional arguments to pass to the callback.
    */
-  void add_start_cb(StartCallbackType cb, std::vector<std::string> args = {});
+  void add_start_cb(StartCallbackType cb, const std::vector<std::string> &args = {});
 
   /**
    * @brief Adds a callback function for state transitions.
@@ -156,7 +156,7 @@ public:
    * @param args Optional arguments to pass to the callback.
    */
   void add_transition_cb(TransitionCallbackType cb,
-                         std::vector<std::string> args = {});
+                         const std::vector<std::string> &args = {});
 
   /**
    * @brief Adds a callback function to be called when the state machine ends.
@@ -164,7 +164,7 @@ public:
    * @param cb The callback function to execute.
    * @param args Optional arguments to pass to the callback.
    */
-  void add_end_cb(EndCallbackType cb, std::vector<std::string> args = {});
+  void add_end_cb(EndCallbackType cb, const std::vector<std::string> &args = {});
 
   /**
    * @brief Calls start callbacks with the given blackboard and start state.
