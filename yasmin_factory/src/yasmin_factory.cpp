@@ -283,6 +283,15 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
       transitions[from] = to;
     }
 
+    // Parse remappings
+    std::map<std::string, std::string> remappings;
+    for (tinyxml2::XMLElement *transition = child->FirstChildElement("Remap");
+         transition; transition = transition->NextSiblingElement("Remap")) {
+      std::string from = this->get_required_attribute(transition, "from");
+      std::string to = this->get_required_attribute(transition, "to");
+      remappings[from] = to;
+    }
+
     // Create the state
     std::shared_ptr<yasmin::State> state;
     if (child_name == "State") {
@@ -296,7 +305,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
     }
 
     // Add state to state machine
-    sm->add_state(name, state, transitions);
+    sm->add_state(name, state, transitions, remappings);
   }
 
   return sm;

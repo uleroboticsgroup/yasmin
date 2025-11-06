@@ -121,9 +121,13 @@ class YasminFactory:
         for child in root:
 
             transitions = {}
+            remainings = {}
+
             for cchild in child:
                 if cchild.tag == "Transition":
                     transitions[cchild.attrib["from"]] = cchild.attrib["to"]
+                elif cchild.tag == "Remap":
+                    remainings[cchild.attrib["from"]] = cchild.attrib["to"]
 
             if child.tag == "State":
                 state = self.create_state(child)
@@ -141,6 +145,7 @@ class YasminFactory:
                 child.attrib["name"],
                 state,
                 transitions=transitions,
+                remainings=remainings,
             )
 
         return sm
