@@ -167,7 +167,13 @@ class YasminFactory:
         if root.tag != "StateMachine":
             raise ValueError("Root element must be 'StateMachine'")
 
-        return self.create_sm(root)
+        # Read the name of the state machine root if available
+        fsm_name = root.attrib.get("name", "")
+
+        # Create the state machine
+        sm = self.create_sm(root)
+        sm.set_name(fsm_name)
+        return sm
 
     def cleanup(self) -> None:
         """

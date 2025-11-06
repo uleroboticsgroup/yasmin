@@ -22,6 +22,7 @@
 #include "yasmin_demos/bar_state.h"
 #include "yasmin_demos/foo_state.h"
 #include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 using namespace yasmin;
 
@@ -38,7 +39,7 @@ using namespace yasmin;
  * @throws std::exception If there is an error during state machine execution.
  */
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("multiple_states_demo");
+  YASMIN_LOG_INFO("yasmin_multiple_states_demo");
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
@@ -65,6 +66,9 @@ int main(int argc, char *argv[]) {
                 {
                     {"outcome3", "FOO"},
                 });
+
+  // Publisher for visualizing the state machine
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MULTIPLE_STATES_DEMO");
 
   // Execute the state machine
   try {

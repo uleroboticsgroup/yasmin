@@ -32,9 +32,15 @@
 using namespace yasmin;
 
 StateMachine::StateMachine(std::set<std::string> outcomes)
-    : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()) {}
+    : StateMachine("", outcomes) {}
 
-void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
+StateMachine::StateMachine(const std::string &name,
+                           std::set<std::string> outcomes)
+    : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()),
+      name(name) {}
+
+void StateMachine::add_state(const std::string &name,
+                             std::shared_ptr<State> state,
                              std::map<std::string, std::string> transitions,
                              std::map<std::string, std::string> remappings) {
 
@@ -101,7 +107,7 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
   this->validated.store(false);
 }
 
-void StateMachine::set_start_state(std::string state_name) {
+void StateMachine::set_start_state(const std::string &state_name) {
 
   if (state_name.empty()) {
     throw std::invalid_argument("Initial state cannot be empty");
@@ -136,7 +142,7 @@ std::string StateMachine::get_current_state() {
   return this->current_state;
 }
 
-void StateMachine::set_current_state(std::string state_name) {
+void StateMachine::set_current_state(const std::string &state_name) {
   const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
   this->current_state = state_name;
   this->current_state_cond.notify_all();

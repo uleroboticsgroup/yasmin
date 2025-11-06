@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_REMAPPING_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_REMAPPING_DEMO");
 
   // Execute the state machine
   try {

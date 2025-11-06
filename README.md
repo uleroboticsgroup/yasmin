@@ -263,7 +263,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_DEMO")
 
     # Execute the FSM
     try:
@@ -579,7 +579,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("yasmin_demo", sm)
+    YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
 
     # Execute the FSM
     try:
@@ -768,7 +768,7 @@ def main():
     )
 
     # Publish FSM info
-    YasminViewerPub("YASMIN_SERVICE_CLIENT_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
 
     # Execute FSM
     try:
@@ -977,7 +977,7 @@ def main():
     )
 
     # Publish FSM information
-    YasminViewerPub("YASMIN_ACTION_CLIENT_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
 
     # Create an initial blackboard with the input value
     blackboard = Blackboard()
@@ -1130,7 +1130,7 @@ def main():
     )
 
     # Publish FSM information
-    YasminViewerPub("YASMIN_MONITOR_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
     # Execute FSM
     try:
@@ -1302,7 +1302,7 @@ def main(args=None):
     )
 
     # Launch YASMIN Viewer publisher for state visualization
-    YasminViewerPub("YASMIN_PUBLISHER_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values
     blackboard = Blackboard()
@@ -1482,7 +1482,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_PARAMETERS_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
 
     # Execute the FSM
     try:
@@ -1710,7 +1710,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_NAV2_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_NAV2_DEMO")
 
     # Execute the state machine
     blackboard = Blackboard()
@@ -1793,7 +1793,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("plugin_demo", sm)
+    YasminViewerPub(sm, "YASMIN_FACTORY_DEMO")
 
     # Execute the FSM
     try:
@@ -1959,7 +1959,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_DEMO");
 
   // Execute the state machine
   try {
@@ -2115,7 +2115,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_REMAPPING_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_REMAPPING_DEMO");
 
   // Execute the state machine
   try {
@@ -2303,7 +2303,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_CONCURRENCE_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_CONCURRENCE_DEMO");
 
   // Execute the state machine
   try {
@@ -2503,7 +2503,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine visualization.
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_SERVICE_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_SERVICE_CLIENT_DEMO");
 
   // Execute the state machine.
   try {
@@ -2715,7 +2715,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
 
   // Create an initial blackboard and set the Fibonacci order
   std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =
@@ -2879,7 +2879,7 @@ int main(int argc, char *argv[]) {
       });
 
   // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_MONITOR_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MONITOR_DEMO");
 
   // Execute the state machine
   try {
@@ -3040,7 +3040,7 @@ int main(int argc, char *argv[]) {
                  {"outcome2", "PUBLISHING_INT"}});
 
   // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PUBLISHER_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
 
   // Execute the state machine
   std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =
@@ -3218,7 +3218,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PARAMETERS_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PARAMETERS_DEMO");
 
   // Execute the state machine
   try {

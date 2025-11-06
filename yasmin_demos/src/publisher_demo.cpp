@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
                  {"outcome2", "PUBLISHING_INT"}});
 
   // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PUBLISHER_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
 
   // Execute the state machine
   std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =

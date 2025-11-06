@@ -52,7 +52,7 @@ def main():
     sm = factory.create_sm_from_file(sm_file)
 
     # Publish FSM information for visualization
-    YasminViewerPub("plugin_demo", sm)
+    YasminViewerPub(sm)
 
     # Execute the FSM
     try:

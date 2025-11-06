@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
       });
 
   // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_MONITOR_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MONITOR_DEMO");
 
   // Execute the state machine
   try {

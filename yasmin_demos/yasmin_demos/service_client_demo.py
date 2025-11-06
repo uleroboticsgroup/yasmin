@@ -169,7 +169,7 @@ def main():
     )
 
     # Publish FSM info
-    YasminViewerPub("YASMIN_SERVICE_CLIENT_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
 
     # Execute FSM
     try:

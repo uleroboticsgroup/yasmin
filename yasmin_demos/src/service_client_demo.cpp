@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine visualization.
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_SERVICE_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_SERVICE_CLIENT_DEMO");
 
   // Execute the state machine.
   try {

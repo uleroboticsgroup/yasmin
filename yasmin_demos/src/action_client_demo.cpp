@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
 
   // Create an initial blackboard and set the Fibonacci order
   std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =

@@ -139,7 +139,7 @@ def main(args=None):
     )
 
     # Launch YASMIN Viewer publisher for state visualization
-    YasminViewerPub("YASMIN_PUBLISHER_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values
     blackboard = Blackboard()

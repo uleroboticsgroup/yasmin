@@ -161,7 +161,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("yasmin_parameters_demo", sm)
+    YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
 
     # Execute the FSM
     try:

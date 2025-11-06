@@ -211,7 +211,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_NAV2_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_NAV2_DEMO")
 
     # Execute the state machine
     blackboard = Blackboard()

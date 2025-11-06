@@ -23,6 +23,7 @@
 #include "yasmin_factory/yasmin_factory.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_factory_node");
@@ -43,6 +44,9 @@ int main(int argc, char *argv[]) {
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(sm_file);
+
+  // Publisher for visualizing the state machine
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm);
 
   // Execute the state machine
   try {

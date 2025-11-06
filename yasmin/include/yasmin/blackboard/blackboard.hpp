@@ -73,7 +73,7 @@ public:
    * @param name The key to associate with the value.
    * @param value The value to store.
    */
-  template <class T> void set(std::string name, T value) {
+  template <class T> void set(const std::string &name, T value) {
 
     YASMIN_LOG_DEBUG("Setting '%s' in the blackboard", name.c_str());
 

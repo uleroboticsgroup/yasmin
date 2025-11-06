@@ -13,38 +13,41 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <chrono>
-
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
 #include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
-#include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 using namespace yasmin_viewer;
 using namespace std::chrono_literals;
 using namespace yasmin;
 
-/**
- * @brief Constructs YasminViewerPub by delegating to another constructor with a
- * nullptr node.
- */
-YasminViewerPub::YasminViewerPub(std::string fsm_name,
-                                 std::shared_ptr<yasmin::StateMachine> fsm)
-    : YasminViewerPub(nullptr, fsm_name, fsm) {}
+YasminViewerPub::YasminViewerPub(std::shared_ptr<yasmin::StateMachine> fsm)
+    : YasminViewerPub(nullptr, fsm, "") {}
 
-/**
- * @brief Constructs YasminViewerPub with a specific ROS node.
- * If the node is nullptr, a singleton instance of YasminNode is used.
- */
 YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
-                                 std::string fsm_name,
                                  std::shared_ptr<yasmin::StateMachine> fsm)
-    : fsm_name(fsm_name), fsm(fsm) {
+    : YasminViewerPub(node, fsm, "") {}
+
+YasminViewerPub::YasminViewerPub(std::shared_ptr<yasmin::StateMachine> fsm,
+                                 const std::string &fsm_name)
+    : YasminViewerPub(nullptr, fsm, fsm_name) {}
+
+YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
+                                 std::shared_ptr<yasmin::StateMachine> fsm,
+                                 const std::string &fsm_name)
+    : fsm(fsm), fsm_name(fsm_name) {
 
   if (node == nullptr) {
     this->node_ = yasmin_ros::YasminNode::get_instance();
   } else {
     this->node_ = node;
+  }
+
+  if (this->fsm_name.empty() && this->fsm->get_name().empty()) {
+    this->fsm_name = "Unnamed_FSM";
+  } else if (this->fsm_name.empty()) {
+    this->fsm_name = this->fsm->get_name();
   }
 
   this->publisher =

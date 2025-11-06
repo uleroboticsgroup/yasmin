@@ -45,8 +45,8 @@ class YasminViewerPub:
 
     def __init__(
         self,
-        fsm_name: str,
         fsm: StateMachine,
+        fsm_name: str = "",
         rate: int = 4,
         node: Node = None,
     ) -> None:
@@ -63,20 +63,22 @@ class YasminViewerPub:
             ValueError: If fsm_name is empty.
         """
 
-        if not fsm_name:
-            raise ValueError("FSM name cannot be empty.")
-
-        ## The finite state machine to be published.
-        self._fsm: StateMachine = fsm
-
-        ## The name of the finite state machine.
-        self._fsm_name: str = fsm_name
-
         ## The ROS 2 node instance used for publishing.
         self._node = node
 
         if self._node is None:
             self._node: Node = YasminNode.get_instance()
+
+        ## The name of the finite state machine.
+        self._fsm_name: str = fsm_name
+
+        if not self._fsm_name and not fsm.get_name():
+            self._fsm_name = "Unnamed_FSM"
+        elif not self._fsm_name:
+            self._fsm_name = fsm.get_name()
+
+        ## The finite state machine to be published.
+        self._fsm: StateMachine = fsm
 
         ## The publisher for the state machine messages.
         self.pub = self._node.create_publisher(StateMachineMsg, "/fsm_viewer", 10)

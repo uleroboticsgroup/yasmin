@@ -1,4 +1,4 @@
-<StateMachine outcomes="outcome4">
+<StateMachine outcomes="outcome4" name="Demo2">
     <State name="Foo" type="py" module="yasmin_demos.foo_state" class="FooState">
         <Transition from="outcome1" to="Bar"/>
         <Transition from="outcome2" to="outcome4"/>

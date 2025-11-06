@@ -56,6 +56,10 @@ PYBIND11_MODULE(state_machine, m) {
           py::arg("remappings") = std::map<std::string, std::string>(),
           py::keep_alive<1, 3>()) // Keep state (arg 3) alive as long as self
                                   // (arg 1) is alive
+      .def("set_name", &yasmin::StateMachine::set_name,
+           "Set the name of the state machine", py::arg("name"))
+      .def("get_name", &yasmin::StateMachine::get_name,
+           "Get the name of the state machine")
       .def("set_start_state", &yasmin::StateMachine::set_start_state,
            "Set the initial state for the state machine", py::arg("state_name"))
       .def("get_start_state", &yasmin::StateMachine::get_start_state,

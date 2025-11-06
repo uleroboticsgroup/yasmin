@@ -331,7 +331,13 @@ YasminFactory::create_sm_from_file(const std::string &xml_file) {
                              std::string(root->Name()));
   }
 
-  return this->create_sm(root);
+  // Read the name of the state machine root if exists
+  std::string sm_name = this->get_optional_attribute(root, "name", "");
+
+  // Create the state machine
+  auto sm = this->create_sm(root);
+  sm->set_name(sm_name);
+  return sm;
 }
 
 } // namespace yasmin_factory
