@@ -91,7 +91,8 @@ public:
    * that outcome.
    */
   Concurrence(const std::map<std::string, std::shared_ptr<State>> &states,
-              const std::string &default_outcome, const OutcomeMap &outcome_map);
+              const std::string &default_outcome,
+              const OutcomeMap &outcome_map);
 
   /**
    * @brief Executes the state's specific logic.

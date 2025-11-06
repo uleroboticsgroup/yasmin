@@ -39,10 +39,10 @@ StateMachine::StateMachine(const std::string &name,
     : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()),
       name(name) {}
 
-void StateMachine::add_state(const std::string &name,
-                             std::shared_ptr<State> state,
-                             const std::map<std::string, std::string> &transitions,
-                             const std::map<std::string, std::string> &remappings) {
+void StateMachine::add_state(
+    const std::string &name, std::shared_ptr<State> state,
+    const std::map<std::string, std::string> &transitions,
+    const std::map<std::string, std::string> &remappings) {
 
   if (this->states.find(name) != this->states.end()) {
     throw std::logic_error("State '" + name +

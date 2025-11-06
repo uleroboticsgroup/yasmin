@@ -104,7 +104,8 @@ public:
    * @param states_list Vector to which the parsed State message will be added.
    * @param parent ID of the parent state.
    */
-  void parse_state(const std::string &name, std::shared_ptr<yasmin::State> state,
+  void parse_state(const std::string &name,
+                   std::shared_ptr<yasmin::State> state,
                    const std::map<std::string, std::string> &transitions,
                    std::vector<yasmin_msgs::msg::State> &states_list,
                    int parent);

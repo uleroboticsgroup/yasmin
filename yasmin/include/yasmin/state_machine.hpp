@@ -147,7 +147,8 @@ public:
    * @param cb The callback function to execute.
    * @param args Optional arguments to pass to the callback.
    */
-  void add_start_cb(StartCallbackType cb, const std::vector<std::string> &args = {});
+  void add_start_cb(StartCallbackType cb,
+                    const std::vector<std::string> &args = {});
 
   /**
    * @brief Adds a callback function for state transitions.
@@ -164,7 +165,8 @@ public:
    * @param cb The callback function to execute.
    * @param args Optional arguments to pass to the callback.
    */
-  void add_end_cb(EndCallbackType cb, const std::vector<std::string> &args = {});
+  void add_end_cb(EndCallbackType cb,
+                  const std::vector<std::string> &args = {});
 
   /**
    * @brief Calls start callbacks with the given blackboard and start state.

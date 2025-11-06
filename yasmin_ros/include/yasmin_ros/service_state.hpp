@@ -162,9 +162,9 @@ public:
    */
   ServiceState(const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               const std::set<std::string> &outcomes, ResponseHandler response_handler,
-               int wait_timeout = -1, int response_timeout = -1,
-               int maximum_retry = 3)
+               const std::set<std::string> &outcomes,
+               ResponseHandler response_handler, int wait_timeout = -1,
+               int response_timeout = -1, int maximum_retry = 3)
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
                      response_handler, nullptr, wait_timeout, response_timeout,
                      maximum_retry) {}
@@ -189,7 +189,8 @@ public:
    */
   ServiceState(const rclcpp::Node::SharedPtr &node, const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               const std::set<std::string> &outcomes, ResponseHandler response_handler,
+               const std::set<std::string> &outcomes,
+               ResponseHandler response_handler,
                rclcpp::CallbackGroup::SharedPtr callback_group,
                int wait_timeout = -1, int response_timeout = -1,
                int maximum_retry = 3)
