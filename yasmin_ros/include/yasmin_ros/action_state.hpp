@@ -91,7 +91,8 @@ public:
    *
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
-  ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
+  ActionState(const std::string &action_name,
+              CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes, int wait_timeout = -1,
               int response_timeout = -1, int maximum_retry = 3)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
@@ -118,7 +119,8 @@ public:
    *
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
-  ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
+  ActionState(const std::string &action_name,
+              CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes,
               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
               int wait_timeout = -1, int response_timeout = -1,
@@ -147,7 +149,8 @@ public:
    *
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
-  ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
+  ActionState(const std::string &action_name,
+              CreateGoalHandler create_goal_handler,
               ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int wait_timeout = -1,
               int response_timeout = -1, int maximum_retry = 3)
@@ -177,7 +180,8 @@ public:
    *
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
-  ActionState(std::string action_name, CreateGoalHandler create_goal_handler,
+  ActionState(const std::string &action_name,
+              CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes,
               ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int wait_timeout = -1,
@@ -210,7 +214,8 @@ public:
    *
    * @throws std::invalid_argument if create_goal_handler is nullptr.
    */
-  ActionState(const rclcpp::Node::SharedPtr &node, std::string action_name,
+  ActionState(const rclcpp::Node::SharedPtr &node,
+              const std::string &action_name,
               CreateGoalHandler create_goal_handler,
               std::set<std::string> outcomes,
               ResultHandler result_handler = nullptr,

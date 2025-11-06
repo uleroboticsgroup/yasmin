@@ -25,7 +25,7 @@
 #include "yasmin_ros/yasmin_node.hpp"
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_factory_demo");
+  YASMIN_LOG_INFO("yasmin_factory_node");
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 loggers
