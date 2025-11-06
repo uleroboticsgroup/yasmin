@@ -287,8 +287,8 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
     std::map<std::string, std::string> remappings;
     for (tinyxml2::XMLElement *transition = child->FirstChildElement("Remap");
          transition; transition = transition->NextSiblingElement("Remap")) {
-      std::string from = this->get_required_attribute(transition, "from");
-      std::string to = this->get_required_attribute(transition, "to");
+      std::string from = this->get_required_attribute(transition, "old");
+      std::string to = this->get_required_attribute(transition, "new");
       remappings[from] = to;
     }
 

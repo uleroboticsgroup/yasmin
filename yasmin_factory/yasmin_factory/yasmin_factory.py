@@ -127,7 +127,7 @@ class YasminFactory:
                 if cchild.tag == "Transition":
                     transitions[cchild.attrib["from"]] = cchild.attrib["to"]
                 elif cchild.tag == "Remap":
-                    remappings[cchild.attrib["from"]] = cchild.attrib["to"]
+                    remappings[cchild.attrib["old"]] = cchild.attrib["new"]
 
             if child.tag == "State":
                 state = self.create_state(child)
