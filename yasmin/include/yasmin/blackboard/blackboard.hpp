@@ -81,21 +81,24 @@ public:
 
     BlackboardValue<T> *b_value = new BlackboardValue<T>(value);
 
+    // Apply remapping if exists
+    std::string key = this->remap(name);
+
     // If the type is changing, remove the old entry first
-    if (this->type_registry.find(name) != this->type_registry.end()) {
-      this->values.erase(name);
-      this->type_registry.erase(name);
+    if (this->type_registry.find(key) != this->type_registry.end()) {
+      this->values.erase(key);
+      this->type_registry.erase(key);
     }
 
     // Insert or update the value
-    if (!this->contains(name)) {
-      this->values.insert({name, b_value});
-      this->type_registry.insert({name, b_value->get_type()});
+    if (!this->contains(key)) {
+      this->values.insert({key, b_value});
+      this->type_registry.insert({key, b_value->get_type()});
 
     } else {
-      b_value = (BlackboardValue<T> *)this->values.at(name);
+      b_value = (BlackboardValue<T> *)this->values.at(key);
       b_value->set(value);
-      this->type_registry[name] = b_value->get_type();
+      this->type_registry[key] = b_value->get_type();
     }
   }
 

@@ -240,8 +240,10 @@ class TestYasminFactory(unittest.TestCase):
 
         # Check the chain of processing
         self.assertEqual(outcome, "end")
-        self.assertTrue(blackboard.contains("output_key"))
-        self.assertEqual(blackboard.get("output_key"), "processed_processed_start")
+        self.assertTrue(blackboard.contains("final_data"))
+        self.assertEqual(blackboard.get("final_data"), "processed_start")
+        self.assertTrue(blackboard.contains("final_data_2"))
+        self.assertEqual(blackboard.get("final_data_2"), "processed_processed_start")
 
 
 if __name__ == "__main__":

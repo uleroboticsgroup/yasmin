@@ -23,6 +23,9 @@ class TestBlackboard(unittest.TestCase):
     def setUp(self):
         self.blackboard = Blackboard()
 
+    def tearDown(self):
+        self.blackboard.set_remappings({})
+
     def test_get(self):
         self.blackboard["foo"] = "foo"
         self.assertEqual("foo", self.blackboard["foo"])
@@ -39,6 +42,11 @@ class TestBlackboard(unittest.TestCase):
     def test_len(self):
         self.blackboard["foo"] = "foo"
         self.assertEqual(1, len(self.blackboard))
+
+    def test_remapping(self):
+        self.blackboard.set("foo", "foo")
+        self.blackboard.set_remappings({"bar": "foo"})
+        self.assertEqual("foo", self.blackboard.get("bar"))
 
     def test_set_get_string(self):
         """Test setting and getting string values"""
