@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
   std::string outcome;
 
-  // Create the factory in a scope
+  // Create the factory and state machine in a scope to ensure proper cleanup
   yasmin_factory::YasminFactory factory;
 
   // Load state machine from XML file
@@ -43,6 +43,16 @@ int main(int argc, char *argv[]) {
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);
+
+  // Cancel state machine on ROS 2 shutdown
+  std::weak_ptr<yasmin::StateMachine> weak_sm = sm;
+  rclcpp::on_shutdown([weak_sm]() {
+    if (auto sm = weak_sm.lock()) {
+      if (sm->is_running()) {
+        sm->cancel_state();
+      }
+    }
+  });
 
   // Publisher for visualizing the state machine
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_FACTORY_DEMO");
