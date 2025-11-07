@@ -37,12 +37,14 @@
 
 1. [Features](#features)
 2. [Installation](#installation)
-3. [Docker](#docker)
-4. [Demos](#demos)
+   - [Debian Packages](#debian-packages)
+   - [Building from Source](#building-from-source)
+   - [Docker](#docker)
+3. [Demos](#demos)
    - [Python](#python)
    - [Cpp](#cpp)
-5. [YASMIN Viewer](#yasmin-viewer)
-6. [Citations](#citations)
+4. [YASMIN Viewer](#yasmin-viewer)
+5. [Citations](#citations)
 
 ## Key Features
 
@@ -84,7 +86,7 @@ colcon test --packages-select yasmin yasmin_ros yasmin_factory
 colcon test-result --verbose
 ```
 
-## Docker
+### Docker
 
 If your operating system doesn't support ROS 2, docker is a great alternative. You can use an image from [Dockerhub](https://hub.docker.com/r/mgons/yasmin/) or create your own images. First of all, to build the image you have to use the following command:
 
