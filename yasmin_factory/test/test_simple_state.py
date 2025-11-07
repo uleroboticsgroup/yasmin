@@ -43,3 +43,20 @@ class TestParameterState(State):
         blackboard["param1"] = self.param1
         blackboard["param2"] = self.param2
         return "success"
+
+
+class TestRemappingState(State):
+    """Test state that reads from and writes to specific blackboard keys."""
+
+    def __init__(self):
+        super().__init__(["success", "failure"])
+
+    def execute(self, blackboard: Blackboard) -> str:
+        # Read from input_key (can be remapped)
+        if blackboard.contains("input_key"):
+            value = blackboard.get("input_key")
+            # Write to output_key (can also be remapped independently)
+            blackboard["output_key"] = f"processed_{value}"
+            return "success"
+        else:
+            return "failure"

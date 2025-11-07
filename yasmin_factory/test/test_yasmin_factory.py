@@ -225,6 +225,24 @@ class TestYasminFactory(unittest.TestCase):
         self.assertIsNotNone(new_state)
         new_factory.cleanup()
 
+    def test_remapping(self):
+        """Test remapping across multiple states that pass data through the chain."""
+        xml_file = os.path.join(self.test_dir, "test_remapping.xml")
+        sm = self.factory.create_sm_from_file(xml_file)
+
+        self.assertIsNotNone(sm)
+
+        # Set up initial input
+        blackboard = Blackboard()
+        blackboard["initial_data"] = "start"
+
+        outcome = sm(blackboard)
+
+        # Check the chain of processing
+        self.assertEqual(outcome, "end")
+        self.assertTrue(blackboard.contains("output_key"))
+        self.assertEqual(blackboard.get("output_key"), "processed_processed_start")
+
 
 if __name__ == "__main__":
     unittest.main()

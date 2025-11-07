@@ -145,8 +145,8 @@ TEST_F(TestYasminFactory, TestCreateStateInvalidType) {
 
   ASSERT_NE(state_elem, nullptr);
 
-  EXPECT_THROW({ auto state = factory->create_state(state_elem); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto state = factory->create_state(state_elem); }, std::runtime_error);
 }
 
 TEST_F(TestYasminFactory, TestCreateStateFromFileCppPy) {
@@ -200,15 +200,17 @@ TEST_F(TestYasminFactory, TestCreateStateFromFileWithParameters) {
 TEST_F(TestYasminFactory, TestCreateStateFromInvalidFile) {
   std::string xml_file = "/non/existent/file.xml";
 
-  EXPECT_THROW({ auto sm = factory->create_sm_from_file(xml_file); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto sm = factory->create_sm_from_file(xml_file); },
+      std::runtime_error);
 }
 
 TEST_F(TestYasminFactory, TestCreateStateFromInvalidXML) {
   std::string temp_file = createTempXMLFile("This is not valid XML");
 
-  EXPECT_THROW({ auto sm = factory->create_sm_from_file(temp_file); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto sm = factory->create_sm_from_file(temp_file); },
+      std::runtime_error);
 
   removeTempFile(temp_file);
 }
@@ -220,8 +222,9 @@ TEST_F(TestYasminFactory, TestCreateStateFromInvalidRootElement) {
 
   std::string temp_file = createTempXMLFile(xml_content);
 
-  EXPECT_THROW({ auto sm = factory->create_sm_from_file(temp_file); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto sm = factory->create_sm_from_file(temp_file); },
+      std::runtime_error);
 
   removeTempFile(temp_file);
 }
@@ -336,8 +339,8 @@ TEST_F(TestYasminFactory, TestMissingRequiredAttribute) {
 
   ASSERT_NE(state_elem, nullptr);
 
-  EXPECT_THROW({ auto state = factory->create_state(state_elem); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto state = factory->create_state(state_elem); }, std::runtime_error);
 }
 
 TEST_F(TestYasminFactory, TestTrimWhitespace) {
@@ -360,6 +363,34 @@ TEST_F(TestYasminFactory, TestTrimWhitespace) {
     EXPECT_EQ(blackboard->get<std::string>("param2"), "value2");
   } catch (const std::exception &e) {
     GTEST_SKIP() << "Python state with parameters failed: " << e.what();
+  }
+}
+
+TEST_F(TestYasminFactory, TestRemapping) {
+  std::string xml_file = test_dir + "/test_remapping.xml";
+
+  try {
+    auto sm = factory->create_sm_from_file(xml_file);
+    ASSERT_NE(sm, nullptr);
+
+    // Set up initial input
+    auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+    blackboard->set<std::string>("initial_data", "start");
+
+    std::string outcome = (*sm)(blackboard);
+
+    // Check the chain of processing
+    EXPECT_EQ(outcome, "end");
+    // State1 reads from initial_data, writes to intermediate_data
+    EXPECT_TRUE(blackboard->contains("intermediate_data"));
+    EXPECT_EQ(blackboard->get<std::string>("intermediate_data"),
+              "processed_start");
+    // State2 reads from intermediate_data, writes to final_data
+    EXPECT_TRUE(blackboard->contains("final_data"));
+    EXPECT_EQ(blackboard->get<std::string>("final_data"),
+              "processed_processed_start");
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "XML file not available or plugin missing: " << e.what();
   }
 }
 

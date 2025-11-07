@@ -41,4 +41,25 @@ public:
   }
 };
 
+/**
+ * @brief Test state that reads from and writes to specific blackboard keys.
+ */
+class TestRemappingState : public yasmin::State {
+public:
+  TestRemappingState() : yasmin::State({"success", "failure"}) {}
+
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+
+    if (blackboard->contains("input_key")) {
+      std::string value = blackboard->get<std::string>("input_key");
+      // Write to output_key (can also be remapped independently)
+      blackboard->set<std::string>("output_key", "processed_" + value);
+      return "success";
+    }
+    return "failure";
+  }
+};
+
 PLUGINLIB_EXPORT_CLASS(TestSimpleState, yasmin::State)
+PLUGINLIB_EXPORT_CLASS(TestRemappingState, yasmin::State)

@@ -120,6 +120,7 @@ if(BUILD_TESTING)
     test/test_simple_sm_2.xml
     test/test_nested_sm.xml
     test/test_parameter_state.xml
+    test/test_remapping.xml
     DESTINATION share/${PROJECT_NAME}/test
   )
 

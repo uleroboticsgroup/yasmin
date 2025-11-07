@@ -77,6 +77,13 @@ TEST_F(TestStateMachine, TestStr) {
   EXPECT_TRUE(sm_str == "State Machine [BAR (BarState), FOO (FooState)]");
 }
 
+TEST_F(TestStateMachine, TestGetNameEmpty) { EXPECT_EQ(sm->get_name(), ""); }
+
+TEST_F(TestStateMachine, TestSetName) {
+  sm->set_name("TestSM");
+  EXPECT_EQ(sm->get_name(), "TestSM");
+}
+
 TEST_F(TestStateMachine, TestGetStates) {
   auto states = sm->get_states();
   EXPECT_EQ(states.size(), 2);

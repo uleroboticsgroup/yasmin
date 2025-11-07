@@ -65,6 +65,13 @@ class TestStateMachine(unittest.TestCase):
     def test_str(self):
         self.assertEqual("State Machine [BAR (BarState), FOO (FooState)]", str(self.sm))
 
+    def test_get_name_empty(self):
+        self.assertEqual("", self.sm.get_name())
+
+    def test_set_name(self):
+        self.sm.set_name("TestSM")
+        self.assertEqual("TestSM", self.sm.get_name())
+
     def test_get_states(self):
         self.assertTrue(isinstance(self.sm.get_states()["FOO"]["state"], FooState))
         self.assertTrue(isinstance(self.sm.get_states()["BAR"]["state"], BarState))

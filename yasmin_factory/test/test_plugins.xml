@@ -4,4 +4,9 @@
       A simple test state for unit testing yasmin_factory.
     </description>
     </class>
+    <class name="yasmin_factory/TestRemappingState" type="TestRemappingState" base_class_type="yasmin::State">
+        <description>
+      A test state that reads from and writes to specific blackboard keys for testing remappings.
+    </description>
+    </class>
 </library>
