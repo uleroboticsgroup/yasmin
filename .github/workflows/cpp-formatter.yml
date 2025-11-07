@@ -10,7 +10,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Clang Formatter
-        uses: DoozyX/clang-format-lint-action@v0.18.1
+        uses: DoozyX/clang-format-lint-action@v0.18.2
         with:
-          clangFormatVersion: 14
+          clangFormatVersion: 18
           source: "."

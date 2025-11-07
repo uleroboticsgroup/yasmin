@@ -42,7 +42,7 @@ public:
    * @brief Constructs a FooState object, initializing the counter.
    */
   FooState()
-      : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0){};
+      : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {};
 
   /**
    * @brief Executes the Foo state logic.
@@ -159,8 +159,8 @@ int main(int argc, char *argv[]) {
       "defaulted",
       yasmin::Concurrence::OutcomeMap{
           {"outcome1",
-           yasmin::Concurrence::StateOutcomeMap{
-               {"FOO", "outcome1"}, {"BAR", "outcome3"}}},
+           yasmin::Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
+                                                {"BAR", "outcome3"}}},
           {"outcome2", yasmin::Concurrence::StateOutcomeMap{
                            {"FOO", "outcome2"}, {"BAR", "outcome3"}}}});
 

@@ -84,7 +84,7 @@ public:
             "/add_two_ints",
             std::bind(&AddTwoIntsState::create_request_handler, this, _1),
             {"outcome1"},
-            std::bind(&AddTwoIntsState::response_handler, this, _1, _2)){};
+            std::bind(&AddTwoIntsState::response_handler, this, _1, _2)) {};
 
   /**
    * @brief Creates a service request using values from the blackboard.

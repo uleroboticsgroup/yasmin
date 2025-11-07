@@ -62,6 +62,6 @@ FooState::execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
   }
 };
 
-FooState::~FooState(){};
+FooState::~FooState() {};
 
 PLUGINLIB_EXPORT_CLASS(FooState, yasmin::State)

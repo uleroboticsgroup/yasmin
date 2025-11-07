@@ -2286,8 +2286,8 @@ int main(int argc, char *argv[]) {
       "defaulted",
       yasmin::Concurrence::OutcomeMap{
           {"outcome1",
-           yasmin::Concurrence::StateOutcomeMap{
-               {"FOO", "outcome1"}, {"BAR", "outcome3"}}},
+           yasmin::Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
+                                                {"BAR", "outcome3"}}},
           {"outcome2", yasmin::Concurrence::StateOutcomeMap{
                            {"FOO", "outcome2"}, {"BAR", "outcome3"}}}});
 

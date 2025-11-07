@@ -32,7 +32,7 @@ namespace blackboard {
 class BlackboardValueInterface {
 public:
   /** @brief Virtual destructor for the interface. */
-  virtual ~BlackboardValueInterface(){};
+  virtual ~BlackboardValueInterface() {};
 
   /**
    * @brief Convert the value to a string representation.

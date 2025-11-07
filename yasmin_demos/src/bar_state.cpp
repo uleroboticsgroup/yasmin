@@ -33,7 +33,7 @@
  * This state logs the value from the blackboard and provides
  * a single outcome to transition.
  */
-BarState::BarState() : yasmin::State({"outcome3"}){};
+BarState::BarState() : yasmin::State({"outcome3"}) {};
 
 /**
  * @brief Executes the Bar state logic.
@@ -54,6 +54,6 @@ BarState::execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
   return "outcome3";
 };
 
-BarState::~BarState(){};
+BarState::~BarState() {};
 
 PLUGINLIB_EXPORT_CLASS(BarState, yasmin::State)
