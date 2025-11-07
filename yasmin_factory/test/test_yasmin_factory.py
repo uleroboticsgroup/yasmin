@@ -245,6 +245,28 @@ class TestYasminFactory(unittest.TestCase):
         self.assertTrue(blackboard.contains("final_data_2"))
         self.assertEqual(blackboard.get("final_data_2"), "processed_processed_start")
 
+    def test_file_path_mechanism(self):
+        """Test including external state machine via file_path attribute."""
+        xml_file = os.path.join(self.test_dir, "test_file_path_sm.xml")
+        sm = self.factory.create_sm_from_file(xml_file)
+
+        self.assertIsNotNone(sm)
+        self.assertIsInstance(sm, StateMachine)
+
+        # Verify the state machine name is set
+        self.assertEqual(sm.get_name(), "MainStateMachine")
+
+        # Verify the outcomes include the final outcome
+        self.assertIn("final_end", sm.get_outcomes())
+
+        # Execute the state machine
+        blackboard = Blackboard()
+        outcome = sm(blackboard)
+
+        # The state machine should execute through FirstState -> IncludedSM -> final_end
+        # or directly to final_end depending on FirstState's execution
+        self.assertIn(outcome, ["final_end"])
+
 
 if __name__ == "__main__":
     unittest.main()

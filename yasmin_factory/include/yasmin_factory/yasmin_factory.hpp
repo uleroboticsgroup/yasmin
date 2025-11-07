@@ -157,6 +157,9 @@ private:
   /// Track if Python interpreter is initialized
   static bool py_initialized_;
 
+  /// Path to the XML file being processed
+  std::string xml_path_;
+
   /**
    * @brief Initializes the Python interpreter if not already initialized.
    */

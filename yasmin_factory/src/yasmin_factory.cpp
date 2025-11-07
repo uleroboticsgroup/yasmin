@@ -20,6 +20,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "rcpputils/filesystem_helper.hpp"
 #include "yasmin/blackboard/blackboard_pywrapper.hpp"
 
 namespace yasmin_factory {
@@ -260,6 +261,18 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
   auto sm = std::make_shared<yasmin::StateMachine>(outcomes);
 
+  if (this->get_optional_attribute(root, "file_path", "") != "") {
+    std::string file_path = this->get_required_attribute(root, "file_path");
+
+    if (!rcpputils::fs::path(file_path).is_absolute()) {
+      file_path =
+          (rcpputils::fs::path(this->xml_path_).parent_path() / file_path)
+              .string();
+    }
+
+    return this->create_sm_from_file(file_path);
+  }
+
   // Parse all child elements
   for (tinyxml2::XMLElement *child = root->FirstChildElement(); child;
        child = child->NextSiblingElement()) {
@@ -313,6 +326,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
 std::shared_ptr<yasmin::StateMachine>
 YasminFactory::create_sm_from_file(const std::string &xml_file) {
+  this->xml_path_ = xml_file;
   tinyxml2::XMLDocument doc;
   tinyxml2::XMLError error = doc.LoadFile(xml_file.c_str());
 

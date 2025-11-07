@@ -14,6 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import importlib
+import os
 import xml.etree.ElementTree as ET
 from yasmin import State, Blackboard, StateMachine, Concurrence
 from yasmin_pybind_bridge import CppStateFactory
@@ -27,6 +28,7 @@ class YasminFactory:
         """
 
         self._cpp_factory = CppStateFactory()
+        self._xml_path = ""
 
     def create_state(self, state_elem: ET.Element) -> State:
         """
@@ -118,6 +120,14 @@ class YasminFactory:
 
         sm = StateMachine(outcomes=root.attrib.get("outcomes", "").split(" "))
 
+        if root.attrib.get("file_path", ""):
+            file_path = root.attrib["file_path"]
+
+            if not os.path.isabs(root.attrib["file_path"]):
+                file_path = os.path.join(os.path.dirname(self._xml_path), file_path)
+
+            return self.create_sm_from_file(file_path)
+
         for child in root:
 
             transitions = {}
@@ -161,6 +171,7 @@ class YasminFactory:
             ValueError: If the XML structure is invalid.
         """
 
+        self._xml_path = xml_file
         tree = ET.parse(xml_file)
         root = tree.getroot()
 

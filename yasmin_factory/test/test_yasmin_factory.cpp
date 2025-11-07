@@ -145,8 +145,8 @@ TEST_F(TestYasminFactory, TestCreateStateInvalidType) {
 
   ASSERT_NE(state_elem, nullptr);
 
-  EXPECT_THROW({ auto state = factory->create_state(state_elem); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto state = factory->create_state(state_elem); }, std::runtime_error);
 }
 
 TEST_F(TestYasminFactory, TestCreateStateFromFileCppPy) {
@@ -200,15 +200,17 @@ TEST_F(TestYasminFactory, TestCreateStateFromFileWithParameters) {
 TEST_F(TestYasminFactory, TestCreateStateFromInvalidFile) {
   std::string xml_file = "/non/existent/file.xml";
 
-  EXPECT_THROW({ auto sm = factory->create_sm_from_file(xml_file); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto sm = factory->create_sm_from_file(xml_file); },
+      std::runtime_error);
 }
 
 TEST_F(TestYasminFactory, TestCreateStateFromInvalidXML) {
   std::string temp_file = createTempXMLFile("This is not valid XML");
 
-  EXPECT_THROW({ auto sm = factory->create_sm_from_file(temp_file); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto sm = factory->create_sm_from_file(temp_file); },
+      std::runtime_error);
 
   removeTempFile(temp_file);
 }
@@ -220,8 +222,9 @@ TEST_F(TestYasminFactory, TestCreateStateFromInvalidRootElement) {
 
   std::string temp_file = createTempXMLFile(xml_content);
 
-  EXPECT_THROW({ auto sm = factory->create_sm_from_file(temp_file); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto sm = factory->create_sm_from_file(temp_file); },
+      std::runtime_error);
 
   removeTempFile(temp_file);
 }
@@ -336,8 +339,8 @@ TEST_F(TestYasminFactory, TestMissingRequiredAttribute) {
 
   ASSERT_NE(state_elem, nullptr);
 
-  EXPECT_THROW({ auto state = factory->create_state(state_elem); },
-               std::runtime_error);
+  EXPECT_THROW(
+      { auto state = factory->create_state(state_elem); }, std::runtime_error);
 }
 
 TEST_F(TestYasminFactory, TestTrimWhitespace) {
@@ -383,6 +386,33 @@ TEST_F(TestYasminFactory, TestRemapping) {
     EXPECT_TRUE(blackboard->contains("final_data_2"));
     EXPECT_EQ(blackboard->get<std::string>("final_data_2"),
               "processed_processed_start");
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "XML file not available or plugin missing: " << e.what();
+  }
+}
+
+TEST_F(TestYasminFactory, TestFilePathMechanism) {
+  std::string xml_file = test_dir + "/test_file_path_sm.xml";
+
+  try {
+    auto sm = factory->create_sm_from_file(xml_file);
+
+    ASSERT_NE(sm, nullptr);
+
+    // Verify the state machine name is set
+    EXPECT_EQ(sm->get_name(), "MainStateMachine");
+
+    // Verify the outcomes include the final outcome
+    auto outcomes = sm->get_outcomes();
+    EXPECT_NE(outcomes.find("final_end"), outcomes.end());
+
+    // Execute the state machine
+    auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+    std::string outcome = (*sm)(blackboard);
+
+    // The state machine should execute through FirstState -> IncludedSM ->
+    // final_end or directly to final_end depending on FirstState's execution
+    EXPECT_EQ(outcome, "final_end");
   } catch (const std::exception &e) {
     GTEST_SKIP() << "XML file not available or plugin missing: " << e.what();
   }
