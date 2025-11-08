@@ -22,8 +22,7 @@ from rclpy.client import Client
 from rclpy.callback_groups import CallbackGroup
 
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
+from yasmin import State, Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT
 from yasmin_ros.ros_clients_cache import ROSClientsCache

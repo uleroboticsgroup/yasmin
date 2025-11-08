@@ -19,9 +19,7 @@ import rclpy
 from example_interfaces.srv import AddTwoInts
 
 import yasmin
-from yasmin import CbState
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import CbState, Blackboard, StateMachine
 from yasmin_ros import ServiceState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT

@@ -139,9 +139,7 @@ import time
 import rclpy
 
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Blackboard, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
@@ -297,9 +295,7 @@ ros2 run yasmin_demos remap_demo.py
 
 ```python
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Blackboard, StateMachine
 from yasmin_ros.basic_outcomes import SUCCEED
 
 
@@ -422,10 +418,7 @@ import time
 import rclpy
 
 import yasmin
-from yasmin import State
-from yasmin import Concurrence
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Concurrence, Blackboard, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
@@ -620,9 +613,7 @@ import rclpy
 from example_interfaces.srv import AddTwoInts
 
 import yasmin
-from yasmin import CbState
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import CbState, Blackboard, StateMachine
 from yasmin_ros import ServiceState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
@@ -1019,8 +1010,7 @@ from rclpy.qos import qos_profile_sensor_data
 from nav_msgs.msg import Odometry
 
 import yasmin
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import Blackboard, StateMachine
 from yasmin_ros import MonitorState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import TIMEOUT
@@ -1185,15 +1175,10 @@ import rclpy
 from std_msgs.msg import Int32
 
 import yasmin
-from yasmin.cb_state import CbState
-from yasmin.state_machine import StateMachine
-from yasmin.blackboard import Blackboard
-
+from yasmin import CbState, StateMachine, Blackboard
+from yasmin_ros import PublisherState, set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED
-from yasmin_ros import PublisherState
-from yasmin_ros.ros_logs import set_ros_loggers
-
-from yasmin_viewer.yasmin_viewer_pub import YasminViewerPub
+from yasmin_viewer import YasminViewerPub
 
 
 class PublishIntState(PublisherState):
@@ -1342,9 +1327,7 @@ import time
 import rclpy
 
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Blackboard, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_ros import GetParametersState
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
@@ -1522,9 +1505,7 @@ from geometry_msgs.msg import Pose
 from nav2_msgs.action import NavigateToPose
 
 import yasmin
-from yasmin import CbState
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import CbState, Blackboard, StateMachine
 from yasmin_ros import ActionState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL

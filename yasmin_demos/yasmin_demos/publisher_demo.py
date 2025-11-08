@@ -20,15 +20,10 @@ import rclpy
 from std_msgs.msg import Int32
 
 import yasmin
-from yasmin.cb_state import CbState
-from yasmin.state_machine import StateMachine
-from yasmin.blackboard import Blackboard
-
+from yasmin import CbState, StateMachine, Blackboard
+from yasmin_ros import PublisherState, set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED
-from yasmin_ros import PublisherState
-from yasmin_ros.ros_logs import set_ros_loggers
-
-from yasmin_viewer.yasmin_viewer_pub import YasminViewerPub
+from yasmin_viewer import YasminViewerPub
 
 
 class PublishIntState(PublisherState):

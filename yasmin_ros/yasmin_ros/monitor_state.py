@@ -22,11 +22,9 @@ from rclpy.qos import QoSProfile
 from rclpy.callback_groups import CallbackGroup
 
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
+from yasmin import State, Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
-from yasmin_ros.ros_clients_cache import ROSClientsCache
 
 
 class MonitorState(State):
