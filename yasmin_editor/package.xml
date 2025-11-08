@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>yasmin_editor</name>
+  <version>3.5.1</version>
+  <description>Editor for YASMIN (Yet Another State MachINe)</description>
+  <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
+  <license>GPL-3.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <depend>rclpy</depend>
+  <depend>yasmin</depend>
+  <depend>yasmin_factory</depend>
+  <exec_depend>python3-tqdm</exec_depend>
+  <exec_depend>python3-pyqt5</exec_depend>
+  <build_depend>ros_environment</build_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

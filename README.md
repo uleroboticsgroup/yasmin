@@ -43,8 +43,12 @@
 3. [Demos](#demos)
    - [Python](#python)
    - [Cpp](#cpp)
-4. [YASMIN Viewer](#yasmin-viewer)
-5. [Citations](#citations)
+4. [YASMIN Editor](#yasmin-editor)
+   - [Getting Started](#getting-started)
+5. [YASMIN Viewer](#yasmin-viewer)
+   - [Getting Started](#getting-started-1)
+   - [Custom Host and Port](#custom-host-and-port)
+6. [Citations](#citations)
 
 ## Key Features
 
@@ -3276,13 +3280,31 @@ int main(int argc, char *argv[]) {
 
 </details>
 
-<a name="#YASMIN-Viewer"></a>
+# YASMIN Editor
+
+The **YASMIN Editor** is a graphical user interface application for building YASMIN state machines using state plugins. It enables intuitive creation of state machines through drag-and-drop functionality, allowing you to:
+
+- Load Python and C++ states
+- Load XML state machines
+- Define transitions between states
+- Create outcomes
+- Visualize state machine structure
+
+State machines can be exported and saved in XML format for reuse and sharing.
+
+![YASMIN Editor Interface](./docs/editor.png)
+
+### Getting Started
+
+```shell
+ros2 run yasmin_editor yasmin_editor
+```
 
 ## YASMIN Viewer
 
 The **YASMIN Viewer** provides a convenient way to monitor **YASMIN**'s Finite State Machines (FSM). It is built using **Flask** and **ReactJS** and includes a filter to focus on a single FSM at a time.
 
-![](./docs/viewer.gif)
+![YASMIN Viewer](./docs/viewer.gif)
 
 ### Getting Started
 
