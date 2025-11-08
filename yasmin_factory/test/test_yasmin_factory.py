@@ -44,21 +44,6 @@ class TestYasminFactory(unittest.TestCase):
         self.assertIn("outcome1", state.get_outcomes())
         self.assertIn("outcome2", state.get_outcomes())
 
-    def test_create_python_state_with_parameters(self):
-        """Test creating a Python state with parameters."""
-        state_xml = '<State name="ParamState" type="py" module="test.test_simple_state" class="TestParameterState" parameters="param_a, param_b"/>'
-        state_elem = ET.fromstring(state_xml)
-
-        state = self.factory.create_state(state_elem)
-
-        self.assertIsNotNone(state)
-        blackboard = Blackboard()
-        outcome = state.execute(blackboard)
-
-        self.assertEqual(outcome, "success")
-        self.assertEqual(blackboard["param1"], "param_a")
-        self.assertEqual(blackboard["param2"], "param_b")
-
     def test_create_cpp_state(self):
         """Test creating a C++ state using pybind bridge."""
         state_xml = (
@@ -131,22 +116,6 @@ class TestYasminFactory(unittest.TestCase):
         self.assertIsNotNone(sm)
         self.assertIsInstance(sm, StateMachine)
         self.assertIn("end", sm.get_outcomes())
-
-    def test_create_sm_from_file_with_parameters(self):
-        """Test creating a state machine with parameter state from XML file."""
-        xml_file = os.path.join(self.test_dir, "test_parameter_state.xml")
-        sm = self.factory.create_sm_from_file(xml_file)
-
-        self.assertIsNotNone(sm)
-        self.assertIsInstance(sm, StateMachine)
-
-        # Execute the state machine
-        blackboard = Blackboard()
-        outcome = sm(blackboard)
-
-        self.assertEqual(outcome, "end")
-        self.assertEqual(blackboard.get("param1"), "value1")
-        self.assertEqual(blackboard.get("param2"), "value2")
 
     def test_create_sm_from_invalid_file(self):
         """Test creating a state machine from non-existent file."""

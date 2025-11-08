@@ -170,14 +170,12 @@ private:
    *
    * @param module_name The Python module name.
    * @param class_name The Python class name.
-   * @param parameters Optional parameters to pass to the constructor.
    * @return A shared pointer to the created Python state adapter.
    * @throws std::runtime_error If the Python state cannot be created.
    */
   std::shared_ptr<yasmin::State>
   create_python_state(const std::string &module_name,
-                      const std::string &class_name,
-                      const std::vector<std::string> &parameters = {});
+                      const std::string &class_name);
 
   /**
    * @brief Helper function to split a string by a delimiter.

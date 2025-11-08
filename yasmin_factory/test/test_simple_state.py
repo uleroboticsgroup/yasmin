@@ -31,20 +31,6 @@ class TestSimpleState(State):
         return "outcome1" if value < 2 else "outcome2"
 
 
-class TestParameterState(State):
-    """Test state that accepts parameters."""
-
-    def __init__(self, param1: str, param2: str):
-        super().__init__(["success", "failure"])
-        self.param1 = param1
-        self.param2 = param2
-
-    def execute(self, blackboard: Blackboard) -> str:
-        blackboard["param1"] = self.param1
-        blackboard["param2"] = self.param2
-        return "success"
-
-
 class TestRemappingState(State):
     """Test state that reads from and writes to specific blackboard keys."""
 

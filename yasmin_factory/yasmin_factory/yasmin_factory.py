@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import importlib
 import os
+import importlib
 import xml.etree.ElementTree as ET
 from yasmin import State, StateMachine, Concurrence
 from yasmin_pybind_bridge import CppStateFactory
@@ -49,14 +49,7 @@ class YasminFactory:
             module_name = state_elem.attrib["module"]
             module = importlib.import_module(module_name)
             state_class = getattr(module, class_name)
-
-            # Handle parameters if any
-            params = state_elem.attrib.get("parameters", "")
-            if params:
-                param_list = [param.strip() for param in params.split(",")]
-                return state_class(*param_list)
-            else:
-                return state_class()
+            return state_class()
 
         elif state_type == "cpp":
             return self._cpp_factory.create(class_name)

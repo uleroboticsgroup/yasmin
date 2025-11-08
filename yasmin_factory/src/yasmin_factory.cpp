@@ -83,8 +83,7 @@ void YasminFactory::initialize_python() {
 
 std::shared_ptr<yasmin::State>
 YasminFactory::create_python_state(const std::string &module_name,
-                                   const std::string &class_name,
-                                   const std::vector<std::string> &parameters) {
+                                   const std::string &class_name) {
   try {
     py::gil_scoped_acquire acquire;
 
@@ -97,20 +96,10 @@ YasminFactory::create_python_state(const std::string &module_name,
     // Get the class
     py::object state_class = module.attr(class_name.c_str());
 
-    // Create instance with or without parameters
-    py::object py_state;
-    if (!parameters.empty()) {
-      py::list py_params;
-      for (const auto &param : parameters) {
-        py_params.append(param);
-      }
-      py_state = state_class(*py_params);
-    } else {
-      py_state = state_class();
-    }
+    // Create instance
+    py::object py_state = state_class();
 
     // Extract the C++ pointer from the Python object
-    // The Python State object is managed by PyState trampoline
     auto cpp_state_ptr = py_state.cast<std::shared_ptr<yasmin::State>>();
 
     // Wrap it in a holder that keeps the Python object alive
@@ -181,19 +170,9 @@ YasminFactory::create_state(tinyxml2::XMLElement *state_elem) {
                                "': " + ex.what());
     }
   } else if (state_type == "py") {
-    // Get required module name for Python states
     std::string module_name =
         this->get_required_attribute(state_elem, "module");
-
-    // Get optional parameters
-    std::string params_str =
-        this->get_optional_attribute(state_elem, "parameters", "");
-    std::vector<std::string> parameters;
-    if (!params_str.empty()) {
-      parameters = this->split_string(params_str, ',');
-    }
-
-    return this->create_python_state(module_name, class_name, parameters);
+    return this->create_python_state(module_name, class_name);
   } else {
     throw std::runtime_error("Unknown state type: " + state_type);
   }

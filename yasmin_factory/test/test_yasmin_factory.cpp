@@ -107,33 +107,6 @@ TEST_F(TestYasminFactory, TestCreatePythonState) {
   }
 }
 
-TEST_F(TestYasminFactory, TestCreatePythonStateWithParameters) {
-  // Create a Python state with parameters
-  std::string xml_content = R"(
-    <State name="ParamState" type="py" module="test.test_simple_state" class="TestParameterState" parameters="test_a, test_b"/>
-  )";
-
-  tinyxml2::XMLDocument doc;
-  doc.Parse(xml_content.c_str());
-  tinyxml2::XMLElement *state_elem = doc.FirstChildElement("State");
-
-  ASSERT_NE(state_elem, nullptr);
-
-  try {
-    auto state = factory->create_state(state_elem);
-    ASSERT_NE(state, nullptr);
-
-    auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
-    std::string outcome = state->execute(blackboard);
-
-    EXPECT_EQ(outcome, "success");
-    EXPECT_EQ(blackboard->get<std::string>("param1"), "test_a");
-    EXPECT_EQ(blackboard->get<std::string>("param2"), "test_b");
-  } catch (const std::exception &e) {
-    GTEST_SKIP() << "Python state with parameters failed: " << e.what();
-  }
-}
-
 TEST_F(TestYasminFactory, TestCreateStateInvalidType) {
   std::string xml_content = R"(
     <State name="InvalidState" type="invalid" class="SomeClass"/>
@@ -174,26 +147,6 @@ TEST_F(TestYasminFactory, TestCreateStateFromFilePyCpp) {
     EXPECT_NE(outcomes.find("end"), outcomes.end());
   } catch (const std::exception &e) {
     GTEST_SKIP() << "XML file not available or plugin missing: " << e.what();
-  }
-}
-
-TEST_F(TestYasminFactory, TestCreateStateFromFileWithParameters) {
-  std::string xml_file = test_dir + "/test_parameter_state.xml";
-
-  try {
-    auto sm = factory->create_sm_from_file(xml_file);
-
-    ASSERT_NE(sm, nullptr);
-
-    // Execute the state machine
-    auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
-    std::string outcome = (*sm)(blackboard);
-
-    EXPECT_EQ(outcome, "end");
-    EXPECT_EQ(blackboard->get<std::string>("param1"), "value1");
-    EXPECT_EQ(blackboard->get<std::string>("param2"), "value2");
-  } catch (const std::exception &e) {
-    GTEST_SKIP() << "XML file not available: " << e.what();
   }
 }
 
@@ -341,29 +294,6 @@ TEST_F(TestYasminFactory, TestMissingRequiredAttribute) {
 
   EXPECT_THROW(
       { auto state = factory->create_state(state_elem); }, std::runtime_error);
-}
-
-TEST_F(TestYasminFactory, TestTrimWhitespace) {
-  // Test that the factory correctly handles whitespace in parameters
-  std::string xml_content = R"(
-    <State name="ParamState" type="py" module="test.test_simple_state" class="TestParameterState" parameters="  value1  ,  value2  "/>
-  )";
-
-  tinyxml2::XMLDocument doc;
-  doc.Parse(xml_content.c_str());
-  tinyxml2::XMLElement *state_elem = doc.FirstChildElement("State");
-
-  try {
-    auto state = factory->create_state(state_elem);
-    auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
-    std::string outcome = state->execute(blackboard);
-
-    EXPECT_EQ(outcome, "success");
-    EXPECT_EQ(blackboard->get<std::string>("param1"), "value1");
-    EXPECT_EQ(blackboard->get<std::string>("param2"), "value2");
-  } catch (const std::exception &e) {
-    GTEST_SKIP() << "Python state with parameters failed: " << e.what();
-  }
 }
 
 TEST_F(TestYasminFactory, TestRemapping) {
