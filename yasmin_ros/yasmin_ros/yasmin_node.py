@@ -16,6 +16,7 @@
 import uuid
 from threading import Thread, RLock
 
+import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 
@@ -56,6 +57,9 @@ class YasminNode(Node):
             RuntimeError: Raised if the creation of the instance fails.
         """
         with YasminNode._lock:
+            if not rclpy.ok():
+                rclpy.init()
+
             if YasminNode._instance is None:
                 YasminNode._instance = YasminNode()
 
