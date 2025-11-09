@@ -78,7 +78,8 @@ class PluginManager:
             for library in root.findall("library"):
                 for class_elem in library.findall("class"):
                     class_name = class_elem.get("name")
-                    self.load_cpp_plugin(class_name)
+                    if class_name:
+                        self.load_cpp_plugin(class_name)
 
     def load_python_plugins_from_package(self, package_name: str) -> None:
         skip_packages = {
@@ -115,8 +116,7 @@ class PluginManager:
             if "__pycache__" in dirpath or "/test" in dirpath:
                 continue
 
-            depth = len(dirpath.replace(package_path, "").split(os.sep))
-            if depth > 3:
+            if len(dirpath.replace(package_path, "").split(os.sep)) > 3:
                 continue
 
             for filename in filenames:

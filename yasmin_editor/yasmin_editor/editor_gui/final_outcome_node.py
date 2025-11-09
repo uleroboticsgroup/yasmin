@@ -18,7 +18,6 @@ from typing import List
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
-from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 
 
@@ -28,7 +27,7 @@ class FinalOutcomeNode(QGraphicsRectItem):
     def __init__(self, name: str, x: float, y: float, inside_container: bool = False):
         super().__init__(-60, -30, 120, 60)
         self.name = name
-        self.connections: List["ConnectionLine"] = []
+        self.connections: List = []
         self.parent_container = None
         self.inside_container = inside_container
 
@@ -84,11 +83,11 @@ class FinalOutcomeNode(QGraphicsRectItem):
 
         return super().itemChange(change, value)
 
-    def add_connection(self, connection: "ConnectionLine"):
+    def add_connection(self, connection):
         if connection not in self.connections:
             self.connections.append(connection)
 
-    def remove_connection(self, connection: "ConnectionLine"):
+    def remove_connection(self, connection):
         if connection in self.connections:
             self.connections.remove(connection)
 

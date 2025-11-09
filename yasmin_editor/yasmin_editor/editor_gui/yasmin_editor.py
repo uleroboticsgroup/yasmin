@@ -14,7 +14,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import math
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from typing import Dict, List
@@ -39,7 +38,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QTextBrowser,
 )
-from PyQt5.QtCore import Qt, QPointF, QRectF
+from PyQt5.QtCore import Qt, QPointF
 
 from yasmin_editor.plugins_manager.plugin_manager import PluginManager
 from yasmin_editor.plugins_manager.plugin_info import PluginInfo
@@ -289,7 +288,6 @@ class YasminEditor(QMainWindow):
 
     def update_start_state_combo(self):
         """Update the initial state combo box with available states."""
-        # Store current selection based on self.start_state (not combo text)
         current = self.start_state
         self.start_state_combo.clear()
         self.start_state_combo.addItem("(None)")
@@ -297,13 +295,11 @@ class YasminEditor(QMainWindow):
         for state_name in self.state_nodes.keys():
             self.start_state_combo.addItem(state_name)
 
-        # Restore selection based on self.start_state
         if current:
             index = self.start_state_combo.findText(current)
             if index >= 0:
                 self.start_state_combo.setCurrentIndex(index)
             else:
-                # If the initial state no longer exists, reset to None
                 self.start_state = None
                 self.start_state_combo.setCurrentIndex(0)
         else:
@@ -326,37 +322,28 @@ class YasminEditor(QMainWindow):
 
     def get_free_position(self):
         """Get a free position following a top-to-bottom vertical layout pattern."""
-        # Configuration for vertical layout
         START_X = 100
         START_Y = 100
         VERTICAL_SPACING = 220
 
-        # Find all root-level nodes (not inside containers)
-        root_nodes = []
-        for node in self.state_nodes.values():
-            if not hasattr(node, "parent_container") or node.parent_container is None:
-                root_nodes.append(node)
+        root_nodes = [
+            node
+            for node in self.state_nodes.values()
+            if not hasattr(node, "parent_container") or node.parent_container is None
+        ]
 
         if not root_nodes:
-            # First node, place at start position
             return QPointF(START_X, START_Y)
 
-        # Calculate the next position below all existing root nodes
         max_bottom = START_Y
-
         for node in root_nodes:
-            # Get node height and position
             if isinstance(node, ContainerStateNode):
                 node.prepareGeometryChange()
-                rect = node.rect()
-                node_bottom = node.pos().y() + rect.height()
+                node_bottom = node.pos().y() + node.rect().height()
             else:
-                bbox = node.boundingRect()
-                node_bottom = node.pos().y() + bbox.height()
-
+                node_bottom = node.pos().y() + node.boundingRect().height()
             max_bottom = max(max_bottom, node_bottom)
 
-        # Position new node below all existing nodes
         return QPointF(START_X, max_bottom + VERTICAL_SPACING)
 
     def create_state_node(
@@ -378,14 +365,9 @@ class YasminEditor(QMainWindow):
             QMessageBox.warning(self, "Error", f"State '{name}' already exists!")
             return
 
-        # Get free position in viewport center or closest free space
         pos = self.get_free_position()
 
-        # Create node
-        # XML state machines are regular StateNode (not containers)
-        # Only user-created State Machines and Concurrences are containers
         if is_state_machine or is_concurrence:
-            # User-created container (State Machine or Concurrence)
             node = ContainerStateNode(
                 name,
                 pos.x(),
@@ -397,22 +379,12 @@ class YasminEditor(QMainWindow):
                 default_outcome,
             )
         else:
-            # Regular state with plugin
-            node = StateNode(
-                name,
-                plugin_info,
-                pos.x(),
-                pos.y(),
-                remappings,
-            )
+            node = StateNode(name, plugin_info, pos.x(), pos.y(), remappings)
 
         self.canvas.scene.addItem(node)
         self.state_nodes[name] = node
-
-        # Update initial state combo
         self.update_start_state_combo()
 
-        # If this is the first state and no initial state is set, set it as initial
         if len(self.state_nodes) == 1 and not self.start_state:
             self.start_state = name
             index = self.start_state_combo.findText(name)
@@ -502,14 +474,10 @@ class YasminEditor(QMainWindow):
             QMessageBox.warning(self, "Error", "Please select a state to edit!")
             return
 
-        # Store old name for renaming
         old_name = state_node.name
 
-        # Use appropriate dialog based on state type
         if isinstance(state_node, ContainerStateNode):
             if state_node.is_state_machine:
-                # Use StateMachineDialog for State Machine containers
-                # Get list of child state names
                 child_state_names = list(state_node.child_states.keys())
 
                 dialog = StateMachineDialog(
@@ -531,38 +499,26 @@ class YasminEditor(QMainWindow):
                     if result:
                         name, outcomes, start_state, remappings = result
 
-                        # Handle name change
                         if name != old_name:
-                            # Check if new name already exists
                             if name in self.state_nodes:
                                 QMessageBox.warning(
                                     self, "Error", f"State '{name}' already exists!"
                                 )
                                 return
 
-                            # Update root initial state if this was the initial state
                             if self.start_state == old_name:
                                 self.start_state = name
 
-                            # Update state_nodes dictionary
                             del self.state_nodes[old_name]
                             self.state_nodes[name] = state_node
-
-                            # Update node's name
                             state_node.name = name
-
-                            # Update visual title
                             state_node.title.setPlainText(f"STATE MACHINE: {name}")
                             title_rect = state_node.title.boundingRect()
                             state_node.title.setPos(-title_rect.width() / 2, -75)
-
-                            # Update initial state combo (will restore the selection)
                             self.update_start_state_combo()
 
-                        # Update remappings
                         state_node.remappings = remappings
 
-                        # Update initial state
                         if start_state:
                             state_node.start_state = start_state
                             state_node.update_start_state_label()
@@ -571,8 +527,6 @@ class YasminEditor(QMainWindow):
                             f"Updated state machine: {name}", 2000
                         )
             elif state_node.is_concurrence:
-                # Use ConcurrenceDialog for Concurrence containers
-                # Get list of final outcome names
                 final_outcome_names = (
                     list(state_node.final_outcomes.keys())
                     if state_node.final_outcomes
@@ -598,46 +552,32 @@ class YasminEditor(QMainWindow):
                     if result:
                         name, outcomes, default_outcome, remappings = result
 
-                        # Handle name change
                         if name != old_name:
-                            # Check if new name already exists
                             if name in self.state_nodes:
                                 QMessageBox.warning(
                                     self, "Error", f"State '{name}' already exists!"
                                 )
                                 return
 
-                            # Update root initial state if this was the initial state
                             if self.start_state == old_name:
                                 self.start_state = name
 
-                            # Update state_nodes dictionary
                             del self.state_nodes[old_name]
                             self.state_nodes[name] = state_node
-
-                            # Update node's name
                             state_node.name = name
-
-                            # Update visual title
                             state_node.title.setPlainText(f"CONCURRENCE: {name}")
                             title_rect = state_node.title.boundingRect()
                             state_node.title.setPos(-title_rect.width() / 2, -75)
-
-                            # Update initial state combo (will restore the selection)
                             self.update_start_state_combo()
 
-                        # Update remappings
                         state_node.remappings = remappings
 
-                        # Update default outcome
                         if default_outcome:
                             state_node.default_outcome = default_outcome
                             state_node.update_default_outcome_label()
 
                         self.statusBar().showMessage(f"Updated concurrence: {name}", 2000)
         else:
-            # Use StatePropertiesDialog for regular states
-            # In edit mode, only pass the selected state's plugin, not all available plugins
             dialog = StatePropertiesDialog(
                 state_name=state_node.name,
                 plugin_info=(
@@ -656,58 +596,39 @@ class YasminEditor(QMainWindow):
 
             if dialog.exec_():
                 result = dialog.get_state_data()
-                if result[0]:  # Check if name is not None (validation passed)
-                    (
-                        name,
-                        plugin,
-                        outcomes,
-                        remappings,
-                    ) = result
+                if result[0]:
+                    name, plugin, outcomes, remappings = result
 
-                    # Handle name change
                     if name != old_name:
-                        # Check if new name already exists
                         if name in self.state_nodes:
                             QMessageBox.warning(
                                 self, "Error", f"State '{name}' already exists!"
                             )
                             return
 
-                        # Update root initial state if this was the initial state
                         if self.start_state == old_name:
                             self.start_state = name
 
-                        # Update state_nodes dictionary
                         del self.state_nodes[old_name]
                         self.state_nodes[name] = state_node
-
-                        # Update node's name
                         state_node.name = name
-
-                        # Update visual text label
                         state_node.text.setPlainText(name)
                         text_rect = state_node.text.boundingRect()
                         state_node.text.setPos(
                             -text_rect.width() / 2, -text_rect.height() / 2
                         )
-
-                        # Update initial state combo (will restore the selection)
                         self.update_start_state_combo()
 
-                    # Update remappings
                     state_node.remappings = remappings
-
                     self.statusBar().showMessage(f"Updated state: {name}", 2000)
 
     def add_state_to_container(self):
         """Add a child state to the selected container (SM or Concurrence)."""
-        # Get selected container
         selected_items = self.canvas.scene.selectedItems()
         container = None
 
         for item in selected_items:
             if isinstance(item, ContainerStateNode):
-                # Only user-created containers (not XML-based)
                 if not hasattr(item, "xml_file") or item.xml_file is None:
                     container = item
                     break
@@ -720,43 +641,26 @@ class YasminEditor(QMainWindow):
             )
             return
 
-        # Create dialog for adding a state
         all_plugins = (
             self.plugin_manager.python_plugins
             + self.plugin_manager.cpp_plugins
             + self.plugin_manager.xml_files
         )
-        dialog = StatePropertiesDialog(
-            available_plugins=all_plugins,
-            parent=self,
-        )
+        dialog = StatePropertiesDialog(available_plugins=all_plugins, parent=self)
 
         if dialog.exec_():
             result = dialog.get_state_data()
-            if result[0]:  # Validation passed
-                (
-                    name,
-                    plugin,
-                    outcomes,
-                    remappings,
-                ) = result
+            if result[0]:
+                name, plugin, outcomes, remappings = result
 
-                # Check if child state already exists in container
                 if name in container.child_states:
                     QMessageBox.warning(
                         self, "Error", f"State '{name}' already exists in this container!"
                     )
                     return
 
-                # Create the child state node
                 child_node = StateNode(name, plugin, 0, 0, remappings)
-
-                # Add to container (this will set parent and position)
                 container.add_child_state(child_node)
-
-                # Note: Don't add to scene separately - it's added via setParentItem in add_child_state
-
-                # Also add to global state nodes dict for transitions
                 full_name = f"{container.name}.{name}"
                 self.state_nodes[full_name] = child_node
 
@@ -764,30 +668,23 @@ class YasminEditor(QMainWindow):
                     f"Added state '{name}' to container '{container.name}'", 2000
                 )
 
-                # Auto-assign initial state if this is the first state in a State Machine
                 if container.is_state_machine and len(container.child_states) == 1:
                     container.start_state = name
                     container.update_start_state_label()
 
     def add_state_machine_to_container(self):
         """Add a State Machine to the selected container."""
-        # Get selected container
         selected_items = self.canvas.scene.selectedItems()
         container = None
 
         for item in selected_items:
             if isinstance(item, ContainerStateNode):
-                # Only user-created containers (not XML-based)
                 if not hasattr(item, "xml_file") or item.xml_file is None:
                     container = item
                     break
 
         if not container:
-            QMessageBox.warning(
-                self,
-                "Error",
-                "Please select a user-created Container!",
-            )
+            QMessageBox.warning(self, "Error", "Please select a user-created Container!")
             return
 
         dialog = StateMachineDialog(parent=self)
@@ -797,29 +694,16 @@ class YasminEditor(QMainWindow):
             if result:
                 name, outcomes, start_state, remappings = result
 
-                # Check if child already exists
                 if name in container.child_states:
                     QMessageBox.warning(
                         self, "Error", f"State '{name}' already exists in this container!"
                     )
                     return
 
-                # Create nested state machine
                 child_sm = ContainerStateNode(
-                    name,
-                    0,
-                    0,
-                    False,  # is_concurrence
-                    remappings,
-                    outcomes,
-                    start_state,
-                    None,
+                    name, 0, 0, False, remappings, outcomes, start_state, None
                 )
-
-                # Add to container
                 container.add_child_state(child_sm)
-
-                # Add to global dict
                 full_name = f"{container.name}.{name}"
                 self.state_nodes[full_name] = child_sm
 
@@ -827,30 +711,23 @@ class YasminEditor(QMainWindow):
                     f"Added State Machine '{name}' to container '{container.name}'", 2000
                 )
 
-                # Auto-assign initial state if this is the first state in a State Machine
                 if container.is_state_machine and len(container.child_states) == 1:
                     container.start_state = name
                     container.update_start_state_label()
 
     def add_concurrence_to_container(self):
         """Add a Concurrence to the selected container."""
-        # Get selected container
         selected_items = self.canvas.scene.selectedItems()
         container = None
 
         for item in selected_items:
             if isinstance(item, ContainerStateNode):
-                # Only user-created containers (not XML-based)
                 if not hasattr(item, "xml_file") or item.xml_file is None:
                     container = item
                     break
 
         if not container:
-            QMessageBox.warning(
-                self,
-                "Error",
-                "Please select a user-created Container!",
-            )
+            QMessageBox.warning(self, "Error", "Please select a user-created Container!")
             return
 
         dialog = ConcurrenceDialog(parent=self)
@@ -860,29 +737,16 @@ class YasminEditor(QMainWindow):
             if result:
                 name, outcomes, default_outcome, remappings = result
 
-                # Check if child already exists
                 if name in container.child_states:
                     QMessageBox.warning(
                         self, "Error", f"State '{name}' already exists in this container!"
                     )
                     return
 
-                # Create nested concurrence
                 child_cc = ContainerStateNode(
-                    name,
-                    0,
-                    0,
-                    True,  # is_concurrence
-                    remappings,
-                    outcomes,
-                    None,
-                    default_outcome,
+                    name, 0, 0, True, remappings, outcomes, None, default_outcome
                 )
-
-                # Add to container
                 container.add_child_state(child_cc)
-
-                # Add to global dict
                 full_name = f"{container.name}.{name}"
                 self.state_nodes[full_name] = child_cc
 
@@ -890,15 +754,12 @@ class YasminEditor(QMainWindow):
                     f"Added Concurrence '{name}' to container '{container.name}'", 2000
                 )
 
-                # Auto-assign initial state if this is the first state in a State Machine
                 if container.is_state_machine and len(container.child_states) == 1:
                     container.start_state = name
                     container.update_start_state_label()
 
     def create_connection_from_drag(self, from_node, to_node):
         """Create a connection when user drags from one node to another."""
-        # Containers (SM/Concurrence) cannot have external transitions
-        # They use final outcomes inside the container instead
         if isinstance(from_node, ContainerStateNode):
             QMessageBox.warning(
                 self,
@@ -908,7 +769,6 @@ class YasminEditor(QMainWindow):
             )
             return
 
-        # Check if from_node has outcomes
         has_outcomes = False
         outcomes_list = []
 
@@ -927,7 +787,6 @@ class YasminEditor(QMainWindow):
             )
             return
 
-        # Check if this state is inside a Concurrence
         is_in_concurrence = False
         parent_concurrence = None
         if hasattr(from_node, "parent_container") and from_node.parent_container:
@@ -936,9 +795,7 @@ class YasminEditor(QMainWindow):
                 if is_in_concurrence:
                     parent_concurrence = from_node.parent_container
 
-        # If state is inside a Concurrence, it can only transition to final outcomes inside the same Concurrence
         if is_in_concurrence:
-            # Check if target is a final outcome inside the same concurrence
             is_valid_target = (
                 isinstance(to_node, FinalOutcomeNode)
                 and to_node.inside_container
@@ -957,7 +814,6 @@ class YasminEditor(QMainWindow):
                 )
                 return
 
-        # Filter out already used outcomes (only if NOT in a Concurrence)
         if not is_in_concurrence:
             used_outcomes = (
                 from_node.get_used_outcomes()
@@ -970,21 +826,16 @@ class YasminEditor(QMainWindow):
 
             if not available_outcomes:
                 QMessageBox.warning(
-                    self,
-                    "Error",
-                    "All outcomes from this state are already used!",
+                    self, "Error", "All outcomes from this state are already used!"
                 )
                 return
         else:
-            # In a Concurrence, allow reusing outcomes
             available_outcomes = outcomes_list
 
-        # If the from_node has only one available outcome, use it directly
         if len(available_outcomes) == 1:
             outcome = available_outcomes[0]
             self.create_connection(from_node, to_node, outcome)
         else:
-            # Ask user to select outcome
             outcome, ok = QInputDialog.getItem(
                 self,
                 "Select Outcome",
@@ -998,13 +849,11 @@ class YasminEditor(QMainWindow):
 
     def create_connection(self, from_node, to_node, outcome: str):
         """Create and add a connection to the scene."""
-        # Check if this state is inside a Concurrence
         is_in_concurrence = False
         if hasattr(from_node, "parent_container") and from_node.parent_container:
             if isinstance(from_node.parent_container, ContainerStateNode):
                 is_in_concurrence = from_node.parent_container.is_concurrence
 
-        # Check if outcome is already used (only if NOT in a Concurrence)
         if not is_in_concurrence:
             if hasattr(from_node, "get_used_outcomes"):
                 used_outcomes = from_node.get_used_outcomes()
@@ -1023,7 +872,6 @@ class YasminEditor(QMainWindow):
         self.canvas.scene.addItem(connection.label)
         self.connections.append(connection)
 
-        # Update all parallel connections to recalculate offsets
         for conn in self.connections:
             if (conn.from_node == from_node and conn.to_node == to_node) or (
                 conn.from_node == to_node and conn.to_node == from_node
@@ -1036,12 +884,11 @@ class YasminEditor(QMainWindow):
         )
 
     def add_transition(self):
-        # Get selected state
         selected_items = self.canvas.scene.selectedItems()
         from_state = None
 
         for item in selected_items:
-            if isinstance(item, StateNode):  # Only regular states, not containers
+            if isinstance(item, StateNode):
                 from_state = item
                 break
 
@@ -1051,20 +898,14 @@ class YasminEditor(QMainWindow):
             )
             return
 
-        # Check if state has outcomes
         has_outcomes = False
         if hasattr(from_state, "plugin_info") and from_state.plugin_info:
             has_outcomes = True
 
         if not has_outcomes:
-            QMessageBox.warning(
-                self,
-                "Error",
-                "Selected state has no outcomes!",
-            )
+            QMessageBox.warning(self, "Error", "Selected state has no outcomes!")
             return
 
-        # Check if state is inside a Concurrence
         is_in_concurrence = False
         parent_concurrence = None
         if hasattr(from_state, "parent_container") and from_state.parent_container:
@@ -1073,11 +914,9 @@ class YasminEditor(QMainWindow):
                 if is_in_concurrence:
                     parent_concurrence = from_state.parent_container
 
-        # Get available targets
         available_targets = []
 
         if is_in_concurrence:
-            # If state is inside a Concurrence, only allow transitions to final outcomes inside the same Concurrence
             available_targets = [
                 outcome for outcome in parent_concurrence.final_outcomes.values()
             ]
@@ -1090,7 +929,6 @@ class YasminEditor(QMainWindow):
                 )
                 return
         else:
-            # For states not in a Concurrence, exclude containers as they can't be transition targets
             for state in self.state_nodes.values():
                 if not isinstance(state, ContainerStateNode):
                     available_targets.append(state)
@@ -1105,7 +943,7 @@ class YasminEditor(QMainWindow):
 
         if dialog.exec_():
             outcome, target = dialog.get_transition_data()
-            if outcome:  # Make sure outcome is selected
+            if outcome:
                 self.create_connection(from_state, target, outcome)
 
     def add_final_outcome(self):
@@ -1113,19 +951,16 @@ class YasminEditor(QMainWindow):
             self, "Final Outcome", "Enter final outcome name:"
         )
         if ok and outcome_name:
-            # Check if a container is selected to add final outcome inside it
             selected_items = self.canvas.scene.selectedItems()
             selected_container = None
 
             for item in selected_items:
                 if isinstance(item, ContainerStateNode):
-                    # Only user-created containers (not XML-based)
                     if not hasattr(item, "xml_file") or item.xml_file is None:
                         selected_container = item
                         break
 
             if selected_container:
-                # Add final outcome to the container
                 if outcome_name in selected_container.final_outcomes:
                     QMessageBox.warning(
                         self,
@@ -1134,10 +969,8 @@ class YasminEditor(QMainWindow):
                     )
                     return
 
-                # Create final outcome node inside container
-                # Position on the right side of the container
                 rect = selected_container.rect()
-                x = rect.right() - 100  # Near right edge
+                x = rect.right() - 100
                 y = rect.top() + 70 + len(selected_container.final_outcomes) * 80
 
                 node = FinalOutcomeNode(outcome_name, x, y, inside_container=True)
@@ -1146,7 +979,6 @@ class YasminEditor(QMainWindow):
                 selected_container.final_outcomes[outcome_name] = node
                 selected_container.auto_resize_for_children()
 
-                # Auto-assign default outcome if this is the first outcome in a Concurrence
                 if (
                     selected_container.is_concurrence
                     and len(selected_container.final_outcomes) == 1
@@ -1160,16 +992,13 @@ class YasminEditor(QMainWindow):
                     2000,
                 )
             else:
-                # Add final outcome to root level
                 if outcome_name in self.final_outcomes:
                     QMessageBox.warning(
                         self, "Error", f"Final outcome '{outcome_name}' already exists!"
                     )
                     return
 
-                # Create final outcome node (positioned on the right side)
-                # Position based on existing final outcomes count
-                x = 600  # Fixed x position on the right
+                x = 600
                 y = len(self.final_outcomes) * 150
                 node = FinalOutcomeNode(outcome_name, x, y)
                 self.canvas.scene.addItem(node)
@@ -1181,15 +1010,12 @@ class YasminEditor(QMainWindow):
 
         for item in selected_items:
             if isinstance(item, (StateNode, ContainerStateNode)):
-                # Remove all connections - properly clean up both ends
                 for connection in item.connections[:]:
-                    # Remove from the other node's connection list
                     if connection.from_node == item:
                         connection.to_node.remove_connection(connection)
                     else:
                         connection.from_node.remove_connection(connection)
 
-                    # Remove from scene
                     self.canvas.scene.removeItem(connection)
                     self.canvas.scene.removeItem(connection.arrow_head)
                     self.canvas.scene.removeItem(connection.label_bg)
@@ -1197,47 +1023,35 @@ class YasminEditor(QMainWindow):
                     if connection in self.connections:
                         self.connections.remove(connection)
 
-                # Handle nested states/containers
                 if hasattr(item, "parent_container") and item.parent_container:
-                    # This is a child state/container inside another container
                     parent = item.parent_container
 
-                    # Remove from parent's child_states dict
                     if item.name in parent.child_states:
                         del parent.child_states[item.name]
 
-                    # Remove from global state_nodes with full path
                     full_name = f"{parent.name}.{item.name}"
                     if full_name in self.state_nodes:
                         del self.state_nodes[full_name]
 
-                    # Update parent container size
                     parent.auto_resize_for_children()
-
-                    # Remove from scene
                     self.canvas.scene.removeItem(item)
                     self.statusBar().showMessage(
                         f"Deleted nested state: {item.name}", 2000
                     )
                 else:
-                    # Root-level state/container
-                    # Remove node
                     self.canvas.scene.removeItem(item)
                     if item.name in self.state_nodes:
                         del self.state_nodes[item.name]
-                    self.update_start_state_combo()  # Update combo after deletion
+                    self.update_start_state_combo()
                     self.statusBar().showMessage(f"Deleted state: {item.name}", 2000)
 
             elif isinstance(item, FinalOutcomeNode):
-                # Remove all connections - properly clean up both ends
                 for connection in item.connections[:]:
-                    # Remove from the other node's connection list
                     if connection.from_node == item:
                         connection.to_node.remove_connection(connection)
                     else:
                         connection.from_node.remove_connection(connection)
 
-                    # Remove from scene
                     self.canvas.scene.removeItem(connection)
                     self.canvas.scene.removeItem(connection.arrow_head)
                     self.canvas.scene.removeItem(connection.label_bg)
@@ -1245,15 +1059,12 @@ class YasminEditor(QMainWindow):
                     if connection in self.connections:
                         self.connections.remove(connection)
 
-                # Remove node - check if it's in a container or at root level
                 if item.parent_container:
-                    # Remove from container
                     if item.name in item.parent_container.final_outcomes:
                         del item.parent_container.final_outcomes[item.name]
                     item.parent_container.auto_resize_for_children()
                     self.canvas.scene.removeItem(item)
                 else:
-                    # Remove from root level
                     self.canvas.scene.removeItem(item)
                     if item.name in self.final_outcomes:
                         del self.final_outcomes[item.name]
@@ -1731,18 +1542,14 @@ class YasminEditor(QMainWindow):
         QApplication.processEvents()
 
     def _layout_container_with_graph(self, container: ContainerStateNode):
-        """Layout children within a container using hierarchical graph layout.
-        Uses Sugiyama-style layering with force-directed positioning.
-        """
+        """Layout children within a container using hierarchical graph layout."""
         if not container.child_states and not container.final_outcomes:
             return
 
-        # Build a directed graph of states and their transitions
         nodes = list(container.child_states.values())
         final_outcomes = list(container.final_outcomes.values())
 
         if not nodes:
-            # Only final outcomes, position them vertically
             rect = container.rect()
             y_start = rect.top() + 140
             for i, outcome in enumerate(final_outcomes):
@@ -1750,17 +1557,13 @@ class YasminEditor(QMainWindow):
             container.auto_resize_for_children()
             return
 
-        # Build adjacency list for the graph
         graph = {node: [] for node in nodes}
         for node in nodes:
             for conn in node.connections:
                 if conn.from_node == node and conn.to_node in nodes:
                     graph[node].append(conn.to_node)
 
-        # Perform topological layering (assign nodes to layers)
         layers = self._compute_layers(nodes, graph, container.start_state)
-
-        # Position nodes using hierarchical layout
         self._position_layers(container, layers, final_outcomes)
 
     def _compute_layers(self, nodes, graph, start_state_name):
@@ -2002,21 +1805,12 @@ class YasminEditor(QMainWindow):
 
     def _load_states_from_xml(self, parent_elem, parent_container):
         """Recursively load states from XML, handling nested containers."""
-        # Counter for positioning root-level states
-        root_state_index = 0
-
-        # For root-level elements, use temporary positioning (0,0)
-        # They will be properly positioned after all sizes are calculated
-
         for elem in parent_elem:
             if elem.tag == "State":
                 state_name = elem.get("name")
                 state_type = elem.get("type")
-
-                # Load remappings
                 remappings = self._load_remappings(elem)
 
-                # Find plugin
                 plugin_info = None
                 if state_type == "py":
                     module = elem.get("module")
@@ -2033,20 +1827,12 @@ class YasminEditor(QMainWindow):
                             break
 
                 if plugin_info:
+                    node = StateNode(state_name, plugin_info, 0, 0, remappings)
                     if parent_container is None:
-                        # Root level state - use temporary position, will be repositioned later
-                        node = StateNode(state_name, plugin_info, 0, 0, remappings)
-                        node.grid_index = (
-                            root_state_index  # Track grid position for repositioning
-                        )
                         self.canvas.scene.addItem(node)
                         self.state_nodes[state_name] = node
-                        root_state_index += 1
                     else:
-                        # Nested state inside a container - position will be auto-arranged
-                        node = StateNode(state_name, plugin_info, 0, 0, remappings)
                         parent_container.add_child_state(node)
-                        # Add to global state nodes with full path
                         full_name = f"{parent_container.name}.{state_name}"
                         self.state_nodes[full_name] = node
 
@@ -2054,94 +1840,48 @@ class YasminEditor(QMainWindow):
                 state_name = elem.get("name")
                 outcomes_str = elem.get("outcomes", "")
                 init_state = elem.get("start_state", "")
-
-                # Load remappings
                 remappings = self._load_remappings(elem)
-
-                # Parse outcomes
                 outcomes = outcomes_str.split() if outcomes_str else []
 
+                node = ContainerStateNode(
+                    state_name, 0, 0, False, remappings, outcomes, init_state
+                )
                 if parent_container is None:
-                    # Root level state machine - use temporary position, will be repositioned later
-                    node = ContainerStateNode(
-                        state_name, 0, 0, False, remappings, outcomes, init_state
-                    )
-                    node.grid_index = (
-                        root_state_index  # Track grid position for repositioning
-                    )
                     self.canvas.scene.addItem(node)
                     self.state_nodes[state_name] = node
-                    root_state_index += 1
                 else:
-                    # Nested state machine inside a container
-                    node = ContainerStateNode(
-                        state_name, 0, 0, False, remappings, outcomes, init_state
-                    )
                     parent_container.add_child_state(node)
-                    # Add to global state nodes with full path
                     full_name = f"{parent_container.name}.{state_name}"
                     self.state_nodes[full_name] = node
 
-                # Load final outcomes for this state machine
                 for outcome in outcomes:
                     outcome_node = FinalOutcomeNode(outcome, 0, 0, inside_container=True)
                     node.add_final_outcome(outcome_node)
 
-                # Recursively load children of this state machine
                 self._load_states_from_xml(elem, node)
 
             elif elem.tag == "Concurrence":
                 state_name = elem.get("name")
                 outcomes_str = elem.get("outcomes", "")
                 default_outcome = elem.get("default_outcome", None)
-
-                # Load remappings
                 remappings = self._load_remappings(elem)
-
-                # Parse outcomes
                 outcomes = outcomes_str.split() if outcomes_str else []
 
+                node = ContainerStateNode(
+                    state_name, 0, 0, True, remappings, outcomes, None, default_outcome
+                )
                 if parent_container is None:
-                    # Root level concurrence - use temporary position, will be repositioned later
-                    node = ContainerStateNode(
-                        state_name,
-                        0,
-                        0,
-                        True,
-                        remappings,
-                        outcomes,
-                        None,
-                        default_outcome,
-                    )
-                    node.grid_index = (
-                        root_state_index  # Track grid position for repositioning
-                    )
                     self.canvas.scene.addItem(node)
                     self.state_nodes[state_name] = node
-                    root_state_index += 1
                 else:
-                    # Nested concurrence inside a container
-                    node = ContainerStateNode(
-                        state_name,
-                        0,
-                        0,
-                        True,
-                        remappings,
-                        outcomes,
-                        None,
-                        default_outcome,
-                    )
                     parent_container.add_child_state(node)
-                    # Add to global state nodes with full path
                     full_name = f"{parent_container.name}.{state_name}"
                     self.state_nodes[full_name] = node
 
-                # Load final outcomes for this concurrence
                 for outcome in outcomes:
                     outcome_node = FinalOutcomeNode(outcome, 0, 0, inside_container=True)
                     node.add_final_outcome(outcome_node)
 
-                # Recursively load children of this concurrence
                 self._load_states_from_xml(elem, node)
 
     def _load_remappings(self, elem):

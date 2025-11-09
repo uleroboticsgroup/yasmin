@@ -109,30 +109,9 @@ class ConcurrenceDialog(QDialog):
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-    def get_concurrence_data(self) -> Tuple[str, List[str], str, Dict[str, str]]:
-        """Returns: (name, outcomes, default_outcome, remappings)"""
+    def get_data(self) -> Tuple[str, List[str]]:
+        """Returns: (name, outcomes)"""
         name = self.name_edit.text().strip()
-        if not name:
-            QMessageBox.warning(self, "Validation Error", "Concurrence name is required!")
-            return None
-
-        # Parse outcomes from display label (read-only)
-        outcomes_text = self.outcomes_display.text().strip()
-        outcomes = [o.strip() for o in outcomes_text.split(",") if o.strip()]
-
-        # Get default outcome from combo box
-        default_outcome_text = self.default_outcome_combo.currentText()
-        default_outcome = (
-            None if default_outcome_text == "(None)" else default_outcome_text
-        )
-
-        # Parse remappings
-        remappings = {}
-        remap_text = self.remappings_edit.toPlainText().strip()
-        if remap_text:
-            for line in remap_text.split("\n"):
-                if ":" in line:
-                    key, value = line.split(":", 1)
-                    remappings[key.strip()] = value.strip()
-
-        return name, outcomes, default_outcome, remappings
+        outcomes_str = self.outcomes_edit.text().strip()
+        outcomes = [o.strip() for o in outcomes_str.split(",") if o.strip()]
+        return name, outcomes

@@ -20,7 +20,6 @@ from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
 from yasmin_editor.plugins_manager.plugin_info import PluginInfo
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
-from yasmin_editor.editor_gui.connection_line import ConnectionLine
 
 
 class StateNode(QGraphicsEllipseItem):
@@ -121,20 +120,20 @@ class StateNode(QGraphicsEllipseItem):
 
         return super().itemChange(change, value)
 
-    def add_connection(self, connection: "ConnectionLine"):
+    def add_connection(self, connection):
         if connection not in self.connections:
             self.connections.append(connection)
 
-    def remove_connection(self, connection: "ConnectionLine"):
+    def remove_connection(self, connection):
         if connection in self.connections:
             self.connections.remove(connection)
 
     def get_used_outcomes(self):
         """Get set of outcomes that already have connections."""
-        used_outcomes = set()
-        for connection in self.connections:
-            used_outcomes.add(connection.from_node.name + connection.outcome)
-        return used_outcomes
+        return {
+            connection.from_node.name + connection.outcome
+            for connection in self.connections
+        }
 
     def get_connection_point(self) -> QPointF:
         """Get the point where connections should attach (center of port)."""

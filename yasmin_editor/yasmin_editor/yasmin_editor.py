@@ -26,8 +26,6 @@ def main():
     manager.load_all_plugins()
 
     app = QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(True)
-
     editor = YasminEditor(manager)
     editor.show()
 

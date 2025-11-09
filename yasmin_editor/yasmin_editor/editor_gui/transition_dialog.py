@@ -45,7 +45,6 @@ class TransitionDialog(QDialog):
         # Outcome
         self.outcome_combo = QComboBox()
 
-        # Get used outcomes to filter them out
         used_outcomes = (
             from_state.get_used_outcomes()
             if hasattr(from_state, "get_used_outcomes")
@@ -65,8 +64,7 @@ class TransitionDialog(QDialog):
                 "This state has no available outcomes (all outcomes already used)!",
             )
         else:
-            for outcome in available_outcomes:
-                self.outcome_combo.addItem(outcome)
+            self.outcome_combo.addItems(available_outcomes)
 
         layout.addRow("Outcome:", self.outcome_combo)
 

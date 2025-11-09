@@ -190,30 +190,19 @@ class StatePropertiesDialog(QDialog):
         List[str],
         Dict[str, str],
     ]:
-        """
-        Returns: (name, plugin_info, outcomes, remappings)
-        """
+        """Returns: (name, plugin_info, outcomes, remappings)"""
         name = self.name_edit.text().strip()
         plugin = self.plugin_combo.currentData()
 
-        # Parse remappings
         remappings = {}
         remap_text = self.remappings_edit.toPlainText().strip()
-        if remap_text:
-            for line in remap_text.split("\n"):
-                line = line.strip()
-                if ":" in line:
-                    key, value = line.split(":", 1)
-                    remappings[key.strip()] = value.strip()
+        for line in remap_text.split("\n"):
+            line = line.strip()
+            if ":" in line:
+                key, value = line.split(":", 1)
+                remappings[key.strip()] = value.strip()
 
-        # Parse outcomes for new SM/Concurrence
-        # For consistency, return outcomes as a list
         outcomes = self.outcomes_display.text().strip()
         outcomes_list = [o.strip() for o in outcomes.split(",") if o.strip()]
 
-        return (
-            name,
-            plugin,
-            outcomes_list,
-            remappings,
-        )
+        return name, plugin, outcomes_list, remappings

@@ -109,32 +109,9 @@ class StateMachineDialog(QDialog):
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-    def get_state_machine_data(
-        self,
-    ) -> Tuple[str, List[str], Optional[str], Dict[str, str]]:
-        """Returns: (name, outcomes, start_state, remappings)"""
+    def get_data(self) -> Tuple[str, List[str]]:
+        """Returns: (name, outcomes)"""
         name = self.name_edit.text().strip()
-        if not name:
-            QMessageBox.warning(
-                self, "Validation Error", "State machine name is required!"
-            )
-            return None
-
-        # Parse outcomes from display label (read-only)
-        outcomes_text = self.outcomes_display.text().strip()
-        outcomes = [o.strip() for o in outcomes_text.split(",") if o.strip()]
-
-        # Get initial state from combo box
-        start_state_text = self.start_state_combo.currentText()
-        start_state = None if start_state_text == "(None)" else start_state_text
-
-        # Parse remappings
-        remappings = {}
-        remap_text = self.remappings_edit.toPlainText().strip()
-        if remap_text:
-            for line in remap_text.split("\n"):
-                if ":" in line:
-                    key, value = line.split(":", 1)
-                    remappings[key.strip()] = value.strip()
-
-        return name, outcomes, start_state, remappings
+        outcomes_str = self.outcomes_edit.text().strip()
+        outcomes = [o.strip() for o in outcomes_str.split(",") if o.strip()]
+        return name, outcomes
