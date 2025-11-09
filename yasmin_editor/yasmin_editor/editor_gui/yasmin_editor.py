@@ -35,6 +35,9 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QAction,
     QToolBar,
+    QDialog,
+    QPushButton,
+    QTextBrowser,
 )
 from PyQt5.QtCore import Qt, QPointF, QRectF
 
@@ -148,6 +151,12 @@ class YasminEditor(QMainWindow):
         delete_action = QAction("Delete Selected", self)
         delete_action.triggered.connect(self.delete_selected)
         toolbar.addAction(delete_action)
+
+        toolbar.addSeparator()
+
+        help_action = QAction("Help", self)
+        help_action.triggered.connect(self.show_help)
+        toolbar.addAction(help_action)
 
         # Python states list
         left_layout.addWidget(QLabel("<b>Python States:</b>"))
@@ -1274,6 +1283,80 @@ class YasminEditor(QMainWindow):
                 if item in self.connections:
                     self.connections.remove(item)
                 self.statusBar().showMessage("Deleted transition", 2000)
+
+    def show_help(self):
+        """Display help dialog with usage instructions."""
+        help_text = """
+        <h2>YASMIN Editor - Quick Guide</h2>
+        
+        <h3>File Operations</h3>
+        <b>New/Open/Save:</b> Create, load, or save state machines from XML files.
+        
+        <h3>Building State Machines</h3>
+        <b>State Machine Name:</b> Set the root state machine name.<br>
+        <b>Start State:</b> Select the first state to execute.<br>
+        <b>Add State:</b> Add a regular state (Python/C++/XML-based).<br>
+        <b>Add State Machine:</b> Add a nested state machine container.<br>
+        <b>Add Concurrence:</b> Add a concurrent execution container.<br>
+        <b>Add Final Outcome:</b> Add an exit point for the state machine.
+        
+        <h3>Working with States</h3>
+        <b>Double-click:</b> A plugin in the left panel to quickly add a state.<br>
+        <b>Right-click:</b> On a state for options (edit, delete, add transitions).<br>
+        <b>Drag:</b> States to reposition them on the canvas.<br>
+        <b>Delete Selected:</b> Select items and click "Delete Selected" button.
+        
+        <h3>Creating Transitions</h3>
+        <b>Drag from blue port:</b> Click and drag from the blue connection port to another state.<br>
+        <b>Select outcome:</b> Choose which outcome triggers the transition.<br>
+        
+        <h3>Containers</h3>
+        <b>Nested States:</b> Double-click a container to view/edit internal states.<br>
+        <b>Final Outcomes:</b> Containers use final outcomes as exit points.<br>
+        <b>State Machine:</b> Sequential execution based on start state.<br>
+        <b>Concurrence:</b> All child states execute in parallel.
+        
+        <h3>Canvas Navigation</h3>
+        <b>Scroll:</b> Zoom in/out.<br>
+        <b>Drag:</b> Move states or pan the view.
+        
+        <h3>Validation (before saving)</h3>
+        • State machine name is set<br>
+        • Start state is selected<br>
+        • At least one final outcome exists<br>
+        • All states have unique names
+        
+        <h3>Tips</h3>
+        • Use filters in left panel to find states quickly.<br>
+        • Container states auto-resize to fit children.<br>
+        • States in Concurrence can only transition to final outcomes within that Concurrence.<br>
+        • XML state machines appear as regular states (not containers).
+        """
+
+        # Create custom dialog with scrollable content
+        dialog = QDialog(self)
+        dialog.setWindowTitle("YASMIN Editor Help")
+        dialog.setMinimumSize(600, 500)
+        dialog.setMaximumSize(800, 600)
+
+        layout = QVBoxLayout(dialog)
+
+        # Text browser for scrollable content
+        text_browser = QTextBrowser()
+        text_browser.setHtml(help_text)
+        text_browser.setOpenExternalLinks(False)
+        layout.addWidget(text_browser)
+
+        # OK button
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        ok_button = QPushButton("OK")
+        ok_button.clicked.connect(dialog.accept)
+        ok_button.setDefault(True)
+        button_layout.addWidget(ok_button)
+        layout.addLayout(button_layout)
+
+        dialog.exec_()
 
     def new_state_machine(self):
         reply = QMessageBox.question(
