@@ -1105,13 +1105,16 @@ class YasminEditor(QMainWindow):
                 node.setParentItem(selected_container)
                 selected_container.final_outcomes[outcome_name] = node
                 selected_container.auto_resize_for_children()
-                
+
                 # Auto-assign default outcome if this is the first outcome in a Concurrence
-                if selected_container.is_concurrence and len(selected_container.final_outcomes) == 1:
+                if (
+                    selected_container.is_concurrence
+                    and len(selected_container.final_outcomes) == 1
+                ):
                     if not selected_container.default_outcome:
                         selected_container.default_outcome = outcome_name
                         selected_container.update_default_outcome_label()
-                
+
                 self.statusBar().showMessage(
                     f"Added final outcome '{outcome_name}' to container '{selected_container.name}'",
                     2000,
@@ -1304,9 +1307,9 @@ class YasminEditor(QMainWindow):
 
         if file_path:
             # Ensure .xml extension
-            if not file_path.lower().endswith('.xml'):
-                file_path += '.xml'
-            
+            if not file_path.lower().endswith(".xml"):
+                file_path += ".xml"
+
             try:
                 self.save_to_xml(file_path)
                 self.statusBar().showMessage(f"Saved: {file_path}", 3000)
@@ -1395,7 +1398,7 @@ class YasminEditor(QMainWindow):
 
                 # Add transitions for this concurrence
                 self._save_transitions(cc_elem, state_node)
-                
+
                 # Add transitions from final outcomes inside this concurrence
                 if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
                     for outcome_node in state_node.final_outcomes.values():
@@ -1428,7 +1431,7 @@ class YasminEditor(QMainWindow):
 
                 # Add transitions for this state machine
                 self._save_transitions(sm_elem, state_node)
-                
+
                 # Add transitions from final outcomes inside this state machine
                 if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
                     for outcome_node in state_node.final_outcomes.values():
@@ -1738,16 +1741,16 @@ class YasminEditor(QMainWindow):
                         for transition in elem.findall("Transition"):
                             outcome = transition.get("from")
                             to_name = transition.get("to")
-                            
+
                             # Check if this transition is from a final outcome
                             from_outcome = None
                             if outcome in container.final_outcomes:
                                 from_outcome = container.final_outcomes[outcome]
-                            
+
                             if from_outcome:
                                 # Find the target node
                                 to_node = None
-                                
+
                                 # Check if target is the parent container
                                 if parent_container and to_name == parent_container.name:
                                     to_node = parent_container
@@ -1757,14 +1760,19 @@ class YasminEditor(QMainWindow):
                                     if not to_node:
                                         to_node = self.final_outcomes.get(to_name)
                                 # Check if target is in parent container's final outcomes
-                                elif parent_container and to_name in parent_container.final_outcomes:
+                                elif (
+                                    parent_container
+                                    and to_name in parent_container.final_outcomes
+                                ):
                                     to_node = parent_container.final_outcomes[to_name]
                                 # Check if target is the container itself (loop back)
                                 elif to_name == container.name:
                                     to_node = container
-                                
+
                                 if to_node:
-                                    connection = ConnectionLine(from_outcome, to_node, outcome)
+                                    connection = ConnectionLine(
+                                        from_outcome, to_node, outcome
+                                    )
                                     self.canvas.scene.addItem(connection)
                                     self.canvas.scene.addItem(connection.arrow_head)
                                     self.canvas.scene.addItem(connection.label_bg)

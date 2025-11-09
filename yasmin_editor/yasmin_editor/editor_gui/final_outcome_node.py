@@ -98,7 +98,7 @@ class FinalOutcomeNode(QGraphicsRectItem):
             # After position has changed, trigger parent resize if in a container
             if self.parent_container:
                 self.parent_container.auto_resize_for_children()
-        
+
         elif change == QGraphicsItem.ItemSelectedChange:
             # Highlight selected items in yellow
             if value:  # Selected

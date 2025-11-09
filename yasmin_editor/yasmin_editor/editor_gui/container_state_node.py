@@ -329,7 +329,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
         # Update child connections recursively
         self.update_child_connections()
-        
+
         # Update connections for nested containers
         for child in self.child_states.values():
             if isinstance(child, ContainerStateNode):
@@ -450,7 +450,7 @@ class ContainerStateNode(QGraphicsRectItem):
             # After position has changed, trigger parent resize if nested
             if self.parent_container:
                 self.parent_container.auto_resize_for_children()
-        
+
         elif change == QGraphicsItem.ItemSelectedChange:
             # Highlight selected items in yellow
             if value:  # Selected
