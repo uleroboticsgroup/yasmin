@@ -13,17 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import math
 from typing import Dict, List
-from PyQt5.QtWidgets import (
-    QGraphicsItem,
-    QGraphicsTextItem,
-    QGraphicsRectItem,
-)
-from PyQt5.QtCore import Qt, QPointF, QRectF, QTimer
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
+from PyQt5.QtCore import Qt, QPointF, QRectF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
-
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 

@@ -15,14 +15,9 @@
 
 import math
 from typing import List
-from PyQt5.QtWidgets import (
-    QGraphicsItem,
-    QGraphicsTextItem,
-    QGraphicsRectItem,
-)
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
-
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 
@@ -34,21 +29,17 @@ class FinalOutcomeNode(QGraphicsRectItem):
         super().__init__(-60, -30, 120, 60)
         self.name = name
         self.connections: List["ConnectionLine"] = []
-        self.parent_container = None  # Reference to parent container if nested
+        self.parent_container = None
+        self.inside_container = inside_container
 
-        # Set position
         self.setPos(x, y)
-
-        # Set drag/move flags
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
-        # Set colors
-        self.setBrush(QBrush(QColor(255, 0, 0)))  # Red
+        self.setBrush(QBrush(QColor(255, 0, 0)))
         self.setPen(QPen(QColor(0, 0, 0), 3))
 
-        # Add text label
         self.text = QGraphicsTextItem(self.name, self)
         self.text.setDefaultTextColor(Qt.black)
         font = QFont()
@@ -56,55 +47,40 @@ class FinalOutcomeNode(QGraphicsRectItem):
         font.setBold(True)
         self.text.setFont(font)
 
-        # Center text
         text_rect = self.text.boundingRect()
         self.text.setPos(-text_rect.width() / 2, -text_rect.height() / 2)
 
-        # Add connection port (small circle on the left edge for incoming connections)
-        self.inside_container = inside_container
         if inside_container:
             self.connection_port = ConnectionPort(self)
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
-            # If this outcome is inside a container, constrain its movement
             if self.parent_container:
-                # Get container's bounds in local coordinates
                 container_rect = self.parent_container.rect()
                 outcome_rect = self.boundingRect()
-
-                # Calculate the constrained position
                 new_pos = value
 
-                # Ensure outcome stays within container bounds
                 min_x = container_rect.left() - outcome_rect.left() + 10
                 max_x = container_rect.right() - outcome_rect.right() - 10
-                min_y = (
-                    container_rect.top() - outcome_rect.top() + 40
-                )  # Extra space for header
+                min_y = container_rect.top() - outcome_rect.top() + 40
                 max_y = container_rect.bottom() - outcome_rect.bottom() - 10
 
-                # Clamp position
                 constrained_x = max(min_x, min(new_pos.x(), max_x))
                 constrained_y = max(min_y, min(new_pos.y(), max_y))
-
                 value = QPointF(constrained_x, constrained_y)
 
-            # Update all connections when the outcome moves
             for connection in self.connections:
                 connection.update_position()
 
         elif change == QGraphicsItem.ItemPositionHasChanged:
-            # After position has changed, trigger parent resize if in a container
             if self.parent_container:
                 self.parent_container.auto_resize_for_children()
 
         elif change == QGraphicsItem.ItemSelectedChange:
-            # Highlight selected items with bright yellow/orange
-            if value:  # Selected
-                self.setPen(QPen(QColor(255, 200, 0), 4))  # Yellow highlight
-            else:  # Deselected
-                self.setPen(QPen(QColor(0, 0, 0), 3))  # Original black
+            if value:
+                self.setPen(QPen(QColor(255, 200, 0), 4))
+            else:
+                self.setPen(QPen(QColor(0, 0, 0), 3))
 
         return super().itemChange(change, value)
 
@@ -124,17 +100,13 @@ class FinalOutcomeNode(QGraphicsRectItem):
         """Get the point on the rectangle edge closest to target."""
         center = self.scenePos()
         angle = math.atan2(target_pos.y() - center.y(), target_pos.x() - center.x())
-        # Rectangle dimensions
-        w = 60
-        h = 30
-        # Determine which edge
+        w, h = 60, 30
         abs_tan = abs(math.tan(angle)) if math.cos(angle) != 0 else float("inf")
+
         if abs_tan <= h / w:
-            # Left or right edge
             x = center.x() + w * (1 if math.cos(angle) > 0 else -1)
             y = center.y() + w * math.tan(angle) * (1 if math.cos(angle) > 0 else -1)
         else:
-            # Top or bottom edge
             y = center.y() + h * (1 if math.sin(angle) > 0 else -1)
             x = (
                 center.x() + h / math.tan(angle) * (1 if math.sin(angle) > 0 else -1)

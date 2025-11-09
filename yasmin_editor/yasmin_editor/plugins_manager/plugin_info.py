@@ -36,20 +36,14 @@ class PluginInfo:
         self.file_path = file_path
         self.package_name = package_name
 
-        # Get outcomes
         if self.plugin_type == "python":
             module = importlib.import_module(self.module)
             state_class = getattr(module, self.class_name)
-            # Store a copy of outcomes to prevent shared mutable state
             self.outcomes = list(state_class().get_outcomes())
-
         elif self.plugin_type == "cpp":
-            # Store a copy of outcomes to prevent shared mutable state
             self.outcomes = list(self._cpp_factory.create(self.class_name).get_outcomes())
-
         elif self.plugin_type == "xml":
             tree = ET.parse(self.file_path)
             root = tree.getroot()
-            # Split returns a new list, but make it explicit
             outcomes_str = root.attrib.get("outcomes", "")
             self.outcomes = outcomes_str.split() if outcomes_str else []

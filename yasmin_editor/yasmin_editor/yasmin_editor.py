@@ -15,37 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import sys
-
 from PyQt5.QtWidgets import QApplication
 from yasmin_editor.plugins_manager.plugin_manager import PluginManager
 from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
 def main():
-    import atexit
-
-    # Load plugins before creating QApplication
     manager = PluginManager()
     manager.load_all_plugins()
 
     app = QApplication(sys.argv)
-
-    # Set application to quit when last window is closed
     app.setQuitOnLastWindowClosed(True)
-
-    # Register cleanup on exit
-    def cleanup():
-        if app:
-            app.quit()
-
-    atexit.register(cleanup)
 
     editor = YasminEditor(manager)
     editor.show()
 
-    # Execute the application and return exit code
     return app.exec_()
 
 
