@@ -180,29 +180,31 @@ class ContainerStateNode(QGraphicsRectItem):
             state_node.parent_container = self
             state_node.setParentItem(self)
 
-            # Position relative to container - arrange children in a grid
+            # Position relative to container - arrange children vertically from top to bottom
             rect = self.rect()
 
-            # Grid configuration for children inside container
-            # Use SINGLE COLUMN layout to prevent horizontal connection overlap
-            CHILD_GRID_COLUMNS = 1  # Single column = all vertical, no overlap issues
-            CHILD_CELL_WIDTH = 250  # Width for each child cell
-            CHILD_CELL_HEIGHT = 180  # Height for each child cell
-            CHILD_SPACING_X = 0  # No horizontal spacing needed (single column)
-            CHILD_SPACING_Y = 180  # Very large vertical spacing for connection clearance
-            CHILD_PADDING_X = 120  # Left padding inside container
-            CHILD_PADDING_Y = 140  # Top padding (below header and labels)
+            # Vertical layout configuration for top-to-bottom placement
+            CHILD_PADDING_X = 80  # Left padding inside container
+            CHILD_PADDING_Y = 100  # Top padding (below header and labels)
+            CHILD_SPACING_Y = (
+                200  # Vertical spacing between children for clear separation
+            )
 
-            # Calculate position based on index
-            index = len(self.child_states) - 1
-            col = index % CHILD_GRID_COLUMNS
-            row = index // CHILD_GRID_COLUMNS
+            # Calculate vertical position based on existing children
+            # Position new child below all existing children
+            y_position = rect.top() + CHILD_PADDING_Y
 
-            # Calculate position
-            x = rect.left() + CHILD_PADDING_X + col * (CHILD_CELL_WIDTH + CHILD_SPACING_X)
-            y = rect.top() + CHILD_PADDING_Y + row * (CHILD_CELL_HEIGHT + CHILD_SPACING_Y)
+            # Add height of all previous children plus spacing
+            for i, existing_child in enumerate(list(self.child_states.values())[:-1]):
+                if isinstance(existing_child, ContainerStateNode):
+                    child_height = existing_child.rect().height()
+                else:
+                    child_height = existing_child.boundingRect().height()
+                y_position += child_height + CHILD_SPACING_Y
 
-            state_node.setPos(x, y)
+            # Set position - all children in a single vertical column
+            x = rect.left() + CHILD_PADDING_X
+            state_node.setPos(x, y_position)
 
             self.auto_resize_for_children()
 
@@ -227,20 +229,19 @@ class ContainerStateNode(QGraphicsRectItem):
             self.auto_resize_for_children()
 
     def _reposition_final_outcomes(self):
-        """Reposition all final outcomes vertically on the right side of the container."""
+        """Reposition all final outcomes vertically on the right side of the container.
+        Uses a top-to-bottom placement strategy aligned with child states."""
         if not self.final_outcomes:
             return
 
         rect = self.rect()
 
         # Configuration for final outcomes positioning
-        # Position outcomes far to the right to avoid ALL connection overlap
-        OUTCOME_PADDING_TOP = 160  # Increased top padding to avoid overlap
-        OUTCOME_SPACING_Y = 200  # Very large vertical spacing to avoid connection overlap
+        OUTCOME_PADDING_TOP = 100  # Top padding to align with first child
+        OUTCOME_SPACING_Y = 200  # Vertical spacing between outcomes
 
-        # Calculate the rightmost position based on child states using FINAL sizes
-        # Find max x position of children to position outcomes to the right of them
-        max_child_x = rect.left() + 450  # Increased default minimum
+        # Calculate the rightmost position based on child states
+        max_child_x = rect.left() + 400  # Default minimum position
 
         for child in self.child_states.values():
             # For nested containers, use their ACTUAL FINAL rect width
@@ -252,16 +253,15 @@ class ContainerStateNode(QGraphicsRectItem):
                 child_right = child.pos().x() + child.boundingRect().width()
             max_child_x = max(max_child_x, child_right)
 
-        # Position outcomes FAR to the right to create wide channel for connections
-        # This ensures connections flow horizontally without hitting outcomes
-        outcome_x = (
-            max_child_x + 300
-        )  # Very large spacing from children to avoid ALL overlap
+        # Position outcomes to the right with generous spacing for clean connection routing
+        outcome_x = max_child_x + 250
 
-        # Position each outcome with uniform vertical spacing
-        for i, outcome_node in enumerate(self.final_outcomes.values()):
-            y = rect.top() + OUTCOME_PADDING_TOP + i * OUTCOME_SPACING_Y
-            outcome_node.setPos(outcome_x, y)
+        # Position each outcome vertically from top to bottom
+        current_y = rect.top() + OUTCOME_PADDING_TOP
+
+        for outcome_node in self.final_outcomes.values():
+            outcome_node.setPos(outcome_x, current_y)
+            current_y += OUTCOME_SPACING_Y
 
     def auto_resize_for_children(self):
         """Automatically resize container to fit all children with padding."""
@@ -315,10 +315,10 @@ class ContainerStateNode(QGraphicsRectItem):
         # Get current rect
         rect = self.rect()
 
-        # Add generous padding for better spacing
-        padding_left = 50
-        padding_right = 60  # Extra right padding for outcomes
-        padding_top = 90  # Extra for header and initial state label
+        # Consistent padding for all sides
+        padding_left = 40
+        padding_right = 60
+        padding_top = 70  # Space for header and labels
         padding_bottom = 50
 
         min_x -= padding_left

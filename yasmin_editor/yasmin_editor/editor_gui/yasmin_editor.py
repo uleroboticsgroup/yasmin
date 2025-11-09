@@ -325,52 +325,39 @@ class YasminEditor(QMainWindow):
             self.create_state_node(state_name, xml_plugin, False, False)
 
     def get_free_position(self):
-        """Get a free position in the center of the current view or nearby."""
-        # Get the center of the current viewport in scene coordinates
-        viewport_rect = self.canvas.viewport().rect()
-        center_in_view = viewport_rect.center()
-        center_in_scene = self.canvas.mapToScene(center_in_view)
+        """Get a free position following a top-to-bottom vertical layout pattern."""
+        # Configuration for vertical layout
+        START_X = 100
+        START_Y = 100
+        VERTICAL_SPACING = 220
 
-        # Start from the center
-        test_pos = center_in_scene
-        search_radius = 50
-        max_attempts = 20
+        # Find all root-level nodes (not inside containers)
+        root_nodes = []
+        for node in self.state_nodes.values():
+            if not hasattr(node, "parent_container") or node.parent_container is None:
+                root_nodes.append(node)
 
-        for attempt in range(max_attempts):
-            # Check if this position is free (no overlap with existing nodes)
-            is_free = True
-            test_rect = QRectF(test_pos.x() - 60, test_pos.y() - 40, 120, 80)
+        if not root_nodes:
+            # First node, place at start position
+            return QPointF(START_X, START_Y)
 
-            for node in self.state_nodes.values():
-                # Only check root-level nodes
-                if hasattr(node, "parent_container") and node.parent_container:
-                    continue
+        # Calculate the next position below all existing root nodes
+        max_bottom = START_Y
 
-                node_rect = QRectF(
-                    node.pos().x() + node.boundingRect().left(),
-                    node.pos().y() + node.boundingRect().top(),
-                    node.boundingRect().width(),
-                    node.boundingRect().height(),
-                )
+        for node in root_nodes:
+            # Get node height and position
+            if isinstance(node, ContainerStateNode):
+                node.prepareGeometryChange()
+                rect = node.rect()
+                node_bottom = node.pos().y() + rect.height()
+            else:
+                bbox = node.boundingRect()
+                node_bottom = node.pos().y() + bbox.height()
 
-                if test_rect.intersects(node_rect):
-                    is_free = False
-                    break
+            max_bottom = max(max_bottom, node_bottom)
 
-            if is_free:
-                return test_pos
-
-            # Spiral search pattern
-            angle = attempt * 0.5
-            radius = search_radius * (1 + attempt * 0.3)
-
-            test_pos = QPointF(
-                center_in_scene.x() + radius * math.cos(angle),
-                center_in_scene.y() + radius * math.sin(angle),
-            )
-
-        # If no free position found, return the center anyway
-        return center_in_scene
+        # Position new node below all existing nodes
+        return QPointF(START_X, max_bottom + VERTICAL_SPACING)
 
     def create_state_node(
         self,
@@ -1838,118 +1825,58 @@ class YasminEditor(QMainWindow):
         return layers
 
     def _position_layers(self, container: ContainerStateNode, layers, final_outcomes):
-        """Position nodes in layers with proper spacing to avoid overlaps.
-        Uses a force-directed approach for final positioning.
+        """Position nodes in layers with proper top-to-bottom spacing.
+        Arranges all nodes in a single vertical column for clean layout.
         """
         rect = container.rect()
 
-        # Configuration
-        LAYER_SPACING = 280  # Horizontal spacing between layers
-        NODE_SPACING = 150  # Vertical spacing between nodes in same layer
-        START_X = rect.left() + 140  # Left padding
-        START_Y = rect.top() + 160  # Top padding (below header)
+        # Configuration for clean vertical layout
+        START_X = rect.left() + 80  # Left padding
+        START_Y = rect.top() + 100  # Top padding (below header)
+        NODE_SPACING = 200  # Vertical spacing between nodes
 
-        # Build adjacency info for better positioning
-        graph = {node: [] for layer in layers for node in layer}
+        # Flatten all layers into a single vertical column for top-to-bottom layout
+        # Order nodes by their layer (topological order) for logical flow
+        all_nodes = []
         for layer in layers:
-            for node in layer:
-                for conn in node.connections:
-                    if conn.from_node == node:
-                        graph[node].append(conn.to_node)
+            all_nodes.extend(layer)
 
-        # First pass: position nodes in layers
-        layer_positions = {}  # Map node -> (x, y)
+        # Position each node vertically from top to bottom
+        current_y = START_Y
 
-        for layer_idx, layer in enumerate(layers):
-            x = START_X + layer_idx * LAYER_SPACING
+        for node in all_nodes:
+            # Get node height
+            if isinstance(node, ContainerStateNode):
+                node.prepareGeometryChange()
+                height = node.rect().height()
+            else:
+                height = node.boundingRect().height()
 
-            # Calculate total height needed for this layer
-            total_height = 0
-            node_heights = []
-            for node in layer:
+            # Position the node
+            node.setPos(START_X, current_y)
+
+            # Move to next position
+            current_y += height + NODE_SPACING
+
+        # Position final outcomes to the right of all nodes
+        if final_outcomes:
+            # Find the maximum width of all nodes
+            max_width = 0
+            for node in all_nodes:
                 if isinstance(node, ContainerStateNode):
                     node.prepareGeometryChange()
-                    height = node.rect().height()
+                    width = node.rect().width()
                 else:
-                    height = node.boundingRect().height()
-                node_heights.append(height)
-                total_height += height
+                    width = node.boundingRect().width()
+                max_width = max(max_width, width)
 
-            # Add spacing between nodes
-            total_height += NODE_SPACING * (len(layer) - 1) if len(layer) > 1 else 0
+            # Position outcomes to the right with generous spacing
+            outcome_x = START_X + max_width + 250
+            outcome_y = START_Y
 
-            # Apply barycenter heuristic for vertical positioning
-            # This minimizes edge crossings by positioning nodes near their neighbors
-            if layer_idx > 0:
-                # Position based on average position of predecessors
-                node_barycenters = []
-                for node in layer:
-                    # Find predecessors in previous layer
-                    predecessors = []
-                    for prev_node in layers[layer_idx - 1]:
-                        if node in graph.get(prev_node, []):
-                            predecessors.append(prev_node)
-
-                    if predecessors:
-                        # Calculate average Y position of predecessors
-                        avg_y = sum(layer_positions[p][1] for p in predecessors) / len(
-                            predecessors
-                        )
-                        node_barycenters.append((node, avg_y))
-                    else:
-                        # No predecessors, use default position
-                        node_barycenters.append((node, START_Y))
-
-                # Sort by barycenter to minimize crossings
-                node_barycenters.sort(key=lambda x: x[1])
-                layer = [n for n, _ in node_barycenters]
-
-            # Position nodes vertically
-            current_y = START_Y
-
-            for node, height in zip(layer, node_heights):
-                layer_positions[node] = (x, current_y)
-                node.setPos(x, current_y)
-                current_y += height + NODE_SPACING
-
-        # Apply force-directed refinement to reduce edge crossings
-        self._refine_positions_force_directed(layers, layer_positions, graph)
-
-        # Position final outcomes to the right of all layers
-        if final_outcomes and layers:
-            max_x = START_X + len(layers) * LAYER_SPACING
-            outcome_x = max_x + 200  # Extra spacing for outcomes
-
-            # Position outcomes based on their incoming connections
-            outcome_positions = {}
             for outcome in final_outcomes:
-                # Find all nodes that connect to this outcome
-                incoming_nodes = []
-                for layer in layers:
-                    for node in layer:
-                        for conn in node.connections:
-                            if conn.to_node == outcome:
-                                incoming_nodes.append(node)
-
-                if incoming_nodes:
-                    # Position near average of incoming nodes
-                    avg_y = sum(
-                        layer_positions[n][1]
-                        for n in incoming_nodes
-                        if n in layer_positions
-                    ) / len(incoming_nodes)
-                    outcome_positions[outcome] = avg_y
-                else:
-                    outcome_positions[outcome] = START_Y
-
-            # Sort outcomes by their target position
-            sorted_outcomes = sorted(final_outcomes, key=lambda o: outcome_positions[o])
-
-            # Position with minimum spacing
-            current_y = START_Y
-            for outcome in sorted_outcomes:
-                outcome.setPos(outcome_x, current_y)
-                current_y += 180
+                outcome.setPos(outcome_x, outcome_y)
+                outcome_y += 200  # Vertical spacing between outcomes
 
         # Resize container to fit all children
         container.auto_resize_for_children()
@@ -2038,12 +1965,11 @@ class YasminEditor(QMainWindow):
         self._position_root_layers(layers)
 
     def _position_root_layers(self, layers):
-        """Position root-level nodes in layers with optimal spacing."""
-        # Configuration for root level (more generous spacing)
-        LAYER_SPACING = 450  # Wide horizontal spacing between layers
-        NODE_SPACING = 200  # Vertical spacing between nodes in same layer
-        START_X = 150  # Left padding
-        START_Y = 150  # Top padding
+        """Position root-level nodes in a single vertical column for clean top-to-bottom layout."""
+        # Configuration for root level with generous spacing
+        START_X = 100  # Left padding
+        START_Y = 100  # Top padding
+        NODE_SPACING = 220  # Vertical spacing between nodes
 
         # Helper function to get element dimensions
         def get_element_size(node):
@@ -2055,46 +1981,24 @@ class YasminEditor(QMainWindow):
                 bbox = node.boundingRect()
                 return bbox.width(), bbox.height()
 
-        # Calculate maximum width for each layer
-        layer_widths = []
+        # Flatten all layers into a single vertical column
+        # Maintain topological order (layers represent execution order)
+        all_nodes = []
         for layer in layers:
-            max_width = 0
-            for node in layer:
-                width, _ = get_element_size(node)
-                max_width = max(max_width, width)
-            layer_widths.append(max_width)
+            all_nodes.extend(layer)
 
-        # Position nodes layer by layer
-        current_x = START_X
+        # Position each node vertically from top to bottom
+        current_y = START_Y
 
-        for layer_idx, layer in enumerate(layers):
-            # Calculate positions for nodes in this layer
-            layer_node_heights = []
-            for node in layer:
-                _, height = get_element_size(node)
-                layer_node_heights.append(height)
-
-            # Calculate total height needed
-            total_height = sum(layer_node_heights)
-            if len(layer) > 1:
-                total_height += NODE_SPACING * (len(layer) - 1)
-
-            # Start from top
-            current_y = START_Y
-
-            # Position each node in the layer
-            for node, height in zip(layer, layer_node_heights):
-                node.setPos(current_x, current_y)
-                current_y += height + NODE_SPACING
-
-            # Move to next layer
-            current_x += layer_widths[layer_idx] + LAYER_SPACING
+        for node in all_nodes:
+            _, height = get_element_size(node)
+            node.setPos(START_X, current_y)
+            current_y += height + NODE_SPACING
 
         # Update all connections after repositioning
-        for layer in layers:
-            for node in layer:
-                for conn in node.connections:
-                    conn.update_position()
+        for node in all_nodes:
+            for conn in node.connections:
+                conn.update_position()
 
     def _load_states_from_xml(self, parent_elem, parent_container):
         """Recursively load states from XML, handling nested containers."""
