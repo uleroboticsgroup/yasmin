@@ -71,14 +71,25 @@ class StateMachineDialog(QDialog):
 
         layout.addRow(self.start_state_label, self.start_state_combo)
 
-        # Outcomes field
-        self.outcomes_label = QLabel("Outcomes (space-separated):")
-        self.outcomes_edit = QLineEdit()
-        self.outcomes_edit.setPlaceholderText("e.g., outcome1 outcome2 outcome3")
-        self.outcomes_edit.setEnabled(False)
-        if outcomes:
-            self.outcomes_edit.setText(" ".join(outcomes))
-        layout.addRow(self.outcomes_label, self.outcomes_edit)
+        # Outcomes field (read-only, better representation)
+        self.outcomes_label = QLabel("Outcomes:")
+        outcomes_str = ", ".join(outcomes) if outcomes else ""
+        from PyQt5.QtCore import Qt
+        from PyQt5.QtWidgets import QSizePolicy
+
+        self.outcomes_display = QLabel(outcomes_str)
+        self.outcomes_display.setWordWrap(True)
+        self.outcomes_display.setStyleSheet(
+            "background: #f0f0f0; border: 1px solid #ccc; padding: 4px;"
+        )
+        self.outcomes_display.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.outcomes_display.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        num_outcomes = len(outcomes_str.split(",")) if outcomes_str else 0
+        base_height = 24
+        extra_height = min(3, num_outcomes) * 18
+        self.outcomes_display.setMinimumHeight(base_height + extra_height)
+        self.outcomes_display.setMaximumHeight(base_height + max(3, num_outcomes) * 18)
+        layout.addRow(self.outcomes_label, self.outcomes_display)
 
         # Remappings
         remappings_label = QLabel("<b>Remappings (optional):</b>")
@@ -109,9 +120,9 @@ class StateMachineDialog(QDialog):
             )
             return None
 
-        # Parse outcomes
-        outcomes_text = self.outcomes_edit.text().strip()
-        outcomes = outcomes_text.split()
+        # Parse outcomes from display label (read-only)
+        outcomes_text = self.outcomes_display.text().strip()
+        outcomes = [o.strip() for o in outcomes_text.split(",") if o.strip()]
 
         # Get initial state from combo box
         start_state_text = self.start_state_combo.currentText()

@@ -96,18 +96,30 @@ class StatePropertiesDialog(QDialog):
             self.plugin_combo.setEnabled(False)
 
         # Outcomes field (for new state machines and concurrence)
-        self.outcomes_label = QLabel("Outcomes (space-separated):*")
-        self.outcomes_edit = QLineEdit()
-        self.outcomes_edit.setPlaceholderText("e.g., outcome1 outcome2 outcome3")
-
-        # Outcomes are read-only
-        self.outcomes_edit.setEnabled(False)
-        self.outcomes_label.setText("Outcomes :")
+        self.outcomes_label = QLabel("Outcomes:")
         if plugin_info and hasattr(plugin_info, "outcomes"):
-            self.outcomes_edit.setText(" ".join(plugin_info.outcomes))
+            outcomes_str = ", ".join(plugin_info.outcomes)
         elif outcomes:
-            self.outcomes_edit.setText(" ".join(outcomes))
-        layout.addRow(self.outcomes_label, self.outcomes_edit)
+            outcomes_str = ", ".join(outcomes)
+        else:
+            outcomes_str = ""
+        from PyQt5.QtCore import Qt
+        from PyQt5.QtWidgets import QSizePolicy
+
+        self.outcomes_display = QLabel(outcomes_str)
+        self.outcomes_display.setStyleSheet(
+            "background: #f0f0f0; border: 1px solid #ccc; padding: 4px;"
+        )
+        self.outcomes_display.setWordWrap(True)
+        self.outcomes_display.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.outcomes_display.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        # Dynamically set min/max height based on number of outcomes
+        num_outcomes = len(outcomes_str.split(",")) if outcomes_str else 0
+        base_height = 24
+        extra_height = min(3, num_outcomes) * 18  # up to 3 lines
+        self.outcomes_display.setMinimumHeight(base_height + extra_height)
+        self.outcomes_display.setMaximumHeight(base_height + max(3, num_outcomes) * 18)
+        layout.addRow(self.outcomes_label, self.outcomes_display)
 
         # Remappings
         remappings_label = QLabel("<b>Remappings (optional):</b>")
@@ -138,9 +150,10 @@ class StatePropertiesDialog(QDialog):
             plugin_info = self.plugin_combo.currentData()
 
         if plugin_info and hasattr(plugin_info, "outcomes"):
-            self.outcomes_edit.setText(" ".join(plugin_info.outcomes))
+            outcomes_str = ", ".join(plugin_info.outcomes)
         else:
-            self.outcomes_edit.setText(" ")
+            outcomes_str = ""
+        self.outcomes_display.setText(outcomes_str)
 
     def update_plugin_list(self):
         self.plugin_combo.clear()
@@ -194,11 +207,13 @@ class StatePropertiesDialog(QDialog):
                     remappings[key.strip()] = value.strip()
 
         # Parse outcomes for new SM/Concurrence
-        outcomes = self.outcomes_edit.text().strip()
+        # For consistency, return outcomes as a list
+        outcomes = self.outcomes_display.text().strip()
+        outcomes_list = [o.strip() for o in outcomes.split(",") if o.strip()]
 
         return (
             name,
             plugin,
-            outcomes,
+            outcomes_list,
             remappings,
         )
