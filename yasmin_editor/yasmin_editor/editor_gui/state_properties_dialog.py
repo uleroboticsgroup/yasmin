@@ -163,7 +163,7 @@ class StatePropertiesDialog(QDialog):
 
                 filename = os.path.basename(plugin.file_path)
                 display_name = (
-                    f"{plugin.package_name}::{plugin.file_path}"
+                    f"{plugin.package_name}::{filename}"
                     if plugin.package_name
                     else filename
                 )
@@ -174,23 +174,14 @@ class StatePropertiesDialog(QDialog):
     ) -> Tuple[
         str,
         Optional[PluginInfo],
-        bool,
-        bool,
-        Optional[str],
         List[str],
         Dict[str, str],
-        Optional[str],
-        Optional[str],
     ]:
         """
-        Returns: (name, plugin_info, is_state_machine, is_concurrence, xml_file, outcomes, remappings, initial_state, default_outcome)
+        Returns: (name, plugin_info, outcomes, remappings)
         """
         name = self.name_edit.text().strip()
-        if not name:
-            QMessageBox.warning(self, "Validation Error", "State name is required!")
-            return None, None, False, False, None, [], {}, None, None
-
-        current_type = self.type_combo.currentIndex()
+        plugin = self.plugin_combo.currentData()
 
         # Parse remappings
         remappings = {}
@@ -203,90 +194,11 @@ class StatePropertiesDialog(QDialog):
                     remappings[key.strip()] = value.strip()
 
         # Parse outcomes for new SM/Concurrence
-        outcomes = []
-        initial_state = None
-        default_outcome = None
-        # Containers don't need outcomes defined upfront - they use final outcomes instead
+        outcomes = self.outcomes_edit.text().strip()
 
-        # Get initial state for new SM
-        if current_type == 3:
-            initial_state = self.initial_state_edit.text().strip() or None
-
-        # Get default outcome for Concurrence
-        if current_type == 4:
-            default_outcome = self.default_outcome_edit.text().strip()
-            if not default_outcome:
-                QMessageBox.warning(
-                    self,
-                    "Validation Error",
-                    "Default outcome is required for Concurrence!",
-                )
-                return None, None, False, False, None, [], {}, None, None
-
-        if current_type == 0:  # Python State
-            plugin = self.plugin_combo.currentData()
-            if not plugin:
-                QMessageBox.warning(self, "Validation Error", "Please select a plugin!")
-                return None, None, False, False, None, [], {}, None, None
-            return (
-                name,
-                plugin,
-                False,
-                False,
-                None,
-                outcomes,
-                remappings,
-            )
-        elif current_type == 1:  # C++ State
-            plugin = self.plugin_combo.currentData()
-            if not plugin:
-                QMessageBox.warning(self, "Validation Error", "Please select a plugin!")
-                return None, None, False, False, None, [], {}, None, None
-            return (
-                name,
-                plugin,
-                False,
-                False,
-                None,
-                outcomes,
-                remappings,
-            )
-        elif current_type == 2:  # State Machine (XML) - regular state, not container
-            xml_plugin = self.plugin_combo.currentData()
-            if not xml_plugin:
-                QMessageBox.warning(
-                    self, "Validation Error", "Please select an XML state machine!"
-                )
-                return None, None, False, False, None, [], {}, None, None
-            return (
-                name,
-                xml_plugin,
-                False,  # NOT a container, just references XML
-                False,
-                xml_plugin.file_path if xml_plugin else None,
-                outcomes,
-                remappings,
-            )
-        elif current_type == 3:  # Container State Machine
-            return (
-                name,
-                None,
-                True,
-                False,
-                None,
-                outcomes,
-                remappings,
-                initial_state,
-                default_outcome,
-            )
-        else:  # Concurrence
-            return (
-                name,
-                None,
-                False,
-                True,
-                None,
-                outcomes,
-                remappings,
-                default_outcome,
-            )
+        return (
+            name,
+            plugin,
+            outcomes,
+            remappings,
+        )

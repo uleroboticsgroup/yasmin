@@ -284,22 +284,30 @@ class YasminEditor(QMainWindow):
 
     def update_initial_state_combo(self):
         """Update the initial state combo box with available states."""
-        current = self.initial_state_combo.currentText()
+        # Store current selection based on self.initial_state (not combo text)
+        current = self.initial_state
         self.initial_state_combo.clear()
         self.initial_state_combo.addItem("(None)")
 
         for state_name in self.state_nodes.keys():
             self.initial_state_combo.addItem(state_name)
 
-        # Restore selection if still valid
-        index = self.initial_state_combo.findText(current)
-        if index >= 0:
-            self.initial_state_combo.setCurrentIndex(index)
+        # Restore selection based on self.initial_state
+        if current:
+            index = self.initial_state_combo.findText(current)
+            if index >= 0:
+                self.initial_state_combo.setCurrentIndex(index)
+            else:
+                # If the initial state no longer exists, reset to None
+                self.initial_state = None
+                self.initial_state_combo.setCurrentIndex(0)
+        else:
+            self.initial_state_combo.setCurrentIndex(0)
 
     def on_plugin_double_clicked(self, item: QListWidgetItem):
         plugin_info = item.data(Qt.UserRole)
         state_name, ok = QInputDialog.getText(self, "State Name", "Enter state name:")
-        if ok and state_name:
+        if ok:
             self.create_state_node(state_name, plugin_info, False, False)
 
     def on_xml_double_clicked(self, item: QListWidgetItem):
@@ -307,7 +315,7 @@ class YasminEditor(QMainWindow):
         state_name, ok = QInputDialog.getText(
             self, "State Machine Name", "Enter state machine name:"
         )
-        if ok and state_name:
+        if ok:
             # For XML state machines, pass the plugin_info
             self.create_state_node(
                 state_name, xml_plugin, True, False, xml_plugin.file_path
@@ -325,6 +333,10 @@ class YasminEditor(QMainWindow):
         initial_state: str = None,
         default_outcome: str = None,
     ):
+        if not name:
+            QMessageBox.warning(self, "Validation Error", "Name is required!")
+            return
+
         if name in self.state_nodes:
             QMessageBox.warning(self, "Error", f"State '{name}' already exists!")
             return
@@ -399,18 +411,12 @@ class YasminEditor(QMainWindow):
                 (
                     name,
                     plugin,
-                    is_sm,
-                    is_cc,
-                    xml_file,
                     outcomes,
                     remappings,
                 ) = result
                 self.create_state_node(
                     name,
                     plugin,
-                    is_sm,
-                    is_cc,
-                    xml_file,
                     outcomes,
                     remappings,
                 )
@@ -469,6 +475,9 @@ class YasminEditor(QMainWindow):
             QMessageBox.warning(self, "Error", "Please select a state to edit!")
             return
 
+        # Store old name for renaming
+        old_name = state_node.name
+
         # Use appropriate dialog based on state type
         if isinstance(state_node, ContainerStateNode):
             if state_node.is_state_machine:
@@ -490,10 +499,43 @@ class YasminEditor(QMainWindow):
                     result = dialog.get_state_machine_data()
                     if result:
                         name, outcomes, initial_state, remappings = result
+
+                        # Handle name change
+                        if name != old_name:
+                            # Check if new name already exists
+                            if name in self.state_nodes:
+                                QMessageBox.warning(
+                                    self, "Error", f"State '{name}' already exists!"
+                                )
+                                return
+
+                            # Update root initial state if this was the initial state
+                            if self.initial_state == old_name:
+                                self.initial_state = name
+
+                            # Update state_nodes dictionary
+                            del self.state_nodes[old_name]
+                            self.state_nodes[name] = state_node
+
+                            # Update node's name
+                            state_node.name = name
+
+                            # Update visual title
+                            state_node.title.setPlainText(f"STATE MACHINE: {name}")
+                            title_rect = state_node.title.boundingRect()
+                            state_node.title.setPos(-title_rect.width() / 2, -75)
+
+                            # Update initial state combo (will restore the selection)
+                            self.update_initial_state_combo()
+
+                        # Update remappings
                         state_node.remappings = remappings
+
+                        # Update initial state
                         if initial_state:
                             state_node.initial_state = initial_state
                             state_node.update_initial_state_label()
+
                         self.statusBar().showMessage(
                             f"Updated state machine: {name}", 2000
                         )
@@ -516,10 +558,43 @@ class YasminEditor(QMainWindow):
                     result = dialog.get_concurrence_data()
                     if result:
                         name, outcomes, default_outcome, remappings = result
+
+                        # Handle name change
+                        if name != old_name:
+                            # Check if new name already exists
+                            if name in self.state_nodes:
+                                QMessageBox.warning(
+                                    self, "Error", f"State '{name}' already exists!"
+                                )
+                                return
+
+                            # Update root initial state if this was the initial state
+                            if self.initial_state == old_name:
+                                self.initial_state = name
+
+                            # Update state_nodes dictionary
+                            del self.state_nodes[old_name]
+                            self.state_nodes[name] = state_node
+
+                            # Update node's name
+                            state_node.name = name
+
+                            # Update visual title
+                            state_node.title.setPlainText(f"CONCURRENCE: {name}")
+                            title_rect = state_node.title.boundingRect()
+                            state_node.title.setPos(-title_rect.width() / 2, -75)
+
+                            # Update initial state combo (will restore the selection)
+                            self.update_initial_state_combo()
+
+                        # Update remappings
                         state_node.remappings = remappings
+
+                        # Update default outcome
                         if default_outcome:
                             state_node.default_outcome = default_outcome
                             state_node.update_default_outcome_label()
+
                         self.statusBar().showMessage(f"Updated concurrence: {name}", 2000)
         else:
             # Use StatePropertiesDialog for regular states
@@ -546,17 +621,43 @@ class YasminEditor(QMainWindow):
                     (
                         name,
                         plugin,
-                        is_sm,
-                        is_cc,
-                        xml_file,
                         outcomes,
                         remappings,
-                        initial_state,
-                        default_outcome,
                     ) = result
+
+                    # Handle name change
+                    if name != old_name:
+                        # Check if new name already exists
+                        if name in self.state_nodes:
+                            QMessageBox.warning(
+                                self, "Error", f"State '{name}' already exists!"
+                            )
+                            return
+
+                        # Update root initial state if this was the initial state
+                        if self.initial_state == old_name:
+                            self.initial_state = name
+
+                        # Update state_nodes dictionary
+                        del self.state_nodes[old_name]
+                        self.state_nodes[name] = state_node
+
+                        # Update node's name
+                        state_node.name = name
+
+                        # Update visual text label
+                        state_node.text.setPlainText(name)
+                        text_rect = state_node.text.boundingRect()
+                        state_node.text.setPos(
+                            -text_rect.width() / 2, -text_rect.height() / 2
+                        )
+
+                        # Update initial state combo (will restore the selection)
+                        self.update_initial_state_combo()
 
                     # Update remappings
                     state_node.remappings = remappings
+
                     self.statusBar().showMessage(f"Updated state: {name}", 2000)
 
     def add_state_to_container(self):
@@ -597,13 +698,8 @@ class YasminEditor(QMainWindow):
                 (
                     name,
                     plugin,
-                    is_sm,
-                    is_cc,
-                    xml_file,
                     outcomes,
                     remappings,
-                    initial_state,
-                    default_outcome,
                 ) = result
 
                 # Check if child state already exists in container
@@ -614,24 +710,7 @@ class YasminEditor(QMainWindow):
                     return
 
                 # Create the child state node
-                if xml_file:
-                    # XML-based state machine - treat as regular StateNode
-                    child_node = StateNode(name, plugin, 0, 0, remappings)
-                    child_node.xml_file = xml_file
-                elif is_sm or is_cc:
-                    # User-created container
-                    child_node = ContainerStateNode(
-                        name,
-                        0,
-                        0,
-                        is_cc,
-                        remappings,
-                        outcomes,
-                        initial_state,
-                        default_outcome,
-                    )
-                else:
-                    child_node = StateNode(name, plugin, 0, 0, remappings)
+                child_node = StateNode(name, plugin, 0, 0, remappings)
 
                 # Add to container (this will set parent and position)
                 container.add_child_state(child_node)
