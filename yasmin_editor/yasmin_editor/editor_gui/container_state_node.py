@@ -335,10 +335,6 @@ class ContainerStateNode(QGraphicsRectItem):
             if isinstance(child, ContainerStateNode):
                 child._update_all_connections_recursive()
 
-    def update_size(self):
-        """Legacy method - now calls auto_resize_for_children."""
-        self.auto_resize_for_children()
-
     def mouseDoubleClickEvent(self, event):
         """Handle double-click to edit container state."""
         if self.scene() and self.scene().views():
@@ -452,7 +448,7 @@ class ContainerStateNode(QGraphicsRectItem):
                 self.parent_container.auto_resize_for_children()
 
         elif change == QGraphicsItem.ItemSelectedChange:
-            # Highlight selected items in yellow
+            # Highlight selected items with bright yellow/orange
             if value:  # Selected
                 if self.is_concurrence:
                     self.setPen(QPen(QColor(255, 200, 0), 4))  # Yellow highlight
@@ -489,8 +485,14 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def get_edge_point(self, target_pos: QPointF) -> QPointF:
         """Get the point on the rectangle edge closest to target."""
-        center = self.scenePos()
+        # Get the rect and calculate the center in scene coordinates
         rect = self.rect()
+        pos = self.scenePos()
+
+        # Calculate the actual center of the rectangle in scene coordinates
+        center_x = pos.x() + rect.left() + rect.width() / 2
+        center_y = pos.y() + rect.top() + rect.height() / 2
+        center = QPointF(center_x, center_y)
 
         # Calculate angle to target
         angle = math.atan2(target_pos.y() - center.y(), target_pos.x() - center.x())

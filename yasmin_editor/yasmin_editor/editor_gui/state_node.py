@@ -143,9 +143,9 @@ class StateNode(QGraphicsEllipseItem):
                 self.parent_container.auto_resize_for_children()
 
         elif change == QGraphicsItem.ItemSelectedChange:
-            # Highlight selected items in yellow
+            # Highlight selected items with bright yellow/orange
             if value:  # Selected
-                self.setPen(QPen(QColor(255, 200, 0), 4))  # Yellow/orange highlight
+                self.setPen(QPen(QColor(255, 200, 0), 4))  # Yellow highlight
             else:  # Deselected
                 self.setPen(QPen(QColor(0, 0, 180), 3))  # Original blue
 
