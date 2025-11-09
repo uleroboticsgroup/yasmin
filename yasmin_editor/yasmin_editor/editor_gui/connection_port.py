@@ -29,12 +29,34 @@ class ConnectionPort(QGraphicsEllipseItem):
         self.parent_state = parent_state
         self.setBrush(QBrush(QColor(100, 100, 255)))
         self.setPen(QPen(QColor(0, 0, 100), 1))
-        self.setPos(60, 0)  # Right edge
+
+        # Position based on parent type
+        from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+
+        if isinstance(parent_state, ContainerStateNode):
+            # For containers, position on the right edge center
+            # This will be updated when the container resizes
+            self.update_position_for_container()
+        else:
+            # For regular states (elliptical), position on right edge
+            self.setPos(60, 0)
+
         self.setCursor(Qt.CrossCursor)
 
         # Make it accept mouse events but not movable
         self.setAcceptedMouseButtons(Qt.LeftButton)
         self.setFlag(QGraphicsItem.ItemIsSelectable, False)
+
+    def update_position_for_container(self):
+        """Update position for container parent."""
+        from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+
+        if isinstance(self.parent_state, ContainerStateNode):
+            rect = self.parent_state.rect()
+            # Position on the right edge, vertically centered
+            # Use the actual center of the rectangle (not relative to origin)
+            center_y = rect.top() + rect.height() / 2
+            self.setPos(rect.right(), center_y)
 
     def mousePressEvent(self, event):
         # Don't propagate to parent - we'll handle this in the canvas

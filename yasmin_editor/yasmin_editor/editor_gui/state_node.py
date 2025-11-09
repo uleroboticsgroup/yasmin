@@ -137,6 +137,18 @@ class StateNode(QGraphicsEllipseItem):
             for connection in self.connections:
                 connection.update_position()
 
+        elif change == QGraphicsItem.ItemPositionHasChanged:
+            # After position has changed, trigger parent resize if in a container
+            if self.parent_container:
+                self.parent_container.auto_resize_for_children()
+        
+        elif change == QGraphicsItem.ItemSelectedChange:
+            # Highlight selected items in yellow
+            if value:  # Selected
+                self.setPen(QPen(QColor(255, 200, 0), 4))  # Yellow/orange highlight
+            else:  # Deselected
+                self.setPen(QPen(QColor(0, 0, 180), 3))  # Original blue
+
         return super().itemChange(change, value)
 
     def add_connection(self, connection: "ConnectionLine"):

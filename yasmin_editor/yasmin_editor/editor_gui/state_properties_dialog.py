@@ -17,7 +17,6 @@
 from typing import Dict, List, Optional, Tuple
 from PyQt5.QtWidgets import (
     QLabel,
-    QMessageBox,
     QDialog,
     QFormLayout,
     QLineEdit,
@@ -159,15 +158,16 @@ class StatePropertiesDialog(QDialog):
                     self.plugin_combo.addItem(plugin.class_name, plugin)
         elif current_type == 2:  # State Machine (XML)
             for plugin in self.available_plugins:
-                import os
+                if plugin.plugin_type == "xml":
+                    import os
 
-                filename = os.path.basename(plugin.file_path)
-                display_name = (
-                    f"{plugin.package_name}::{filename}"
-                    if plugin.package_name
-                    else filename
-                )
-                self.plugin_combo.addItem(display_name, plugin)
+                    filename = os.path.basename(plugin.file_path)
+                    display_name = (
+                        f"{plugin.package_name}::{filename}"
+                        if plugin.package_name
+                        else filename
+                    )
+                    self.plugin_combo.addItem(display_name, plugin)
 
     def get_state_data(
         self,

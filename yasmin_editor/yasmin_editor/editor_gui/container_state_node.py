@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import (
     QGraphicsTextItem,
     QGraphicsRectItem,
 )
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import Qt, QPointF, QRectF, QTimer
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
 
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
@@ -57,8 +57,8 @@ class ContainerStateNode(QGraphicsRectItem):
         self.default_outcome = default_outcome  # For Concurrence
         self.child_states = {}  # Dict[str, Union[StateNode, ContainerStateNode]]
         self.parent_container = None
-        self.min_width = 200
-        self.min_height = 160
+        self.min_width = 300
+        self.min_height = 200
         self.xml_file = None  # For XML-based state machines
 
         # Set position
@@ -120,7 +120,7 @@ class ContainerStateNode(QGraphicsRectItem):
             self.default_outcome_label.setFont(label_font)
             self.update_default_outcome_label()
 
-        # Add connection port for drag-to-connect (containers can start connections)
+        # Add connection port for receiving connections from outside
         self.connection_port = ConnectionPort(self)
 
     def update_initial_state_label(self):
@@ -145,22 +145,57 @@ class ContainerStateNode(QGraphicsRectItem):
         label_rect = self.default_outcome_label.boundingRect()
         self.default_outcome_label.setPos(-label_rect.width() / 2, -45)
 
+    def update_visual_elements(self):
+        """Update positions of header, title, and labels based on current rect."""
+        rect = self.rect()
+
+        # Update header
+        self.header.setRect(rect.left(), rect.top(), rect.width(), 30)
+
+        # Update title position
+        title_rect = self.title.boundingRect()
+        self.title.setPos(
+            rect.left() + rect.width() / 2 - title_rect.width() / 2, rect.top() + 5
+        )
+
+        # Update initial state label position (for State Machine)
+        if hasattr(self, "initial_state_label"):
+            label_rect = self.initial_state_label.boundingRect()
+            self.initial_state_label.setPos(
+                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 30
+            )
+
+        # Update default outcome label position (for Concurrence)
+        if hasattr(self, "default_outcome_label"):
+            label_rect = self.default_outcome_label.boundingRect()
+            self.default_outcome_label.setPos(
+                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 30
+            )
+
+        # Update connection port position
+        if hasattr(self, "connection_port"):
+            self.connection_port.update_position_for_container()
+
     def add_child_state(self, state_node):
         """Add a child state to this container."""
         if state_node.name not in self.child_states:
             self.child_states[state_node.name] = state_node
             state_node.parent_container = self
             state_node.setParentItem(self)
-            # Position relative to container
-            if len(self.child_states) == 1:
-                state_node.setPos(-50, -20)
-            else:
-                # Arrange in a grid
-                index = len(self.child_states) - 1
-                row = index // 2
-                col = index % 2
-                state_node.setPos(-80 + col * 100, -20 + row * 100)
-            self.update_size()
+
+            # Position relative to container - place new states in available space
+            rect = self.rect()
+            # Start positioning from top-left, below header
+            base_x = rect.left() + 80
+            base_y = rect.top() + 70
+
+            # Arrange in a grid
+            index = len(self.child_states) - 1
+            col = index % 3  # 3 columns
+            row = index // 3
+            state_node.setPos(base_x + col * 150, base_y + row * 120)
+
+            self.auto_resize_for_children()
 
     def remove_child_state(self, state_name: str):
         """Remove a child state from this container."""
@@ -169,24 +204,52 @@ class ContainerStateNode(QGraphicsRectItem):
             state.parent_container = None
             state.setParentItem(None)
             del self.child_states[state_name]
-            self.update_size()
+            self.auto_resize_for_children()
 
-    def update_size(self):
-        """Adjust container size based on child states."""
-        if not self.child_states:
-            self.setRect(-100, -80, self.min_width, self.min_height)
-            self.header.setRect(-100, -80, self.min_width, 30)
+    def add_final_outcome(self, outcome_node):
+        """Add a final outcome to this container."""
+        if outcome_node.name not in self.final_outcomes:
+            self.final_outcomes[outcome_node.name] = outcome_node
+            outcome_node.parent_container = self
+            outcome_node.setParentItem(self)
+
+            # Position relative to container - place on the right side
+            rect = self.rect()
+            base_x = rect.right() - 100
+            base_y = rect.top() + 70
+
+            # Stack vertically
+            index = len(self.final_outcomes) - 1
+            outcome_node.setPos(base_x, base_y + index * 80)
+
+            self.auto_resize_for_children()
+
+    def auto_resize_for_children(self):
+        """Automatically resize container to fit all children with padding."""
+        if not self.child_states and not self.final_outcomes:
+            # Reset to minimum size if empty
+            rect = self.rect()
+            self.setRect(rect.left(), rect.top(), self.min_width, self.min_height)
+            self.update_visual_elements()
+            # Trigger parent resize if this container is nested
+            if self.parent_container:
+                self.parent_container.auto_resize_for_children()
             return
 
-        # Calculate bounding box of all children
+        # Calculate bounding box of all children (states and outcomes)
         min_x, min_y = float("inf"), float("inf")
         max_x, max_y = float("-inf"), float("-inf")
 
+        # Include child states
         for child in self.child_states.values():
             child_rect = child.boundingRect()
             child_pos = child.pos()
 
-            # Get child bounds
+            # Get the actual bounds of the child
+            # For containers, use their full rect size
+            if isinstance(child, ContainerStateNode):
+                child_rect = child.rect()
+
             left = child_pos.x() + child_rect.left()
             top = child_pos.y() + child_rect.top()
             right = child_pos.x() + child_rect.right()
@@ -197,35 +260,84 @@ class ContainerStateNode(QGraphicsRectItem):
             max_x = max(max_x, right)
             max_y = max(max_y, bottom)
 
-        # Add padding
-        padding = 30
-        min_x -= padding
-        min_y -= padding + 50  # Extra for header
-        max_x += padding
-        max_y += padding
+        # Include final outcomes
+        for outcome in self.final_outcomes.values():
+            outcome_rect = outcome.boundingRect()
+            outcome_pos = outcome.pos()
+            left = outcome_pos.x() + outcome_rect.left()
+            top = outcome_pos.y() + outcome_rect.top()
+            right = outcome_pos.x() + outcome_rect.right()
+            bottom = outcome_pos.y() + outcome_rect.bottom()
+            min_x = min(min_x, left)
+            min_y = min(min_y, top)
+            max_x = max(max_x, right)
+            max_y = max(max_y, bottom)
 
-        # Ensure minimum size
-        width = max(self.min_width, max_x - min_x)
-        height = max(self.min_height, max_y - min_y)
+        # Get current rect
+        rect = self.rect()
 
-        # Update rectangle
-        self.setRect(min_x, min_y, width, height)
-        self.header.setRect(min_x, min_y, width, 30)
+        # Add padding - more padding for better spacing
+        padding_left = 40
+        padding_right = 40
+        padding_top = 80  # Extra for header and initial state label
+        padding_bottom = 40
 
-        # Update title position
-        title_rect = self.title.boundingRect()
-        self.title.setPos(min_x + width / 2 - title_rect.width() / 2, min_y + 5)
+        min_x -= padding_left
+        min_y -= padding_top
+        max_x += padding_right
+        max_y += padding_bottom
 
-        # Update initial state label position
-        if hasattr(self, "initial_state_label"):
-            label_rect = self.initial_state_label.boundingRect()
-            self.initial_state_label.setPos(
-                min_x + width / 2 - label_rect.width() / 2, min_y + 30
+        # Calculate new dimensions
+        new_width = max(self.min_width, max_x - min_x)
+        new_height = max(self.min_height, max_y - min_y)
+
+        # Get current dimensions
+        current_width = rect.width()
+        current_height = rect.height()
+
+        # Check if we need to resize
+        needs_resize = new_width > current_width or new_height > current_height
+
+        if needs_resize:
+            # Notify the scene about the geometry change
+            self.prepareGeometryChange()
+
+            # Expand to fit children
+            self.setRect(
+                rect.left(),
+                rect.top(),
+                max(new_width, current_width),
+                max(new_height, current_height),
             )
 
-        # Update connection port position if it exists
-        if hasattr(self, "connection_port"):
-            self.connection_port.setPos(min_x + width, min_y + height / 2)
+            # Update visual elements (including connection port position)
+            self.update_visual_elements()
+
+            # Recursively trigger parent resize if this container is nested
+            # Do this BEFORE updating connections so all containers are resized first
+            if self.parent_container:
+                self.parent_container.auto_resize_for_children()
+            else:
+                # Only update connections at the root level (after all nested resizing is done)
+                self._update_all_connections_recursive()
+
+    def _update_all_connections_recursive(self):
+        """Recursively update all connections for this container and its children."""
+        # Update connections to/from this container
+        for connection in self.connections:
+            connection.update_position()
+
+        # Update child connections recursively
+        self.update_child_connections()
+        
+        # Update connections for nested containers
+        for child in self.child_states.values():
+            if isinstance(child, ContainerStateNode):
+                child._update_all_connections_recursive()
+
+    def update_size(self):
+        """Legacy method - now calls auto_resize_for_children."""
+        self.auto_resize_for_children()
 
     def mouseDoubleClickEvent(self, event):
         """Handle double-click to edit container state."""
@@ -238,6 +350,69 @@ class ContainerStateNode(QGraphicsRectItem):
                 event.accept()
                 return
         super().mouseDoubleClickEvent(event)
+
+    def contextMenuEvent(self, event):
+        """Handle right-click context menu."""
+        if self.scene() and self.scene().views():
+            canvas = self.scene().views()[0]
+            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
+                from PyQt5.QtWidgets import QMenu
+
+                menu = QMenu()
+
+                # Add actions for containers
+                add_state_action = menu.addAction("Add State")
+                add_sm_action = menu.addAction("Add State Machine")
+                add_cc_action = menu.addAction("Add Concurrence")
+                menu.addSeparator()
+                add_outcome_action = menu.addAction("Add Final Outcome")
+                menu.addSeparator()
+                edit_action = menu.addAction("Edit Properties")
+                delete_action = menu.addAction("Delete")
+
+                # Show menu and get action
+                action = menu.exec_(event.screenPos())
+
+                # Handle actions
+                if action == add_state_action:
+                    self.setSelected(True)
+                    canvas.editor_ref.add_state_to_container()
+                elif action == add_sm_action:
+                    self.setSelected(True)
+                    canvas.editor_ref.add_state_machine_to_container()
+                elif action == add_cc_action:
+                    self.setSelected(True)
+                    canvas.editor_ref.add_concurrence_to_container()
+                elif action == add_outcome_action:
+                    self.setSelected(True)
+                    canvas.editor_ref.add_final_outcome()
+                elif action == edit_action:
+                    self.setSelected(True)
+                    canvas.editor_ref.edit_state()
+                elif action == delete_action:
+                    self.setSelected(True)
+                    canvas.editor_ref.delete_selected()
+
+                event.accept()
+                return
+        super().contextMenuEvent(event)
+
+    def update_child_connections(self):
+        """Recursively update all connections of child states and nested containers."""
+        # Update connections of all child states
+        for child in self.child_states.values():
+            # Update child's own connections
+            for connection in child.connections:
+                connection.update_position()
+
+            # If child is also a container, recursively update its children
+            if isinstance(child, ContainerStateNode):
+                child.update_child_connections()
+
+        # Update connections of final outcomes
+        for outcome in self.final_outcomes.values():
+            for connection in outcome.connections:
+                connection.update_position()
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
@@ -268,6 +443,27 @@ class ContainerStateNode(QGraphicsRectItem):
             for connection in self.connections:
                 connection.update_position()
 
+            # Update all child connections recursively
+            self.update_child_connections()
+
+        elif change == QGraphicsItem.ItemPositionHasChanged:
+            # After position has changed, trigger parent resize if nested
+            if self.parent_container:
+                self.parent_container.auto_resize_for_children()
+        
+        elif change == QGraphicsItem.ItemSelectedChange:
+            # Highlight selected items in yellow
+            if value:  # Selected
+                if self.is_concurrence:
+                    self.setPen(QPen(QColor(255, 200, 0), 4))  # Yellow highlight
+                else:
+                    self.setPen(QPen(QColor(255, 200, 0), 4))  # Yellow highlight
+            else:  # Deselected
+                if self.is_concurrence:
+                    self.setPen(QPen(QColor(255, 140, 0), 3))  # Original dark orange
+                else:
+                    self.setPen(QPen(QColor(0, 0, 180), 3))  # Original dark blue
+
         return super().itemChange(change, value)
 
     def add_connection(self, connection: "ConnectionLine"):
@@ -286,7 +482,9 @@ class ContainerStateNode(QGraphicsRectItem):
         return used_outcomes
 
     def get_connection_point(self) -> QPointF:
-        """Get the point where connections should attach."""
+        """Get the point where connections should attach (connection port position)."""
+        if hasattr(self, "connection_port"):
+            return self.connection_port.scenePos()
         return self.scenePos()
 
     def get_edge_point(self, target_pos: QPointF) -> QPointF:
@@ -297,11 +495,11 @@ class ContainerStateNode(QGraphicsRectItem):
         # Calculate angle to target
         angle = math.atan2(target_pos.y() - center.y(), target_pos.x() - center.x())
 
-        # Rectangle dimensions
+        # Rectangle dimensions (half-width and half-height)
         w = rect.width() / 2
         h = rect.height() / 2
 
-        # Determine which edge
+        # Determine which edge the line intersects
         abs_tan = abs(math.tan(angle)) if math.cos(angle) != 0 else float("inf")
         if abs_tan <= h / w:
             # Left or right edge

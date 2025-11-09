@@ -29,31 +29,96 @@ from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
 
 class StateMachineCanvas(QGraphicsView):
-    """Canvas for drawing the state machine with drag-to-connect support."""
+    """Canvas for drawing and connecting state machine nodes."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
         self.setRenderHint(QPainter.Antialiasing)
-        self.setSceneRect(-2000, -2000, 4000, 4000)
+        self.setDragMode(QGraphicsView.ScrollHandDrag)
 
         # Set background
-        self.setBackgroundBrush(QBrush(QColor(250, 250, 250)))
+        self.setBackgroundBrush(QBrush(QColor(255, 255, 255)))  # White background
 
-        # Drag-to-connect state
+        # Connection dragging state
+        self.is_dragging_connection = False
         self.drag_start_node = None
         self.temp_line = None
-        self.editor_ref = None  # Will be set by YasminEditor
-        self.is_dragging_connection = False
 
-        # Enable dragging by default
-        self.setDragMode(QGraphicsView.ScrollHandDrag)
-        self.setMouseTracking(True)
+        # Reference to editor window
+        self.editor_ref = None
 
-        # Enable context menu
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.show_context_menu)
+    def is_valid_connection(self, source_node, target_node):
+        """
+        Validate if a connection between two nodes is allowed.
+
+        Rules:
+        - States, State Machines, and Concurrence can only connect within their own container
+        - Final outcomes can receive connections from inside their container
+        - Final outcomes can send connections outside their container (to parent's outcomes or external states)
+        - Containers can receive connections from outside states and final outcomes
+        - States within a Concurrence can connect to themselves (self-loop for repeater pattern)
+        - No self-connections for other node types
+        """
+        # Allow self-connections ONLY for states inside a Concurrence
+        if source_node == target_node:
+            # Check if this is a state inside a Concurrence
+            if isinstance(source_node, StateNode):
+                source_container = getattr(source_node, "parent_container", None)
+                if source_container and isinstance(source_container, ContainerStateNode):
+                    if source_container.is_concurrence:
+                        return True  # Allow self-loop in Concurrence
+            return False  # Disallow for all other cases
+
+        # Get parent containers
+        source_container = getattr(source_node, "parent_container", None)
+        target_container = getattr(target_node, "parent_container", None)
+
+        # Source is a FinalOutcomeNode
+        if isinstance(source_node, FinalOutcomeNode):
+            # Final outcomes can connect to:
+            # 1. Their own parent container (creates a loop back)
+            # 2. Other containers at any level
+            # 3. Final outcomes of parent container (one level up)
+            # 4. States/containers outside their own container (root level)
+
+            if isinstance(target_node, ContainerStateNode):
+                # Can connect to any container, including their own parent
+                # Check if target is the parent container (loop back)
+                if source_container == target_node:
+                    return True  # Allow loop back to parent container
+                # Can connect to any other container
+                return True
+
+            if isinstance(target_node, FinalOutcomeNode):
+                # Can connect to final outcomes of parent container
+                # Check if target is in the parent of source's container
+                if (
+                    source_container
+                    and target_container == source_container.parent_container
+                ):
+                    return True
+                # Also allow if both are in the same container (for flexibility)
+                if source_container == target_container:
+                    return True
+
+            # Can connect to states/containers outside their container
+            return source_container != target_container and target_container is None
+
+        # Source is a State or Container (SM/Concurrence)
+        if isinstance(source_node, (StateNode, ContainerStateNode)):
+            # Target is a FinalOutcomeNode
+            if isinstance(target_node, FinalOutcomeNode):
+                # Can only connect to final outcomes in the same container
+                return source_container == target_container
+
+            # Target is a State or Container
+            if isinstance(target_node, (StateNode, ContainerStateNode)):
+                # Must be in the same container (or both at root level)
+                return source_container == target_container
+
+        return False
 
     def keyPressEvent(self, event):
         """Handle keyboard shortcuts."""
@@ -199,17 +264,19 @@ class StateMachineCanvas(QGraphicsView):
 
             # Highlight if hovering over a valid target
             target = None
-            if isinstance(item, (StateNode, FinalOutcomeNode)):
+            if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                 target = item
             elif hasattr(item, "parentItem"):
                 parent = item.parentItem()
-                if isinstance(parent, (StateNode, FinalOutcomeNode)):
+                if isinstance(parent, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                     target = parent
 
-            # Containers cannot be the end of a connection
-            # (they use final outcomes instead)
-
-            if target and target != self.drag_start_node:
+            # Check if connection is valid
+            if (
+                target
+                and target != self.drag_start_node
+                and self.is_valid_connection(self.drag_start_node, target)
+            ):
                 target.setOpacity(0.6)
 
             event.accept()
@@ -225,13 +292,15 @@ class StateMachineCanvas(QGraphicsView):
 
             target_node = None
             for item in items:
-                # Containers cannot be the end of a connection
-                if isinstance(item, (StateNode, FinalOutcomeNode)):
+                # Check all node types including containers
+                if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                     target_node = item
                     break
                 elif hasattr(item, "parentItem"):
                     parent = item.parentItem()
-                    if isinstance(parent, (StateNode, FinalOutcomeNode)):
+                    if isinstance(
+                        parent, (StateNode, FinalOutcomeNode, ContainerStateNode)
+                    ):
                         target_node = parent
                         break
 
@@ -256,8 +325,12 @@ class StateMachineCanvas(QGraphicsView):
             self.is_dragging_connection = False
             self.setDragMode(QGraphicsView.ScrollHandDrag)
 
-            # Now create connection with captured references
-            if target_node and source_node and target_node != source_node:
+            # Now create connection with captured references - validate first
+            if (
+                target_node
+                and source_node
+                and self.is_valid_connection(source_node, target_node)
+            ):
                 if self.editor_ref:
                     # Use QTimer to defer the connection creation
                     # This ensures the event loop processes properly
@@ -273,3 +346,38 @@ class StateMachineCanvas(QGraphicsView):
             return
 
         super().mouseReleaseEvent(event)
+
+    def contextMenuEvent(self, event):
+        """Handle right-click context menu on canvas background."""
+        # Check if clicking on empty space (not on an item)
+        item = self.itemAt(event.pos())
+        if item is None:
+            # Clicked on empty canvas
+            if self.editor_ref:
+                from PyQt5.QtWidgets import QMenu
+
+                menu = QMenu()
+
+                add_state_action = menu.addAction("Add State")
+                add_sm_action = menu.addAction("Add State Machine")
+                add_cc_action = menu.addAction("Add Concurrence")
+                menu.addSeparator()
+                add_outcome_action = menu.addAction("Add Final Outcome")
+
+                # Show menu and get action
+                action = menu.exec_(event.globalPos())
+
+                # Handle actions
+                if action == add_state_action:
+                    self.editor_ref.add_state()
+                elif action == add_sm_action:
+                    self.editor_ref.add_state_machine()
+                elif action == add_cc_action:
+                    self.editor_ref.add_concurrence()
+                elif action == add_outcome_action:
+                    self.editor_ref.add_final_outcome()
+
+                event.accept()
+                return
+
+        super().contextMenuEvent(event)

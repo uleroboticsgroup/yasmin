@@ -24,12 +24,13 @@ from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
 
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
+from yasmin_editor.editor_gui.connection_port import ConnectionPort
 
 
 class FinalOutcomeNode(QGraphicsRectItem):
     """Graphical representation of a final outcome."""
 
-    def __init__(self, name: str, x: float, y: float):
+    def __init__(self, name: str, x: float, y: float, inside_container: bool = False):
         super().__init__(-60, -30, 120, 60)
         self.name = name
         self.connections: List["ConnectionLine"] = []
@@ -59,6 +60,11 @@ class FinalOutcomeNode(QGraphicsRectItem):
         text_rect = self.text.boundingRect()
         self.text.setPos(-text_rect.width() / 2, -text_rect.height() / 2)
 
+        # Add connection port (small circle on the left edge for incoming connections)
+        self.inside_container = inside_container
+        if inside_container:
+            self.connection_port = ConnectionPort(self)
+
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
             # If this outcome is inside a container, constrain its movement
@@ -87,6 +93,18 @@ class FinalOutcomeNode(QGraphicsRectItem):
             # Update all connections when the outcome moves
             for connection in self.connections:
                 connection.update_position()
+
+        elif change == QGraphicsItem.ItemPositionHasChanged:
+            # After position has changed, trigger parent resize if in a container
+            if self.parent_container:
+                self.parent_container.auto_resize_for_children()
+        
+        elif change == QGraphicsItem.ItemSelectedChange:
+            # Highlight selected items in yellow
+            if value:  # Selected
+                self.setPen(QPen(QColor(255, 200, 0), 4))  # Yellow highlight
+            else:  # Deselected
+                self.setPen(QPen(QColor(100, 100, 100), 2))  # Original gray
 
         return super().itemChange(change, value)
 

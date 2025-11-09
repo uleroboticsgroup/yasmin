@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QDialogButtonBox,
     QTextEdit,
+    QComboBox,
 )
 
 
@@ -34,6 +35,7 @@ class ConcurrenceDialog(QDialog):
         outcomes: List[str] = None,
         default_outcome: str = None,
         remappings: Dict[str, str] = None,
+        final_outcomes: List[str] = None,
         edit_mode: bool = False,
         parent=None,
     ):
@@ -49,13 +51,25 @@ class ConcurrenceDialog(QDialog):
         self.name_edit.setPlaceholderText("Enter concurrence name (required)")
         layout.addRow("Name:*", self.name_edit)
 
-        # Default outcome
-        self.default_outcome_label = QLabel("Default Outcome:*")
-        self.default_outcome_edit = QLineEdit()
-        self.default_outcome_edit.setPlaceholderText("Enter default outcome name")
+        # Default outcome - use combo box
+        self.default_outcome_label = QLabel("Default Outcome:")
+        self.default_outcome_combo = QComboBox()
+        self.default_outcome_combo.addItem("(None)")
+        if not self.edit_mode:
+            self.default_outcome_combo.setEnabled(False)
+
+        # Add available final outcomes to combo
+        if final_outcomes:
+            for outcome in final_outcomes:
+                self.default_outcome_combo.addItem(outcome)
+
+        # Set current default outcome
         if default_outcome:
-            self.default_outcome_edit.setText(default_outcome)
-        layout.addRow(self.default_outcome_label, self.default_outcome_edit)
+            index = self.default_outcome_combo.findText(default_outcome)
+            if index >= 0:
+                self.default_outcome_combo.setCurrentIndex(index)
+
+        layout.addRow(self.default_outcome_label, self.default_outcome_combo)
 
         # Outcomes field
         self.outcomes_label = QLabel("Outcomes (space-separated):")
@@ -95,11 +109,11 @@ class ConcurrenceDialog(QDialog):
         outcomes_text = self.outcomes_edit.text().strip()
         outcomes = outcomes_text.split()
 
-        # Get default outcome
-        default_outcome = self.default_outcome_edit.text().strip()
-        if not default_outcome:
-            QMessageBox.warning(self, "Validation Error", "Default outcome is required!")
-            return None
+        # Get default outcome from combo box
+        default_outcome_text = self.default_outcome_combo.currentText()
+        default_outcome = (
+            None if default_outcome_text == "(None)" else default_outcome_text
+        )
 
         # Parse remappings
         remappings = {}

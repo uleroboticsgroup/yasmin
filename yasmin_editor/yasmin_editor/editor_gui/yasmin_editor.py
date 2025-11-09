@@ -33,7 +33,7 @@ from PyQt5.QtWidgets import (
     QAction,
     QToolBar,
 )
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import Qt, QPointF, QRectF
 
 from yasmin_editor.plugins_manager.plugin_manager import PluginManager
 from yasmin_editor.plugins_manager.plugin_info import PluginInfo
@@ -317,9 +317,56 @@ class YasminEditor(QMainWindow):
         )
         if ok:
             # For XML state machines, pass the plugin_info
-            self.create_state_node(
-                state_name, xml_plugin, True, False, xml_plugin.file_path
+            self.create_state_node(state_name, xml_plugin, False, False)
+
+    def get_free_position(self):
+        """Get a free position in the center of the current view or nearby."""
+        # Get the center of the current viewport in scene coordinates
+        viewport_rect = self.canvas.viewport().rect()
+        center_in_view = viewport_rect.center()
+        center_in_scene = self.canvas.mapToScene(center_in_view)
+
+        # Start from the center
+        test_pos = center_in_scene
+        search_radius = 50
+        max_attempts = 20
+
+        for attempt in range(max_attempts):
+            # Check if this position is free (no overlap with existing nodes)
+            is_free = True
+            test_rect = QRectF(test_pos.x() - 60, test_pos.y() - 40, 120, 80)
+
+            for node in self.state_nodes.values():
+                # Only check root-level nodes
+                if hasattr(node, "parent_container") and node.parent_container:
+                    continue
+
+                node_rect = QRectF(
+                    node.pos().x() + node.boundingRect().left(),
+                    node.pos().y() + node.boundingRect().top(),
+                    node.boundingRect().width(),
+                    node.boundingRect().height(),
+                )
+
+                if test_rect.intersects(node_rect):
+                    is_free = False
+                    break
+
+            if is_free:
+                return test_pos
+
+            # Spiral search pattern
+            angle = attempt * 0.5
+            radius = search_radius * (1 + attempt * 0.3)
+            import math
+
+            test_pos = QPointF(
+                center_in_scene.x() + radius * math.cos(angle),
+                center_in_scene.y() + radius * math.sin(angle),
             )
+
+        # If no free position found, return the center anyway
+        return center_in_scene
 
     def create_state_node(
         self,
@@ -327,7 +374,6 @@ class YasminEditor(QMainWindow):
         plugin_info: PluginInfo,
         is_state_machine: bool = False,
         is_concurrence: bool = False,
-        xml_file: str = None,
         outcomes: List[str] = None,
         remappings: Dict[str, str] = None,
         initial_state: str = None,
@@ -341,25 +387,18 @@ class YasminEditor(QMainWindow):
             QMessageBox.warning(self, "Error", f"State '{name}' already exists!")
             return
 
+        # Get free position in viewport center or closest free space
+        pos = self.get_free_position()
+
         # Create node
         # XML state machines are regular StateNode (not containers)
         # Only user-created State Machines and Concurrences are containers
-        if xml_file:
-            # XML-based state machine - treat as regular StateNode
-            node = StateNode(
-                name,
-                plugin_info,
-                self.next_state_position.x(),
-                self.next_state_position.y(),
-                remappings,
-            )
-            node.xml_file = xml_file  # Store XML reference
-        elif is_state_machine or is_concurrence:
+        if is_state_machine or is_concurrence:
             # User-created container (State Machine or Concurrence)
             node = ContainerStateNode(
                 name,
-                self.next_state_position.x(),
-                self.next_state_position.y(),
+                pos.x(),
+                pos.y(),
                 is_concurrence,
                 remappings,
                 outcomes,
@@ -371,16 +410,13 @@ class YasminEditor(QMainWindow):
             node = StateNode(
                 name,
                 plugin_info,
-                self.next_state_position.x(),
-                self.next_state_position.y(),
+                pos.x(),
+                pos.y(),
                 remappings,
             )
 
         self.canvas.scene.addItem(node)
         self.state_nodes[name] = node
-
-        # Update position for next state
-        self.next_state_position += QPointF(200, 150)
 
         # Update initial state combo
         self.update_initial_state_combo()
@@ -417,8 +453,10 @@ class YasminEditor(QMainWindow):
                 self.create_state_node(
                     name,
                     plugin,
-                    outcomes,
-                    remappings,
+                    is_state_machine=False,
+                    is_concurrence=False,
+                    outcomes=outcomes,
+                    remappings=remappings,
                 )
 
     def add_state_machine(self):
@@ -434,7 +472,6 @@ class YasminEditor(QMainWindow):
                     plugin_info=None,
                     is_state_machine=True,
                     is_concurrence=False,
-                    xml_file=None,
                     outcomes=outcomes,
                     remappings=remappings,
                     initial_state=initial_state,
@@ -454,7 +491,6 @@ class YasminEditor(QMainWindow):
                     plugin_info=None,
                     is_state_machine=False,
                     is_concurrence=True,
-                    xml_file=None,
                     outcomes=outcomes,
                     remappings=remappings,
                     initial_state=None,
@@ -482,6 +518,9 @@ class YasminEditor(QMainWindow):
         if isinstance(state_node, ContainerStateNode):
             if state_node.is_state_machine:
                 # Use StateMachineDialog for State Machine containers
+                # Get list of child state names
+                child_state_names = list(state_node.child_states.keys())
+
                 dialog = StateMachineDialog(
                     name=state_node.name,
                     outcomes=(
@@ -491,6 +530,7 @@ class YasminEditor(QMainWindow):
                     ),
                     initial_state=state_node.initial_state,
                     remappings=state_node.remappings,
+                    child_states=child_state_names,
                     edit_mode=True,
                     parent=self,
                 )
@@ -541,6 +581,13 @@ class YasminEditor(QMainWindow):
                         )
             elif state_node.is_concurrence:
                 # Use ConcurrenceDialog for Concurrence containers
+                # Get list of final outcome names
+                final_outcome_names = (
+                    list(state_node.final_outcomes.keys())
+                    if state_node.final_outcomes
+                    else []
+                )
+
                 dialog = ConcurrenceDialog(
                     name=state_node.name,
                     outcomes=(
@@ -550,6 +597,7 @@ class YasminEditor(QMainWindow):
                     ),
                     default_outcome=state_node.default_outcome,
                     remappings=state_node.remappings,
+                    final_outcomes=final_outcome_names,
                     edit_mode=True,
                     parent=self,
                 )
@@ -725,6 +773,137 @@ class YasminEditor(QMainWindow):
                     f"Added state '{name}' to container '{container.name}'", 2000
                 )
 
+                # Auto-assign initial state if this is the first state in a State Machine
+                if container.is_state_machine and len(container.child_states) == 1:
+                    container.initial_state = name
+                    container.update_initial_state_label()
+
+    def add_state_machine_to_container(self):
+        """Add a State Machine to the selected container."""
+        # Get selected container
+        selected_items = self.canvas.scene.selectedItems()
+        container = None
+
+        for item in selected_items:
+            if isinstance(item, ContainerStateNode):
+                # Only user-created containers (not XML-based)
+                if not hasattr(item, "xml_file") or item.xml_file is None:
+                    container = item
+                    break
+
+        if not container:
+            QMessageBox.warning(
+                self,
+                "Error",
+                "Please select a user-created Container!",
+            )
+            return
+
+        dialog = StateMachineDialog(parent=self)
+
+        if dialog.exec_():
+            result = dialog.get_state_machine_data()
+            if result:
+                name, outcomes, initial_state, remappings = result
+
+                # Check if child already exists
+                if name in container.child_states:
+                    QMessageBox.warning(
+                        self, "Error", f"State '{name}' already exists in this container!"
+                    )
+                    return
+
+                # Create nested state machine
+                child_sm = ContainerStateNode(
+                    name,
+                    0,
+                    0,
+                    False,  # is_concurrence
+                    remappings,
+                    outcomes,
+                    initial_state,
+                    None,
+                )
+
+                # Add to container
+                container.add_child_state(child_sm)
+
+                # Add to global dict
+                full_name = f"{container.name}.{name}"
+                self.state_nodes[full_name] = child_sm
+
+                self.statusBar().showMessage(
+                    f"Added State Machine '{name}' to container '{container.name}'", 2000
+                )
+
+                # Auto-assign initial state if this is the first state in a State Machine
+                if container.is_state_machine and len(container.child_states) == 1:
+                    container.initial_state = name
+                    container.update_initial_state_label()
+
+    def add_concurrence_to_container(self):
+        """Add a Concurrence to the selected container."""
+        # Get selected container
+        selected_items = self.canvas.scene.selectedItems()
+        container = None
+
+        for item in selected_items:
+            if isinstance(item, ContainerStateNode):
+                # Only user-created containers (not XML-based)
+                if not hasattr(item, "xml_file") or item.xml_file is None:
+                    container = item
+                    break
+
+        if not container:
+            QMessageBox.warning(
+                self,
+                "Error",
+                "Please select a user-created Container!",
+            )
+            return
+
+        dialog = ConcurrenceDialog(parent=self)
+
+        if dialog.exec_():
+            result = dialog.get_concurrence_data()
+            if result:
+                name, outcomes, default_outcome, remappings = result
+
+                # Check if child already exists
+                if name in container.child_states:
+                    QMessageBox.warning(
+                        self, "Error", f"State '{name}' already exists in this container!"
+                    )
+                    return
+
+                # Create nested concurrence
+                child_cc = ContainerStateNode(
+                    name,
+                    0,
+                    0,
+                    True,  # is_concurrence
+                    remappings,
+                    outcomes,
+                    None,
+                    default_outcome,
+                )
+
+                # Add to container
+                container.add_child_state(child_cc)
+
+                # Add to global dict
+                full_name = f"{container.name}.{name}"
+                self.state_nodes[full_name] = child_cc
+
+                self.statusBar().showMessage(
+                    f"Added Concurrence '{name}' to container '{container.name}'", 2000
+                )
+
+                # Auto-assign initial state if this is the first state in a State Machine
+                if container.is_state_machine and len(container.child_states) == 1:
+                    container.initial_state = name
+                    container.update_initial_state_label()
+
     def create_connection_from_drag(self, from_node, to_node):
         """Create a connection when user drags from one node to another."""
         # Containers (SM/Concurrence) cannot have external transitions
@@ -745,6 +924,9 @@ class YasminEditor(QMainWindow):
         if hasattr(from_node, "plugin_info") and from_node.plugin_info:
             has_outcomes = True
             outcomes_list = list(from_node.plugin_info.outcomes)
+        elif isinstance(from_node, FinalOutcomeNode) and from_node.inside_container:
+            has_outcomes = True
+            outcomes_list = [from_node.name]
 
         if not has_outcomes or not outcomes_list:
             QMessageBox.warning(
@@ -754,23 +936,33 @@ class YasminEditor(QMainWindow):
             )
             return
 
-        # Filter out already used outcomes
-        used_outcomes = (
-            from_node.get_used_outcomes()
-            if hasattr(from_node, "get_used_outcomes")
-            else set()
-        )
-        available_outcomes = [
-            o for o in outcomes_list if from_node.name + o not in used_outcomes
-        ]
+        # Check if this state is inside a Concurrence
+        is_in_concurrence = False
+        if hasattr(from_node, "parent_container") and from_node.parent_container:
+            if isinstance(from_node.parent_container, ContainerStateNode):
+                is_in_concurrence = from_node.parent_container.is_concurrence
 
-        if not available_outcomes:
-            QMessageBox.warning(
-                self,
-                "Error",
-                "All outcomes from this state are already used!",
+        # Filter out already used outcomes (only if NOT in a Concurrence)
+        if not is_in_concurrence:
+            used_outcomes = (
+                from_node.get_used_outcomes()
+                if hasattr(from_node, "get_used_outcomes")
+                else set()
             )
-            return
+            available_outcomes = [
+                o for o in outcomes_list if from_node.name + o not in used_outcomes
+            ]
+
+            if not available_outcomes:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    "All outcomes from this state are already used!",
+                )
+                return
+        else:
+            # In a Concurrence, allow reusing outcomes
+            available_outcomes = outcomes_list
 
         # If the from_node has only one available outcome, use it directly
         if len(available_outcomes) == 1:
@@ -791,16 +983,23 @@ class YasminEditor(QMainWindow):
 
     def create_connection(self, from_node, to_node, outcome: str):
         """Create and add a connection to the scene."""
-        # Check if outcome is already used
-        if hasattr(from_node, "get_used_outcomes"):
-            used_outcomes = from_node.get_used_outcomes()
-            if outcome in used_outcomes:
-                QMessageBox.warning(
-                    self,
-                    "Error",
-                    f"Outcome '{outcome}' is already used for a transition!",
-                )
-                return
+        # Check if this state is inside a Concurrence
+        is_in_concurrence = False
+        if hasattr(from_node, "parent_container") and from_node.parent_container:
+            if isinstance(from_node.parent_container, ContainerStateNode):
+                is_in_concurrence = from_node.parent_container.is_concurrence
+
+        # Check if outcome is already used (only if NOT in a Concurrence)
+        if not is_in_concurrence:
+            if hasattr(from_node, "get_used_outcomes"):
+                used_outcomes = from_node.get_used_outcomes()
+                if outcome in used_outcomes:
+                    QMessageBox.warning(
+                        self,
+                        "Error",
+                        f"Outcome '{outcome}' is already used for a transition!",
+                    )
+                    return
 
         connection = ConnectionLine(from_node, to_node, outcome)
         self.canvas.scene.addItem(connection)
@@ -896,13 +1095,23 @@ class YasminEditor(QMainWindow):
                     return
 
                 # Create final outcome node inside container
-                x = 0
-                y = len(selected_container.final_outcomes) * 100
-                node = FinalOutcomeNode(outcome_name, x, y)
+                # Position on the right side of the container
+                rect = selected_container.rect()
+                x = rect.right() - 100  # Near right edge
+                y = rect.top() + 70 + len(selected_container.final_outcomes) * 80
+
+                node = FinalOutcomeNode(outcome_name, x, y, inside_container=True)
                 node.parent_container = selected_container
                 node.setParentItem(selected_container)
                 selected_container.final_outcomes[outcome_name] = node
-                selected_container.update_size()
+                selected_container.auto_resize_for_children()
+                
+                # Auto-assign default outcome if this is the first outcome in a Concurrence
+                if selected_container.is_concurrence and len(selected_container.final_outcomes) == 1:
+                    if not selected_container.default_outcome:
+                        selected_container.default_outcome = outcome_name
+                        selected_container.update_default_outcome_label()
+                
                 self.statusBar().showMessage(
                     f"Added final outcome '{outcome_name}' to container '{selected_container.name}'",
                     2000,
@@ -944,11 +1153,36 @@ class YasminEditor(QMainWindow):
                     if connection in self.connections:
                         self.connections.remove(connection)
 
-                # Remove node
-                self.canvas.scene.removeItem(item)
-                del self.state_nodes[item.name]
-                self.update_initial_state_combo()  # Update combo after deletion
-                self.statusBar().showMessage(f"Deleted state: {item.name}", 2000)
+                # Handle nested states/containers
+                if hasattr(item, "parent_container") and item.parent_container:
+                    # This is a child state/container inside another container
+                    parent = item.parent_container
+
+                    # Remove from parent's child_states dict
+                    if item.name in parent.child_states:
+                        del parent.child_states[item.name]
+
+                    # Remove from global state_nodes with full path
+                    full_name = f"{parent.name}.{item.name}"
+                    if full_name in self.state_nodes:
+                        del self.state_nodes[full_name]
+
+                    # Update parent container size
+                    parent.auto_resize_for_children()
+
+                    # Remove from scene
+                    self.canvas.scene.removeItem(item)
+                    self.statusBar().showMessage(
+                        f"Deleted nested state: {item.name}", 2000
+                    )
+                else:
+                    # Root-level state/container
+                    # Remove node
+                    self.canvas.scene.removeItem(item)
+                    if item.name in self.state_nodes:
+                        del self.state_nodes[item.name]
+                    self.update_initial_state_combo()  # Update combo after deletion
+                    self.statusBar().showMessage(f"Deleted state: {item.name}", 2000)
 
             elif isinstance(item, FinalOutcomeNode):
                 # Remove all connections - properly clean up both ends
@@ -1069,6 +1303,10 @@ class YasminEditor(QMainWindow):
         )
 
         if file_path:
+            # Ensure .xml extension
+            if not file_path.lower().endswith('.xml'):
+                file_path += '.xml'
+            
             try:
                 self.save_to_xml(file_path)
                 self.statusBar().showMessage(f"Saved: {file_path}", 3000)
@@ -1098,86 +1336,15 @@ class YasminEditor(QMainWindow):
         if self.initial_state:
             root.set("initial_state", self.initial_state)
 
-        # Add states
-        for state_name, state_node in self.state_nodes.items():
-            if state_node.is_concurrence:
-                # Concurrence state
-                cc_elem = ET.SubElement(root, "Concurrence")
-                cc_elem.set("name", state_name)
+        # Filter to only include root-level states (not nested in containers)
+        root_level_states = {
+            name: node
+            for name, node in self.state_nodes.items()
+            if not hasattr(node, "parent_container") or node.parent_container is None
+        }
 
-                # Add custom outcomes if available
-                if hasattr(state_node, "custom_outcomes") and state_node.custom_outcomes:
-                    cc_elem.set("outcomes", " ".join(state_node.custom_outcomes))
-
-                # Add remappings
-                if state_node.remappings:
-                    for old_key, new_key in state_node.remappings.items():
-                        remap_elem = ET.SubElement(cc_elem, "Remap")
-                        remap_elem.set("from", old_key)
-                        remap_elem.set("to", new_key)
-
-            elif state_node.is_state_machine:
-                # Nested state machine
-                sm_elem = ET.SubElement(root, "StateMachine")
-                sm_elem.set("name", state_name)
-
-                # Set initial state if the node has one
-                if hasattr(state_node, "initial_state") and state_node.initial_state:
-                    sm_elem.set("initial_state", state_node.initial_state)
-
-                # Get outcomes from XML file if available
-                if hasattr(state_node, "xml_file") and state_node.xml_file:
-                    # Parse XML to get outcomes
-                    import xml.etree.ElementTree as ET_parse
-
-                    tree = ET_parse.parse(state_node.xml_file)
-                    xml_root = tree.getroot()
-                    outcomes = xml_root.get("outcomes", "")
-                    if outcomes:
-                        sm_elem.set("outcomes", outcomes)
-                elif (
-                    hasattr(state_node, "custom_outcomes") and state_node.custom_outcomes
-                ):
-                    # Use custom outcomes for new state machines
-                    sm_elem.set("outcomes", " ".join(state_node.custom_outcomes))
-
-                # Add remappings
-                if state_node.remappings:
-                    for old_key, new_key in state_node.remappings.items():
-                        remap_elem = ET.SubElement(sm_elem, "Remap")
-                        remap_elem.set("from", old_key)
-                        remap_elem.set("to", new_key)
-            else:
-                state_elem = ET.SubElement(root, "State")
-                state_elem.set("name", state_name)
-
-                if state_node.plugin_info:
-                    if state_node.plugin_info.plugin_type == "python":
-                        state_elem.set("type", "py")
-                        state_elem.set("module", state_node.plugin_info.module)
-                        state_elem.set("class", state_node.plugin_info.class_name)
-                    else:
-                        state_elem.set("type", "cpp")
-                        state_elem.set("class", state_node.plugin_info.class_name)
-
-                # Add remappings
-                if state_node.remappings:
-                    for old_key, new_key in state_node.remappings.items():
-                        remap_elem = ET.SubElement(state_elem, "Remap")
-                        remap_elem.set("from", old_key)
-                        remap_elem.set("to", new_key)
-
-            # Add transitions
-            for connection in state_node.connections:
-                if connection.from_node == state_node:
-                    parent_elem = (
-                        state_elem
-                        if not (state_node.is_state_machine or state_node.is_concurrence)
-                        else (sm_elem if state_node.is_state_machine else cc_elem)
-                    )
-                    transition = ET.SubElement(parent_elem, "Transition")
-                    transition.set("from", connection.outcome)
-                    transition.set("to", connection.to_node.name)
+        # Add states recursively
+        self._save_states_to_xml(root, root_level_states)
 
         # Pretty print XML
         xml_str = ET.tostring(root, encoding="unicode")
@@ -1187,9 +1354,131 @@ class YasminEditor(QMainWindow):
         # Remove extra blank lines
         pretty_xml = "\n".join([line for line in pretty_xml.split("\n") if line.strip()])
 
+        # Check if file_path ends with .xml
+        if not file_path.lower().endswith(".xml"):
+            file_path += ".xml"
+
         # Write to file
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(pretty_xml)
+
+    def _save_states_to_xml(self, parent_elem, state_nodes_dict):
+        """Recursively save states and their children to XML."""
+        import xml.etree.ElementTree as ET
+
+        # Add states
+        for state_name, state_node in state_nodes_dict.items():
+            if state_node.is_concurrence:
+                # Concurrence state
+                cc_elem = ET.SubElement(parent_elem, "Concurrence")
+                cc_elem.set("name", state_name)
+
+                # Add default outcome if available
+                if hasattr(state_node, "default_outcome") and state_node.default_outcome:
+                    cc_elem.set("default_outcome", state_node.default_outcome)
+
+                # Get outcomes from final_outcomes (container children)
+                if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
+                    cc_elem.set("outcomes", " ".join(state_node.final_outcomes.keys()))
+
+                # Add remappings
+                if state_node.remappings:
+                    for old_key, new_key in state_node.remappings.items():
+                        if old_key and new_key:  # Skip None values
+                            remap_elem = ET.SubElement(cc_elem, "Remap")
+                            remap_elem.set("from", old_key)
+                            remap_elem.set("to", new_key)
+
+                # Recursively add child states if any
+                if hasattr(state_node, "child_states") and state_node.child_states:
+                    self._save_states_to_xml(cc_elem, state_node.child_states)
+
+                # Add transitions for this concurrence
+                self._save_transitions(cc_elem, state_node)
+                
+                # Add transitions from final outcomes inside this concurrence
+                if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
+                    for outcome_node in state_node.final_outcomes.values():
+                        self._save_transitions(cc_elem, outcome_node)
+
+            elif state_node.is_state_machine:
+                # Nested state machine
+                sm_elem = ET.SubElement(parent_elem, "StateMachine")
+                sm_elem.set("name", state_name)
+
+                # Set initial state if the node has one
+                if hasattr(state_node, "initial_state") and state_node.initial_state:
+                    sm_elem.set("initial_state", state_node.initial_state)
+
+                # Get outcomes from final_outcomes (container children)
+                if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
+                    sm_elem.set("outcomes", " ".join(state_node.final_outcomes.keys()))
+
+                # Add remappings
+                if state_node.remappings:
+                    for old_key, new_key in state_node.remappings.items():
+                        if old_key and new_key:  # Skip None values
+                            remap_elem = ET.SubElement(sm_elem, "Remap")
+                            remap_elem.set("from", old_key)
+                            remap_elem.set("to", new_key)
+
+                # Recursively add child states if any
+                if hasattr(state_node, "child_states") and state_node.child_states:
+                    self._save_states_to_xml(sm_elem, state_node.child_states)
+
+                # Add transitions for this state machine
+                self._save_transitions(sm_elem, state_node)
+                
+                # Add transitions from final outcomes inside this state machine
+                if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
+                    for outcome_node in state_node.final_outcomes.values():
+                        self._save_transitions(sm_elem, outcome_node)
+
+            else:
+                state_elem = ET.SubElement(parent_elem, "State")
+                state_elem.set("name", state_name)
+
+                if state_node.plugin_info:
+                    if state_node.plugin_info.plugin_type == "python":
+                        state_elem.set("type", "py")
+                        if state_node.plugin_info.module:
+                            state_elem.set("module", state_node.plugin_info.module)
+                        if state_node.plugin_info.class_name:
+                            state_elem.set("class", state_node.plugin_info.class_name)
+                    elif state_node.plugin_info.plugin_type == "cpp":
+                        state_elem.set("type", "cpp")
+                        if state_node.plugin_info.class_name:
+                            state_elem.set("class", state_node.plugin_info.class_name)
+                    elif state_node.plugin_info.plugin_type == "xml":
+                        # XML-based state machine reference
+                        state_elem.set("type", "xml")
+                        if hasattr(state_node, "xml_file") and state_node.xml_file:
+                            state_elem.set("file", state_node.xml_file)
+
+                # Add remappings
+                if state_node.remappings:
+                    for old_key, new_key in state_node.remappings.items():
+                        if old_key and new_key:  # Skip None values
+                            remap_elem = ET.SubElement(state_elem, "Remap")
+                            remap_elem.set("from", old_key)
+                            remap_elem.set("to", new_key)
+
+                # Add transitions for this state
+                self._save_transitions(state_elem, state_node)
+
+    def _save_transitions(self, parent_elem, state_node):
+        """Save transitions for a state node."""
+        import xml.etree.ElementTree as ET
+
+        for connection in state_node.connections:
+            if connection.from_node == state_node:
+                transition = ET.SubElement(parent_elem, "Transition")
+                if connection.outcome:  # Only add if outcome is not None
+                    transition.set("from", connection.outcome)
+                if (
+                    connection.to_node and connection.to_node.name
+                ):  # Only add if target exists
+                    transition.set("to", connection.to_node.name)
 
     def load_from_xml(self, file_path: str):
         import xml.etree.ElementTree as ET
@@ -1231,9 +1520,24 @@ class YasminEditor(QMainWindow):
                 self.canvas.scene.addItem(node)
                 self.final_outcomes[outcome] = node
 
-        # Load states
-        y_offset = 0
-        for elem in root:
+        # Load states recursively
+        self._load_states_from_xml(root, None, 0)
+
+        # Update initial state combo
+        self.update_initial_state_combo()
+
+        # Set initial state selection
+        if initial_state:
+            index = self.initial_state_combo.findText(initial_state)
+            if index >= 0:
+                self.initial_state_combo.setCurrentIndex(index)
+
+        # Load transitions recursively
+        self._load_transitions_from_xml(root, None)
+
+    def _load_states_from_xml(self, parent_elem, parent_container, y_offset):
+        """Recursively load states from XML, handling nested containers."""
+        for elem in parent_elem:
             if elem.tag == "State":
                 state_name = elem.get("name")
                 state_type = elem.get("type")
@@ -1263,10 +1567,19 @@ class YasminEditor(QMainWindow):
                             break
 
                 if plugin_info:
-                    node = StateNode(state_name, plugin_info, 0, y_offset, remappings)
-                    self.canvas.scene.addItem(node)
-                    self.state_nodes[state_name] = node
-                    y_offset += 200
+                    if parent_container is None:
+                        # Root level state
+                        node = StateNode(state_name, plugin_info, 0, y_offset, remappings)
+                        self.canvas.scene.addItem(node)
+                        self.state_nodes[state_name] = node
+                        y_offset += 200
+                    else:
+                        # Nested state inside a container
+                        node = StateNode(state_name, plugin_info, 0, 0, remappings)
+                        parent_container.add_child_state(node)
+                        # Add to global state nodes with full path
+                        full_name = f"{parent_container.name}.{state_name}"
+                        self.state_nodes[full_name] = node
 
             elif elem.tag == "StateMachine":
                 state_name = elem.get("name")
@@ -1284,18 +1597,36 @@ class YasminEditor(QMainWindow):
                 # Parse outcomes
                 outcomes = outcomes_str.split() if outcomes_str else []
 
-                # Create state machine container node
-                node = ContainerStateNode(
-                    state_name, 0, y_offset, False, remappings, outcomes, init_state
-                )
+                if parent_container is None:
+                    # Root level state machine
+                    node = ContainerStateNode(
+                        state_name, 0, y_offset, False, remappings, outcomes, init_state
+                    )
+                    self.canvas.scene.addItem(node)
+                    self.state_nodes[state_name] = node
+                    y_offset += 200
+                else:
+                    # Nested state machine inside a container
+                    node = ContainerStateNode(
+                        state_name, 0, 0, False, remappings, outcomes, init_state
+                    )
+                    parent_container.add_child_state(node)
+                    # Add to global state nodes with full path
+                    full_name = f"{parent_container.name}.{state_name}"
+                    self.state_nodes[full_name] = node
 
-                self.canvas.scene.addItem(node)
-                self.state_nodes[state_name] = node
-                y_offset += 200
+                # Load final outcomes for this state machine
+                for outcome in outcomes:
+                    outcome_node = FinalOutcomeNode(outcome, 0, 0, inside_container=True)
+                    node.add_final_outcome(outcome_node)
+
+                # Recursively load children of this state machine
+                self._load_states_from_xml(elem, node, 0)
 
             elif elem.tag == "Concurrence":
                 state_name = elem.get("name")
                 outcomes_str = elem.get("outcomes", "")
+                default_outcome = elem.get("default_outcome", None)
 
                 # Load remappings
                 remappings = {}
@@ -1308,39 +1639,83 @@ class YasminEditor(QMainWindow):
                 # Parse outcomes
                 outcomes = outcomes_str.split() if outcomes_str else []
 
-                # Create concurrence container node
-                node = ContainerStateNode(
-                    state_name, 0, y_offset, True, remappings, outcomes, None
-                )
+                if parent_container is None:
+                    # Root level concurrence
+                    node = ContainerStateNode(
+                        state_name,
+                        0,
+                        y_offset,
+                        True,
+                        remappings,
+                        outcomes,
+                        None,
+                        default_outcome,
+                    )
+                    self.canvas.scene.addItem(node)
+                    self.state_nodes[state_name] = node
+                    y_offset += 200
+                else:
+                    # Nested concurrence inside a container
+                    node = ContainerStateNode(
+                        state_name,
+                        0,
+                        0,
+                        True,
+                        remappings,
+                        outcomes,
+                        None,
+                        default_outcome,
+                    )
+                    parent_container.add_child_state(node)
+                    # Add to global state nodes with full path
+                    full_name = f"{parent_container.name}.{state_name}"
+                    self.state_nodes[full_name] = node
 
-                self.canvas.scene.addItem(node)
-                self.state_nodes[state_name] = node
-                y_offset += 200
+                # Load final outcomes for this concurrence
+                for outcome in outcomes:
+                    outcome_node = FinalOutcomeNode(outcome, 0, 0, inside_container=True)
+                    node.add_final_outcome(outcome_node)
 
-        # Update initial state combo
-        self.update_initial_state_combo()
+                # Recursively load children of this concurrence
+                self._load_states_from_xml(elem, node, 0)
 
-        # Set initial state selection
-        if initial_state:
-            index = self.initial_state_combo.findText(initial_state)
-            if index >= 0:
-                self.initial_state_combo.setCurrentIndex(index)
+        return y_offset
 
-        # Load transitions
-        for elem in root:
+    def _load_transitions_from_xml(self, parent_elem, parent_container):
+        """Recursively load transitions from XML."""
+        for elem in parent_elem:
             if elem.tag in ["State", "StateMachine", "Concurrence"]:
                 state_name = elem.get("name")
-                from_node = self.state_nodes.get(state_name)
+
+                # Find the from_node
+                if parent_container is None:
+                    from_node = self.state_nodes.get(state_name)
+                else:
+                    full_name = f"{parent_container.name}.{state_name}"
+                    from_node = self.state_nodes.get(full_name)
 
                 if from_node:
                     for transition in elem.findall("Transition"):
                         outcome = transition.get("from")
                         to_name = transition.get("to")
 
-                        # Find target node
-                        to_node = self.state_nodes.get(to_name)
-                        if not to_node:
-                            to_node = self.final_outcomes.get(to_name)
+                        # Find target node - could be in same container or a final outcome
+                        to_node = None
+
+                        if parent_container is None:
+                            # Root level - check root states and final outcomes
+                            to_node = self.state_nodes.get(to_name)
+                            if not to_node:
+                                to_node = self.final_outcomes.get(to_name)
+                        else:
+                            # Inside a container - check sibling states and final outcomes
+                            # First check if it's a final outcome of this container
+                            if to_name in parent_container.final_outcomes:
+                                to_node = parent_container.final_outcomes[to_name]
+                            else:
+                                # Check if it's a sibling state
+                                full_to_name = f"{parent_container.name}.{to_name}"
+                                to_node = self.state_nodes.get(full_to_name)
 
                         if to_node:
                             connection = ConnectionLine(from_node, to_node, outcome)
@@ -1349,3 +1724,53 @@ class YasminEditor(QMainWindow):
                             self.canvas.scene.addItem(connection.label_bg)
                             self.canvas.scene.addItem(connection.label)
                             self.connections.append(connection)
+
+                # If this is a container, load transitions from its final outcomes too
+                if elem.tag in ["StateMachine", "Concurrence"]:
+                    if parent_container is None:
+                        container = self.state_nodes.get(state_name)
+                    else:
+                        full_name = f"{parent_container.name}.{state_name}"
+                        container = self.state_nodes.get(full_name)
+
+                    if container and hasattr(container, "final_outcomes"):
+                        # Load transitions from final outcomes
+                        for transition in elem.findall("Transition"):
+                            outcome = transition.get("from")
+                            to_name = transition.get("to")
+                            
+                            # Check if this transition is from a final outcome
+                            from_outcome = None
+                            if outcome in container.final_outcomes:
+                                from_outcome = container.final_outcomes[outcome]
+                            
+                            if from_outcome:
+                                # Find the target node
+                                to_node = None
+                                
+                                # Check if target is the parent container
+                                if parent_container and to_name == parent_container.name:
+                                    to_node = parent_container
+                                # Check if target is a root-level node
+                                elif parent_container is None:
+                                    to_node = self.state_nodes.get(to_name)
+                                    if not to_node:
+                                        to_node = self.final_outcomes.get(to_name)
+                                # Check if target is in parent container's final outcomes
+                                elif parent_container and to_name in parent_container.final_outcomes:
+                                    to_node = parent_container.final_outcomes[to_name]
+                                # Check if target is the container itself (loop back)
+                                elif to_name == container.name:
+                                    to_node = container
+                                
+                                if to_node:
+                                    connection = ConnectionLine(from_outcome, to_node, outcome)
+                                    self.canvas.scene.addItem(connection)
+                                    self.canvas.scene.addItem(connection.arrow_head)
+                                    self.canvas.scene.addItem(connection.label_bg)
+                                    self.canvas.scene.addItem(connection.label)
+                                    self.connections.append(connection)
+
+                    # Recursively load transitions from children
+                    if container:
+                        self._load_transitions_from_xml(elem, container)

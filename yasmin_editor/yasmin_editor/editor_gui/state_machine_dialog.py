@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QDialogButtonBox,
     QTextEdit,
+    QComboBox,
 )
 
 
@@ -34,6 +35,7 @@ class StateMachineDialog(QDialog):
         outcomes: List[str] = None,
         initial_state: str = None,
         remappings: Dict[str, str] = None,
+        child_states: List[str] = None,
         edit_mode: bool = False,
         parent=None,
     ):
@@ -49,13 +51,25 @@ class StateMachineDialog(QDialog):
         self.name_edit.setPlaceholderText("Enter state machine name (required)")
         layout.addRow("Name:*", self.name_edit)
 
-        # Initial state
-        self.initial_state_label = QLabel("Initial State (optional):")
-        self.initial_state_edit = QLineEdit()
-        self.initial_state_edit.setPlaceholderText("Enter initial state name")
+        # Initial state - use combo box
+        self.initial_state_label = QLabel("Initial State:")
+        self.initial_state_combo = QComboBox()
+        self.initial_state_combo.addItem("(None)")
+        if not self.edit_mode:
+            self.initial_state_combo.setEnabled(False)
+
+        # Add available child states to combo
+        if child_states:
+            for state in child_states:
+                self.initial_state_combo.addItem(state)
+
+        # Set current initial state
         if initial_state:
-            self.initial_state_edit.setText(initial_state)
-        layout.addRow(self.initial_state_label, self.initial_state_edit)
+            index = self.initial_state_combo.findText(initial_state)
+            if index >= 0:
+                self.initial_state_combo.setCurrentIndex(index)
+
+        layout.addRow(self.initial_state_label, self.initial_state_combo)
 
         # Outcomes field
         self.outcomes_label = QLabel("Outcomes (space-separated):")
@@ -99,8 +113,9 @@ class StateMachineDialog(QDialog):
         outcomes_text = self.outcomes_edit.text().strip()
         outcomes = outcomes_text.split()
 
-        # Get initial state
-        initial_state = self.initial_state_edit.text().strip() or None
+        # Get initial state from combo box
+        initial_state_text = self.initial_state_combo.currentText()
+        initial_state = None if initial_state_text == "(None)" else initial_state_text
 
         # Parse remappings
         remappings = {}
