@@ -1627,7 +1627,7 @@ class YasminEditor(QMainWindow):
 
     def _reorganize_all_containers(self):
         """Reorganize all containers and their children after loading.
-        Multiple passes ensure all FINAL sizes are correctly calculated before repositioning.
+        Uses graph-based layout algorithms for optimal placement.
         """
         # Process all containers (both root-level and nested)
         all_containers = []
@@ -1647,22 +1647,11 @@ class YasminEditor(QMainWindow):
 
         all_containers.sort(key=get_nesting_depth, reverse=True)
 
-        # Multiple passes to ensure all FINAL sizes are correctly calculated
-        # This handles complex nested structures where parent sizes depend on child FINAL sizes
-        for pass_num in range(4):  # 4 passes to handle deep nesting
-            # Reorganize each container based on CURRENT sizes
-            for container in all_containers:
-                self._reorganize_container_children(container)
+        # Process each container with graph-based layout
+        for container in all_containers:
+            self._layout_container_with_graph(container)
 
-            # Force complete geometry update after each pass
-            for container in all_containers:
-                container.prepareGeometryChange()
-                container.update()
-
-            self.canvas.scene.update()
-            QApplication.processEvents()
-
-        # Final pass to ensure all sizes are FINAL and correct
+        # Final pass to ensure all sizes are correct
         for container in all_containers:
             container.prepareGeometryChange()
             container.auto_resize_for_children()
@@ -1671,192 +1660,358 @@ class YasminEditor(QMainWindow):
         self.canvas.scene.update()
         QApplication.processEvents()
 
-    def _reorganize_container_children(self, container: ContainerStateNode):
-        """Reorganize children within a container using dynamic grid layout with uniform spacing.
-        Uses FINAL sizes of all children after they've been resized.
+    def _layout_container_with_graph(self, container: ContainerStateNode):
+        """Layout children within a container using hierarchical graph layout.
+        Uses Sugiyama-style layering with force-directed positioning.
         """
         if not container.child_states and not container.final_outcomes:
             return
 
-        rect = container.rect()
+        # Build a directed graph of states and their transitions
+        nodes = list(container.child_states.values())
+        final_outcomes = list(container.final_outcomes.values())
 
-        # Grid configuration for children - use SINGLE COLUMN for maximum vertical space
-        # This prevents horizontal connections from overlapping nodes
-        CHILD_GRID_COLUMNS = (
-            1  # Single column = all vertical layout, no horizontal overlap
-        )
-        CHILD_PADDING_X = 120  # Increased left padding
-        CHILD_PADDING_Y = 140  # Increased top padding
-        CHILD_SPACING_X = 0  # No horizontal spacing needed (single column)
-        CHILD_SPACING_Y = 180  # Very large vertical spacing for connection clearance
+        if not nodes:
+            # Only final outcomes, position them vertically
+            rect = container.rect()
+            y_start = rect.top() + 140
+            for i, outcome in enumerate(final_outcomes):
+                outcome.setPos(rect.left() + 120, y_start + i * 120)
+            container.auto_resize_for_children()
+            return
 
-        # Convert child_states dict to list for indexing
-        child_list = list(container.child_states.values())
+        # Build adjacency list for the graph
+        graph = {node: [] for node in nodes}
+        for node in nodes:
+            for conn in node.connections:
+                if conn.from_node == node and conn.to_node in nodes:
+                    graph[node].append(conn.to_node)
 
-        # First pass: calculate MAXIMUM width and height for each column and row
-        # This ensures uniform grid sizing based on ACTUAL FINAL child sizes
-        num_children = len(child_list)
-        num_rows = (num_children + CHILD_GRID_COLUMNS - 1) // CHILD_GRID_COLUMNS
+        # Perform topological layering (assign nodes to layers)
+        layers = self._compute_layers(nodes, graph, container.start_state)
 
-        column_widths = [0] * CHILD_GRID_COLUMNS
-        row_heights = [0] * num_rows
+        # Position nodes using hierarchical layout
+        self._position_layers(container, layers, final_outcomes)
 
-        for index, child in enumerate(child_list):
-            col = index % CHILD_GRID_COLUMNS
-            row = index // CHILD_GRID_COLUMNS
+    def _compute_layers(self, nodes, graph, start_state_name):
+        """Compute hierarchical layers for nodes using longest path layering.
+        Places start state in layer 0, then assigns other nodes based on longest path.
+        """
+        from collections import deque
 
-            # Get ACTUAL FINAL size of the child
-            if isinstance(child, ContainerStateNode):
-                # For nested containers, ensure geometry is updated and use their FINAL rect size
-                child.prepareGeometryChange()
-                child_rect = child.rect()
-                width = child_rect.width()
-                height = child_rect.height()
-            else:
-                # For regular states, use bounding rect
-                bbox = child.boundingRect()
-                width = bbox.width()
-                height = bbox.height()
+        # Initialize all nodes at layer 0
+        layer_map = {node: 0 for node in nodes}
 
-            # Track MAXIMUM width for this column across all rows
-            column_widths[col] = max(column_widths[col], width)
-            # Track MAXIMUM height for this specific row
-            row_heights[row] = max(row_heights[row], height)
-
-        # Second pass: position children using calculated MAXIMUM column widths and row heights
-        # Single column layout eliminates horizontal overlap issues
-        current_y = rect.top() + CHILD_PADDING_Y
-
-        for row in range(num_rows):
-            current_x = rect.left() + CHILD_PADDING_X
-
-            for col in range(CHILD_GRID_COLUMNS):
-                index = row * CHILD_GRID_COLUMNS + col
-                if index >= num_children:
+        # Find start node
+        start_node = None
+        if start_state_name:
+            for node in nodes:
+                if node.name == start_state_name:
+                    start_node = node
                     break
 
-                child = child_list[index]
+        # If no start state, use first node or node with no incoming edges
+        if not start_node:
+            # Find nodes with no incoming edges
+            has_incoming = set()
+            for node in nodes:
+                for neighbor in graph[node]:
+                    has_incoming.add(neighbor)
 
-                # No vertical stagger needed with single column layout
-                # All elements are vertically aligned for clean connection routing
+            candidates = [n for n in nodes if n not in has_incoming]
+            start_node = candidates[0] if candidates else nodes[0]
 
-                # Set position based on FINAL sizes
-                child.setPos(current_x, current_y)
+        # BFS to assign layers based on longest path from start
+        visited = set()
+        queue = deque([(start_node, 0)])
 
-                # Move to next column (not needed for single column, but kept for consistency)
-                current_x += column_widths[col] + CHILD_SPACING_X
+        while queue:
+            node, layer = queue.popleft()
 
-            # Move to next row with large vertical spacing for connection clearance
-            current_y += row_heights[row] + CHILD_SPACING_Y
+            if node in visited and layer_map[node] >= layer:
+                continue
 
-        # Reposition all final outcomes AFTER children are positioned with FINAL sizes
-        container._reposition_final_outcomes()
+            visited.add(node)
+            layer_map[node] = max(layer_map[node], layer)
 
-        # Resize container to fit all children with their ACTUAL FINAL sizes
+            # Process neighbors
+            for neighbor in graph[node]:
+                if neighbor in nodes:  # Only process nodes in this container
+                    queue.append((neighbor, layer + 1))
+
+        # Group nodes by layer
+        max_layer = max(layer_map.values()) if layer_map else 0
+        layers = [[] for _ in range(max_layer + 1)]
+
+        for node, layer in layer_map.items():
+            layers[layer].append(node)
+
+        # Sort nodes within each layer to minimize edge crossings
+        for layer in layers:
+            if len(layer) > 1:
+                # Simple heuristic: sort by number of connections
+                layer.sort(key=lambda n: len(graph[n]), reverse=True)
+
+        return layers
+
+    def _position_layers(self, container: ContainerStateNode, layers, final_outcomes):
+        """Position nodes in layers with proper spacing to avoid overlaps.
+        Uses a force-directed approach for final positioning.
+        """
+        rect = container.rect()
+
+        # Configuration
+        LAYER_SPACING = 280  # Horizontal spacing between layers
+        NODE_SPACING = 150  # Vertical spacing between nodes in same layer
+        START_X = rect.left() + 140  # Left padding
+        START_Y = rect.top() + 160  # Top padding (below header)
+
+        # Build adjacency info for better positioning
+        graph = {node: [] for layer in layers for node in layer}
+        for layer in layers:
+            for node in layer:
+                for conn in node.connections:
+                    if conn.from_node == node:
+                        graph[node].append(conn.to_node)
+
+        # First pass: position nodes in layers
+        layer_positions = {}  # Map node -> (x, y)
+
+        for layer_idx, layer in enumerate(layers):
+            x = START_X + layer_idx * LAYER_SPACING
+
+            # Calculate total height needed for this layer
+            total_height = 0
+            node_heights = []
+            for node in layer:
+                if isinstance(node, ContainerStateNode):
+                    node.prepareGeometryChange()
+                    height = node.rect().height()
+                else:
+                    height = node.boundingRect().height()
+                node_heights.append(height)
+                total_height += height
+
+            # Add spacing between nodes
+            total_height += NODE_SPACING * (len(layer) - 1) if len(layer) > 1 else 0
+
+            # Apply barycenter heuristic for vertical positioning
+            # This minimizes edge crossings by positioning nodes near their neighbors
+            if layer_idx > 0:
+                # Position based on average position of predecessors
+                node_barycenters = []
+                for node in layer:
+                    # Find predecessors in previous layer
+                    predecessors = []
+                    for prev_node in layers[layer_idx - 1]:
+                        if node in graph.get(prev_node, []):
+                            predecessors.append(prev_node)
+
+                    if predecessors:
+                        # Calculate average Y position of predecessors
+                        avg_y = sum(layer_positions[p][1] for p in predecessors) / len(
+                            predecessors
+                        )
+                        node_barycenters.append((node, avg_y))
+                    else:
+                        # No predecessors, use default position
+                        node_barycenters.append((node, START_Y))
+
+                # Sort by barycenter to minimize crossings
+                node_barycenters.sort(key=lambda x: x[1])
+                layer = [n for n, _ in node_barycenters]
+
+            # Position nodes vertically
+            current_y = START_Y
+
+            for node, height in zip(layer, node_heights):
+                layer_positions[node] = (x, current_y)
+                node.setPos(x, current_y)
+                current_y += height + NODE_SPACING
+
+        # Apply force-directed refinement to reduce edge crossings
+        self._refine_positions_force_directed(layers, layer_positions, graph)
+
+        # Position final outcomes to the right of all layers
+        if final_outcomes and layers:
+            max_x = START_X + len(layers) * LAYER_SPACING
+            outcome_x = max_x + 200  # Extra spacing for outcomes
+
+            # Position outcomes based on their incoming connections
+            outcome_positions = {}
+            for outcome in final_outcomes:
+                # Find all nodes that connect to this outcome
+                incoming_nodes = []
+                for layer in layers:
+                    for node in layer:
+                        for conn in node.connections:
+                            if conn.to_node == outcome:
+                                incoming_nodes.append(node)
+
+                if incoming_nodes:
+                    # Position near average of incoming nodes
+                    avg_y = sum(
+                        layer_positions[n][1]
+                        for n in incoming_nodes
+                        if n in layer_positions
+                    ) / len(incoming_nodes)
+                    outcome_positions[outcome] = avg_y
+                else:
+                    outcome_positions[outcome] = START_Y
+
+            # Sort outcomes by their target position
+            sorted_outcomes = sorted(final_outcomes, key=lambda o: outcome_positions[o])
+
+            # Position with minimum spacing
+            current_y = START_Y
+            for outcome in sorted_outcomes:
+                outcome.setPos(outcome_x, current_y)
+                current_y += 180
+
+        # Resize container to fit all children
         container.auto_resize_for_children()
 
-    def _reposition_root_elements_after_resize(self):
-        """Reposition root-level elements in a grid after containers have been auto-resized.
-        This ensures uniform spacing between all components based on actual FINAL element sizes.
-        Uses 2 columns for more rows and better vertical distribution.
-        """
+    def _refine_positions_force_directed(self, layers, positions, graph, iterations=5):
+        """Refine node positions using force-directed algorithm to minimize crossings."""
+        # Force-directed adjustment within layers
+        for iteration in range(iterations):
+            for layer_idx, layer in enumerate(layers):
+                if len(layer) <= 1:
+                    continue
 
-        # Get all root-level nodes and sort by their grid index
+                # Calculate forces between nodes in the same layer
+                forces = {node: 0 for node in layer}
+
+                for i, node in enumerate(layer):
+                    # 1. Repulsion from neighbors in same layer (prevent overlap)
+                    for j, other in enumerate(layer):
+                        if i != j:
+                            y1 = positions[node][1]
+                            y2 = positions[other][1]
+                            dist = abs(y1 - y2)
+
+                            min_distance = 150  # Minimum distance between nodes
+                            if dist < min_distance:
+                                # Push apart with stronger force
+                                force = (min_distance - dist) * 0.5
+                                if y1 < y2:
+                                    forces[node] -= force
+                                else:
+                                    forces[node] += force
+
+                    # 2. Attraction to connected nodes (minimize edge length)
+                    if layer_idx > 0:
+                        # Check predecessors
+                        for prev_node in layers[layer_idx - 1]:
+                            if node in graph.get(prev_node, []):
+                                y_prev = positions[prev_node][1]
+                                y_curr = positions[node][1]
+                                # Gentle attraction
+                                forces[node] += (y_prev - y_curr) * 0.2
+
+                    if layer_idx < len(layers) - 1:
+                        # Check successors
+                        for next_node in graph.get(node, []):
+                            if next_node in layers[layer_idx + 1]:
+                                y_next = positions[next_node][1]
+                                y_curr = positions[node][1]
+                                # Gentle attraction
+                                forces[node] += (y_next - y_curr) * 0.2
+
+                # Apply forces with damping
+                damping = 0.8 - (iteration * 0.1)  # Reduce force over iterations
+                for node in layer:
+                    x, y = positions[node]
+                    new_y = y + forces[node] * damping
+                    # Ensure nodes stay in reasonable bounds
+                    new_y = max(new_y, 160)  # Don't go above container top
+                    positions[node] = (x, new_y)
+                    node.setPos(x, new_y)
+
+    def _reposition_root_elements_after_resize(self):
+        """Reposition root-level elements using graph-based hierarchical layout.
+        This ensures optimal spacing and prevents overlapping.
+        """
+        # Get all root-level nodes
         root_nodes = []
         for node in self.state_nodes.values():
             if not hasattr(node, "parent_container") or node.parent_container is None:
-                # Use grid_index if available, otherwise append to end
-                if not hasattr(node, "grid_index"):
-                    node.grid_index = 9999  # Place at end if no index
                 root_nodes.append(node)
 
         if not root_nodes:
             return
 
-        # Sort by grid_index to maintain load order
-        root_nodes.sort(key=lambda n: n.grid_index)
+        # Build graph of root-level transitions
+        graph = {node: [] for node in root_nodes}
+        for node in root_nodes:
+            for conn in node.connections:
+                if conn.from_node == node and conn.to_node in root_nodes:
+                    graph[node].append(conn.to_node)
 
-        # Grid configuration - use 2 columns for MORE ROWS and better vertical distribution
-        GRID_COLUMNS = 2  # Only 2 columns = more rows
-        GRID_PADDING_X = 120
-        GRID_PADDING_Y = 120
-        UNIFORM_SPACING_X = (
-            200  # Increased horizontal spacing for better connection routing
-        )
-        UNIFORM_SPACING_Y = (
-            180  # Increased vertical spacing for better connection routing
-        )
+        # Compute hierarchical layers
+        layers = self._compute_layers(root_nodes, graph, self.start_state)
 
-        # Helper function to get FINAL accurate element dimensions after all resizing
-        def get_final_element_size(node):
+        # Position using hierarchical layout with generous spacing
+        self._position_root_layers(layers)
+
+    def _position_root_layers(self, layers):
+        """Position root-level nodes in layers with optimal spacing."""
+        # Configuration for root level (more generous spacing)
+        LAYER_SPACING = 450  # Wide horizontal spacing between layers
+        NODE_SPACING = 200  # Vertical spacing between nodes in same layer
+        START_X = 150  # Left padding
+        START_Y = 150  # Top padding
+
+        # Helper function to get element dimensions
+        def get_element_size(node):
             if isinstance(node, ContainerStateNode):
-                # Ensure geometry is completely up to date
                 node.prepareGeometryChange()
                 rect = node.rect()
-                # For containers, use the FINAL rect dimensions after all children are sized
                 return rect.width(), rect.height()
             else:
                 bbox = node.boundingRect()
                 return bbox.width(), bbox.height()
 
-        # Organize nodes into rows
-        rows = []
-        current_row = []
-        current_row_index = 0
+        # Calculate maximum width for each layer
+        layer_widths = []
+        for layer in layers:
+            max_width = 0
+            for node in layer:
+                width, _ = get_element_size(node)
+                max_width = max(max_width, width)
+            layer_widths.append(max_width)
 
-        for index, node in enumerate(root_nodes):
-            row_num = index // GRID_COLUMNS
+        # Position nodes layer by layer
+        current_x = START_X
 
-            if row_num > current_row_index:
-                rows.append(current_row)
-                current_row = [node]
-                current_row_index = row_num
-            else:
-                current_row.append(node)
+        for layer_idx, layer in enumerate(layers):
+            # Calculate positions for nodes in this layer
+            layer_node_heights = []
+            for node in layer:
+                _, height = get_element_size(node)
+                layer_node_heights.append(height)
 
-        if current_row:
-            rows.append(current_row)
+            # Calculate total height needed
+            total_height = sum(layer_node_heights)
+            if len(layer) > 1:
+                total_height += NODE_SPACING * (len(layer) - 1)
 
-        # First pass: calculate column widths based on MAXIMUM FINAL WIDTH in each column
-        # and row heights based on MAXIMUM FINAL HEIGHT in each row
-        column_widths = [0] * GRID_COLUMNS
-        row_heights = []
+            # Start from top
+            current_y = START_Y
 
-        for row in rows:
-            max_height = 0
-            for col_idx, node in enumerate(row):
-                width, height = get_final_element_size(node)
-                # Track MAXIMUM width for this column across all rows
-                column_widths[col_idx] = max(column_widths[col_idx], width)
-                # Track MAXIMUM height for this specific row
-                max_height = max(max_height, height)
-            row_heights.append(max_height)
+            # Position each node in the layer
+            for node, height in zip(layer, layer_node_heights):
+                node.setPos(current_x, current_y)
+                current_y += height + NODE_SPACING
 
-        # Second pass: position elements using calculated column widths and row heights
-        # with UNIFORM spacing between all elements
-        # Use staggered vertical offsets to prevent overlapping with connection lines
-        current_y = GRID_PADDING_Y
+            # Move to next layer
+            current_x += layer_widths[layer_idx] + LAYER_SPACING
 
-        for row_idx, row in enumerate(rows):
-            current_x = GRID_PADDING_X
-
-            for col_idx, node in enumerate(row):
-                # Add a larger vertical stagger based on column to prevent connection line overlap
-                # This helps connections flow without being blocked by nodes in adjacent columns
-                vertical_stagger = col_idx * 50  # Increased to 50px stagger per column
-
-                # Set position based on FINAL sizes with vertical stagger
-                node.setPos(current_x, current_y + vertical_stagger)
-
-                # Move to next column using MAXIMUM column width plus UNIFORM spacing
-                current_x += column_widths[col_idx] + UNIFORM_SPACING_X
-
-            # Move to next row using MAXIMUM row height plus UNIFORM spacing
-            # Add extra spacing to account for stagger and connection routing
-            row_spacing = (
-                UNIFORM_SPACING_Y + 80
-            )  # Increased to 80px extra for connection clearance
-            current_y += row_heights[row_idx] + row_spacing
+        # Update all connections after repositioning
+        for layer in layers:
+            for node in layer:
+                for conn in node.connections:
+                    conn.update_position()
 
     def _load_states_from_xml(self, parent_elem, parent_container):
         """Recursively load states from XML, handling nested containers."""
