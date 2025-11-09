@@ -1547,19 +1547,67 @@ class YasminEditor(QMainWindow):
         if start_state:
             self.start_state = start_state
 
-        # Get final outcomes and position them properly
+        # Load states recursively with initial positioning
+        self._load_states_from_xml(root, None)
+
+        # Reorganize all containers to properly layout their children
+        # This must be done BEFORE repositioning root elements so containers have their final sizes
+        self._reorganize_all_containers()
+
+        # Force scene update to ensure all geometries are calculated
+        self.canvas.scene.update()
+        QApplication.processEvents()  # Process any pending events
+
+        # Now reposition root-level elements based on actual sizes after auto-resize
+        self._reposition_root_elements_after_resize()
+
+        # Force another scene update after repositioning and ensure geometry is calculated
+        self.canvas.scene.update()
+        QApplication.processEvents()  # Process any pending events to update geometries
+
+        # Get final outcomes and position them properly AFTER states are resized and repositioned
         outcomes_str = root.get("outcomes", "")
         if outcomes_str:
             outcomes = outcomes_str.split()
+
+            # Find the rightmost position of all root-level nodes (now with correct sizes)
+            max_x = 0
+            max_y = 0
+            for state_node in self.state_nodes.values():
+                # Only check root-level nodes
+                if (
+                    not hasattr(state_node, "parent_container")
+                    or state_node.parent_container is None
+                ):
+                    # Ensure geometry is up to date before measuring
+                    if isinstance(state_node, ContainerStateNode):
+                        state_node.prepareGeometryChange()
+                        rect = state_node.rect()
+                        # Use actual width from rect
+                        node_right = state_node.pos().x() + rect.width()
+                        node_bottom = state_node.pos().y() + rect.height()
+                    else:
+                        bbox = state_node.boundingRect()
+                        node_right = state_node.pos().x() + bbox.width()
+                        node_bottom = state_node.pos().y() + bbox.height()
+                    max_x = max(max_x, node_right)
+                    max_y = max(max_y, node_bottom)
+
+            # Position final outcomes to the right of all states with generous padding
+            # Extra spacing to prevent connection lines from overlapping outcomes
+            outcome_x = (
+                max_x + 300 if max_x > 0 else 900
+            )  # Increased for better clearance
+            outcome_start_y = 140  # Increased start position
+            outcome_spacing = (
+                180  # Increased vertical spacing to prevent connection overlap
+            )
+
             for i, outcome in enumerate(outcomes):
-                x = 600  # Fixed x position on the right
-                y = i * 150
-                node = FinalOutcomeNode(outcome, x, y)
+                y = outcome_start_y + i * outcome_spacing
+                node = FinalOutcomeNode(outcome, outcome_x, y)
                 self.canvas.scene.addItem(node)
                 self.final_outcomes[outcome] = node
-
-        # Load states recursively with proper positioning
-        self._load_states_from_xml(root, None)
 
         # Update initial state combo
         self.update_start_state_combo()
@@ -1573,10 +1621,250 @@ class YasminEditor(QMainWindow):
         # Load transitions recursively
         self._load_transitions_from_xml(root, None)
 
+        # Final scene update to ensure all connections are drawn correctly
+        self.canvas.scene.update()
+        QApplication.processEvents()
+
+    def _reorganize_all_containers(self):
+        """Reorganize all containers and their children after loading.
+        Multiple passes ensure all FINAL sizes are correctly calculated before repositioning.
+        """
+        # Process all containers (both root-level and nested)
+        all_containers = []
+        for node in self.state_nodes.values():
+            if isinstance(node, ContainerStateNode):
+                all_containers.append(node)
+
+        # Sort containers by nesting depth (deepest first) to ensure
+        # nested containers are processed before their parents
+        def get_nesting_depth(container):
+            depth = 0
+            current = container
+            while hasattr(current, "parent_container") and current.parent_container:
+                depth += 1
+                current = current.parent_container
+            return depth
+
+        all_containers.sort(key=get_nesting_depth, reverse=True)
+
+        # Multiple passes to ensure all FINAL sizes are correctly calculated
+        # This handles complex nested structures where parent sizes depend on child FINAL sizes
+        for pass_num in range(4):  # 4 passes to handle deep nesting
+            # Reorganize each container based on CURRENT sizes
+            for container in all_containers:
+                self._reorganize_container_children(container)
+
+            # Force complete geometry update after each pass
+            for container in all_containers:
+                container.prepareGeometryChange()
+                container.update()
+
+            self.canvas.scene.update()
+            QApplication.processEvents()
+
+        # Final pass to ensure all sizes are FINAL and correct
+        for container in all_containers:
+            container.prepareGeometryChange()
+            container.auto_resize_for_children()
+
+        # One more geometry update to finalize everything
+        self.canvas.scene.update()
+        QApplication.processEvents()
+
+    def _reorganize_container_children(self, container: ContainerStateNode):
+        """Reorganize children within a container using dynamic grid layout with uniform spacing.
+        Uses FINAL sizes of all children after they've been resized.
+        """
+        if not container.child_states and not container.final_outcomes:
+            return
+
+        rect = container.rect()
+
+        # Grid configuration for children - use SINGLE COLUMN for maximum vertical space
+        # This prevents horizontal connections from overlapping nodes
+        CHILD_GRID_COLUMNS = (
+            1  # Single column = all vertical layout, no horizontal overlap
+        )
+        CHILD_PADDING_X = 120  # Increased left padding
+        CHILD_PADDING_Y = 140  # Increased top padding
+        CHILD_SPACING_X = 0  # No horizontal spacing needed (single column)
+        CHILD_SPACING_Y = 180  # Very large vertical spacing for connection clearance
+
+        # Convert child_states dict to list for indexing
+        child_list = list(container.child_states.values())
+
+        # First pass: calculate MAXIMUM width and height for each column and row
+        # This ensures uniform grid sizing based on ACTUAL FINAL child sizes
+        num_children = len(child_list)
+        num_rows = (num_children + CHILD_GRID_COLUMNS - 1) // CHILD_GRID_COLUMNS
+
+        column_widths = [0] * CHILD_GRID_COLUMNS
+        row_heights = [0] * num_rows
+
+        for index, child in enumerate(child_list):
+            col = index % CHILD_GRID_COLUMNS
+            row = index // CHILD_GRID_COLUMNS
+
+            # Get ACTUAL FINAL size of the child
+            if isinstance(child, ContainerStateNode):
+                # For nested containers, ensure geometry is updated and use their FINAL rect size
+                child.prepareGeometryChange()
+                child_rect = child.rect()
+                width = child_rect.width()
+                height = child_rect.height()
+            else:
+                # For regular states, use bounding rect
+                bbox = child.boundingRect()
+                width = bbox.width()
+                height = bbox.height()
+
+            # Track MAXIMUM width for this column across all rows
+            column_widths[col] = max(column_widths[col], width)
+            # Track MAXIMUM height for this specific row
+            row_heights[row] = max(row_heights[row], height)
+
+        # Second pass: position children using calculated MAXIMUM column widths and row heights
+        # Single column layout eliminates horizontal overlap issues
+        current_y = rect.top() + CHILD_PADDING_Y
+
+        for row in range(num_rows):
+            current_x = rect.left() + CHILD_PADDING_X
+
+            for col in range(CHILD_GRID_COLUMNS):
+                index = row * CHILD_GRID_COLUMNS + col
+                if index >= num_children:
+                    break
+
+                child = child_list[index]
+
+                # No vertical stagger needed with single column layout
+                # All elements are vertically aligned for clean connection routing
+
+                # Set position based on FINAL sizes
+                child.setPos(current_x, current_y)
+
+                # Move to next column (not needed for single column, but kept for consistency)
+                current_x += column_widths[col] + CHILD_SPACING_X
+
+            # Move to next row with large vertical spacing for connection clearance
+            current_y += row_heights[row] + CHILD_SPACING_Y
+
+        # Reposition all final outcomes AFTER children are positioned with FINAL sizes
+        container._reposition_final_outcomes()
+
+        # Resize container to fit all children with their ACTUAL FINAL sizes
+        container.auto_resize_for_children()
+
+    def _reposition_root_elements_after_resize(self):
+        """Reposition root-level elements in a grid after containers have been auto-resized.
+        This ensures uniform spacing between all components based on actual FINAL element sizes.
+        Uses 2 columns for more rows and better vertical distribution.
+        """
+
+        # Get all root-level nodes and sort by their grid index
+        root_nodes = []
+        for node in self.state_nodes.values():
+            if not hasattr(node, "parent_container") or node.parent_container is None:
+                # Use grid_index if available, otherwise append to end
+                if not hasattr(node, "grid_index"):
+                    node.grid_index = 9999  # Place at end if no index
+                root_nodes.append(node)
+
+        if not root_nodes:
+            return
+
+        # Sort by grid_index to maintain load order
+        root_nodes.sort(key=lambda n: n.grid_index)
+
+        # Grid configuration - use 2 columns for MORE ROWS and better vertical distribution
+        GRID_COLUMNS = 2  # Only 2 columns = more rows
+        GRID_PADDING_X = 120
+        GRID_PADDING_Y = 120
+        UNIFORM_SPACING_X = (
+            200  # Increased horizontal spacing for better connection routing
+        )
+        UNIFORM_SPACING_Y = (
+            180  # Increased vertical spacing for better connection routing
+        )
+
+        # Helper function to get FINAL accurate element dimensions after all resizing
+        def get_final_element_size(node):
+            if isinstance(node, ContainerStateNode):
+                # Ensure geometry is completely up to date
+                node.prepareGeometryChange()
+                rect = node.rect()
+                # For containers, use the FINAL rect dimensions after all children are sized
+                return rect.width(), rect.height()
+            else:
+                bbox = node.boundingRect()
+                return bbox.width(), bbox.height()
+
+        # Organize nodes into rows
+        rows = []
+        current_row = []
+        current_row_index = 0
+
+        for index, node in enumerate(root_nodes):
+            row_num = index // GRID_COLUMNS
+
+            if row_num > current_row_index:
+                rows.append(current_row)
+                current_row = [node]
+                current_row_index = row_num
+            else:
+                current_row.append(node)
+
+        if current_row:
+            rows.append(current_row)
+
+        # First pass: calculate column widths based on MAXIMUM FINAL WIDTH in each column
+        # and row heights based on MAXIMUM FINAL HEIGHT in each row
+        column_widths = [0] * GRID_COLUMNS
+        row_heights = []
+
+        for row in rows:
+            max_height = 0
+            for col_idx, node in enumerate(row):
+                width, height = get_final_element_size(node)
+                # Track MAXIMUM width for this column across all rows
+                column_widths[col_idx] = max(column_widths[col_idx], width)
+                # Track MAXIMUM height for this specific row
+                max_height = max(max_height, height)
+            row_heights.append(max_height)
+
+        # Second pass: position elements using calculated column widths and row heights
+        # with UNIFORM spacing between all elements
+        # Use staggered vertical offsets to prevent overlapping with connection lines
+        current_y = GRID_PADDING_Y
+
+        for row_idx, row in enumerate(rows):
+            current_x = GRID_PADDING_X
+
+            for col_idx, node in enumerate(row):
+                # Add a larger vertical stagger based on column to prevent connection line overlap
+                # This helps connections flow without being blocked by nodes in adjacent columns
+                vertical_stagger = col_idx * 50  # Increased to 50px stagger per column
+
+                # Set position based on FINAL sizes with vertical stagger
+                node.setPos(current_x, current_y + vertical_stagger)
+
+                # Move to next column using MAXIMUM column width plus UNIFORM spacing
+                current_x += column_widths[col_idx] + UNIFORM_SPACING_X
+
+            # Move to next row using MAXIMUM row height plus UNIFORM spacing
+            # Add extra spacing to account for stagger and connection routing
+            row_spacing = (
+                UNIFORM_SPACING_Y + 80
+            )  # Increased to 80px extra for connection clearance
+            current_y += row_heights[row_idx] + row_spacing
+
     def _load_states_from_xml(self, parent_elem, parent_container):
         """Recursively load states from XML, handling nested containers."""
         # Counter for positioning root-level states
         root_state_index = 0
+
+        # For root-level elements, use temporary positioning (0,0)
+        # They will be properly positioned after all sizes are calculated
 
         for elem in parent_elem:
             if elem.tag == "State":
@@ -1604,12 +1892,11 @@ class YasminEditor(QMainWindow):
 
                 if plugin_info:
                     if parent_container is None:
-                        # Root level state - position in a grid layout
-                        col = root_state_index % 3  # 3 columns
-                        row = root_state_index // 3
-                        x = 50 + col * 200
-                        y = 50 + row * 150
-                        node = StateNode(state_name, plugin_info, x, y, remappings)
+                        # Root level state - use temporary position, will be repositioned later
+                        node = StateNode(state_name, plugin_info, 0, 0, remappings)
+                        node.grid_index = (
+                            root_state_index  # Track grid position for repositioning
+                        )
                         self.canvas.scene.addItem(node)
                         self.state_nodes[state_name] = node
                         root_state_index += 1
@@ -1633,15 +1920,12 @@ class YasminEditor(QMainWindow):
                 outcomes = outcomes_str.split() if outcomes_str else []
 
                 if parent_container is None:
-                    # Root level state machine - position in grid
-                    col = (
-                        root_state_index % 2
-                    )  # 2 columns for containers (they're bigger)
-                    row = root_state_index // 2
-                    x = 50 + col * 350
-                    y = 50 + row * 250
+                    # Root level state machine - use temporary position, will be repositioned later
                     node = ContainerStateNode(
-                        state_name, x, y, False, remappings, outcomes, init_state
+                        state_name, 0, 0, False, remappings, outcomes, init_state
+                    )
+                    node.grid_index = (
+                        root_state_index  # Track grid position for repositioning
                     )
                     self.canvas.scene.addItem(node)
                     self.state_nodes[state_name] = node
@@ -1676,20 +1960,19 @@ class YasminEditor(QMainWindow):
                 outcomes = outcomes_str.split() if outcomes_str else []
 
                 if parent_container is None:
-                    # Root level concurrence - position in grid
-                    col = root_state_index % 2  # 2 columns for containers
-                    row = root_state_index // 2
-                    x = 50 + col * 350
-                    y = 50 + row * 250
+                    # Root level concurrence - use temporary position, will be repositioned later
                     node = ContainerStateNode(
                         state_name,
-                        x,
-                        y,
+                        0,
+                        0,
                         True,
                         remappings,
                         outcomes,
                         None,
                         default_outcome,
+                    )
+                    node.grid_index = (
+                        root_state_index  # Track grid position for repositioning
                     )
                     self.canvas.scene.addItem(node)
                     self.state_nodes[state_name] = node

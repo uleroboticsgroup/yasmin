@@ -42,8 +42,9 @@ class ContainerStateNode(QGraphicsRectItem):
         start_state: str = None,
         default_outcome: str = None,
     ):
-        # Start with a default size, will expand as states are added
-        super().__init__(-100, -80, 200, 160)
+        # Start with a larger default size to accommodate grid layout
+        # Will expand as states are added
+        super().__init__(-200, -125, 400, 250)
         self.name = name
         self.plugin_info = None  # Containers don't have plugin info
         self.is_state_machine = not is_concurrence
@@ -57,8 +58,8 @@ class ContainerStateNode(QGraphicsRectItem):
         self.default_outcome = default_outcome  # For Concurrence
         self.child_states = {}  # Dict[str, Union[StateNode, ContainerStateNode]]
         self.parent_container = None
-        self.min_width = 300
-        self.min_height = 200
+        self.min_width = 400  # Increased minimum width to accommodate grid layout
+        self.min_height = 250  # Increased minimum height for better spacing
         self.xml_file = None  # For XML-based state machines
 
         # Set position
@@ -81,7 +82,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
         # Add header background
         self.header = QGraphicsRectItem(self)
-        self.header.setRect(-100, -80, 200, 30)
+        self.header.setRect(-200, -125, 400, 35)  # Updated to match new container size
         if is_concurrence:
             self.header.setBrush(QBrush(QColor(255, 140, 0)))
         else:
@@ -99,7 +100,9 @@ class ContainerStateNode(QGraphicsRectItem):
         type_label = "CONCURRENCE" if is_concurrence else "STATE MACHINE"
         self.title.setPlainText(f"{type_label}: {name}")
         title_rect = self.title.boundingRect()
-        self.title.setPos(-title_rect.width() / 2, -75)
+        self.title.setPos(
+            -title_rect.width() / 2, -118
+        )  # Updated for new header position
 
         # Update initial state label (for SM only)
         if not is_concurrence:
@@ -149,27 +152,27 @@ class ContainerStateNode(QGraphicsRectItem):
         """Update positions of header, title, and labels based on current rect."""
         rect = self.rect()
 
-        # Update header
-        self.header.setRect(rect.left(), rect.top(), rect.width(), 30)
+        # Update header - make it slightly taller for better visibility
+        self.header.setRect(rect.left(), rect.top(), rect.width(), 35)
 
         # Update title position
         title_rect = self.title.boundingRect()
         self.title.setPos(
-            rect.left() + rect.width() / 2 - title_rect.width() / 2, rect.top() + 5
+            rect.left() + rect.width() / 2 - title_rect.width() / 2, rect.top() + 7
         )
 
         # Update initial state label position (for State Machine)
         if hasattr(self, "start_state_label"):
             label_rect = self.start_state_label.boundingRect()
             self.start_state_label.setPos(
-                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 30
+                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 35
             )
 
         # Update default outcome label position (for Concurrence)
         if hasattr(self, "default_outcome_label"):
             label_rect = self.default_outcome_label.boundingRect()
             self.default_outcome_label.setPos(
-                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 30
+                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 35
             )
 
         # Update connection port position
@@ -183,17 +186,29 @@ class ContainerStateNode(QGraphicsRectItem):
             state_node.parent_container = self
             state_node.setParentItem(self)
 
-            # Position relative to container - place new states in available space
+            # Position relative to container - arrange children in a grid
             rect = self.rect()
-            # Start positioning from top-left, below header
-            base_x = rect.left() + 80
-            base_y = rect.top() + 70
 
-            # Arrange in a grid
+            # Grid configuration for children inside container
+            # Use SINGLE COLUMN layout to prevent horizontal connection overlap
+            CHILD_GRID_COLUMNS = 1  # Single column = all vertical, no overlap issues
+            CHILD_CELL_WIDTH = 250  # Width for each child cell
+            CHILD_CELL_HEIGHT = 180  # Height for each child cell
+            CHILD_SPACING_X = 0  # No horizontal spacing needed (single column)
+            CHILD_SPACING_Y = 180  # Very large vertical spacing for connection clearance
+            CHILD_PADDING_X = 120  # Left padding inside container
+            CHILD_PADDING_Y = 140  # Top padding (below header and labels)
+
+            # Calculate position based on index
             index = len(self.child_states) - 1
-            col = index % 3  # 3 columns
-            row = index // 3
-            state_node.setPos(base_x + col * 150, base_y + row * 120)
+            col = index % CHILD_GRID_COLUMNS
+            row = index // CHILD_GRID_COLUMNS
+
+            # Calculate position
+            x = rect.left() + CHILD_PADDING_X + col * (CHILD_CELL_WIDTH + CHILD_SPACING_X)
+            y = rect.top() + CHILD_PADDING_Y + row * (CHILD_CELL_HEIGHT + CHILD_SPACING_Y)
+
+            state_node.setPos(x, y)
 
             self.auto_resize_for_children()
 
@@ -213,16 +228,46 @@ class ContainerStateNode(QGraphicsRectItem):
             outcome_node.parent_container = self
             outcome_node.setParentItem(self)
 
-            # Position relative to container - place on the right side
-            rect = self.rect()
-            base_x = rect.right() - 100
-            base_y = rect.top() + 70
-
-            # Stack vertically
-            index = len(self.final_outcomes) - 1
-            outcome_node.setPos(base_x, base_y + index * 80)
-
+            # Re-position all final outcomes to ensure they're aligned properly
+            self._reposition_final_outcomes()
             self.auto_resize_for_children()
+
+    def _reposition_final_outcomes(self):
+        """Reposition all final outcomes vertically on the right side of the container."""
+        if not self.final_outcomes:
+            return
+
+        rect = self.rect()
+
+        # Configuration for final outcomes positioning
+        # Position outcomes far to the right to avoid ALL connection overlap
+        OUTCOME_PADDING_TOP = 160  # Increased top padding to avoid overlap
+        OUTCOME_SPACING_Y = 200  # Very large vertical spacing to avoid connection overlap
+
+        # Calculate the rightmost position based on child states using FINAL sizes
+        # Find max x position of children to position outcomes to the right of them
+        max_child_x = rect.left() + 450  # Increased default minimum
+
+        for child in self.child_states.values():
+            # For nested containers, use their ACTUAL FINAL rect width
+            if isinstance(child, ContainerStateNode):
+                child.prepareGeometryChange()
+                child_rect = child.rect()
+                child_right = child.pos().x() + child_rect.width()
+            else:
+                child_right = child.pos().x() + child.boundingRect().width()
+            max_child_x = max(max_child_x, child_right)
+
+        # Position outcomes FAR to the right to create wide channel for connections
+        # This ensures connections flow horizontally without hitting outcomes
+        outcome_x = (
+            max_child_x + 300
+        )  # Very large spacing from children to avoid ALL overlap
+
+        # Position each outcome with uniform vertical spacing
+        for i, outcome_node in enumerate(self.final_outcomes.values()):
+            y = rect.top() + OUTCOME_PADDING_TOP + i * OUTCOME_SPACING_Y
+            outcome_node.setPos(outcome_x, y)
 
     def auto_resize_for_children(self):
         """Automatically resize container to fit all children with padding."""
@@ -276,11 +321,11 @@ class ContainerStateNode(QGraphicsRectItem):
         # Get current rect
         rect = self.rect()
 
-        # Add padding - more padding for better spacing
-        padding_left = 40
-        padding_right = 40
-        padding_top = 80  # Extra for header and initial state label
-        padding_bottom = 40
+        # Add generous padding for better spacing
+        padding_left = 50
+        padding_right = 60  # Extra right padding for outcomes
+        padding_top = 90  # Extra for header and initial state label
+        padding_bottom = 50
 
         min_x -= padding_left
         min_y -= padding_top
