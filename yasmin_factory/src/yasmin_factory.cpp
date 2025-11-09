@@ -235,8 +235,8 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
 std::shared_ptr<yasmin::StateMachine>
 YasminFactory::create_sm(tinyxml2::XMLElement *root) {
   std::string outcomes_str = this->get_optional_attribute(root, "outcomes", "");
-  std::string initial_state =
-      this->get_optional_attribute(root, "initial_state", "");
+  std::string set_start_state =
+      this->get_optional_attribute(root, "start_state", "");
   std::vector<std::string> outcomes_vec = this->split_string(outcomes_str, ' ');
   std::set<std::string> outcomes(outcomes_vec.begin(), outcomes_vec.end());
 
@@ -303,8 +303,8 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
   }
 
   // Set initial state if specified
-  if (!initial_state.empty()) {
-    sm->set_initial_state(initial_state);
+  if (!set_start_state.empty()) {
+    sm->set_start_state(set_start_state);
   }
 
   return sm;

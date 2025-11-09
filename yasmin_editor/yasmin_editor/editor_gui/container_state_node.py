@@ -39,7 +39,7 @@ class ContainerStateNode(QGraphicsRectItem):
         is_concurrence: bool = False,
         remappings: Dict[str, str] = None,
         outcomes: List[str] = None,
-        initial_state: str = None,
+        start_state: str = None,
         default_outcome: str = None,
     ):
         # Start with a default size, will expand as states are added
@@ -53,7 +53,7 @@ class ContainerStateNode(QGraphicsRectItem):
         self.final_outcomes = (
             {}
         )  # Dict[str, FinalOutcomeNode] - final outcomes inside container
-        self.initial_state = initial_state
+        self.start_state = start_state
         self.default_outcome = default_outcome  # For Concurrence
         self.child_states = {}  # Dict[str, Union[StateNode, ContainerStateNode]]
         self.parent_container = None
@@ -103,13 +103,13 @@ class ContainerStateNode(QGraphicsRectItem):
 
         # Update initial state label (for SM only)
         if not is_concurrence:
-            self.initial_state_label = QGraphicsTextItem(self)
-            self.initial_state_label.setDefaultTextColor(QColor(0, 100, 0))
+            self.start_state_label = QGraphicsTextItem(self)
+            self.start_state_label.setDefaultTextColor(QColor(0, 100, 0))
             label_font = QFont()
             label_font.setPointSize(8)
             label_font.setBold(True)
-            self.initial_state_label.setFont(label_font)
-            self.update_initial_state_label()
+            self.start_state_label.setFont(label_font)
+            self.update_start_state_label()
         else:
             # Add default outcome label (for Concurrence only)
             self.default_outcome_label = QGraphicsTextItem(self)
@@ -123,16 +123,16 @@ class ContainerStateNode(QGraphicsRectItem):
         # Add connection port for receiving connections from outside
         self.connection_port = ConnectionPort(self)
 
-    def update_initial_state_label(self):
+    def update_start_state_label(self):
         """Update the initial state label text."""
-        if not hasattr(self, "initial_state_label"):
+        if not hasattr(self, "start_state_label"):
             return
-        if self.initial_state:
-            self.initial_state_label.setPlainText(f"Initial: {self.initial_state}")
+        if self.start_state:
+            self.start_state_label.setPlainText(f"Initial: {self.start_state}")
         else:
-            self.initial_state_label.setPlainText("Initial: (none)")
-        label_rect = self.initial_state_label.boundingRect()
-        self.initial_state_label.setPos(-label_rect.width() / 2, -45)
+            self.start_state_label.setPlainText("Initial: (none)")
+        label_rect = self.start_state_label.boundingRect()
+        self.start_state_label.setPos(-label_rect.width() / 2, -45)
 
     def update_default_outcome_label(self):
         """Update the default outcome label text for Concurrence."""
@@ -159,9 +159,9 @@ class ContainerStateNode(QGraphicsRectItem):
         )
 
         # Update initial state label position (for State Machine)
-        if hasattr(self, "initial_state_label"):
-            label_rect = self.initial_state_label.boundingRect()
-            self.initial_state_label.setPos(
+        if hasattr(self, "start_state_label"):
+            label_rect = self.start_state_label.boundingRect()
+            self.start_state_label.setPos(
                 rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 30
             )
 

@@ -65,7 +65,7 @@ class YasminEditor(QMainWindow):
         self.connections: List[ConnectionLine] = []
         self.next_state_position = QPointF(0, 0)
         self.root_sm_name = ""  # Root state machine name
-        self.initial_state = None  # Initial state for root SM
+        self.start_state = None  # Initial state for root SM
 
         # Create UI
         self.create_ui()
@@ -198,11 +198,11 @@ class YasminEditor(QMainWindow):
         self.root_sm_name_edit.textChanged.connect(self.on_root_sm_name_changed)
         root_sm_layout.addWidget(self.root_sm_name_edit)
 
-        root_sm_layout.addWidget(QLabel("<b>Initial State:</b>"))
-        self.initial_state_combo = QComboBox()
-        self.initial_state_combo.addItem("(None)")
-        self.initial_state_combo.currentTextChanged.connect(self.on_initial_state_changed)
-        root_sm_layout.addWidget(self.initial_state_combo)
+        root_sm_layout.addWidget(QLabel("<b>Start State:</b>"))
+        self.start_state_combo = QComboBox()
+        self.start_state_combo.addItem("(None)")
+        self.start_state_combo.currentTextChanged.connect(self.on_start_state_changed)
+        root_sm_layout.addWidget(self.start_state_combo)
 
         right_layout.addWidget(root_sm_widget)
 
@@ -275,34 +275,34 @@ class YasminEditor(QMainWindow):
         """Handle root state machine name change."""
         self.root_sm_name = text
 
-    def on_initial_state_changed(self, text):
+    def on_start_state_changed(self, text):
         """Handle initial state selection change."""
         if text == "(None)":
-            self.initial_state = None
+            self.start_state = None
         else:
-            self.initial_state = text
+            self.start_state = text
 
-    def update_initial_state_combo(self):
+    def update_start_state_combo(self):
         """Update the initial state combo box with available states."""
-        # Store current selection based on self.initial_state (not combo text)
-        current = self.initial_state
-        self.initial_state_combo.clear()
-        self.initial_state_combo.addItem("(None)")
+        # Store current selection based on self.start_state (not combo text)
+        current = self.start_state
+        self.start_state_combo.clear()
+        self.start_state_combo.addItem("(None)")
 
         for state_name in self.state_nodes.keys():
-            self.initial_state_combo.addItem(state_name)
+            self.start_state_combo.addItem(state_name)
 
-        # Restore selection based on self.initial_state
+        # Restore selection based on self.start_state
         if current:
-            index = self.initial_state_combo.findText(current)
+            index = self.start_state_combo.findText(current)
             if index >= 0:
-                self.initial_state_combo.setCurrentIndex(index)
+                self.start_state_combo.setCurrentIndex(index)
             else:
                 # If the initial state no longer exists, reset to None
-                self.initial_state = None
-                self.initial_state_combo.setCurrentIndex(0)
+                self.start_state = None
+                self.start_state_combo.setCurrentIndex(0)
         else:
-            self.initial_state_combo.setCurrentIndex(0)
+            self.start_state_combo.setCurrentIndex(0)
 
     def on_plugin_double_clicked(self, item: QListWidgetItem):
         plugin_info = item.data(Qt.UserRole)
@@ -376,7 +376,7 @@ class YasminEditor(QMainWindow):
         is_concurrence: bool = False,
         outcomes: List[str] = None,
         remappings: Dict[str, str] = None,
-        initial_state: str = None,
+        start_state: str = None,
         default_outcome: str = None,
     ):
         if not name:
@@ -402,7 +402,7 @@ class YasminEditor(QMainWindow):
                 is_concurrence,
                 remappings,
                 outcomes,
-                initial_state,
+                start_state,
                 default_outcome,
             )
         else:
@@ -419,14 +419,14 @@ class YasminEditor(QMainWindow):
         self.state_nodes[name] = node
 
         # Update initial state combo
-        self.update_initial_state_combo()
+        self.update_start_state_combo()
 
         # If this is the first state and no initial state is set, set it as initial
-        if len(self.state_nodes) == 1 and not self.initial_state:
-            self.initial_state = name
-            index = self.initial_state_combo.findText(name)
+        if len(self.state_nodes) == 1 and not self.start_state:
+            self.start_state = name
+            index = self.start_state_combo.findText(name)
             if index >= 0:
-                self.initial_state_combo.setCurrentIndex(index)
+                self.start_state_combo.setCurrentIndex(index)
 
         self.statusBar().showMessage(f"Added state: {name}", 2000)
 
@@ -466,7 +466,7 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             result = dialog.get_state_machine_data()
             if result:  # Check if validation passed
-                name, outcomes, initial_state, remappings = result
+                name, outcomes, start_state, remappings = result
                 self.create_state_node(
                     name=name,
                     plugin_info=None,
@@ -474,7 +474,7 @@ class YasminEditor(QMainWindow):
                     is_concurrence=False,
                     outcomes=outcomes,
                     remappings=remappings,
-                    initial_state=initial_state,
+                    start_state=start_state,
                     default_outcome=None,
                 )
 
@@ -493,7 +493,7 @@ class YasminEditor(QMainWindow):
                     is_concurrence=True,
                     outcomes=outcomes,
                     remappings=remappings,
-                    initial_state=None,
+                    start_state=None,
                     default_outcome=default_outcome,
                 )
 
@@ -528,7 +528,7 @@ class YasminEditor(QMainWindow):
                         if state_node.final_outcomes
                         else []
                     ),
-                    initial_state=state_node.initial_state,
+                    start_state=state_node.start_state,
                     remappings=state_node.remappings,
                     child_states=child_state_names,
                     edit_mode=True,
@@ -538,7 +538,7 @@ class YasminEditor(QMainWindow):
                 if dialog.exec_():
                     result = dialog.get_state_machine_data()
                     if result:
-                        name, outcomes, initial_state, remappings = result
+                        name, outcomes, start_state, remappings = result
 
                         # Handle name change
                         if name != old_name:
@@ -550,8 +550,8 @@ class YasminEditor(QMainWindow):
                                 return
 
                             # Update root initial state if this was the initial state
-                            if self.initial_state == old_name:
-                                self.initial_state = name
+                            if self.start_state == old_name:
+                                self.start_state = name
 
                             # Update state_nodes dictionary
                             del self.state_nodes[old_name]
@@ -566,15 +566,15 @@ class YasminEditor(QMainWindow):
                             state_node.title.setPos(-title_rect.width() / 2, -75)
 
                             # Update initial state combo (will restore the selection)
-                            self.update_initial_state_combo()
+                            self.update_start_state_combo()
 
                         # Update remappings
                         state_node.remappings = remappings
 
                         # Update initial state
-                        if initial_state:
-                            state_node.initial_state = initial_state
-                            state_node.update_initial_state_label()
+                        if start_state:
+                            state_node.start_state = start_state
+                            state_node.update_start_state_label()
 
                         self.statusBar().showMessage(
                             f"Updated state machine: {name}", 2000
@@ -617,8 +617,8 @@ class YasminEditor(QMainWindow):
                                 return
 
                             # Update root initial state if this was the initial state
-                            if self.initial_state == old_name:
-                                self.initial_state = name
+                            if self.start_state == old_name:
+                                self.start_state = name
 
                             # Update state_nodes dictionary
                             del self.state_nodes[old_name]
@@ -633,7 +633,7 @@ class YasminEditor(QMainWindow):
                             state_node.title.setPos(-title_rect.width() / 2, -75)
 
                             # Update initial state combo (will restore the selection)
-                            self.update_initial_state_combo()
+                            self.update_start_state_combo()
 
                         # Update remappings
                         state_node.remappings = remappings
@@ -683,8 +683,8 @@ class YasminEditor(QMainWindow):
                             return
 
                         # Update root initial state if this was the initial state
-                        if self.initial_state == old_name:
-                            self.initial_state = name
+                        if self.start_state == old_name:
+                            self.start_state = name
 
                         # Update state_nodes dictionary
                         del self.state_nodes[old_name]
@@ -701,7 +701,7 @@ class YasminEditor(QMainWindow):
                         )
 
                         # Update initial state combo (will restore the selection)
-                        self.update_initial_state_combo()
+                        self.update_start_state_combo()
 
                     # Update remappings
                     state_node.remappings = remappings
@@ -775,8 +775,8 @@ class YasminEditor(QMainWindow):
 
                 # Auto-assign initial state if this is the first state in a State Machine
                 if container.is_state_machine and len(container.child_states) == 1:
-                    container.initial_state = name
-                    container.update_initial_state_label()
+                    container.start_state = name
+                    container.update_start_state_label()
 
     def add_state_machine_to_container(self):
         """Add a State Machine to the selected container."""
@@ -804,7 +804,7 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             result = dialog.get_state_machine_data()
             if result:
-                name, outcomes, initial_state, remappings = result
+                name, outcomes, start_state, remappings = result
 
                 # Check if child already exists
                 if name in container.child_states:
@@ -821,7 +821,7 @@ class YasminEditor(QMainWindow):
                     False,  # is_concurrence
                     remappings,
                     outcomes,
-                    initial_state,
+                    start_state,
                     None,
                 )
 
@@ -838,8 +838,8 @@ class YasminEditor(QMainWindow):
 
                 # Auto-assign initial state if this is the first state in a State Machine
                 if container.is_state_machine and len(container.child_states) == 1:
-                    container.initial_state = name
-                    container.update_initial_state_label()
+                    container.start_state = name
+                    container.update_start_state_label()
 
     def add_concurrence_to_container(self):
         """Add a Concurrence to the selected container."""
@@ -901,8 +901,8 @@ class YasminEditor(QMainWindow):
 
                 # Auto-assign initial state if this is the first state in a State Machine
                 if container.is_state_machine and len(container.child_states) == 1:
-                    container.initial_state = name
-                    container.update_initial_state_label()
+                    container.start_state = name
+                    container.update_start_state_label()
 
     def create_connection_from_drag(self, from_node, to_node):
         """Create a connection when user drags from one node to another."""
@@ -1184,7 +1184,7 @@ class YasminEditor(QMainWindow):
                     self.canvas.scene.removeItem(item)
                     if item.name in self.state_nodes:
                         del self.state_nodes[item.name]
-                    self.update_initial_state_combo()  # Update combo after deletion
+                    self.update_start_state_combo()  # Update combo after deletion
                     self.statusBar().showMessage(f"Deleted state: {item.name}", 2000)
 
             elif isinstance(item, FinalOutcomeNode):
@@ -1245,9 +1245,9 @@ class YasminEditor(QMainWindow):
             self.connections.clear()
             self.next_state_position = QPointF(0, 0)
             self.root_sm_name = ""
-            self.initial_state = None
+            self.start_state = None
             self.root_sm_name_edit.clear()
-            self.update_initial_state_combo()
+            self.update_start_state_combo()
             self.statusBar().showMessage("New state machine created", 2000)
 
     def open_state_machine(self):
@@ -1275,10 +1275,10 @@ class YasminEditor(QMainWindow):
         if not self.state_nodes:
             errors.append("- No states defined")
 
-        if not self.initial_state:
+        if not self.start_state:
             errors.append("- Initial state is not set")
-        elif self.initial_state not in self.state_nodes:
-            errors.append(f"- Initial state '{self.initial_state}' does not exist")
+        elif self.start_state not in self.state_nodes:
+            errors.append(f"- Initial state '{self.start_state}' does not exist")
 
         # Check for states with empty names
         for name in self.state_nodes.keys():
@@ -1336,8 +1336,8 @@ class YasminEditor(QMainWindow):
             root.set("name", sm_name)
 
         # Set initial state if specified
-        if self.initial_state:
-            root.set("initial_state", self.initial_state)
+        if self.start_state:
+            root.set("start_state", self.start_state)
 
         # Filter to only include root-level states (not nested in containers)
         root_level_states = {
@@ -1410,8 +1410,8 @@ class YasminEditor(QMainWindow):
                 sm_elem.set("name", state_name)
 
                 # Set initial state if the node has one
-                if hasattr(state_node, "initial_state") and state_node.initial_state:
-                    sm_elem.set("initial_state", state_node.initial_state)
+                if hasattr(state_node, "start_state") and state_node.start_state:
+                    sm_elem.set("start_state", state_node.start_state)
 
                 # Get outcomes from final_outcomes (container children)
                 if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
@@ -1500,17 +1500,17 @@ class YasminEditor(QMainWindow):
             self.root_sm_name_edit.setText(sm_name)
 
         # Load initial state
-        initial_state = root.get("initial_state", "")
+        start_state = root.get("start_state", "")
 
-        # If no initial_state attribute, find the first State element
-        if not initial_state:
+        # If no start_state attribute, find the first State element
+        if not start_state:
             for elem in root:
                 if elem.tag == "State":
-                    initial_state = elem.get("name", "")
+                    start_state = elem.get("name", "")
                     break
 
-        if initial_state:
-            self.initial_state = initial_state
+        if start_state:
+            self.start_state = start_state
 
         # Get final outcomes
         outcomes_str = root.get("outcomes", "")
@@ -1527,13 +1527,13 @@ class YasminEditor(QMainWindow):
         self._load_states_from_xml(root, None, 0)
 
         # Update initial state combo
-        self.update_initial_state_combo()
+        self.update_start_state_combo()
 
         # Set initial state selection
-        if initial_state:
-            index = self.initial_state_combo.findText(initial_state)
+        if start_state:
+            index = self.start_state_combo.findText(start_state)
             if index >= 0:
-                self.initial_state_combo.setCurrentIndex(index)
+                self.start_state_combo.setCurrentIndex(index)
 
         # Load transitions recursively
         self._load_transitions_from_xml(root, None)
@@ -1587,7 +1587,7 @@ class YasminEditor(QMainWindow):
             elif elem.tag == "StateMachine":
                 state_name = elem.get("name")
                 outcomes_str = elem.get("outcomes", "")
-                init_state = elem.get("initial_state", "")
+                init_state = elem.get("start_state", "")
 
                 # Load remappings
                 remappings = {}

@@ -33,7 +33,7 @@ class StateMachineDialog(QDialog):
         self,
         name: str = "",
         outcomes: List[str] = None,
-        initial_state: str = None,
+        start_state: str = None,
         remappings: Dict[str, str] = None,
         child_states: List[str] = None,
         edit_mode: bool = False,
@@ -52,24 +52,24 @@ class StateMachineDialog(QDialog):
         layout.addRow("Name:*", self.name_edit)
 
         # Initial state - use combo box
-        self.initial_state_label = QLabel("Initial State:")
-        self.initial_state_combo = QComboBox()
-        self.initial_state_combo.addItem("(None)")
+        self.start_state_label = QLabel("Start State:")
+        self.start_state_combo = QComboBox()
+        self.start_state_combo.addItem("(None)")
         if not self.edit_mode:
-            self.initial_state_combo.setEnabled(False)
+            self.start_state_combo.setEnabled(False)
 
         # Add available child states to combo
         if child_states:
             for state in child_states:
-                self.initial_state_combo.addItem(state)
+                self.start_state_combo.addItem(state)
 
         # Set current initial state
-        if initial_state:
-            index = self.initial_state_combo.findText(initial_state)
+        if start_state:
+            index = self.start_state_combo.findText(start_state)
             if index >= 0:
-                self.initial_state_combo.setCurrentIndex(index)
+                self.start_state_combo.setCurrentIndex(index)
 
-        layout.addRow(self.initial_state_label, self.initial_state_combo)
+        layout.addRow(self.start_state_label, self.start_state_combo)
 
         # Outcomes field
         self.outcomes_label = QLabel("Outcomes (space-separated):")
@@ -101,7 +101,7 @@ class StateMachineDialog(QDialog):
     def get_state_machine_data(
         self,
     ) -> Tuple[str, List[str], Optional[str], Dict[str, str]]:
-        """Returns: (name, outcomes, initial_state, remappings)"""
+        """Returns: (name, outcomes, start_state, remappings)"""
         name = self.name_edit.text().strip()
         if not name:
             QMessageBox.warning(
@@ -114,8 +114,8 @@ class StateMachineDialog(QDialog):
         outcomes = outcomes_text.split()
 
         # Get initial state from combo box
-        initial_state_text = self.initial_state_combo.currentText()
-        initial_state = None if initial_state_text == "(None)" else initial_state_text
+        start_state_text = self.start_state_combo.currentText()
+        start_state = None if start_state_text == "(None)" else start_state_text
 
         # Parse remappings
         remappings = {}
@@ -126,4 +126,4 @@ class StateMachineDialog(QDialog):
                     key, value = line.split(":", 1)
                     remappings[key.strip()] = value.strip()
 
-        return name, outcomes, initial_state, remappings
+        return name, outcomes, start_state, remappings

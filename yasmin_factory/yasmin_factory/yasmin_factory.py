@@ -112,7 +112,7 @@ class YasminFactory:
         """
 
         sm = StateMachine(outcomes=root.attrib.get("outcomes", "").split(" "))
-        initial_state = root.attrib.get("initial_state", "")
+        set_start_state = root.attrib.get("start_state", "")
 
         if root.attrib.get("file_path", ""):
             file_path = root.attrib["file_path"]
@@ -152,8 +152,8 @@ class YasminFactory:
                 remappings=remappings,
             )
 
-        if initial_state:
-            sm.set_initial_state(initial_state)
+        if set_start_state:
+            sm.set_start_state(set_start_state)
 
         return sm
 
