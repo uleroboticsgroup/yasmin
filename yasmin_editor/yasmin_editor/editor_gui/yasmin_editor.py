@@ -1428,8 +1428,8 @@ class YasminEditor(QMainWindow):
                     for old_key, new_key in state_node.remappings.items():
                         if old_key and new_key:  # Skip None values
                             remap_elem = ET.SubElement(cc_elem, "Remap")
-                            remap_elem.set("from", old_key)
-                            remap_elem.set("to", new_key)
+                            remap_elem.set("old", old_key)
+                            remap_elem.set("new", new_key)
 
                 # Recursively add child states if any
                 if hasattr(state_node, "child_states") and state_node.child_states:
@@ -1461,8 +1461,8 @@ class YasminEditor(QMainWindow):
                     for old_key, new_key in state_node.remappings.items():
                         if old_key and new_key:  # Skip None values
                             remap_elem = ET.SubElement(sm_elem, "Remap")
-                            remap_elem.set("from", old_key)
-                            remap_elem.set("to", new_key)
+                            remap_elem.set("old", old_key)
+                            remap_elem.set("new", new_key)
 
                 # Recursively add child states if any
                 if hasattr(state_node, "child_states") and state_node.child_states:
@@ -1502,8 +1502,8 @@ class YasminEditor(QMainWindow):
                     for old_key, new_key in state_node.remappings.items():
                         if old_key and new_key:  # Skip None values
                             remap_elem = ET.SubElement(state_elem, "Remap")
-                            remap_elem.set("from", old_key)
-                            remap_elem.set("to", new_key)
+                            remap_elem.set("old", old_key)
+                            remap_elem.set("new", new_key)
 
                 # Add transitions for this state
                 self._save_transitions(state_elem, state_node)
@@ -2006,8 +2006,8 @@ class YasminEditor(QMainWindow):
         """Helper method to load remappings from an XML element."""
         remappings = {}
         for remap in elem.findall("Remap"):
-            from_key = remap.get("from", "")
-            to_key = remap.get("to", "")
+            from_key = remap.get("old", "")
+            to_key = remap.get("new", "")
             if from_key and to_key:
                 remappings[from_key] = to_key
         return remappings
