@@ -14,9 +14,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import math
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from typing import Dict, List
+from collections import OrderedDict
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -120,10 +122,12 @@ class YasminEditor(QMainWindow):
         toolbar.addAction(new_action)
 
         open_action = QAction("Open", self)
+        open_action.setShortcut("Ctrl+O")
         open_action.triggered.connect(self.open_state_machine)
         toolbar.addAction(open_action)
 
         save_action = QAction("Save", self)
+        save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self.save_state_machine)
         toolbar.addAction(save_action)
 
@@ -321,21 +325,114 @@ class YasminEditor(QMainWindow):
             self.create_state_node(state_name, xml_plugin, False, False)
 
     def get_free_position(self):
-        """Get a free position following a top-to-bottom vertical layout pattern."""
-        START_X = 100
-        START_Y = 100
-        VERTICAL_SPACING = 220
+        """Get a free position in the closest empty space from the viewport center.
 
+        This method:
+        1. Gets the current viewport center in scene coordinates
+        2. Finds all existing nodes and their bounding boxes
+        3. Searches in a spiral pattern from the center to find an empty spot
+        4. Returns the closest available position
+        """
+        # Default position if canvas is empty
+        DEFAULT_X = 100
+        DEFAULT_Y = 100
+        NODE_WIDTH = 200  # Approximate node width
+        NODE_HEIGHT = 150  # Approximate node height
+        SPACING = 50  # Minimum spacing between nodes
+
+        # Get root-level nodes only
         root_nodes = [
             node
             for node in self.state_nodes.values()
             if not hasattr(node, "parent_container") or node.parent_container is None
         ]
 
-        if not root_nodes:
-            return QPointF(START_X, START_Y)
+        # Add final outcomes to the list of items to avoid
+        all_items = list(root_nodes) + list(self.final_outcomes.values())
 
-        max_bottom = START_Y
+        # If no items exist, return default position
+        if not all_items:
+            return QPointF(DEFAULT_X, DEFAULT_Y)
+
+        # Get the viewport center in scene coordinates
+        viewport_rect = self.canvas.viewport().rect()
+        center_in_view = viewport_rect.center()
+        center_in_scene = self.canvas.mapToScene(center_in_view)
+
+        # Function to check if a position overlaps with existing nodes
+        def is_position_free(x, y, width=NODE_WIDTH, height=NODE_HEIGHT):
+            test_rect_left = x
+            test_rect_top = y
+            test_rect_right = x + width
+            test_rect_bottom = y + height
+
+            for item in all_items:
+                if isinstance(item, ContainerStateNode):
+                    item.prepareGeometryChange()
+                    item_rect = item.rect()
+                    item_x = item.pos().x()
+                    item_y = item.pos().y()
+                    item_width = item_rect.width()
+                    item_height = item_rect.height()
+                else:
+                    item_bbox = item.boundingRect()
+                    item_x = item.pos().x()
+                    item_y = item.pos().y()
+                    item_width = item_bbox.width()
+                    item_height = item_bbox.height()
+
+                # Add spacing to existing items
+                item_left = item_x - SPACING
+                item_top = item_y - SPACING
+                item_right = item_x + item_width + SPACING
+                item_bottom = item_y + item_height + SPACING
+
+                # Check for overlap
+                if not (
+                    test_rect_right < item_left
+                    or test_rect_left > item_right
+                    or test_rect_bottom < item_top
+                    or test_rect_top > item_bottom
+                ):
+                    return False
+
+            return True
+
+        # Search in a spiral pattern from the center
+        # Start at the viewport center
+        center_x = center_in_scene.x()
+        center_y = center_in_scene.y()
+
+        # Snap to grid for cleaner positioning
+        GRID_SIZE = 50
+        center_x = round(center_x / GRID_SIZE) * GRID_SIZE
+        center_y = round(center_y / GRID_SIZE) * GRID_SIZE
+
+        # Try the center first
+        if is_position_free(center_x - NODE_WIDTH / 2, center_y - NODE_HEIGHT / 2):
+            return QPointF(center_x - NODE_WIDTH / 2, center_y - NODE_HEIGHT / 2)
+
+        # Spiral search pattern
+        max_search_radius = 2000  # Maximum distance to search
+        search_step = GRID_SIZE  # Step size for spiral
+
+        for radius in range(search_step, max_search_radius, search_step):
+            # Try positions in a circle around the center
+            angles = 16  # Number of angles to try at each radius
+            for i in range(angles):
+                angle = (2 * math.pi * i) / angles
+                x = center_x + radius * math.cos(angle) - NODE_WIDTH / 2
+                y = center_y + radius * math.sin(angle) - NODE_HEIGHT / 2
+
+                # Snap to grid
+                x = round(x / GRID_SIZE) * GRID_SIZE
+                y = round(y / GRID_SIZE) * GRID_SIZE
+
+                if is_position_free(x, y):
+                    return QPointF(x, y)
+
+        # Fallback: place below all existing items if spiral search fails
+        max_bottom = DEFAULT_Y
         for node in root_nodes:
             if isinstance(node, ContainerStateNode):
                 node.prepareGeometryChange()
@@ -344,7 +441,7 @@ class YasminEditor(QMainWindow):
                 node_bottom = node.pos().y() + node.boundingRect().height()
             max_bottom = max(max_bottom, node_bottom)
 
-        return QPointF(START_X, max_bottom + VERTICAL_SPACING)
+        return QPointF(DEFAULT_X, max_bottom + SPACING + 50)
 
     def create_state_node(
         self,
