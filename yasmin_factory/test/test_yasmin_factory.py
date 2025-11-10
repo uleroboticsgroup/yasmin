@@ -16,7 +16,7 @@
 import unittest
 import os
 import tempfile
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 from yasmin import Blackboard, StateMachine
 from yasmin_factory.yasmin_factory import YasminFactory
 

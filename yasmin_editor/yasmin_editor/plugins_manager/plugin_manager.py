@@ -19,7 +19,7 @@ import importlib
 import inspect
 from contextlib import redirect_stdout, redirect_stderr
 from tqdm import tqdm
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 import rclpy
 from yasmin import State, set_log_level, LogLevel
 from ament_index_python import get_packages_with_prefixes, get_package_share_path

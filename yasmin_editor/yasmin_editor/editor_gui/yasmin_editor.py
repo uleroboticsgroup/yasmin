@@ -15,10 +15,8 @@
 
 import os
 import math
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
+from lxml import etree as ET
 from typing import Dict, List
-from collections import OrderedDict
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -1368,21 +1366,13 @@ class YasminEditor(QMainWindow):
         # Add states recursively
         self._save_states_to_xml(root, root_level_states)
 
-        # Pretty print XML
-        xml_str = ET.tostring(root, encoding="unicode")
-        dom = minidom.parseString(xml_str)
-        pretty_xml = dom.toprettyxml(indent="    ")
-
-        # Remove extra blank lines
-        pretty_xml = "\n".join([line for line in pretty_xml.split("\n") if line.strip()])
-
         # Check if file_path ends with .xml
         if not file_path.lower().endswith(".xml"):
             file_path += ".xml"
 
-        # Write to file
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(pretty_xml)
+        # Write to file with lxml pretty printing
+        tree = ET.ElementTree(root)
+        tree.write(file_path, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
     def _save_states_to_xml(self, parent_elem, state_nodes_dict):
         """Recursively save states and their children to XML."""

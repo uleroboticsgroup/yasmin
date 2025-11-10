@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import importlib
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 from yasmin_pybind_bridge import CppStateFactory
 
 

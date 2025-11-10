@@ -13,6 +13,7 @@
   <depend>yasmin_factory</depend>
   <exec_depend>python3-tqdm</exec_depend>
   <exec_depend>python3-pyqt5</exec_depend>
+  <exec_depend>python3-lxml</exec_depend>
   <build_depend>ros_environment</build_depend>
   <export>
     <build_type>ament_cmake</build_type>

@@ -15,7 +15,7 @@
 
 import os
 import importlib
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 from yasmin import State, StateMachine, Concurrence
 from yasmin_pybind_bridge import CppStateFactory
 
