@@ -116,6 +116,7 @@ class YasminEditor(QMainWindow):
         self.addToolBar(toolbar)
 
         new_action = QAction("New", self)
+        new_action.setShortcut("Ctrl+N")
         new_action.triggered.connect(self.new_state_machine)
         toolbar.addAction(new_action)
 
@@ -1269,6 +1270,9 @@ class YasminEditor(QMainWindow):
             self.root_sm_name_edit.clear()
             self.update_start_state_combo()
             self.statusBar().showMessage("New state machine created", 2000)
+            return True
+
+        return False
 
     def open_state_machine(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -1490,7 +1494,8 @@ class YasminEditor(QMainWindow):
 
     def load_from_xml(self, file_path: str):
         # Clear current state machine
-        self.new_state_machine()
+        if not self.new_state_machine():
+            return
 
         # Parse XML
         tree = ET.parse(file_path)
