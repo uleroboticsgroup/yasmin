@@ -13,38 +13,46 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from typing import Optional, Union
 from PyQt5.QtWidgets import (
     QGraphicsView,
     QGraphicsScene,
     QGraphicsLineItem,
     QMenu,
+    QWidget,
 )
-from PyQt5.QtCore import Qt, QLineF, QTimer
+from PyQt5.QtCore import Qt, QLineF, QTimer, QPointF, QEvent
 from PyQt5.QtGui import QPen, QBrush, QColor, QPainter
 
-from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.editor_gui.state_node import StateNode
 from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
 class StateMachineCanvas(QGraphicsView):
     """Canvas for drawing and connecting state machine nodes."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
-        self.scene = QGraphicsScene(self)
+        self.scene: QGraphicsScene = QGraphicsScene(self)
         self.setScene(self.scene)
         self.setRenderHint(QPainter.Antialiasing)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setBackgroundBrush(QBrush(QColor(255, 255, 255)))
 
-        self.is_dragging_connection = False
-        self.drag_start_node = None
-        self.temp_line = None
-        self.editor_ref = None
+        self.is_dragging_connection: bool = False
+        self.drag_start_node: Optional[
+            Union[StateNode, ContainerStateNode, FinalOutcomeNode]
+        ] = None
+        self.temp_line: Optional[QGraphicsLineItem] = None
+        self.editor_ref: Optional["YasminEditor"] = None
 
-    def is_valid_connection(self, source_node, target_node):
+    def is_valid_connection(
+        self,
+        source_node: Union[StateNode, ContainerStateNode, FinalOutcomeNode],
+        target_node: Union[StateNode, ContainerStateNode, FinalOutcomeNode],
+    ) -> bool:
         """Validate if a connection between two nodes is allowed."""
         if source_node == target_node:
             if isinstance(source_node, StateNode):
@@ -54,8 +62,12 @@ class StateMachineCanvas(QGraphicsView):
                         return True
             return False
 
-        source_container = getattr(source_node, "parent_container", None)
-        target_container = getattr(target_node, "parent_container", None)
+        source_container: Optional[ContainerStateNode] = getattr(
+            source_node, "parent_container", None
+        )
+        target_container: Optional[ContainerStateNode] = getattr(
+            target_node, "parent_container", None
+        )
 
         if isinstance(source_node, FinalOutcomeNode):
             if isinstance(target_node, ContainerStateNode):
@@ -83,7 +95,7 @@ class StateMachineCanvas(QGraphicsView):
 
         return False
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: QEvent) -> None:
         """Handle keyboard shortcuts."""
         if event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
             if self.editor_ref:
@@ -92,31 +104,35 @@ class StateMachineCanvas(QGraphicsView):
                 return
         super().keyPressEvent(event)
 
-    def wheelEvent(self, event):
-        factor = 1.2 if event.angleDelta().y() > 0 else 1.0 / 1.2
+    def wheelEvent(self, event: QEvent) -> None:
+        factor: float = 1.2 if event.angleDelta().y() > 0 else 1.0 / 1.2
         self.scale(factor, factor)
 
-    def start_connection_drag(self, from_node, event):
+    def start_connection_drag(
+        self,
+        from_node: Union[StateNode, ContainerStateNode, FinalOutcomeNode],
+        event: QEvent,
+    ) -> None:
         """Start dragging a connection from a node's port."""
         self.drag_start_node = from_node
         self.is_dragging_connection = True
         self.setDragMode(QGraphicsView.NoDrag)
 
         self.temp_line = QGraphicsLineItem()
-        pen = QPen(QColor(100, 100, 255), 3, Qt.DashLine)
+        pen: QPen = QPen(QColor(100, 100, 255), 3, Qt.DashLine)
         self.temp_line.setPen(pen)
         self.scene.addItem(self.temp_line)
 
-        port_scene_pos = from_node.connection_port.scenePos()
+        port_scene_pos: QPointF = from_node.connection_port.scenePos()
         self.temp_line.setLine(QLineF(port_scene_pos, port_scene_pos))
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QEvent) -> None:
         super().mousePressEvent(event)
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event: QEvent) -> None:
         if self.is_dragging_connection and self.temp_line and self.drag_start_node:
-            port_scene_pos = self.drag_start_node.connection_port.scenePos()
-            scene_pos = self.mapToScene(event.pos())
+            port_scene_pos: QPointF = self.drag_start_node.connection_port.scenePos()
+            scene_pos: QPointF = self.mapToScene(event.pos())
             self.temp_line.setLine(QLineF(port_scene_pos, scene_pos))
 
             for scene_item in self.scene.items():
@@ -126,7 +142,9 @@ class StateMachineCanvas(QGraphicsView):
                     scene_item.setOpacity(1.0)
 
             item = self.itemAt(event.pos())
-            target = None
+            target: Optional[Union[StateNode, ContainerStateNode, FinalOutcomeNode]] = (
+                None
+            )
             if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                 target = item
             elif hasattr(item, "parentItem"):
@@ -146,12 +164,14 @@ class StateMachineCanvas(QGraphicsView):
 
         super().mouseMoveEvent(event)
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QEvent) -> None:
         if event.button() == Qt.LeftButton and self.is_dragging_connection:
-            scene_pos = self.mapToScene(event.pos())
+            scene_pos: QPointF = self.mapToScene(event.pos())
             items = self.scene.items(scene_pos)
 
-            target_node = None
+            target_node: Optional[
+                Union[StateNode, ContainerStateNode, FinalOutcomeNode]
+            ] = None
             for item in items:
                 if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                     target_node = item
@@ -174,7 +194,9 @@ class StateMachineCanvas(QGraphicsView):
                 ):
                     scene_item.setOpacity(1.0)
 
-            source_node = self.drag_start_node
+            source_node: Optional[
+                Union[StateNode, ContainerStateNode, FinalOutcomeNode]
+            ] = self.drag_start_node
             self.drag_start_node = None
             self.is_dragging_connection = False
             self.setDragMode(QGraphicsView.ScrollHandDrag)
@@ -197,12 +219,12 @@ class StateMachineCanvas(QGraphicsView):
 
         super().mouseReleaseEvent(event)
 
-    def contextMenuEvent(self, event):
+    def contextMenuEvent(self, event: QEvent) -> None:
         """Handle right-click context menu on canvas background."""
         item = self.itemAt(event.pos())
         if item is None:
             if self.editor_ref:
-                menu = QMenu()
+                menu: QMenu = QMenu()
 
                 add_state_action = menu.addAction("Add State")
                 add_sm_action = menu.addAction("Add State Machine")

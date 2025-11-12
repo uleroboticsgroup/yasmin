@@ -1709,9 +1709,9 @@ class YasminEditor(QMainWindow):
 
         # Step 4: Coordinate Assignment with proper spacing
         # Final outcomes are now part of the layer structure
-        self._sugiyama_coordinate_assignment(container, layers, [])
+        self._sugiyama_coordinate_assignment(container, layers)
 
-    def _preorder_outcomes_in_layers(self, layers, reverse_graph, final_outcomes):
+    def _preorder_outcomes_in_layers(self, layers, reverse_graph):
         """Pre-order final outcomes within their layers based on incoming connections.
 
         This helps establish a good initial ordering before the main crossing reduction,
@@ -1894,15 +1894,13 @@ class YasminEditor(QMainWindow):
             # Downward pass: order based on successors
             for i in range(len(layers) - 1):
                 if len(layers[i]) > 1:
-                    self._order_layer_by_barycenter(
-                        layers[i], layers[i + 1], graph, forward=True
-                    )
+                    self._order_layer_by_barycenter(layers[i], layers[i + 1], graph)
 
             # Upward pass: order based on predecessors
             for i in range(len(layers) - 1, 0, -1):
                 if len(layers[i]) > 1:
                     self._order_layer_by_barycenter(
-                        layers[i], layers[i - 1], reverse_graph, forward=False
+                        layers[i], layers[i - 1], reverse_graph
                     )
 
             # Additional pass: Focus on layers containing outcomes
@@ -1916,7 +1914,7 @@ class YasminEditor(QMainWindow):
                     if has_outcomes and len(layers[i]) > 1:
                         # Extra ordering pass for outcome-heavy layers
                         self._order_layer_by_barycenter(
-                            layers[i], layers[i - 1], reverse_graph, forward=False
+                            layers[i], layers[i - 1], reverse_graph
                         )
 
             # Count crossings and keep track of best solution
@@ -1969,9 +1967,7 @@ class YasminEditor(QMainWindow):
 
         return total_crossings
 
-    def _order_layer_by_barycenter(
-        self, current_layer, adjacent_layer, edge_map, forward=True
-    ):
+    def _order_layer_by_barycenter(self, current_layer, adjacent_layer, edge_map):
         """Order nodes in current_layer based on barycenter positions in adjacent_layer.
 
         Uses median/barycenter heuristic for optimal ordering to minimize crossings.
@@ -2018,18 +2014,13 @@ class YasminEditor(QMainWindow):
         for i, (_, _, node) in enumerate(barycenters):
             current_layer[i] = node
 
-    def _sugiyama_coordinate_assignment(
-        self, container: ContainerStateNode, layers, final_outcomes
-    ):
+    def _sugiyama_coordinate_assignment(self, container: ContainerStateNode, layers):
         """Step 3 of Sugiyama Framework: Assign coordinates to nodes.
 
         Uses a left-to-right, top-to-bottom layout where:
         - Layers progress from left to right
         - Nodes within a layer are spaced vertically
         - Spacing prevents overlaps and provides clean layout
-
-        Note: final_outcomes parameter is kept for backwards compatibility but
-        final outcomes should now be included in the layers structure.
         """
         rect = container.rect()
 
@@ -2300,7 +2291,7 @@ class YasminEditor(QMainWindow):
         )
 
         # Step 2: Pre-order outcomes based on connections
-        self._preorder_outcomes_in_layers(layers, reverse_graph, root_final_outcomes)
+        self._preorder_outcomes_in_layers(layers, reverse_graph)
 
         # Step 3: Crossing Reduction - considers connections to final outcomes
         layers = self._sugiyama_crossing_reduction(layers, graph, reverse_graph)

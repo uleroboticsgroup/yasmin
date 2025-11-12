@@ -17,6 +17,7 @@ import os
 import io
 import importlib
 import inspect
+from typing import List, Optional
 from contextlib import redirect_stdout, redirect_stderr
 from tqdm import tqdm
 from lxml import etree as ET
@@ -29,9 +30,9 @@ from yasmin_editor.plugins_manager.plugin_info import PluginInfo
 class PluginManager:
 
     def __init__(self) -> None:
-        self.cpp_plugins = []
-        self.python_plugins = []
-        self.xml_files = []
+        self.cpp_plugins: List[PluginInfo] = []
+        self.python_plugins: List[PluginInfo] = []
+        self.xml_files: List[PluginInfo] = []
 
     def load_all_plugins(self) -> None:
         set_log_level(LogLevel.WARN)
@@ -47,23 +48,23 @@ class PluginManager:
 
     def load_cpp_plugins_from_package(self, package_name: str) -> None:
         package_share_path = get_package_share_path(package_name)
-        xml_file = os.path.join(package_share_path, "resource", "plugins.xml")
+        xml_file: str = os.path.join(package_share_path, "resource", "plugins.xml")
 
         if not os.path.exists(xml_file):
             return
 
         with open(xml_file, "r", encoding="utf-8") as f:
-            content = f.read().strip()
+            content: str = f.read().strip()
 
-        libraries_content = []
-        start = 0
+        libraries_content: List[str] = []
+        start: int = 0
 
         while True:
-            lib_start = content.find("<library", start)
+            lib_start: int = content.find("<library", start)
             if lib_start == -1:
                 break
 
-            lib_end = content.find("</library>", lib_start)
+            lib_end: int = content.find("</library>", lib_start)
             if lib_end == -1:
                 break
 
@@ -72,17 +73,17 @@ class PluginManager:
             start = lib_end
 
         for library_content in libraries_content:
-            library_xml = f"<root>{library_content}</root>"
+            library_xml: str = f"<root>{library_content}</root>"
             root = ET.fromstring(library_xml)
 
             for library in root.findall("library"):
                 for class_elem in library.findall("class"):
-                    class_name = class_elem.get("name")
+                    class_name: str = class_elem.get("name")
                     if class_name:
                         self.load_cpp_plugin(class_name)
 
     def load_python_plugins_from_package(self, package_name: str) -> None:
-        skip_packages = {
+        skip_packages: set = {
             "yasmin_ros",
             "rosidl_adapter",
             "rosidl_cli",
@@ -110,7 +111,7 @@ class PluginManager:
         if not hasattr(package, "__file__") or package.__file__ is None:
             return
 
-        package_path = os.path.dirname(package.__file__)
+        package_path: str = os.path.dirname(package.__file__)
 
         for dirpath, _, filenames in os.walk(package_path):
             if "__pycache__" in dirpath or "/test" in dirpath:
@@ -123,20 +124,20 @@ class PluginManager:
                 if not filename.endswith(".py") or filename == "__init__.py":
                     continue
 
-                file_path = os.path.join(dirpath, filename)
+                file_path: str = os.path.join(dirpath, filename)
 
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
-                        content = f.read(2000)
+                        content: str = f.read(2000)
 
                     if "yasmin" not in content or "State" not in content:
                         continue
                 except (IOError, UnicodeDecodeError):
                     continue
 
-                module_path = os.path.relpath(file_path, package_path)
-                module_name = module_path[:-3].replace(os.sep, ".")
-                full_module_name = f"{package_name}.{module_name}"
+                module_path: str = os.path.relpath(file_path, package_path)
+                module_name: str = module_path[:-3].replace(os.sep, ".")
+                full_module_name: str = f"{package_name}.{module_name}"
 
                 try:
                     with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
@@ -154,28 +155,30 @@ class PluginManager:
 
     def load_xml_state_machines_from_package(self, package_name: str) -> None:
         package_share_path = get_package_share_path(package_name)
-        state_machines_path = os.path.join(package_share_path, "state_machines")
+        state_machines_path: str = os.path.join(package_share_path, "state_machines")
 
         if not os.path.exists(state_machines_path):
             return
 
         for filename in os.listdir(state_machines_path):
             if filename.endswith(".xml"):
-                xml_file = os.path.join(state_machines_path, filename)
+                xml_file: str = os.path.join(state_machines_path, filename)
                 self.load_xml_state_machine(xml_file, package_name)
 
     def load_cpp_plugin(self, class_name: str) -> None:
-        plugin_info = PluginInfo(plugin_type="cpp", class_name=class_name)
+        plugin_info: PluginInfo = PluginInfo(plugin_type="cpp", class_name=class_name)
         self.cpp_plugins.append(plugin_info)
 
     def load_python_plugin(self, module: str, class_name: str) -> None:
-        plugin_info = PluginInfo(
+        plugin_info: PluginInfo = PluginInfo(
             plugin_type="python", class_name=class_name, module=module
         )
         self.python_plugins.append(plugin_info)
 
-    def load_xml_state_machine(self, xml_file: str, package_name: str = None) -> None:
-        plugin_info = PluginInfo(
+    def load_xml_state_machine(
+        self, xml_file: str, package_name: Optional[str] = None
+    ) -> None:
+        plugin_info: PluginInfo = PluginInfo(
             plugin_type="xml", file_path=xml_file, package_name=package_name
         )
         self.xml_files.append(plugin_info)

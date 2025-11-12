@@ -14,6 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
+from typing import Union, List, Any
 from PyQt5.QtWidgets import (
     QGraphicsItem,
     QGraphicsTextItem,
@@ -24,37 +25,50 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont, QPolygonF, QPainterPath
 
+from yasmin_editor.editor_gui.state_node import StateNode
+from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+
 
 class ConnectionLine(QGraphicsPathItem):
     """Graphical representation of a transition between states with curved line."""
 
-    def __init__(self, from_node, to_node, outcome: str):
+    def __init__(
+        self,
+        from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
+        to_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
+        outcome: str,
+    ) -> None:
         super().__init__()
-        self.from_node = from_node
-        self.to_node = to_node
-        self.outcome = outcome
+        self.from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"] = (
+            from_node
+        )
+        self.to_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"] = (
+            to_node
+        )
+        self.outcome: str = outcome
 
-        pen = QPen(QColor(60, 60, 180), 3, Qt.SolidLine)
+        pen: QPen = QPen(QColor(60, 60, 180), 3, Qt.SolidLine)
         pen.setCapStyle(Qt.RoundCap)
         pen.setJoinStyle(Qt.RoundJoin)
         self.setPen(pen)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
 
-        self.normal_pen = pen
-        self.selected_pen = QPen(QColor(255, 100, 0), 4, Qt.SolidLine)
+        self.normal_pen: QPen = pen
+        self.selected_pen: QPen = QPen(QColor(255, 100, 0), 4, Qt.SolidLine)
         self.selected_pen.setCapStyle(Qt.RoundCap)
 
-        self.arrow_head = QGraphicsPolygonItem()
+        self.arrow_head: QGraphicsPolygonItem = QGraphicsPolygonItem()
         self.arrow_head.setBrush(QBrush(QColor(60, 60, 180)))
         self.arrow_head.setPen(QPen(QColor(60, 60, 180)))
 
-        self.label_bg = QGraphicsRectItem()
+        self.label_bg: QGraphicsRectItem = QGraphicsRectItem()
         self.label_bg.setBrush(QBrush(QColor(255, 255, 255, 230)))
         self.label_bg.setPen(QPen(QColor(60, 60, 180), 1))
 
-        self.label = QGraphicsTextItem(outcome)
+        self.label: QGraphicsTextItem = QGraphicsTextItem(outcome)
         self.label.setDefaultTextColor(QColor(0, 0, 100))
-        font = QFont()
+        font: QFont = QFont()
         font.setPointSize(9)
         font.setBold(True)
         self.label.setFont(font)
@@ -64,12 +78,12 @@ class ConnectionLine(QGraphicsPathItem):
         from_node.add_connection(self)
         to_node.add_connection(self)
 
-    def _calculate_offset(self):
+    def _calculate_offset(self) -> float:
         """Calculate offset for this connection to avoid overlap with other connections between same nodes."""
-        same_direction = []
-        opposite_direction = []
+        same_direction: List["ConnectionLine"] = []
+        opposite_direction: List["ConnectionLine"] = []
 
-        all_connections = list(self.from_node.connections) + list(
+        all_connections: List["ConnectionLine"] = list(self.from_node.connections) + list(
             self.to_node.connections
         )
 
@@ -81,11 +95,11 @@ class ConnectionLine(QGraphicsPathItem):
                 if conn not in opposite_direction:
                     opposite_direction.append(conn)
 
-        is_same_direction = self in same_direction
-        connections_in_my_direction = (
+        is_same_direction: bool = self in same_direction
+        connections_in_my_direction: List["ConnectionLine"] = (
             same_direction if is_same_direction else opposite_direction
         )
-        connections_in_other_direction = (
+        connections_in_other_direction: List["ConnectionLine"] = (
             opposite_direction if is_same_direction else same_direction
         )
 
@@ -98,28 +112,28 @@ class ConnectionLine(QGraphicsPathItem):
         connections_in_my_direction.sort(key=lambda c: c.outcome)
 
         try:
-            my_index = connections_in_my_direction.index(self)
+            my_index: int = connections_in_my_direction.index(self)
         except ValueError:
             return 0
 
-        num_in_direction = len(connections_in_my_direction)
-        has_opposite = len(connections_in_other_direction) > 0
+        num_in_direction: int = len(connections_in_my_direction)
+        has_opposite: bool = len(connections_in_other_direction) > 0
 
-        base_offset = (
+        base_offset: float = (
             35 if (is_same_direction and has_opposite) else (-35 if has_opposite else 0)
         )
-        spacing = 40
+        spacing: float = 40
 
         if num_in_direction == 2:
-            offset = spacing * (0.5 if my_index == 0 else -0.5)
+            offset: float = spacing * (0.5 if my_index == 0 else -0.5)
         else:
-            center_index = (num_in_direction - 1) / 2
-            offset_from_center = my_index - center_index
+            center_index: float = (num_in_direction - 1) / 2
+            offset_from_center: float = my_index - center_index
             offset = offset_from_center * spacing * 0.7
 
         return base_offset + offset
 
-    def itemChange(self, change, value):
+    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemSelectedChange:
             if value:
                 self.setPen(self.selected_pen)
@@ -131,59 +145,56 @@ class ConnectionLine(QGraphicsPathItem):
                 self.arrow_head.setPen(QPen(QColor(60, 60, 180)))
         return super().itemChange(change, value)
 
-    def update_position(self):
+    def update_position(self) -> None:
         """Update the connection line with a smooth curved path."""
-        from_center = self.from_node.get_connection_point()
-        to_center = self.to_node.get_connection_point()
-        from_pos = self.from_node.get_edge_point(to_center)
-        to_pos = self.to_node.get_edge_point(from_center)
+        from_center: QPointF = self.from_node.get_connection_point()
+        to_center: QPointF = self.to_node.get_connection_point()
+        from_pos: QPointF = self.from_node.get_edge_point(to_center)
+        to_pos: QPointF = self.to_node.get_edge_point(from_center)
 
-        offset_amount = self._calculate_offset()
+        offset_amount: float = self._calculate_offset()
 
-        path = QPainterPath()
+        path: QPainterPath = QPainterPath()
         path.moveTo(from_pos)
 
-        dx = to_pos.x() - from_pos.x()
-        dy = to_pos.y() - from_pos.y()
-        distance = math.sqrt(dx * dx + dy * dy)
+        dx: float = to_pos.x() - from_pos.x()
+        dy: float = to_pos.y() - from_pos.y()
 
-        base_offset = distance * 0.25
-        angle = math.atan2(dy, dx)
-        perp_angle = angle + math.pi / 2
-        total_offset = offset_amount
+        angle: float = math.atan2(dy, dx)
+        perp_angle: float = angle + math.pi / 2
 
-        ctrl1 = QPointF(
-            from_pos.x() + dx * 0.25 + math.cos(perp_angle) * total_offset,
-            from_pos.y() + dy * 0.25 + math.sin(perp_angle) * total_offset,
+        ctrl1: QPointF = QPointF(
+            from_pos.x() + dx * 0.25 + math.cos(perp_angle) * offset_amount,
+            from_pos.y() + dy * 0.25 + math.sin(perp_angle) * offset_amount,
         )
-        ctrl2 = QPointF(
-            from_pos.x() + dx * 0.75 + math.cos(perp_angle) * total_offset,
-            from_pos.y() + dy * 0.75 + math.sin(perp_angle) * total_offset,
+        ctrl2: QPointF = QPointF(
+            from_pos.x() + dx * 0.75 + math.cos(perp_angle) * offset_amount,
+            from_pos.y() + dy * 0.75 + math.sin(perp_angle) * offset_amount,
         )
 
         path.cubicTo(ctrl1, ctrl2, to_pos)
         self.setPath(path)
 
-        t = 0.95
-        tangent_point = path.pointAtPercent(t)
+        t: float = 0.95
+        tangent_point: QPointF = path.pointAtPercent(t)
         angle = math.atan2(to_pos.y() - tangent_point.y(), to_pos.x() - tangent_point.x())
 
-        arrow_size = 12
-        arrow_p1 = to_pos - QPointF(
+        arrow_size: float = 12
+        arrow_p1: QPointF = to_pos - QPointF(
             math.cos(angle - math.pi / 6) * arrow_size,
             math.sin(angle - math.pi / 6) * arrow_size,
         )
-        arrow_p2 = to_pos - QPointF(
+        arrow_p2: QPointF = to_pos - QPointF(
             math.cos(angle + math.pi / 6) * arrow_size,
             math.sin(angle + math.pi / 6) * arrow_size,
         )
 
-        arrow_polygon = QPolygonF([to_pos, arrow_p1, arrow_p2])
+        arrow_polygon: QPolygonF = QPolygonF([to_pos, arrow_p1, arrow_p2])
         self.arrow_head.setPolygon(arrow_polygon)
 
-        mid_point = path.pointAtPercent(0.5)
+        mid_point: QPointF = path.pointAtPercent(0.5)
         label_rect = self.label.boundingRect()
-        padding = 4
+        padding: float = 4
 
         self.label_bg.setRect(
             mid_point.x() - label_rect.width() / 2 - padding,

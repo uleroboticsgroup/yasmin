@@ -13,17 +13,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from typing import Union
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QPen, QBrush, QColor
+from yasmin_editor.editor_gui.state_node import StateNode
+from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
 
 class ConnectionPort(QGraphicsEllipseItem):
     """Connection port for drag-to-connect functionality."""
 
-    def __init__(self, parent_state):
+    def __init__(
+        self, parent_state: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
+    ) -> None:
         super().__init__(-5, -5, 10, 10, parent_state)
-        self.parent_state = parent_state
+        self.parent_state: Union[
+            "StateNode", "ContainerStateNode", "FinalOutcomeNode"
+        ] = parent_state
         self.setBrush(QBrush(QColor(100, 100, 255)))
         self.setPen(QPen(QColor(0, 0, 100), 1))
 
@@ -38,16 +46,16 @@ class ConnectionPort(QGraphicsEllipseItem):
         self.setAcceptedMouseButtons(Qt.LeftButton)
         self.setFlag(QGraphicsItem.ItemIsSelectable, False)
 
-    def update_position_for_container(self):
+    def update_position_for_container(self) -> None:
         """Update position for container parent."""
         from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 
         if isinstance(self.parent_state, ContainerStateNode):
             rect = self.parent_state.rect()
-            center_y = rect.top() + rect.height() / 2
+            center_y: float = rect.top() + rect.height() / 2
             self.setPos(rect.right(), center_y)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QEvent) -> None:
         if event.button() == Qt.LeftButton:
             if self.scene() and self.scene().views():
                 canvas = self.scene().views()[0]
@@ -57,8 +65,8 @@ class ConnectionPort(QGraphicsEllipseItem):
                     return
         event.ignore()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event: QEvent) -> None:
         event.accept()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QEvent) -> None:
         event.accept()

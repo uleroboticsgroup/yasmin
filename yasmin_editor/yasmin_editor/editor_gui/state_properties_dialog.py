@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+import os
 from typing import Dict, List, Optional, Tuple
 from PyQt5.QtWidgets import (
     QLabel,
@@ -24,6 +24,8 @@ from PyQt5.QtWidgets import (
     QDialogButtonBox,
     QTextEdit,
 )
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QSizePolicy
 
 from yasmin_editor.plugins_manager.plugin_info import PluginInfo
 
@@ -34,27 +36,27 @@ class StatePropertiesDialog(QDialog):
     def __init__(
         self,
         state_name: str = "",
-        plugin_info: PluginInfo = None,
-        available_plugins: List[PluginInfo] = None,
-        remappings: Dict[str, str] = None,
-        outcomes: List[str] = None,
+        plugin_info: Optional[PluginInfo] = None,
+        available_plugins: Optional[List[PluginInfo]] = None,
+        remappings: Optional[Dict[str, str]] = None,
+        outcomes: Optional[List[str]] = None,
         edit_mode: bool = False,
-        parent=None,
-    ):
+        parent: Optional[QDialog] = None,
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Edit State Properties" if edit_mode else "Add State")
         self.resize(500, 500)
-        self.edit_mode = edit_mode
+        self.edit_mode: bool = edit_mode
 
-        layout = QFormLayout(self)
+        layout: QFormLayout = QFormLayout(self)
 
         # State name
-        self.name_edit = QLineEdit(state_name)
+        self.name_edit: QLineEdit = QLineEdit(state_name)
         self.name_edit.setPlaceholderText("Enter state name (required)")
         layout.addRow("Name:*", self.name_edit)
 
         # State type
-        self.type_combo = QComboBox()
+        self.type_combo: QComboBox = QComboBox()
         self.type_combo.addItem("Python State")
         self.type_combo.addItem("C++ State")
         self.type_combo.addItem("XML File")
@@ -74,10 +76,10 @@ class StatePropertiesDialog(QDialog):
 
         layout.addRow("Type:", self.type_combo)
 
-        # Plugin selection (for Python/C++/XML) - CREATE LABEL BEFORE USING IT
-        self.plugin_label = QLabel("Plugin:*")
-        self.plugin_combo = QComboBox()
-        self.available_plugins = available_plugins or []
+        # Plugin selection (for Python/C++/XML)
+        self.plugin_label: QLabel = QLabel("Plugin:*")
+        self.plugin_combo: QComboBox = QComboBox()
+        self.available_plugins: List[PluginInfo] = available_plugins or []
 
         layout.addRow(self.plugin_label, self.plugin_combo)
 
@@ -96,17 +98,15 @@ class StatePropertiesDialog(QDialog):
             self.plugin_combo.setEnabled(False)
 
         # Outcomes field (for new state machines and concurrence)
-        self.outcomes_label = QLabel("Outcomes:")
+        self.outcomes_label: QLabel = QLabel("Outcomes:")
         if plugin_info and hasattr(plugin_info, "outcomes"):
-            outcomes_str = ", ".join(plugin_info.outcomes)
+            outcomes_str: str = ", ".join(plugin_info.outcomes)
         elif outcomes:
             outcomes_str = ", ".join(outcomes)
         else:
             outcomes_str = ""
-        from PyQt5.QtCore import Qt
-        from PyQt5.QtWidgets import QSizePolicy
 
-        self.outcomes_display = QLabel(outcomes_str)
+        self.outcomes_display: QLabel = QLabel(outcomes_str)
         self.outcomes_display.setStyleSheet(
             "background: #f0f0f0; border: 1px solid #ccc; padding: 4px;"
         )
@@ -114,23 +114,23 @@ class StatePropertiesDialog(QDialog):
         self.outcomes_display.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.outcomes_display.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         # Dynamically set min/max height based on number of outcomes
-        num_outcomes = len(outcomes_str.split(",")) if outcomes_str else 0
-        base_height = 24
-        extra_height = min(3, num_outcomes) * 18  # up to 3 lines
+        num_outcomes: int = len(outcomes_str.split(",")) if outcomes_str else 0
+        base_height: int = 24
+        extra_height: int = min(3, num_outcomes) * 18  # up to 3 lines
         self.outcomes_display.setMinimumHeight(base_height + extra_height)
         self.outcomes_display.setMaximumHeight(base_height + max(3, num_outcomes) * 18)
         layout.addRow(self.outcomes_label, self.outcomes_display)
 
         # Remappings
-        remappings_label = QLabel("<b>Remappings (optional):</b>")
+        remappings_label: QLabel = QLabel("<b>Remappings (optional):</b>")
 
-        self.remappings_edit = QTextEdit()
+        self.remappings_edit: QTextEdit = QTextEdit()
         self.remappings_edit.setMaximumHeight(100)
         self.remappings_edit.setPlaceholderText(
             "old_key:new_key\nanother_key:another_value"
         )
         if remappings:
-            remap_text = "\n".join([f"{k}:{v}" for k, v in remappings.items()])
+            remap_text: str = "\n".join([f"{k}:{v}" for k, v in remappings.items()])
             self.remappings_edit.setPlainText(remap_text)
         layout.addRow(remappings_label, self.remappings_edit)
 
@@ -138,27 +138,29 @@ class StatePropertiesDialog(QDialog):
         self.update_outcome_list()
 
         # Buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons: QDialogButtonBox = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        )
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-    def update_outcome_list(self):
-        current_type = self.type_combo.currentIndex()
-        plugin_info: PluginInfo = None
+    def update_outcome_list(self) -> None:
+        current_type: int = self.type_combo.currentIndex()
+        plugin_info: Optional[PluginInfo] = None
         if current_type in [0, 1, 2]:
             plugin_info = self.plugin_combo.currentData()
 
         if plugin_info and hasattr(plugin_info, "outcomes"):
-            outcomes_str = ", ".join(plugin_info.outcomes)
+            outcomes_str: str = ", ".join(plugin_info.outcomes)
         else:
             outcomes_str = ""
         self.outcomes_display.setText(outcomes_str)
 
-    def update_plugin_list(self):
+    def update_plugin_list(self) -> None:
         self.plugin_combo.clear()
 
-        current_type = self.type_combo.currentIndex()
+        current_type: int = self.type_combo.currentIndex()
         if current_type == 0:  # Python
             for plugin in self.available_plugins:
                 if plugin.plugin_type == "python":
@@ -172,10 +174,8 @@ class StatePropertiesDialog(QDialog):
         elif current_type == 2:  # State Machine (XML)
             for plugin in self.available_plugins:
                 if plugin.plugin_type == "xml":
-                    import os
-
-                    filename = os.path.basename(plugin.file_path)
-                    display_name = (
+                    filename: str = os.path.basename(plugin.file_path)
+                    display_name: str = (
                         f"{plugin.package_name}::{filename}"
                         if plugin.package_name
                         else filename
@@ -191,18 +191,20 @@ class StatePropertiesDialog(QDialog):
         Dict[str, str],
     ]:
         """Returns: (name, plugin_info, outcomes, remappings)"""
-        name = self.name_edit.text().strip()
-        plugin = self.plugin_combo.currentData()
+        name: str = self.name_edit.text().strip()
+        plugin: Optional[PluginInfo] = self.plugin_combo.currentData()
 
-        remappings = {}
-        remap_text = self.remappings_edit.toPlainText().strip()
+        remappings: Dict[str, str] = {}
+        remap_text: str = self.remappings_edit.toPlainText().strip()
         for line in remap_text.split("\n"):
             line = line.strip()
             if ":" in line:
+                key: str
+                value: str
                 key, value = line.split(":", 1)
                 remappings[key.strip()] = value.strip()
 
-        outcomes = self.outcomes_display.text().strip()
-        outcomes_list = [o.strip() for o in outcomes.split(",") if o.strip()]
+        outcomes: str = self.outcomes_display.text().strip()
+        outcomes_list: List[str] = [o.strip() for o in outcomes.split(",") if o.strip()]
 
         return name, plugin, outcomes_list, remappings

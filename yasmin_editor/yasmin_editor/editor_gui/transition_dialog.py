@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import List, Tuple
+from typing import List, Tuple, Union, Optional
 from PyQt5.QtWidgets import (
     QLabel,
     QMessageBox,
@@ -31,19 +31,24 @@ from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 class TransitionDialog(QDialog):
     """Dialog for creating transitions between states."""
 
-    def __init__(self, from_state, available_targets: List, parent=None):
+    def __init__(
+        self,
+        from_state: Union[StateNode, ContainerStateNode, FinalOutcomeNode],
+        available_targets: List[Union[StateNode, ContainerStateNode, FinalOutcomeNode]],
+        parent: Optional[QDialog] = None,
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Create Transition")
         self.resize(400, 200)
 
-        layout = QFormLayout(self)
+        layout: QFormLayout = QFormLayout(self)
 
         # From state
-        from_label = QLabel(f"<b>{from_state.name}</b>")
+        from_label: QLabel = QLabel(f"<b>{from_state.name}</b>")
         layout.addRow("From State:", from_label)
 
         # Outcome
-        self.outcome_combo = QComboBox()
+        self.outcome_combo: QComboBox = QComboBox()
 
         used_outcomes = (
             from_state.get_used_outcomes()
@@ -51,7 +56,7 @@ class TransitionDialog(QDialog):
             else set()
         )
 
-        available_outcomes = []
+        available_outcomes: List[str] = []
         if hasattr(from_state, "plugin_info") and from_state.plugin_info:
             available_outcomes = [
                 o for o in from_state.plugin_info.outcomes if o not in used_outcomes
@@ -69,7 +74,7 @@ class TransitionDialog(QDialog):
         layout.addRow("Outcome:", self.outcome_combo)
 
         # To state
-        self.target_combo = QComboBox()
+        self.target_combo: QComboBox = QComboBox()
         for target in available_targets:
             if isinstance(target, (StateNode, ContainerStateNode)):
                 self.target_combo.addItem(target.name, target)
@@ -78,12 +83,18 @@ class TransitionDialog(QDialog):
         layout.addRow("To State:", self.target_combo)
 
         # Buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons: QDialogButtonBox = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        )
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-    def get_transition_data(self) -> Tuple[str, object]:
-        outcome = self.outcome_combo.currentText()
-        target = self.target_combo.currentData()
+    def get_transition_data(
+        self,
+    ) -> Tuple[str, Union[StateNode, ContainerStateNode, FinalOutcomeNode]]:
+        outcome: str = self.outcome_combo.currentText()
+        target: Union[StateNode, ContainerStateNode, FinalOutcomeNode] = (
+            self.target_combo.currentData()
+        )
         return outcome, target
