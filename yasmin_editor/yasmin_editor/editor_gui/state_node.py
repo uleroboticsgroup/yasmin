@@ -14,14 +14,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-from typing import Dict, List, Set, Optional, Any
+from typing import Dict, List, Set, Optional, Any, TYPE_CHECKING
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem, QGraphicsTextItem
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
 from yasmin_editor.plugins_manager.plugin_info import PluginInfo
+
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
-from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+
+if TYPE_CHECKING:
+    from yasmin_editor.editor_gui.connection_line import ConnectionLine
+    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 
 
 class StateNode(QGraphicsEllipseItem):

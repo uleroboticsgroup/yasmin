@@ -13,13 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Union
+from typing import Union, TYPE_CHECKING
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QPen, QBrush, QColor
-from yasmin_editor.editor_gui.state_node import StateNode
-from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+
+if TYPE_CHECKING:
+    from yasmin_editor.editor_gui.state_node import StateNode
+    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+    from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
 
 class ConnectionPort(QGraphicsEllipseItem):

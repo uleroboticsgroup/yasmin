@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-from typing import Union, List, Any
+from typing import Union, List, Any, TYPE_CHECKING
 from PyQt5.QtWidgets import (
     QGraphicsItem,
     QGraphicsTextItem,
@@ -25,9 +25,10 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont, QPolygonF, QPainterPath
 
-from yasmin_editor.editor_gui.state_node import StateNode
-from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+if TYPE_CHECKING:
+    from yasmin_editor.editor_gui.state_node import StateNode
+    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+    from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
 
 class ConnectionLine(QGraphicsPathItem):
