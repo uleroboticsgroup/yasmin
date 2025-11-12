@@ -1522,88 +1522,17 @@ class YasminEditor(QMainWindow):
         # Load states recursively with initial positioning
         self._load_states_from_xml(root, None)
 
-        # Reorganize all containers to properly layout their children
-        # This must be done BEFORE repositioning root elements so containers have their final sizes
-        self._reorganize_all_containers()
-
-        # Force scene update to ensure all geometries are calculated
-        self.canvas.scene.update()
-        QApplication.processEvents()  # Process any pending events
-
-        # Now reposition root-level elements based on actual sizes after auto-resize
-        self._reposition_root_elements_after_resize()
-
-        # Force another scene update after repositioning and ensure geometry is calculated
-        self.canvas.scene.update()
-        QApplication.processEvents()  # Process any pending events to update geometries
-
-        # Get final outcomes and position them properly AFTER states are resized and repositioned
+        # Get final outcomes and create them BEFORE loading transitions
         outcomes_str = root.get("outcomes", "")
         if outcomes_str:
             outcomes = outcomes_str.split()
-
-            # Find the rightmost position of all root-level nodes (now with correct sizes)
-            max_x = 0
-            max_y = 0
-            min_y = float("inf")
-
-            for state_node in self.state_nodes.values():
-                # Only check root-level nodes
-                if (
-                    not hasattr(state_node, "parent_container")
-                    or state_node.parent_container is None
-                ):
-                    # Ensure geometry is up to date before measuring
-                    if isinstance(state_node, ContainerStateNode):
-                        state_node.prepareGeometryChange()
-                        rect = state_node.rect()
-                        # Use actual width from rect
-                        node_right = state_node.pos().x() + rect.width()
-                        node_bottom = state_node.pos().y() + rect.height()
-                        node_top = state_node.pos().y()
-                    else:
-                        bbox = state_node.boundingRect()
-                        node_right = state_node.pos().x() + bbox.width()
-                        node_bottom = state_node.pos().y() + bbox.height()
-                        node_top = state_node.pos().y()
-
-                    max_x = max(max_x, node_right)
-                    max_y = max(max_y, node_bottom)
-                    min_y = min(min_y, node_top)
-
-            # Position final outcomes to the right of all states
-            outcome_x = max_x + 250 if max_x > 0 else 800  # Reduced spacing
-
-            # Calculate vertical space for distributing outcomes
-            if min_y != float("inf") and max_y > min_y:
-                total_vertical_space = max_y - min_y
-
-                # Distribute outcomes evenly across the vertical space
-                if len(outcomes) > 1:
-                    outcome_spacing = total_vertical_space / (len(outcomes) - 1)
-                    outcome_spacing = max(outcome_spacing, 150)  # Reduced minimum spacing
-
-                    for i, outcome in enumerate(outcomes):
-                        y = min_y + (i * outcome_spacing)
-                        node = FinalOutcomeNode(outcome, outcome_x, y)
-                        self.canvas.scene.addItem(node)
-                        self.final_outcomes[outcome] = node
-                else:
-                    # Single outcome: center it vertically
-                    center_y = (min_y + max_y) / 2
-                    node = FinalOutcomeNode(outcomes[0], outcome_x, center_y)
-                    self.canvas.scene.addItem(node)
-                    self.final_outcomes[outcomes[0]] = node
-            else:
-                # Fallback to simple stacking if no vertical extent calculated
-                outcome_start_y = 120
-                outcome_spacing = 180  # Reduced spacing
-
-                for i, outcome in enumerate(outcomes):
-                    y = outcome_start_y + i * outcome_spacing
-                    node = FinalOutcomeNode(outcome, outcome_x, y)
-                    self.canvas.scene.addItem(node)
-                    self.final_outcomes[outcome] = node
+            # Create final outcomes at temporary positions
+            # They will be repositioned after layout computation
+            for i, outcome in enumerate(outcomes):
+                y = 200 + i * 120
+                node = FinalOutcomeNode(outcome, 800, y)
+                self.canvas.scene.addItem(node)
+                self.final_outcomes[outcome] = node
 
         # Update initial state combo
         self.update_start_state_combo()
@@ -1614,10 +1543,25 @@ class YasminEditor(QMainWindow):
             if index >= 0:
                 self.start_state_combo.setCurrentIndex(index)
 
-        # Load transitions recursively
+        # Load transitions recursively BEFORE layout computation
+        # This is CRITICAL - the layout algorithm needs the connection graph!
         self._load_transitions_from_xml(root, None)
 
+        # NOW reorganize all containers to properly layout their children
+        # Transitions are loaded, so the graph-based layout will work correctly
+        self._reorganize_all_containers()
+
+        # Force scene update to ensure all geometries are calculated
+        self.canvas.scene.update()
+        QApplication.processEvents()  # Process any pending events
+
+        # Now reposition root-level elements based on actual sizes after auto-resize
+        # This also positions final outcomes correctly based on their connections
+        self._reposition_root_elements_after_resize()
+
         # Final scene update to ensure all connections are drawn correctly
+        self.canvas.scene.update()
+        QApplication.processEvents()
         self.canvas.scene.update()
         QApplication.processEvents()
 
@@ -1686,12 +1630,32 @@ class YasminEditor(QMainWindow):
         reverse_graph = {node: [] for node in all_nodes}
 
         for node in nodes:
-            for conn in node.connections:
-                if conn.from_node == node:
-                    # Include connections to both states and final outcomes
-                    if conn.to_node in all_nodes:
-                        graph[node].append(conn.to_node)
-                        reverse_graph[conn.to_node].append(node)
+            # Safely access connections attribute
+            if hasattr(node, "connections"):
+                for conn in node.connections:
+                    if conn.from_node == node:
+                        # Include connections to both states and final outcomes
+                        if conn.to_node in all_nodes:
+                            graph[node].append(conn.to_node)
+                            reverse_graph[conn.to_node].append(node)
+
+        # Verify we have some connections before proceeding
+        total_edges = sum(len(neighbors) for neighbors in graph.values())
+        if total_edges == 0 and len(all_nodes) > 1:
+            # No connections found - this might happen if transitions aren't loaded yet
+            # Fall back to simple positioning
+            rect = container.rect()
+            x_pos = rect.left() + 120
+            y_pos = rect.top() + 140
+            for node in nodes:
+                node.setPos(x_pos, y_pos)
+                y_pos += 150
+            for outcome in final_outcomes:
+                outcome.setPos(
+                    x_pos + 400, rect.top() + 140 + final_outcomes.index(outcome) * 120
+                )
+            container.auto_resize_for_children()
+            return
 
         # Step 1: Layer Assignment using longest path method
         # This will now place final outcomes in appropriate layers
@@ -1709,7 +1673,8 @@ class YasminEditor(QMainWindow):
 
         # Step 4: Coordinate Assignment with proper spacing
         # Final outcomes are now part of the layer structure
-        self._sugiyama_coordinate_assignment(container, layers)
+        # Pass the graph so coordinate assignment can use it
+        self._sugiyama_coordinate_assignment(container, layers, graph, reverse_graph)
 
     def _preorder_outcomes_in_layers(self, layers, reverse_graph):
         """Pre-order final outcomes within their layers based on incoming connections.
@@ -1717,10 +1682,15 @@ class YasminEditor(QMainWindow):
         This helps establish a good initial ordering before the main crossing reduction,
         which is especially important for terminal nodes (outcomes) that may have
         multiple incoming edges from different layers.
+
+        Uses a more sophisticated algorithm that considers:
+        - Median position of predecessors
+        - Layer proximity (closer layers weighted more)
+        - Number of connections from each predecessor
         """
         from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
-        for layer in layers:
+        for layer_idx, layer in enumerate(layers):
             # Find outcomes in this layer
             outcomes_in_layer = [
                 node for node in layer if isinstance(node, FinalOutcomeNode)
@@ -1729,7 +1699,7 @@ class YasminEditor(QMainWindow):
             if len(outcomes_in_layer) <= 1:
                 continue
 
-            # Calculate average position of incoming connections for each outcome
+            # Calculate weighted average position of incoming connections for each outcome
             outcome_positions = []
 
             for outcome in outcomes_in_layer:
@@ -1737,29 +1707,40 @@ class YasminEditor(QMainWindow):
 
                 if predecessors:
                     # Find the layer indices and positions of predecessors
-                    predecessor_positions = []
+                    predecessor_info = []
 
                     for pred in predecessors:
                         # Find which layer and position the predecessor is in
-                        for layer_idx, pred_layer in enumerate(layers):
+                        for pred_layer_idx, pred_layer in enumerate(layers):
                             if pred in pred_layer:
                                 pos_in_layer = pred_layer.index(pred)
                                 # Weight by layer proximity (closer layers matter more)
-                                weight = 1.0 / (1.0 + abs(len(layers) - 1 - layer_idx))
-                                predecessor_positions.append(pos_in_layer * weight)
+                                layer_distance = abs(layer_idx - pred_layer_idx)
+                                weight = 1.0 / (1.0 + layer_distance)
+                                predecessor_info.append(
+                                    (pos_in_layer, weight, pred_layer_idx)
+                                )
                                 break
 
-                    if predecessor_positions:
-                        # Use median of predecessor positions
-                        predecessor_positions.sort()
-                        n = len(predecessor_positions)
-                        if n % 2 == 1:
-                            avg_pos = predecessor_positions[n // 2]
-                        else:
-                            avg_pos = (
-                                predecessor_positions[n // 2 - 1]
-                                + predecessor_positions[n // 2]
-                            ) / 2.0
+                    if predecessor_info:
+                        # Use weighted median of predecessor positions
+                        # Sort by position
+                        predecessor_info.sort(key=lambda x: x[0])
+
+                        # Calculate total weight
+                        total_weight = sum(info[1] for info in predecessor_info)
+
+                        # Find weighted median
+                        cumulative_weight = 0
+                        weighted_median = 0
+
+                        for pos, weight, _ in predecessor_info:
+                            cumulative_weight += weight
+                            if cumulative_weight >= total_weight / 2.0:
+                                weighted_median = pos
+                                break
+
+                        avg_pos = weighted_median
                     else:
                         avg_pos = layer.index(outcome)  # Keep current position
                 else:
@@ -1768,7 +1749,7 @@ class YasminEditor(QMainWindow):
 
                 outcome_positions.append((avg_pos, outcome))
 
-            # Sort outcomes by their average predecessor position
+            # Sort outcomes by their weighted average predecessor position
             outcome_positions.sort(key=lambda x: x[0])
 
             # Reorder outcomes in the layer
@@ -1863,6 +1844,32 @@ class YasminEditor(QMainWindow):
                 # No predecessors, place in layer 0
                 layer_map[node] = 0
 
+        # Optimize final outcome placement - place them based on median of their predecessors
+        # This reduces crossing by positioning outcomes near their primary input sources
+        from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+
+        for node in nodes:
+            if isinstance(node, FinalOutcomeNode):
+                predecessors = reverse_graph.get(node, [])
+                if predecessors:
+                    # Get layers of all predecessors
+                    pred_layers = [
+                        layer_map[pred]
+                        for pred in predecessors
+                        if pred in layer_map and layer_map[pred] != -1
+                    ]
+                    if pred_layers:
+                        # Place outcome one layer after the median of predecessor layers
+                        # Using median instead of max reduces edge length and crossings
+                        pred_layers.sort()
+                        median_layer = pred_layers[len(pred_layers) // 2]
+                        # Place outcome at median + 1, but not beyond current assignment
+                        optimal_layer = median_layer + 1
+                        if layer_map[node] == -1 or abs(
+                            optimal_layer - median_layer
+                        ) < abs(layer_map[node] - median_layer):
+                            layer_map[node] = optimal_layer
+
         # Group nodes by layer
         max_layer = max(layer_map.values()) if layer_map else 0
         layers = [[] for _ in range(max_layer + 1)]
@@ -1870,15 +1877,68 @@ class YasminEditor(QMainWindow):
         for node, layer in layer_map.items():
             layers[layer].append(node)
 
+        # Initial ordering within each layer based on dependencies
+        # This provides a better starting point for crossing reduction
+        from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+
+        for layer_idx, layer in enumerate(layers):
+            if len(layer) <= 1:
+                continue
+
+            # For outcomes, sort by the average position of their predecessors
+            # This gives a much better initial ordering
+            def get_predecessor_positions(node):
+                if not isinstance(node, FinalOutcomeNode):
+                    return []
+                predecessors = reverse_graph.get(node, [])
+                positions = []
+                for pred in predecessors:
+                    # Find predecessor's position in its layer
+                    for prev_layer_idx, prev_layer in enumerate(layers[:layer_idx]):
+                        if pred in prev_layer:
+                            positions.append((prev_layer_idx, prev_layer.index(pred)))
+                            break
+                return positions
+
+            # Create a sorting key that considers:
+            # 1. Whether it's an outcome (outcomes last)
+            # 2. Average layer and position of predecessors
+            # 3. Number of predecessors (fewer first for non-outcomes)
+            # 4. Node name for stability
+            def ordering_key(node):
+                is_outcome = isinstance(node, FinalOutcomeNode)
+                num_predecessors = len(reverse_graph.get(node, []))
+
+                # Calculate average predecessor position
+                pred_positions = get_predecessor_positions(node)
+                if pred_positions:
+                    # Weight by layer (closer layers = higher weight)
+                    weighted_sum = sum(
+                        (layer_idx + 1) * pos for layer_idx, pos in pred_positions
+                    )
+                    weighted_count = sum(layer_idx + 1 for layer_idx, _ in pred_positions)
+                    avg_pred_pos = (
+                        weighted_sum / weighted_count if weighted_count > 0 else 0
+                    )
+                else:
+                    avg_pred_pos = (
+                        0 if not is_outcome else 999
+                    )  # Outcomes without preds go last
+
+                return (is_outcome, avg_pred_pos, num_predecessors, node.name)
+
+            layer.sort(key=ordering_key)
+
         return layers
 
-    def _sugiyama_crossing_reduction(self, layers, graph, reverse_graph, iterations=32):
+    def _sugiyama_crossing_reduction(self, layers, graph, reverse_graph, iterations=48):
         """Step 2 of Sugiyama Framework: Reduce edge crossings using barycentric method.
 
         Uses median/barycentric heuristic to order nodes within each layer
         to minimize edge crossings between adjacent layers.
 
-        Increased iterations to 32 with special focus on outcome positioning.
+        Increased iterations to 48 with special focus on outcome positioning and
+        better convergence detection.
         """
         from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
@@ -1888,7 +1948,7 @@ class YasminEditor(QMainWindow):
         best_layers = None
         best_crossings = float("inf")
         no_improvement_count = 0
-        MAX_NO_IMPROVEMENT = 5  # Stop if no improvement for 5 consecutive iterations
+        MAX_NO_IMPROVEMENT = 8  # Stop if no improvement for 8 consecutive iterations
 
         for iteration in range(iterations):
             # Downward pass: order based on successors
@@ -1905,7 +1965,7 @@ class YasminEditor(QMainWindow):
 
             # Additional pass: Focus on layers containing outcomes
             # Outcomes often have multiple incoming edges, so extra ordering helps
-            if iteration % 3 == 0:  # Every 3rd iteration
+            if iteration % 2 == 0:  # Every 2nd iteration
                 for i in range(len(layers) - 1, 0, -1):
                     # Check if layer has outcomes
                     has_outcomes = any(
@@ -1915,6 +1975,14 @@ class YasminEditor(QMainWindow):
                         # Extra ordering pass for outcome-heavy layers
                         self._order_layer_by_barycenter(
                             layers[i], layers[i - 1], reverse_graph
+                        )
+
+            # Additional pass: Advanced local optimization every 4 iterations
+            if iteration % 4 == 0 and iteration > 0:
+                for layer_idx, layer in enumerate(layers):
+                    if len(layer) > 2:
+                        self._local_crossing_optimization(
+                            layer, layers, layer_idx, graph, reverse_graph
                         )
 
             # Count crossings and keep track of best solution
@@ -1967,11 +2035,102 @@ class YasminEditor(QMainWindow):
 
         return total_crossings
 
+    def _local_crossing_optimization(
+        self, layer, layers, layer_idx, graph, reverse_graph
+    ):
+        """Apply local optimization by trying adjacent swaps to reduce crossings.
+
+        This greedy local search tries swapping adjacent nodes to find immediate
+        crossing reductions.
+        """
+        if len(layer) < 2:
+            return
+
+        improved = True
+        max_passes = 3
+        pass_count = 0
+
+        while improved and pass_count < max_passes:
+            improved = False
+            pass_count += 1
+
+            for i in range(len(layer) - 1):
+                # Try swapping nodes at positions i and i+1
+                layer[i], layer[i + 1] = layer[i + 1], layer[i]
+
+                # Count crossings before and after
+                crossings_after = self._count_crossings(layers, graph)
+
+                # If swap improved things, keep it
+                # Otherwise, swap back
+                # We use a simple greedy approach here
+                # In practice, we'd need to store the before state, but this is a local optimization
+                # so we just try and see if the overall structure is better
+
+                # For simplicity, always try and keep the swap that reduces local crossings
+                # between this layer and adjacent layers
+                local_crossings = 0
+
+                # Count crossings with previous layer
+                if layer_idx > 0:
+                    local_crossings += self._count_layer_crossings(
+                        layers[layer_idx - 1], layer, reverse_graph
+                    )
+
+                # Count crossings with next layer
+                if layer_idx < len(layers) - 1:
+                    local_crossings += self._count_layer_crossings(
+                        layer, layers[layer_idx + 1], graph
+                    )
+
+                # Swap back to test original
+                layer[i], layer[i + 1] = layer[i + 1], layer[i]
+
+                local_crossings_before = 0
+                if layer_idx > 0:
+                    local_crossings_before += self._count_layer_crossings(
+                        layers[layer_idx - 1], layer, reverse_graph
+                    )
+                if layer_idx < len(layers) - 1:
+                    local_crossings_before += self._count_layer_crossings(
+                        layer, layers[layer_idx + 1], graph
+                    )
+
+                # If swapping reduced crossings, keep the swap
+                if local_crossings < local_crossings_before:
+                    layer[i], layer[i + 1] = layer[i + 1], layer[i]
+                    improved = True
+
+    def _count_layer_crossings(self, layer1, layer2, edge_map):
+        """Count crossings between two specific layers."""
+        crossings = 0
+
+        pos1 = {node: idx for idx, node in enumerate(layer1)}
+        pos2 = {node: idx for idx, node in enumerate(layer2)}
+
+        edges = []
+        for node in layer1:
+            for neighbor in edge_map.get(node, []):
+                if neighbor in pos2:
+                    edges.append((pos1[node], pos2[neighbor]))
+
+        for i in range(len(edges)):
+            for j in range(i + 1, len(edges)):
+                a1, a2 = edges[i]
+                b1, b2 = edges[j]
+                if (a1 < b1 and a2 > b2) or (a1 > b1 and a2 < b2):
+                    crossings += 1
+
+        return crossings
+
     def _order_layer_by_barycenter(self, current_layer, adjacent_layer, edge_map):
         """Order nodes in current_layer based on barycenter positions in adjacent_layer.
 
-        Uses median/barycenter heuristic for optimal ordering to minimize crossings.
+        Uses weighted median heuristic for optimal ordering to minimize crossings.
+        The weighted median gives better results than simple median for nodes with
+        multiple connections.
         """
+        from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
         # Create position map for adjacent layer
         pos_map = {node: idx for idx, node in enumerate(adjacent_layer)}
@@ -1985,18 +2144,45 @@ class YasminEditor(QMainWindow):
             ]
 
             if neighbor_positions:
-                # Use MEDIAN instead of mean for better crossing reduction
-                # Median is more robust to outliers and often produces better results
+                # Use WEIGHTED MEDIAN for better results
+                # For final outcomes with many predecessors, this gives better positioning
                 neighbor_positions.sort()
                 n = len(neighbor_positions)
-                if n % 2 == 1:
-                    # Odd number: take middle element
-                    barycenter = neighbor_positions[n // 2]
+
+                if isinstance(node, FinalOutcomeNode) and n > 2:
+                    # For outcomes with many connections, use a weighted approach
+                    # Give more weight to central positions to avoid extreme placements
+                    weights = []
+                    for i, pos in enumerate(neighbor_positions):
+                        # Central positions get higher weight
+                        distance_from_center = abs(i - n / 2.0)
+                        weight = 1.0 / (1.0 + distance_from_center * 0.5)
+                        weights.append(weight)
+
+                    # Calculate weighted median
+                    total_weight = sum(weights)
+                    weighted_positions = [
+                        (neighbor_positions[i], weights[i]) for i in range(n)
+                    ]
+
+                    cumulative_weight = 0
+                    for pos, weight in weighted_positions:
+                        cumulative_weight += weight
+                        if cumulative_weight >= total_weight / 2.0:
+                            barycenter = pos
+                            break
+                    else:
+                        barycenter = neighbor_positions[n // 2]
                 else:
-                    # Even number: take average of two middle elements
-                    barycenter = (
-                        neighbor_positions[n // 2 - 1] + neighbor_positions[n // 2]
-                    ) / 2.0
+                    # Standard median for regular nodes
+                    if n % 2 == 1:
+                        # Odd number: take middle element
+                        barycenter = neighbor_positions[n // 2]
+                    else:
+                        # Even number: take average of two middle elements
+                        barycenter = (
+                            neighbor_positions[n // 2 - 1] + neighbor_positions[n // 2]
+                        ) / 2.0
             else:
                 # No neighbors, keep relative position
                 # Use current position normalized to middle of layer
@@ -2014,22 +2200,31 @@ class YasminEditor(QMainWindow):
         for i, (_, _, node) in enumerate(barycenters):
             current_layer[i] = node
 
-    def _sugiyama_coordinate_assignment(self, container: ContainerStateNode, layers):
+    def _sugiyama_coordinate_assignment(
+        self, container: ContainerStateNode, layers, graph, reverse_graph
+    ):
         """Step 3 of Sugiyama Framework: Assign coordinates to nodes.
 
-        Uses a left-to-right, top-to-bottom layout where:
-        - Layers progress from left to right
-        - Nodes within a layer are spaced vertically
+        Uses a top-to-bottom layout where:
+        - Layers progress from top to bottom
+        - Nodes within a layer are spaced horizontally
         - Spacing prevents overlaps and provides clean layout
+        - Nodes are centered based on their connections (edge length minimization)
+
+        Args:
+            container: The container state node
+            layers: List of layers, each containing nodes
+            graph: Forward adjacency graph (node -> list of successors)
+            reverse_graph: Reverse adjacency graph (node -> list of predecessors)
         """
         rect = container.rect()
 
-        # Layout configuration - optimized spacing
-        START_X = rect.left() + 100  # Left padding
-        START_Y = rect.top() + 120  # Top padding
-        LAYER_SPACING = 300  # Horizontal spacing between layers
-        NODE_SPACING = 80  # Base vertical spacing between nodes
-        MIN_VERTICAL_GAP = 40  # Minimum gap between node edges
+        # Layout configuration - optimized spacing for top-to-bottom
+        START_X = rect.left() + 120  # Left padding
+        START_Y = rect.top() + 140  # Top padding
+        LAYER_SPACING = 200  # Vertical spacing between layers
+        NODE_SPACING = 100  # Base horizontal spacing between nodes
+        MIN_HORIZONTAL_GAP = 50  # Minimum gap between node edges
 
         # Calculate dimensions for each node (including final outcomes)
         node_dimensions = {}
@@ -2044,37 +2239,100 @@ class YasminEditor(QMainWindow):
                     height = node.boundingRect().height()
                 node_dimensions[node] = (width, height)
 
-        # Position nodes layer by layer
-        current_x = START_X
-        max_x = START_X
-
-        # Track the maximum Y extent across all layers for alignment
-        global_max_y = START_Y
+        # Phase 1: Initial positioning - place nodes in layers (top to bottom)
+        positions = {}  # node -> (x, y)
+        current_y = START_Y
 
         for layer_idx, layer in enumerate(layers):
-            # Find maximum width in this layer for next layer positioning
-            max_width = max((node_dimensions[node][0] for node in layer), default=0)
+            # Find maximum height in this layer for next layer positioning
+            max_height = max((node_dimensions[node][1] for node in layer), default=0)
 
-            # Calculate vertical positions for this layer
-            # Start from the top, ensuring proper spacing
-            current_y = START_Y
+            # Calculate total width needed for this layer
+            total_width = sum(node_dimensions[node][0] for node in layer)
+            total_spacing = NODE_SPACING * (len(layer) - 1) if len(layer) > 1 else 0
+            layer_width = total_width + total_spacing
 
-            # Position each node in the layer
-            for node_idx, node in enumerate(layer):
+            # Center the layer horizontally
+            current_x = START_X + (rect.width() - layer_width) / 2
+            # Ensure we don't go too far left
+            current_x = max(START_X, current_x)
+
+            # Initial positioning
+            for node in layer:
                 width, height = node_dimensions[node]
+                positions[node] = (current_x, current_y)
+                current_x += width + NODE_SPACING
 
-                # Position the node
-                node.setPos(current_x, current_y)
+            current_y += max_height + LAYER_SPACING
 
-                # Track global extent
-                global_max_y = max(global_max_y, current_y + height)
+        # Phase 2: Horizontal centering to minimize edge lengths
+        # Adjust X positions based on connected nodes for better visual alignment
+        for iteration in range(3):  # Multiple passes for convergence
+            for layer_idx, layer in enumerate(layers):
+                if len(layer) <= 1:
+                    continue
 
-                # Move to next vertical position - use height + spacing
-                current_y += height + NODE_SPACING
+                for node in layer:
+                    # Calculate ideal X position based on connected nodes
+                    connected_x_positions = []
 
-            # Move to next layer horizontally with generous spacing
-            current_x += max_width + LAYER_SPACING
-            max_x = max(max_x, current_x)
+                    # Look at predecessors (previous layer) using reverse_graph
+                    if layer_idx > 0:
+                        predecessors = reverse_graph.get(node, [])
+                        for pred_node in predecessors:
+                            if pred_node in positions:
+                                # Get center X of predecessor
+                                pred_x, pred_y = positions[pred_node]
+                                pred_width = node_dimensions[pred_node][0]
+                                connected_x_positions.append(pred_x + pred_width / 2)
+
+                    # Look at successors (next layer) using graph
+                    if layer_idx < len(layers) - 1:
+                        successors = graph.get(node, [])
+                        for succ_node in successors:
+                            if succ_node in positions:
+                                # Get center X of successor
+                                succ_x, succ_y = positions[succ_node]
+                                succ_width = node_dimensions[succ_node][0]
+                                connected_x_positions.append(succ_x + succ_width / 2)
+
+                    # If we have connections, try to center between them
+                    if connected_x_positions:
+                        ideal_center_x = sum(connected_x_positions) / len(
+                            connected_x_positions
+                        )
+                        # Convert to position (top-left corner)
+                        node_width = node_dimensions[node][0]
+                        ideal_x = ideal_center_x - node_width / 2
+
+                        current_x, current_y = positions[node]
+                        # Smooth adjustment (don't jump all the way to ideal)
+                        new_x = current_x * 0.6 + ideal_x * 0.4
+                        positions[node] = (new_x, current_y)
+
+                # After adjustment, resolve overlaps within the layer
+                layer_nodes_with_pos = [(positions[node][0], node) for node in layer]
+                layer_nodes_with_pos.sort()
+
+                # Ensure minimum spacing
+                for i in range(1, len(layer_nodes_with_pos)):
+                    prev_x, prev_node = layer_nodes_with_pos[i - 1]
+                    curr_x, curr_node = layer_nodes_with_pos[i]
+                    prev_width = node_dimensions[prev_node][0]
+
+                    min_x = prev_x + prev_width + MIN_HORIZONTAL_GAP
+                    if curr_x < min_x:
+                        # Shift current and all following nodes right
+                        shift = min_x - curr_x
+                        for j in range(i, len(layer_nodes_with_pos)):
+                            _, shift_node = layer_nodes_with_pos[j]
+                            x, y = positions[shift_node]
+                            positions[shift_node] = (x + shift, y)
+                        layer_nodes_with_pos[i] = (min_x, curr_node)
+
+        # Phase 3: Apply final positions
+        for node, (x, y) in positions.items():
+            node.setPos(x, y)
 
         # Resize container to fit all children
         container.auto_resize_for_children()
@@ -2277,12 +2535,29 @@ class YasminEditor(QMainWindow):
         reverse_graph = {node: [] for node in all_nodes}
 
         for node in root_nodes:
-            for conn in node.connections:
-                if conn.from_node == node:
-                    # Include connections to both states and final outcomes
-                    if conn.to_node in all_nodes:
-                        graph[node].append(conn.to_node)
-                        reverse_graph[conn.to_node].append(node)
+            # Safely access connections attribute
+            if hasattr(node, "connections"):
+                for conn in node.connections:
+                    if conn.from_node == node:
+                        # Include connections to both states and final outcomes
+                        if conn.to_node in all_nodes:
+                            graph[node].append(conn.to_node)
+                            reverse_graph[conn.to_node].append(node)
+
+        # Verify we have some connections
+        total_edges = sum(len(neighbors) for neighbors in graph.values())
+        if total_edges == 0 and len(all_nodes) > 1:
+            # No connections found - fall back to simple positioning
+            x_pos = 120
+            y_pos = 120
+            for node in root_nodes:
+                node.setPos(x_pos, y_pos)
+                y_pos += 200
+            for outcome in root_final_outcomes:
+                outcome.setPos(
+                    x_pos + 600, 120 + root_final_outcomes.index(outcome) * 150
+                )
+            return
 
         # Apply Sugiyama Framework for root level
         # Step 1: Layer Assignment - final outcomes will be placed in appropriate layers
@@ -2297,19 +2572,24 @@ class YasminEditor(QMainWindow):
         layers = self._sugiyama_crossing_reduction(layers, graph, reverse_graph)
 
         # Step 4: Coordinate Assignment for root level
-        self._position_root_layers_sugiyama(layers)
+        self._position_root_layers_sugiyama(layers, graph, reverse_graph)
 
-    def _position_root_layers_sugiyama(self, layers):
+    def _position_root_layers_sugiyama(self, layers, graph, reverse_graph):
         """Position root-level nodes using Sugiyama coordinate assignment.
-        Uses left-to-right layering with proper vertical spacing.
+        Uses top-to-bottom layering with proper horizontal spacing and edge length minimization.
         Final outcomes are now part of the layers structure.
+
+        Args:
+            layers: List of layers, each containing nodes
+            graph: Forward adjacency graph (node -> list of successors)
+            reverse_graph: Reverse adjacency graph (node -> list of predecessors)
         """
-        # Configuration for root level - optimized spacing
-        START_X = 120  # Left padding
-        START_Y = 120  # Top padding
-        LAYER_SPACING = 350  # Horizontal spacing between layers
-        NODE_SPACING = 100  # Base vertical spacing between nodes
-        MIN_VERTICAL_GAP = 50  # Minimum gap between node edges
+        # Configuration for root level - optimized spacing for top-to-bottom
+        START_X = 150  # Left padding
+        START_Y = 150  # Top padding
+        LAYER_SPACING = 220  # Vertical spacing between layers
+        NODE_SPACING = 120  # Base horizontal spacing between nodes
+        MIN_HORIZONTAL_GAP = 60  # Minimum gap between node edges
 
         # Helper function to get element dimensions
         def get_element_size(node):
@@ -2328,79 +2608,97 @@ class YasminEditor(QMainWindow):
                 width, height = get_element_size(node)
                 node_dimensions[node] = (width, height)
 
-        # Position nodes layer by layer (left to right)
-        current_x = START_X
-        max_x = START_X
-        global_max_y = START_Y
-
-        for layer_idx, layer in enumerate(layers):
-            # Find maximum width in this layer for next layer positioning
-            max_width = max((node_dimensions[node][0] for node in layer), default=0)
-
-            # Start Y position for this layer
-            current_y = START_Y
-
-            # Position each node in the layer
-            for node in layer:
-                width, height = node_dimensions[node]
-
-                # Position the node
-                node.setPos(current_x, current_y)
-
-                # Track maximum bounds
-                global_max_y = max(global_max_y, current_y + height)
-
-                # Move to next vertical position - use height + spacing
-                current_y += height + NODE_SPACING
-
-            # Move to next layer horizontally with generous spacing
-            current_x += max_width + LAYER_SPACING
-            max_x = max(max_x, current_x)
-
-        # Update all connections after repositioning
-        # Collect all nodes from layers
-        all_nodes = []
-        for layer in layers:
-            all_nodes.extend(layer)
-
-        for node in all_nodes:
-            for conn in node.connections:
-                conn.update_position()
-
-    def _position_root_layers(self, layers):
-        """Position root-level nodes in a single vertical column for clean top-to-bottom layout."""
-        # Configuration for root level with generous spacing
-        START_X = 100  # Left padding
-        START_Y = 100  # Top padding
-        NODE_SPACING = 220  # Vertical spacing between nodes
-
-        # Helper function to get element dimensions
-        def get_element_size(node):
-            if isinstance(node, ContainerStateNode):
-                node.prepareGeometryChange()
-                rect = node.rect()
-                return rect.width(), rect.height()
-            else:
-                bbox = node.boundingRect()
-                return bbox.width(), bbox.height()
-
-        # Flatten all layers into a single vertical column
-        # Maintain topological order (layers represent execution order)
-        all_nodes = []
-        for layer in layers:
-            all_nodes.extend(layer)
-
-        # Position each node vertically from top to bottom
+        # Phase 1: Initial positioning (top to bottom)
+        positions = {}
         current_y = START_Y
 
-        for node in all_nodes:
-            _, height = get_element_size(node)
-            node.setPos(START_X, current_y)
-            current_y += height + NODE_SPACING
+        for layer_idx, layer in enumerate(layers):
+            # Find maximum height in this layer
+            max_height = max((node_dimensions[node][1] for node in layer), default=0)
+
+            # Calculate total width needed for this layer
+            total_width = sum(node_dimensions[node][0] for node in layer)
+            total_spacing = NODE_SPACING * (len(layer) - 1) if len(layer) > 1 else 0
+            layer_width = total_width + total_spacing
+
+            # Center the layer horizontally (simple centering for root level)
+            current_x = START_X
+
+            # Initial positioning
+            for node in layer:
+                width, height = node_dimensions[node]
+                positions[node] = (current_x, current_y)
+                current_x += width + NODE_SPACING
+
+            current_y += max_height + LAYER_SPACING
+
+        # Phase 2: Horizontal centering to minimize edge lengths (use graph instead of node.connections)
+        for iteration in range(3):
+            for layer_idx, layer in enumerate(layers):
+                if len(layer) <= 1:
+                    continue
+
+                for node in layer:
+                    connected_x_positions = []
+
+                    # Check predecessors using reverse_graph
+                    if layer_idx > 0:
+                        predecessors = reverse_graph.get(node, [])
+                        for pred_node in predecessors:
+                            if pred_node in positions:
+                                # Get center X of predecessor
+                                pred_x, pred_y = positions[pred_node]
+                                pred_width = node_dimensions[pred_node][0]
+                                connected_x_positions.append(pred_x + pred_width / 2)
+
+                    # Check successors using graph
+                    if layer_idx < len(layers) - 1:
+                        successors = graph.get(node, [])
+                        for succ_node in successors:
+                            if succ_node in positions:
+                                # Get center X of successor
+                                succ_x, succ_y = positions[succ_node]
+                                succ_width = node_dimensions[succ_node][0]
+                                connected_x_positions.append(succ_x + succ_width / 2)
+
+                    if connected_x_positions:
+                        ideal_center_x = sum(connected_x_positions) / len(
+                            connected_x_positions
+                        )
+                        # Convert to position (top-left corner)
+                        node_width = node_dimensions[node][0]
+                        ideal_x = ideal_center_x - node_width / 2
+
+                        current_x, current_y = positions[node]
+                        new_x = current_x * 0.6 + ideal_x * 0.4
+                        positions[node] = (new_x, current_y)
+
+                # Resolve overlaps
+                layer_nodes_with_pos = [(positions[node][0], node) for node in layer]
+                layer_nodes_with_pos.sort()
+
+                for i in range(1, len(layer_nodes_with_pos)):
+                    prev_x, prev_node = layer_nodes_with_pos[i - 1]
+                    curr_x, curr_node = layer_nodes_with_pos[i]
+                    prev_width = node_dimensions[prev_node][0]
+
+                    min_x = prev_x + prev_width + MIN_HORIZONTAL_GAP
+                    if curr_x < min_x:
+                        shift = min_x - curr_x
+                        for j in range(i, len(layer_nodes_with_pos)):
+                            _, shift_node = layer_nodes_with_pos[j]
+                            x, y = positions[shift_node]
+                            positions[shift_node] = (x + shift, y)
+                        layer_nodes_with_pos[i] = (min_x, curr_node)
+
+        # Phase 3: Apply positions
+        for node, (x, y) in positions.items():
+            node.setPos(x, y)
 
         # Update all connections after repositioning
+        all_nodes = [node for layer in layers for node in layer]
         for node in all_nodes:
-            for conn in node.connections:
+            for conn in node.connections if hasattr(node, "connections") else []:
                 conn.update_position()
 
     def _load_states_from_xml(self, parent_elem, parent_container):
