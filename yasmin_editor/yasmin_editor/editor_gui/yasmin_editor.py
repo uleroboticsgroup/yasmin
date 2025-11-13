@@ -724,9 +724,8 @@ class YasminEditor(QMainWindow):
 
         for item in selected_items:
             if isinstance(item, ContainerStateNode):
-                if not hasattr(item, "xml_file") or item.xml_file is None:
-                    container = item
-                    break
+                container = item
+                break
 
         if not container:
             QMessageBox.warning(
@@ -774,9 +773,8 @@ class YasminEditor(QMainWindow):
 
         for item in selected_items:
             if isinstance(item, ContainerStateNode):
-                if not hasattr(item, "xml_file") or item.xml_file is None:
-                    container = item
-                    break
+                container = item
+                break
 
         if not container:
             QMessageBox.warning(self, "Error", "Please select a user-created Container!")
@@ -817,9 +815,8 @@ class YasminEditor(QMainWindow):
 
         for item in selected_items:
             if isinstance(item, ContainerStateNode):
-                if not hasattr(item, "xml_file") or item.xml_file is None:
-                    container = item
-                    break
+                container = item
+                break
 
         if not container:
             QMessageBox.warning(self, "Error", "Please select a user-created Container!")
@@ -1051,9 +1048,8 @@ class YasminEditor(QMainWindow):
 
             for item in selected_items:
                 if isinstance(item, ContainerStateNode):
-                    if not hasattr(item, "xml_file") or item.xml_file is None:
-                        selected_container = item
-                        break
+                    selected_container = item
+                    break
 
             if selected_container:
                 if outcome_name in selected_container.final_outcomes:
@@ -1448,7 +1444,10 @@ class YasminEditor(QMainWindow):
                         self._save_transitions(sm_elem, outcome_node)
 
             else:
-                state_elem = ET.SubElement(parent_elem, "State")
+                if state_node.plugin_info.plugin_type != "xml":
+                    state_elem = ET.SubElement(parent_elem, "State")
+                else:
+                    state_elem = ET.SubElement(parent_elem, "StateMachine")
                 state_elem.set("name", state_name)
 
                 if state_node.plugin_info:
@@ -1463,10 +1462,9 @@ class YasminEditor(QMainWindow):
                         if state_node.plugin_info.class_name:
                             state_elem.set("class", state_node.plugin_info.class_name)
                     elif state_node.plugin_info.plugin_type == "xml":
-                        # XML-based state machine reference
                         state_elem.set("type", "xml")
-                        if hasattr(state_node, "xml_file") and state_node.xml_file:
-                            state_elem.set("file", state_node.xml_file)
+                        if state_node.plugin_info.file_path:
+                            state_elem.set("file_path", state_node.plugin_info.file_path)
 
                 # Add remappings
                 if state_node.remappings:
@@ -2704,7 +2702,9 @@ class YasminEditor(QMainWindow):
     def _load_states_from_xml(self, parent_elem, parent_container):
         """Recursively load states from XML, handling nested containers."""
         for elem in parent_elem:
-            if elem.tag == "State":
+            if elem.tag == "State" or (
+                elem.tag == "StateMachine" and elem.get("file_path")
+            ):
                 state_name = elem.get("name")
                 state_type = elem.get("type")
                 remappings = self._load_remappings(elem)
@@ -2723,6 +2723,12 @@ class YasminEditor(QMainWindow):
                         if plugin.class_name == class_name:
                             plugin_info = plugin
                             break
+                elif state_type == "xml":
+                    file_path = elem.get("file_path")
+                    for plugin in self.plugin_manager.xml_files:
+                        if plugin.file_path == file_path:
+                            plugin_info = plugin
+                            break
 
                 if plugin_info:
                     node = StateNode(state_name, plugin_info, 0, 0, remappings)
@@ -2734,7 +2740,7 @@ class YasminEditor(QMainWindow):
                         full_name = f"{parent_container.name}.{state_name}"
                         self.state_nodes[full_name] = node
 
-            elif elem.tag == "StateMachine":
+            elif elem.tag == "StateMachine" and not elem.get("file_path"):
                 state_name = elem.get("name")
                 outcomes_str = elem.get("outcomes", "")
                 init_state = elem.get("start_state", "")
