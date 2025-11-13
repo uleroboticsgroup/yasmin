@@ -22,6 +22,7 @@ from contextlib import redirect_stdout, redirect_stderr
 from tqdm import tqdm
 from lxml import etree as ET
 import rclpy
+import yasmin
 from yasmin import State, set_log_level, LogLevel
 from ament_index_python import get_packages_with_prefixes, get_package_share_path
 from yasmin_editor.plugins_manager.plugin_info import PluginInfo
@@ -167,19 +168,35 @@ class PluginManager:
                 self.load_xml_state_machine(filename, package_name)
 
     def load_cpp_plugin(self, class_name: str) -> None:
-        plugin_info: PluginInfo = PluginInfo(plugin_type="cpp", class_name=class_name)
+        try:
+            plugin_info: PluginInfo = PluginInfo(plugin_type="cpp", class_name=class_name)
+        except Exception:
+            yasmin.YASMIN_LOG_ERROR(f"Failed to load C++ plugin: {class_name}")
+            return
         self.cpp_plugins.append(plugin_info)
 
     def load_python_plugin(self, module: str, class_name: str) -> None:
-        plugin_info: PluginInfo = PluginInfo(
-            plugin_type="python", class_name=class_name, module=module
-        )
+        try:
+            plugin_info: PluginInfo = PluginInfo(
+                plugin_type="python", class_name=class_name, module=module
+            )
+        except Exception:
+            yasmin.YASMIN_LOG_ERROR(
+                f"Failed to load Python plugin: {class_name} from module {module}"
+            )
+            return
         self.python_plugins.append(plugin_info)
 
     def load_xml_state_machine(
         self, xml_file: str, package_name: Optional[str] = None
     ) -> None:
-        plugin_info: PluginInfo = PluginInfo(
-            plugin_type="xml", file_name=xml_file, package_name=package_name
-        )
+        try:
+            plugin_info: PluginInfo = PluginInfo(
+                plugin_type="xml", file_name=xml_file, package_name=package_name
+            )
+        except Exception:
+            yasmin.YASMIN_LOG_ERROR(
+                f"Failed to load XML state machine: {xml_file} of package {package_name}"
+            )
+            return
         self.xml_files.append(plugin_info)
