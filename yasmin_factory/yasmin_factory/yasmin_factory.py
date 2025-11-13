@@ -111,9 +111,6 @@ class YasminFactory:
             ValueError: If the XML structure is invalid.
         """
 
-        sm = StateMachine(outcomes=root.attrib.get("outcomes", "").split(" "))
-        set_start_state = root.attrib.get("start_state", "")
-
         if root.attrib.get("file_path", ""):
             file_path = root.attrib["file_path"]
 
@@ -121,6 +118,9 @@ class YasminFactory:
                 file_path = os.path.join(os.path.dirname(self._xml_path), file_path)
 
             return self.create_sm_from_file(file_path)
+
+        sm = StateMachine(outcomes=root.attrib.get("outcomes", "").split(" "))
+        set_start_state = root.attrib.get("start_state", "")
 
         for child in root:
 

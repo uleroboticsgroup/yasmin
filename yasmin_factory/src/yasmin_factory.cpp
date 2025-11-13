@@ -234,14 +234,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
 
 std::shared_ptr<yasmin::StateMachine>
 YasminFactory::create_sm(tinyxml2::XMLElement *root) {
-  std::string outcomes_str = this->get_optional_attribute(root, "outcomes", "");
-  std::string set_start_state =
-      this->get_optional_attribute(root, "start_state", "");
-  std::vector<std::string> outcomes_vec = this->split_string(outcomes_str, ' ');
-  std::set<std::string> outcomes(outcomes_vec.begin(), outcomes_vec.end());
-
-  auto sm = std::make_shared<yasmin::StateMachine>(outcomes);
-
+  // Check if StateMachine is an included XML file
   if (this->get_optional_attribute(root, "file_path", "") != "") {
     std::string file_path = this->get_required_attribute(root, "file_path");
 
@@ -253,6 +246,14 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
     return this->create_sm_from_file(file_path);
   }
+
+  std::string outcomes_str = this->get_optional_attribute(root, "outcomes", "");
+  std::string set_start_state =
+      this->get_optional_attribute(root, "start_state", "");
+  std::vector<std::string> outcomes_vec = this->split_string(outcomes_str, ' ');
+  std::set<std::string> outcomes(outcomes_vec.begin(), outcomes_vec.end());
+
+  auto sm = std::make_shared<yasmin::StateMachine>(outcomes);
 
   // Parse all child elements
   for (tinyxml2::XMLElement *child = root->FirstChildElement(); child;
