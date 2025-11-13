@@ -24,10 +24,11 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QLineF, QTimer, QPointF, QEvent
 from PyQt5.QtGui import QPen, QBrush, QColor, QPainter
 
+from yasmin_editor.editor_gui.state_node import StateNode
+from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+
 if TYPE_CHECKING:
-    from yasmin_editor.editor_gui.state_node import StateNode
-    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-    from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
@@ -56,7 +57,7 @@ class StateMachineCanvas(QGraphicsView):
     ) -> bool:
         """Validate if a connection between two nodes is allowed."""
         if source_node == target_node:
-            if isinstance(source_node, "StateNode"):
+            if isinstance(source_node, StateNode):
                 source_container = getattr(source_node, "parent_container", None)
                 if source_container and isinstance(source_container, ContainerStateNode):
                     if source_container.is_concurrence:
@@ -70,13 +71,13 @@ class StateMachineCanvas(QGraphicsView):
             target_node, "parent_container", None
         )
 
-        if isinstance(source_node, "FinalOutcomeNode"):
-            if isinstance(target_node, "ContainerStateNode"):
+        if isinstance(source_node, FinalOutcomeNode):
+            if isinstance(target_node, ContainerStateNode):
                 if source_container == target_node:
                     return True
                 return True
 
-            if isinstance(target_node, "FinalOutcomeNode"):
+            if isinstance(target_node, FinalOutcomeNode):
                 if (
                     source_container
                     and target_container == source_container.parent_container
@@ -87,11 +88,11 @@ class StateMachineCanvas(QGraphicsView):
 
             return source_container != target_container and target_container is None
 
-        if isinstance(source_node, ("StateNode", "ContainerStateNode")):
-            if isinstance(target_node, "FinalOutcomeNode"):
+        if isinstance(source_node, (StateNode, ContainerStateNode)):
+            if isinstance(target_node, FinalOutcomeNode):
                 return source_container == target_container
 
-            if isinstance(target_node, ("StateNode", "ContainerStateNode")):
+            if isinstance(target_node, (StateNode, ContainerStateNode)):
                 return source_container == target_container
 
         return False
@@ -138,7 +139,7 @@ class StateMachineCanvas(QGraphicsView):
 
             for scene_item in self.scene.items():
                 if isinstance(
-                    scene_item, ("StateNode", "FinalOutcomeNode", "ContainerStateNode")
+                    scene_item, (StateNode, FinalOutcomeNode, ContainerStateNode)
                 ):
                     scene_item.setOpacity(1.0)
 
@@ -146,13 +147,11 @@ class StateMachineCanvas(QGraphicsView):
             target: Optional[
                 Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
             ] = None
-            if isinstance(item, ("StateNode", "FinalOutcomeNode", "ContainerStateNode")):
+            if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                 target = item
             elif hasattr(item, "parentItem"):
                 parent = item.parentItem()
-                if isinstance(
-                    parent, ("StateNode", "FinalOutcomeNode", "ContainerStateNode")
-                ):
+                if isinstance(parent, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                     target = parent
 
             if (
@@ -176,15 +175,13 @@ class StateMachineCanvas(QGraphicsView):
                 Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
             ] = None
             for item in items:
-                if isinstance(
-                    item, ("StateNode", "FinalOutcomeNode", "ContainerStateNode")
-                ):
+                if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                     target_node = item
                     break
                 elif hasattr(item, "parentItem"):
                     parent = item.parentItem()
                     if isinstance(
-                        parent, ("StateNode", "FinalOutcomeNode", "ContainerStateNode")
+                        parent, (StateNode, FinalOutcomeNode, ContainerStateNode)
                     ):
                         target_node = parent
                         break
@@ -195,7 +192,7 @@ class StateMachineCanvas(QGraphicsView):
 
             for scene_item in self.scene.items():
                 if isinstance(
-                    scene_item, ("StateNode", "FinalOutcomeNode", "ContainerStateNode")
+                    scene_item, (StateNode, FinalOutcomeNode, ContainerStateNode)
                 ):
                     scene_item.setOpacity(1.0)
 
