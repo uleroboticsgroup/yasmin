@@ -13,10 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import importlib
 from typing import List, Optional
 from lxml import etree as ET
 from yasmin_pybind_bridge import CppStateFactory
+from ament_index_python import get_package_share_path
 
 
 class PluginInfo:
@@ -26,7 +28,7 @@ class PluginInfo:
         plugin_type: str,
         class_name: Optional[str] = None,
         module: Optional[str] = None,
-        file_path: Optional[str] = None,
+        file_name: Optional[str] = None,
         package_name: Optional[str] = None,
     ) -> None:
         self._cpp_factory: CppStateFactory = CppStateFactory()
@@ -34,7 +36,7 @@ class PluginInfo:
         self.plugin_type: str = plugin_type
         self.class_name: Optional[str] = class_name
         self.module: Optional[str] = module
-        self.file_path: Optional[str] = file_path
+        self.file_name: Optional[str] = file_name
         self.package_name: Optional[str] = package_name
         self.outcomes: List[str] = []
 
@@ -45,7 +47,12 @@ class PluginInfo:
         elif self.plugin_type == "cpp":
             self.outcomes = list(self._cpp_factory.create(self.class_name).get_outcomes())
         elif self.plugin_type == "xml":
-            tree = ET.parse(self.file_path)
+            file_path = os.path.join(
+                get_package_share_path(self.package_name),
+                "state_machines",
+                self.file_name,
+            )
+            tree = ET.parse(file_path)
             root = tree.getroot()
             outcomes_str: str = root.attrib.get("outcomes", "")
             self.outcomes = outcomes_str.split() if outcomes_str else []

@@ -18,6 +18,7 @@ import importlib
 from lxml import etree as ET
 from yasmin import State, StateMachine, Concurrence
 from yasmin_pybind_bridge import CppStateFactory
+from ament_index_python import get_package_share_path
 
 
 class YasminFactory:
@@ -110,11 +111,24 @@ class YasminFactory:
         Raises:
             ValueError: If the XML structure is invalid.
         """
+        file_path = root.attrib.get("file_path", "")
 
-        if root.attrib.get("file_path", ""):
-            file_path = root.attrib["file_path"]
+        if not file_path:
+            file_name = root.attrib.get("file_name", "")
+            package = root.attrib.get("package", "")
 
-            if not os.path.isabs(root.attrib["file_path"]):
+            if file_name and package:
+                try:
+                    file_path = os.path.join(
+                        get_package_share_path(package),
+                        "state_machines",
+                        file_name,
+                    )
+                except Exception as e:
+                    file_path = ""
+
+        if file_path:
+            if not os.path.isabs(file_path):
                 file_path = os.path.join(os.path.dirname(self._xml_path), file_path)
 
             return self.create_sm_from_file(file_path)

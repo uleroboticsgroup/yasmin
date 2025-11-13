@@ -249,12 +249,7 @@ class YasminEditor(QMainWindow):
 
         # Populate XML list
         for xml_plugin in self.plugin_manager.xml_files:
-            filename = os.path.basename(xml_plugin.file_path)
-            display_name = (
-                f"{xml_plugin.package_name}::{filename}"
-                if xml_plugin.package_name
-                else filename
-            )
+            display_name = f"{xml_plugin.package_name}/{xml_plugin.file_name}"
             item = QListWidgetItem(display_name)
             item.setData(Qt.UserRole, xml_plugin)
             self.xml_list.addItem(item)
@@ -1347,9 +1342,8 @@ class YasminEditor(QMainWindow):
 
         # Create root element
         root = ET.Element("StateMachine")
+        root.set("name", sm_name)
         root.set("outcomes", " ".join(self.final_outcomes.keys()))
-        if ok and sm_name:
-            root.set("name", sm_name)
 
         # Set initial state if specified
         if self.start_state:
@@ -1463,8 +1457,9 @@ class YasminEditor(QMainWindow):
                             state_elem.set("class", state_node.plugin_info.class_name)
                     elif state_node.plugin_info.plugin_type == "xml":
                         state_elem.set("type", "xml")
-                        if state_node.plugin_info.file_path:
-                            state_elem.set("file_path", state_node.plugin_info.file_path)
+                        if state_node.plugin_info.file_name:
+                            state_elem.set("file_name", state_node.plugin_info.file_name)
+                            state_elem.set("package", state_node.plugin_info.package)
 
                 # Add remappings
                 if state_node.remappings:
@@ -2703,7 +2698,7 @@ class YasminEditor(QMainWindow):
         """Recursively load states from XML, handling nested containers."""
         for elem in parent_elem:
             if elem.tag == "State" or (
-                elem.tag == "StateMachine" and elem.get("file_path")
+                elem.tag == "StateMachine" and elem.get("file_name")
             ):
                 state_name = elem.get("name")
                 state_type = elem.get("type")
@@ -2724,9 +2719,9 @@ class YasminEditor(QMainWindow):
                             plugin_info = plugin
                             break
                 elif state_type == "xml":
-                    file_path = elem.get("file_path")
+                    file_name = elem.get("file_name")
                     for plugin in self.plugin_manager.xml_files:
-                        if plugin.file_path == file_path:
+                        if plugin.file_name == file_name:
                             plugin_info = plugin
                             break
 
@@ -2740,7 +2735,7 @@ class YasminEditor(QMainWindow):
                         full_name = f"{parent_container.name}.{state_name}"
                         self.state_nodes[full_name] = node
 
-            elif elem.tag == "StateMachine" and not elem.get("file_path"):
+            elif elem.tag == "StateMachine" and not elem.get("file_name"):
                 state_name = elem.get("name")
                 outcomes_str = elem.get("outcomes", "")
                 init_state = elem.get("start_state", "")

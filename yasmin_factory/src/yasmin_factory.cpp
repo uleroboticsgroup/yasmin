@@ -234,10 +234,27 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
 
 std::shared_ptr<yasmin::StateMachine>
 YasminFactory::create_sm(tinyxml2::XMLElement *root) {
-  // Check if StateMachine is an included XML file
-  if (this->get_optional_attribute(root, "file_path", "") != "") {
-    std::string file_path = this->get_required_attribute(root, "file_path");
 
+  std::string file_path = this->get_optional_attribute(root, "file_path", "");
+
+  if (file_path.empty()) {
+    std::string file_name = this->get_optional_attribute(root, "file_name", "");
+    std::string package = this->get_optional_attribute(root, "package", "");
+
+    if (!file_name.empty() && !package.empty()) {
+      std::string package_path;
+      try {
+        package_path = ament_index_cpp::get_package_share_directory(package) +
+                       "/state_machines";
+        file_path = (rcpputils::fs::path(package_path) / file_name).string();
+      } catch (const ament_index_cpp::PackageNotFoundError &e) {
+        file_path = "";
+      }
+    }
+  }
+
+  // Check if StateMachine is an included XML file
+  if (!file_path.empty()) {
     if (!rcpputils::fs::path(file_path).is_absolute()) {
       file_path =
           (rcpputils::fs::path(this->xml_path_).parent_path() / file_path)

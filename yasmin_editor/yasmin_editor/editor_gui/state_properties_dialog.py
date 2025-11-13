@@ -174,7 +174,7 @@ class StatePropertiesDialog(QDialog):
         elif current_type == 2:  # State Machine (XML)
             for plugin in self.available_plugins:
                 if plugin.plugin_type == "xml":
-                    filename: str = os.path.basename(plugin.file_path)
+                    filename: str = os.path.basename(plugin.file_name)
                     display_name: str = (
                         f"{plugin.package_name}::{filename}"
                         if plugin.package_name

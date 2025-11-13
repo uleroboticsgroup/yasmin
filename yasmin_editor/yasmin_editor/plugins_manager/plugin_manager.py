@@ -163,7 +163,8 @@ class PluginManager:
         for filename in os.listdir(state_machines_path):
             if filename.endswith(".xml"):
                 xml_file: str = os.path.join(state_machines_path, filename)
-                self.load_xml_state_machine(xml_file, package_name)
+                filename = os.path.basename(xml_file)
+                self.load_xml_state_machine(filename, package_name)
 
     def load_cpp_plugin(self, class_name: str) -> None:
         plugin_info: PluginInfo = PluginInfo(plugin_type="cpp", class_name=class_name)
@@ -179,6 +180,6 @@ class PluginManager:
         self, xml_file: str, package_name: Optional[str] = None
     ) -> None:
         plugin_info: PluginInfo = PluginInfo(
-            plugin_type="xml", file_path=xml_file, package_name=package_name
+            plugin_type="xml", file_name=xml_file, package_name=package_name
         )
         self.xml_files.append(plugin_info)
