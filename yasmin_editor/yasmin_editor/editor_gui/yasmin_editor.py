@@ -1459,7 +1459,7 @@ class YasminEditor(QMainWindow):
                         state_elem.set("type", "xml")
                         if state_node.plugin_info.file_name:
                             state_elem.set("file_name", state_node.plugin_info.file_name)
-                            state_elem.set("package", state_node.plugin_info.package)
+                            state_elem.set("package", state_node.plugin_info.package_name)
 
                 # Add remappings
                 if state_node.remappings:
