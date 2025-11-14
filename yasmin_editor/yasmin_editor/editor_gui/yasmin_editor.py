@@ -1658,7 +1658,7 @@ class YasminEditor(QMainWindow):
 
         # Step 2: Initial ordering of outcomes within their layers based on connections
         # This pre-orders outcomes before crossing reduction for better results
-        self._preorder_outcomes_in_layers(layers, reverse_graph, final_outcomes)
+        self._preorder_outcomes_in_layers(layers, reverse_graph)
 
         # Step 3: Crossing Reduction using barycentric method
         # This will consider connections to final outcomes
