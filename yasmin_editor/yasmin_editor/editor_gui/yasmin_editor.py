@@ -1552,11 +1552,22 @@ class YasminEditor(QMainWindow):
         # This also positions final outcomes correctly based on their connections
         self._reposition_root_elements_after_resize()
 
-        # Final scene update to ensure all connections are drawn correctly
-        self.canvas.scene.update()
-        QApplication.processEvents()
-        self.canvas.scene.update()
-        QApplication.processEvents()
+        # Force update all connections throughout the entire scene
+        # This ensures connections are drawn correctly both inside containers and at root level
+        for state in self.state_nodes.values():
+            if hasattr(state, "connections"):
+                for conn in state.connections:
+                    conn.update_position()
+
+        for outcome in self.final_outcomes.values():
+            if hasattr(outcome, "connections"):
+                for conn in outcome.connections:
+                    conn.update_position()
+
+        # Multiple scene updates to ensure all connections are drawn correctly
+        for _ in range(3):
+            self.canvas.scene.update()
+            QApplication.processEvents()
 
     def _reorganize_all_containers(self):
         """Reorganize all containers and their children after loading.
@@ -1589,9 +1600,32 @@ class YasminEditor(QMainWindow):
             container.prepareGeometryChange()
             container.auto_resize_for_children()
 
-        # One more geometry update to finalize everything
-        self.canvas.scene.update()
-        QApplication.processEvents()
+        # Force all connections to update their positions
+        # This is critical for containers to show their internal connections correctly
+        for container in all_containers:
+            # Ensure container geometry is up to date
+            container.prepareGeometryChange()
+            container.update()
+
+            # Update all child connections
+            for child_state in container.child_states.values():
+                child_state.prepareGeometryChange()
+                child_state.update()
+                if hasattr(child_state, "connections"):
+                    for conn in child_state.connections:
+                        conn.update_position()
+
+            for final_outcome in container.final_outcomes.values():
+                final_outcome.prepareGeometryChange()
+                final_outcome.update()
+                if hasattr(final_outcome, "connections"):
+                    for conn in final_outcome.connections:
+                        conn.update_position()
+
+        # Multiple geometry updates to finalize everything
+        for _ in range(4):
+            self.canvas.scene.update()
+            QApplication.processEvents()
 
     def _layout_container_sugiyama(self, container: ContainerStateNode):
         """Layout children within a container using Sugiyama Framework.
@@ -1841,6 +1875,8 @@ class YasminEditor(QMainWindow):
         # This reduces crossing by positioning outcomes near their primary input sources
         from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
+        max_layer = None
+
         for node in nodes:
             if isinstance(node, FinalOutcomeNode):
                 predecessors = reverse_graph.get(node, [])
@@ -1852,16 +1888,19 @@ class YasminEditor(QMainWindow):
                         if pred in layer_map and layer_map[pred] != -1
                     ]
                     if pred_layers:
-                        # Place outcome one layer after the median of predecessor layers
-                        # Using median instead of max reduces edge length and crossings
+                        # Place outcome one layer after the maximum predecessor layer
+                        # This ensures it's reachable from all predecessors
                         pred_layers.sort()
-                        median_layer = pred_layers[len(pred_layers) // 2]
-                        # Place outcome at median + 1, but not beyond current assignment
-                        optimal_layer = median_layer + 1
-                        if layer_map[node] == -1 or abs(
-                            optimal_layer - median_layer
-                        ) < abs(layer_map[node] - median_layer):
+                        max_pred_layer = max(pred_layers)
+                        optimal_layer = max_pred_layer + 1
+                        # Update if this is better than current assignment
+                        if layer_map[node] == -1 or layer_map[node] < optimal_layer:
                             layer_map[node] = optimal_layer
+                            # Update max_layer if needed
+                            if max_layer is None:
+                                max_layer = optimal_layer
+                            else:
+                                max_layer = max(max_layer, optimal_layer)
 
         # Group nodes by layer
         max_layer = max(layer_map.values()) if layer_map else 0
@@ -1924,14 +1963,11 @@ class YasminEditor(QMainWindow):
 
         return layers
 
-    def _sugiyama_crossing_reduction(self, layers, graph, reverse_graph, iterations=48):
+    def _sugiyama_crossing_reduction(self, layers, graph, reverse_graph, iterations=100):
         """Step 2 of Sugiyama Framework: Reduce edge crossings using barycentric method.
 
         Uses median/barycentric heuristic to order nodes within each layer
         to minimize edge crossings between adjacent layers.
-
-        Increased iterations to 48 with special focus on outcome positioning and
-        better convergence detection.
         """
         from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
@@ -1941,7 +1977,7 @@ class YasminEditor(QMainWindow):
         best_layers = None
         best_crossings = float("inf")
         no_improvement_count = 0
-        MAX_NO_IMPROVEMENT = 8  # Stop if no improvement for 8 consecutive iterations
+        MAX_NO_IMPROVEMENT = 10  # Stop if no improvement for 10 consecutive iterations
 
         for iteration in range(iterations):
             # Downward pass: order based on successors
