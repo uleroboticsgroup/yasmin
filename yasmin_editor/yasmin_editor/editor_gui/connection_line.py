@@ -178,7 +178,9 @@ class ConnectionLine(QGraphicsPathItem):
 
         t: float = 0.95
         tangent_point: QPointF = path.pointAtPercent(t)
-        angle = math.atan2(to_pos.y() - tangent_point.y(), to_pos.x() - tangent_point.x())
+        angle = math.atan2(
+            to_pos.y() - tangent_point.y(), to_pos.x() - tangent_point.x()
+        )
 
         arrow_size: float = 12
         arrow_p1: QPointF = to_pos - QPointF(

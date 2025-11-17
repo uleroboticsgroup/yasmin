@@ -15,6 +15,7 @@
 
 import os
 import math
+import random
 from lxml import etree as ET
 from typing import Dict, List
 from PyQt5.QtWidgets import (
@@ -69,6 +70,11 @@ class YasminEditor(QMainWindow):
         self.connections: List[ConnectionLine] = []
         self.root_sm_name = ""  # Root state machine name
         self.start_state = None  # Initial state for root SM
+
+        # Deterministic layout seed and RNG
+        # By default, we set a stable seed so the graph layout is reproducible
+        self.layout_seed = 42
+        self.layout_rng = random.Random(self.layout_seed)
 
         # Create UI
         self.create_ui()
@@ -159,6 +165,14 @@ class YasminEditor(QMainWindow):
         help_action.triggered.connect(self.show_help)
         toolbar.addAction(help_action)
 
+        # Layout seed control - allows deterministic layouts
+        set_seed_action = QAction("Set Layout Seed", self)
+        set_seed_action.triggered.connect(self.set_layout_seed)
+        toolbar.addAction(set_seed_action)
+        apply_layout_action = QAction("Reapply Layout", self)
+        apply_layout_action.triggered.connect(self.reapply_layout)
+        toolbar.addAction(apply_layout_action)
+
         # Python states list
         left_layout.addWidget(QLabel("<b>Python States:</b>"))
         self.python_filter = QLineEdit()
@@ -233,6 +247,52 @@ class YasminEditor(QMainWindow):
 
         # Status bar
         self.statusBar()
+
+    def set_layout_seed(self):
+        """Open a dialog to set the layout seed. Set to -1 to use non-deterministic random."""
+        seed, ok = QInputDialog.getInt(
+            self,
+            "Set Layout Seed",
+            "Enter layout seed (-1 to disable deterministic layout):",
+            value=(self.layout_seed if self.layout_seed is not None else -1),
+        )
+
+        if not ok:
+            return
+
+        if seed == -1:
+            self.layout_seed = None
+            self.layout_rng = None
+            self.statusBar().showMessage("Layout seed disabled (non-deterministic)", 3000)
+        else:
+            self.layout_seed = int(seed)
+            self.layout_rng = random.Random(self.layout_seed)
+            self.statusBar().showMessage(f"Layout seed set to {seed}", 3000)
+
+    def _reset_layout_rng(self):
+        """Reset the layout RNG from the stored seed. If seed is None, use module-level randomness."""
+        if getattr(self, "layout_seed", None) is None:
+            self.layout_rng = None
+        else:
+            self.layout_rng = random.Random(self.layout_seed)
+
+    def reapply_layout(self):
+        """Re-seed RNG and re-run the layout over the entire document."""
+        # Reset RNG and layouts
+        self._reset_layout_rng()
+        self._reorganize_all_containers()
+        try:
+            self._reposition_root_elements_after_resize()
+        except Exception:
+            pass
+
+        # Update all connections positions
+        for state in self.state_nodes.values():
+            if hasattr(state, "connections"):
+                for conn in state.connections:
+                    conn.update_position()
+
+        self.statusBar().showMessage("Reapplied layout", 2000)
 
     def populate_plugin_lists(self):
         # Populate Python list
@@ -318,20 +378,19 @@ class YasminEditor(QMainWindow):
             self.create_state_node(state_name, xml_plugin, False, False)
 
     def get_free_position(self):
-        """Get a free position in the closest empty space from the viewport center.
+        """Get a free position in a deterministic grid layout.
 
         This method:
-        1. Gets the current viewport center in scene coordinates
-        2. Finds all existing nodes and their bounding boxes
-        3. Searches in a spiral pattern from the center to find an empty spot
-        4. Returns the closest available position
+        1. Uses a fixed grid starting from (100, 100)
+        2. Places nodes in a predictable left-to-right, top-to-bottom pattern
+        3. Ensures consistent positioning across different runs
         """
-        # Default position if canvas is empty
-        DEFAULT_X = 100
-        DEFAULT_Y = 100
-        NODE_WIDTH = 200  # Approximate node width
-        NODE_HEIGHT = 150  # Approximate node height
-        SPACING = 50  # Minimum spacing between nodes
+        # Grid parameters for deterministic layout
+        START_X = 100
+        START_Y = 100
+        NODE_WIDTH = 400  # Width including spacing
+        NODE_HEIGHT = 350  # Height including spacing
+        NODES_PER_ROW = 3  # Number of nodes per row
 
         # Get root-level nodes only
         root_nodes = [
@@ -340,101 +399,18 @@ class YasminEditor(QMainWindow):
             if not hasattr(node, "parent_container") or node.parent_container is None
         ]
 
-        # Add final outcomes to the list of items to avoid
+        # Add final outcomes to the list of items to count
         all_items = list(root_nodes) + list(self.final_outcomes.values())
 
-        # If no items exist, return default position
-        if not all_items:
-            return QPointF(DEFAULT_X, DEFAULT_Y)
+        # Calculate position based on number of existing items
+        num_items = len(all_items)
+        row = num_items // NODES_PER_ROW
+        col = num_items % NODES_PER_ROW
 
-        # Get the viewport center in scene coordinates
-        viewport_rect = self.canvas.viewport().rect()
-        center_in_view = viewport_rect.center()
-        center_in_scene = self.canvas.mapToScene(center_in_view)
+        x = START_X + (col * NODE_WIDTH)
+        y = START_Y + (row * NODE_HEIGHT)
 
-        # Function to check if a position overlaps with existing nodes
-        def is_position_free(x, y, width=NODE_WIDTH, height=NODE_HEIGHT):
-            test_rect_left = x
-            test_rect_top = y
-            test_rect_right = x + width
-            test_rect_bottom = y + height
-
-            for item in all_items:
-                if isinstance(item, ContainerStateNode):
-                    item.prepareGeometryChange()
-                    item_rect = item.rect()
-                    item_x = item.pos().x()
-                    item_y = item.pos().y()
-                    item_width = item_rect.width()
-                    item_height = item_rect.height()
-                else:
-                    item_bbox = item.boundingRect()
-                    item_x = item.pos().x()
-                    item_y = item.pos().y()
-                    item_width = item_bbox.width()
-                    item_height = item_bbox.height()
-
-                # Add spacing to existing items
-                item_left = item_x - SPACING
-                item_top = item_y - SPACING
-                item_right = item_x + item_width + SPACING
-                item_bottom = item_y + item_height + SPACING
-
-                # Check for overlap
-                if not (
-                    test_rect_right < item_left
-                    or test_rect_left > item_right
-                    or test_rect_bottom < item_top
-                    or test_rect_top > item_bottom
-                ):
-                    return False
-
-            return True
-
-        # Search in a spiral pattern from the center
-        # Start at the viewport center
-        center_x = center_in_scene.x()
-        center_y = center_in_scene.y()
-
-        # Snap to grid for cleaner positioning
-        GRID_SIZE = 50
-        center_x = round(center_x / GRID_SIZE) * GRID_SIZE
-        center_y = round(center_y / GRID_SIZE) * GRID_SIZE
-
-        # Try the center first
-        if is_position_free(center_x - NODE_WIDTH / 2, center_y - NODE_HEIGHT / 2):
-            return QPointF(center_x - NODE_WIDTH / 2, center_y - NODE_HEIGHT / 2)
-
-        # Spiral search pattern
-        max_search_radius = 2000  # Maximum distance to search
-        search_step = GRID_SIZE  # Step size for spiral
-
-        for radius in range(search_step, max_search_radius, search_step):
-            # Try positions in a circle around the center
-            angles = 16  # Number of angles to try at each radius
-            for i in range(angles):
-                angle = (2 * math.pi * i) / angles
-                x = center_x + radius * math.cos(angle) - NODE_WIDTH / 2
-                y = center_y + radius * math.sin(angle) - NODE_HEIGHT / 2
-
-                # Snap to grid
-                x = round(x / GRID_SIZE) * GRID_SIZE
-                y = round(y / GRID_SIZE) * GRID_SIZE
-
-                if is_position_free(x, y):
-                    return QPointF(x, y)
-
-        # Fallback: place below all existing items if spiral search fails
-        max_bottom = DEFAULT_Y
-        for node in root_nodes:
-            if isinstance(node, ContainerStateNode):
-                node.prepareGeometryChange()
-                node_bottom = node.pos().y() + node.rect().height()
-            else:
-                node_bottom = node.pos().y() + node.boundingRect().height()
-            max_bottom = max(max_bottom, node_bottom)
-
-        return QPointF(DEFAULT_X, max_bottom + SPACING + 50)
+        return QPointF(x, y)
 
     def create_state_node(
         self,
@@ -1573,6 +1549,8 @@ class YasminEditor(QMainWindow):
         """Reorganize all containers and their children after loading.
         Uses Sugiyama Framework for hierarchical graph layout.
         """
+        # Reset layout RNG to ensure deterministic layout runs when a seed is set
+        self._reset_layout_rng()
         # Process all containers (both root-level and nested)
         all_containers = []
         for node in self.state_nodes.values():
@@ -1680,7 +1658,7 @@ class YasminEditor(QMainWindow):
             graph: Adjacency dictionary mapping nodes to their neighbors
         """
         import math
-        import random
+        rng = self.layout_rng if getattr(self, "layout_rng", None) is not None else random
         
         rect = container.rect()
         
@@ -1712,8 +1690,8 @@ class YasminEditor(QMainWindow):
                 positions[node] = [current_pos.x(), current_pos.y()]
             else:
                 # Random initial position
-                x = rect.left() + MARGIN_X + random.random() * area_width
-                y = rect.top() + MARGIN_Y_TOP + random.random() * area_height
+                x = rect.left() + MARGIN_X + rng.random() * area_width
+                y = rect.top() + MARGIN_Y_TOP + rng.random() * area_height
                 positions[node] = [x, y]
         
         # Algorithm parameters
@@ -2738,7 +2716,7 @@ class YasminEditor(QMainWindow):
             Optimized positions
         """
         import math
-        import random
+        rng = self.layout_rng if getattr(self, "layout_rng", None) is not None else random
         
         MAX_ITERATIONS = 100
         INITIAL_TEMP = 50.0
@@ -2754,12 +2732,12 @@ class YasminEditor(QMainWindow):
         
         for iteration in range(MAX_ITERATIONS):
             # Try moving a random node
-            node = random.choice(list(current_positions.keys()))
+            node = rng.choice(list(current_positions.keys()))
             old_pos = current_positions[node]
             
             # Generate small random movement
-            dx = random.uniform(-MAX_MOVE, MAX_MOVE)
-            dy = random.uniform(-MAX_MOVE, MAX_MOVE)
+            dx = rng.uniform(-MAX_MOVE, MAX_MOVE)
+            dy = rng.uniform(-MAX_MOVE, MAX_MOVE)
             new_pos = (old_pos[0] + dx, old_pos[1] + dy)
             
             # Apply tentative move
@@ -2777,7 +2755,7 @@ class YasminEditor(QMainWindow):
                 # Decide whether to accept the move (simulated annealing)
                 delta = new_crossings - current_crossings
                 
-                if delta < 0 or random.random() < math.exp(-delta / temperature):
+                if delta < 0 or rng.random() < math.exp(-delta / temperature):
                     # Accept move
                     current_crossings = new_crossings
                     
@@ -2826,6 +2804,148 @@ class YasminEditor(QMainWindow):
             # Check bounding box overlap with spacing
             if (abs(x - ox) < (w + ow) / 2 + min_spacing and
                 abs(y - oy) < (h + oh) / 2 + min_spacing):
+                return True
+
+        # Helper to compute rect from center coords
+        def rect_from_center(cx, cy, width, height):
+            left = cx - width / 2.0
+            right = cx + width / 2.0
+            top = cy - height / 2.0
+            bottom = cy + height / 2.0
+            return left, top, right, bottom
+
+        # Helper to detect if a segment intersects a rectangle
+        def segment_intersects_rect(x1, y1, x2, y2, left, top, right, bottom):
+            # Quick reject: both points to one side
+            if (x1 < left and x2 < left) or (x1 > right and x2 > right) or (
+                y1 < top and y2 < top) or (y1 > bottom and y2 > bottom
+            ):
+                return False
+
+            # Check if either endpoint is inside the rect
+            if left <= x1 <= right and top <= y1 <= bottom:
+                return True
+            if left <= x2 <= right and top <= y2 <= bottom:
+                return True
+
+            # Check intersection with each rectangle edge (as segments)
+            def seg_intersect(ax, ay, bx, by, cx, cy, dx, dy):
+                def orientation(px, py, qx, qy, rx, ry):
+                    val = (qy - py) * (rx - qx) - (qx - px) * (ry - qy)
+                    if abs(val) < 1e-9:
+                        return 0
+                    return 1 if val > 0 else 2
+
+                o1 = orientation(ax, ay, bx, by, cx, cy)
+                o2 = orientation(ax, ay, bx, by, dx, dy)
+                o3 = orientation(cx, cy, dx, dy, ax, ay)
+                o4 = orientation(cx, cy, dx, dy, bx, by)
+
+                if o1 != o2 and o3 != o4:
+                    return True
+                return False
+
+            # Rectangle edges
+            # Left edge
+            if seg_intersect(x1, y1, x2, y2, left, top, left, bottom):
+                return True
+            # Right edge
+            if seg_intersect(x1, y1, x2, y2, right, top, right, bottom):
+                return True
+            # Top edge
+            if seg_intersect(x1, y1, x2, y2, left, top, right, top):
+                return True
+            # Bottom edge
+            if seg_intersect(x1, y1, x2, y2, left, bottom, right, bottom):
+                return True
+            return False
+
+        # Check box intersections with connection segments to avoid nodes sitting over other edges
+        for conn in getattr(self, "connections", []):
+            # Skip connections that attach to this node - self connections are allowed
+            if conn.from_node == node or conn.to_node == node:
+                continue
+
+            # For simulation, use the positions dict centers (fallback to scene positions)
+            if conn.from_node in positions and conn.to_node in positions:
+                fx, fy = positions[conn.from_node]
+                tx, ty = positions[conn.to_node]
+            else:
+                # Fall back to actual scene positions
+                fc = conn.from_node.scenePos()
+                tx = conn.to_node.scenePos().x()
+                ty = conn.to_node.scenePos().y()
+                fx = fc.x()
+                fy = fc.y()
+
+            # Node rect
+            n_left, n_top, n_right, n_bottom = rect_from_center(x, y, w, h)
+
+            # Check if segment intersects node rect (avoid crossing edges)
+            if segment_intersects_rect(fx, fy, tx, ty, n_left, n_top, n_right, n_bottom):
+                return True
+
+            # Also check approx label region (midpoint area)
+            midx = (fx + tx) / 2.0
+            midy = (fy + ty) / 2.0
+            # Estimate label size if available
+            try:
+                label_rect = conn.label.boundingRect()
+                lw, lh = label_rect.width(), label_rect.height()
+            except Exception:
+                lw, lh = 80, 20
+            l_left, l_top, l_right, l_bottom = rect_from_center(midx, midy, lw + 8, lh + 8)
+            if not (n_right < l_left or n_left > l_right or n_bottom < l_top or n_top > l_bottom):
+                return True
+
+        # Check against container bounds/header to avoid placing node on top the header or outside container
+        # If node is inside a container, ensure it doesn't overlap header (top area) and stays within bounds
+        if hasattr(node, "parent_container") and node.parent_container:
+            container = node.parent_container
+            crect = container.rect()
+            # Header/gap (header height from container.header rect)
+            try:
+                header_h = container.header.rect().height()
+            except Exception:
+                header_h = 50
+
+            # Define safe area margins
+            SAFE_LEFT = crect.left() + 10
+            SAFE_RIGHT = crect.right() - 10
+            SAFE_TOP = crect.top() + header_h + 10
+            SAFE_BOTTOM = crect.bottom() - 10
+
+            # Node boundaries
+            node_left, node_top, node_right, node_bottom = rect_from_center(x, y, w, h)
+
+            if node_left < SAFE_LEFT or node_right > SAFE_RIGHT or node_top < SAFE_TOP or node_bottom > SAFE_BOTTOM:
+                return True
+
+        # Prevent nodes from overlapping containers they are not inside (root nodes vs container boxes)
+        for c in [n for n in self.state_nodes.values() if isinstance(n, ContainerStateNode)]:
+            if hasattr(node, "parent_container") and node.parent_container == c:
+                continue
+            # For root-level nodes, ensure they don't overlap container boxes
+            crect = c.rect()
+            c_left = crect.left()
+            c_right = crect.right()
+            c_top = crect.top()
+            c_bottom = crect.bottom()
+            # Container position in the same coordinate space? Assume positions are comparable
+            # Compute container center
+            c_cx = c.scenePos().x() + (c_left + c_right) / 2.0
+            c_cy = c.scenePos().y() + (c_top + c_bottom) / 2.0
+            c_w = c.rect().width()
+            c_h = c.rect().height()
+            c_left = c_cx - c_w / 2.0
+            c_right = c_cx + c_w / 2.0
+            c_top = c_cy - c_h / 2.0
+            c_bottom = c_cy + c_h / 2.0
+            # Node world-space bounding box
+            # For positions already in world-space (root nodes), pos is center
+            node_left, node_top, node_right, node_bottom = rect_from_center(x, y, w, h)
+            # If overlap -> collision
+            if not (node_right < c_left or node_left > c_right or node_bottom < c_top or node_top > c_bottom):
                 return True
         
         return False
@@ -3132,7 +3252,7 @@ class YasminEditor(QMainWindow):
             graph: Adjacency dictionary
         """
         import math
-        import random
+        rng = self.layout_rng if getattr(self, "layout_rng", None) is not None else random
         
         # Get viewport dimensions
         viewport_rect = self.canvas.viewport().rect()
@@ -3165,8 +3285,8 @@ class YasminEditor(QMainWindow):
                 MARGIN_Y < current_pos.y() < viewport_height - MARGIN_Y):
                 positions[node] = [current_pos.x(), current_pos.y()]
             else:
-                x = MARGIN_X + random.random() * area_width
-                y = MARGIN_Y + random.random() * area_height
+                x = MARGIN_X + rng.random() * area_width
+                y = MARGIN_Y + rng.random() * area_height
                 positions[node] = [x, y]
         
         # Algorithm parameters
