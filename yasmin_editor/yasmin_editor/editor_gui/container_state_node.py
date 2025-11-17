@@ -42,7 +42,7 @@ class ContainerStateNode(QGraphicsRectItem):
         start_state: Optional[str] = None,
         default_outcome: Optional[str] = None,
     ) -> None:
-        super().__init__(-200, -125, 400, 250)
+        super().__init__(-500, -400, 1000, 800)
         self.name: str = name
         self.plugin_info: Optional["PluginInfo"] = None
         self.is_state_machine: bool = not is_concurrence
@@ -54,8 +54,8 @@ class ContainerStateNode(QGraphicsRectItem):
         self.default_outcome: Optional[str] = default_outcome
         self.child_states: Dict[str, Union["StateNode", "ContainerStateNode"]] = {}
         self.parent_container: Optional["ContainerStateNode"] = None
-        self.min_width: int = 400
-        self.min_height: int = 250
+        self.min_width: int = 1000
+        self.min_height: int = 800
         self.xml_file: Optional[str] = None
 
         self.setPos(x, y)
@@ -71,7 +71,7 @@ class ContainerStateNode(QGraphicsRectItem):
             self.setPen(QPen(QColor(0, 0, 180), 3))
 
         self.header: QGraphicsRectItem = QGraphicsRectItem(self)
-        self.header.setRect(-200, -125, 400, 35)
+        self.header.setRect(-500, -400, 1000, 50)
         if is_concurrence:
             self.header.setBrush(QBrush(QColor(255, 140, 0)))
         else:
@@ -81,14 +81,14 @@ class ContainerStateNode(QGraphicsRectItem):
         self.title: QGraphicsTextItem = QGraphicsTextItem(self)
         self.title.setDefaultTextColor(Qt.white)
         title_font: QFont = QFont()
-        title_font.setPointSize(11)
+        title_font.setPointSize(12)
         title_font.setBold(True)
         self.title.setFont(title_font)
 
         type_label: str = "CONCURRENCE" if is_concurrence else "STATE MACHINE"
         self.title.setPlainText(f"{type_label}: {name}")
         title_rect = self.title.boundingRect()
-        self.title.setPos(-title_rect.width() / 2, -118)
+        self.title.setPos(-title_rect.width() / 2, -385)
 
         if not is_concurrence:
             self.start_state_label: QGraphicsTextItem = QGraphicsTextItem(self)
@@ -135,27 +135,27 @@ class ContainerStateNode(QGraphicsRectItem):
         """Update positions of header, title, and labels based on current rect."""
         rect = self.rect()
 
-        # Update header - make it slightly taller for better visibility
-        self.header.setRect(rect.left(), rect.top(), rect.width(), 35)
+        # Update header - make it taller for better visibility
+        self.header.setRect(rect.left(), rect.top(), rect.width(), 50)
 
         # Update title position
         title_rect = self.title.boundingRect()
         self.title.setPos(
-            rect.left() + rect.width() / 2 - title_rect.width() / 2, rect.top() + 7
+            rect.left() + rect.width() / 2 - title_rect.width() / 2, rect.top() + 12
         )
 
         # Update initial state label position (for State Machine)
         if hasattr(self, "start_state_label"):
             label_rect = self.start_state_label.boundingRect()
             self.start_state_label.setPos(
-                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 35
+                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 52
             )
 
         # Update default outcome label position (for Concurrence)
         if hasattr(self, "default_outcome_label"):
             label_rect = self.default_outcome_label.boundingRect()
             self.default_outcome_label.setPos(
-                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 35
+                rect.left() + rect.width() / 2 - label_rect.width() / 2, rect.top() + 52
             )
 
         # Update connection port position
@@ -172,9 +172,9 @@ class ContainerStateNode(QGraphicsRectItem):
             state_node.setParentItem(self)
 
             rect = self.rect()
-            CHILD_PADDING_X: int = 80
-            CHILD_PADDING_Y: int = 100
-            CHILD_SPACING_Y: int = 200
+            CHILD_PADDING_X: int = 60
+            CHILD_PADDING_Y: int = 110
+            CHILD_SPACING_Y: int = 600
 
             y_position: float = rect.top() + CHILD_PADDING_Y
 
@@ -218,10 +218,10 @@ class ContainerStateNode(QGraphicsRectItem):
             return
 
         rect = self.rect()
-        OUTCOME_PADDING_TOP: int = 100
-        OUTCOME_SPACING_Y: int = 200
+        OUTCOME_PADDING_TOP: int = 110
+        OUTCOME_SPACING_Y: int = 600
 
-        max_child_x: float = rect.left() + 400
+        max_child_x: float = rect.left() + 500
 
         for child in self.child_states.values():
             if isinstance(child, ContainerStateNode):
@@ -231,7 +231,7 @@ class ContainerStateNode(QGraphicsRectItem):
                 child_right = child.pos().x() + child.boundingRect().width()
             max_child_x = max(max_child_x, child_right)
 
-        outcome_x: float = max_child_x + 250
+        outcome_x: float = max_child_x + 450
         current_y: float = rect.top() + OUTCOME_PADDING_TOP
 
         for outcome_node in self.final_outcomes.values():
@@ -240,82 +240,8 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def auto_resize_for_children(self) -> None:
         """Automatically resize container to fit all children with padding."""
-        if not self.child_states and not self.final_outcomes:
-            rect = self.rect()
-            self.setRect(rect.left(), rect.top(), self.min_width, self.min_height)
-            self.update_visual_elements()
-            if self.parent_container:
-                self.parent_container.auto_resize_for_children()
-            return
-
-        min_x, min_y = float("inf"), float("inf")
-        max_x, max_y = float("-inf"), float("-inf")
-
-        for child in self.child_states.values():
-            child_rect = child.boundingRect()
-            child_pos = child.pos()
-
-            if isinstance(child, ContainerStateNode):
-                child_rect = child.rect()
-
-            left = child_pos.x() + child_rect.left()
-            top = child_pos.y() + child_rect.top()
-            right = child_pos.x() + child_rect.right()
-            bottom = child_pos.y() + child_rect.bottom()
-
-            min_x = min(min_x, left)
-            min_y = min(min_y, top)
-            max_x = max(max_x, right)
-            max_y = max(max_y, bottom)
-
-        for outcome in self.final_outcomes.values():
-            outcome_rect = outcome.boundingRect()
-            outcome_pos = outcome.pos()
-            left = outcome_pos.x() + outcome_rect.left()
-            top = outcome_pos.y() + outcome_rect.top()
-            right = outcome_pos.x() + outcome_rect.right()
-            bottom = outcome_pos.y() + outcome_rect.bottom()
-            min_x = min(min_x, left)
-            min_y = min(min_y, top)
-            max_x = max(max_x, right)
-            max_y = max(max_y, bottom)
-
-        rect = self.rect()
-
-        padding_left = 40
-        padding_right = 60
-        padding_top = 70
-        padding_bottom = 50
-
-        min_x -= padding_left
-        min_y -= padding_top
-        max_x += padding_right
-        max_y += padding_bottom
-
-        new_width = max(self.min_width, max_x - min_x)
-        new_height = max(self.min_height, max_y - min_y)
-
-        current_width = rect.width()
-        current_height = rect.height()
-
-        needs_resize = new_width > current_width or new_height > current_height
-
-        if needs_resize:
-            self.prepareGeometryChange()
-
-            self.setRect(
-                rect.left(),
-                rect.top(),
-                max(new_width, current_width),
-                max(new_height, current_height),
-            )
-
-            self.update_visual_elements()
-
-            if self.parent_container:
-                self.parent_container.auto_resize_for_children()
-            else:
-                self._update_all_connections_recursive()
+        # Disabled - container size is now fixed
+        return
 
     def _update_all_connections_recursive(self) -> None:
         """Recursively update all connections for this container and its children."""

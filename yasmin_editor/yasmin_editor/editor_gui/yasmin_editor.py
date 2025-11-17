@@ -1628,13 +1628,12 @@ class YasminEditor(QMainWindow):
             QApplication.processEvents()
 
     def _layout_container_sugiyama(self, container: ContainerStateNode):
-        """Layout children within a container using Sugiyama Framework.
+        """Layout children within a container using Force-Directed algorithm (Fruchterman-Reingold).
 
-        Steps:
-        1. Layer Assignment - Assign hierarchy levels to nodes
-        2. Crossing Reduction - Order nodes within layers to minimize crossings
-        3. Coordinate Assignment - Position nodes with proper spacing
-        4. Edge Routing - Draw edges (handled by ConnectionLine)
+        Uses physical simulation with:
+        - Repulsive forces between all nodes (prevent overlap)
+        - Attractive forces along edges (keep connected nodes close)
+        - Boundary forces (keep nodes within container)
         """
         if not container.child_states and not container.final_outcomes:
             return
@@ -1654,7 +1653,6 @@ class YasminEditor(QMainWindow):
         # Build adjacency graph - INCLUDE final outcomes as terminal nodes
         all_nodes = nodes + final_outcomes
         graph = {node: [] for node in all_nodes}
-        reverse_graph = {node: [] for node in all_nodes}
 
         for node in nodes:
             # Safely access connections attribute
@@ -1664,44 +1662,147 @@ class YasminEditor(QMainWindow):
                         # Include connections to both states and final outcomes
                         if conn.to_node in all_nodes:
                             graph[node].append(conn.to_node)
-                            reverse_graph[conn.to_node].append(node)
 
-        # Verify we have some connections before proceeding
-        total_edges = sum(len(neighbors) for neighbors in graph.values())
-        if total_edges == 0 and len(all_nodes) > 1:
-            # No connections found - this might happen if transitions aren't loaded yet
-            # Fall back to simple positioning
-            rect = container.rect()
-            x_pos = rect.left() + 120
-            y_pos = rect.top() + 140
+        # Use Force-Directed layout
+        self._force_directed_layout(container, all_nodes, graph)
+
+    def _force_directed_layout(self, container, nodes, graph):
+        """Fruchterman-Reingold force-directed layout algorithm.
+        
+        Simulates physical forces:
+        - Repulsion: All nodes repel each other (prevents overlap)
+        - Attraction: Connected nodes attract each other (keeps graph connected)
+        - Boundary: Nodes are pushed back if they leave the container
+        
+        Args:
+            container: The container node
+            nodes: List of all nodes to position
+            graph: Adjacency dictionary mapping nodes to their neighbors
+        """
+        import math
+        import random
+        
+        rect = container.rect()
+        
+        # Layout parameters
+        MARGIN_X = rect.width() * 0.05
+        MARGIN_Y_TOP = rect.height() * 0.12
+        MARGIN_Y_BOTTOM = rect.height() * 0.05
+        
+        area_width = rect.width() - (2 * MARGIN_X)
+        area_height = rect.height() - MARGIN_Y_TOP - MARGIN_Y_BOTTOM
+        
+        # Get node dimensions
+        node_dimensions = {}
+        for node in nodes:
+            if isinstance(node, ContainerStateNode):
+                node.prepareGeometryChange()
+                w, h = node.rect().width(), node.rect().height()
+            else:
+                w, h = node.boundingRect().width(), node.boundingRect().height()
+            node_dimensions[node] = (w, h)
+        
+        # Initialize positions randomly or use current positions
+        positions = {}
+        for node in nodes:
+            current_pos = node.pos()
+            # Check if node already has a reasonable position
+            if (rect.left() < current_pos.x() < rect.right() and 
+                rect.top() < current_pos.y() < rect.bottom()):
+                positions[node] = [current_pos.x(), current_pos.y()]
+            else:
+                # Random initial position
+                x = rect.left() + MARGIN_X + random.random() * area_width
+                y = rect.top() + MARGIN_Y_TOP + random.random() * area_height
+                positions[node] = [x, y]
+        
+        # Algorithm parameters
+        area = area_width * area_height
+        k = math.sqrt(area / len(nodes))  # Optimal distance between nodes (increased for more separation)
+        
+        ITERATIONS = 100
+        initial_temp = area_width / 10
+        temp = initial_temp
+        
+        # Simulation loop
+        for iteration in range(ITERATIONS):
+            # Calculate displacement for each node
+            displacement = {node: [0.0, 0.0] for node in nodes}
+            
+            # 1. Calculate repulsive forces between all pairs
+            for i, node1 in enumerate(nodes):
+                for node2 in nodes[i+1:]:
+                    delta_x = positions[node1][0] - positions[node2][0]
+                    delta_y = positions[node1][1] - positions[node2][1]
+                    
+                    # Distance between nodes
+                    distance = math.sqrt(delta_x**2 + delta_y**2)
+                    if distance < 0.01:
+                        distance = 0.01  # Prevent division by zero
+                    
+                    # Repulsive force (inversely proportional to distance)
+                    force = (k * k) / distance
+                    
+                    # Apply force
+                    displacement[node1][0] += (delta_x / distance) * force
+                    displacement[node1][1] += (delta_y / distance) * force
+                    displacement[node2][0] -= (delta_x / distance) * force
+                    displacement[node2][1] -= (delta_y / distance) * force
+            
+            # 2. Calculate attractive forces along edges
             for node in nodes:
-                node.setPos(x_pos, y_pos)
-                y_pos += 150
-            for outcome in final_outcomes:
-                outcome.setPos(
-                    x_pos + 400, rect.top() + 140 + final_outcomes.index(outcome) * 120
-                )
-            container.auto_resize_for_children()
-            return
-
-        # Step 1: Layer Assignment using longest path method
-        # This will now place final outcomes in appropriate layers
-        layers = self._sugiyama_layer_assignment(
-            all_nodes, graph, reverse_graph, container.start_state
-        )
-
-        # Step 2: Initial ordering of outcomes within their layers based on connections
-        # This pre-orders outcomes before crossing reduction for better results
-        self._preorder_outcomes_in_layers(layers, reverse_graph)
-
-        # Step 3: Crossing Reduction using barycentric method
-        # This will consider connections to final outcomes
-        layers = self._sugiyama_crossing_reduction(layers, graph, reverse_graph)
-
-        # Step 4: Coordinate Assignment with proper spacing
-        # Final outcomes are now part of the layer structure
-        # Pass the graph so coordinate assignment can use it
-        self._sugiyama_coordinate_assignment(container, layers, graph, reverse_graph)
+                for neighbor in graph.get(node, []):
+                    if neighbor not in nodes:
+                        continue
+                    
+                    delta_x = positions[node][0] - positions[neighbor][0]
+                    delta_y = positions[node][1] - positions[neighbor][1]
+                    
+                    distance = math.sqrt(delta_x**2 + delta_y**2)
+                    if distance < 0.01:
+                        distance = 0.01
+                    
+                    # Attractive force (proportional to distance)
+                    force = (distance * distance) / k
+                    
+                    # Apply force
+                    displacement[node][0] -= (delta_x / distance) * force
+                    displacement[node][1] -= (delta_y / distance) * force
+                    displacement[neighbor][0] += (delta_x / distance) * force
+                    displacement[neighbor][1] += (delta_y / distance) * force
+            
+            # 3. Limit displacement by temperature and apply
+            for node in nodes:
+                disp_x = displacement[node][0]
+                disp_y = displacement[node][1]
+                
+                disp_length = math.sqrt(disp_x**2 + disp_y**2)
+                if disp_length < 0.01:
+                    disp_length = 0.01
+                
+                # Limit by temperature
+                limited_disp = min(disp_length, temp) / disp_length
+                
+                positions[node][0] += disp_x * limited_disp
+                positions[node][1] += disp_y * limited_disp
+                
+                # Keep within boundaries
+                node_w, node_h = node_dimensions[node]
+                positions[node][0] = max(rect.left() + MARGIN_X, 
+                                        min(positions[node][0], 
+                                            rect.right() - MARGIN_X - node_w))
+                positions[node][1] = max(rect.top() + MARGIN_Y_TOP, 
+                                        min(positions[node][1], 
+                                            rect.bottom() - MARGIN_Y_BOTTOM - node_h))
+            
+            # Cool down temperature
+            temp = initial_temp * (1 - iteration / ITERATIONS)
+        
+        # Apply final positions
+        for node, (x, y) in positions.items():
+            node.setPos(x, y)
+        
+        container.auto_resize_for_children()
 
     def _preorder_outcomes_in_layers(self, layers, reverse_graph):
         """Pre-order final outcomes within their layers based on incoming connections.
@@ -2234,11 +2335,11 @@ class YasminEditor(QMainWindow):
     ):
         """Step 3 of Sugiyama Framework: Assign coordinates to nodes.
 
-        Uses a top-to-bottom layout where:
-        - Layers progress from top to bottom
-        - Nodes within a layer are spaced horizontally
-        - Spacing prevents overlaps and provides clean layout
-        - Nodes are centered based on their connections (edge length minimization)
+        Uses a grid-based layout with optimal spacing:
+        - Nodes are positioned in a grid to maximize space usage
+        - Considers actual node dimensions for precise placement
+        - Minimizes edge crossings through strategic positioning
+        - Dynamic spacing based on connection density
 
         Args:
             container: The container state node
@@ -2248,15 +2349,10 @@ class YasminEditor(QMainWindow):
         """
         rect = container.rect()
 
-        # Layout configuration - optimized spacing for top-to-bottom
-        START_X = rect.left() + 120  # Left padding
-        START_Y = rect.top() + 140  # Top padding
-        LAYER_SPACING = 200  # Vertical spacing between layers
-        NODE_SPACING = 100  # Base horizontal spacing between nodes
-        MIN_HORIZONTAL_GAP = 50  # Minimum gap between node edges
-
-        # Calculate dimensions for each node (including final outcomes)
+        # Calculate dimensions for each node FIRST
         node_dimensions = {}
+        max_node_height = 0
+        
         for layer in layers:
             for node in layer:
                 if isinstance(node, ContainerStateNode):
@@ -2267,104 +2363,539 @@ class YasminEditor(QMainWindow):
                     width = node.boundingRect().width()
                     height = node.boundingRect().height()
                 node_dimensions[node] = (width, height)
+                max_node_height = max(max_node_height, height)
+        
+        # Dynamic margins based on container size (percentage-based)
+        MARGIN_RATIO_X = 0.01  # 3% margin on each side
+        MARGIN_RATIO_Y_TOP = 0.01  # 12% margin top (for header)
+        MARGIN_RATIO_Y_BOTTOM = 0.01  # 3% margin bottom
+        
+        margin_x = rect.width() * MARGIN_RATIO_X
+        margin_y_top = rect.height() * MARGIN_RATIO_Y_TOP
+        margin_y_bottom = rect.height() * MARGIN_RATIO_Y_BOTTOM
+        
+        # Use local coordinates relative to rect origin
+        START_X = rect.left() + margin_x
+        START_Y = rect.top() + margin_y_top
+        
+        # Calculate available space
+        available_width = rect.width() - (2 * margin_x)
+        available_height = rect.height() - margin_y_top - margin_y_bottom
+        
+        num_layers = len(layers)
+        
+        # Calculate ADAPTIVE vertical spacing
+        if num_layers > 1:
+            # Space available after accounting for node heights
+            total_nodes_height = num_layers * max_node_height
+            space_for_gaps = available_height - total_nodes_height
+            layer_spacing = space_for_gaps / (num_layers - 1) if space_for_gaps > 0 else max_node_height * 0.3
+        else:
+            layer_spacing = 0
 
-        # Phase 1: Initial positioning - place nodes in layers (top to bottom)
-        positions = {}  # node -> (x, y)
+        # Phase 1: Calculate layer Y positions with adaptive spacing
+        layer_y_positions = []
         current_y = START_Y
+        
+        for layer_idx in range(num_layers):
+            layer_y_positions.append(current_y)
+            if layer_idx < num_layers - 1:
+                # Add node height + calculated spacing
+                current_y += max_node_height + layer_spacing
 
+        # Phase 2: Position nodes with adaptive horizontal spacing
+        positions = {}
+        
         for layer_idx, layer in enumerate(layers):
-            # Find maximum height in this layer for next layer positioning
-            max_height = max((node_dimensions[node][1] for node in layer), default=0)
+            layer_y = layer_y_positions[layer_idx]
+            
+            if len(layer) == 0:
+                continue
+            
+            # Calculate total width of all nodes in this layer
+            total_node_width = sum(node_dimensions[node][0] for node in layer)
+            
+            if len(layer) == 1:
+                # Single node - center it horizontally
+                node = layer[0]
+                node_width = node_dimensions[node][0]
+                x = START_X + (available_width - node_width) / 2
+                positions[node] = (x, layer_y)
+            else:
+                # Multiple nodes - distribute evenly from left to right edge
+                # Use edge-to-edge distribution (no extra gaps at edges)
+                available_space = available_width - total_node_width
+                
+                if len(layer) > 1:
+                    # Distribute space between nodes only
+                    gap_size = available_space / (len(layer) - 1)
+                else:
+                    gap_size = 0
+                
+                # Start at left edge
+                current_x = START_X
+                
+                for node in layer:
+                    positions[node] = (current_x, layer_y)
+                    width = node_dimensions[node][0]
+                    current_x += width + gap_size
 
-            # Calculate total width needed for this layer
-            total_width = sum(node_dimensions[node][0] for node in layer)
-            total_spacing = NODE_SPACING * (len(layer) - 1) if len(layer) > 1 else 0
-            layer_width = total_width + total_spacing
-
-            # Center the layer horizontally
-            current_x = START_X + (rect.width() - layer_width) / 2
-            # Ensure we don't go too far left
-            current_x = max(START_X, current_x)
-
-            # Initial positioning
-            for node in layer:
-                width, height = node_dimensions[node]
-                positions[node] = (current_x, current_y)
-                current_x += width + NODE_SPACING
-
-            current_y += max_height + LAYER_SPACING
-
-        # Phase 2: Horizontal centering to minimize edge lengths
-        # Adjust X positions based on connected nodes for better visual alignment
-        for iteration in range(3):  # Multiple passes for convergence
-            for layer_idx, layer in enumerate(layers):
+        # Phase 3: Optimize positions using median of connected nodes
+        for iteration in range(5):
+            for layer_idx in range(len(layers)):
+                layer = layers[layer_idx]
+                
                 if len(layer) <= 1:
                     continue
-
+                
+                # Calculate ideal X based on connections
                 for node in layer:
-                    # Calculate ideal X position based on connected nodes
-                    connected_x_positions = []
-
-                    # Look at predecessors (previous layer) using reverse_graph
-                    if layer_idx > 0:
-                        predecessors = reverse_graph.get(node, [])
-                        for pred_node in predecessors:
-                            if pred_node in positions:
-                                # Get center X of predecessor
-                                pred_x, pred_y = positions[pred_node]
-                                pred_width = node_dimensions[pred_node][0]
-                                connected_x_positions.append(pred_x + pred_width / 2)
-
-                    # Look at successors (next layer) using graph
-                    if layer_idx < len(layers) - 1:
-                        successors = graph.get(node, [])
-                        for succ_node in successors:
-                            if succ_node in positions:
-                                # Get center X of successor
-                                succ_x, succ_y = positions[succ_node]
-                                succ_width = node_dimensions[succ_node][0]
-                                connected_x_positions.append(succ_x + succ_width / 2)
-
-                    # If we have connections, try to center between them
-                    if connected_x_positions:
-                        ideal_center_x = sum(connected_x_positions) / len(
-                            connected_x_positions
-                        )
-                        # Convert to position (top-left corner)
-                        node_width = node_dimensions[node][0]
-                        ideal_x = ideal_center_x - node_width / 2
-
+                    connected_positions = []
+                    
+                    # Predecessors
+                    for pred in reverse_graph.get(node, []):
+                        if pred in positions:
+                            connected_positions.append(positions[pred][0])
+                    
+                    # Successors
+                    for succ in graph.get(node, []):
+                        if succ in positions:
+                            connected_positions.append(positions[succ][0])
+                    
+                    if connected_positions:
+                        connected_positions.sort()
+                        median_x = connected_positions[len(connected_positions) // 2]
+                        
                         current_x, current_y = positions[node]
-                        # Smooth adjustment (don't jump all the way to ideal)
-                        new_x = current_x * 0.6 + ideal_x * 0.4
+                        new_x = current_x + (median_x - current_x) * 0.3
                         positions[node] = (new_x, current_y)
 
-                # After adjustment, resolve overlaps within the layer
-                layer_nodes_with_pos = [(positions[node][0], node) for node in layer]
-                layer_nodes_with_pos.sort()
+        # Calculate minimum spacing for collision detection
+        # Use the smallest gap size as the minimum spacing
+        min_spacing = min(
+            available_width / (max(len(layer) for layer in layers) + 1),
+            layer_spacing if layer_spacing > 0 else max_node_height * 0.3
+        )
+        min_spacing = max(20, min_spacing)  # At least 20px, but use calculated value
 
-                # Ensure minimum spacing
-                for i in range(1, len(layer_nodes_with_pos)):
-                    prev_x, prev_node = layer_nodes_with_pos[i - 1]
-                    curr_x, curr_node = layer_nodes_with_pos[i]
-                    prev_width = node_dimensions[prev_node][0]
+        # Phase 4: Resolve collisions with grid-aware algorithm
+        positions = self._resolve_collisions_grid_based(positions, node_dimensions, min_spacing)
 
-                    min_x = prev_x + prev_width + MIN_HORIZONTAL_GAP
-                    if curr_x < min_x:
-                        # Shift current and all following nodes right
-                        shift = min_x - curr_x
-                        for j in range(i, len(layer_nodes_with_pos)):
-                            _, shift_node = layer_nodes_with_pos[j]
-                            x, y = positions[shift_node]
-                            positions[shift_node] = (x + shift, y)
-                        layer_nodes_with_pos[i] = (min_x, curr_node)
+        # Phase 5: Minimize crossings with grid awareness
+        positions = self._minimize_crossings_grid_aware(
+            positions, node_dimensions, layers, graph, reverse_graph, min_spacing
+        )
 
-        # Phase 3: Apply final positions
+        # Phase 6: Apply positions
         for node, (x, y) in positions.items():
             node.setPos(x, y)
 
-        # Resize container to fit all children
         container.auto_resize_for_children()
+
+    def _resolve_collisions_grid_based(self, positions, node_dimensions, min_spacing):
+        """Resolve collisions using grid-aware approach that maintains layer structure.
+        
+        Args:
+            positions: Dict mapping nodes to (x, y) tuples
+            node_dimensions: Dict mapping nodes to (width, height) tuples
+            min_spacing: Minimum spacing between nodes
+            
+        Returns:
+            Updated positions dict with no overlaps
+        """
+        MAX_ITERATIONS = 30
+        PUSH_DISTANCE = 40  # Aumentado para más separación
+        
+        for iteration in range(MAX_ITERATIONS):
+            collision_found = False
+            adjusted_positions = positions.copy()
+            
+            # Group nodes by Y position (layers)
+            layers_dict = {}
+            for node, (x, y) in positions.items():
+                if y not in layers_dict:
+                    layers_dict[y] = []
+                layers_dict[y].append(node)
+            
+            # Check collisions within each layer
+            for y_pos, layer_nodes in layers_dict.items():
+                # Sort by X position
+                layer_nodes.sort(key=lambda n: positions[n][0])
+                
+                # Check adjacent nodes in same layer
+                for i in range(len(layer_nodes) - 1):
+                    node1 = layer_nodes[i]
+                    node2 = layer_nodes[i + 1]
+                    
+                    x1, y1 = positions[node1]
+                    x2, y2 = positions[node2]
+                    w1, h1 = node_dimensions[node1]
+                    w2, h2 = node_dimensions[node2]
+                    
+                    # Check horizontal overlap
+                    if x1 + w1 + min_spacing > x2:
+                        collision_found = True
+                        # Push node2 to the right
+                        needed_space = (x1 + w1 + min_spacing) - x2
+                        adjusted_positions[node2] = (x2 + needed_space, y2)
+            
+            positions = adjusted_positions
+            
+            if not collision_found:
+                break
+        
+        return positions
+
+    def _minimize_crossings_grid_aware(self, positions, node_dimensions, layers, graph, reverse_graph, base_spacing):
+        """Minimize edge crossings while maintaining grid structure.
+        
+        Uses layer-by-layer optimization to reduce crossings without causing collisions.
+        
+        Args:
+            positions: Current node positions
+            node_dimensions: Node dimensions
+            layers: Layer structure
+            graph: Forward adjacency graph
+            reverse_graph: Reverse adjacency graph
+            base_spacing: Base spacing between nodes
+            
+        Returns:
+            Optimized positions
+        """
+        # Try small adjustments within each layer to reduce crossings
+        for iteration in range(10):
+            improved = False
+            
+            for layer in layers:
+                if len(layer) <= 1:
+                    continue
+                
+                # Try swapping adjacent nodes if it reduces crossings
+                for i in range(len(layer) - 1):
+                    node1 = layer[i]
+                    node2 = layer[i + 1]
+                    
+                    # Count crossings before swap
+                    crossings_before = self._count_node_crossings(node1, positions, graph, reverse_graph)
+                    crossings_before += self._count_node_crossings(node2, positions, graph, reverse_graph)
+                    
+                    # Swap positions
+                    pos1 = positions[node1]
+                    pos2 = positions[node2]
+                    positions[node1] = pos2
+                    positions[node2] = pos1
+                    
+                    # Count crossings after swap
+                    crossings_after = self._count_node_crossings(node1, positions, graph, reverse_graph)
+                    crossings_after += self._count_node_crossings(node2, positions, graph, reverse_graph)
+                    
+                    # Keep swap if it reduces crossings
+                    if crossings_after < crossings_before:
+                        improved = True
+                    else:
+                        # Revert swap
+                        positions[node1] = pos1
+                        positions[node2] = pos2
+            
+            if not improved:
+                break
+        
+        return positions
+
+    def _count_node_crossings(self, node, positions, graph, reverse_graph):
+        """Count crossings for edges connected to a specific node.
+        
+        Args:
+            node: Node to check
+            positions: All node positions
+            graph: Forward graph
+            reverse_graph: Reverse graph
+            
+        Returns:
+            Number of crossings for this node's edges
+        """
+        crossings = 0
+        node_edges = []
+        
+        # Get all edges for this node
+        if node in positions:
+            x1, y1 = positions[node]
+            
+            # Outgoing edges
+            for succ in graph.get(node, []):
+                if succ in positions:
+                    x2, y2 = positions[succ]
+                    node_edges.append(((x1, y1), (x2, y2)))
+            
+            # Incoming edges
+            for pred in reverse_graph.get(node, []):
+                if pred in positions:
+                    x0, y0 = positions[pred]
+                    node_edges.append(((x0, y0), (x1, y1)))
+        
+        # Count crossings with all other edges
+        all_edges = []
+        for n, neighbors in graph.items():
+            if n not in positions:
+                continue
+            nx, ny = positions[n]
+            for neighbor in neighbors:
+                if neighbor not in positions:
+                    continue
+                nnx, nny = positions[neighbor]
+                all_edges.append(((nx, ny), (nnx, nny)))
+        
+        # Check each node edge against all edges
+        for edge1 in node_edges:
+            for edge2 in all_edges:
+                if edge1 != edge2 and self._edges_cross(edge1, edge2):
+                    crossings += 1
+        
+        return crossings
+
+    def _resolve_collisions(self, positions, node_dimensions, min_spacing):
+        """Detect and resolve overlapping nodes by adjusting positions.
+        
+        Uses iterative collision detection with spatial hashing for efficiency.
+        Adjusts positions horizontally to maintain layer structure while preventing overlaps.
+        
+        Args:
+            positions: Dict mapping nodes to (x, y) tuples
+            node_dimensions: Dict mapping nodes to (width, height) tuples
+            min_spacing: Minimum spacing between nodes
+            
+        Returns:
+            Updated positions dict with no overlaps
+        """
+        MAX_ITERATIONS = 50
+        PUSH_DISTANCE = 20  # Distance to push nodes apart per iteration
+        
+        for iteration in range(MAX_ITERATIONS):
+            collision_found = False
+            adjusted_positions = positions.copy()
+            
+            # Check all pairs for collisions
+            nodes = list(positions.keys())
+            for i in range(len(nodes)):
+                for j in range(i + 1, len(nodes)):
+                    node1, node2 = nodes[i], nodes[j]
+                    x1, y1 = positions[node1]
+                    x2, y2 = positions[node2]
+                    w1, h1 = node_dimensions[node1]
+                    w2, h2 = node_dimensions[node2]
+                    
+                    # Check if bounding boxes overlap (with min_spacing buffer)
+                    if (abs(x1 - x2) < (w1 + w2) / 2 + min_spacing and
+                        abs(y1 - y2) < (h1 + h2) / 2 + min_spacing):
+                        
+                        collision_found = True
+                        
+                        # Calculate overlap amounts
+                        x_overlap = (w1 + w2) / 2 + min_spacing - abs(x1 - x2)
+                        y_overlap = (h1 + h2) / 2 + min_spacing - abs(y1 - y2)
+                        
+                        # Push nodes apart in the direction with less overlap
+                        # Prefer horizontal separation to maintain layer structure
+                        if x_overlap < y_overlap * 1.5:  # Bias towards horizontal
+                            # Push horizontally
+                            if x1 < x2:
+                                adjusted_positions[node1] = (x1 - PUSH_DISTANCE, y1)
+                                adjusted_positions[node2] = (x2 + PUSH_DISTANCE, y2)
+                            else:
+                                adjusted_positions[node1] = (x1 + PUSH_DISTANCE, y1)
+                                adjusted_positions[node2] = (x2 - PUSH_DISTANCE, y2)
+                        else:
+                            # Push vertically
+                            if y1 < y2:
+                                adjusted_positions[node1] = (x1, y1 - PUSH_DISTANCE)
+                                adjusted_positions[node2] = (x2, y2 + PUSH_DISTANCE)
+                            else:
+                                adjusted_positions[node1] = (x1, y1 + PUSH_DISTANCE)
+                                adjusted_positions[node2] = (x2, y2 - PUSH_DISTANCE)
+            
+            positions = adjusted_positions
+            
+            # If no collisions found, we're done
+            if not collision_found:
+                break
+        
+        return positions
+
+    def _minimize_edge_crossings_final(self, positions, node_dimensions, layers, graph, reverse_graph):
+        """Final pass to minimize edge crossings through micro-adjustments.
+        
+        Makes small position adjustments to reduce crossings without causing overlaps.
+        Uses simulated annealing approach for global optimization.
+        
+        Args:
+            positions: Current node positions
+            node_dimensions: Node dimensions
+            layers: Layer structure
+            graph: Forward adjacency graph
+            reverse_graph: Reverse adjacency graph
+            
+        Returns:
+            Optimized positions
+        """
+        import math
+        import random
+        
+        MAX_ITERATIONS = 100
+        INITIAL_TEMP = 50.0
+        COOLING_RATE = 0.95
+        MAX_MOVE = 30  # Maximum movement per iteration
+        
+        current_positions = positions.copy()
+        best_positions = positions.copy()
+        current_crossings = self._count_all_crossings(current_positions, graph)
+        best_crossings = current_crossings
+        
+        temperature = INITIAL_TEMP
+        
+        for iteration in range(MAX_ITERATIONS):
+            # Try moving a random node
+            node = random.choice(list(current_positions.keys()))
+            old_pos = current_positions[node]
+            
+            # Generate small random movement
+            dx = random.uniform(-MAX_MOVE, MAX_MOVE)
+            dy = random.uniform(-MAX_MOVE, MAX_MOVE)
+            new_pos = (old_pos[0] + dx, old_pos[1] + dy)
+            
+            # Apply tentative move
+            current_positions[node] = new_pos
+            
+            # Check if this creates collisions
+            has_collision = self._check_collision_at_position(
+                node, new_pos, current_positions, node_dimensions, min_spacing=100
+            )
+            
+            if not has_collision:
+                # Calculate new crossing count
+                new_crossings = self._count_all_crossings(current_positions, graph)
+                
+                # Decide whether to accept the move (simulated annealing)
+                delta = new_crossings - current_crossings
+                
+                if delta < 0 or random.random() < math.exp(-delta / temperature):
+                    # Accept move
+                    current_crossings = new_crossings
+                    
+                    if new_crossings < best_crossings:
+                        best_crossings = new_crossings
+                        best_positions = current_positions.copy()
+                else:
+                    # Reject move
+                    current_positions[node] = old_pos
+            else:
+                # Reject move due to collision
+                current_positions[node] = old_pos
+            
+            # Cool down
+            temperature *= COOLING_RATE
+            
+            # Early exit if no crossings
+            if best_crossings == 0:
+                break
+        
+        return best_positions
+
+    def _check_collision_at_position(self, node, pos, positions, node_dimensions, min_spacing):
+        """Check if a node at a given position would collide with others.
+        
+        Args:
+            node: Node to check
+            pos: Position tuple (x, y)
+            positions: Dict of all node positions
+            node_dimensions: Dict of node dimensions
+            min_spacing: Minimum required spacing
+            
+        Returns:
+            True if collision detected, False otherwise
+        """
+        x, y = pos
+        w, h = node_dimensions[node]
+        
+        for other_node, other_pos in positions.items():
+            if other_node == node:
+                continue
+            
+            ox, oy = other_pos
+            ow, oh = node_dimensions[other_node]
+            
+            # Check bounding box overlap with spacing
+            if (abs(x - ox) < (w + ow) / 2 + min_spacing and
+                abs(y - oy) < (h + oh) / 2 + min_spacing):
+                return True
+        
+        return False
+
+    def _count_all_crossings(self, positions, graph):
+        """Count total edge crossings across all connections.
+        
+        Args:
+            positions: Node positions
+            graph: Adjacency graph
+            
+        Returns:
+            Total number of edge crossings
+        """
+        # Collect all edges with their positions
+        edges = []
+        for node, neighbors in graph.items():
+            if node not in positions:
+                continue
+            x1, y1 = positions[node]
+            for neighbor in neighbors:
+                if neighbor not in positions:
+                    continue
+                x2, y2 = positions[neighbor]
+                edges.append(((x1, y1), (x2, y2)))
+        
+        # Count crossings between all edge pairs
+        crossings = 0
+        for i in range(len(edges)):
+            for j in range(i + 1, len(edges)):
+                if self._edges_cross(edges[i], edges[j]):
+                    crossings += 1
+        
+        return crossings
+
+    def _edges_cross(self, edge1, edge2):
+        """Check if two edges cross using line segment intersection.
+        
+        Args:
+            edge1: Tuple of ((x1, y1), (x2, y2))
+            edge2: Tuple of ((x3, y3), (x4, y4))
+            
+        Returns:
+            True if edges cross, False otherwise
+        """
+        (x1, y1), (x2, y2) = edge1
+        (x3, y3), (x4, y4) = edge2
+        
+        # Skip if edges share endpoints
+        if (x1, y1) == (x3, y3) or (x1, y1) == (x4, y4) or \
+           (x2, y2) == (x3, y3) or (x2, y2) == (x4, y4):
+            return False
+        
+        # Calculate orientation of ordered triplet (p, q, r)
+        def orientation(px, py, qx, qy, rx, ry):
+            val = (qy - py) * (rx - qx) - (qx - px) * (ry - qy)
+            if abs(val) < 1e-9:
+                return 0  # Collinear
+            return 1 if val > 0 else 2  # Clockwise or Counterclockwise
+        
+        o1 = orientation(x1, y1, x2, y2, x3, y3)
+        o2 = orientation(x1, y1, x2, y2, x4, y4)
+        o3 = orientation(x3, y3, x4, y4, x1, y1)
+        o4 = orientation(x3, y3, x4, y4, x2, y2)
+        
+        # General case: segments intersect if orientations differ
+        if o1 != o2 and o3 != o4:
+            return True
+        
+        return False
 
     def _compute_layers(self, nodes, graph, start_state_name):
         """Compute hierarchical layers for nodes using longest path layering.
@@ -2588,39 +3119,170 @@ class YasminEditor(QMainWindow):
                 )
             return
 
-        # Apply Sugiyama Framework for root level
-        # Step 1: Layer Assignment - final outcomes will be placed in appropriate layers
-        layers = self._sugiyama_layer_assignment(
-            all_nodes, graph, reverse_graph, self.start_state
-        )
+        # Apply Force-Directed layout for root level
+        self._force_directed_layout_root(all_nodes, graph)
 
-        # Step 2: Pre-order outcomes based on connections
-        self._preorder_outcomes_in_layers(layers, reverse_graph)
-
-        # Step 3: Crossing Reduction - considers connections to final outcomes
-        layers = self._sugiyama_crossing_reduction(layers, graph, reverse_graph)
-
-        # Step 4: Coordinate Assignment for root level
-        self._position_root_layers_sugiyama(layers, graph, reverse_graph)
+    def _force_directed_layout_root(self, nodes, graph):
+        """Force-directed layout for root-level nodes.
+        
+        Uses Fruchterman-Reingold algorithm adapted for the root canvas.
+        
+        Args:
+            nodes: List of all root-level nodes
+            graph: Adjacency dictionary
+        """
+        import math
+        import random
+        
+        # Get viewport dimensions
+        viewport_rect = self.canvas.viewport().rect()
+        viewport_width = viewport_rect.width()
+        viewport_height = viewport_rect.height()
+        
+        # Margins
+        MARGIN_X = viewport_width * 0.1
+        MARGIN_Y = viewport_height * 0.1
+        
+        area_width = viewport_width - (2 * MARGIN_X)
+        area_height = viewport_height - (2 * MARGIN_Y)
+        
+        # Get node dimensions
+        node_dimensions = {}
+        for node in nodes:
+            if isinstance(node, ContainerStateNode):
+                node.prepareGeometryChange()
+                w, h = node.rect().width(), node.rect().height()
+            else:
+                w, h = node.boundingRect().width(), node.boundingRect().height()
+            node_dimensions[node] = (w, h)
+        
+        # Initialize positions
+        positions = {}
+        for node in nodes:
+            current_pos = node.scenePos()
+            # Use current position if reasonable, otherwise random
+            if (MARGIN_X < current_pos.x() < viewport_width - MARGIN_X and 
+                MARGIN_Y < current_pos.y() < viewport_height - MARGIN_Y):
+                positions[node] = [current_pos.x(), current_pos.y()]
+            else:
+                x = MARGIN_X + random.random() * area_width
+                y = MARGIN_Y + random.random() * area_height
+                positions[node] = [x, y]
+        
+        # Algorithm parameters
+        area = area_width * area_height
+        k = math.sqrt(area / len(nodes)) * 1.5  # Optimal distance (increased for more separation)
+        
+        ITERATIONS = 150
+        initial_temp = area_width / 8
+        temp = initial_temp
+        
+        # Simulation
+        for iteration in range(ITERATIONS):
+            displacement = {node: [0.0, 0.0] for node in nodes}
+            
+            # Repulsive forces
+            for i, node1 in enumerate(nodes):
+                for node2 in nodes[i+1:]:
+                    delta_x = positions[node1][0] - positions[node2][0]
+                    delta_y = positions[node1][1] - positions[node2][1]
+                    
+                    distance = math.sqrt(delta_x**2 + delta_y**2)
+                    if distance < 0.01:
+                        distance = 0.01
+                    
+                    force = (k * k) / distance
+                    
+                    displacement[node1][0] += (delta_x / distance) * force
+                    displacement[node1][1] += (delta_y / distance) * force
+                    displacement[node2][0] -= (delta_x / distance) * force
+                    displacement[node2][1] -= (delta_y / distance) * force
+            
+            # Attractive forces
+            for node in nodes:
+                for neighbor in graph.get(node, []):
+                    if neighbor not in nodes:
+                        continue
+                    
+                    delta_x = positions[node][0] - positions[neighbor][0]
+                    delta_y = positions[node][1] - positions[neighbor][1]
+                    
+                    distance = math.sqrt(delta_x**2 + delta_y**2)
+                    if distance < 0.01:
+                        distance = 0.01
+                    
+                    force = (distance * distance) / k
+                    
+                    displacement[node][0] -= (delta_x / distance) * force
+                    displacement[node][1] -= (delta_y / distance) * force
+                    displacement[neighbor][0] += (delta_x / distance) * force
+                    displacement[neighbor][1] += (delta_y / distance) * force
+            
+            # Apply displacement with temperature limit
+            for node in nodes:
+                disp_x = displacement[node][0]
+                disp_y = displacement[node][1]
+                
+                disp_length = math.sqrt(disp_x**2 + disp_y**2)
+                if disp_length < 0.01:
+                    disp_length = 0.01
+                
+                limited_disp = min(disp_length, temp) / disp_length
+                
+                positions[node][0] += disp_x * limited_disp
+                positions[node][1] += disp_y * limited_disp
+                
+                # Boundaries
+                node_w, node_h = node_dimensions[node]
+                positions[node][0] = max(MARGIN_X, 
+                                        min(positions[node][0], 
+                                            viewport_width - MARGIN_X - node_w))
+                positions[node][1] = max(MARGIN_Y, 
+                                        min(positions[node][1], 
+                                            viewport_height - MARGIN_Y - node_h))
+            
+            # Cool down
+            temp = initial_temp * (1 - iteration / ITERATIONS)
+        
+        # Apply positions
+        for node, (x, y) in positions.items():
+            node.setPos(x, y)
+        
+        # Update connections
+        for node in nodes:
+            if hasattr(node, "connections"):
+                for conn in node.connections:
+                    conn.update_position()
 
     def _position_root_layers_sugiyama(self, layers, graph, reverse_graph):
-        """Position root-level nodes using Sugiyama coordinate assignment.
-        Uses top-to-bottom layering with proper horizontal spacing and edge length minimization.
-        Final outcomes are now part of the layers structure.
+        """Position root-level nodes using grid-based Sugiyama assignment.
+        
+        Uses adaptive layout that scales with viewport and content size.
 
         Args:
             layers: List of layers, each containing nodes
             graph: Forward adjacency graph (node -> list of successors)
             reverse_graph: Reverse adjacency graph (node -> list of predecessors)
         """
-        # Configuration for root level - optimized spacing for top-to-bottom
-        START_X = 150  # Left padding
-        START_Y = 150  # Top padding
-        LAYER_SPACING = 220  # Vertical spacing between layers
-        NODE_SPACING = 120  # Base horizontal spacing between nodes
-        MIN_HORIZONTAL_GAP = 60  # Minimum gap between node edges
+        # Get viewport dimensions to calculate available space
+        viewport_rect = self.canvas.viewport().rect()
+        viewport_width = viewport_rect.width()
+        viewport_height = viewport_rect.height()
+        
+        # Adaptive margins based on viewport size
+        MARGIN_RATIO_X = 0.08  # 8% margin on sides
+        MARGIN_RATIO_Y = 0.1   # 10% margin top/bottom
+        
+        margin_x = viewport_width * MARGIN_RATIO_X
+        margin_y = viewport_height * MARGIN_RATIO_Y
+        
+        START_X = margin_x
+        START_Y = margin_y
+        
+        available_width = viewport_width - (2 * margin_x)
+        available_height = viewport_height - (2 * margin_y)
 
-        # Helper function to get element dimensions
+        # Get element dimensions
         def get_element_size(node):
             if isinstance(node, ContainerStateNode):
                 node.prepareGeometryChange()
@@ -2630,101 +3292,121 @@ class YasminEditor(QMainWindow):
                 bbox = node.boundingRect()
                 return bbox.width(), bbox.height()
 
-        # Calculate dimensions for each node (including final outcomes)
+        # Calculate dimensions
         node_dimensions = {}
+        max_node_height = 0
+        
         for layer in layers:
             for node in layer:
                 width, height = get_element_size(node)
                 node_dimensions[node] = (width, height)
+                max_node_height = max(max_node_height, height)
 
-        # Phase 1: Initial positioning (top to bottom)
-        positions = {}
+        num_layers = len(layers)
+        
+        # Adaptive vertical spacing
+        if num_layers > 1:
+            total_nodes_height = num_layers * max_node_height
+            space_for_gaps = available_height - total_nodes_height
+            layer_spacing = space_for_gaps / (num_layers - 1) if space_for_gaps > 0 else max_node_height * 0.4
+        else:
+            layer_spacing = 0
+
+        # Phase 1: Calculate layer Y positions with adaptive spacing
+        layer_y_positions = []
         current_y = START_Y
+        
+        for layer_idx in range(num_layers):
+            layer_y_positions.append(current_y)
+            if layer_idx < num_layers - 1:
+                current_y += max_node_height + layer_spacing
 
+        # Phase 2: Initial X positioning with adaptive horizontal spacing
+        positions = {}
+        
         for layer_idx, layer in enumerate(layers):
-            # Find maximum height in this layer
-            max_height = max((node_dimensions[node][1] for node in layer), default=0)
+            layer_y = layer_y_positions[layer_idx]
+            
+            if len(layer) == 0:
+                continue
+            
+            # Calculate total width of nodes in this layer
+            total_node_width = sum(node_dimensions[node][0] for node in layer)
+            
+            if len(layer) == 1:
+                # Single node - center it
+                node = layer[0]
+                node_width = node_dimensions[node][0]
+                x = START_X + (available_width - node_width) / 2
+                positions[node] = (x, layer_y)
+            else:
+                # Multiple nodes - distribute edge to edge
+                available_space = available_width - total_node_width
+                
+                if len(layer) > 1:
+                    gap_size = available_space / (len(layer) - 1)
+                else:
+                    gap_size = 0
+                
+                current_x = START_X
+                
+                for node in layer:
+                    positions[node] = (current_x, layer_y)
+                    width = node_dimensions[node][0]
+                    current_x += width + gap_size
 
-            # Calculate total width needed for this layer
-            total_width = sum(node_dimensions[node][0] for node in layer)
-            total_spacing = NODE_SPACING * (len(layer) - 1) if len(layer) > 1 else 0
-            layer_width = total_width + total_spacing
-
-            # Center the layer horizontally (simple centering for root level)
-            current_x = START_X
-
-            # Initial positioning
-            for node in layer:
-                width, height = node_dimensions[node]
-                positions[node] = (current_x, current_y)
-                current_x += width + NODE_SPACING
-
-            current_y += max_height + LAYER_SPACING
-
-        # Phase 2: Horizontal centering to minimize edge lengths (use graph instead of node.connections)
-        for iteration in range(3):
+        # Phase 3: Optimize with median positioning
+        for iteration in range(5):
             for layer_idx, layer in enumerate(layers):
                 if len(layer) <= 1:
                     continue
 
                 for node in layer:
-                    connected_x_positions = []
-
-                    # Check predecessors using reverse_graph
-                    if layer_idx > 0:
-                        predecessors = reverse_graph.get(node, [])
-                        for pred_node in predecessors:
-                            if pred_node in positions:
-                                # Get center X of predecessor
-                                pred_x, pred_y = positions[pred_node]
-                                pred_width = node_dimensions[pred_node][0]
-                                connected_x_positions.append(pred_x + pred_width / 2)
-
-                    # Check successors using graph
-                    if layer_idx < len(layers) - 1:
-                        successors = graph.get(node, [])
-                        for succ_node in successors:
-                            if succ_node in positions:
-                                # Get center X of successor
-                                succ_x, succ_y = positions[succ_node]
-                                succ_width = node_dimensions[succ_node][0]
-                                connected_x_positions.append(succ_x + succ_width / 2)
-
-                    if connected_x_positions:
-                        ideal_center_x = sum(connected_x_positions) / len(
-                            connected_x_positions
-                        )
-                        # Convert to position (top-left corner)
-                        node_width = node_dimensions[node][0]
-                        ideal_x = ideal_center_x - node_width / 2
-
+                    connected_positions = []
+                    
+                    # Predecessors
+                    for pred in reverse_graph.get(node, []):
+                        if pred in positions:
+                            connected_positions.append(positions[pred][0])
+                    
+                    # Successors
+                    for succ in graph.get(node, []):
+                        if succ in positions:
+                            connected_positions.append(positions[succ][0])
+                    
+                    if connected_positions:
+                        connected_positions.sort()
+                        median_x = connected_positions[len(connected_positions) // 2]
+                        
                         current_x, current_y = positions[node]
-                        new_x = current_x * 0.6 + ideal_x * 0.4
+                        new_x = current_x + (median_x - current_x) * 0.3
                         positions[node] = (new_x, current_y)
 
-                # Resolve overlaps
-                layer_nodes_with_pos = [(positions[node][0], node) for node in layer]
-                layer_nodes_with_pos.sort()
+        # Calculate minimum spacing for collision detection
+        # Use the smallest gap size as minimum spacing
+        max_nodes_in_layer = max(len(layer) for layer in layers) if layers else 1
+        min_spacing = available_width / (max_nodes_in_layer + 1) if max_nodes_in_layer > 1 else 100
+        min_spacing = max(30, min_spacing)
 
-                for i in range(1, len(layer_nodes_with_pos)):
-                    prev_x, prev_node = layer_nodes_with_pos[i - 1]
-                    curr_x, curr_node = layer_nodes_with_pos[i]
-                    prev_width = node_dimensions[prev_node][0]
+        # Phase 4: Grid-based collision resolution
+        positions = self._resolve_collisions_grid_based(positions, node_dimensions, min_spacing)
 
-                    min_x = prev_x + prev_width + MIN_HORIZONTAL_GAP
-                    if curr_x < min_x:
-                        shift = min_x - curr_x
-                        for j in range(i, len(layer_nodes_with_pos)):
-                            _, shift_node = layer_nodes_with_pos[j]
-                            x, y = positions[shift_node]
-                            positions[shift_node] = (x + shift, y)
-                        layer_nodes_with_pos[i] = (min_x, curr_node)
+        # Phase 5: Grid-aware crossing minimization
+        positions = self._minimize_crossings_grid_aware(
+            positions, node_dimensions, layers, graph, reverse_graph, min_spacing
+        )
 
-        # Phase 3: Apply positions
+        # Phase 6: Apply positions
         for node, (x, y) in positions.items():
             node.setPos(x, y)
 
-        # Update all connections after repositioning
+        # Update connections
+        all_nodes = [node for layer in layers for node in layer]
+        for node in all_nodes:
+                layer_nodes_with_pos = [(positions[node][0], node) for node in layer]
+                layer_nodes_with_pos.sort()
+
+        # Update connections
         all_nodes = [node for layer in layers for node in layer]
         for node in all_nodes:
             for conn in node.connections if hasattr(node, "connections") else []:
