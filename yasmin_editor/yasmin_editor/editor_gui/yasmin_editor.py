@@ -14,7 +14,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import math
 import random
 from lxml import etree as ET
 from typing import Dict, List
@@ -55,31 +54,45 @@ from yasmin_editor.editor_gui.transition_dialog import TransitionDialog
 
 
 class YasminEditor(QMainWindow):
+    """Main editor window for YASMIN state machines.
+    
+    Provides a graphical interface for creating, editing, and managing
+    hierarchical state machines with support for Python, C++, and XML states.
+    
+    Attributes:
+        plugin_manager: Manager for loading and handling plugins.
+        state_nodes: Dictionary mapping state names to StateNode objects.
+        final_outcomes: Dictionary mapping outcome names to FinalOutcomeNode objects.
+        connections: List of ConnectionLine objects representing transitions.
+        root_sm_name: Name of the root state machine.
+        start_state: Name of the initial state.
+        layout_seed: Seed for deterministic layout generation.
+        layout_rng: Random number generator for layout.
+    """
 
     def __init__(self, manager: PluginManager):
+        """Initialize the YASMIN Editor.
+        
+        Args:
+            manager: The PluginManager instance for handling plugins.
+        """
         super().__init__()
         self.setWindowTitle("YASMIN Editor")
 
-        # Start maximized
         self.showMaximized()
 
-        # Plugin manager
         self.plugin_manager = manager
         self.state_nodes: Dict[str, StateNode] = {}
         self.final_outcomes: Dict[str, FinalOutcomeNode] = {}
         self.connections: List[ConnectionLine] = []
-        self.root_sm_name = ""  # Root state machine name
-        self.start_state = None  # Initial state for root SM
+        self.root_sm_name = ""
+        self.start_state = None
 
-        # Deterministic layout seed and RNG
-        # By default, we set a stable seed so the graph layout is reproducible
         self.layout_seed = 42
         self.layout_rng = random.Random(self.layout_seed)
 
-        # Create UI
         self.create_ui()
 
-        # Load plugins in background
         self.statusBar().showMessage("Loading plugins...")
         QApplication.processEvents()
         self.populate_plugin_lists()
@@ -103,20 +116,22 @@ class YasminEditor(QMainWindow):
         os._exit(0)
 
     def create_ui(self):
-        # Central widget
+        """Create and setup the user interface.
+        
+        Sets up the main window layout including toolbars, panels,
+        and the state machine canvas.
+        """
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
 
-        # Create splitter
         splitter = QSplitter(Qt.Horizontal)
         main_layout.addWidget(splitter)
 
-        # Left panel - Available states
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
 
-        # Toolbar
+
         toolbar = QToolBar()
         self.addToolBar(toolbar)
 
@@ -193,7 +208,6 @@ class YasminEditor(QMainWindow):
         self.cpp_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
         left_layout.addWidget(self.cpp_list)
 
-        # XML state machines list
         left_layout.addWidget(QLabel("<b>XML State Machines:</b>"))
         self.xml_filter = QLineEdit()
         self.xml_filter.setPlaceholderText("Filter XML state machines...")
@@ -203,11 +217,10 @@ class YasminEditor(QMainWindow):
         self.xml_list.itemDoubleClicked.connect(self.on_xml_double_clicked)
         left_layout.addWidget(self.xml_list)
 
-        # Right panel - Canvas
         right_panel = QWidget()
         right_layout = QVBoxLayout(right_panel)
 
-        # Root SM configuration
+
         root_sm_widget = QWidget()
         root_sm_layout = QHBoxLayout(root_sm_widget)
         root_sm_layout.setContentsMargins(0, 0, 0, 0)
@@ -226,30 +239,31 @@ class YasminEditor(QMainWindow):
 
         right_layout.addWidget(root_sm_widget)
 
-        # Canvas header with instructions
         canvas_header = QLabel(
             "<b>State Machine Canvas:</b> "
             "<i>(Drag from blue port to create transitions, scroll to zoom, right-click for options)</i>"
         )
         right_layout.addWidget(canvas_header)
         self.canvas = StateMachineCanvas()
-        self.canvas.editor_ref = self  # Set reference for drag-to-connect
+        self.canvas.editor_ref = self
         right_layout.addWidget(self.canvas)
 
-        # Add panels to splitter
+
         splitter.addWidget(left_panel)
         splitter.addWidget(right_panel)
 
-        # Set initial sizes: left panel 300px, right panel takes remaining space
         splitter.setSizes([300, 1000])
-        splitter.setStretchFactor(0, 0)  # Left panel doesn't stretch
-        splitter.setStretchFactor(1, 1)  # Right panel stretches
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
 
-        # Status bar
+
         self.statusBar()
 
     def set_layout_seed(self):
-        """Open a dialog to set the layout seed. Set to -1 to use non-deterministic random."""
+        """Open a dialog to set the layout seed.
+        
+        Set to -1 to use non-deterministic random layout.
+        """
         seed, ok = QInputDialog.getInt(
             self,
             "Set Layout Seed",
@@ -270,7 +284,10 @@ class YasminEditor(QMainWindow):
             self.statusBar().showMessage(f"Layout seed set to {seed}", 3000)
 
     def _reset_layout_rng(self):
-        """Reset the layout RNG from the stored seed. If seed is None, use module-level randomness."""
+        """Reset the layout RNG from the stored seed.
+        
+        If seed is None, uses module-level randomness.
+        """
         if getattr(self, "layout_seed", None) is None:
             self.layout_rng = None
         else:
@@ -278,7 +295,6 @@ class YasminEditor(QMainWindow):
 
     def reapply_layout(self):
         """Re-seed RNG and re-run the layout over the entire document."""
-        # Reset RNG and layouts
         self._reset_layout_rng()
         self._reorganize_all_containers()
         try:
@@ -286,7 +302,7 @@ class YasminEditor(QMainWindow):
         except Exception:
             pass
 
-        # Update all connections positions
+
         for state in self.state_nodes.values():
             if hasattr(state, "connections"):
                 for conn in state.connections:
@@ -295,19 +311,17 @@ class YasminEditor(QMainWindow):
         self.statusBar().showMessage("Reapplied layout", 2000)
 
     def populate_plugin_lists(self):
-        # Populate Python list
+        """Populate the plugin lists with available Python, C++, and XML states."""
         for plugin in self.plugin_manager.python_plugins:
             item = QListWidgetItem(f"{plugin.module}.{plugin.class_name}")
             item.setData(Qt.UserRole, plugin)
             self.python_list.addItem(item)
 
-        # Populate C++ list
         for plugin in self.plugin_manager.cpp_plugins:
             item = QListWidgetItem(plugin.class_name)
             item.setData(Qt.UserRole, plugin)
             self.cpp_list.addItem(item)
 
-        # Populate XML list
         for xml_plugin in self.plugin_manager.xml_files:
             display_name = f"{xml_plugin.package_name}/{xml_plugin.file_name}"
             item = QListWidgetItem(display_name)
@@ -315,29 +329,49 @@ class YasminEditor(QMainWindow):
             self.xml_list.addItem(item)
 
     def filter_python_list(self, text):
-        """Filter Python states list based on search text."""
+        """Filter Python states list based on search text.
+        
+        Args:
+            text: The search text to filter by.
+        """
         for i in range(self.python_list.count()):
             item = self.python_list.item(i)
             item.setHidden(text.lower() not in item.text().lower())
 
     def filter_cpp_list(self, text):
-        """Filter C++ states list based on search text."""
+        """Filter C++ states list based on search text.
+        
+        Args:
+            text: The search text to filter by.
+        """
         for i in range(self.cpp_list.count()):
             item = self.cpp_list.item(i)
             item.setHidden(text.lower() not in item.text().lower())
 
     def filter_xml_list(self, text):
-        """Filter XML state machines list based on search text."""
+        """Filter XML state machines list based on search text.
+        
+        Args:
+            text: The search text to filter by.
+        """
         for i in range(self.xml_list.count()):
             item = self.xml_list.item(i)
             item.setHidden(text.lower() not in item.text().lower())
 
     def on_root_sm_name_changed(self, text):
-        """Handle root state machine name change."""
+        """Handle root state machine name change.
+        
+        Args:
+            text: The new state machine name.
+        """
         self.root_sm_name = text
 
     def on_start_state_changed(self, text):
-        """Handle initial state selection change."""
+        """Handle initial state selection change.
+        
+        Args:
+            text: The selected state name or "(None)".
+        """
         if text == "(None)":
             self.start_state = None
         else:
@@ -363,46 +397,55 @@ class YasminEditor(QMainWindow):
             self.start_state_combo.setCurrentIndex(0)
 
     def on_plugin_double_clicked(self, item: QListWidgetItem):
+        """Handle double-click on a plugin item to add it as a state.
+        
+        Args:
+            item: The list widget item that was double-clicked.
+        """
         plugin_info = item.data(Qt.UserRole)
         state_name, ok = QInputDialog.getText(self, "State Name", "Enter state name:")
         if ok:
             self.create_state_node(state_name, plugin_info, False, False)
 
     def on_xml_double_clicked(self, item: QListWidgetItem):
+        """Handle double-click on an XML state machine to add it.
+        
+        Args:
+            item: The list widget item that was double-clicked.
+        """
         xml_plugin = item.data(Qt.UserRole)
         state_name, ok = QInputDialog.getText(
             self, "State Machine Name", "Enter state machine name:"
         )
         if ok:
-            # For XML state machines, pass the plugin_info
             self.create_state_node(state_name, xml_plugin, False, False)
 
     def get_free_position(self):
         """Get a free position in a deterministic grid layout.
 
-        This method:
-        1. Uses a fixed grid starting from (100, 100)
-        2. Places nodes in a predictable left-to-right, top-to-bottom pattern
-        3. Ensures consistent positioning across different runs
+        Uses a fixed grid starting from (100, 100) and places nodes in a predictable
+        left-to-right, top-to-bottom pattern to ensure consistent positioning across
+        different runs.
+        
+        Returns:
+            QPointF: The calculated free position for a new node.
         """
-        # Grid parameters for deterministic layout
         START_X = 100
         START_Y = 100
-        NODE_WIDTH = 400  # Width including spacing
-        NODE_HEIGHT = 350  # Height including spacing
-        NODES_PER_ROW = 3  # Number of nodes per row
+        NODE_WIDTH = 400
+        NODE_HEIGHT = 350
+        NODES_PER_ROW = 3
 
-        # Get root-level nodes only
+
         root_nodes = [
             node
             for node in self.state_nodes.values()
             if not hasattr(node, "parent_container") or node.parent_container is None
         ]
 
-        # Add final outcomes to the list of items to count
         all_items = list(root_nodes) + list(self.final_outcomes.values())
 
-        # Calculate position based on number of existing items
+
         num_items = len(all_items)
         row = num_items // NODES_PER_ROW
         col = num_items % NODES_PER_ROW
@@ -423,6 +466,18 @@ class YasminEditor(QMainWindow):
         start_state: str = None,
         default_outcome: str = None,
     ):
+        """Create a new state node in the canvas.
+        
+        Args:
+            name: Name of the state.
+            plugin_info: Plugin information for the state.
+            is_state_machine: Whether this is a state machine container.
+            is_concurrence: Whether this is a concurrence container.
+            outcomes: List of outcome names.
+            remappings: Dictionary of key remappings.
+            start_state: Initial state for state machines.
+            default_outcome: Default outcome for concurrences.
+        """
         if not name:
             QMessageBox.warning(self, "Validation Error", "Name is required!")
             return
@@ -460,6 +515,7 @@ class YasminEditor(QMainWindow):
         self.statusBar().showMessage(f"Added state: {name}", 2000)
 
     def add_state(self):
+        """Open dialog to add a new state to the state machine."""
         all_plugins = (
             self.plugin_manager.python_plugins
             + self.plugin_manager.cpp_plugins
@@ -472,7 +528,7 @@ class YasminEditor(QMainWindow):
 
         if dialog.exec_():
             result = dialog.get_state_data()
-            if result[0]:  # Check if name is not None (validation passed)
+            if result[0]:
                 (
                     name,
                     plugin,
@@ -494,7 +550,7 @@ class YasminEditor(QMainWindow):
 
         if dialog.exec_():
             result = dialog.get_state_machine_data()
-            if result:  # Check if validation passed
+            if result:
                 name, outcomes, start_state, remappings = result
                 self.create_state_node(
                     name=name,
@@ -822,7 +878,12 @@ class YasminEditor(QMainWindow):
                     container.update_start_state_label()
 
     def create_connection_from_drag(self, from_node, to_node):
-        """Create a connection when user drags from one node to another."""
+        """Create a connection when user drags from one node to another.
+        
+        Args:
+            from_node: The source node.
+            to_node: The target node.
+        """
         if isinstance(from_node, ContainerStateNode):
             QMessageBox.warning(
                 self,
@@ -911,7 +972,13 @@ class YasminEditor(QMainWindow):
                 self.create_connection(from_node, to_node, outcome)
 
     def create_connection(self, from_node, to_node, outcome: str):
-        """Create and add a connection to the scene."""
+        """Create and add a connection to the scene.
+        
+        Args:
+            from_node: The source node.
+            to_node: The target node.
+            outcome: The outcome name for this transition.
+        """
         is_in_concurrence = False
         if hasattr(from_node, "parent_container") and from_node.parent_container:
             if isinstance(from_node.parent_container, ContainerStateNode):
@@ -947,6 +1014,7 @@ class YasminEditor(QMainWindow):
         )
 
     def add_transition(self):
+        """Add a transition from the selected state."""
         selected_items = self.canvas.scene.selectedItems()
         from_state = None
 
@@ -1010,6 +1078,7 @@ class YasminEditor(QMainWindow):
                 self.create_connection(from_state, target, outcome)
 
     def add_final_outcome(self):
+        """Add a final outcome to the state machine or selected container."""
         outcome_name, ok = QInputDialog.getText(
             self, "Final Outcome", "Enter final outcome name:"
         )
@@ -1068,6 +1137,7 @@ class YasminEditor(QMainWindow):
                 self.statusBar().showMessage(f"Added final outcome: {outcome_name}", 2000)
 
     def delete_selected(self):
+        """Delete the selected items from the canvas."""
         selected_items = self.canvas.scene.selectedItems()
 
         for item in selected_items:
@@ -1219,6 +1289,11 @@ class YasminEditor(QMainWindow):
         dialog.exec_()
 
     def new_state_machine(self):
+        """Create a new state machine, clearing the current one.
+        
+        Returns:
+            bool: True if a new state machine was created, False if cancelled.
+        """
         reply = QMessageBox.question(
             self,
             "New State Machine",
@@ -1241,6 +1316,7 @@ class YasminEditor(QMainWindow):
         return False
 
     def open_state_machine(self):
+        """Open a state machine from an XML file."""
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Open State Machine", "", "XML Files (*.xml)"
         )
@@ -1270,7 +1346,6 @@ class YasminEditor(QMainWindow):
         elif self.start_state not in self.state_nodes:
             errors.append(f"- Initial state '{self.start_state}' does not exist")
 
-        # Check for states with empty names
         for name in self.state_nodes.keys():
             if not name or not name.strip():
                 errors.append("- Found state with empty name")
@@ -1296,7 +1371,6 @@ class YasminEditor(QMainWindow):
         )
 
         if file_path:
-            # Ensure .xml extension
             if not file_path.lower().endswith(".xml"):
                 file_path += ".xml"
 
@@ -1307,7 +1381,11 @@ class YasminEditor(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Failed to save file: {str(e)}")
 
     def save_to_xml(self, file_path: str):
-        # Use root SM name if set, otherwise ask
+        """Save the state machine to an XML file.
+        
+        Args:
+            file_path: The path where the XML file will be saved.
+        """
         sm_name = self.root_sm_name
         if not sm_name:
             sm_name, ok = QInputDialog.getText(
@@ -1316,96 +1394,85 @@ class YasminEditor(QMainWindow):
         else:
             ok = True
 
-        # Create root element
         root = ET.Element("StateMachine")
         root.set("name", sm_name)
         root.set("outcomes", " ".join(self.final_outcomes.keys()))
 
-        # Set initial state if specified
         if self.start_state:
             root.set("start_state", self.start_state)
 
-        # Filter to only include root-level states (not nested in containers)
+
         root_level_states = {
             name: node
             for name, node in self.state_nodes.items()
             if not hasattr(node, "parent_container") or node.parent_container is None
         }
 
-        # Add states recursively
         self._save_states_to_xml(root, root_level_states)
 
-        # Check if file_path ends with .xml
+
         if not file_path.lower().endswith(".xml"):
             file_path += ".xml"
 
-        # Write to file with lxml pretty printing
         tree = ET.ElementTree(root)
         tree.write(file_path, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
     def _save_states_to_xml(self, parent_elem, state_nodes_dict):
-        """Recursively save states and their children to XML."""
-        # Add states
+        """Recursively save states and their children to XML.
+        
+        Args:
+            parent_elem: The parent XML element.
+            state_nodes_dict: Dictionary of state names to state nodes.
+        """
         for state_name, state_node in state_nodes_dict.items():
             if state_node.is_concurrence:
                 # Concurrence state
                 cc_elem = ET.SubElement(parent_elem, "Concurrence")
                 cc_elem.set("name", state_name)
 
-                # Add default outcome if available
                 if hasattr(state_node, "default_outcome") and state_node.default_outcome:
                     cc_elem.set("default_outcome", state_node.default_outcome)
 
-                # Get outcomes from final_outcomes (container children)
                 if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
                     cc_elem.set("outcomes", " ".join(state_node.final_outcomes.keys()))
 
-                # Add remappings
                 if state_node.remappings:
                     for old_key, new_key in state_node.remappings.items():
-                        if old_key and new_key:  # Skip None values
+                        if old_key and new_key:
                             remap_elem = ET.SubElement(cc_elem, "Remap")
                             remap_elem.set("old", old_key)
                             remap_elem.set("new", new_key)
 
-                # Recursively add child states if any
                 if hasattr(state_node, "child_states") and state_node.child_states:
                     self._save_states_to_xml(cc_elem, state_node.child_states)
 
-                # Add transitions for this concurrence
                 self._save_transitions(cc_elem, state_node)
 
-                # Add transitions from final outcomes inside this concurrence
+
                 if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
                     for outcome_node in state_node.final_outcomes.values():
                         self._save_transitions(cc_elem, outcome_node)
 
             elif state_node.is_state_machine:
-                # Nested state machine
                 sm_elem = ET.SubElement(parent_elem, "StateMachine")
                 sm_elem.set("name", state_name)
 
-                # Set initial state if the node has one
                 if hasattr(state_node, "start_state") and state_node.start_state:
                     sm_elem.set("start_state", state_node.start_state)
 
-                # Get outcomes from final_outcomes (container children)
                 if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
                     sm_elem.set("outcomes", " ".join(state_node.final_outcomes.keys()))
 
-                # Add remappings
                 if state_node.remappings:
                     for old_key, new_key in state_node.remappings.items():
-                        if old_key and new_key:  # Skip None values
+                        if old_key and new_key:
                             remap_elem = ET.SubElement(sm_elem, "Remap")
                             remap_elem.set("old", old_key)
                             remap_elem.set("new", new_key)
 
-                # Recursively add child states if any
                 if hasattr(state_node, "child_states") and state_node.child_states:
                     self._save_states_to_xml(sm_elem, state_node.child_states)
 
-                # Add transitions for this state machine
                 self._save_transitions(sm_elem, state_node)
 
                 # Add transitions from final outcomes inside this state machine
@@ -1437,48 +1504,52 @@ class YasminEditor(QMainWindow):
                             state_elem.set("file_name", state_node.plugin_info.file_name)
                             state_elem.set("package", state_node.plugin_info.package_name)
 
-                # Add remappings
                 if state_node.remappings:
                     for old_key, new_key in state_node.remappings.items():
-                        if old_key and new_key:  # Skip None values
+                        if old_key and new_key:
                             remap_elem = ET.SubElement(state_elem, "Remap")
                             remap_elem.set("old", old_key)
                             remap_elem.set("new", new_key)
 
-                # Add transitions for this state
                 self._save_transitions(state_elem, state_node)
 
     def _save_transitions(self, parent_elem, state_node):
-        """Save transitions for a state node."""
+        """Save transitions for a state node.
+        
+        Args:
+            parent_elem: The parent XML element.
+            state_node: The state node whose transitions to save.
+        """
         for connection in state_node.connections:
             if connection.from_node == state_node:
                 transition = ET.SubElement(parent_elem, "Transition")
-                if connection.outcome:  # Only add if outcome is not None
+                if connection.outcome:
                     transition.set("from", connection.outcome)
                 if (
                     connection.to_node and connection.to_node.name
-                ):  # Only add if target exists
+                ):
                     transition.set("to", connection.to_node.name)
 
     def load_from_xml(self, file_path: str):
-        # Clear current state machine
+        """Load a state machine from an XML file.
+        
+        Args:
+            file_path: The path to the XML file to load.
+        """
         if not self.new_state_machine():
             return
 
-        # Parse XML
         tree = ET.parse(file_path)
         root = tree.getroot()
 
-        # Load root SM name
         sm_name = root.get("name", "")
         if sm_name:
             self.root_sm_name = sm_name
             self.root_sm_name_edit.setText(sm_name)
 
-        # Load initial state
         start_state = root.get("start_state", "")
 
-        # If no start_state attribute, find the first State element
+
         if not start_state:
             for elem in root:
                 if elem.tag == "State":
@@ -1488,48 +1559,34 @@ class YasminEditor(QMainWindow):
         if start_state:
             self.start_state = start_state
 
-        # Load states recursively with initial positioning
         self._load_states_from_xml(root, None)
 
-        # Get final outcomes and create them BEFORE loading transitions
         outcomes_str = root.get("outcomes", "")
         if outcomes_str:
             outcomes = outcomes_str.split()
-            # Create final outcomes at temporary positions
-            # They will be repositioned after layout computation
             for i, outcome in enumerate(outcomes):
                 y = 200 + i * 120
                 node = FinalOutcomeNode(outcome, 800, y)
                 self.canvas.scene.addItem(node)
                 self.final_outcomes[outcome] = node
 
-        # Update initial state combo
         self.update_start_state_combo()
 
-        # Set initial state selection
+
         if start_state:
             index = self.start_state_combo.findText(start_state)
             if index >= 0:
                 self.start_state_combo.setCurrentIndex(index)
 
-        # Load transitions recursively BEFORE layout computation
-        # This is CRITICAL - the layout algorithm needs the connection graph!
         self._load_transitions_from_xml(root, None)
 
-        # NOW reorganize all containers to properly layout their children
-        # Transitions are loaded, so the graph-based layout will work correctly
         self._reorganize_all_containers()
 
-        # Force scene update to ensure all geometries are calculated
-        self.canvas.scene.update()
-        QApplication.processEvents()  # Process any pending events
 
-        # Now reposition root-level elements based on actual sizes after auto-resize
-        # This also positions final outcomes correctly based on their connections
+        QApplication.processEvents()
+
         self._reposition_root_elements_after_resize()
 
-        # Force update all connections throughout the entire scene
-        # This ensures connections are drawn correctly both inside containers and at root level
         for state in self.state_nodes.values():
             if hasattr(state, "connections"):
                 for conn in state.connections:
@@ -1540,25 +1597,22 @@ class YasminEditor(QMainWindow):
                 for conn in outcome.connections:
                     conn.update_position()
 
-        # Multiple scene updates to ensure all connections are drawn correctly
         for _ in range(3):
             self.canvas.scene.update()
             QApplication.processEvents()
 
     def _reorganize_all_containers(self):
         """Reorganize all containers and their children after loading.
+        
         Uses Sugiyama Framework for hierarchical graph layout.
         """
-        # Reset layout RNG to ensure deterministic layout runs when a seed is set
         self._reset_layout_rng()
-        # Process all containers (both root-level and nested)
         all_containers = []
         for node in self.state_nodes.values():
             if isinstance(node, ContainerStateNode):
                 all_containers.append(node)
 
-        # Sort containers by nesting depth (deepest first) to ensure
-        # nested containers are processed before their parents
+
         def get_nesting_depth(container):
             depth = 0
             current = container
@@ -1569,23 +1623,18 @@ class YasminEditor(QMainWindow):
 
         all_containers.sort(key=get_nesting_depth, reverse=True)
 
-        # Process each container with Sugiyama Framework
         for container in all_containers:
             self._layout_container_sugiyama(container)
 
-        # Final pass to ensure all sizes are correct
         for container in all_containers:
             container.prepareGeometryChange()
             container.auto_resize_for_children()
 
-        # Force all connections to update their positions
-        # This is critical for containers to show their internal connections correctly
         for container in all_containers:
-            # Ensure container geometry is up to date
             container.prepareGeometryChange()
             container.update()
 
-            # Update all child connections
+
             for child_state in container.child_states.values():
                 child_state.prepareGeometryChange()
                 child_state.update()
@@ -1600,18 +1649,20 @@ class YasminEditor(QMainWindow):
                     for conn in final_outcome.connections:
                         conn.update_position()
 
-        # Multiple geometry updates to finalize everything
         for _ in range(4):
             self.canvas.scene.update()
             QApplication.processEvents()
 
     def _layout_container_sugiyama(self, container: ContainerStateNode):
-        """Layout children within a container using Force-Directed algorithm (Fruchterman-Reingold).
+        """Layout children within a container using Force-Directed algorithm.
 
-        Uses physical simulation with:
+        Uses physical simulation with Fruchterman-Reingold algorithm:
         - Repulsive forces between all nodes (prevent overlap)
         - Attractive forces along edges (keep connected nodes close)
         - Boundary forces (keep nodes within container)
+        
+        Args:
+            container: The container state node to layout.
         """
         if not container.child_states and not container.final_outcomes:
             return
@@ -1620,7 +1671,6 @@ class YasminEditor(QMainWindow):
         final_outcomes = list(container.final_outcomes.values())
 
         if not nodes:
-            # Only final outcomes, position them simply
             rect = container.rect()
             y_start = rect.top() + 140
             for i, outcome in enumerate(final_outcomes):
@@ -1628,20 +1678,16 @@ class YasminEditor(QMainWindow):
             container.auto_resize_for_children()
             return
 
-        # Build adjacency graph - INCLUDE final outcomes as terminal nodes
         all_nodes = nodes + final_outcomes
         graph = {node: [] for node in all_nodes}
 
         for node in nodes:
-            # Safely access connections attribute
             if hasattr(node, "connections"):
                 for conn in node.connections:
                     if conn.from_node == node:
-                        # Include connections to both states and final outcomes
                         if conn.to_node in all_nodes:
                             graph[node].append(conn.to_node)
 
-        # Use Force-Directed layout
         self._force_directed_layout(container, all_nodes, graph)
 
     def _force_directed_layout(self, container, nodes, graph):
@@ -1653,16 +1699,15 @@ class YasminEditor(QMainWindow):
         - Boundary: Nodes are pushed back if they leave the container
         
         Args:
-            container: The container node
-            nodes: List of all nodes to position
-            graph: Adjacency dictionary mapping nodes to their neighbors
+            container: The container node.
+            nodes: List of all nodes to position.
+            graph: Adjacency dictionary mapping nodes to their neighbors.
         """
         import math
         rng = self.layout_rng if getattr(self, "layout_rng", None) is not None else random
         
         rect = container.rect()
         
-        # Layout parameters
         MARGIN_X = rect.width() * 0.05
         MARGIN_Y_TOP = rect.height() * 0.12
         MARGIN_Y_BOTTOM = rect.height() * 0.05
@@ -1670,7 +1715,6 @@ class YasminEditor(QMainWindow):
         area_width = rect.width() - (2 * MARGIN_X)
         area_height = rect.height() - MARGIN_Y_TOP - MARGIN_Y_BOTTOM
         
-        # Get node dimensions
         node_dimensions = {}
         for node in nodes:
             if isinstance(node, ContainerStateNode):
@@ -1680,54 +1724,43 @@ class YasminEditor(QMainWindow):
                 w, h = node.boundingRect().width(), node.boundingRect().height()
             node_dimensions[node] = (w, h)
         
-        # Initialize positions randomly or use current positions
         positions = {}
         for node in nodes:
             current_pos = node.pos()
-            # Check if node already has a reasonable position
             if (rect.left() < current_pos.x() < rect.right() and 
                 rect.top() < current_pos.y() < rect.bottom()):
                 positions[node] = [current_pos.x(), current_pos.y()]
             else:
-                # Random initial position
                 x = rect.left() + MARGIN_X + rng.random() * area_width
                 y = rect.top() + MARGIN_Y_TOP + rng.random() * area_height
                 positions[node] = [x, y]
         
-        # Algorithm parameters
         area = area_width * area_height
-        k = math.sqrt(area / len(nodes))  # Optimal distance between nodes (increased for more separation)
+        k = math.sqrt(area / len(nodes))
         
         ITERATIONS = 100
         initial_temp = area_width / 10
         temp = initial_temp
         
-        # Simulation loop
         for iteration in range(ITERATIONS):
-            # Calculate displacement for each node
             displacement = {node: [0.0, 0.0] for node in nodes}
             
-            # 1. Calculate repulsive forces between all pairs
             for i, node1 in enumerate(nodes):
                 for node2 in nodes[i+1:]:
                     delta_x = positions[node1][0] - positions[node2][0]
                     delta_y = positions[node1][1] - positions[node2][1]
                     
-                    # Distance between nodes
                     distance = math.sqrt(delta_x**2 + delta_y**2)
                     if distance < 0.01:
-                        distance = 0.01  # Prevent division by zero
+                        distance = 0.01
                     
-                    # Repulsive force (inversely proportional to distance)
                     force = (k * k) / distance
                     
-                    # Apply force
                     displacement[node1][0] += (delta_x / distance) * force
                     displacement[node1][1] += (delta_y / distance) * force
                     displacement[node2][0] -= (delta_x / distance) * force
                     displacement[node2][1] -= (delta_y / distance) * force
             
-            # 2. Calculate attractive forces along edges
             for node in nodes:
                 for neighbor in graph.get(node, []):
                     if neighbor not in nodes:
@@ -1740,16 +1773,13 @@ class YasminEditor(QMainWindow):
                     if distance < 0.01:
                         distance = 0.01
                     
-                    # Attractive force (proportional to distance)
                     force = (distance * distance) / k
                     
-                    # Apply force
                     displacement[node][0] -= (delta_x / distance) * force
                     displacement[node][1] -= (delta_y / distance) * force
                     displacement[neighbor][0] += (delta_x / distance) * force
                     displacement[neighbor][1] += (delta_y / distance) * force
             
-            # 3. Limit displacement by temperature and apply
             for node in nodes:
                 disp_x = displacement[node][0]
                 disp_y = displacement[node][1]
@@ -1758,13 +1788,11 @@ class YasminEditor(QMainWindow):
                 if disp_length < 0.01:
                     disp_length = 0.01
                 
-                # Limit by temperature
                 limited_disp = min(disp_length, temp) / disp_length
                 
                 positions[node][0] += disp_x * limited_disp
                 positions[node][1] += disp_y * limited_disp
                 
-                # Keep within boundaries
                 node_w, node_h = node_dimensions[node]
                 positions[node][0] = max(rect.left() + MARGIN_X, 
                                         min(positions[node][0], 
@@ -1773,10 +1801,8 @@ class YasminEditor(QMainWindow):
                                         min(positions[node][1], 
                                             rect.bottom() - MARGIN_Y_BOTTOM - node_h))
             
-            # Cool down temperature
             temp = initial_temp * (1 - iteration / ITERATIONS)
         
-        # Apply final positions
         for node, (x, y) in positions.items():
             node.setPos(x, y)
         
@@ -1785,19 +1811,18 @@ class YasminEditor(QMainWindow):
     def _preorder_outcomes_in_layers(self, layers, reverse_graph):
         """Pre-order final outcomes within their layers based on incoming connections.
 
-        This helps establish a good initial ordering before the main crossing reduction,
-        which is especially important for terminal nodes (outcomes) that may have
-        multiple incoming edges from different layers.
-
-        Uses a more sophisticated algorithm that considers:
+        Uses a sophisticated algorithm that considers:
         - Median position of predecessors
         - Layer proximity (closer layers weighted more)
         - Number of connections from each predecessor
+        
+        Args:
+            layers: List of layers, each containing nodes.
+            reverse_graph: Reverse adjacency graph (node -> predecessors).
         """
         from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
         for layer_idx, layer in enumerate(layers):
-            # Find outcomes in this layer
             outcomes_in_layer = [
                 node for node in layer if isinstance(node, FinalOutcomeNode)
             ]
@@ -1805,22 +1830,18 @@ class YasminEditor(QMainWindow):
             if len(outcomes_in_layer) <= 1:
                 continue
 
-            # Calculate weighted average position of incoming connections for each outcome
             outcome_positions = []
 
             for outcome in outcomes_in_layer:
                 predecessors = reverse_graph.get(outcome, [])
 
                 if predecessors:
-                    # Find the layer indices and positions of predecessors
                     predecessor_info = []
 
                     for pred in predecessors:
-                        # Find which layer and position the predecessor is in
                         for pred_layer_idx, pred_layer in enumerate(layers):
                             if pred in pred_layer:
                                 pos_in_layer = pred_layer.index(pred)
-                                # Weight by layer proximity (closer layers matter more)
                                 layer_distance = abs(layer_idx - pred_layer_idx)
                                 weight = 1.0 / (1.0 + layer_distance)
                                 predecessor_info.append(
@@ -1829,14 +1850,10 @@ class YasminEditor(QMainWindow):
                                 break
 
                     if predecessor_info:
-                        # Use weighted median of predecessor positions
-                        # Sort by position
                         predecessor_info.sort(key=lambda x: x[0])
 
-                        # Calculate total weight
                         total_weight = sum(info[1] for info in predecessor_info)
 
-                        # Find weighted median
                         cumulative_weight = 0
                         weighted_median = 0
 
@@ -1848,35 +1865,38 @@ class YasminEditor(QMainWindow):
 
                         avg_pos = weighted_median
                     else:
-                        avg_pos = layer.index(outcome)  # Keep current position
+                        avg_pos = layer.index(outcome)
                 else:
-                    # No predecessors, use current position
                     avg_pos = layer.index(outcome)
 
                 outcome_positions.append((avg_pos, outcome))
 
-            # Sort outcomes by their weighted average predecessor position
             outcome_positions.sort(key=lambda x: x[0])
 
-            # Reorder outcomes in the layer
-            # First, remove outcomes from layer
             for outcome in outcomes_in_layer:
                 layer.remove(outcome)
 
-            # Find where outcomes should be inserted (at the end of non-outcome nodes)
             non_outcome_count = len(layer)
 
-            # Insert sorted outcomes
             for _, outcome in outcome_positions:
                 layer.append(outcome)
 
     def _sugiyama_layer_assignment(self, nodes, graph, reverse_graph, start_state_name):
         """Step 1 of Sugiyama Framework: Assign layers to nodes using longest path layering.
 
-        This ensures:
+        Ensures:
         - All edges point downward (from lower layer number to higher)
         - Start state is in layer 0
         - Each node is placed as far down as possible (longest path from start)
+        
+        Args:
+            nodes: List of nodes to assign layers to.
+            graph: Forward adjacency graph.
+            reverse_graph: Reverse adjacency graph.
+            start_state_name: Name of the start state.
+            
+        Returns:
+            List[List]: Layers with nodes grouped by layer index.
         """
         from collections import deque
 
@@ -2047,45 +2067,46 @@ class YasminEditor(QMainWindow):
 
         Uses median/barycentric heuristic to order nodes within each layer
         to minimize edge crossings between adjacent layers.
+        
+        Args:
+            layers: List of layers with nodes.
+            graph: Forward adjacency graph.
+            reverse_graph: Reverse adjacency graph.
+            iterations: Number of iterations to run (default: 100).
+            
+        Returns:
+            List[List]: Optimized layers with reduced crossings.
         """
         from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
-        # Make a copy to avoid modifying original
         layers = [layer[:] for layer in layers]
 
         best_layers = None
         best_crossings = float("inf")
         no_improvement_count = 0
-        MAX_NO_IMPROVEMENT = 10  # Stop if no improvement for 10 consecutive iterations
+        MAX_NO_IMPROVEMENT = 10
 
         for iteration in range(iterations):
-            # Downward pass: order based on successors
             for i in range(len(layers) - 1):
                 if len(layers[i]) > 1:
                     self._order_layer_by_barycenter(layers[i], layers[i + 1], graph)
 
-            # Upward pass: order based on predecessors
             for i in range(len(layers) - 1, 0, -1):
                 if len(layers[i]) > 1:
                     self._order_layer_by_barycenter(
                         layers[i], layers[i - 1], reverse_graph
                     )
 
-            # Additional pass: Focus on layers containing outcomes
-            # Outcomes often have multiple incoming edges, so extra ordering helps
-            if iteration % 2 == 0:  # Every 2nd iteration
+            if iteration % 2 == 0:
                 for i in range(len(layers) - 1, 0, -1):
-                    # Check if layer has outcomes
                     has_outcomes = any(
                         isinstance(node, FinalOutcomeNode) for node in layers[i]
                     )
                     if has_outcomes and len(layers[i]) > 1:
-                        # Extra ordering pass for outcome-heavy layers
                         self._order_layer_by_barycenter(
                             layers[i], layers[i - 1], reverse_graph
                         )
 
-            # Additional pass: Advanced local optimization every 4 iterations
             if iteration % 4 == 0 and iteration > 0:
                 for layer_idx, layer in enumerate(layers):
                     if len(layer) > 2:
@@ -2093,7 +2114,6 @@ class YasminEditor(QMainWindow):
                             layer, layers, layer_idx, graph, reverse_graph
                         )
 
-            # Count crossings and keep track of best solution
             crossings = self._count_crossings(layers, graph)
             if crossings < best_crossings:
                 best_crossings = crossings
@@ -2102,40 +2122,41 @@ class YasminEditor(QMainWindow):
             else:
                 no_improvement_count += 1
 
-            # Early exit if no crossings
             if crossings == 0:
                 break
 
-            # Early exit if no improvement for several iterations
             if no_improvement_count >= MAX_NO_IMPROVEMENT:
                 break
 
         return best_layers if best_layers else layers
 
     def _count_crossings(self, layers, graph):
-        """Count the total number of edge crossings between adjacent layers."""
+        """Count the total number of edge crossings between adjacent layers.
+        
+        Args:
+            layers: List of layers with nodes.
+            graph: Forward adjacency graph.
+            
+        Returns:
+            int: Total number of crossings.
+        """
         total_crossings = 0
 
         for i in range(len(layers) - 1):
             layer1 = layers[i]
             layer2 = layers[i + 1]
 
-            # Create position maps
             pos1 = {node: idx for idx, node in enumerate(layer1)}
             pos2 = {node: idx for idx, node in enumerate(layer2)}
 
-            # Get all edges between these two layers
             edges = []
             for node in layer1:
                 for neighbor in graph.get(node, []):
                     if neighbor in pos2:
                         edges.append((pos1[node], pos2[neighbor]))
 
-            # Count crossings between all pairs of edges
             for i in range(len(edges)):
                 for j in range(i + 1, len(edges)):
-                    # Two edges (a1, a2) and (b1, b2) cross if:
-                    # (a1 < b1 and a2 > b2) or (a1 > b1 and a2 < b2)
                     a1, a2 = edges[i]
                     b1, b2 = edges[j]
                     if (a1 < b1 and a2 > b2) or (a1 > b1 and a2 < b2):
@@ -2150,6 +2171,13 @@ class YasminEditor(QMainWindow):
 
         This greedy local search tries swapping adjacent nodes to find immediate
         crossing reductions.
+        
+        Args:
+            layer: The current layer to optimize.
+            layers: All layers in the graph.
+            layer_idx: Index of the current layer.
+            graph: Forward adjacency graph.
+            reverse_graph: Reverse adjacency graph.
         """
         if len(layer) < 2:
             return
@@ -2163,35 +2191,22 @@ class YasminEditor(QMainWindow):
             pass_count += 1
 
             for i in range(len(layer) - 1):
-                # Try swapping nodes at positions i and i+1
                 layer[i], layer[i + 1] = layer[i + 1], layer[i]
 
-                # Count crossings before and after
                 crossings_after = self._count_crossings(layers, graph)
 
-                # If swap improved things, keep it
-                # Otherwise, swap back
-                # We use a simple greedy approach here
-                # In practice, we'd need to store the before state, but this is a local optimization
-                # so we just try and see if the overall structure is better
-
-                # For simplicity, always try and keep the swap that reduces local crossings
-                # between this layer and adjacent layers
                 local_crossings = 0
 
-                # Count crossings with previous layer
                 if layer_idx > 0:
                     local_crossings += self._count_layer_crossings(
                         layers[layer_idx - 1], layer, reverse_graph
                     )
 
-                # Count crossings with next layer
                 if layer_idx < len(layers) - 1:
                     local_crossings += self._count_layer_crossings(
                         layer, layers[layer_idx + 1], graph
                     )
 
-                # Swap back to test original
                 layer[i], layer[i + 1] = layer[i + 1], layer[i]
 
                 local_crossings_before = 0
@@ -2204,13 +2219,21 @@ class YasminEditor(QMainWindow):
                         layer, layers[layer_idx + 1], graph
                     )
 
-                # If swapping reduced crossings, keep the swap
                 if local_crossings < local_crossings_before:
                     layer[i], layer[i + 1] = layer[i + 1], layer[i]
                     improved = True
 
     def _count_layer_crossings(self, layer1, layer2, edge_map):
-        """Count crossings between two specific layers."""
+        """Count crossings between two specific layers.
+        
+        Args:
+            layer1: First layer.
+            layer2: Second layer.
+            edge_map: Edge mapping between layers.
+            
+        Returns:
+            int: Number of crossings between the two layers.
+        """
         crossings = 0
 
         pos1 = {node: idx for idx, node in enumerate(layer1)}
@@ -2237,6 +2260,11 @@ class YasminEditor(QMainWindow):
         Uses weighted median heuristic for optimal ordering to minimize crossings.
         The weighted median gives better results than simple median for nodes with
         multiple connections.
+        
+        Args:
+            current_layer: Layer to reorder.
+            adjacent_layer: Reference layer for barycenter calculation.
+            edge_map: Edge mapping between layers.
         """
         from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 
@@ -2320,10 +2348,10 @@ class YasminEditor(QMainWindow):
         - Dynamic spacing based on connection density
 
         Args:
-            container: The container state node
-            layers: List of layers, each containing nodes
-            graph: Forward adjacency graph (node -> list of successors)
-            reverse_graph: Reverse adjacency graph (node -> list of predecessors)
+            container: The container state node.
+            layers: List of layers, each containing nodes.
+            graph: Forward adjacency graph (node -> list of successors).
+            reverse_graph: Reverse adjacency graph (node -> list of predecessors).
         """
         rect = container.rect()
 
@@ -2474,12 +2502,12 @@ class YasminEditor(QMainWindow):
         """Resolve collisions using grid-aware approach that maintains layer structure.
         
         Args:
-            positions: Dict mapping nodes to (x, y) tuples
-            node_dimensions: Dict mapping nodes to (width, height) tuples
-            min_spacing: Minimum spacing between nodes
+            positions: Dict mapping nodes to (x, y) tuples.
+            node_dimensions: Dict mapping nodes to (width, height) tuples.
+            min_spacing: Minimum spacing between nodes.
             
         Returns:
-            Updated positions dict with no overlaps
+            dict: Updated positions dict with no overlaps.
         """
         MAX_ITERATIONS = 30
         PUSH_DISTANCE = 40  # Aumentado para más separación
@@ -2584,13 +2612,13 @@ class YasminEditor(QMainWindow):
         """Count crossings for edges connected to a specific node.
         
         Args:
-            node: Node to check
-            positions: All node positions
-            graph: Forward graph
-            reverse_graph: Reverse graph
+            node: Node to check.
+            positions: All node positions.
+            graph: Forward graph.
+            reverse_graph: Reverse graph.
             
         Returns:
-            Number of crossings for this node's edges
+            int: Number of crossings for this node's edges.
         """
         crossings = 0
         node_edges = []
@@ -2638,12 +2666,12 @@ class YasminEditor(QMainWindow):
         Adjusts positions horizontally to maintain layer structure while preventing overlaps.
         
         Args:
-            positions: Dict mapping nodes to (x, y) tuples
-            node_dimensions: Dict mapping nodes to (width, height) tuples
-            min_spacing: Minimum spacing between nodes
+            positions: Dict mapping nodes to (x, y) tuples.
+            node_dimensions: Dict mapping nodes to (width, height) tuples.
+            min_spacing: Minimum spacing between nodes.
             
         Returns:
-            Updated positions dict with no overlaps
+            dict: Updated positions dict with no overlaps.
         """
         MAX_ITERATIONS = 50
         PUSH_DISTANCE = 20  # Distance to push nodes apart per iteration
@@ -2706,14 +2734,14 @@ class YasminEditor(QMainWindow):
         Uses simulated annealing approach for global optimization.
         
         Args:
-            positions: Current node positions
-            node_dimensions: Node dimensions
-            layers: Layer structure
-            graph: Forward adjacency graph
-            reverse_graph: Reverse adjacency graph
+            positions: Current node positions.
+            node_dimensions: Node dimensions.
+            layers: Layer structure.
+            graph: Forward adjacency graph.
+            reverse_graph: Reverse adjacency graph.
             
         Returns:
-            Optimized positions
+            dict: Optimized positions.
         """
         import math
         rng = self.layout_rng if getattr(self, "layout_rng", None) is not None else random
@@ -2782,14 +2810,14 @@ class YasminEditor(QMainWindow):
         """Check if a node at a given position would collide with others.
         
         Args:
-            node: Node to check
-            pos: Position tuple (x, y)
-            positions: Dict of all node positions
-            node_dimensions: Dict of node dimensions
-            min_spacing: Minimum required spacing
+            node: Node to check.
+            pos: Position tuple (x, y).
+            positions: Dict of all node positions.
+            node_dimensions: Dict of node dimensions.
+            min_spacing: Minimum required spacing.
             
         Returns:
-            True if collision detected, False otherwise
+            bool: True if collision detected, False otherwise.
         """
         x, y = pos
         w, h = node_dimensions[node]
@@ -2985,11 +3013,11 @@ class YasminEditor(QMainWindow):
         """Check if two edges cross using line segment intersection.
         
         Args:
-            edge1: Tuple of ((x1, y1), (x2, y2))
-            edge2: Tuple of ((x3, y3), (x4, y4))
+            edge1: Tuple of ((x1, y1), (x2, y2)).
+            edge2: Tuple of ((x3, y3), (x4, y4)).
             
         Returns:
-            True if edges cross, False otherwise
+            bool: True if edges cross, False otherwise.
         """
         (x1, y1), (x2, y2) = edge1
         (x3, y3), (x4, y4) = edge2
@@ -3019,7 +3047,16 @@ class YasminEditor(QMainWindow):
 
     def _compute_layers(self, nodes, graph, start_state_name):
         """Compute hierarchical layers for nodes using longest path layering.
+        
         Places start state in layer 0, then assigns other nodes based on longest path.
+        
+        Args:
+            nodes: List of nodes to layer.
+            graph: Adjacency graph.
+            start_state_name: Name of the start state.
+            
+        Returns:
+            List[List]: Layers with nodes grouped by layer.
         """
         from collections import deque
 
@@ -3080,7 +3117,13 @@ class YasminEditor(QMainWindow):
 
     def _position_layers(self, container: ContainerStateNode, layers, final_outcomes):
         """Position nodes in layers with proper top-to-bottom spacing.
+        
         Arranges all nodes in a single vertical column for clean layout.
+        
+        Args:
+            container: The container state node.
+            layers: List of layers with nodes.
+            final_outcomes: List of final outcome nodes.
         """
         rect = container.rect()
 
@@ -3143,91 +3186,75 @@ class YasminEditor(QMainWindow):
                 if len(layer) <= 1:
                     continue
 
-                # Calculate forces between nodes in the same layer
                 forces = {node: 0 for node in layer}
 
                 for i, node in enumerate(layer):
-                    # 1. Repulsion from neighbors in same layer (prevent overlap)
                     for j, other in enumerate(layer):
                         if i != j:
                             y1 = positions[node][1]
                             y2 = positions[other][1]
                             dist = abs(y1 - y2)
 
-                            min_distance = 150  # Minimum distance between nodes
+                            min_distance = 150
                             if dist < min_distance:
-                                # Push apart with stronger force
                                 force = (min_distance - dist) * 0.5
                                 if y1 < y2:
                                     forces[node] -= force
                                 else:
                                     forces[node] += force
 
-                    # 2. Attraction to connected nodes (minimize edge length)
                     if layer_idx > 0:
-                        # Check predecessors
                         for prev_node in layers[layer_idx - 1]:
                             if node in graph.get(prev_node, []):
                                 y_prev = positions[prev_node][1]
                                 y_curr = positions[node][1]
-                                # Gentle attraction
                                 forces[node] += (y_prev - y_curr) * 0.2
 
                     if layer_idx < len(layers) - 1:
-                        # Check successors
                         for next_node in graph.get(node, []):
                             if next_node in layers[layer_idx + 1]:
                                 y_next = positions[next_node][1]
                                 y_curr = positions[node][1]
-                                # Gentle attraction
                                 forces[node] += (y_next - y_curr) * 0.2
 
-                # Apply forces with damping
-                damping = 0.8 - (iteration * 0.1)  # Reduce force over iterations
+                damping = 0.8 - (iteration * 0.1)
                 for node in layer:
                     x, y = positions[node]
                     new_y = y + forces[node] * damping
-                    # Ensure nodes stay in reasonable bounds
-                    new_y = max(new_y, 160)  # Don't go above container top
+                    new_y = max(new_y, 160)
                     positions[node] = (x, new_y)
                     node.setPos(x, new_y)
 
     def _reposition_root_elements_after_resize(self):
         """Reposition root-level elements using Sugiyama Framework.
-        This ensures optimal spacing and prevents overlapping.
+        
+        Ensures optimal spacing and prevents overlapping.
         Includes final outcomes in the graph layout.
         """
-        # Get all root-level nodes
         root_nodes = []
         for node in self.state_nodes.values():
             if not hasattr(node, "parent_container") or node.parent_container is None:
                 root_nodes.append(node)
 
-        # Get all root-level final outcomes
         root_final_outcomes = list(self.final_outcomes.values())
 
         if not root_nodes and not root_final_outcomes:
             return
 
-        # Build adjacency graph - INCLUDE final outcomes as terminal nodes
         all_nodes = root_nodes + root_final_outcomes
         graph = {node: [] for node in all_nodes}
         reverse_graph = {node: [] for node in all_nodes}
 
         for node in root_nodes:
-            # Safely access connections attribute
             if hasattr(node, "connections"):
                 for conn in node.connections:
                     if conn.from_node == node:
-                        # Include connections to both states and final outcomes
                         if conn.to_node in all_nodes:
                             graph[node].append(conn.to_node)
                             reverse_graph[conn.to_node].append(node)
 
-        # Verify we have some connections
         total_edges = sum(len(neighbors) for neighbors in graph.values())
         if total_edges == 0 and len(all_nodes) > 1:
-            # No connections found - fall back to simple positioning
             x_pos = 120
             y_pos = 120
             for node in root_nodes:
@@ -3239,7 +3266,6 @@ class YasminEditor(QMainWindow):
                 )
             return
 
-        # Apply Force-Directed layout for root level
         self._force_directed_layout_root(all_nodes, graph)
 
     def _force_directed_layout_root(self, nodes, graph):
@@ -3248,25 +3274,22 @@ class YasminEditor(QMainWindow):
         Uses Fruchterman-Reingold algorithm adapted for the root canvas.
         
         Args:
-            nodes: List of all root-level nodes
-            graph: Adjacency dictionary
+            nodes: List of all root-level nodes.
+            graph: Adjacency dictionary.
         """
         import math
         rng = self.layout_rng if getattr(self, "layout_rng", None) is not None else random
         
-        # Get viewport dimensions
         viewport_rect = self.canvas.viewport().rect()
         viewport_width = viewport_rect.width()
         viewport_height = viewport_rect.height()
         
-        # Margins
         MARGIN_X = viewport_width * 0.1
         MARGIN_Y = viewport_height * 0.1
         
         area_width = viewport_width - (2 * MARGIN_X)
         area_height = viewport_height - (2 * MARGIN_Y)
         
-        # Get node dimensions
         node_dimensions = {}
         for node in nodes:
             if isinstance(node, ContainerStateNode):
@@ -3276,11 +3299,9 @@ class YasminEditor(QMainWindow):
                 w, h = node.boundingRect().width(), node.boundingRect().height()
             node_dimensions[node] = (w, h)
         
-        # Initialize positions
         positions = {}
         for node in nodes:
             current_pos = node.scenePos()
-            # Use current position if reasonable, otherwise random
             if (MARGIN_X < current_pos.x() < viewport_width - MARGIN_X and 
                 MARGIN_Y < current_pos.y() < viewport_height - MARGIN_Y):
                 positions[node] = [current_pos.x(), current_pos.y()]
@@ -3289,19 +3310,16 @@ class YasminEditor(QMainWindow):
                 y = MARGIN_Y + rng.random() * area_height
                 positions[node] = [x, y]
         
-        # Algorithm parameters
         area = area_width * area_height
-        k = math.sqrt(area / len(nodes)) * 1.5  # Optimal distance (increased for more separation)
+        k = math.sqrt(area / len(nodes)) * 1.5
         
         ITERATIONS = 150
         initial_temp = area_width / 8
         temp = initial_temp
         
-        # Simulation
         for iteration in range(ITERATIONS):
             displacement = {node: [0.0, 0.0] for node in nodes}
             
-            # Repulsive forces
             for i, node1 in enumerate(nodes):
                 for node2 in nodes[i+1:]:
                     delta_x = positions[node1][0] - positions[node2][0]
@@ -3318,7 +3336,6 @@ class YasminEditor(QMainWindow):
                     displacement[node2][0] -= (delta_x / distance) * force
                     displacement[node2][1] -= (delta_y / distance) * force
             
-            # Attractive forces
             for node in nodes:
                 for neighbor in graph.get(node, []):
                     if neighbor not in nodes:
@@ -3338,7 +3355,6 @@ class YasminEditor(QMainWindow):
                     displacement[neighbor][0] += (delta_x / distance) * force
                     displacement[neighbor][1] += (delta_y / distance) * force
             
-            # Apply displacement with temperature limit
             for node in nodes:
                 disp_x = displacement[node][0]
                 disp_y = displacement[node][1]
@@ -3352,7 +3368,6 @@ class YasminEditor(QMainWindow):
                 positions[node][0] += disp_x * limited_disp
                 positions[node][1] += disp_y * limited_disp
                 
-                # Boundaries
                 node_w, node_h = node_dimensions[node]
                 positions[node][0] = max(MARGIN_X, 
                                         min(positions[node][0], 
@@ -3361,14 +3376,11 @@ class YasminEditor(QMainWindow):
                                         min(positions[node][1], 
                                             viewport_height - MARGIN_Y - node_h))
             
-            # Cool down
             temp = initial_temp * (1 - iteration / ITERATIONS)
         
-        # Apply positions
         for node, (x, y) in positions.items():
             node.setPos(x, y)
         
-        # Update connections
         for node in nodes:
             if hasattr(node, "connections"):
                 for conn in node.connections:
@@ -3380,18 +3392,16 @@ class YasminEditor(QMainWindow):
         Uses adaptive layout that scales with viewport and content size.
 
         Args:
-            layers: List of layers, each containing nodes
-            graph: Forward adjacency graph (node -> list of successors)
-            reverse_graph: Reverse adjacency graph (node -> list of predecessors)
+            layers: List of layers, each containing nodes.
+            graph: Forward adjacency graph (node -> list of successors).
+            reverse_graph: Reverse adjacency graph (node -> list of predecessors).
         """
-        # Get viewport dimensions to calculate available space
         viewport_rect = self.canvas.viewport().rect()
         viewport_width = viewport_rect.width()
         viewport_height = viewport_rect.height()
         
-        # Adaptive margins based on viewport size
-        MARGIN_RATIO_X = 0.08  # 8% margin on sides
-        MARGIN_RATIO_Y = 0.1   # 10% margin top/bottom
+        MARGIN_RATIO_X = 0.08
+        MARGIN_RATIO_Y = 0.1
         
         margin_x = viewport_width * MARGIN_RATIO_X
         margin_y = viewport_height * MARGIN_RATIO_Y
@@ -3402,7 +3412,6 @@ class YasminEditor(QMainWindow):
         available_width = viewport_width - (2 * margin_x)
         available_height = viewport_height - (2 * margin_y)
 
-        # Get element dimensions
         def get_element_size(node):
             if isinstance(node, ContainerStateNode):
                 node.prepareGeometryChange()
@@ -3412,7 +3421,6 @@ class YasminEditor(QMainWindow):
                 bbox = node.boundingRect()
                 return bbox.width(), bbox.height()
 
-        # Calculate dimensions
         node_dimensions = {}
         max_node_height = 0
         
@@ -3424,7 +3432,6 @@ class YasminEditor(QMainWindow):
 
         num_layers = len(layers)
         
-        # Adaptive vertical spacing
         if num_layers > 1:
             total_nodes_height = num_layers * max_node_height
             space_for_gaps = available_height - total_nodes_height
@@ -3432,7 +3439,6 @@ class YasminEditor(QMainWindow):
         else:
             layer_spacing = 0
 
-        # Phase 1: Calculate layer Y positions with adaptive spacing
         layer_y_positions = []
         current_y = START_Y
         
@@ -3441,7 +3447,6 @@ class YasminEditor(QMainWindow):
             if layer_idx < num_layers - 1:
                 current_y += max_node_height + layer_spacing
 
-        # Phase 2: Initial X positioning with adaptive horizontal spacing
         positions = {}
         
         for layer_idx, layer in enumerate(layers):
@@ -3450,17 +3455,14 @@ class YasminEditor(QMainWindow):
             if len(layer) == 0:
                 continue
             
-            # Calculate total width of nodes in this layer
             total_node_width = sum(node_dimensions[node][0] for node in layer)
             
             if len(layer) == 1:
-                # Single node - center it
                 node = layer[0]
                 node_width = node_dimensions[node][0]
                 x = START_X + (available_width - node_width) / 2
                 positions[node] = (x, layer_y)
             else:
-                # Multiple nodes - distribute edge to edge
                 available_space = available_width - total_node_width
                 
                 if len(layer) > 1:
@@ -3475,7 +3477,6 @@ class YasminEditor(QMainWindow):
                     width = node_dimensions[node][0]
                     current_x += width + gap_size
 
-        # Phase 3: Optimize with median positioning
         for iteration in range(5):
             for layer_idx, layer in enumerate(layers):
                 if len(layer) <= 1:
@@ -3502,38 +3503,36 @@ class YasminEditor(QMainWindow):
                         new_x = current_x + (median_x - current_x) * 0.3
                         positions[node] = (new_x, current_y)
 
-        # Calculate minimum spacing for collision detection
-        # Use the smallest gap size as minimum spacing
         max_nodes_in_layer = max(len(layer) for layer in layers) if layers else 1
         min_spacing = available_width / (max_nodes_in_layer + 1) if max_nodes_in_layer > 1 else 100
         min_spacing = max(30, min_spacing)
 
-        # Phase 4: Grid-based collision resolution
         positions = self._resolve_collisions_grid_based(positions, node_dimensions, min_spacing)
 
-        # Phase 5: Grid-aware crossing minimization
         positions = self._minimize_crossings_grid_aware(
             positions, node_dimensions, layers, graph, reverse_graph, min_spacing
         )
 
-        # Phase 6: Apply positions
         for node, (x, y) in positions.items():
             node.setPos(x, y)
 
-        # Update connections
         all_nodes = [node for layer in layers for node in layer]
         for node in all_nodes:
                 layer_nodes_with_pos = [(positions[node][0], node) for node in layer]
                 layer_nodes_with_pos.sort()
 
-        # Update connections
         all_nodes = [node for layer in layers for node in layer]
         for node in all_nodes:
             for conn in node.connections if hasattr(node, "connections") else []:
                 conn.update_position()
 
     def _load_states_from_xml(self, parent_elem, parent_container):
-        """Recursively load states from XML, handling nested containers."""
+        """Recursively load states from XML, handling nested containers.
+        
+        Args:
+            parent_elem: The parent XML element.
+            parent_container: The parent container node (None for root).
+        """
         for elem in parent_elem:
             if elem.tag == "State" or (
                 elem.tag == "StateMachine" and elem.get("file_name")
@@ -3622,7 +3621,14 @@ class YasminEditor(QMainWindow):
                 self._load_states_from_xml(elem, node)
 
     def _load_remappings(self, elem):
-        """Helper method to load remappings from an XML element."""
+        """Load remappings from an XML element.
+        
+        Args:
+            elem: The XML element to load remappings from.
+            
+        Returns:
+            dict: Dictionary of remappings (old -> new).
+        """
         remappings = {}
         for remap in elem.findall("Remap"):
             from_key = remap.get("old", "")
@@ -3632,7 +3638,12 @@ class YasminEditor(QMainWindow):
         return remappings
 
     def _load_transitions_from_xml(self, parent_elem, parent_container):
-        """Recursively load transitions from XML."""
+        """Recursively load transitions from XML.
+        
+        Args:
+            parent_elem: The parent XML element.
+            parent_container: The parent container node (None for root).
+        """
         for elem in parent_elem:
             if elem.tag in ["State", "StateMachine", "Concurrence"]:
                 state_name = elem.get("name")
@@ -3645,8 +3656,6 @@ class YasminEditor(QMainWindow):
                     from_node = self.state_nodes.get(full_name)
 
                 if from_node:
-                    # For containers, collect final outcome names to distinguish
-                    # transitions from child states vs transitions from final outcomes
                     final_outcome_names = set()
                     if elem.tag in ["StateMachine", "Concurrence"] and hasattr(
                         from_node, "final_outcomes"
@@ -3657,25 +3666,20 @@ class YasminEditor(QMainWindow):
                         outcome = transition.get("from")
                         to_name = transition.get("to")
 
-                        # Determine if this transition is from a final outcome or from a child state
                         is_from_final_outcome = outcome in final_outcome_names
 
                         if is_from_final_outcome:
-                            # Transition from a final outcome inside the container
                             from_outcome = from_node.final_outcomes[outcome]
 
-                            # Find the target node
                             to_node = None
 
-                            # Check if target is a root-level node or final outcome
+
                             if parent_container is None:
                                 to_node = self.state_nodes.get(to_name)
                                 if not to_node:
                                     to_node = self.final_outcomes.get(to_name)
-                            # Check if target is in parent container's final outcomes
                             elif to_name in parent_container.final_outcomes:
                                 to_node = parent_container.final_outcomes[to_name]
-                            # Check if target is a sibling state
                             else:
                                 full_to_name = f"{parent_container.name}.{to_name}"
                                 to_node = self.state_nodes.get(full_to_name)
@@ -3690,22 +3694,16 @@ class YasminEditor(QMainWindow):
                                 self.canvas.scene.addItem(connection.label)
                                 self.connections.append(connection)
                         else:
-                            # Transition from a child state inside the container
-                            # Find target node - could be in same container or a final outcome
                             to_node = None
 
                             if parent_container is None:
-                                # Root level - check root states and final outcomes
                                 to_node = self.state_nodes.get(to_name)
                                 if not to_node:
                                     to_node = self.final_outcomes.get(to_name)
                             else:
-                                # Inside a container - check sibling states and final outcomes
-                                # First check if it's a final outcome of this container
                                 if to_name in parent_container.final_outcomes:
                                     to_node = parent_container.final_outcomes[to_name]
                                 else:
-                                    # Check if it's a sibling state
                                     full_to_name = f"{parent_container.name}.{to_name}"
                                     to_node = self.state_nodes.get(full_to_name)
 
@@ -3717,7 +3715,6 @@ class YasminEditor(QMainWindow):
                                 self.canvas.scene.addItem(connection.label)
                                 self.connections.append(connection)
 
-                # If this is a container, recursively load transitions from children
                 if elem.tag in ["StateMachine", "Concurrence"]:
                     if parent_container is None:
                         container = self.state_nodes.get(state_name)
@@ -3725,6 +3722,5 @@ class YasminEditor(QMainWindow):
                         full_name = f"{parent_container.name}.{state_name}"
                         container = self.state_nodes.get(full_name)
 
-                    # Recursively load transitions from children
                     if container:
                         self._load_transitions_from_xml(elem, container)
