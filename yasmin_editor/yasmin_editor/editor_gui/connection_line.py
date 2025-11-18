@@ -33,10 +33,10 @@ if TYPE_CHECKING:
 
 class ConnectionLine(QGraphicsPathItem):
     """Graphical representation of a transition between states with curved line.
-    
+
     Provides a visual representation of state transitions using Bezier curves,
     with automatic routing to avoid overlaps and visual feedback for selection.
-    
+
     Attributes:
         from_node: Source state node.
         to_node: Destination state node.
@@ -55,7 +55,7 @@ class ConnectionLine(QGraphicsPathItem):
         outcome: str,
     ) -> None:
         """Initialize a connection line between two nodes.
-        
+
         Args:
             from_node: The source state node.
             to_node: The destination state node.
@@ -102,10 +102,10 @@ class ConnectionLine(QGraphicsPathItem):
 
     def _calculate_offset(self) -> float:
         """Calculate offset for this connection to avoid overlap with other connections.
-        
+
         Computes a perpendicular offset based on the number and direction of
         connections between the same pair of nodes to prevent visual overlap.
-        
+
         Returns:
             The offset amount in pixels (positive or negative).
         """
@@ -164,11 +164,11 @@ class ConnectionLine(QGraphicsPathItem):
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         """Handle item changes like selection state.
-        
+
         Args:
             change: The type of change occurring.
             value: The new value for the change.
-            
+
         Returns:
             The potentially modified value.
         """
@@ -185,7 +185,7 @@ class ConnectionLine(QGraphicsPathItem):
 
     def update_position(self) -> None:
         """Update the connection line with a smooth curved path.
-        
+
         Recalculates the cubic Bezier curve path between nodes, including
         offset for multiple connections, arrow head position, and label placement.
         """
@@ -219,9 +219,7 @@ class ConnectionLine(QGraphicsPathItem):
 
         t: float = 0.95
         tangent_point: QPointF = path.pointAtPercent(t)
-        angle = math.atan2(
-            to_pos.y() - tangent_point.y(), to_pos.x() - tangent_point.x()
-        )
+        angle = math.atan2(to_pos.y() - tangent_point.y(), to_pos.x() - tangent_point.x())
 
         arrow_size: float = 12
         arrow_p1: QPointF = to_pos - QPointF(

@@ -30,10 +30,10 @@ if TYPE_CHECKING:
 
 class ContainerStateNode(QGraphicsRectItem):
     """Container for State Machines and Concurrence states.
-    
+
     Provides a graphical representation and management of hierarchical
     state containers including State Machines and Concurrence states.
-    
+
     Attributes:
         name: Name of the container state.
         plugin_info: Plugin information (optional).
@@ -63,7 +63,7 @@ class ContainerStateNode(QGraphicsRectItem):
         default_outcome: Optional[str] = None,
     ) -> None:
         """Initialize a container state node.
-        
+
         Args:
             name: Name of the container state.
             x: X coordinate for initial position.
@@ -84,9 +84,7 @@ class ContainerStateNode(QGraphicsRectItem):
         self.final_outcomes: Dict[str, "FinalOutcomeNode"] = {}
         self.start_state: Optional[str] = start_state
         self.default_outcome: Optional[str] = default_outcome
-        self.child_states: Dict[
-            str, Union["StateNode", "ContainerStateNode"]
-        ] = {}
+        self.child_states: Dict[str, Union["StateNode", "ContainerStateNode"]] = {}
         self.parent_container: Optional["ContainerStateNode"] = None
         self.min_width: int = 1000
         self.min_height: int = 800
@@ -125,9 +123,7 @@ class ContainerStateNode(QGraphicsRectItem):
         self.title.setPos(-title_rect.width() / 2, -385)
 
         if not is_concurrence:
-            self.start_state_label: QGraphicsTextItem = (
-                QGraphicsTextItem(self)
-            )
+            self.start_state_label: QGraphicsTextItem = QGraphicsTextItem(self)
             self.start_state_label.setDefaultTextColor(QColor(0, 100, 0))
             label_font: QFont = QFont()
             label_font.setPointSize(8)
@@ -135,12 +131,8 @@ class ContainerStateNode(QGraphicsRectItem):
             self.start_state_label.setFont(label_font)
             self.update_start_state_label()
         else:
-            self.default_outcome_label: QGraphicsTextItem = (
-                QGraphicsTextItem(self)
-            )
-            self.default_outcome_label.setDefaultTextColor(
-                QColor(139, 69, 19)
-            )
+            self.default_outcome_label: QGraphicsTextItem = QGraphicsTextItem(self)
+            self.default_outcome_label.setDefaultTextColor(QColor(139, 69, 19))
             label_font = QFont()
             label_font.setPointSize(8)
             label_font.setBold(True)
@@ -151,27 +143,27 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def update_start_state_label(self) -> None:
         """Update the initial state label text.
-        
+
         Updates the visual label showing the start state for State Machine containers.
         """
         if not hasattr(self, "start_state_label"):
             return
-        text = f"Initial: {self.start_state}" if self.start_state else (
-            "Initial: (none)"
-        )
+        text = f"Initial: {self.start_state}" if self.start_state else ("Initial: (none)")
         self.start_state_label.setPlainText(text)
         label_rect = self.start_state_label.boundingRect()
         self.start_state_label.setPos(-label_rect.width() / 2, -45)
 
     def update_default_outcome_label(self) -> None:
         """Update the default outcome label text for Concurrence.
-        
+
         Updates the visual label showing the default outcome for Concurrence containers.
         """
         if not hasattr(self, "default_outcome_label"):
             return
-        text = f"Default: {self.default_outcome}" if self.default_outcome else (
-            "Default: (none)"
+        text = (
+            f"Default: {self.default_outcome}"
+            if self.default_outcome
+            else ("Default: (none)")
         )
         self.default_outcome_label.setPlainText(text)
         label_rect = self.default_outcome_label.boundingRect()
@@ -179,7 +171,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def update_visual_elements(self) -> None:
         """Update positions of header, title, and labels.
-        
+
         Repositions all visual elements (header, title, labels, connection port)
         to match the current container dimensions.
         """
@@ -214,7 +206,7 @@ class ContainerStateNode(QGraphicsRectItem):
         self, state_node: Union["StateNode", "ContainerStateNode"]
     ) -> None:
         """Add a child state to this container.
-        
+
         Args:
             state_node: The state node to add as a child.
         """
@@ -227,14 +219,14 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def remove_child_state(self, state_name: str) -> None:
         """Remove a child state from this container.
-        
+
         Args:
             state_name: Name of the child state to remove.
         """
         if state_name in self.child_states:
-            state: Union[
-                "StateNode", "ContainerStateNode"
-            ] = self.child_states[state_name]
+            state: Union["StateNode", "ContainerStateNode"] = self.child_states[
+                state_name
+            ]
             state.parent_container = None
             state.setParentItem(None)
             del self.child_states[state_name]
@@ -243,7 +235,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def _layout_children(self) -> None:
         """Layout child states in a deterministic grid pattern.
-        
+
         Positions child states in a grid layout with configurable spacing
         and padding for visual clarity.
         """
@@ -257,9 +249,7 @@ class ContainerStateNode(QGraphicsRectItem):
         CHILD_SPACING_Y: int = 650
         CHILDREN_PER_COLUMN: int = 3
 
-        sorted_children = sorted(
-            self.child_states.items(), key=lambda x: x[0]
-        )
+        sorted_children = sorted(self.child_states.items(), key=lambda x: x[0])
 
         x_position: float = rect.left() + CHILD_PADDING_X
         y_position: float = rect.top() + CHILD_PADDING_Y
@@ -284,7 +274,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def add_final_outcome(self, outcome_node: "FinalOutcomeNode") -> None:
         """Add a final outcome to this container.
-        
+
         Args:
             outcome_node: The final outcome node to add.
         """
@@ -298,7 +288,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def _reposition_final_outcomes(self) -> None:
         """Reposition final outcomes on the right side of container.
-        
+
         Places final outcome nodes vertically along the right edge of the
         container with appropriate spacing.
         """
@@ -322,9 +312,7 @@ class ContainerStateNode(QGraphicsRectItem):
         outcome_x: float = max_child_x + 300
         current_y: float = rect.top() + OUTCOME_PADDING_TOP
 
-        sorted_outcomes = sorted(
-            self.final_outcomes.items(), key=lambda x: x[0]
-        )
+        sorted_outcomes = sorted(self.final_outcomes.items(), key=lambda x: x[0])
 
         for name, outcome_node in sorted_outcomes:
             outcome_node.setPos(outcome_x, current_y)
@@ -332,7 +320,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def auto_resize_for_children(self) -> None:
         """Automatically resize container to fit all children with padding.
-        
+
         Calculates the minimum bounding box needed to contain all child states
         and final outcomes, then resizes the container accordingly.
         """
@@ -422,7 +410,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def mouseDoubleClickEvent(self, event: Any) -> None:
         """Handle double-click to edit container state.
-        
+
         Args:
             event: The mouse event.
         """
@@ -438,7 +426,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def contextMenuEvent(self, event: Any) -> None:
         """Handle right-click context menu.
-        
+
         Args:
             event: The context menu event.
         """
@@ -497,21 +485,17 @@ class ContainerStateNode(QGraphicsRectItem):
             for connection in outcome.connections:
                 connection.update_position()
 
-    def itemChange(
-        self, change: QGraphicsItem.GraphicsItemChange, value: Any
-    ) -> Any:
+    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         """Handle item changes like position and selection.
-        
+
         Args:
             change: The type of change occurring.
             value: The new value for the change.
-            
+
         Returns:
             The potentially modified value.
         """
-        if change == QGraphicsItem.ItemPositionChange and isinstance(
-            value, QPointF
-        ):
+        if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
             if self.parent_container:
                 container_rect = self.parent_container.rect()
                 self_rect = self.rect()
@@ -540,18 +524,14 @@ class ContainerStateNode(QGraphicsRectItem):
             if value:
                 self.setPen(QPen(QColor(255, 200, 0), 4))
             else:
-                color = (
-                    QColor(255, 140, 0)
-                    if self.is_concurrence
-                    else QColor(0, 0, 180)
-                )
+                color = QColor(255, 140, 0) if self.is_concurrence else QColor(0, 0, 180)
                 self.setPen(QPen(color, 3))
 
         return super().itemChange(change, value)
 
     def add_connection(self, connection: "ConnectionLine") -> None:
         """Add a connection line to this container.
-        
+
         Args:
             connection: The connection line to add.
         """
@@ -560,7 +540,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def remove_connection(self, connection: "ConnectionLine") -> None:
         """Remove a connection line from this container.
-        
+
         Args:
             connection: The connection line to remove.
         """
@@ -569,7 +549,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def get_used_outcomes(self) -> Set[str]:
         """Get set of outcomes that already have connections.
-        
+
         Returns:
             Set of outcome names that are already connected.
         """
@@ -580,7 +560,7 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def get_connection_point(self) -> QPointF:
         """Get the connection point for outgoing connections.
-        
+
         Returns:
             Scene position of the connection port.
         """
@@ -590,10 +570,10 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def get_edge_point(self, target_pos: QPointF) -> QPointF:
         """Get the intersection point on container edge towards target.
-        
+
         Args:
             target_pos: The target position to point towards.
-            
+
         Returns:
             Point on the container's edge closest to the target.
         """
@@ -604,28 +584,19 @@ class ContainerStateNode(QGraphicsRectItem):
         center_y = pos.y() + rect.top() + rect.height() / 2
         center = QPointF(center_x, center_y)
 
-        angle = math.atan2(
-            target_pos.y() - center.y(), target_pos.x() - center.x()
-        )
+        angle = math.atan2(target_pos.y() - center.y(), target_pos.x() - center.x())
 
         w = rect.width() / 2
         h = rect.height() / 2
 
-        abs_tan = (
-            abs(math.tan(angle))
-            if math.cos(angle) != 0
-            else float("inf")
-        )
+        abs_tan = abs(math.tan(angle)) if math.cos(angle) != 0 else float("inf")
         if abs_tan <= h / w:
             x = center.x() + w * (1 if math.cos(angle) > 0 else -1)
-            y = center.y() + w * math.tan(angle) * (
-                1 if math.cos(angle) > 0 else -1
-            )
+            y = center.y() + w * math.tan(angle) * (1 if math.cos(angle) > 0 else -1)
         else:
             y = center.y() + h * (1 if math.sin(angle) > 0 else -1)
             x = (
-                center.x()
-                + h / math.tan(angle) * (1 if math.sin(angle) > 0 else -1)
+                center.x() + h / math.tan(angle) * (1 if math.sin(angle) > 0 else -1)
                 if math.sin(angle) != 0
                 else center.x()
             )
