@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from PyQt5.QtWidgets import (
     QLabel,
     QDialog,
@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (
     QDialogButtonBox,
     QTextEdit,
     QComboBox,
+    QMessageBox,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
@@ -109,3 +110,31 @@ class ConcurrenceDialog(QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+    def get_concurrence_data(self) -> Tuple[str, List[str], str, Dict[str, str]]:
+        """Returns: (name, outcomes, default_outcome, remappings)"""
+        name = self.name_edit.text().strip()
+        if not name:
+            QMessageBox.warning(self, "Validation Error", "Concurrence name is required!")
+            return None
+
+        # Parse outcomes from display label (read-only)
+        outcomes_text = self.outcomes_display.text().strip()
+        outcomes = [o.strip() for o in outcomes_text.split(",") if o.strip()]
+
+        # Get default outcome from combo box
+        default_outcome_text = self.default_outcome_combo.currentText()
+        default_outcome = (
+            None if default_outcome_text == "(None)" else default_outcome_text
+        )
+
+        # Parse remappings
+        remappings = {}
+        remap_text = self.remappings_edit.toPlainText().strip()
+        if remap_text:
+            for line in remap_text.split("\n"):
+                if ":" in line:
+                    key, value = line.split(":", 1)
+                    remappings[key.strip()] = value.strip()
+
+        return name, outcomes, default_outcome, remappings
