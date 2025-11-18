@@ -32,7 +32,21 @@ if TYPE_CHECKING:
 
 
 class ConnectionLine(QGraphicsPathItem):
-    """Graphical representation of a transition between states with curved line."""
+    """Graphical representation of a transition between states with curved line.
+    
+    Provides a visual representation of state transitions using Bezier curves,
+    with automatic routing to avoid overlaps and visual feedback for selection.
+    
+    Attributes:
+        from_node: Source state node.
+        to_node: Destination state node.
+        outcome: The outcome name that triggers this transition.
+        arrow_head: Polygon representing the arrow at the destination.
+        label_bg: Background rectangle for the outcome label.
+        label: Text item displaying the outcome name.
+        normal_pen: Pen used for normal display.
+        selected_pen: Pen used when the connection is selected.
+    """
 
     def __init__(
         self,
@@ -40,6 +54,13 @@ class ConnectionLine(QGraphicsPathItem):
         to_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
         outcome: str,
     ) -> None:
+        """Initialize a connection line between two nodes.
+        
+        Args:
+            from_node: The source state node.
+            to_node: The destination state node.
+            outcome: The outcome name that triggers this transition.
+        """
         super().__init__()
         self.from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"] = (
             from_node
@@ -80,7 +101,14 @@ class ConnectionLine(QGraphicsPathItem):
         to_node.add_connection(self)
 
     def _calculate_offset(self) -> float:
-        """Calculate offset for this connection to avoid overlap with other connections between same nodes."""
+        """Calculate offset for this connection to avoid overlap with other connections.
+        
+        Computes a perpendicular offset based on the number and direction of
+        connections between the same pair of nodes to prevent visual overlap.
+        
+        Returns:
+            The offset amount in pixels (positive or negative).
+        """
         same_direction: List["ConnectionLine"] = []
         opposite_direction: List["ConnectionLine"] = []
 
@@ -135,6 +163,15 @@ class ConnectionLine(QGraphicsPathItem):
         return base_offset + offset
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
+        """Handle item changes like selection state.
+        
+        Args:
+            change: The type of change occurring.
+            value: The new value for the change.
+            
+        Returns:
+            The potentially modified value.
+        """
         if change == QGraphicsItem.ItemSelectedChange:
             if value:
                 self.setPen(self.selected_pen)
@@ -147,7 +184,11 @@ class ConnectionLine(QGraphicsPathItem):
         return super().itemChange(change, value)
 
     def update_position(self) -> None:
-        """Update the connection line with a smooth curved path."""
+        """Update the connection line with a smooth curved path.
+        
+        Recalculates the cubic Bezier curve path between nodes, including
+        offset for multiple connections, arrow head position, and label placement.
+        """
         from_center: QPointF = self.from_node.get_connection_point()
         to_center: QPointF = self.to_node.get_connection_point()
         from_pos: QPointF = self.from_node.get_edge_point(to_center)

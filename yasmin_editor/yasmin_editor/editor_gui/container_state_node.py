@@ -29,7 +29,27 @@ if TYPE_CHECKING:
 
 
 class ContainerStateNode(QGraphicsRectItem):
-    """Container for State Machines and Concurrence states."""
+    """Container for State Machines and Concurrence states.
+    
+    Provides a graphical representation and management of hierarchical
+    state containers including State Machines and Concurrence states.
+    
+    Attributes:
+        name: Name of the container state.
+        plugin_info: Plugin information (optional).
+        is_state_machine: True if this is a State Machine container.
+        is_concurrence: True if this is a Concurrence container.
+        connections: List of outgoing connection lines.
+        remappings: Dictionary of key remappings.
+        final_outcomes: Dictionary of final outcome nodes.
+        start_state: Initial state name for State Machines.
+        default_outcome: Default outcome for Concurrence states.
+        child_states: Dictionary of child state nodes.
+        parent_container: Parent container if nested.
+        min_width: Minimum width of the container.
+        min_height: Minimum height of the container.
+        xml_file: Path to XML file if loaded from file.
+    """
 
     def __init__(
         self,
@@ -42,6 +62,18 @@ class ContainerStateNode(QGraphicsRectItem):
         start_state: Optional[str] = None,
         default_outcome: Optional[str] = None,
     ) -> None:
+        """Initialize a container state node.
+        
+        Args:
+            name: Name of the container state.
+            x: X coordinate for initial position.
+            y: Y coordinate for initial position.
+            is_concurrence: True for Concurrence, False for State Machine.
+            remappings: Dictionary of key remappings.
+            outcomes: List of outcome names.
+            start_state: Initial state for State Machines.
+            default_outcome: Default outcome for Concurrence states.
+        """
         super().__init__(-500, -400, 1000, 800)
         self.name: str = name
         self.plugin_info: Optional["PluginInfo"] = None
@@ -118,7 +150,10 @@ class ContainerStateNode(QGraphicsRectItem):
         self.connection_port: ConnectionPort = ConnectionPort(self)
 
     def update_start_state_label(self) -> None:
-        """Update the initial state label text."""
+        """Update the initial state label text.
+        
+        Updates the visual label showing the start state for State Machine containers.
+        """
         if not hasattr(self, "start_state_label"):
             return
         text = f"Initial: {self.start_state}" if self.start_state else (
@@ -129,7 +164,10 @@ class ContainerStateNode(QGraphicsRectItem):
         self.start_state_label.setPos(-label_rect.width() / 2, -45)
 
     def update_default_outcome_label(self) -> None:
-        """Update the default outcome label text for Concurrence."""
+        """Update the default outcome label text for Concurrence.
+        
+        Updates the visual label showing the default outcome for Concurrence containers.
+        """
         if not hasattr(self, "default_outcome_label"):
             return
         text = f"Default: {self.default_outcome}" if self.default_outcome else (
@@ -140,7 +178,11 @@ class ContainerStateNode(QGraphicsRectItem):
         self.default_outcome_label.setPos(-label_rect.width() / 2, -45)
 
     def update_visual_elements(self) -> None:
-        """Update positions of header, title, and labels."""
+        """Update positions of header, title, and labels.
+        
+        Repositions all visual elements (header, title, labels, connection port)
+        to match the current container dimensions.
+        """
         rect = self.rect()
 
         self.header.setRect(rect.left(), rect.top(), rect.width(), 50)
@@ -171,7 +213,11 @@ class ContainerStateNode(QGraphicsRectItem):
     def add_child_state(
         self, state_node: Union["StateNode", "ContainerStateNode"]
     ) -> None:
-        """Add a child state to this container."""
+        """Add a child state to this container.
+        
+        Args:
+            state_node: The state node to add as a child.
+        """
         if state_node.name not in self.child_states:
             self.child_states[state_node.name] = state_node
             state_node.parent_container = self
@@ -180,7 +226,11 @@ class ContainerStateNode(QGraphicsRectItem):
             self.auto_resize_for_children()
 
     def remove_child_state(self, state_name: str) -> None:
-        """Remove a child state from this container."""
+        """Remove a child state from this container.
+        
+        Args:
+            state_name: Name of the child state to remove.
+        """
         if state_name in self.child_states:
             state: Union[
                 "StateNode", "ContainerStateNode"
@@ -192,7 +242,11 @@ class ContainerStateNode(QGraphicsRectItem):
             self.auto_resize_for_children()
 
     def _layout_children(self) -> None:
-        """Layout child states in a deterministic grid pattern."""
+        """Layout child states in a deterministic grid pattern.
+        
+        Positions child states in a grid layout with configurable spacing
+        and padding for visual clarity.
+        """
         if not self.child_states:
             return
 
@@ -229,7 +283,11 @@ class ContainerStateNode(QGraphicsRectItem):
                 y_position += max(child_height, 200) + CHILD_SPACING_Y
 
     def add_final_outcome(self, outcome_node: "FinalOutcomeNode") -> None:
-        """Add a final outcome to this container."""
+        """Add a final outcome to this container.
+        
+        Args:
+            outcome_node: The final outcome node to add.
+        """
         if outcome_node.name not in self.final_outcomes:
             self.final_outcomes[outcome_node.name] = outcome_node
             outcome_node.parent_container = self
@@ -239,7 +297,11 @@ class ContainerStateNode(QGraphicsRectItem):
             self.auto_resize_for_children()
 
     def _reposition_final_outcomes(self) -> None:
-        """Reposition final outcomes on the right side of container."""
+        """Reposition final outcomes on the right side of container.
+        
+        Places final outcome nodes vertically along the right edge of the
+        container with appropriate spacing.
+        """
         if not self.final_outcomes:
             return
 
@@ -269,7 +331,11 @@ class ContainerStateNode(QGraphicsRectItem):
             current_y += OUTCOME_SPACING_Y
 
     def auto_resize_for_children(self) -> None:
-        """Automatically resize container to fit all children with padding."""
+        """Automatically resize container to fit all children with padding.
+        
+        Calculates the minimum bounding box needed to contain all child states
+        and final outcomes, then resizes the container accordingly.
+        """
         if not self.child_states and not self.final_outcomes:
             return
 
@@ -344,6 +410,7 @@ class ContainerStateNode(QGraphicsRectItem):
             self.parent_container.auto_resize_for_children()
 
     def _update_all_connections_recursive(self) -> None:
+        """Recursively update all connections in this container and children."""
         for connection in self.connections:
             connection.update_position()
 
@@ -354,7 +421,11 @@ class ContainerStateNode(QGraphicsRectItem):
                 child._update_all_connections_recursive()
 
     def mouseDoubleClickEvent(self, event: Any) -> None:
-        """Handle double-click to edit container state."""
+        """Handle double-click to edit container state.
+        
+        Args:
+            event: The mouse event.
+        """
         if self.scene() and self.scene().views():
             canvas = self.scene().views()[0]
             if hasattr(canvas, "editor_ref") and canvas.editor_ref:
@@ -366,7 +437,11 @@ class ContainerStateNode(QGraphicsRectItem):
         super().mouseDoubleClickEvent(event)
 
     def contextMenuEvent(self, event: Any) -> None:
-        """Handle right-click context menu."""
+        """Handle right-click context menu.
+        
+        Args:
+            event: The context menu event.
+        """
         if self.scene() and self.scene().views():
             canvas = self.scene().views()[0]
             if hasattr(canvas, "editor_ref") and canvas.editor_ref:
@@ -410,6 +485,7 @@ class ContainerStateNode(QGraphicsRectItem):
         super().contextMenuEvent(event)
 
     def update_child_connections(self) -> None:
+        """Update all connections for child states and outcomes recursively."""
         for child in self.child_states.values():
             for connection in child.connections:
                 connection.update_position()
@@ -424,6 +500,15 @@ class ContainerStateNode(QGraphicsRectItem):
     def itemChange(
         self, change: QGraphicsItem.GraphicsItemChange, value: Any
     ) -> Any:
+        """Handle item changes like position and selection.
+        
+        Args:
+            change: The type of change occurring.
+            value: The new value for the change.
+            
+        Returns:
+            The potentially modified value.
+        """
         if change == QGraphicsItem.ItemPositionChange and isinstance(
             value, QPointF
         ):
@@ -465,26 +550,53 @@ class ContainerStateNode(QGraphicsRectItem):
         return super().itemChange(change, value)
 
     def add_connection(self, connection: "ConnectionLine") -> None:
+        """Add a connection line to this container.
+        
+        Args:
+            connection: The connection line to add.
+        """
         if connection not in self.connections:
             self.connections.append(connection)
 
     def remove_connection(self, connection: "ConnectionLine") -> None:
+        """Remove a connection line from this container.
+        
+        Args:
+            connection: The connection line to remove.
+        """
         if connection in self.connections:
             self.connections.remove(connection)
 
     def get_used_outcomes(self) -> Set[str]:
-        """Get set of outcomes that already have connections."""
+        """Get set of outcomes that already have connections.
+        
+        Returns:
+            Set of outcome names that are already connected.
+        """
         used_outcomes: Set[str] = set()
         for connection in self.connections:
             used_outcomes.add(connection.outcome)
         return used_outcomes
 
     def get_connection_point(self) -> QPointF:
+        """Get the connection point for outgoing connections.
+        
+        Returns:
+            Scene position of the connection port.
+        """
         if hasattr(self, "connection_port"):
             return self.connection_port.scenePos()
         return self.scenePos()
 
     def get_edge_point(self, target_pos: QPointF) -> QPointF:
+        """Get the intersection point on container edge towards target.
+        
+        Args:
+            target_pos: The target position to point towards.
+            
+        Returns:
+            Point on the container's edge closest to the target.
+        """
         rect = self.rect()
         pos = self.scenePos()
 
