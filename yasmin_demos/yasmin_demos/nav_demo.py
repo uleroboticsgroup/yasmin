@@ -98,7 +98,7 @@ def create_waypoints(blackboard: Blackboard) -> str:
     return SUCCEED
 
 
-def take_random_waypoint(blackboard: Blackboard) -> str:
+def take_random_waypoints(blackboard: Blackboard) -> str:
     """
     Selects a random set of waypoints from the available waypoints.
 
@@ -174,7 +174,7 @@ def main() -> None:
     )
     sm.add_state(
         "TAKING_RANDOM_WAYPOINTS",
-        CbState([SUCCEED], take_random_waypoint),
+        CbState([SUCCEED], take_random_waypoints),
         transitions={
             SUCCEED: "NAVIGATING",
         },
