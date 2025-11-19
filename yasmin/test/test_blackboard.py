@@ -28,7 +28,9 @@ class TestBlackboard(unittest.TestCase):
 
     def test_get(self):
         self.blackboard["foo"] = "foo"
+        self.blackboard.bar = "bar"
         self.assertEqual("foo", self.blackboard["foo"])
+        self.assertEqual("bar", self.blackboard.bar)
 
     def test_delete(self):
         self.blackboard["foo"] = "foo"
