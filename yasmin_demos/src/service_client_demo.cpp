@@ -84,7 +84,7 @@ public:
             "/add_two_ints",
             std::bind(&AddTwoIntsState::create_request_handler, this, _1),
             {"outcome1"},
-            std::bind(&AddTwoIntsState::response_handler, this, _1, _2)) {};
+            std::bind(&AddTwoIntsState::response_handler, this, _1, _2)){};
 
   /**
    * @brief Creates a service request using values from the blackboard.
@@ -127,16 +127,6 @@ public:
   };
 };
 
-/**
- * @brief Main function to initialize and run the state machine.
- *
- * Sets up logging, initializes ROS 2, and defines a state machine with three
- * states.
- *
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int Exit code indicating success or failure.
- */
 int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_service_client_demo");
   rclcpp::init(argc, argv);

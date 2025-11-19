@@ -141,15 +141,6 @@ private:
   }
 }; // class FibonacciActionServer
 
-/**
- * @brief Main entry point for the Fibonacci action server.
- *
- * Initializes the ROS 2 node, spins it to handle incoming requests, and shuts
- * down gracefully.
- * @param argc Number of command-line arguments.
- * @param argv Array of command-line arguments.
- * @return Exit status.
- */
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<FibonacciActionServer>();

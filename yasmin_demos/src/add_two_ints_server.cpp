@@ -67,15 +67,6 @@ private:
   rclcpp::Service<example_interfaces::srv::AddTwoInts>::SharedPtr srv_;
 };
 
-/**
- * @brief Main entry point for the ServerNode application.
- *
- * Initializes the ROS 2 node, spins it to handle incoming service requests,
- * and shuts down gracefully when done.
- * @param argc Number of command-line arguments.
- * @param argv Array of command-line arguments.
- * @return Exit status.
- */
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<ServerNode>();

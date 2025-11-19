@@ -24,17 +24,7 @@ from yasmin_factory import YasminFactory
 from ament_index_python import get_package_share_directory
 
 
-# Main function to initialize and run the state machine
-def main():
-    """
-    The main entry point of the application.
-
-    Initializes the ROS 2 environment, sets up the state machine,
-    and handles execution and termination.
-
-    Raises:
-        KeyboardInterrupt: If the execution is interrupted by the user.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("YASMIN_FACTORY_DEMO")
 
     # Initialize ROS 2

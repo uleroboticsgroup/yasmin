@@ -21,7 +21,7 @@ from yasmin_editor.plugins_manager.plugin_manager import PluginManager
 from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
-def main():
+def main() -> int:
     manager = PluginManager()
     manager.load_all_plugins()
 

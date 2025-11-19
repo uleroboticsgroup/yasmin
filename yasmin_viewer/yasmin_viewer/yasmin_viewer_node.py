@@ -32,30 +32,18 @@ import ament_index_python
 from yasmin_msgs.msg import StateMachine, State, Transition
 
 
-class YasminFsmViewerNode(Node):
+class YasminViewerNode(Node):
     """
     A ROS 2 node that serves as a viewer for the finite state machines (FSMs)
     using a Flask web server.
 
     This class subscribes to FSM updates and serves them over HTTP. It utilizes
     a dictionary with expiring entries to manage the FSM data.
-
-    Attributes:
-        __fsm_dict (ExpiringDict): A dictionary that stores FSM data with
-                                    automatic expiration.
-
-    Methods:
-        start_backend_server(): Initializes and starts the Flask server.
-        start_subscriber(): Subscribes to the FSM state updates.
-        transition_msg_to_list(tansitions): Converts a list of transitions to a dictionary.
-        state_msg_to_dict(msg): Converts a State message to a dictionary.
-        msg_to_dict(msg): Converts a StateMachine message to a list of dictionaries.
-        fsm_viewer_cb(msg): Callback function for processing FSM updates.
     """
 
     def __init__(self) -> None:
         """
-        Initializes the YasminFsmViewerNode node.
+        Initializes the YasminViewerNode node.
 
         Declares parameters for the host and port, sets up the expiring dictionary,
         starts the subscriber thread, and initializes the backend server.
@@ -200,14 +188,9 @@ class YasminFsmViewerNode(Node):
 
 
 def main() -> None:
-    """
-    Main entry point for the YasminFsmViewerNode node.
-
-    Initializes the ROS 2 communication and creates an instance of
-    YasminFsmViewerNode.
-    """
     rclpy.init()
-    YasminFsmViewerNode()
+    node = YasminViewerNode()
+    node.destroy_node()
 
 
 if __name__ == "__main__":

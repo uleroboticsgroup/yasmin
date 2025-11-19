@@ -41,7 +41,7 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {};
+  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0){};
 
   /**
    * @brief Executes the Foo state logic.
@@ -105,18 +105,6 @@ public:
   }
 };
 
-/**
- * @brief Main function that initializes the ROS 2 node and state machine.
- *
- * This function sets up the state machine, adds states, and handles
- * the execution flow, including logging and cleanup.
- *
- * @param argc Argument count from the command line.
- * @param argv Argument vector from the command line.
- * @return int Exit status of the program. Returns 0 on success.
- *
- * @throws std::exception If there is an error during state machine execution.
- */
 int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_parameters_demo");
   rclcpp::init(argc, argv);

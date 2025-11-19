@@ -28,19 +28,6 @@ from yasmin_msgs.msg import (
 class YasminViewerPub:
     """
     A class to publish the state of a Finite State Machine (FSM) for visualization.
-
-    Attributes:
-        _node (Node): The ROS 2 node instance used for publishing.
-        _fsm (StateMachine): The finite state machine to be published.
-        _fsm_name (str): The name of the finite state machine.
-        pub: The publisher for the state machine messages.
-        _timer: A timer to periodically publish the FSM state.
-
-    Methods:
-        parse_transitions(transitions): Converts a dictionary of transitions to a list of TransitionMsg.
-        parse_state(state_name, state_info, states_list, parent): Parses a state and its children recursively.
-        parse_concurrence_transitions(concurrence): Converts a concurrence outcome map into transition-like information.
-        _publish_data(): Publishes the current state of the FSM.
     """
 
     def __init__(

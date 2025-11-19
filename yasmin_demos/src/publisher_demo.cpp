@@ -50,7 +50,7 @@ public:
             "count", // topic name
             std::bind(&PublishIntState::create_int_msg, this,
                       _1) // create msg handler callback
-        ) {};
+        ){};
 
   /**
    * @brief Create a new Int message.
@@ -98,20 +98,6 @@ check_count(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
   }
 }
 
-/**
- * @brief Main function initializing ROS 2 and setting up the state machine.
- *
- * Initializes ROS 2, configures loggers, sets up the state machine with states
- * and transitions, and starts monitoring odometry data. The state machine will
- * cancel upon ROS 2 shutdown.
- *
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int Exit code.
- *
- * @exception std::exception Catches and logs any exceptions thrown by the state
- * machine.
- */
 int main(int argc, char *argv[]) {
 
   YASMIN_LOG_INFO("yasmin_publisher_demo");

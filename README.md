@@ -227,17 +227,7 @@ class BarState(State):
         return "outcome3"
 
 
-# Main function to initialize and run the state machine
-def main():
-    """
-    The main entry point of the application.
-
-    Initializes the ROS 2 environment, sets up the state machine,
-    and handles execution and termination.
-
-    Raises:
-        KeyboardInterrupt: If the execution is interrupted by the user.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_demo")
 
     # Initialize ROS 2
@@ -521,17 +511,7 @@ class BarState(State):
         return "outcome3"
 
 
-# Main function to initialize and run the state machine
-def main():
-    """
-    The main entry point of the application.
-
-    Initializes the ROS 2 environment, sets up the state machine,
-    and handles execution and termination.
-
-    Raises:
-        KeyboardInterrupt: If the execution is interrupted by the user.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("CONCURRENCE_DEMO")
 
     # Initialize ROS 2
@@ -720,16 +700,7 @@ def print_sum(blackboard: Blackboard) -> str:
     return SUCCEED
 
 
-def main():
-    """
-    The main function to execute the finite state machine (FSM).
-
-    This function initializes the ROS 2 environment, sets up logging,
-    creates the FSM with defined states, and executes the FSM.
-
-    Raises:
-        KeyboardInterrupt: If the user interrupts the program.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
 
     # Init ROS 2
@@ -928,22 +899,7 @@ def print_result(blackboard: Blackboard) -> str:
     return SUCCEED
 
 
-def main():
-    """
-    Main function to execute the ROS 2 action client demo.
-
-    This function initializes the ROS 2 client, sets up the finite state
-    machine, adds the states, and starts the action processing.
-
-    Args:
-        None
-
-    Returns:
-        None
-
-    Raises:
-        KeyboardInterrupt: If the user interrupts the execution.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_action_client_demo")
 
     # Initialize ROS 2
@@ -1090,18 +1046,7 @@ class PrintOdometryState(MonitorState):
         return "outcome1"
 
 
-def main():
-    """
-    Main function to initialize and run the ROS 2 state machine.
-
-    This function initializes ROS 2, sets up logging, creates a finite state
-    machine (FSM), adds states to the FSM, and executes the FSM. It handles
-    cleanup and shutdown of ROS 2 gracefully.
-
-    Exceptions:
-        KeyboardInterrupt: Caught to allow graceful cancellation of the
-                          state machine during execution.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
 
     # Initialize ROS 2
@@ -1249,16 +1194,9 @@ def check_count(blackboard: Blackboard) -> str:
         return "outcome2"
 
 
-def main(args=None):
-    """
-    Main function to initialize ROS 2, configure logging, build the YASMIN state machine,
-    and execute it until the max_count is reached.
-
-    Args:
-        args (list, optional): Command-line arguments passed to rclpy.init().
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
-    rclpy.init(args=args)
+    rclpy.init()
 
     # Configure YASMIN to use ROS-based logging
     set_ros_loggers()
@@ -1417,17 +1355,7 @@ class BarState(State):
         return "outcome3"
 
 
-# Main function to initialize and run the state machine
-def main():
-    """
-    The main entry point of the application.
-
-    Initializes the ROS 2 environment, sets up the state machine,
-    and handles execution and termination.
-
-    Raises:
-        KeyboardInterrupt: If the execution is interrupted by the user.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_parameters_demo")
 
     # Initialize ROS 2
@@ -1635,11 +1563,6 @@ def get_next_waypoint(blackboard: Blackboard) -> str:
 
 # main function
 def main() -> None:
-    """
-    Initializes the ROS 2 node, sets up state machines for navigation, and executes the FSM.
-
-    Handles cleanup and shutdown of the ROS 2 node upon completion.
-    """
     yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
 
     # Initialize ROS 2
@@ -1752,17 +1675,7 @@ from yasmin_factory import YasminFactory
 from ament_index_python import get_package_share_directory
 
 
-# Main function to initialize and run the state machine
-def main():
-    """
-    The main entry point of the application.
-
-    Initializes the ROS 2 environment, sets up the state machine,
-    and handles execution and termination.
-
-    Raises:
-        KeyboardInterrupt: If the execution is interrupted by the user.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_demo")
 
     # Initialize ROS 2
@@ -1902,18 +1815,6 @@ public:
   }
 };
 
-/**
- * @brief Main function that initializes the ROS 2 node and state machine.
- *
- * This function sets up the state machine, adds states, and handles
- * the execution flow, including logging and cleanup.
- *
- * @param argc Argument count from the command line.
- * @param argv Argument vector from the command line.
- * @return int Exit status of the program. Returns 0 on success.
- *
- * @throws std::exception If there is an error during state machine execution.
- */
 int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_demo");
   rclcpp::init(argc, argv);
@@ -2038,18 +1939,6 @@ public:
   }
 };
 
-/**
- * @brief Main function that initializes the ROS 2 node and state machine.
- *
- * This function sets up the state machine, adds states, and handles
- * the execution flow, including logging and cleanup.
- *
- * @param argc Argument count from the command line.
- * @param argv Argument vector from the command line.
- * @return int Exit status of the program. Returns 0 on success.
- *
- * @throws std::exception If there is an error during state machine execution.
- */
 int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_remapping_demo");
   rclcpp::init(argc, argv);
@@ -2230,18 +2119,6 @@ public:
   }
 };
 
-/**
- * @brief Main function that initializes the ROS 2 node and state machine.
- *
- * This function sets up the state machine, adds states, and handles
- * the execution flow, including logging and cleanup.
- *
- * @param argc Argument count from the command line.
- * @param argv Argument vector from the command line.
- * @return int Exit status of the program. Returns 0 on success.
- *
- * @throws std::exception If there is an error during state machine execution.
- */
 int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_concurrence_demo");
   rclcpp::init(argc, argv);
@@ -2431,16 +2308,6 @@ public:
   };
 };
 
-/**
- * @brief Main function to initialize and run the state machine.
- *
- * Sets up logging, initializes ROS 2, and defines a state machine with three
- * states.
- *
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int Exit code indicating success or failure.
- */
 int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_service_client_demo");
   rclcpp::init(argc, argv);
@@ -2648,17 +2515,6 @@ public:
   };
 };
 
-/**
- * @brief Main function for the Fibonacci action client.
- *
- * Initializes ROS 2, sets up logging, creates a state machine to manage action
- * states, and executes the Fibonacci action.
- *
- * @param argc Argument count.
- * @param argv Argument values.
- * @return Execution status code.
- * @exception std::exception if there is an error during execution.
- */
 int main(int argc, char *argv[]) {
 
   YASMIN_LOG_INFO("yasmin_action_client_demo");
@@ -2813,20 +2669,6 @@ public:
   };
 };
 
-/**
- * @brief Main function initializing ROS 2 and setting up the state machine.
- *
- * Initializes ROS 2, configures loggers, sets up the state machine with states
- * and transitions, and starts monitoring odometry data. The state machine will
- * cancel upon ROS 2 shutdown.
- *
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int Exit code.
- *
- * @exception std::exception Catches and logs any exceptions thrown by the state
- * machine.
- */
 int main(int argc, char *argv[]) {
 
   YASMIN_LOG_INFO("yasmin_monitor_demo");
@@ -2971,20 +2813,6 @@ check_count(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
   }
 }
 
-/**
- * @brief Main function initializing ROS 2 and setting up the state machine.
- *
- * Initializes ROS 2, configures loggers, sets up the state machine with states
- * and transitions, and starts monitoring odometry data. The state machine will
- * cancel upon ROS 2 shutdown.
- *
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return int Exit code.
- *
- * @exception std::exception Catches and logs any exceptions thrown by the state
- * machine.
- */
 int main(int argc, char *argv[]) {
 
   YASMIN_LOG_INFO("yasmin_publisher_demo");
@@ -3142,18 +2970,6 @@ public:
   }
 };
 
-/**
- * @brief Main function that initializes the ROS 2 node and state machine.
- *
- * This function sets up the state machine, adds states, and handles
- * the execution flow, including logging and cleanup.
- *
- * @param argc Argument count from the command line.
- * @param argv Argument vector from the command line.
- * @return int Exit status of the program. Returns 0 on success.
- *
- * @throws std::exception If there is an error during state machine execution.
- */
 int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_parameters_demo");
   rclcpp::init(argc, argv);
@@ -3391,18 +3207,6 @@ get_next_waypoint(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
   return HAS_NEXT;
 }
 
-/**
- * @brief Main function that initializes the ROS 2 node and state machine.
- *
- * This function sets up the state machine, adds states, and handles
- * the execution flow, including logging and cleanup.
- *
- * @param argc Argument count from the command line.
- * @param argv Argument vector from the command line.
- * @return int Exit status of the program. Returns 0 on success.
- *
- * @throws std::exception If there is an error during state machine execution.
- */
 int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_nav2_demo");
   rclcpp::init(argc, argv);

@@ -35,13 +35,6 @@ END = "end"  ##< Indicates no more waypoints
 class Nav2State(ActionState):
     """
     ActionState for navigating to a specified pose using ROS 2 Navigation.
-
-    Attributes:
-        None
-
-    Methods:
-        create_goal_handler(blackboard: Blackboard) -> NavigateToPose.Goal:
-            Creates the navigation goal from the blackboard.
     """
 
     def __init__(self) -> None:
@@ -145,13 +138,7 @@ def get_next_waypoint(blackboard: Blackboard) -> str:
     return HAS_NEXT
 
 
-# main function
 def main() -> None:
-    """
-    Initializes the ROS 2 node, sets up state machines for navigation, and executes the FSM.
-
-    Handles cleanup and shutdown of the ROS 2 node upon completion.
-    """
     yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
 
     # Initialize ROS 2

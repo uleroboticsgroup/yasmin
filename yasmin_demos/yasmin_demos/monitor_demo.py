@@ -33,19 +33,6 @@ class PrintOdometryState(MonitorState):
 
     This state monitors Odometry messages from the specified ROS topic,
     logging them and transitioning based on the number of messages received.
-
-    Attributes:
-        times (int): The number of messages to monitor before transitioning
-                     to the next outcome.
-
-    Args:
-        times (int): The initial count of how many Odometry messages to
-                     process before changing state.
-
-    Methods:
-        monitor_handler(blackboard: Blackboard, msg: Odometry) -> str:
-            Handles incoming Odometry messages, logging the message and
-            returning the appropriate outcome based on the remaining count.
     """
 
     def __init__(self, times: int) -> None:
@@ -96,18 +83,7 @@ class PrintOdometryState(MonitorState):
         return "outcome1"
 
 
-def main():
-    """
-    Main function to initialize and run the ROS 2 state machine.
-
-    This function initializes ROS 2, sets up logging, creates a finite state
-    machine (FSM), adds states to the FSM, and executes the FSM. It handles
-    cleanup and shutdown of ROS 2 gracefully.
-
-    Exceptions:
-        KeyboardInterrupt: Caught to allow graceful cancellation of the
-                          state machine during execution.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
 
     # Initialize ROS 2

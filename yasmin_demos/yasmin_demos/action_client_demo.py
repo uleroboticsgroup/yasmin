@@ -143,22 +143,7 @@ def print_result(blackboard: Blackboard) -> str:
     return SUCCEED
 
 
-def main():
-    """
-    Main function to execute the ROS 2 action client demo.
-
-    This function initializes the ROS 2 client, sets up the finite state
-    machine, adds the states, and starts the action processing.
-
-    Args:
-        None
-
-    Returns:
-        None
-
-    Raises:
-        KeyboardInterrupt: If the user interrupts the execution.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_action_client_demo")
 
     # Initialize ROS 2

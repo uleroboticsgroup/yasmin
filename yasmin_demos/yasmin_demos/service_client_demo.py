@@ -122,16 +122,7 @@ def print_sum(blackboard: Blackboard) -> str:
     return SUCCEED
 
 
-def main():
-    """
-    The main function to execute the finite state machine (FSM).
-
-    This function initializes the ROS 2 environment, sets up logging,
-    creates the FSM with defined states, and executes the FSM.
-
-    Raises:
-        KeyboardInterrupt: If the user interrupts the program.
-    """
+def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
 
     # Init ROS 2

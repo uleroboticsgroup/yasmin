@@ -90,7 +90,7 @@ def check_count(blackboard: Blackboard) -> str:
         return "outcome2"
 
 
-def main(args=None):
+def main() -> None:
     """
     Main function to initialize ROS 2, configure logging, build the YASMIN state machine,
     and execute it until the max_count is reached.
@@ -99,7 +99,7 @@ def main(args=None):
         args (list, optional): Command-line arguments passed to rclpy.init().
     """
     yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
-    rclpy.init(args=args)
+    rclpy.init()
 
     # Configure YASMIN to use ROS-based logging
     set_ros_loggers()
