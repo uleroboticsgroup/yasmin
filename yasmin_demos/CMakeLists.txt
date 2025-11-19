@@ -22,8 +22,6 @@ find_package(yasmin_ros REQUIRED)
 find_package(yasmin_viewer REQUIRED)
 find_package(yasmin_factory REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(nav2_msgs REQUIRED)
 find_package(example_interfaces REQUIRED)
 
 # C++
@@ -39,8 +37,6 @@ set(DEPENDENCIES
   yasmin_viewer::yasmin_viewer
   yasmin_factory::yasmin_factory
   ${nav_msgs_TARGETS}
-  ${geometry_msgs_TARGETS}
-  ${nav2_msgs_TARGETS}
   ${example_interfaces_TARGETS}
 )
 set(DEPENDENCIES_PACKAGE
@@ -52,8 +48,6 @@ set(DEPENDENCIES_PACKAGE
   yasmin_viewer
   yasmin_factory
   nav_msgs
-  geometry_msgs
-  nav2_msgs
   example_interfaces
 )
 
@@ -106,14 +100,6 @@ add_executable(action_client_demo src/action_client_demo.cpp)
 target_link_libraries(action_client_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   action_client_demo
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-# nav demo
-add_executable(nav_demo src/nav_demo.cpp)
-target_link_libraries(nav_demo PUBLIC ${DEPENDENCIES})
-install(TARGETS
-  nav_demo
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -213,11 +199,6 @@ install(PROGRAMS
 
 install(PROGRAMS
   yasmin_demos/action_client_demo.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(PROGRAMS
-  yasmin_demos/nav_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
