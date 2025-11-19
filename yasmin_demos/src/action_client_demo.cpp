@@ -80,7 +80,7 @@ public:
             "/fibonacci",
             std::bind(&FibonacciState::create_goal_handler, this, _1),
             std::bind(&FibonacciState::response_handler, this, _1, _2),
-            std::bind(&FibonacciState::print_feedback, this, _1, _2)){};
+            std::bind(&FibonacciState::print_feedback, this, _1, _2)) {};
 
   /**
    * @brief Callback for creating the Fibonacci action goal.

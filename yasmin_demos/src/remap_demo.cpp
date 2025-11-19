@@ -34,7 +34,7 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}){};
+  FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {};
 
   /**
    * @brief Executes the Foo state logic.

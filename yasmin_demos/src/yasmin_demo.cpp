@@ -39,7 +39,7 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0){};
+  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {};
 
   /**
    * @brief Executes the Foo state logic.

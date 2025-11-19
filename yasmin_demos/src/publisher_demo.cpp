@@ -50,7 +50,7 @@ public:
             "count", // topic name
             std::bind(&PublishIntState::create_int_msg, this,
                       _1) // create msg handler callback
-        ){};
+        ) {};
 
   /**
    * @brief Create a new Int message.
