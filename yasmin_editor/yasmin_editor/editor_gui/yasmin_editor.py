@@ -196,7 +196,7 @@ class YasminEditor(QMainWindow):
         left_layout.addWidget(QLabel("<b>Python States:</b>"))
         self.python_filter = QLineEdit()
         self.python_filter.setPlaceholderText("Filter Python states...")
-        self.python_filter.textChanged.connect(self.filter_python_list)
+        self.python_filter.textChanged.connect(lambda text: self.filter_list(self.python_list, text))
         left_layout.addWidget(self.python_filter)
         self.python_list = QListWidget()
         self.python_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
@@ -206,7 +206,7 @@ class YasminEditor(QMainWindow):
         left_layout.addWidget(QLabel("<b>C++ States:</b>"))
         self.cpp_filter = QLineEdit()
         self.cpp_filter.setPlaceholderText("Filter C++ states...")
-        self.cpp_filter.textChanged.connect(self.filter_cpp_list)
+        self.cpp_filter.textChanged.connect(lambda text: self.filter_list(self.cpp_list, text))
         left_layout.addWidget(self.cpp_filter)
         self.cpp_list = QListWidget()
         self.cpp_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
@@ -215,7 +215,7 @@ class YasminEditor(QMainWindow):
         left_layout.addWidget(QLabel("<b>XML State Machines:</b>"))
         self.xml_filter = QLineEdit()
         self.xml_filter.setPlaceholderText("Filter XML state machines...")
-        self.xml_filter.textChanged.connect(self.filter_xml_list)
+        self.xml_filter.textChanged.connect(lambda text: self.filter_list(self.xml_list, text))
         left_layout.addWidget(self.xml_filter)
         self.xml_list = QListWidget()
         self.xml_list.itemDoubleClicked.connect(self.on_xml_double_clicked)
@@ -328,34 +328,10 @@ class YasminEditor(QMainWindow):
             item.setData(Qt.UserRole, xml_plugin)
             self.xml_list.addItem(item)
 
-    def filter_python_list(self, text: str) -> None:
-        """Filter Python states list based on search text.
-
-        Args:
-            text: The search text to filter by.
-        """
-        for i in range(self.python_list.count()):
-            item = self.python_list.item(i)
-            item.setHidden(text.lower() not in item.text().lower())
-
-    def filter_cpp_list(self, text: str) -> None:
-        """Filter C++ states list based on search text.
-
-        Args:
-            text: The search text to filter by.
-        """
-        for i in range(self.cpp_list.count()):
-            item = self.cpp_list.item(i)
-            item.setHidden(text.lower() not in item.text().lower())
-
-    def filter_xml_list(self, text: str) -> None:
-        """Filter XML state machines list based on search text.
-
-        Args:
-            text: The search text to filter by.
-        """
-        for i in range(self.xml_list.count()):
-            item = self.xml_list.item(i)
+    def filter_list(self, list_widget: QListWidget, text: str) -> None:
+        """Filter a list widget based on search text."""
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
             item.setHidden(text.lower() not in item.text().lower())
 
     def on_root_sm_name_changed(self, text: str) -> None:
@@ -514,71 +490,39 @@ class YasminEditor(QMainWindow):
 
     def add_state(self) -> None:
         """Open dialog to add a new state to the state machine."""
-        all_plugins = (
-            self.plugin_manager.python_plugins
-            + self.plugin_manager.cpp_plugins
-            + self.plugin_manager.xml_files
-        )
-        dialog = StatePropertiesDialog(
-            available_plugins=all_plugins,
-            parent=self,
-        )
-
+        all_plugins = self.plugin_manager.python_plugins + self.plugin_manager.cpp_plugins + self.plugin_manager.xml_files
+        dialog = StatePropertiesDialog(available_plugins=all_plugins, parent=self)
         if dialog.exec_():
             result = dialog.get_state_data()
             if result[0]:
-                (
-                    name,
-                    plugin,
-                    outcomes,
-                    remappings,
-                ) = result
+                name, plugin, outcomes, remappings = result
+                self.create_state_node(name, plugin, outcomes=outcomes, remappings=remappings)
+
+    def add_container(self, is_concurrence: bool = False) -> None:
+        """Add a new container (State Machine or Concurrence)."""
+        dialog = ConcurrenceDialog(parent=self) if is_concurrence else StateMachineDialog(parent=self)
+        if dialog.exec_():
+            result = dialog.get_concurrence_data() if is_concurrence else dialog.get_state_machine_data()
+            if result:
+                name, outcomes, param, remappings = result
                 self.create_state_node(
-                    name,
-                    plugin,
-                    is_state_machine=False,
-                    is_concurrence=False,
+                    name=name,
+                    plugin_info=None,
+                    is_state_machine=not is_concurrence,
+                    is_concurrence=is_concurrence,
                     outcomes=outcomes,
                     remappings=remappings,
+                    start_state=param if not is_concurrence else None,
+                    default_outcome=param if is_concurrence else None,
                 )
 
     def add_state_machine(self) -> None:
         """Add a new State Machine container."""
-        dialog = StateMachineDialog(parent=self)
-
-        if dialog.exec_():
-            result = dialog.get_state_machine_data()
-            if result:
-                name, outcomes, start_state, remappings = result
-                self.create_state_node(
-                    name=name,
-                    plugin_info=None,
-                    is_state_machine=True,
-                    is_concurrence=False,
-                    outcomes=outcomes,
-                    remappings=remappings,
-                    start_state=start_state,
-                    default_outcome=None,
-                )
+        self.add_container(False)
 
     def add_concurrence(self) -> None:
         """Add a new Concurrence container."""
-        dialog = ConcurrenceDialog(parent=self)
-
-        if dialog.exec_():
-            result = dialog.get_concurrence_data()
-            if result:  # Check if validation passed
-                name, outcomes, default_outcome, remappings = result
-                self.create_state_node(
-                    name=name,
-                    plugin_info=None,
-                    is_state_machine=False,
-                    is_concurrence=True,
-                    outcomes=outcomes,
-                    remappings=remappings,
-                    start_state=None,
-                    default_outcome=default_outcome,
-                )
+        self.add_container(True)
 
     def edit_state(self) -> None:
         """Edit properties of the selected state."""
@@ -1156,74 +1100,58 @@ class YasminEditor(QMainWindow):
         """Display help dialog with usage instructions."""
         help_text = """
         <h2>YASMIN Editor - Quick Guide</h2>
-        
         <h3>File Operations</h3>
         <b>New/Open/Save:</b> Create, load, or save state machines from XML files.
-        
         <h3>Building State Machines</h3>
-        <b>State Machine Name:</b> Set the root state machine name.<br>
-        <b>Start State:</b> Select the first state to execute.<br>
-        <b>Add State:</b> Add a regular state (Python/C++/XML-based).<br>
-        <b>Add State Machine:</b> Add a nested state machine container.<br>
-        <b>Add Concurrence:</b> Add a concurrent execution container.<br>
-        <b>Add Final Outcome:</b> Add an exit point for the state machine.
-        
+        <b>State Machine Name:</b> Set root name.<br>
+        <b>Start State:</b> Select initial state.<br>
+        <b>Add State:</b> Add regular state (Python/C++/XML).<br>
+        <b>Add State Machine:</b> Add nested container.<br>
+        <b>Add Concurrence:</b> Add parallel container.<br>
+        <b>Add Final Outcome:</b> Add exit point.
         <h3>Working with States</h3>
-        <b>Double-click:</b> A plugin in the left panel to quickly add a state.<br>
-        <b>Right-click:</b> On a state for options (edit, delete, add transitions).<br>
-        <b>Drag:</b> States to reposition them on the canvas.<br>
-        <b>Delete Selected:</b> Select items and click "Delete Selected" button.
-        
+        <b>Double-click:</b> Plugin to add state.<br>
+        <b>Right-click:</b> State options.<br>
+        <b>Drag:</b> Reposition states.<br>
+        <b>Delete Selected:</b> Remove items.
         <h3>Creating Transitions</h3>
-        <b>Drag from blue port:</b> Click and drag from the blue connection port to another state.<br>
-        <b>Select outcome:</b> Choose which outcome triggers the transition.<br>
-        
+        <b>Drag from blue port:</b> Create transitions.<br>
+        <b>Select outcome:</b> Choose trigger.
         <h3>Containers</h3>
-        <b>Nested States:</b> Double-click a container to view/edit internal states.<br>
-        <b>Final Outcomes:</b> Containers use final outcomes as exit points.<br>
-        <b>State Machine:</b> Sequential execution based on start state.<br>
-        <b>Concurrence:</b> All child states execute in parallel.
-        
+        <b>Nested States:</b> Double-click to edit.<br>
+        <b>Final Outcomes:</b> Exit points.<br>
+        <b>State Machine:</b> Sequential.<br>
+        <b>Concurrence:</b> Parallel.
         <h3>Canvas Navigation</h3>
-        <b>Scroll:</b> Zoom in/out.<br>
-        <b>Drag:</b> Move states or pan the view.
-        
-        <h3>Validation (before saving)</h3>
-        • State machine name is set<br>
-        • Start state is selected<br>
-        • At least one final outcome exists<br>
-        • All states have unique names
-        
+        <b>Scroll:</b> Zoom.<br>
+        <b>Drag:</b> Pan.
+        <h3>Validation</h3>
+        • Name set<br>
+        • Start state selected<br>
+        • Final outcome exists<br>
+        • Unique names
         <h3>Tips</h3>
-        • Use filters in left panel to find states quickly.<br>
-        • Container states auto-resize to fit children.<br>
-        • States in Concurrence can only transition to final outcomes within that Concurrence.<br>
-        • XML state machines appear as regular states (not containers).
+        • Use filters to find states.<br>
+        • Containers auto-resize.<br>
+        • Concurrence states transition to internal final outcomes.<br>
+        • XML SMs are regular states.
         """
 
-        # Create custom dialog with scrollable content
         dialog = QDialog(self)
         dialog.setWindowTitle("YASMIN Editor Help")
         dialog.setMinimumSize(600, 500)
         dialog.setMaximumSize(800, 600)
-
         layout = QVBoxLayout(dialog)
-
-        # Text browser for scrollable content
         text_browser = QTextBrowser()
         text_browser.setHtml(help_text)
         text_browser.setOpenExternalLinks(False)
         layout.addWidget(text_browser)
-
-        # OK button
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         ok_button = QPushButton("OK")
         ok_button.clicked.connect(dialog.accept)
         ok_button.setDefault(True)
         button_layout.addWidget(ok_button)
-        layout.addLayout(button_layout)
-
         dialog.exec_()
 
     def new_state_machine(self) -> bool:
