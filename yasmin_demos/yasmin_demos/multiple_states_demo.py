@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding: utf-8
 
 # Copyright (C) 2025 Pedro Edom Nunes
 #
@@ -35,7 +34,7 @@ def main():
     Raises:
         KeyboardInterrupt: If the execution is interrupted by the user.
     """
-    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+    yasmin.YASMIN_LOG_INFO("yasmin_multiple_states_demo")
 
     # Initialize ROS 2
     rclpy.init()
@@ -64,7 +63,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("yasmin_demo", sm)
+    YasminViewerPub(sm, "YASMIN_MULTIPLE_STATES_DEMO")
 
     # Execute the FSM
     try:

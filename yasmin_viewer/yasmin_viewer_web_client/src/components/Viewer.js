@@ -17,6 +17,7 @@ import React from "react";
 import Grid from "@mui/material/Grid";
 import FSM from "./FSM";
 import TopAppBar from "./TopAppBar";
+import io from "socket.io-client";
 
 class Viewer extends React.Component {
   constructor(props) {
@@ -38,42 +39,59 @@ class Viewer extends React.Component {
     this.handle_change_layout = this.handle_change_layout.bind(this);
   }
 
-  get_fsms() {
-    fetch("/get_fsms")
-      .then((res) => res.json())
-      .then((data) => {
-        let fsm_list = [];
-        let fsm_name_list = ["ALL"];
-        let current_fsm = this.state.current_fsm;
+  setupSocketListeners() {
+    this.socket.on("connect", () => {
+      console.log("Connected to Yasmin viewer server");
+    });
 
-        for (let key in data) {
-          fsm_name_list.push(key);
-          fsm_list.push(data[key]);
-        }
+    this.socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
 
-        if (!fsm_name_list.includes(current_fsm)) {
-          current_fsm = "ALL";
-        }
+    this.socket.on("fsms_update", (data) => {
+      console.log("Received FSMs update");
+      this.processFSMData(JSON.parse(data));
+    });
 
-        // Update state only if there's an actual difference
-        if (JSON.stringify(fsm_list) !== JSON.stringify(this.state.fsm_list)) {
-          this.setState({
-            fsm_list: fsm_list,
-            fsm_name_list: fsm_name_list,
-            current_fsm: current_fsm,
-          });
-        }
+    this.socket.on("connect_error", (error) => {
+      console.error("Connection error:", error);
+    });
+  }
+
+  processFSMData(data) {
+    let fsm_list = [];
+    let fsm_name_list = ["ALL"];
+    let current_fsm = this.state.current_fsm;
+
+    for (let key in data) {
+      fsm_name_list.push(key);
+      fsm_list.push(data[key]);
+    }
+
+    if (!fsm_name_list.includes(current_fsm)) {
+      current_fsm = "ALL";
+    }
+
+    // Update state only if there's an actual difference
+    if (JSON.stringify(fsm_list) !== JSON.stringify(this.state.fsm_list)) {
+      this.setState({
+        fsm_list: fsm_list,
+        fsm_name_list: fsm_name_list,
+        current_fsm: current_fsm,
       });
+    }
   }
 
   componentDidMount() {
-    this.interval = setInterval(() => {
-      this.get_fsms();
-    }, 250);
+    this.socket = io();
+    this.setupSocketListeners();
   }
 
   componentWillUnmount() {
-    clearInterval(this.interval);
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket.removeAllListeners();
+    }
   }
 
   handle_current_fsm(current_fsm) {

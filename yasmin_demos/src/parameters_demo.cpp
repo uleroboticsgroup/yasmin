@@ -27,8 +27,6 @@
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
-using namespace yasmin;
-
 /**
  * @brief Represents the "Foo" state in the state machine.
  *
@@ -43,7 +41,7 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0){};
+  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {};
 
   /**
    * @brief Executes the Foo state logic.
@@ -159,7 +157,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PARAMETERS_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PARAMETERS_DEMO");
 
   // Execute the state machine
   try {

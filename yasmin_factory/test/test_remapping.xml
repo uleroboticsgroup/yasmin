@@ -1,0 +1,14 @@
+<StateMachine outcomes="end">
+    <State name="State1" type="py" module="test.test_simple_state" class="TestRemappingState">
+        <Transition from="success" to="State2"/>
+        <Transition from="failure" to="end"/>
+        <Remap old="input_key" new="initial_data"/>
+        <Remap old="output_key" new="final_data"/>
+    </State>
+    <State name="State2" type="cpp" class="yasmin_factory/TestRemappingState">
+        <Transition from="success" to="end"/>
+        <Transition from="failure" to="end"/>
+        <Remap old="input_key" new="final_data"/>
+        <Remap old="output_key" new="final_data_2"/>
+    </State>
+</StateMachine>

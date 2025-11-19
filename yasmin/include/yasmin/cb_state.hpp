@@ -50,7 +50,7 @@ public:
    *
    * @throw std::invalid_argument If the outcomes set is empty.
    */
-  CbState(std::set<std::string> outcomes,
+  CbState(const std::set<std::string> &outcomes,
           std::function<std::string(std::shared_ptr<blackboard::Blackboard>)>
               callback);
 

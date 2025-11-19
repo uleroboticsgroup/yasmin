@@ -5,11 +5,12 @@
   <version>3.5.1</version>
   <description>YASMIN viewer for FSM</description>
   <maintainer email="mgons@unileon.es">miguel</maintainer>
-  <license>GPL-3</license>
+  <license>GPL-3.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
   <exec_depend>python3-expiringdict</exec_depend>
   <exec_depend>python3-flask</exec_depend>
+  <exec_depend>python3-flask-socketio</exec_depend>
   <exec_depend>python3-waitress</exec_depend>
   <depend>rclpy</depend>
   <depend>rclcpp</depend>

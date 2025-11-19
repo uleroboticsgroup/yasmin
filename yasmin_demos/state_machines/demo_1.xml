@@ -1,0 +1,9 @@
+<StateMachine outcomes="outcome4" name="Demo1">
+    <State name="Foo" type="cpp" class="yasmin_demos/FooState">
+        <Transition from="outcome1" to="Bar"/>
+        <Transition from="outcome2" to="outcome4"/>
+    </State>
+    <State name="Bar" type="py" module="yasmin_demos.bar_state" class="BarState">
+        <Transition from="outcome3" to="Foo"/>
+    </State>
+</StateMachine>

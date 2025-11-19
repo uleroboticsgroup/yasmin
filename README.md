@@ -37,11 +37,17 @@
 
 1. [Features](#features)
 2. [Installation](#installation)
-3. [Docker](#docker)
-4. [Demos](#demos)
+   - [Debian Packages](#debian-packages)
+   - [Building from Source](#building-from-source)
+   - [Docker](#docker)
+3. [Demos](#demos)
    - [Python](#python)
    - [Cpp](#cpp)
+4. [YASMIN Editor](#yasmin-editor)
+   - [Getting Started](#getting-started)
 5. [YASMIN Viewer](#yasmin-viewer)
+   - [Getting Started](#getting-started-1)
+   - [Custom Host and Port](#custom-host-and-port)
 6. [Citations](#citations)
 
 ## Key Features
@@ -80,17 +86,11 @@ colcon build
 Then, you can run the tests as follow:
 
 ```shell
-colcon test --packages-select yasmin yasmin_ros
+colcon test --packages-select yasmin yasmin_ros yasmin_factory
 colcon test-result --verbose
 ```
 
-To see the coverage report you have to run the tests with pytest directly:
-
-```shell
-python3 -m pytest ~/ros2_ws/src/yasmin/yasmin/test ~/ros2_ws/src/yasmin/yasmin_ros/test --cov=yasmin --cov=yasmin_ros --cov-report=html --cov-report=term-missing
-```
-
-## Docker
+### Docker
 
 If your operating system doesn't support ROS 2, docker is a great alternative. You can use an image from [Dockerhub](https://hub.docker.com/r/mgons/yasmin/) or create your own images. First of all, to build the image you have to use the following command:
 
@@ -143,9 +143,7 @@ import time
 import rclpy
 
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Blackboard, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
@@ -269,7 +267,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_DEMO")
 
     # Execute the FSM
     try:
@@ -301,9 +299,7 @@ ros2 run yasmin_demos remap_demo.py
 
 ```python
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Blackboard, StateMachine
 from yasmin_ros.basic_outcomes import SUCCEED
 
 
@@ -426,10 +422,7 @@ import time
 import rclpy
 
 import yasmin
-from yasmin import State
-from yasmin import Concurrence
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Concurrence, Blackboard, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
@@ -585,7 +578,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("yasmin_demo", sm)
+    YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
 
     # Execute the FSM
     try:
@@ -624,9 +617,7 @@ import rclpy
 from example_interfaces.srv import AddTwoInts
 
 import yasmin
-from yasmin import CbState
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import CbState, Blackboard, StateMachine
 from yasmin_ros import ServiceState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
@@ -774,7 +765,7 @@ def main():
     )
 
     # Publish FSM info
-    YasminViewerPub("YASMIN_SERVICE_CLIENT_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
 
     # Execute FSM
     try:
@@ -983,7 +974,7 @@ def main():
     )
 
     # Publish FSM information
-    YasminViewerPub("YASMIN_ACTION_CLIENT_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
 
     # Create an initial blackboard with the input value
     blackboard = Blackboard()
@@ -1023,8 +1014,7 @@ from rclpy.qos import qos_profile_sensor_data
 from nav_msgs.msg import Odometry
 
 import yasmin
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import Blackboard, StateMachine
 from yasmin_ros import MonitorState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import TIMEOUT
@@ -1136,7 +1126,7 @@ def main():
     )
 
     # Publish FSM information
-    YasminViewerPub("YASMIN_MONITOR_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
     # Execute FSM
     try:
@@ -1189,15 +1179,10 @@ import rclpy
 from std_msgs.msg import Int32
 
 import yasmin
-from yasmin.cb_state import CbState
-from yasmin.state_machine import StateMachine
-from yasmin.blackboard import Blackboard
-
+from yasmin import CbState, StateMachine, Blackboard
+from yasmin_ros import PublisherState, set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED
-from yasmin_ros import PublisherState
-from yasmin_ros.ros_logs import set_ros_loggers
-
-from yasmin_viewer.yasmin_viewer_pub import YasminViewerPub
+from yasmin_viewer import YasminViewerPub
 
 
 class PublishIntState(PublisherState):
@@ -1212,7 +1197,7 @@ class PublishIntState(PublisherState):
         """
         Initializes the PublishIntState with the topic 'count' and a message creation callback.
         """
-        super().__init__("count", self.create_int_msg)
+        super().__init__(Int32, "count", self.create_int_msg)
 
     def create_int_msg(self, blackboard: Blackboard) -> Int32:
         """
@@ -1225,7 +1210,7 @@ class PublishIntState(PublisherState):
             Int32: A ROS message containing the updated counter.
         """
         # Get and increment the counter from the blackboard
-        counter = blackboard.get("counter", 0)
+        counter = blackboard.get("counter")
         counter += 1
         blackboard.set("counter", counter)
 
@@ -1252,8 +1237,8 @@ def check_count(blackboard: Blackboard) -> str:
     time.sleep(1)
 
     # Retrieve the counter and max value from blackboard
-    count = blackboard.get("counter", 0)
-    max_count = blackboard.get("max_count", 10)
+    count = blackboard.get("counter")
+    max_count = blackboard.get("max_count")
 
     yasmin.YASMIN_LOG_INFO(f"Checking count: {count}")
 
@@ -1308,7 +1293,7 @@ def main(args=None):
     )
 
     # Launch YASMIN Viewer publisher for state visualization
-    YasminViewerPub("YASMIN_PUBLISHER_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values
     blackboard = Blackboard()
@@ -1346,9 +1331,7 @@ import time
 import rclpy
 
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Blackboard, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_ros import GetParametersState
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
@@ -1488,7 +1471,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_PARAMETERS_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
 
     # Execute the FSM
     try:
@@ -1526,9 +1509,7 @@ from geometry_msgs.msg import Pose
 from nav2_msgs.action import NavigateToPose
 
 import yasmin
-from yasmin import CbState
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import CbState, Blackboard, StateMachine
 from yasmin_ros import ActionState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
@@ -1716,7 +1697,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_NAV2_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_NAV2_DEMO")
 
     # Execute the state machine
     blackboard = Blackboard()
@@ -1732,6 +1713,86 @@ def main() -> None:
     if rclpy.ok():
         if sm.is_running():
             rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+</details>
+
+#### Factory Demo (Plugins)
+
+```shell
+ros2 run yasmin_demos factory_demo.py
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```xml
+<StateMachine outcomes="outcome4">
+    <State name="Foo" type="cpp" class="yasmin_demos/FooState">
+        <Transition from="outcome1" to="Bar"/>
+        <Transition from="outcome2" to="outcome4"/>
+    </State>
+    <State name="Bar" type="py" module="yasmin_demos.bar_state" class="BarState">
+        <Transition from="outcome3" to="Foo"/>
+    </State>
+</StateMachine>
+```
+
+```python
+import os
+import rclpy
+import yasmin
+from yasmin_ros import set_ros_loggers
+from yasmin_viewer import YasminViewerPub
+from yasmin_factory import YasminFactory
+from ament_index_python import get_package_share_directory
+
+
+# Main function to initialize and run the state machine
+def main():
+    """
+    The main entry point of the application.
+
+    Initializes the ROS 2 environment, sets up the state machine,
+    and handles execution and termination.
+
+    Raises:
+        KeyboardInterrupt: If the execution is interrupted by the user.
+    """
+    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+
+    # Initialize ROS 2
+    rclpy.init()
+
+    # Set ROS 2 loggers
+    set_ros_loggers()
+
+    # Create a finite state machine (FSM)
+    factory = YasminFactory()
+    sm = factory.create_sm_from_file(
+        os.path.join(
+            get_package_share_directory("yasmin_demos"), "state_machines", "demo_1.xml"
+        )
+    )
+
+    # Publish FSM information for visualization
+    YasminViewerPub(sm, "YASMIN_FACTORY_DEMO")
+
+    # Execute the FSM
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        if sm.is_running():
+            sm.cancel_state()
+
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1763,8 +1824,6 @@ ros2 run yasmin_demos yasmin_demo
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
-
-using namespace yasmin;
 
 /**
  * @brief Represents the "Foo" state in the state machine.
@@ -1885,7 +1944,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_DEMO");
 
   // Execute the state machine
   try {
@@ -1925,8 +1984,6 @@ ros2 run yasmin_demos remap_demo
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
-
-using namespace yasmin;
 
 /**
  * @brief Represents the "Foo" state in the state machine.
@@ -2041,7 +2098,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_REMAPPING_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_REMAPPING_DEMO");
 
   // Execute the state machine
   try {
@@ -2081,8 +2138,6 @@ ros2 run yasmin_demos concurrence_demo
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
-
-using namespace yasmin;
 
 /**
  * @brief Represents the "Foo" state in the state machine.
@@ -2210,15 +2265,16 @@ int main(int argc, char *argv[]) {
   auto bar_state = std::make_shared<BarState>();
 
   // Create concurrent state
-  auto concurrent_state = std::make_shared<Concurrence>(
-      std::map<std::string, std::shared_ptr<State>>{{"FOO", foo_state},
-                                                    {"BAR", bar_state}},
+  auto concurrent_state = std::make_shared<yasmin::Concurrence>(
+      std::map<std::string, std::shared_ptr<yasmin::State>>{{"FOO", foo_state},
+                                                            {"BAR", bar_state}},
       "defaulted",
-      Concurrence::OutcomeMap{
-          {"outcome1", Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
-                                                    {"BAR", "outcome3"}}},
-          {"outcome2", Concurrence::StateOutcomeMap{{"FOO", "outcome2"},
-                                                    {"BAR", "outcome3"}}}});
+      yasmin::Concurrence::OutcomeMap{
+          {"outcome1",
+           yasmin::Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
+                                                {"BAR", "outcome3"}}},
+          {"outcome2", yasmin::Concurrence::StateOutcomeMap{
+                           {"FOO", "outcome2"}, {"BAR", "outcome3"}}}});
 
   // Add concurrent state to the state machine
   sm->add_state("CONCURRENCE", concurrent_state,
@@ -2229,7 +2285,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_CONCURRENCE_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_CONCURRENCE_DEMO");
 
   // Execute the state machine
   try {
@@ -2278,7 +2334,6 @@ ros2 run yasmin_demos service_client_demo
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using namespace yasmin;
 
 /**
  * @brief Sets two integer values in the blackboard.
@@ -2429,7 +2484,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine visualization.
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_SERVICE_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_SERVICE_CLIENT_DEMO");
 
   // Execute the state machine.
   try {
@@ -2479,7 +2534,6 @@ ros2 run yasmin_demos action_client_demo
 using std::placeholders::_1;
 using std::placeholders::_2;
 using Fibonacci = example_interfaces::action::Fibonacci;
-using namespace yasmin;
 
 /**
  * @brief Prints the result of the Fibonacci action.
@@ -2641,7 +2695,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
 
   // Create an initial blackboard and set the Fibonacci order
   std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =
@@ -2690,7 +2744,6 @@ ros2 run yasmin_demos monitor_demo
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using namespace yasmin;
 
 /**
  * @class PrintOdometryState
@@ -2805,7 +2858,7 @@ int main(int argc, char *argv[]) {
       });
 
   // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_MONITOR_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MONITOR_DEMO");
 
   // Execute the state machine
   try {
@@ -2850,7 +2903,6 @@ ros2 run yasmin_demos publisher_demo
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using namespace yasmin;
 
 /**
  * @class PublishIntState
@@ -2966,7 +3018,7 @@ int main(int argc, char *argv[]) {
                  {"outcome2", "PUBLISHING_INT"}});
 
   // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PUBLISHER_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
 
   // Execute the state machine
   std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =
@@ -3011,8 +3063,6 @@ ros2 run yasmin_demos parameters_demo --ros-args -p max_counter:=5
 #include "yasmin_ros/get_parameters_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
-
-using namespace yasmin;
 
 /**
  * @brief Represents the "Foo" state in the state machine.
@@ -3144,7 +3194,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PARAMETERS_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PARAMETERS_DEMO");
 
   // Execute the state machine
   try {
@@ -3162,13 +3212,99 @@ int main(int argc, char *argv[]) {
 
 </details>
 
-<a name="#YASMIN-Viewer"></a>
+#### Factory Demo (Plugins)
+
+```shell
+ros2 run yasmin_demos factory_demo
+```
+
+<details>
+<summary>Click to expand</summary>
+
+```xml
+<StateMachine outcomes="outcome4">
+    <State name="Foo" type="py" module="yasmin_demos.foo_state" class="FooState">
+        <Transition from="outcome1" to="Bar"/>
+        <Transition from="outcome2" to="outcome4"/>
+    </State>
+    <State name="Bar" type="cpp" class="yasmin_demos/BarState">
+        <Transition from="outcome3" to="Foo"/>
+    </State>
+</StateMachine>
+```
+
+```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include "ament_index_cpp/get_package_share_directory.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_factory/yasmin_factory.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+
+int main(int argc, char *argv[]) {
+  YASMIN_LOG_INFO("yasmin_factory_demo");
+  rclcpp::init(argc, argv);
+
+  // Set up ROS 2 loggers
+  yasmin_ros::set_ros_loggers();
+
+  std::string outcome;
+
+  // Create the factory in a scope
+  yasmin_factory::YasminFactory factory;
+
+  // Load state machine from XML file
+  std::string xml_file =
+      ament_index_cpp::get_package_share_directory("yasmin_demos") +
+      "/state_machines/demo_2.xml";
+
+  // Create the state machine from the XML file
+  auto sm = factory.create_sm_from_file(xml_file);
+
+  // Execute the state machine
+  try {
+    std::string outcome = (*sm.get())();
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  // Shutdown ROS 2
+  rclcpp::shutdown();
+  return 0;
+}
+```
+
+</details>
+
+# YASMIN Editor
+
+The **YASMIN Editor** is a graphical user interface application for building YASMIN state machines using state plugins. It enables intuitive creation of state machines through drag-and-drop functionality, allowing you to:
+
+- Load Python and C++ states
+- Load XML state machines
+- Define transitions between states
+- Create outcomes
+- Visualize state machine structure
+
+State machines can be exported and saved in XML format for reuse and sharing.
+
+![YASMIN Editor Interface](./docs/editor.png)
+
+### Getting Started
+
+```shell
+ros2 run yasmin_editor yasmin_editor
+```
 
 ## YASMIN Viewer
 
 The **YASMIN Viewer** provides a convenient way to monitor **YASMIN**'s Finite State Machines (FSM). It is built using **Flask** and **ReactJS** and includes a filter to focus on a single FSM at a time.
 
-![](./docs/viewer.gif)
+![YASMIN Viewer](./docs/viewer.gif)
 
 ### Getting Started
 

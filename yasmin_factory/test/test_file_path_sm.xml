@@ -1,0 +1,9 @@
+<StateMachine name="MainStateMachine" outcomes="final_end">
+    <State name="FirstState" type="cpp" class="yasmin_factory/TestSimpleState">
+        <Transition from="outcome1" to="IncludedSM"/>
+        <Transition from="outcome2" to="final_end"/>
+    </State>
+    <StateMachine name="IncludedSM" file_path="test_included_sm.xml">
+        <Transition from="included_end" to="final_end"/>
+    </StateMachine>
+</StateMachine>

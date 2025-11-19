@@ -71,7 +71,7 @@ public:
    * @param maximum_retry (Optional) Maximum retries of the service if it
    * returns timeout. Default is 3.
    */
-  ServiceState(std::string srv_name,
+  ServiceState(const std::string &srv_name,
                CreateRequestHandler create_request_handler,
                int wait_timeout = -1, int response_timeout = -1,
                int maximum_retry = 3)
@@ -91,9 +91,9 @@ public:
    * @param maximum_retry (Optional) Maximum retries of the service if it
    * returns timeout. Default is 3.
    */
-  ServiceState(std::string srv_name,
+  ServiceState(const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               std::set<std::string> outcomes, int wait_timeout = -1,
+               const std::set<std::string> &outcomes, int wait_timeout = -1,
                int response_timeout = -1, int maximum_retry = 3)
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
                      nullptr, nullptr, wait_timeout, response_timeout,
@@ -113,14 +113,36 @@ public:
    * @param maximum_retry (Optional) Maximum retries of the service if it
    * returns timeout. Default is 3.
    */
-  ServiceState(std::string srv_name,
+  ServiceState(const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               std::set<std::string> outcomes,
+               const std::set<std::string> &outcomes,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int wait_timeout = -1, int response_timeout = -1,
                int maximum_retry = 3)
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
                      nullptr, callback_group, wait_timeout, response_timeout,
+                     maximum_retry) {}
+
+  /**
+   * @brief Construct a ServiceState with a request handler and response
+   * handler.
+   *
+   * @param srv_name The name of the service to call.
+   * @param create_request_handler Function to create a service request.
+   * @param response_handler (Optional) Function to handle the service response.
+   * @param wait_timeout Maximum time to wait for the service to become
+   * available, in seconds. Default is -1 (wait indefinitely).
+   * @param response_timeout Maximum time to wait for the service response, in
+   * seconds. Default is -1 (wait indefinitely).
+   * @param maximum_retry (Optional) Maximum retries of the service if it
+   * returns timeout. Default is 3.
+   */
+  ServiceState(const std::string &srv_name,
+               CreateRequestHandler create_request_handler,
+               ResponseHandler response_handler, int wait_timeout = -1,
+               int response_timeout = -1, int maximum_retry = 3)
+      : ServiceState(nullptr, srv_name, create_request_handler, {},
+                     response_handler, nullptr, wait_timeout, response_timeout,
                      maximum_retry) {}
 
   /**
@@ -138,11 +160,11 @@ public:
    * @param maximum_retry (Optional) Maximum retries of the service if it
    * returns timeout. Default is 3.
    */
-  ServiceState(std::string srv_name,
+  ServiceState(const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               std::set<std::string> outcomes, ResponseHandler response_handler,
-               int wait_timeout = -1, int response_timeout = -1,
-               int maximum_retry = 3)
+               const std::set<std::string> &outcomes,
+               ResponseHandler response_handler, int wait_timeout = -1,
+               int response_timeout = -1, int maximum_retry = 3)
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
                      response_handler, nullptr, wait_timeout, response_timeout,
                      maximum_retry) {}
@@ -165,9 +187,10 @@ public:
    *
    * @throws std::invalid_argument if the create_request_handler is nullptr.
    */
-  ServiceState(const rclcpp::Node::SharedPtr &node, std::string srv_name,
+  ServiceState(const rclcpp::Node::SharedPtr &node, const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               std::set<std::string> outcomes, ResponseHandler response_handler,
+               const std::set<std::string> &outcomes,
+               ResponseHandler response_handler,
                rclcpp::CallbackGroup::SharedPtr callback_group,
                int wait_timeout = -1, int response_timeout = -1,
                int maximum_retry = 3)

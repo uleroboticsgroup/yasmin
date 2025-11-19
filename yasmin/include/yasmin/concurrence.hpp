@@ -90,8 +90,9 @@ public:
    * @param outcome_map A map of outcome names to requirements for achieving
    * that outcome.
    */
-  Concurrence(std::map<std::string, std::shared_ptr<State>> states,
-              std::string default_outcome, OutcomeMap outcome_map);
+  Concurrence(const std::map<std::string, std::shared_ptr<State>> &states,
+              const std::string &default_outcome,
+              const OutcomeMap &outcome_map);
 
   /**
    * @brief Executes the state's specific logic.
@@ -116,42 +117,26 @@ public:
    * @brief Returns the map of states managed by this concurrence state.
    * @return A map of state names to states.
    */
-  std::map<std::string, std::shared_ptr<State>> get_states() const;
+  const std::map<std::string, std::shared_ptr<State>> &get_states() const;
 
   /**
    * @brief Returns the outcome map for this concurrence state.
    * @return A map of outcome names to their requirements.
    */
-  OutcomeMap get_outcome_map() const;
+  const OutcomeMap &get_outcome_map() const;
 
   /**
    * @brief Returns the default outcome for this concurrence state.
    * @return The default outcome as a string.
    */
-  std::string get_default_outcome() const;
+  const std::string &get_default_outcome() const;
 
   /**
    * @brief Converts the state to a string representation.
    * @return A string representation of the state.
-   *
-   * This method retrieves the demangled name of the class for a readable
-   * string representation.
    */
   std::string to_string() override {
-    std::string name = typeid(*this).name();
-
-#ifdef __GNUG__ // If using GCC/G++
-    int status;
-    // Demangle the name using GCC's demangling function
-    char *demangled =
-        abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
-    if (status == 0) {
-      name = demangled;
-    }
-    free(demangled);
-#endif
-
-    name += "[";
+    std::string name = "Concurrence [";
 
     for (auto it = states.begin(); it != states.end(); ++it) {
       name += it->first + " (" + it->second->to_string() + ")";
@@ -164,7 +149,7 @@ public:
 
     name += "]";
 
-    return name; // Return the demangled class name
+    return name;
   }
 };
 

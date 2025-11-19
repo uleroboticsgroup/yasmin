@@ -44,8 +44,10 @@ private:
   std::recursive_mutex mutex;
   /// Storage for key-value pairs.
   std::map<std::string, BlackboardValueInterface *> values;
-  /// Storage for key-value pairs.
-  std::map<std::string, std::string> remapping;
+  /// Storage for type information for each key.
+  std::map<std::string, std::string> type_registry;
+  /// Storage for key remappings.
+  std::map<std::string, std::string> remappings;
 
   /** @brief Internal method that acquires the maped key. In the case the key is
    * not remaped, retruns the arg key.
@@ -62,8 +64,43 @@ public:
    */
   Blackboard(const Blackboard &other);
 
-  /** @brief Destructor for Blackboard. */
-  ~Blackboard();
+  /** @brief Virtual destructor for Blackboard. */
+  virtual ~Blackboard();
+
+  /**
+   * @brief Set a value in the blackboard.
+   * @tparam T The type of the value to store.
+   * @param name The key to associate with the value.
+   * @param value The value to store.
+   */
+  template <class T> void set(const std::string &name, T value) {
+
+    YASMIN_LOG_DEBUG("Setting '%s' in the blackboard", name.c_str());
+
+    std::lock_guard<std::recursive_mutex> lk(this->mutex);
+
+    BlackboardValue<T> *b_value = new BlackboardValue<T>(value);
+
+    // Apply remapping if exists
+    std::string key = this->remap(name);
+
+    // If the type is changing, remove the old entry first
+    if (this->type_registry.find(key) != this->type_registry.end()) {
+      this->values.erase(key);
+      this->type_registry.erase(key);
+    }
+
+    // Insert or update the value
+    if (!this->contains(key)) {
+      this->values.insert({key, b_value});
+      this->type_registry.insert({key, b_value->get_type()});
+
+    } else {
+      b_value = (BlackboardValue<T> *)this->values.at(key);
+      b_value->set(value);
+      this->type_registry[key] = b_value->get_type();
+    }
+  }
 
   /**
    * @brief Retrieve a value from the blackboard.
@@ -89,27 +126,6 @@ public:
   }
 
   /**
-   * @brief Set a value in the blackboard.
-   * @tparam T The type of the value to store.
-   * @param name The key to associate with the value.
-   * @param value The value to store.
-   */
-  template <class T> void set(std::string name, T value) {
-
-    YASMIN_LOG_DEBUG("Setting '%s' in the blackboard", name.c_str());
-
-    std::lock_guard<std::recursive_mutex> lk(this->mutex);
-
-    if (!this->contains(name)) {
-      BlackboardValue<T> *b_value = new BlackboardValue<T>(value);
-      this->values.insert({name, b_value});
-
-    } else {
-      ((BlackboardValue<T> *)this->values.at(name))->set(value);
-    }
-  }
-
-  /**
    * @brief Remove a value from the blackboard.
    * @param key The key associated with the value to remove.
    */
@@ -129,22 +145,30 @@ public:
   int size();
 
   /**
+   * @brief Get the type of a value stored in the blackboard.
+   * @param key The key associated with the value.
+   * @return A string representation of the type.
+   * @throws std::runtime_error if the key does not exist.
+   */
+  std::string get_type(const std::string &key);
+
+  /**
    * @brief Convert the contents of the blackboard to a string.
    * @return A string representation of the blackboard.
    */
   std::string to_string();
 
   /**
-   * @brief Set the remapping of the blackboard.
-   * @param remapping The remapping to set.
+   * @brief Set the remappings of the blackboard.
+   * @param remappings The remappings to set.
    */
-  void set_remapping(const std::map<std::string, std::string> &remapping);
+  void set_remappings(const std::map<std::string, std::string> &remappings);
 
   /**
-   * @brief Get the remapping of the blackboard.
-   * @return The remapping of the blackboard.
+   * @brief Get the remappings of the blackboard.
+   * @return The remappings of the blackboard.
    */
-  const std::map<std::string, std::string> &get_remapping();
+  const std::map<std::string, std::string> &get_remappings();
 };
 
 } // namespace blackboard

@@ -31,12 +31,18 @@
 
 using namespace yasmin;
 
-StateMachine::StateMachine(std::set<std::string> outcomes)
-    : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()) {}
+StateMachine::StateMachine(const std::set<std::string> &outcomes)
+    : StateMachine("", outcomes) {}
 
-void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
-                             std::map<std::string, std::string> transitions,
-                             std::map<std::string, std::string> remapping) {
+StateMachine::StateMachine(const std::string &name,
+                           const std::set<std::string> &outcomes)
+    : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()),
+      name(name) {}
+
+void StateMachine::add_state(
+    const std::string &name, std::shared_ptr<State> state,
+    const std::map<std::string, std::string> &transitions,
+    const std::map<std::string, std::string> &remappings) {
 
   if (this->states.find(name) != this->states.end()) {
     throw std::logic_error("State '" + name +
@@ -91,7 +97,7 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
 
   this->states.insert({name, state});
   this->transitions.insert({name, transitions});
-  this->remappings.insert({name, remapping});
+  this->remappings.insert({name, remappings});
 
   if (this->start_state.empty()) {
     this->set_start_state(name);
@@ -101,7 +107,7 @@ void StateMachine::add_state(std::string name, std::shared_ptr<State> state,
   this->validated.store(false);
 }
 
-void StateMachine::set_start_state(std::string state_name) {
+void StateMachine::set_start_state(const std::string &state_name) {
 
   if (state_name.empty()) {
     throw std::invalid_argument("Initial state cannot be empty");
@@ -136,24 +142,24 @@ std::string StateMachine::get_current_state() {
   return this->current_state;
 }
 
-void StateMachine::set_current_state(std::string state_name) {
+void StateMachine::set_current_state(const std::string &state_name) {
   const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
   this->current_state = state_name;
   this->current_state_cond.notify_all();
 }
 
 void StateMachine::add_start_cb(StartCallbackType cb,
-                                std::vector<std::string> args) {
+                                const std::vector<std::string> &args) {
   this->start_cbs.emplace_back(cb, args);
 }
 
 void StateMachine::add_transition_cb(TransitionCallbackType cb,
-                                     std::vector<std::string> args) {
+                                     const std::vector<std::string> &args) {
   this->transition_cbs.emplace_back(cb, args);
 }
 
 void StateMachine::add_end_cb(EndCallbackType cb,
-                              std::vector<std::string> args) {
+                              const std::vector<std::string> &args) {
   this->end_cbs.emplace_back(cb, args);
 }
 
@@ -308,7 +314,7 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
   this->set_current_state(this->start_state);
 
   std::map<std::string, std::string> transitions;
-  std::map<std::string, std::string> remapping;
+  std::map<std::string, std::string> remappings;
   std::string outcome;
   std::string old_outcome;
 
@@ -317,8 +323,8 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
     std::string current_state = this->get_current_state();
     auto state = this->states.at(current_state);
     transitions = this->transitions.at(current_state);
-    remapping = this->remappings.at(current_state);
-    blackboard->set_remapping(remapping);
+    remappings = this->remappings.at(current_state);
+    blackboard->set_remappings(remappings);
 
     outcome = (*state.get())(blackboard);
     old_outcome = std::string(outcome);

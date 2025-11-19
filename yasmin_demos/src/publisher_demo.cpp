@@ -30,7 +30,6 @@
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using namespace yasmin;
 
 /**
  * @class PublishIntState
@@ -51,7 +50,7 @@ public:
             "count", // topic name
             std::bind(&PublishIntState::create_int_msg, this,
                       _1) // create msg handler callback
-        ){};
+        ) {};
 
   /**
    * @brief Create a new Int message.
@@ -146,7 +145,7 @@ int main(int argc, char *argv[]) {
                  {"outcome2", "PUBLISHING_INT"}});
 
   // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_PUBLISHER_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
 
   // Execute the state machine
   std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =

@@ -20,8 +20,7 @@ from rclpy.qos import qos_profile_sensor_data
 from nav_msgs.msg import Odometry
 
 import yasmin
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import Blackboard, StateMachine
 from yasmin_ros import MonitorState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
@@ -133,7 +132,7 @@ def main():
     )
 
     # Publish FSM information
-    YasminViewerPub("YASMIN_MONITOR_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
     # Execute FSM
     try:

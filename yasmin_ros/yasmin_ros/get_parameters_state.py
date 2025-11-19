@@ -13,14 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Dict, Union, Type, Any
+from typing import Dict, Any
 
 import rclpy
 from rclpy.node import Node
 
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
+from yasmin import State, Blackboard
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
 

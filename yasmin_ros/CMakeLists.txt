@@ -75,18 +75,26 @@ ament_python_install_package(${PROJECT_NAME})
 # Tests
 if(BUILD_TESTING)
   # Python tests
-  ament_add_pytest_test(test_yasmin_ros test/test_yasmin_ros.py)
-
-  # C++ tests
-  ament_add_gtest(test_yasmin_ros_cpp test/test_yasmin_ros.cpp)
-  target_link_libraries(test_yasmin_ros_cpp ${PROJECT_NAME})
-  ament_target_dependencies(test_yasmin_ros_cpp
-    rclcpp
-    rclcpp_action
-    example_interfaces
-    std_msgs
-    yasmin
+  set(_pytest_tests
+    test_action_client_state
+    test_service_client_state
+    test_monitor_state
+    test_publisher_state
   )
+  
+  foreach(_test_name ${_pytest_tests})
+    ament_add_pytest_test(${_test_name} test/${_test_name}.py)
+    ament_add_gtest(${_test_name}_cpp test/${_test_name}.cpp)
+    target_link_libraries(${_test_name}_cpp ${PROJECT_NAME})
+    ament_target_dependencies(${_test_name}_cpp
+      rclcpp
+      rclcpp_action
+      example_interfaces
+      std_msgs
+      yasmin
+    )
+  endforeach()
+
 endif()
 
 ament_package()

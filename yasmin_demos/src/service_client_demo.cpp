@@ -30,7 +30,6 @@
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using namespace yasmin;
 
 /**
  * @brief Sets two integer values in the blackboard.
@@ -85,7 +84,7 @@ public:
             "/add_two_ints",
             std::bind(&AddTwoIntsState::create_request_handler, this, _1),
             {"outcome1"},
-            std::bind(&AddTwoIntsState::response_handler, this, _1, _2)){};
+            std::bind(&AddTwoIntsState::response_handler, this, _1, _2)) {};
 
   /**
    * @brief Creates a service request using values from the blackboard.
@@ -181,7 +180,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publish state machine visualization.
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_SERVICE_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_SERVICE_CLIENT_DEMO");
 
   // Execute the state machine.
   try {

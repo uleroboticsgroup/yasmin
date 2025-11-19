@@ -70,14 +70,14 @@ TEST_F(TestState, TestGetOutcomes) {
 
 TEST_F(TestState, TestStr) {
   std::string state_str = state->to_string();
-  EXPECT_TRUE(state_str.find("FooState") != std::string::npos);
+  EXPECT_TRUE(state_str == "FooState");
 }
 
 TEST_F(TestState, TestInitException) {
   try {
     BarState();
-    FAIL() << "Expected std::invalid_argument";
-  } catch (const std::invalid_argument &e) {
+    FAIL() << "Expected std::logic_error";
+  } catch (const std::logic_error &e) {
     EXPECT_STREQ("A state must have at least one possible outcome.", e.what());
   }
 }

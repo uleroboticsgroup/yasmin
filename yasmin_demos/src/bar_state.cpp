@@ -25,7 +25,7 @@
 #include "yasmin_demos/bar_state.h"
 #include "yasmin_ros/ros_logs.hpp"
 
-using namespace yasmin;
+#include <pluginlib/class_list_macros.hpp>
 
 /**
  * @brief Represents the "Bar" state in the state machine.
@@ -33,7 +33,7 @@ using namespace yasmin;
  * This state logs the value from the blackboard and provides
  * a single outcome to transition.
  */
-BarState::BarState() : yasmin::State({"outcome3"}){};
+BarState::BarState() : yasmin::State({"outcome3"}) {};
 
 /**
  * @brief Executes the Bar state logic.
@@ -54,4 +54,6 @@ BarState::execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
   return "outcome3";
 };
 
-BarState::~BarState(){};
+BarState::~BarState() {};
+
+PLUGINLIB_EXPORT_CLASS(BarState, yasmin::State)

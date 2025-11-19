@@ -20,15 +20,10 @@ import rclpy
 from std_msgs.msg import Int32
 
 import yasmin
-from yasmin.cb_state import CbState
-from yasmin.state_machine import StateMachine
-from yasmin.blackboard import Blackboard
-
+from yasmin import CbState, StateMachine, Blackboard
+from yasmin_ros import PublisherState, set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED
-from yasmin_ros import PublisherState
-from yasmin_ros.ros_logs import set_ros_loggers
-
-from yasmin_viewer.yasmin_viewer_pub import YasminViewerPub
+from yasmin_viewer import YasminViewerPub
 
 
 class PublishIntState(PublisherState):
@@ -43,7 +38,7 @@ class PublishIntState(PublisherState):
         """
         Initializes the PublishIntState with the topic 'count' and a message creation callback.
         """
-        super().__init__("count", self.create_int_msg)
+        super().__init__(Int32, "count", self.create_int_msg)
 
     def create_int_msg(self, blackboard: Blackboard) -> Int32:
         """
@@ -56,7 +51,7 @@ class PublishIntState(PublisherState):
             Int32: A ROS message containing the updated counter.
         """
         # Get and increment the counter from the blackboard
-        counter = blackboard.get("counter", 0)
+        counter = blackboard.get("counter")
         counter += 1
         blackboard.set("counter", counter)
 
@@ -83,8 +78,8 @@ def check_count(blackboard: Blackboard) -> str:
     time.sleep(1)
 
     # Retrieve the counter and max value from blackboard
-    count = blackboard.get("counter", 0)
-    max_count = blackboard.get("max_count", 10)
+    count = blackboard.get("counter")
+    max_count = blackboard.get("max_count")
 
     yasmin.YASMIN_LOG_INFO(f"Checking count: {count}")
 
@@ -139,7 +134,7 @@ def main(args=None):
     )
 
     # Launch YASMIN Viewer publisher for state visualization
-    YasminViewerPub("YASMIN_PUBLISHER_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values
     blackboard = Blackboard()

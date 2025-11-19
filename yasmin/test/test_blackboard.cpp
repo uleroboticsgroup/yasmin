@@ -23,6 +23,8 @@ using namespace yasmin::blackboard;
 class TestBlackboard : public ::testing::Test {
 protected:
   Blackboard blackboard;
+
+  void TearDown() override { blackboard.set_remappings({}); }
 };
 
 TEST_F(TestBlackboard, TestGet) {
@@ -44,6 +46,17 @@ TEST_F(TestBlackboard, TestContains) {
 TEST_F(TestBlackboard, TestLen) {
   blackboard.set<std::string>("foo", "foo");
   EXPECT_EQ(blackboard.size(), 1);
+}
+
+TEST_F(TestBlackboard, TestType) {
+  blackboard.set<int>("foo", 10);
+  EXPECT_EQ(blackboard.get_type("foo"), "int");
+}
+
+TEST_F(TestBlackboard, TestRemappings) {
+  blackboard.set<std::string>("bar", "foo");
+  blackboard.set_remappings({{"foo", "bar"}});
+  EXPECT_EQ(blackboard.get<std::string>("bar"), "foo");
 }
 
 int main(int argc, char **argv) {

@@ -21,9 +21,7 @@ from geometry_msgs.msg import Pose
 from nav2_msgs.action import NavigateToPose
 
 import yasmin
-from yasmin import CbState
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import CbState, Blackboard, StateMachine
 from yasmin_ros import ActionState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
@@ -211,7 +209,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("YASMIN_NAV2_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_NAV2_DEMO")
 
     # Execute the state machine
     blackboard = Blackboard()

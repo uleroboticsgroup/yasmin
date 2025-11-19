@@ -62,7 +62,15 @@ public:
    *
    * @param outcomes A set of possible outcomes for the state machine.
    */
-  StateMachine(std::set<std::string> outcomes);
+  StateMachine(const std::set<std::string> &outcomes);
+
+  /**
+   * @brief Construct a new StateMachine object.
+   *
+   * @param name The name of the state machine.
+   * @param outcomes A set of possible outcomes for the state machine.
+   */
+  StateMachine(const std::string &name, const std::set<std::string> &outcomes);
 
   /**
    * @brief Adds a state to the state machine with specified transitions.
@@ -72,15 +80,29 @@ public:
    * state.
    * @param transitions A map of transitions where the key is the outcome
    *                    and the value is the target state name.
-   * @param remapping A map of remapping keys for the blackboard.
+   * @param remappings A map of remappings keys for the blackboard.
    * @throws std::logic_error If the state is already registered or is an
    * outcome.
    * @throws std::invalid_argument If any transition has empty source or target,
    *                               or references unregistered outcomes.
    */
-  void add_state(std::string name, std::shared_ptr<State> state,
-                 std::map<std::string, std::string> transitions = {},
-                 std::map<std::string, std::string> remapping = {});
+  void add_state(const std::string &name, std::shared_ptr<State> state,
+                 const std::map<std::string, std::string> &transitions = {},
+                 const std::map<std::string, std::string> &remappings = {});
+
+  /**
+   * @brief Sets the name of the state machine.
+   *
+   * @param name The name to set for the state machine.
+   */
+  void set_name(const std::string &name) { this->name = name; }
+
+  /**
+   * @brief Gets the name of the state machine.
+   *
+   * @return The name of the state machine.
+   */
+  const std::string &get_name() const { return this->name; }
 
   /**
    * @brief Sets the start state for the state machine.
@@ -88,7 +110,7 @@ public:
    * @param state_name The name of the state to set as the start state.
    * @throws std::invalid_argument If the state name is empty or not registered.
    */
-  void set_start_state(std::string state_name);
+  void set_start_state(const std::string &state_name);
 
   /**
    * @brief Retrieves the name of the start state.
@@ -125,7 +147,8 @@ public:
    * @param cb The callback function to execute.
    * @param args Optional arguments to pass to the callback.
    */
-  void add_start_cb(StartCallbackType cb, std::vector<std::string> args = {});
+  void add_start_cb(StartCallbackType cb,
+                    const std::vector<std::string> &args = {});
 
   /**
    * @brief Adds a callback function for state transitions.
@@ -134,7 +157,7 @@ public:
    * @param args Optional arguments to pass to the callback.
    */
   void add_transition_cb(TransitionCallbackType cb,
-                         std::vector<std::string> args = {});
+                         const std::vector<std::string> &args = {});
 
   /**
    * @brief Adds a callback function to be called when the state machine ends.
@@ -142,7 +165,8 @@ public:
    * @param cb The callback function to execute.
    * @param args Optional arguments to pass to the callback.
    */
-  void add_end_cb(EndCallbackType cb, std::vector<std::string> args = {});
+  void add_end_cb(EndCallbackType cb,
+                  const std::vector<std::string> &args = {});
 
   /**
    * @brief Calls start callbacks with the given blackboard and start state.
@@ -225,6 +249,8 @@ public:
   std::string to_string();
 
 private:
+  // Name of the state machine (used if this is the root state machine)
+  std::string name;
   /// Map of states
   std::map<std::string, std::shared_ptr<State>> states;
   /// Map of transitions
@@ -256,7 +282,7 @@ private:
    *
    * @param state_name The name of the state to set as the current state.
    */
-  void set_current_state(std::string state_name);
+  void set_current_state(const std::string &state_name);
 };
 
 } // namespace yasmin

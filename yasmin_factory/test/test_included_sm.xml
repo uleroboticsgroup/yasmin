@@ -1,0 +1,10 @@
+<StateMachine outcomes="included_end">
+    <State name="IncludedState1" type="cpp" class="yasmin_factory/TestSimpleState">
+        <Transition from="outcome1" to="IncludedState2"/>
+        <Transition from="outcome2" to="included_end"/>
+    </State>
+    <State name="IncludedState2" type="py" module="test.test_simple_state" class="TestSimpleState">
+        <Transition from="outcome1" to="IncludedState1"/>
+        <Transition from="outcome2" to="included_end"/>
+    </State>
+</StateMachine>

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# coding: utf-8
 
 # Copyright (C) 2025 Pedro Edom Nunes
 #
@@ -18,8 +17,7 @@
 
 import time
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
+from yasmin import State, Blackboard
 
 
 # Define the BarState class, inheriting from the State class

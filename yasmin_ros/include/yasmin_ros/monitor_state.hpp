@@ -65,7 +65,8 @@ public:
    * @param maximum_retry Maximum retries of the service if it returns timeout.
    * Default is 3.
    */
-  MonitorState(std::string topic_name, std::set<std::string> outcomes,
+  MonitorState(const std::string &topic_name,
+               const std::set<std::string> &outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
                int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
       : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
@@ -86,7 +87,8 @@ public:
    * Default is 3.
    *
    */
-  MonitorState(std::string topic_name, std::set<std::string> outcomes,
+  MonitorState(const std::string &topic_name,
+               const std::set<std::string> &outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
@@ -107,9 +109,10 @@ public:
    * @param maximum_retry Maximum retries of the service if it returns timeout.
    * Default is 3.
    */
-  MonitorState(const rclcpp::Node::SharedPtr &node, std::string topic_name,
-               std::set<std::string> outcomes, MonitorHandler monitor_handler,
-               rclcpp::QoS qos = 10,
+  MonitorState(const rclcpp::Node::SharedPtr &node,
+               const std::string &topic_name,
+               const std::set<std::string> &outcomes,
+               MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
       : State({basic_outcomes::CANCEL}), topic_name(topic_name),
@@ -118,11 +121,11 @@ public:
 
     // set outcomes
     if (timeout > 0) {
-      this->outcomes = {basic_outcomes::TIMEOUT};
+      this->outcomes.insert(basic_outcomes::TIMEOUT);
     }
 
     if (outcomes.size() > 0) {
-      for (std::string outcome : outcomes) {
+      for (const std::string &outcome : outcomes) {
         this->outcomes.insert(outcome);
       }
     }

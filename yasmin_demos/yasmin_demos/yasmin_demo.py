@@ -19,9 +19,7 @@ import time
 import rclpy
 
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Blackboard, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
@@ -145,7 +143,7 @@ def main():
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub("yasmin_demo", sm)
+    YasminViewerPub(sm, "YASMIN_DEMO")
 
     # Execute the FSM
     try:

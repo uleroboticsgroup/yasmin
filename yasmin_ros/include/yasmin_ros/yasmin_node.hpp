@@ -71,6 +71,9 @@ public:
    * @return A shared pointer to the singleton instance of YasminNode.
    */
   static std::shared_ptr<YasminNode> get_instance() {
+    if (!rclcpp::ok()) {
+      rclcpp::init(0, nullptr);
+    }
     static std::shared_ptr<YasminNode> instance =
         std::make_shared<YasminNode>();
     return instance;

@@ -18,9 +18,7 @@
 import rclpy
 
 import yasmin
-from yasmin import State
-from yasmin import Blackboard
-from yasmin import StateMachine
+from yasmin import State, Blackboard, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED
 

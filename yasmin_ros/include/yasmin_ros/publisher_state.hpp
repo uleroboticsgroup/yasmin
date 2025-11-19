@@ -53,7 +53,7 @@ public:
    * @param create_message_handler A callback handler to create messages.
    * @param qos Quality of Service settings for the topic.
    */
-  PublisherState(std::string topic_name,
+  PublisherState(const std::string &topic_name,
                  CreateMessageHandler create_message_handler,
                  rclcpp::QoS qos = 10,
                  rclcpp::CallbackGroup::SharedPtr callback_group = nullptr)
@@ -68,13 +68,13 @@ public:
    * @param create_message_handler A callback handler to create messages.
    * @param qos Quality of Service settings for the topic.
    */
-  PublisherState(const rclcpp::Node::SharedPtr &node, std::string topic_name,
+  PublisherState(const rclcpp::Node::SharedPtr &node,
+                 const std::string &topic_name,
                  CreateMessageHandler create_message_handler,
                  rclcpp::QoS qos = 10,
                  rclcpp::CallbackGroup::SharedPtr callback_group = nullptr)
       : State({basic_outcomes::SUCCEED}), topic_name(topic_name),
         create_message_handler(create_message_handler) {
-    ;
 
     if (node == nullptr) {
       this->node_ = YasminNode::get_instance();

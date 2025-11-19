@@ -26,6 +26,7 @@ Blackboard::Blackboard(const Blackboard &other) {
   for (const auto &ele : other.values) {
     this->values.insert({ele.first, ele.second});
   }
+  this->type_registry = other.type_registry;
 }
 
 Blackboard::~Blackboard() {
@@ -40,8 +41,9 @@ void Blackboard::remove(const std::string &key) {
 
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
   auto remapped_key = this->remap(key);
-  delete this->values.at(remapped_key); // Free memory of the value
-  this->values.erase(remapped_key);     // Remove the entry from the map
+  delete this->values.at(remapped_key);    // Free memory of the value
+  this->values.erase(remapped_key);        // Remove the entry from the map
+  this->type_registry.erase(remapped_key); // Remove the type info
 }
 
 bool Blackboard::contains(const std::string &key) {
@@ -58,6 +60,20 @@ int Blackboard::size() {
   return this->values.size(); // Return the number of key-value pairs
 }
 
+std::string Blackboard::get_type(const std::string &key) {
+  YASMIN_LOG_DEBUG("Getting type of '%s' from the blackboard", key.c_str());
+
+  std::lock_guard<std::recursive_mutex> lk(this->mutex);
+  auto remapped_key = this->remap(key);
+
+  if (!this->contains(key)) {
+    throw std::runtime_error("Element '" + key +
+                             "' does not exist in the blackboard");
+  }
+
+  return this->type_registry.at(remapped_key);
+}
+
 std::string Blackboard::to_string() {
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
@@ -72,18 +88,18 @@ std::string Blackboard::to_string() {
 }
 
 const std::string &Blackboard::remap(const std::string &key) {
-  if (this->remapping.find(key) != this->remapping.end()) {
-    return this->remapping.at(key);
+  if (this->remappings.find(key) != this->remappings.end()) {
+    return this->remappings.at(key);
   }
 
   return key;
 }
 
-void Blackboard::set_remapping(
-    const std::map<std::string, std::string> &remapping) {
-  this->remapping = remapping;
+void Blackboard::set_remappings(
+    const std::map<std::string, std::string> &remappings) {
+  this->remappings = remappings;
 }
 
-const std::map<std::string, std::string> &Blackboard::get_remapping() {
-  return this->remapping;
+const std::map<std::string, std::string> &Blackboard::get_remappings() {
+  return this->remappings;
 }

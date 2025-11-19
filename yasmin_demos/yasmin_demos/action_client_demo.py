@@ -189,7 +189,7 @@ def main():
     )
 
     # Publish FSM information
-    YasminViewerPub("YASMIN_ACTION_CLIENT_DEMO", sm)
+    YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
 
     # Create an initial blackboard with the input value
     blackboard = Blackboard()

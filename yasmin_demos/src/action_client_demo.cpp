@@ -31,7 +31,6 @@
 using std::placeholders::_1;
 using std::placeholders::_2;
 using Fibonacci = example_interfaces::action::Fibonacci;
-using namespace yasmin;
 
 /**
  * @brief Prints the result of the Fibonacci action.
@@ -81,7 +80,7 @@ public:
             "/fibonacci",
             std::bind(&FibonacciState::create_goal_handler, this, _1),
             std::bind(&FibonacciState::response_handler, this, _1, _2),
-            std::bind(&FibonacciState::print_feedback, this, _1, _2)){};
+            std::bind(&FibonacciState::print_feedback, this, _1, _2)) {};
 
   /**
    * @brief Callback for creating the Fibonacci action goal.
@@ -193,7 +192,7 @@ int main(int argc, char *argv[]) {
                 });
 
   // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub("YASMIN_ACTION_CLIENT_DEMO", sm);
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
 
   // Create an initial blackboard and set the Fibonacci order
   std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =

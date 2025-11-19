@@ -25,8 +25,9 @@
 
 using namespace yasmin;
 
-Concurrence::Concurrence(std::map<std::string, std::shared_ptr<State>> states,
-                         std::string default_outcome, OutcomeMap outcome_map)
+Concurrence::Concurrence(
+    const std::map<std::string, std::shared_ptr<State>> &states,
+    const std::string &default_outcome, const OutcomeMap &outcome_map)
     : State(generate_possible_outcomes(outcome_map, default_outcome)),
       states(states), default_outcome(default_outcome),
       outcome_map(outcome_map) {
@@ -157,15 +158,16 @@ void Concurrence::cancel_state() {
   yasmin::State::cancel_state();
 }
 
-std::map<std::string, std::shared_ptr<State>> Concurrence::get_states() const {
+const std::map<std::string, std::shared_ptr<State>> &
+Concurrence::get_states() const {
   return this->states;
 }
 
-Concurrence::OutcomeMap Concurrence::get_outcome_map() const {
+const Concurrence::OutcomeMap &Concurrence::get_outcome_map() const {
   return this->outcome_map;
 }
 
-std::string Concurrence::get_default_outcome() const {
+const std::string &Concurrence::get_default_outcome() const {
   return this->default_outcome;
 }
 
