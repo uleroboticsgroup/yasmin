@@ -196,7 +196,9 @@ class YasminEditor(QMainWindow):
         left_layout.addWidget(QLabel("<b>Python States:</b>"))
         self.python_filter = QLineEdit()
         self.python_filter.setPlaceholderText("Filter Python states...")
-        self.python_filter.textChanged.connect(lambda text: self.filter_list(self.python_list, text))
+        self.python_filter.textChanged.connect(
+            lambda text: self.filter_list(self.python_list, text)
+        )
         left_layout.addWidget(self.python_filter)
         self.python_list = QListWidget()
         self.python_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
@@ -206,7 +208,9 @@ class YasminEditor(QMainWindow):
         left_layout.addWidget(QLabel("<b>C++ States:</b>"))
         self.cpp_filter = QLineEdit()
         self.cpp_filter.setPlaceholderText("Filter C++ states...")
-        self.cpp_filter.textChanged.connect(lambda text: self.filter_list(self.cpp_list, text))
+        self.cpp_filter.textChanged.connect(
+            lambda text: self.filter_list(self.cpp_list, text)
+        )
         left_layout.addWidget(self.cpp_filter)
         self.cpp_list = QListWidget()
         self.cpp_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
@@ -215,7 +219,9 @@ class YasminEditor(QMainWindow):
         left_layout.addWidget(QLabel("<b>XML State Machines:</b>"))
         self.xml_filter = QLineEdit()
         self.xml_filter.setPlaceholderText("Filter XML state machines...")
-        self.xml_filter.textChanged.connect(lambda text: self.filter_list(self.xml_list, text))
+        self.xml_filter.textChanged.connect(
+            lambda text: self.filter_list(self.xml_list, text)
+        )
         left_layout.addWidget(self.xml_filter)
         self.xml_list = QListWidget()
         self.xml_list.itemDoubleClicked.connect(self.on_xml_double_clicked)
@@ -490,19 +496,33 @@ class YasminEditor(QMainWindow):
 
     def add_state(self) -> None:
         """Open dialog to add a new state to the state machine."""
-        all_plugins = self.plugin_manager.python_plugins + self.plugin_manager.cpp_plugins + self.plugin_manager.xml_files
+        all_plugins = (
+            self.plugin_manager.python_plugins
+            + self.plugin_manager.cpp_plugins
+            + self.plugin_manager.xml_files
+        )
         dialog = StatePropertiesDialog(available_plugins=all_plugins, parent=self)
         if dialog.exec_():
             result = dialog.get_state_data()
             if result[0]:
                 name, plugin, outcomes, remappings = result
-                self.create_state_node(name, plugin, outcomes=outcomes, remappings=remappings)
+                self.create_state_node(
+                    name, plugin, outcomes=outcomes, remappings=remappings
+                )
 
     def add_container(self, is_concurrence: bool = False) -> None:
         """Add a new container (State Machine or Concurrence)."""
-        dialog = ConcurrenceDialog(parent=self) if is_concurrence else StateMachineDialog(parent=self)
+        dialog = (
+            ConcurrenceDialog(parent=self)
+            if is_concurrence
+            else StateMachineDialog(parent=self)
+        )
         if dialog.exec_():
-            result = dialog.get_concurrence_data() if is_concurrence else dialog.get_state_machine_data()
+            result = (
+                dialog.get_concurrence_data()
+                if is_concurrence
+                else dialog.get_state_machine_data()
+            )
             if result:
                 name, outcomes, param, remappings = result
                 self.create_state_node(
