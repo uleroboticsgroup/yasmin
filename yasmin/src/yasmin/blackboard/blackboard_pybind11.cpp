@@ -29,10 +29,23 @@ PYBIND11_MODULE(blackboard, m) {
            "Set a value in the blackboard", py::arg("key"), py::arg("value"))
       .def("__setitem__", &yasmin::blackboard::BlackboardPyWrapper::set,
            "Set a value in the blackboard", py::arg("key"), py::arg("value"))
+      .def(
+          "__setattr__",
+          [](yasmin::blackboard::BlackboardPyWrapper &self,
+             const std::string &name,
+             py::object value) { self.set(name, value); },
+          "Set a value in the blackboard using attribute access",
+          py::arg("name"), py::arg("value"))
       .def("get", &yasmin::blackboard::BlackboardPyWrapper::get,
            "Get a value from the blackboard", py::arg("key"))
       .def("__getitem__", &yasmin::blackboard::BlackboardPyWrapper::get,
            "Get a value from the blackboard", py::arg("key"))
+      .def(
+          "__getattr__",
+          [](yasmin::blackboard::BlackboardPyWrapper &self,
+             const std::string &name) -> py::object { return self.get(name); },
+          "Get a value from the blackboard using attribute access",
+          py::arg("name"))
       .def("remove", &yasmin::blackboard::BlackboardPyWrapper::remove,
            "Remove a value from the blackboard", py::arg("key"))
       .def("__delitem__", &yasmin::blackboard::BlackboardPyWrapper::remove,
