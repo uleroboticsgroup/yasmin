@@ -13,82 +13,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Python bindings for yasmin::CbState"""
-
 from typing import Callable, List, Set, overload
 from yasmin.state import State
 from yasmin.blackboard import Blackboard
 
 class CbState(State):
-    """
-    A state that executes a callback function.
-
-    CbState is a convenience state that wraps a Python callback function,
-    allowing for quick creation of simple states without defining a new class.
-    """
-
     @overload
-    def __init__(self, outcomes: Set[str], callback: Callable[[Blackboard], str]) -> None:
-        """
-        Construct a CbState with outcomes as a set and a callback function.
-
-        Args:
-            outcomes: Set of possible outcome strings
-            callback: Function that takes a Blackboard and returns an outcome string
-        """
-        ...
-
+    def __init__(
+        self, outcomes: Set[str], callback: Callable[[Blackboard], str]
+    ) -> None: ...
     @overload
     def __init__(
         self, outcomes: List[str], callback: Callable[[Blackboard], str]
-    ) -> None:
-        """
-        Construct a CbState with outcomes as a list and a callback function.
-
-        Args:
-            outcomes: List of possible outcome strings
-            callback: Function that takes a Blackboard and returns an outcome string
-        """
-        ...
-
-    def execute(self, blackboard: Blackboard) -> str:
-        """
-        Execute the callback function with the provided blackboard.
-
-        Args:
-            blackboard: The blackboard for reading/writing data
-
-        Returns:
-            The outcome string returned by the callback
-        """
-        ...
-
-    def to_string(self) -> str:
-        """
-        Convert the CbState to a string representation.
-
-        Returns:
-            String representation of the CbState
-        """
-        ...
-
-    def __str__(self) -> str:
-        """
-        Convert the CbState to a string representation.
-
-        Returns:
-            String representation of the CbState
-        """
-        ...
-
-    def __call__(self, blackboard: Blackboard) -> str:
-        """
-        Execute the CbState by calling it like a function.
-
-        Args:
-            blackboard: The blackboard for reading/writing data
-
-        Returns:
-            The outcome string returned by the callback
-        """
-        ...
+    ) -> None: ...
+    def execute(self, blackboard: Blackboard) -> str: ...
+    def to_string(self) -> str: ...
+    def __str__(self) -> str: ...
+    def __call__(self, blackboard: Blackboard) -> str: ...

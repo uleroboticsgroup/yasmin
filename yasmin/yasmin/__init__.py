@@ -60,7 +60,6 @@ def py_default_log_message(
     """
     Default python logging function.
 
-
     @param level The log level as a string (e.g., "ERROR", "WARN", "INFO",
     "DEBUG").
     @param file The source file where the log function is called.
