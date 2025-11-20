@@ -180,14 +180,6 @@ class YasminEditor(QMainWindow):
         help_action.triggered.connect(self.show_help)
         toolbar.addAction(help_action)
 
-        # Layout seed control - allows deterministic layouts
-        set_seed_action = QAction("Set Layout Seed", self)
-        set_seed_action.triggered.connect(self.set_layout_seed)
-        toolbar.addAction(set_seed_action)
-        apply_layout_action = QAction("Reapply Layout", self)
-        apply_layout_action.triggered.connect(self.reapply_layout)
-        toolbar.addAction(apply_layout_action)
-
         # Python states list
         left_layout.addWidget(QLabel("<b>Python States:</b>"))
         self.python_filter = QLineEdit()
@@ -261,56 +253,6 @@ class YasminEditor(QMainWindow):
         splitter.setStretchFactor(1, 1)
 
         self.statusBar()
-
-    def set_layout_seed(self) -> None:
-        """Open a dialog to set the layout seed.
-
-        Set to -1 to use non-deterministic random layout.
-        """
-        seed, ok = QInputDialog.getInt(
-            self,
-            "Set Layout Seed",
-            "Enter layout seed (-1 to disable deterministic layout):",
-            value=(self.layout_seed if self.layout_seed is not None else -1),
-        )
-
-        if not ok:
-            return
-
-        if seed == -1:
-            self.layout_seed = None
-            self.layout_rng = None
-            self.statusBar().showMessage("Layout seed disabled (non-deterministic)", 3000)
-        else:
-            self.layout_seed = int(seed)
-            self.layout_rng = random.Random(self.layout_seed)
-            self.statusBar().showMessage(f"Layout seed set to {seed}", 3000)
-
-    def reset_layout_rng(self) -> None:
-        """Reset the layout RNG from the stored seed.
-
-        If seed is None, uses module-level randomness.
-        """
-        if getattr(self, "layout_seed", None) is None:
-            self.layout_rng = None
-        else:
-            self.layout_rng = random.Random(self.layout_seed)
-
-    def reapply_layout(self) -> None:
-        """Re-seed RNG and re-run the layout over the entire document."""
-        self.reset_layout_rng()
-        self.xml_manager.reorganize_all_containers()
-        try:
-            self.xml_manager.reposition_root_elements_after_resize()
-        except Exception:
-            pass
-
-        for state in self.state_nodes.values():
-            if hasattr(state, "connections"):
-                for conn in state.connections:
-                    conn.update_position()
-
-        self.statusBar().showMessage("Reapplied layout", 2000)
 
     def populate_plugin_lists(self) -> None:
         """Populate the plugin lists with available Python, C++, and XML states."""

@@ -191,7 +191,6 @@ class XmlManager:
 
     def reorganize_all_containers(self) -> None:
         """Reorganize containers and children after loading."""
-        self.editor.reset_layout_rng()
         all_containers = [
             node
             for node in self.editor.state_nodes.values()
