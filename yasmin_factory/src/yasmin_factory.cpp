@@ -15,13 +15,12 @@
 
 #include "yasmin_factory/yasmin_factory.hpp"
 
+#include "yasmin/blackboard/blackboard_pywrapper.hpp"
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <sstream>
 #include <stdexcept>
-
-#include "rcpputils/filesystem_helper.hpp"
-#include "yasmin/blackboard/blackboard_pywrapper.hpp"
 
 namespace yasmin_factory {
 
@@ -246,7 +245,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
       try {
         package_path = ament_index_cpp::get_package_share_directory(package) +
                        "/state_machines";
-        file_path = (rcpputils::fs::path(package_path) / file_name).string();
+        file_path = (std::filesystem::path(package_path) / file_name).string();
       } catch (const ament_index_cpp::PackageNotFoundError &e) {
         file_path = "";
       }
@@ -255,12 +254,11 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
   // Check if StateMachine is an included XML file
   if (!file_path.empty()) {
-    if (!rcpputils::fs::path(file_path).is_absolute()) {
+    if (!std::filesystem::path(file_path).is_absolute()) {
       file_path =
-          (rcpputils::fs::path(this->xml_path_).parent_path() / file_path)
+          (std::filesystem::path(this->xml_path_).parent_path() / file_path)
               .string();
     }
-
     return this->create_sm_from_file(file_path);
   }
 
