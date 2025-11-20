@@ -85,13 +85,13 @@ if(BUILD_TESTING)
   foreach(_test_name ${_pytest_tests})
     ament_add_pytest_test(${_test_name} test/${_test_name}.py)
     ament_add_gtest(${_test_name}_cpp test/${_test_name}.cpp)
-    target_link_libraries(${_test_name}_cpp ${PROJECT_NAME})
-    ament_target_dependencies(${_test_name}_cpp
-      rclcpp
-      rclcpp_action
-      example_interfaces
-      std_msgs
-      yasmin
+    target_link_libraries(${_test_name}_cpp
+     ${PROJECT_NAME}
+      yasmin::yasmin
+      rclcpp::rclcpp
+      rclcpp_action::rclcpp_action
+      ${std_msgs_TARGETS}
+      ${example_interfaces_TARGETS}
     )
   endforeach()
 
