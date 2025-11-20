@@ -50,12 +50,7 @@ from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
 from yasmin_editor.editor_gui.state_properties_dialog import StatePropertiesDialog
 from yasmin_editor.editor_gui.state_machine_dialog import StateMachineDialog
 from yasmin_editor.editor_gui.concurrence_dialog import ConcurrenceDialog
-from yasmin_editor.editor_gui.save_state_machine import save_to_xml
-from yasmin_editor.editor_gui.load_state_machine import (
-    load_from_xml,
-    reposition_root_elements_after_resize,
-    reorganize_all_containers,
-)
+from yasmin_editor.editor_gui.xml_manager import XmlManager
 
 
 class YasminEditor(QMainWindow):
@@ -96,6 +91,7 @@ class YasminEditor(QMainWindow):
         self.layout_seed = 42
         self.layout_rng = random.Random(self.layout_seed)
 
+        self.xml_manager = XmlManager(self)
         self.create_ui()
 
         self.statusBar().showMessage("Loading plugins...")
@@ -303,9 +299,9 @@ class YasminEditor(QMainWindow):
     def reapply_layout(self) -> None:
         """Re-seed RNG and re-run the layout over the entire document."""
         self.reset_layout_rng()
-        reorganize_all_containers(self)
+        self.xml_manager.reorganize_all_containers()
         try:
-            reposition_root_elements_after_resize()
+            self.xml_manager.reposition_root_elements_after_resize()
         except Exception:
             pass
 
@@ -1212,7 +1208,7 @@ class YasminEditor(QMainWindow):
                 if not self.new_state_machine():
                     return
 
-                load_from_xml(self, file_path)
+                self.xml_manager.load_from_xml(file_path)
                 self.statusBar().showMessage(f"Opened: {file_path}", 3000)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to open file: {str(e)}")
@@ -1264,7 +1260,7 @@ class YasminEditor(QMainWindow):
                 file_path += ".xml"
 
             try:
-                save_to_xml(self, file_path)
+                self.xml_manager.save_to_xml(file_path)
                 self.statusBar().showMessage(f"Saved: {file_path}", 3000)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save file: {str(e)}")
