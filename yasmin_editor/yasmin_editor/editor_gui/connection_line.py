@@ -36,16 +36,6 @@ class ConnectionLine(QGraphicsPathItem):
 
     Provides a visual representation of state transitions using Bezier curves,
     with automatic routing to avoid overlaps and visual feedback for selection.
-
-    Attributes:
-        from_node: Source state node.
-        to_node: Destination state node.
-        outcome: The outcome name that triggers this transition.
-        arrow_head: Polygon representing the arrow at the destination.
-        label_bg: Background rectangle for the outcome label.
-        label: Text item displaying the outcome name.
-        normal_pen: Pen used for normal display.
-        selected_pen: Pen used when the connection is selected.
     """
 
     def __init__(

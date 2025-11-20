@@ -33,22 +33,6 @@ class ContainerStateNode(QGraphicsRectItem):
 
     Provides a graphical representation and management of hierarchical
     state containers including State Machines and Concurrence states.
-
-    Attributes:
-        name: Name of the container state.
-        plugin_info: Plugin information (optional).
-        is_state_machine: True if this is a State Machine container.
-        is_concurrence: True if this is a Concurrence container.
-        connections: List of outgoing connection lines.
-        remappings: Dictionary of key remappings.
-        final_outcomes: Dictionary of final outcome nodes.
-        start_state: Initial state name for State Machines.
-        default_outcome: Default outcome for Concurrence states.
-        child_states: Dictionary of child state nodes.
-        parent_container: Parent container if nested.
-        min_width: Minimum width of the container.
-        min_height: Minimum height of the container.
-        xml_file: Path to XML file if loaded from file.
     """
 
     def __init__(
@@ -75,19 +59,19 @@ class ContainerStateNode(QGraphicsRectItem):
             default_outcome: Default outcome for Concurrence states.
         """
         super().__init__(-500, -400, 1000, 800)
-        self.name: str = name
+        self.name = name
         self.plugin_info: Optional["PluginInfo"] = None
-        self.is_state_machine: bool = not is_concurrence
-        self.is_concurrence: bool = is_concurrence
+        self.is_state_machine = not is_concurrence
+        self.is_concurrence = is_concurrence
         self.connections: List["ConnectionLine"] = []
-        self.remappings: Dict[str, str] = remappings or {}
+        self.remappings = remappings or {}
         self.final_outcomes: Dict[str, "FinalOutcomeNode"] = {}
-        self.start_state: Optional[str] = start_state
-        self.default_outcome: Optional[str] = default_outcome
+        self.start_state = start_state
+        self.default_outcome = default_outcome
         self.child_states: Dict[str, Union["StateNode", "ContainerStateNode"]] = {}
         self.parent_container: Optional["ContainerStateNode"] = None
-        self.min_width: int = 1000
-        self.min_height: int = 800
+        self.min_width = 1000
+        self.min_height = 800
         self.xml_file: Optional[str] = None
 
         self.setPos(x, y)
@@ -95,143 +79,111 @@ class ContainerStateNode(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
-        if is_concurrence:
-            self.setBrush(QBrush(QColor(255, 220, 150, 180)))
-            self.setPen(QPen(QColor(255, 140, 0), 3))
-        else:
-            self.setBrush(QBrush(QColor(173, 216, 230, 180)))
-            self.setPen(QPen(QColor(0, 0, 180), 3))
+        self.setBrush(
+            QBrush(
+                QColor(255, 220, 150, 180)
+                if is_concurrence
+                else QColor(173, 216, 230, 180)
+            )
+        )
+        self.setPen(QPen(QColor(255, 140, 0) if is_concurrence else QColor(0, 0, 180), 3))
 
-        self.header: QGraphicsRectItem = QGraphicsRectItem(self)
+        self.header = QGraphicsRectItem(self)
         self.header.setRect(-500, -400, 1000, 50)
-        if is_concurrence:
-            self.header.setBrush(QBrush(QColor(255, 140, 0)))
-        else:
-            self.header.setBrush(QBrush(QColor(0, 100, 200)))
+        self.header.setBrush(
+            QBrush(QColor(255, 140, 0) if is_concurrence else QColor(0, 100, 200))
+        )
         self.header.setPen(QPen(Qt.NoPen))
 
-        self.title: QGraphicsTextItem = QGraphicsTextItem(self)
+        self.title = QGraphicsTextItem(self)
         self.title.setDefaultTextColor(Qt.white)
-        title_font: QFont = QFont()
-        title_font.setPointSize(12)
-        title_font.setBold(True)
-        self.title.setFont(title_font)
-
-        type_label: str = "CONCURRENCE" if is_concurrence else "STATE MACHINE"
-        self.title.setPlainText(f"{type_label}: {name}")
+        font = QFont()
+        font.setPointSize(12)
+        font.setBold(True)
+        self.title.setFont(font)
+        self.title.setPlainText(
+            f"{'CONCURRENCE' if is_concurrence else 'STATE MACHINE'}: {name}"
+        )
         title_rect = self.title.boundingRect()
         self.title.setPos(-title_rect.width() / 2, -385)
 
         if not is_concurrence:
-            self.start_state_label: QGraphicsTextItem = QGraphicsTextItem(self)
+            self.start_state_label = QGraphicsTextItem(self)
             self.start_state_label.setDefaultTextColor(QColor(0, 100, 0))
-            label_font: QFont = QFont()
-            label_font.setPointSize(8)
-            label_font.setBold(True)
-            self.start_state_label.setFont(label_font)
-            self.update_start_state_label()
+            self._set_label_font(self.start_state_label)
+            self.update_label()
         else:
-            self.default_outcome_label: QGraphicsTextItem = QGraphicsTextItem(self)
+            self.default_outcome_label = QGraphicsTextItem(self)
             self.default_outcome_label.setDefaultTextColor(QColor(139, 69, 19))
-            label_font = QFont()
-            label_font.setPointSize(8)
-            label_font.setBold(True)
-            self.default_outcome_label.setFont(label_font)
-            self.update_default_outcome_label()
+            self._set_label_font(self.default_outcome_label)
+            self.update_label()
 
-        self.connection_port: ConnectionPort = ConnectionPort(self)
+        self.connection_port = ConnectionPort(self)
 
-    def update_start_state_label(self) -> None:
-        """Update the initial state label text.
+    def _set_label_font(self, label: QGraphicsTextItem) -> None:
+        font = QFont()
+        font.setPointSize(8)
+        font.setBold(True)
+        label.setFont(font)
 
-        Updates the visual label showing the start state for State Machine containers.
-        """
-        if not hasattr(self, "start_state_label"):
-            return
-        text = f"Initial: {self.start_state}" if self.start_state else ("Initial: (none)")
-        self.start_state_label.setPlainText(text)
-        label_rect = self.start_state_label.boundingRect()
-        self.start_state_label.setPos(-label_rect.width() / 2, -45)
-
-    def update_default_outcome_label(self) -> None:
-        """Update the default outcome label text for Concurrence.
-
-        Updates the visual label showing the default outcome for Concurrence containers.
-        """
-        if not hasattr(self, "default_outcome_label"):
-            return
-        text = (
-            f"Default: {self.default_outcome}"
-            if self.default_outcome
-            else ("Default: (none)")
-        )
-        self.default_outcome_label.setPlainText(text)
-        label_rect = self.default_outcome_label.boundingRect()
-        self.default_outcome_label.setPos(-label_rect.width() / 2, -45)
+    def update_label(self) -> None:
+        if hasattr(self, "start_state_label"):
+            text = (
+                f"Initial: {self.start_state}" if self.start_state else "Initial: (none)"
+            )
+            self.start_state_label.setPlainText(text)
+            rect = self.start_state_label.boundingRect()
+            self.start_state_label.setPos(-rect.width() / 2, -45)
+        elif hasattr(self, "default_outcome_label"):
+            text = (
+                f"Default: {self.default_outcome}"
+                if self.default_outcome
+                else "Default: (none)"
+            )
+            self.default_outcome_label.setPlainText(text)
+            rect = self.default_outcome_label.boundingRect()
+            self.default_outcome_label.setPos(-rect.width() / 2, -45)
 
     def update_visual_elements(self) -> None:
-        """Update positions of header, title, and labels.
-
-        Repositions all visual elements (header, title, labels, connection port)
-        to match the current container dimensions.
-        """
         rect = self.rect()
-
         self.header.setRect(rect.left(), rect.top(), rect.width(), 50)
-
         title_rect = self.title.boundingRect()
         self.title.setPos(
-            rect.left() + rect.width() / 2 - title_rect.width() / 2,
-            rect.top() + 12,
+            rect.left() + rect.width() / 2 - title_rect.width() / 2, rect.top() + 12
         )
-
-        if hasattr(self, "start_state_label"):
-            label_rect = self.start_state_label.boundingRect()
-            self.start_state_label.setPos(
-                rect.left() + rect.width() / 2 - label_rect.width() / 2,
-                rect.top() + 52,
-            )
-
-        if hasattr(self, "default_outcome_label"):
-            label_rect = self.default_outcome_label.boundingRect()
-            self.default_outcome_label.setPos(
-                rect.left() + rect.width() / 2 - label_rect.width() / 2,
-                rect.top() + 52,
-            )
-
+        for label in [
+            getattr(self, "start_state_label", None),
+            getattr(self, "default_outcome_label", None),
+        ]:
+            if label:
+                label_rect = label.boundingRect()
+                label.setPos(
+                    rect.left() + rect.width() / 2 - label_rect.width() / 2,
+                    rect.top() + 52,
+                )
         if hasattr(self, "connection_port"):
             self.connection_port.update_position_for_container()
 
     def add_child_state(
         self, state_node: Union["StateNode", "ContainerStateNode"]
     ) -> None:
-        """Add a child state to this container.
-
-        Args:
-            state_node: The state node to add as a child.
-        """
         if state_node.name not in self.child_states:
             self.child_states[state_node.name] = state_node
             state_node.parent_container = self
             state_node.setParentItem(self)
-            self._layout_children()
-            self.auto_resize_for_children()
+            self._update_layout()
 
     def remove_child_state(self, state_name: str) -> None:
-        """Remove a child state from this container.
-
-        Args:
-            state_name: Name of the child state to remove.
-        """
         if state_name in self.child_states:
-            state: Union["StateNode", "ContainerStateNode"] = self.child_states[
-                state_name
-            ]
+            state = self.child_states[state_name]
             state.parent_container = None
             state.setParentItem(None)
             del self.child_states[state_name]
-            self._layout_children()
-            self.auto_resize_for_children()
+            self._update_layout()
+
+    def _update_layout(self) -> None:
+        self._layout_children()
+        self.auto_resize_for_children()
 
     def _layout_children(self) -> None:
         """Layout child states in a deterministic grid pattern.
@@ -319,81 +271,45 @@ class ContainerStateNode(QGraphicsRectItem):
             current_y += OUTCOME_SPACING_Y
 
     def auto_resize_for_children(self) -> None:
-        """Automatically resize container to fit all children with padding.
-
-        Calculates the minimum bounding box needed to contain all child states
-        and final outcomes, then resizes the container accordingly.
-        """
         if not self.child_states and not self.final_outcomes:
             return
-
         self.prepareGeometryChange()
-
-        PADDING_LEFT: int = 50
-        PADDING_RIGHT: int = 50
-        PADDING_TOP: int = 100
-        PADDING_BOTTOM: int = 50
-
-        min_x: float = float("inf")
-        max_x: float = float("-inf")
-        min_y: float = float("inf")
-        max_y: float = float("-inf")
-
-        for child in self.child_states.values():
-            child_pos = child.pos()
-            if isinstance(child, ContainerStateNode):
-                child_rect = child.rect()
-                child_left = child_pos.x() + child_rect.left()
-                child_right = child_pos.x() + child_rect.right()
-                child_top = child_pos.y() + child_rect.top()
-                child_bottom = child_pos.y() + child_rect.bottom()
-            else:
-                child_bounds = child.boundingRect()
-                child_left = child_pos.x()
-                child_right = child_pos.x() + child_bounds.width()
-                child_top = child_pos.y()
-                child_bottom = child_pos.y() + child_bounds.height()
-
-            min_x = min(min_x, child_left)
-            max_x = max(max_x, child_right)
-            min_y = min(min_y, child_top)
-            max_y = max(max_y, child_bottom)
-
-        for outcome in self.final_outcomes.values():
-            outcome_pos = outcome.pos()
-            outcome_bounds = outcome.boundingRect()
-            outcome_left = outcome_pos.x()
-            outcome_right = outcome_pos.x() + outcome_bounds.width()
-            outcome_top = outcome_pos.y()
-            outcome_bottom = outcome_pos.y() + outcome_bounds.height()
-
-            min_x = min(min_x, outcome_left)
-            max_x = max(max_x, outcome_right)
-            min_y = min(min_y, outcome_top)
-            max_y = max(max_y, outcome_bottom)
-
-        if min_x == float("inf"):
-            new_width = self.min_width
-            new_height = self.min_height
-            new_left = -new_width / 2
-            new_top = -new_height / 2
-        else:
-            new_left = min_x - PADDING_LEFT
-            new_top = min_y - PADDING_TOP
-            new_width = max(
-                (max_x - min_x) + PADDING_LEFT + PADDING_RIGHT, self.min_width
-            )
-            new_height = max(
-                (max_y - min_y) + PADDING_TOP + PADDING_BOTTOM,
+        PADDING = [50, 100, 50, 50]  # left, top, right, bottom
+        items = list(self.child_states.values()) + list(self.final_outcomes.values())
+        if not items:
+            new_rect = [
+                -self.min_width / 2,
+                -self.min_height / 2,
+                self.min_width,
                 self.min_height,
-            )
-
-        self.setRect(new_left, new_top, new_width, new_height)
-
+            ]
+        else:
+            bounds = [
+                float("inf"),
+                float("inf"),
+                float("-inf"),
+                float("-inf"),
+            ]  # min_x, min_y, max_x, max_y
+            for item in items:
+                pos = item.pos()
+                rect = (
+                    item.rect()
+                    if isinstance(item, ContainerStateNode)
+                    else item.boundingRect()
+                )
+                bounds[0] = min(bounds[0], pos.x() + rect.left())
+                bounds[1] = min(bounds[1], pos.y() + rect.top())
+                bounds[2] = max(bounds[2], pos.x() + rect.right())
+                bounds[3] = max(bounds[3], pos.y() + rect.bottom())
+            new_rect = [
+                bounds[0] - PADDING[0],
+                bounds[1] - PADDING[1],
+                max(bounds[2] - bounds[0] + PADDING[0] + PADDING[2], self.min_width),
+                max(bounds[3] - bounds[1] + PADDING[1] + PADDING[3], self.min_height),
+            ]
+        self.setRect(*new_rect)
         self.update_visual_elements()
-
         self._update_all_connections_recursive()
-
         if self.parent_container:
             self.parent_container.auto_resize_for_children()
 
@@ -425,51 +341,41 @@ class ContainerStateNode(QGraphicsRectItem):
         super().mouseDoubleClickEvent(event)
 
     def contextMenuEvent(self, event: Any) -> None:
-        """Handle right-click context menu.
-
-        Args:
-            event: The context menu event.
-        """
         if self.scene() and self.scene().views():
             canvas = self.scene().views()[0]
             if hasattr(canvas, "editor_ref") and canvas.editor_ref:
                 from PyQt5.QtWidgets import QMenu
 
-                menu: QMenu = QMenu()
-
-                # Add actions for containers
-                add_state_action = menu.addAction("Add State")
-                add_sm_action = menu.addAction("Add State Machine")
-                add_cc_action = menu.addAction("Add Concurrence")
-                menu.addSeparator()
-                add_outcome_action = menu.addAction("Add Final Outcome")
-                menu.addSeparator()
-                edit_action = menu.addAction("Edit Properties")
-                delete_action = menu.addAction("Delete")
-
+                menu = QMenu()
+                actions = [
+                    ("Add State", lambda: canvas.editor_ref.add_state_to_container()),
+                    (
+                        "Add State Machine",
+                        lambda: canvas.editor_ref.add_state_machine_to_container(),
+                    ),
+                    (
+                        "Add Concurrence",
+                        lambda: canvas.editor_ref.add_concurrence_to_container(),
+                    ),
+                    None,  # separator
+                    ("Add Final Outcome", lambda: canvas.editor_ref.add_final_outcome()),
+                    None,
+                    ("Edit Properties", lambda: canvas.editor_ref.edit_state()),
+                    ("Delete", lambda: canvas.editor_ref.delete_selected()),
+                ]
+                menu_actions = {}
+                for item in actions:
+                    if item is None:
+                        menu.addSeparator()
+                    else:
+                        name, func = item
+                        menu_actions[menu.addAction(name)] = func
                 action = menu.exec_(event.screenPos())
-
-                if action == add_state_action:
+                if action in menu_actions:
                     self.setSelected(True)
-                    canvas.editor_ref.add_state_to_container()
-                elif action == add_sm_action:
-                    self.setSelected(True)
-                    canvas.editor_ref.add_state_machine_to_container()
-                elif action == add_cc_action:
-                    self.setSelected(True)
-                    canvas.editor_ref.add_concurrence_to_container()
-                elif action == add_outcome_action:
-                    self.setSelected(True)
-                    canvas.editor_ref.add_final_outcome()
-                elif action == edit_action:
-                    self.setSelected(True)
-                    canvas.editor_ref.edit_state()
-                elif action == delete_action:
-                    self.setSelected(True)
-                    canvas.editor_ref.delete_selected()
-
-                event.accept()
-                return
+                    menu_actions[action]()
+                    event.accept()
+                    return
         super().contextMenuEvent(event)
 
     def update_child_connections(self) -> None:
@@ -548,25 +454,14 @@ class ContainerStateNode(QGraphicsRectItem):
             self.connections.remove(connection)
 
     def get_used_outcomes(self) -> Set[str]:
-        """Get set of outcomes that already have connections.
-
-        Returns:
-            Set of outcome names that are already connected.
-        """
-        used_outcomes: Set[str] = set()
-        for connection in self.connections:
-            used_outcomes.add(connection.outcome)
-        return used_outcomes
+        return {conn.outcome for conn in self.connections}
 
     def get_connection_point(self) -> QPointF:
-        """Get the connection point for outgoing connections.
-
-        Returns:
-            Scene position of the connection port.
-        """
-        if hasattr(self, "connection_port"):
-            return self.connection_port.scenePos()
-        return self.scenePos()
+        return (
+            self.connection_port.scenePos()
+            if hasattr(self, "connection_port")
+            else self.scenePos()
+        )
 
     def get_edge_point(self, target_pos: QPointF) -> QPointF:
         """Get the intersection point on container edge towards target.

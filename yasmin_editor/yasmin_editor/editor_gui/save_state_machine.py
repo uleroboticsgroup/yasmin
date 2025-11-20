@@ -22,148 +22,97 @@ if TYPE_CHECKING:
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
+def add_remappings(elem: ET.Element, remappings: dict) -> None:
+    for old, new in remappings.items():
+        if old and new:
+            remap = ET.SubElement(elem, "Remap")
+            remap.set("old", old)
+            remap.set("new", new)
+
+
+def save_container(parent_elem: ET.Element, state_node: StateNode, tag: str) -> None:
+    cont_elem = ET.SubElement(parent_elem, tag)
+    cont_elem.set("name", state_node.name)
+    if hasattr(state_node, "start_state") and state_node.start_state:
+        cont_elem.set("start_state", state_node.start_state)
+    if hasattr(state_node, "default_outcome") and state_node.default_outcome:
+        cont_elem.set("default_outcome", state_node.default_outcome)
+    if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
+        cont_elem.set("outcomes", " ".join(state_node.final_outcomes.keys()))
+    if state_node.remappings:
+        add_remappings(cont_elem, state_node.remappings)
+    if hasattr(state_node, "child_states") and state_node.child_states:
+        save_states_to_xml(cont_elem, state_node.child_states)
+    save_transitions(cont_elem, state_node)
+    if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
+        for outcome_node in state_node.final_outcomes.values():
+            save_transitions(cont_elem, outcome_node)
+
+
 def save_to_xml(editor: "YasminEditor", file_path: str) -> None:
-    """Save the state machine to an XML file.
-
-    Args:
-        file_path: The path where the XML file will be saved.
-    """
-    sm_name = editor.root_sm_name
-    final_outcomes = editor.final_outcomes
-    start_state = editor.start_state
-    state_nodes = editor.state_nodes
-
-    if not sm_name:
-        sm_name, ok = QInputDialog.getText(
+    """Save state machine to XML."""
+    sm_name = (
+        editor.root_sm_name
+        or QInputDialog.getText(
             editor, "State Machine Name", "Enter state machine name (optional):"
-        )
-    else:
-        ok = True
-
+        )[0]
+    )
     root = ET.Element("StateMachine")
     root.set("name", sm_name)
-    root.set("outcomes", " ".join(final_outcomes.keys()))
-
-    if start_state:
-        root.set("start_state", start_state)
-
+    root.set("outcomes", " ".join(editor.final_outcomes.keys()))
+    if editor.start_state:
+        root.set("start_state", editor.start_state)
     root_level_states = {
         name: node
-        for name, node in state_nodes.items()
+        for name, node in editor.state_nodes.items()
         if not hasattr(node, "parent_container") or node.parent_container is None
     }
-
     save_states_to_xml(root, root_level_states)
-    if not file_path.lower().endswith(".xml"):
-        file_path += ".xml"
-
     tree = ET.ElementTree(root)
-    tree.write(file_path, encoding="utf-8", xml_declaration=True, pretty_print=True)
+    tree.write(
+        file_path if file_path.lower().endswith(".xml") else file_path + ".xml",
+        encoding="utf-8",
+        xml_declaration=True,
+        pretty_print=True,
+    )
 
 
 def save_states_to_xml(parent_elem: ET.Element, state_nodes_dict: dict) -> None:
-    """Recursively save states and their children to XML.
-
-    Args:
-        parent_elem: The parent XML element.
-        state_nodes_dict: Dictionary of state names to state nodes.
-    """
-    for state_name, state_node in state_nodes_dict.items():
+    """Recursively save states to XML."""
+    for state_node in state_nodes_dict.values():
         if state_node.is_concurrence:
-            # Concurrence state
-            cc_elem = ET.SubElement(parent_elem, "Concurrence")
-            cc_elem.set("name", state_name)
-
-            if hasattr(state_node, "default_outcome") and state_node.default_outcome:
-                cc_elem.set("default_outcome", state_node.default_outcome)
-
-            if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
-                cc_elem.set("outcomes", " ".join(state_node.final_outcomes.keys()))
-
-            if state_node.remappings:
-                for old_key, new_key in state_node.remappings.items():
-                    if old_key and new_key:
-                        remap_elem = ET.SubElement(cc_elem, "Remap")
-                        remap_elem.set("old", old_key)
-                        remap_elem.set("new", new_key)
-
-            if hasattr(state_node, "child_states") and state_node.child_states:
-                save_states_to_xml(cc_elem, state_node.child_states)
-
-            save_transitions(cc_elem, state_node)
-
-            if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
-                for outcome_node in state_node.final_outcomes.values():
-                    save_transitions(cc_elem, outcome_node)
-
+            save_container(parent_elem, state_node, "Concurrence")
         elif state_node.is_state_machine:
-            sm_elem = ET.SubElement(parent_elem, "StateMachine")
-            sm_elem.set("name", state_name)
-
-            if hasattr(state_node, "start_state") and state_node.start_state:
-                sm_elem.set("start_state", state_node.start_state)
-
-            if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
-                sm_elem.set("outcomes", " ".join(state_node.final_outcomes.keys()))
-
-            if state_node.remappings:
-                for old_key, new_key in state_node.remappings.items():
-                    if old_key and new_key:
-                        remap_elem = ET.SubElement(sm_elem, "Remap")
-                        remap_elem.set("old", old_key)
-                        remap_elem.set("new", new_key)
-
-            if hasattr(state_node, "child_states") and state_node.child_states:
-                save_states_to_xml(sm_elem, state_node.child_states)
-
-            save_transitions(sm_elem, state_node)
-
-            # Add transitions from final outcomes inside this state machine
-            if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
-                for outcome_node in state_node.final_outcomes.values():
-                    save_transitions(sm_elem, outcome_node)
-
+            save_container(parent_elem, state_node, "StateMachine")
         else:
-            if state_node.plugin_info.plugin_type != "xml":
-                state_elem = ET.SubElement(parent_elem, "State")
-            else:
-                state_elem = ET.SubElement(parent_elem, "StateMachine")
-            state_elem.set("name", state_name)
-
+            tag = (
+                "State" if state_node.plugin_info.plugin_type != "xml" else "StateMachine"
+            )
+            state_elem = ET.SubElement(parent_elem, tag)
+            state_elem.set("name", state_node.name)
             if state_node.plugin_info:
-                if state_node.plugin_info.plugin_type == "python":
-                    state_elem.set("type", "py")
+                ptype = state_node.plugin_info.plugin_type
+                state_elem.set(
+                    "type", {"python": "py", "cpp": "cpp", "xml": "xml"}[ptype]
+                )
+                if ptype == "python":
                     if state_node.plugin_info.module:
                         state_elem.set("module", state_node.plugin_info.module)
                     if state_node.plugin_info.class_name:
                         state_elem.set("class", state_node.plugin_info.class_name)
-                elif state_node.plugin_info.plugin_type == "cpp":
-                    state_elem.set("type", "cpp")
-                    if state_node.plugin_info.class_name:
-                        state_elem.set("class", state_node.plugin_info.class_name)
-                elif state_node.plugin_info.plugin_type == "xml":
-                    state_elem.set("type", "xml")
+                elif ptype == "cpp" and state_node.plugin_info.class_name:
+                    state_elem.set("class", state_node.plugin_info.class_name)
+                elif ptype == "xml":
                     if state_node.plugin_info.file_name:
                         state_elem.set("file_name", state_node.plugin_info.file_name)
                         state_elem.set("package", state_node.plugin_info.package_name)
-
             if state_node.remappings:
-                for old_key, new_key in state_node.remappings.items():
-                    if old_key and new_key:
-                        remap_elem = ET.SubElement(state_elem, "Remap")
-                        remap_elem.set("old", old_key)
-                        remap_elem.set("new", new_key)
-
+                add_remappings(state_elem, state_node.remappings)
             save_transitions(state_elem, state_node)
 
 
 def save_transitions(parent_elem: ET.Element, state_node: "StateNode") -> None:
-    """Save transitions for a state node.
-
-    Args:
-        parent_elem: The parent XML element.
-        state_node: The state node whose transitions to save.
-    """
+    """Save transitions for a state node."""
     for connection in state_node.connections:
         if connection.from_node == state_node:
             transition = ET.SubElement(parent_elem, "Transition")

@@ -28,12 +28,7 @@ if TYPE_CHECKING:
 
 
 def load_from_xml(editor: "YasminEditor", file_path: str) -> None:
-    """Load a state machine from an XML file.
-
-    Args:
-        file_path: The path to the XML file to load.
-    """
-
+    """Load state machine from XML file."""
     tree = ET.parse(file_path)
     root = tree.getroot()
 
@@ -93,25 +88,14 @@ def load_from_xml(editor: "YasminEditor", file_path: str) -> None:
 
 
 def reorganize_all_containers(editor: "YasminEditor") -> None:
-    """Reorganize all containers and their children after loading.
-
-    Uses force-directed layout for graph positioning.
-    """
+    """Reorganize containers and children after loading."""
     editor.reset_layout_rng()
-    all_containers = []
-    for node in editor.state_nodes.values():
-        if isinstance(node, ContainerStateNode):
-            all_containers.append(node)
-
-    def get_nesting_depth(container):
-        depth = 0
-        current = container
-        while hasattr(current, "parent_container") and current.parent_container:
-            depth += 1
-            current = current.parent_container
-        return depth
-
-    all_containers.sort(key=get_nesting_depth, reverse=True)
+    all_containers = [
+        node
+        for node in editor.state_nodes.values()
+        if isinstance(node, ContainerStateNode)
+    ]
+    all_containers.sort(key=lambda c: c.name.count("."), reverse=True)
 
     for container in all_containers:
         layout_container_force_directed(editor, container)
@@ -146,16 +130,7 @@ def reorganize_all_containers(editor: "YasminEditor") -> None:
 def layout_container_force_directed(
     editor: "YasminEditor", container: ContainerStateNode
 ) -> None:
-    """Layout children within a container using Fruchterman–Reingold algorithm.
-
-    Uses physical simulation with Fruchterman-Reingold algorithm:
-    - Repulsive forces between all nodes (prevent overlap)
-    - Attractive forces along edges (keep connected nodes close)
-    - Boundary forces (keep nodes within container)
-
-    Args:
-        container: The container state node to layout.
-    """
+    """Layout children in container using force-directed algorithm."""
     if not container.child_states and not container.final_outcomes:
         return
 
@@ -180,39 +155,56 @@ def layout_container_force_directed(
                     if conn.to_node in all_nodes:
                         graph[node].append(conn.to_node)
 
-    force_directed_layout(editor, container, all_nodes, graph)
+    rect = container.rect()
+    force_directed_layout_generic(
+        editor,
+        all_nodes,
+        graph,
+        rect.left(),
+        rect.top(),
+        rect.right(),
+        rect.bottom(),
+        rect.width() * 0.05,
+        rect.height() * 0.12,
+        rect.height() * 0.05,
+        0.0,
+        0.0,
+        0.0,
+        1.2,
+        1000,
+        15,
+        lambda n: n.pos(),
+        lambda: container.auto_resize_for_children(),
+    )
 
 
-def force_directed_layout(
+def force_directed_layout_generic(
     editor: "YasminEditor",
-    container: ContainerStateNode,
     nodes: list,
     graph: dict,
+    rect_left: float,
+    rect_top: float,
+    rect_right: float,
+    rect_bottom: float,
+    margin_x: float,
+    margin_y_top: float,
+    margin_y_bottom: float,
+    check_margin_x: float,
+    check_margin_y_top: float,
+    check_margin_y_bottom: float,
+    k_multiplier: float,
+    iterations: int,
+    temp_divisor: float,
+    get_pos_func,
+    auto_resize_func=None,
 ) -> None:
-    """Fruchterman-Reingold force-directed layout algorithm.
-
-    Simulates physical forces:
-    - Repulsion: All nodes repel each other (prevents overlap)
-    - Attraction: Connected nodes attract each other (keeps graph connected)
-    - Boundary: Nodes are pushed back if they leave the container
-
-    Args:
-        container: The container node.
-        nodes: List of all nodes to position.
-        graph: Adjacency dictionary mapping nodes to their neighbors.
-    """
+    """Generic Fruchterman-Reingold force-directed layout algorithm."""
     import math
 
     rng = editor.layout_rng if getattr(editor, "layout_rng", None) is not None else random
 
-    rect = container.rect()
-
-    MARGIN_X = rect.width() * 0.05
-    MARGIN_Y_TOP = rect.height() * 0.12
-    MARGIN_Y_BOTTOM = rect.height() * 0.05
-
-    area_width = rect.width() - (2 * MARGIN_X)
-    area_height = rect.height() - MARGIN_Y_TOP - MARGIN_Y_BOTTOM
+    area_width = rect_right - rect_left - 2 * margin_x
+    area_height = rect_bottom - rect_top - margin_y_top - margin_y_bottom
 
     node_dimensions = {}
     for node in nodes:
@@ -225,25 +217,26 @@ def force_directed_layout(
 
     positions = {}
     for node in nodes:
-        current_pos = node.pos()
+        current_pos = get_pos_func(node)
         if (
-            rect.left() < current_pos.x() < rect.right()
-            and rect.top() < current_pos.y() < rect.bottom()
+            rect_left + check_margin_x < current_pos.x() < rect_right - check_margin_x
+            and rect_top + check_margin_y_top
+            < current_pos.y()
+            < rect_bottom - check_margin_y_bottom
         ):
             positions[node] = [current_pos.x(), current_pos.y()]
         else:
-            x = rect.left() + MARGIN_X + rng.random() * area_width
-            y = rect.top() + MARGIN_Y_TOP + rng.random() * area_height
+            x = rect_left + margin_x + rng.random() * area_width
+            y = rect_top + margin_y_top + rng.random() * area_height
             positions[node] = [x, y]
 
     area = area_width * area_height
-    k = math.sqrt(area / len(nodes))
+    k = math.sqrt(area / len(nodes)) * k_multiplier
 
-    ITERATIONS = 100
-    initial_temp = area_width / 10
+    initial_temp = area_width / temp_divisor
     temp = initial_temp
 
-    for iteration in range(ITERATIONS):
+    for iteration in range(iterations):
         displacement = {node: [0.0, 0.0] for node in nodes}
 
         for i, node1 in enumerate(nodes):
@@ -296,28 +289,25 @@ def force_directed_layout(
 
             node_w, node_h = node_dimensions[node]
             positions[node][0] = max(
-                rect.left() + MARGIN_X,
-                min(positions[node][0], rect.right() - MARGIN_X - node_w),
+                rect_left + margin_x,
+                min(positions[node][0], rect_right - margin_x - node_w),
             )
             positions[node][1] = max(
-                rect.top() + MARGIN_Y_TOP,
-                min(positions[node][1], rect.bottom() - MARGIN_Y_BOTTOM - node_h),
+                rect_top + margin_y_top,
+                min(positions[node][1], rect_bottom - margin_y_bottom - node_h),
             )
 
-        temp = initial_temp * (1 - iteration / ITERATIONS)
+        temp = initial_temp * (1 - iteration / iterations)
 
     for node, (x, y) in positions.items():
         node.setPos(x, y)
 
-    container.auto_resize_for_children()
+    if auto_resize_func:
+        auto_resize_func()
 
 
 def reposition_root_elements_after_resize(editor: "YasminEditor") -> None:
-    """Reposition root-level elements using force-directed layout.
-
-    Ensures optimal spacing and prevents overlapping.
-    Includes final outcomes in the graph layout.
-    """
+    """Reposition root elements using force-directed layout."""
     root_nodes = []
     for node in editor.state_nodes.values():
         if not hasattr(node, "parent_container") or node.parent_container is None:
@@ -358,125 +348,41 @@ def force_directed_layout_root(
     nodes: list,
     graph: dict,
 ) -> None:
-    """Force-directed layout for root-level nodes.
-
-    Uses Fruchterman-Reingold algorithm adapted for the root canvas.
-
-    Args:
-        nodes: List of all root-level nodes.
-        graph: Adjacency dictionary.
-    """
-    import math
-
-    rng = editor.layout_rng if getattr(editor, "layout_rng", None) is not None else random
-
+    """Force-directed layout for root-level nodes."""
     viewport_rect = editor.canvas.viewport().rect()
-    viewport_width = viewport_rect.width()
-    viewport_height = viewport_rect.height()
+    margin_x = viewport_rect.width() * 0.1
+    margin_y = viewport_rect.height() * 0.1
+    force_directed_layout_generic(
+        editor,
+        nodes,
+        graph,
+        viewport_rect.left(),
+        viewport_rect.top(),
+        viewport_rect.right(),
+        viewport_rect.bottom(),
+        margin_x,
+        margin_y,
+        margin_y,
+        margin_x,
+        margin_y,
+        margin_y,
+        1.5,
+        1000,
+        15,
+        lambda n: n.scenePos(),
+        None,
+    )
 
-    MARGIN_X = viewport_width * 0.1
-    MARGIN_Y = viewport_height * 0.1
 
-    area_width = viewport_width - (2 * MARGIN_X)
-    area_height = viewport_height - (2 * MARGIN_Y)
+def add_node_to_editor_or_container(editor, node, state_name, parent_container):
 
-    node_dimensions = {}
-    for node in nodes:
-        if isinstance(node, ContainerStateNode):
-            node.prepareGeometryChange()
-            w, h = node.rect().width(), node.rect().height()
-        else:
-            w, h = node.boundingRect().width(), node.boundingRect().height()
-        node_dimensions[node] = (w, h)
+    if parent_container is None:
+        editor.canvas.scene.addItem(node)
+        editor.state_nodes[state_name] = node
 
-    positions = {}
-    for node in nodes:
-        current_pos = node.scenePos()
-        if (
-            MARGIN_X < current_pos.x() < viewport_width - MARGIN_X
-            and MARGIN_Y < current_pos.y() < viewport_height - MARGIN_Y
-        ):
-            positions[node] = [current_pos.x(), current_pos.y()]
-        else:
-            x = MARGIN_X + rng.random() * area_width
-            y = MARGIN_Y + rng.random() * area_height
-            positions[node] = [x, y]
-
-    area = area_width * area_height
-    k = math.sqrt(area / len(nodes)) * 1.5
-
-    ITERATIONS = 150
-    initial_temp = area_width / 8
-    temp = initial_temp
-
-    for iteration in range(ITERATIONS):
-        displacement = {node: [0.0, 0.0] for node in nodes}
-
-        for i, node1 in enumerate(nodes):
-            for node2 in nodes[i + 1 :]:
-                delta_x = positions[node1][0] - positions[node2][0]
-                delta_y = positions[node1][1] - positions[node2][1]
-
-                distance = math.sqrt(delta_x**2 + delta_y**2)
-                if distance < 0.01:
-                    distance = 0.01
-
-                force = (k * k) / distance
-
-                displacement[node1][0] += (delta_x / distance) * force
-                displacement[node1][1] += (delta_y / distance) * force
-                displacement[node2][0] -= (delta_x / distance) * force
-                displacement[node2][1] -= (delta_y / distance) * force
-
-        for node in nodes:
-            for neighbor in graph.get(node, []):
-                if neighbor not in nodes:
-                    continue
-
-                delta_x = positions[node][0] - positions[neighbor][0]
-                delta_y = positions[node][1] - positions[neighbor][1]
-
-                distance = math.sqrt(delta_x**2 + delta_y**2)
-                if distance < 0.01:
-                    distance = 0.01
-
-                force = (distance * distance) / k
-
-                displacement[node][0] -= (delta_x / distance) * force
-                displacement[node][1] -= (delta_y / distance) * force
-                displacement[neighbor][0] += (delta_x / distance) * force
-                displacement[neighbor][1] += (delta_y / distance) * force
-
-        for node in nodes:
-            disp_x = displacement[node][0]
-            disp_y = displacement[node][1]
-
-            disp_length = math.sqrt(disp_x**2 + disp_y**2)
-            if disp_length < 0.01:
-                disp_length = 0.01
-
-            limited_disp = min(disp_length, temp) / disp_length
-
-            positions[node][0] += disp_x * limited_disp
-            positions[node][1] += disp_y * limited_disp
-
-            node_w, node_h = node_dimensions[node]
-            positions[node][0] = max(
-                MARGIN_X, min(positions[node][0], viewport_width - MARGIN_X - node_w)
-            )
-            positions[node][1] = max(
-                MARGIN_Y, min(positions[node][1], viewport_height - MARGIN_Y - node_h)
-            )
-
-        temp = initial_temp * (1 - iteration / ITERATIONS)
-
-    for node, (x, y) in positions.items():
-        node.setPos(x, y)
-
-    for node in nodes:
-        if hasattr(node, "connections"):
-            for conn in node.connections:
-                conn.update_position()
+    else:
+        parent_container.add_child_state(node)
+        editor.state_nodes[f"{parent_container.name}.{state_name}"] = node
 
 
 def load_states_from_xml(
@@ -484,12 +390,7 @@ def load_states_from_xml(
     parent_elem: ET.Element,
     parent_container: ContainerStateNode = None,
 ) -> None:
-    """Recursively load states from XML, handling nested containers.
-
-    Args:
-        parent_elem: The parent XML element.
-        parent_container: The parent container node (None for root).
-    """
+    """Recursively load states from XML."""
     for elem in parent_elem:
         if elem.tag == "State" or (elem.tag == "StateMachine" and elem.get("file_name")):
             state_name = elem.get("name")
@@ -500,32 +401,40 @@ def load_states_from_xml(
             if state_type == "py":
                 module = elem.get("module")
                 class_name = elem.get("class")
-                for plugin in editor.plugin_manager.python_plugins:
-                    if plugin.module == module and plugin.class_name == class_name:
-                        plugin_info = plugin
-                        break
+                plugin_info = next(
+                    (
+                        p
+                        for p in editor.plugin_manager.python_plugins
+                        if p.module == module and p.class_name == class_name
+                    ),
+                    None,
+                )
             elif state_type == "cpp":
                 class_name = elem.get("class")
-                for plugin in editor.plugin_manager.cpp_plugins:
-                    if plugin.class_name == class_name:
-                        plugin_info = plugin
-                        break
+                plugin_info = next(
+                    (
+                        p
+                        for p in editor.plugin_manager.cpp_plugins
+                        if p.class_name == class_name
+                    ),
+                    None,
+                )
             elif state_type == "xml":
                 file_name = elem.get("file_name")
-                for plugin in editor.plugin_manager.xml_files:
-                    if plugin.file_name == file_name:
-                        plugin_info = plugin
-                        break
+                plugin_info = next(
+                    (
+                        p
+                        for p in editor.plugin_manager.xml_files
+                        if p.file_name == file_name
+                    ),
+                    None,
+                )
 
             if plugin_info:
                 node = StateNode(state_name, plugin_info, 0, 0, remappings)
-                if parent_container is None:
-                    editor.canvas.scene.addItem(node)
-                    editor.state_nodes[state_name] = node
-                else:
-                    parent_container.add_child_state(node)
-                    full_name = f"{parent_container.name}.{state_name}"
-                    editor.state_nodes[full_name] = node
+                add_node_to_editor_or_container(
+                    editor, node, state_name, parent_container
+                )
 
         elif elem.tag == "StateMachine" and not elem.get("file_name"):
             state_name = elem.get("name")
@@ -537,17 +446,12 @@ def load_states_from_xml(
             node = ContainerStateNode(
                 state_name, 0, 0, False, remappings, outcomes, init_state
             )
-            if parent_container is None:
-                editor.canvas.scene.addItem(node)
-                editor.state_nodes[state_name] = node
-            else:
-                parent_container.add_child_state(node)
-                full_name = f"{parent_container.name}.{state_name}"
-                editor.state_nodes[full_name] = node
+            add_node_to_editor_or_container(editor, node, state_name, parent_container)
 
             for outcome in outcomes:
-                outcome_node = FinalOutcomeNode(outcome, 0, 0, inside_container=True)
-                node.add_final_outcome(outcome_node)
+                node.add_final_outcome(
+                    FinalOutcomeNode(outcome, 0, 0, inside_container=True)
+                )
 
             load_states_from_xml(editor, elem, node)
 
@@ -561,29 +465,18 @@ def load_states_from_xml(
             node = ContainerStateNode(
                 state_name, 0, 0, True, remappings, outcomes, None, default_outcome
             )
-            if parent_container is None:
-                editor.canvas.scene.addItem(node)
-                editor.state_nodes[state_name] = node
-            else:
-                parent_container.add_child_state(node)
-                full_name = f"{parent_container.name}.{state_name}"
-                editor.state_nodes[full_name] = node
+            add_node_to_editor_or_container(editor, node, state_name, parent_container)
+
             for outcome in outcomes:
-                outcome_node = FinalOutcomeNode(outcome, 0, 0, inside_container=True)
-                node.add_final_outcome(outcome_node)
+                node.add_final_outcome(
+                    FinalOutcomeNode(outcome, 0, 0, inside_container=True)
+                )
 
             load_states_from_xml(editor, elem, node)
 
 
 def load_remappings(elem: ET.Element) -> dict:
-    """Load remappings from an XML element.
-
-    Args:
-        elem: The XML element to load remappings from.
-
-    Returns:
-        dict: Dictionary of remappings (old -> new).
-    """
+    """Load remappings from XML element."""
     remappings = {}
     for remap in elem.findall("Remap"):
         from_key = remap.get("old", "")
@@ -593,91 +486,71 @@ def load_remappings(elem: ET.Element) -> dict:
     return remappings
 
 
+def find_to_node(
+    editor: "YasminEditor", to_name: str, parent_container: ContainerStateNode = None
+) -> "StateNode":
+
+    if parent_container is None:
+        return editor.state_nodes.get(to_name) or editor.final_outcomes.get(to_name)
+
+    return parent_container.final_outcomes.get(to_name) or editor.state_nodes.get(
+        f"{parent_container.name}.{to_name}"
+    )
+
+
+def add_connection(
+    editor: "YasminEditor", from_node: "StateNode", to_node: "StateNode", outcome: str
+) -> None:
+    connection = ConnectionLine(from_node, to_node, outcome)
+    editor.canvas.scene.addItem(connection)
+    editor.canvas.scene.addItem(connection.arrow_head)
+    editor.canvas.scene.addItem(connection.label_bg)
+    editor.canvas.scene.addItem(connection.label)
+    editor.connections.append(connection)
+
+
 def load_transitions_from_xml(
     editor: "YasminEditor",
     parent_elem: ET.Element,
     parent_container: ContainerStateNode = None,
 ) -> None:
-    """Recursively load transitions from XML.
-
-    Args:
-        parent_elem: The parent XML element.
-        parent_container: The parent container node (None for root).
-    """
+    """Recursively load transitions from XML."""
     for elem in parent_elem:
         if elem.tag in ["State", "StateMachine", "Concurrence"]:
             state_name = elem.get("name")
 
-            # Find the from_node
-            if parent_container is None:
-                from_node = editor.state_nodes.get(state_name)
-            else:
-                full_name = f"{parent_container.name}.{state_name}"
-                from_node = editor.state_nodes.get(full_name)
+            from_node = editor.state_nodes.get(
+                state_name
+                if parent_container is None
+                else f"{parent_container.name}.{state_name}"
+            )
 
             if from_node:
-                final_outcome_names = set()
-                if elem.tag in ["StateMachine", "Concurrence"] and hasattr(
-                    from_node, "final_outcomes"
-                ):
-                    final_outcome_names = set(from_node.final_outcomes.keys())
+                final_outcome_names = (
+                    set(from_node.final_outcomes.keys())
+                    if hasattr(from_node, "final_outcomes")
+                    else set()
+                )
 
                 for transition in elem.findall("Transition"):
                     outcome = transition.get("from")
                     to_name = transition.get("to")
 
-                    is_from_final_outcome = outcome in final_outcome_names
+                    from_node_actual = (
+                        from_node.final_outcomes[outcome]
+                        if outcome in final_outcome_names
+                        else from_node
+                    )
+                    to_node = find_to_node(editor, to_name, parent_container)
 
-                    if is_from_final_outcome:
-                        from_outcome = from_node.final_outcomes[outcome]
-
-                        to_node = None
-
-                        if parent_container is None:
-                            to_node = editor.state_nodes.get(to_name)
-                            if not to_node:
-                                to_node = editor.final_outcomes.get(to_name)
-                        elif to_name in parent_container.final_outcomes:
-                            to_node = parent_container.final_outcomes[to_name]
-                        else:
-                            full_to_name = f"{parent_container.name}.{to_name}"
-                            to_node = editor.state_nodes.get(full_to_name)
-
-                        if to_node:
-                            connection = ConnectionLine(from_outcome, to_node, outcome)
-                            editor.canvas.scene.addItem(connection)
-                            editor.canvas.scene.addItem(connection.arrow_head)
-                            editor.canvas.scene.addItem(connection.label_bg)
-                            editor.canvas.scene.addItem(connection.label)
-                            editor.connections.append(connection)
-                    else:
-                        to_node = None
-
-                        if parent_container is None:
-                            to_node = editor.state_nodes.get(to_name)
-                            if not to_node:
-                                to_node = editor.final_outcomes.get(to_name)
-                        else:
-                            if to_name in parent_container.final_outcomes:
-                                to_node = parent_container.final_outcomes[to_name]
-                            else:
-                                full_to_name = f"{parent_container.name}.{to_name}"
-                                to_node = editor.state_nodes.get(full_to_name)
-
-                        if to_node:
-                            connection = ConnectionLine(from_node, to_node, outcome)
-                            editor.canvas.scene.addItem(connection)
-                            editor.canvas.scene.addItem(connection.arrow_head)
-                            editor.canvas.scene.addItem(connection.label_bg)
-                            editor.canvas.scene.addItem(connection.label)
-                            editor.connections.append(connection)
+                    if to_node:
+                        add_connection(editor, from_node_actual, to_node, outcome)
 
             if elem.tag in ["StateMachine", "Concurrence"]:
-                if parent_container is None:
-                    container = editor.state_nodes.get(state_name)
-                else:
-                    full_name = f"{parent_container.name}.{state_name}"
-                    container = editor.state_nodes.get(full_name)
-
+                container = editor.state_nodes.get(
+                    state_name
+                    if parent_container is None
+                    else f"{parent_container.name}.{state_name}"
+                )
                 if container:
                     load_transitions_from_xml(editor, elem, container)
