@@ -120,7 +120,7 @@ class XmlManager:
                     self.add_remappings(state_elem, state_node.remappings)
                 self.save_transitions(state_elem, state_node)
 
-    def save_transitions(self, parent_elem: ET.Element, state_node: "StateNode") -> None:
+    def save_transitions(self, parent_elem: ET.Element, state_node: StateNode) -> None:
         """Save transitions for a state node."""
         for connection in state_node.connections:
             if connection.from_node == state_node:
@@ -585,7 +585,7 @@ class XmlManager:
 
     def find_to_node(
         self, to_name: str, parent_container: ContainerStateNode = None
-    ) -> "StateNode":
+    ) -> StateNode:
 
         if parent_container is None:
             return self.editor.state_nodes.get(to_name) or self.editor.final_outcomes.get(
@@ -597,7 +597,7 @@ class XmlManager:
         ) or self.editor.state_nodes.get(f"{parent_container.name}.{to_name}")
 
     def add_connection(
-        self, from_node: "StateNode", to_node: "StateNode", outcome: str
+        self, from_node: StateNode, to_node: StateNode, outcome: str
     ) -> None:
         connection = ConnectionLine(from_node, to_node, outcome)
         self.editor.canvas.scene.addItem(connection)

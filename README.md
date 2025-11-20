@@ -127,16 +127,16 @@ There are some examples, for both Python and C++, that can be found in [yasmin_d
 
 #### Vanilla Demo (FSM)
 
-```shell
-ros2 run yasmin_demos yasmin_demo.py
-```
-
 <p align="center">
   <img src="./docs/demo.gif" width="65%" />
 </p>
 
 <details>
 <summary>Click to expand</summary>
+
+```shell
+ros2 run yasmin_demos yasmin_demo.py
+```
 
 ```python
 import time
@@ -280,12 +280,12 @@ if __name__ == "__main__":
 
 #### Blackboard Remapping Demo
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos remap_demo.py
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```python
 import yasmin
@@ -400,12 +400,12 @@ if __name__ == "__main__":
 
 #### Concurrence Demo
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos concurrence_demo.py
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```python
 import time
@@ -581,6 +581,9 @@ if __name__ == "__main__":
 
 #### Service Demo (FSM + ROS 2 Service Client)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos add_two_ints_server
 ```
@@ -588,9 +591,6 @@ ros2 run yasmin_demos add_two_ints_server
 ```shell
 ros2 run yasmin_demos service_client_demo.py
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```python
 import rclpy
@@ -759,6 +759,9 @@ if __name__ == "__main__":
 
 #### Action Demo (FSM + ROS 2 Action)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos fibonacci_action_server
 ```
@@ -766,9 +769,6 @@ ros2 run yasmin_demos fibonacci_action_server
 ```shell
 ros2 run yasmin_demos action_client_demo.py
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```python
 import rclpy
@@ -957,12 +957,12 @@ if __name__ == "__main__":
 
 #### Monitor Demo (FSM + ROS 2 Subscriber)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos monitor_demo.py
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```python
 import rclpy
@@ -1094,31 +1094,14 @@ if __name__ == "__main__":
 
 #### Publisher Demo (FSM + ROS 2 Publisher)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos publisher_demo.py
 ```
 
-<details>
-<summary>Click to expand</summary>
-
 ```python
-#!/usr/bin/env python3
-
-# Copyright (C) 2025 Miguel Ángel González Santamarta
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 import time
 import rclpy
 from std_msgs.msg import Int32
@@ -1257,12 +1240,12 @@ if __name__ == "__main__":
 
 #### Parameters Demo (FSM + ROS 2 Parameters)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos parameters_demo.py --ros-args -p max_counter:=5
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```python
 import time
@@ -1416,7 +1399,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
 ```
 
 </details>
@@ -1557,7 +1539,6 @@ def get_next_waypoint(blackboard: Blackboard) -> str:
     return HAS_NEXT
 
 
-# main function
 def main() -> None:
     yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
 
@@ -1642,12 +1623,12 @@ if __name__ == "__main__":
 
 #### Factory Demo (Plugins)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos factory_demo.py
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```xml
 <StateMachine outcomes="outcome4">
@@ -1714,12 +1695,12 @@ if __name__ == "__main__":
 
 #### Vanilla Demo
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos yasmin_demo
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```cpp
 #include <chrono>
@@ -1861,12 +1842,12 @@ int main(int argc, char *argv[]) {
 
 #### Blackboard Remapping Demo
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos remap_demo
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```cpp
 #include <chrono>
@@ -2003,12 +1984,12 @@ int main(int argc, char *argv[]) {
 
 #### Concurrence Demo
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos concurrence_demo
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```cpp
 #include <chrono>
@@ -2178,6 +2159,9 @@ int main(int argc, char *argv[]) {
 
 #### Service Demo (FSM + ROS 2 Service Client)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos add_two_ints_server
 ```
@@ -2185,9 +2169,6 @@ ros2 run yasmin_demos add_two_ints_server
 ```shell
 ros2 run yasmin_demos service_client_demo
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```cpp
 #include <iostream>
@@ -2367,6 +2348,9 @@ int main(int argc, char *argv[]) {
 
 #### Action Demo (FSM + ROS 2 Action)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos fibonacci_action_server
 ```
@@ -2374,9 +2358,6 @@ ros2 run yasmin_demos fibonacci_action_server
 ```shell
 ros2 run yasmin_demos action_client_demo
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```cpp
 #include <iostream>
@@ -2572,12 +2553,12 @@ int main(int argc, char *argv[]) {
 
 #### Monitor Demo (FSM + ROS 2 Subscriber)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos monitor_demo
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```cpp
 #include <iostream>
@@ -2716,12 +2697,12 @@ int main(int argc, char *argv[]) {
 
 #### Publisher Demo (FSM + ROS 2 Publisher)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos publisher_demo
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```cpp
 #include <iostream>
@@ -2866,12 +2847,12 @@ int main(int argc, char *argv[]) {
 
 #### Parameters Demo (FSM + ROS 2 Parameters)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos parameters_demo --ros-args -p max_counter:=5
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```cpp
 #include <chrono>
@@ -3278,12 +3259,12 @@ int main(int argc, char *argv[]) {
 
 #### Factory Demo (Plugins)
 
+<details>
+<summary>Click to expand</summary>
+
 ```shell
 ros2 run yasmin_demos factory_demo
 ```
-
-<details>
-<summary>Click to expand</summary>
 
 ```xml
 <StateMachine outcomes="outcome4">
@@ -3410,7 +3391,6 @@ pages="528--539",
 abstract="State machines are a common mechanism for defining behaviors in robots where each behavior is based on identifiable stages. There are several libraries available for easing the implementation of state machines in ROS 1, however, the community was focused on SMACH or SMACC. Although these tools are still predominant, there are fewer alternatives for ROS 2. Besides, Behavior Trees are spreading fast, but there is a niche for using State Machines. Here, YASMIN is presented as yet another library specifically designed for ROS 2 for easing the design of robotic behaviors using state machines. It is available in C++ and Python, and provides some default states to speed up the development, in addition to a web viewer for monitoring the execution of the system and helping in the debugging.",
 isbn="978-3-031-21062-4"
 }
-
 ```
 
 ```bibtex
