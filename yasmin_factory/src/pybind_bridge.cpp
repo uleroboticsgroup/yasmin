@@ -74,9 +74,13 @@ private:
 PYBIND11_MODULE(yasmin_pybind_bridge, m) {
   m.doc() = "Python bindings for yasmin factory C++ state loading";
 
-  // Import the State class from yasmin.state module
-  // This ensures pybind11 knows how to handle yasmin::State objects
+// Import the State class from yasmin.state module
+// This ensures pybind11 knows how to handle yasmin::State objects
+#if __has_include("rclcpp/version.h")
   auto state_module = py::module_::import("yasmin.state");
+#else
+  auto state_module = py::module::import("yasmin.state");
+#endif
 
   // Get the State class that's already registered in yasmin.state
   auto state_class = state_module.attr("State");
