@@ -28,10 +28,6 @@ class TestYasminFactory(unittest.TestCase):
         self.factory = YasminFactory()
         self.test_dir = os.path.dirname(os.path.abspath(__file__))
 
-    def tearDown(self):
-        """Clean up after tests."""
-        self.factory.cleanup()
-
     def test_create_python_state_simple(self):
         """Test creating a simple Python state."""
         state_xml = '<State name="TestState" type="py" module="test.test_simple_state" class="TestSimpleState"/>'
@@ -176,23 +172,6 @@ class TestYasminFactory(unittest.TestCase):
         self.assertIsNotNone(sm)
         self.assertIsInstance(sm, StateMachine)
         self.assertIn("final_outcome", sm.get_outcomes())
-
-    def test_factory_cleanup(self):
-        """Test factory cleanup method."""
-        state_xml = '<State name="TestState" type="py" module="test.test_simple_state" class="TestSimpleState"/>'
-        state_elem = ET.fromstring(state_xml)
-
-        state = self.factory.create_state(state_elem)
-        self.assertIsNotNone(state)
-
-        # Cleanup should not raise errors
-        self.factory.cleanup()
-
-        # Should still be able to create new factory
-        new_factory = YasminFactory()
-        new_state = new_factory.create_state(state_elem)
-        self.assertIsNotNone(new_state)
-        new_factory.cleanup()
 
     def test_remapping(self):
         """Test remapping across multiple states that pass data through the chain."""

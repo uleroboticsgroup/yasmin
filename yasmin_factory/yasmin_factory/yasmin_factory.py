@@ -197,21 +197,3 @@ class YasminFactory:
         sm = self.create_sm(root)
         sm.set_name(fsm_name)
         return sm
-
-    def cleanup(self) -> None:
-        """
-        Explicitly cleanup all created C++ state states and the factory.
-        This should be called before the plugin loader is destroyed to avoid
-        class loader warnings.
-        """
-        self._cpp_factory.clear_states()
-
-    def __del__(self) -> None:
-        """
-        Destructor that ensures proper cleanup of C++ objects.
-        """
-        try:
-            self.cleanup()
-        except:
-            # Ignore errors during cleanup in destructor
-            pass
