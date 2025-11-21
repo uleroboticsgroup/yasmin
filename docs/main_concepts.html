@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Concepts - YASMIN</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <img src="logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="index.html">Introduction</a></li>
+                <li><a href="main_concepts.html">Main Concepts</a></li>
+                <li><a href="packages.html">Packages Overview</a></li>
+                <li><a href="docker.html">Docker</a></li>
+                <li><a href="xml_factory.html">XML Factory</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <ul>
+                <li><a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="tutorials/cpp/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="tutorials/cpp/service_client_demo.html">Service Client</a></li>
+                <li><a href="tutorials/cpp/action_client_demo.html">Action Client</a></li>
+                <li><a href="tutorials/cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+                <li><a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <ul>
+                <li><a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="tutorials/python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="tutorials/python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="tutorials/python/service_client_demo.html">Service Client</a></li>
+                <li><a href="tutorials/python/action_client_demo.html">Action Client</a></li>
+                <li><a href="tutorials/python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="tutorials/python/publisher_demo.html">Publisher</a></li>
+                <li><a href="tutorials/python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="tutorials/python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1>Main Concepts</h1>
+            
+            <p>YASMIN (Yet Another State MachINe) is designed to simplify the creation of complex robot behaviors using state machines. Understanding the core concepts is essential for using the library effectively.</p>
+
+            <h2>Finite State Machines (FSM)</h2>
+            <p>A Finite State Machine is a mathematical model of computation. It is an abstract machine that can be in exactly one of a finite number of states at any given time. The FSM can change from one state to another in response to some inputs; the change from one state to another is called a transition.</p>
+            <p>In the context of robotics, FSMs are used to define the behavior of a robot. Each state represents a specific task or mode of operation (e.g., "Idle", "Moving", "Grasping"), and transitions define how the robot switches between these tasks based on sensor data or internal logic.</p>
+
+            <h2>Hierarchical Finite State Machines (HFSM)</h2>
+            <p>As systems become more complex, a simple "flat" FSM can become unmanageable due to the explosion of states and transitions. Hierarchical Finite State Machines (HFSM) address this by allowing states to contain other state machines.</p>
+            <p>In YASMIN, you can nest state machines within states. This allows you to encapsulate complex behaviors into reusable modules. For example, a "Navigation" state could internally be an FSM with states like "Plan Path", "Follow Path", and "Recover". The parent FSM only sees the high-level "Navigation" state.</p>
+
+            <h2>Key Components in YASMIN</h2>
+
+            <h3>State</h3>
+            <p>The fundamental building block. A state performs a task and returns an <strong>outcome</strong>. In YASMIN, you create custom states by inheriting from the <code>State</code> class and implementing the <code>execute</code> method.</p>
+
+            <h3>Transitions</h3>
+            <p>Transitions map the <strong>outcome</strong> of a state to the next state to be executed. This defines the flow of the application. When you add a state to a state machine, you specify a dictionary of transitions where each key is a possible outcome from that state, and the value is the name of the next state to execute. This creates a directed graph that represents your application's logic. Transitions can point to other states, loop back to the same state (useful for retry logic), or terminate the state machine by mapping to a final outcome. The transition mechanism is what makes YASMIN a true finite state machine, ensuring deterministic and predictable behavior flows.</p>
+
+            <h3>Blackboard</h3>
+            <p>The Blackboard is a shared memory space that allows states to exchange data. Since states are often independent classes, they need a mechanism to pass information (e.g., a target pose found by a "Perception" state needs to be passed to a "Move" state). The Blackboard stores key-value pairs that are accessible to all states in the FSM.</p>
+
+            <h3>Outcomes</h3>
+            <p>Every state execution concludes with an outcome (a string). This outcome determines which transition is triggered. Common outcomes include "success", "failure", "aborted", or custom events like "target_detected".</p>
+
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+    </footer>
+</body>
+</html>
