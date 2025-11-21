@@ -243,10 +243,18 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
     if (!file_name.empty() && !package.empty()) {
       std::string package_path;
       try {
-        package_path = ament_index_cpp::get_package_share_directory(package) +
-                       "/state_machines";
-        file_path = (std::filesystem::path(package_path) / file_name).string();
+        package_path = ament_index_cpp::get_package_share_directory(package);
+        file_path = "";
+        for (const auto &entry :
+             std::filesystem::recursive_directory_iterator(package_path)) {
+          if (entry.is_regular_file() && entry.path().filename() == file_name) {
+            file_path = entry.path().string();
+            break;
+          }
+        }
       } catch (const ament_index_cpp::PackageNotFoundError &e) {
+        file_path = "";
+      } catch (const std::filesystem::filesystem_error &e) {
         file_path = "";
       }
     }

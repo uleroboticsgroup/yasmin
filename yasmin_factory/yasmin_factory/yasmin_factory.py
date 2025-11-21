@@ -119,11 +119,12 @@ class YasminFactory:
 
             if file_name and package:
                 try:
-                    file_path = os.path.join(
-                        get_package_share_path(package),
-                        "state_machines",
-                        file_name,
-                    )
+                    package_path = get_package_share_path(package)
+                    file_path = ""
+                    for root, dirs, files in os.walk(package_path):
+                        if file_name in files:
+                            file_path = os.path.join(root, file_name)
+                            break
                 except Exception as e:
                     file_path = ""
 
