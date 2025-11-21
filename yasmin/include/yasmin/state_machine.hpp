@@ -73,6 +73,11 @@ public:
   StateMachine(const std::string &name, const std::set<std::string> &outcomes);
 
   /**
+   * @brief Destroy the StateMachine object.
+   */
+  ~StateMachine();
+
+  /**
    * @brief Adds a state to the state machine with specified transitions.
    *
    * @param name The name of the state.

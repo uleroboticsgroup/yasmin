@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Dict, List
+from typing import Any, Dict, List
 from rclpy.node import Node
 import yasmin
 from yasmin import StateMachine, State, Concurrence
@@ -25,7 +25,7 @@ from yasmin_msgs.msg import (
 )
 
 
-class YasminViewerPub:
+class YasminViewerPub(object):
     """
     A class to publish the state of a Finite State Machine (FSM) for visualization.
     """
@@ -68,10 +68,23 @@ class YasminViewerPub:
         self._fsm: StateMachine = fsm
 
         ## The publisher for the state machine messages.
-        self.pub = self._node.create_publisher(StateMachineMsg, "/fsm_viewer", 10)
+        self._pub = self._node.create_publisher(StateMachineMsg, "/fsm_viewer", 10)
 
         ## A timer to periodically publish the FSM state.
         self._timer = self._node.create_timer(1 / rate, self._publish_data)
+
+    def cleanup(self) -> None:
+        """
+        Cleans up resources used by the YasminViewerPub instance.
+        """
+        if self._timer is not None:
+            self._timer.cancel()
+            self._node.destroy_timer(self._timer)
+        del self._timer
+        if self._pub is not None:
+            self._node.destroy_publisher(self._pub)
+        del self._pub
+        self._fsm = None
 
     def parse_transitions(self, transitions: Dict[str, str]) -> List[TransitionMsg]:
         """
@@ -96,7 +109,7 @@ class YasminViewerPub:
     def parse_state(
         self,
         state_name: str,
-        state_info: Dict[str, str],
+        state_info: Dict[str, Any],
         states_list: List[StateMsg],
         parent: int = -1,
     ) -> None:
@@ -239,7 +252,7 @@ class YasminViewerPub:
             yasmin.YASMIN_LOG_DEBUG(
                 f"Publishing data of state machine '{self._fsm_name}'"
             )
-            self.pub.publish(state_machine_msg)
+            self._pub.publish(state_machine_msg)
 
         except Exception as e:
             yasmin.YASMIN_LOG_ERROR(

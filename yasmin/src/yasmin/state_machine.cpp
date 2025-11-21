@@ -39,6 +39,12 @@ StateMachine::StateMachine(const std::string &name,
     : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()),
       name(name) {}
 
+StateMachine::~StateMachine() {
+  this->states.clear();
+  this->transitions.clear();
+  this->remappings.clear();
+}
+
 void StateMachine::add_state(
     const std::string &name, std::shared_ptr<State> state,
     const std::map<std::string, std::string> &transitions,

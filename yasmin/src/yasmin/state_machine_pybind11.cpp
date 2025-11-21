@@ -41,6 +41,8 @@ PYBIND11_MODULE(state_machine, m) {
                  std::set<std::string>(outcomes.begin(), outcomes.end()));
            }),
            py::arg("outcomes"))
+      // Add destructor from StateMachine
+      .def("__del__", [](yasmin::StateMachine *self) { delete self; })
       .def(
           "add_state",
           [](yasmin::StateMachine &self, const std::string &name,
