@@ -13,6 +13,7 @@
     <depend>yasmin</depend>
     <depend>yasmin_viewer</depend>
     <depend>tinyxml2_vendor</depend>
+    <depend condition="$ROS_DISTRO == foxy">boost</depend>
     <exec_depend>python3</exec_depend>
     <exec_depend>python3-lxml</exec_depend>
     <test_depend>ament_cmake_gtest</test_depend>
