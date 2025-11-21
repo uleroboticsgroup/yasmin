@@ -257,7 +257,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_DEMO")
+    viewer = YasminViewerPub(sm, "YASMIN_DEMO")
 
     # Execute the FSM
     try:
@@ -266,10 +266,13 @@ def main() -> None:
     except KeyboardInterrupt:
         if sm.is_running():
             sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2 if it's running
-    if rclpy.ok():
-        rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -288,9 +291,13 @@ ros2 run yasmin_demos remap_demo.py
 ```
 
 ```python
+import rclpy
+
 import yasmin
 from yasmin import State, Blackboard, StateMachine
+from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED
+from yasmin_viewer import YasminViewerPub
 
 
 class Foo(State):
@@ -359,16 +366,11 @@ class BarState(State):
         return SUCCEED
 
 
-if __name__ == "__main__":
-    """
-    The main entry point of the application.
+def main() -> None:
+    yasmin.YASMIN_LOG_INFO("yasmin_remapping_demo")
+    rclpy.init()
+    set_ros_loggers()
 
-    Initializes the ROS 2 environment, sets up the state machine,
-    and handles execution and termination.
-
-    Raises:
-        KeyboardInterrupt: If the execution is interrupted by the user.
-    """
     bb = Blackboard()
     bb["msg1"] = "test1"
     bb["msg2"] = "test2"
@@ -393,7 +395,27 @@ if __name__ == "__main__":
         remappings={"bar_data": "foo_out_data"},
     )
 
-    sm.execute(bb)
+    # Launch YASMIN Viewer publisher for state visualization
+    viewer = YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
+
+    # Execute the FSM
+    try:
+        outcome = sm(bb)
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        if sm.is_running():
+            sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
+
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
 ```
 
 </details>
@@ -558,7 +580,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
+    viewer = YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
 
     # Execute the FSM
     try:
@@ -567,10 +589,13 @@ def main() -> None:
     except KeyboardInterrupt:
         if sm.is_running():
             sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2 if it's running
-    if rclpy.ok():
-        rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -736,7 +761,7 @@ def main() -> None:
     )
 
     # Publish FSM info
-    YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
+    viewer = YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
 
     # Execute FSM
     try:
@@ -745,10 +770,13 @@ def main() -> None:
     except KeyboardInterrupt:
         if sm.is_running():
             sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2
-    if rclpy.ok():
-        rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -930,7 +958,7 @@ def main() -> None:
     )
 
     # Publish FSM information
-    YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
+    viewer = YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
 
     # Create an initial blackboard with the input value
     blackboard = Blackboard()
@@ -943,10 +971,13 @@ def main() -> None:
     except KeyboardInterrupt:
         if sm.is_running():
             sm.cancel_state()  # Cancel the state if interrupted
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2
-    if rclpy.ok():
-        rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1071,7 +1102,7 @@ def main() -> None:
     )
 
     # Publish FSM information
-    YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
+    viewer = YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
     # Execute FSM
     try:
@@ -1080,10 +1111,13 @@ def main() -> None:
     except KeyboardInterrupt:
         if sm.is_running():
             sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2
-    if rclpy.ok():
-        rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1214,7 +1248,7 @@ def main() -> None:
     )
 
     # Launch YASMIN Viewer publisher for state visualization
-    YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
+    viewer = YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values
     blackboard = Blackboard()
@@ -1227,9 +1261,13 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_INFO(str(e))
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS
-    rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1382,7 +1420,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
+    viewer = YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
 
     # Execute the FSM
     try:
@@ -1391,10 +1429,13 @@ def main() -> None:
     except KeyboardInterrupt:
         if sm.is_running():
             sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2 if it's running
-    if rclpy.ok():
-        rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1597,7 +1638,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_NAV2_DEMO")
+    viewer = YasminViewerPub(sm, "YASMIN_NAV2_DEMO")
 
     # Execute the state machine
     blackboard = Blackboard()
@@ -1608,12 +1649,13 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except KeyboardInterrupt:
         sm.cancel_state()  # Handle manual interruption
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2
-    if rclpy.ok():
-        if sm.is_running():
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
             rclpy.shutdown()
-
 
 if __name__ == "__main__":
     main()
@@ -1670,7 +1712,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_FACTORY_DEMO")
+    viewer = YasminViewerPub(sm, "plugin_demo")
 
     # Execute the FSM
     try:
@@ -1679,10 +1721,13 @@ def main() -> None:
     except KeyboardInterrupt:
         if sm.is_running():
             sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2 if it's running
-    if rclpy.ok():
-        rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":

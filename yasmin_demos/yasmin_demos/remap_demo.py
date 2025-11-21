@@ -21,6 +21,7 @@ import yasmin
 from yasmin import State, Blackboard, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.basic_outcomes import SUCCEED
+from yasmin_viewer import YasminViewerPub
 
 
 class Foo(State):
@@ -89,17 +90,8 @@ class BarState(State):
         return SUCCEED
 
 
-if __name__ == "__main__":
-    """
-    The main entry point of the application.
-
-    Initializes the ROS 2 environment, sets up the state machine,
-    and handles execution and termination.
-
-    Raises:
-        KeyboardInterrupt: If the execution is interrupted by the user.
-    """
-
+def main() -> None:
+    yasmin.YASMIN_LOG_INFO("yasmin_remapping_demo")
     rclpy.init()
     set_ros_loggers()
 
@@ -127,6 +119,9 @@ if __name__ == "__main__":
         remappings={"bar_data": "foo_out_data"},
     )
 
+    # Launch YASMIN Viewer publisher for state visualization
+    viewer = YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
+
     # Execute the FSM
     try:
         outcome = sm(bb)
@@ -134,7 +129,14 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         if sm.is_running():
             sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2 if it's running
-    if rclpy.ok():
-        rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()

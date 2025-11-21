@@ -166,7 +166,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
+    viewer = YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
 
     # Execute the FSM
     try:
@@ -175,10 +175,13 @@ def main() -> None:
     except KeyboardInterrupt:
         if sm.is_running():
             sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
 
-    # Shutdown ROS 2 if it's running
-    if rclpy.ok():
-        rclpy.shutdown()
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
