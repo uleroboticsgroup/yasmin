@@ -19,8 +19,6 @@
 #include "yasmin/blackboard/blackboard.hpp"
 #include "yasmin/state.hpp"
 
-#include <pluginlib/class_list_macros.hpp>
-
 /**
  * @brief Simple test state for testing purposes.
  */
@@ -61,5 +59,6 @@ public:
   }
 };
 
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(TestSimpleState, yasmin::State)
 PLUGINLIB_EXPORT_CLASS(TestRemappingState, yasmin::State)

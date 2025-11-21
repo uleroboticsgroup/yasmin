@@ -25,8 +25,6 @@
 #include "yasmin_demos/bar_state.h"
 #include "yasmin_ros/ros_logs.hpp"
 
-#include <pluginlib/class_list_macros.hpp>
-
 /**
  * @brief Represents the "Bar" state in the state machine.
  *
@@ -56,4 +54,5 @@ BarState::execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
 
 BarState::~BarState() {};
 
+#include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(BarState, yasmin::State)
