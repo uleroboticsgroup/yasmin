@@ -29,11 +29,6 @@ namespace py = pybind11;
  * This class uses pluginlib to load and instantiate C++ State classes
  * dynamically. The returned states are pybind11-wrapped yasmin::State
  * instances that can be used directly in Python.
- *
- * The factory maintains strong references to created states and uses
- * pybind11's keep_alive policy to ensure the ClassLoader outlives all
- * created objects, preventing class_loader warnings about unloading
- * libraries while objects still exist.
  */
 class CppStateFactory {
 public:
@@ -46,14 +41,9 @@ public:
             "yasmin", "yasmin::State")) {}
 
   /**
-   * @brief Destructor that ensures all created states are destroyed
-   * before the ClassLoader.
+   * @brief Destructor that destroys the ClassLoader.
    */
-  ~CppStateFactory() {
-    // Clear all created states before destroying the loader
-    this->created_states_.clear();
-    // The shared_ptr to loader will be destroyed after created_states_
-  }
+  ~CppStateFactory() = default;
 
   /**
    * @brief Retrieves a list of available C++ State class names.
@@ -72,36 +62,13 @@ public:
    * instantiated.
    */
   std::shared_ptr<yasmin::State> create(const std::string &class_name) {
-    auto state = this->loader_->createSharedInstance(class_name);
-    // Keep a strong reference to track created states
-    this->created_states_.push_back(state);
-    return state;
+    return this->loader_->createSharedInstance(class_name);
   }
-
-  /**
-   * @brief Clears all references to created states.
-   * Call this before destroying the factory to ensure proper cleanup order.
-   * This forces destruction of all C++ states before the ClassLoader is
-   * destroyed.
-   */
-  void clear_states() {
-    // Explicitly reset all shared pointers to trigger destruction
-    this->created_states_.clear();
-  }
-
-  /**
-   * @brief Gets the number of states currently tracked by the factory.
-   * @return The number of tracked states.
-   */
-  size_t state_count() const { return this->created_states_.size(); }
 
 private:
   /// The pluginlib ClassLoader for yasmin::State classes (as shared_ptr for
   /// controlled lifetime).
   std::shared_ptr<pluginlib::ClassLoader<yasmin::State>> loader_;
-
-  /// Track all created states to ensure proper cleanup order
-  std::vector<std::shared_ptr<yasmin::State>> created_states_;
 };
 
 PYBIND11_MODULE(yasmin_pybind_bridge, m) {
@@ -118,10 +85,6 @@ PYBIND11_MODULE(yasmin_pybind_bridge, m) {
       .def(py::init<>())
       .def("available_classes", &CppStateFactory::available_classes,
            "Get list of available C++ State class names")
-      .def("clear_states", &CppStateFactory::clear_states,
-           "Clear all references to created states (call before destruction)")
-      .def("state_count", &CppStateFactory::state_count,
-           "Get the number of states currently tracked by the factory")
       .def(
           "create",
           [state_class](CppStateFactory &self,
@@ -129,6 +92,5 @@ PYBIND11_MODULE(yasmin_pybind_bridge, m) {
             auto cpp_state = self.create(class_name);
             return py::cast(cpp_state);
           },
-          py::arg("class_name"), py::keep_alive<0, 1>(),
-          "Create a C++ State instance by class name");
+          py::arg("class_name"), "Create a C++ State instance by class name");
 }
