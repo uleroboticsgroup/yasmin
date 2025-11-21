@@ -47,11 +47,16 @@ class PluginInfo:
         elif self.plugin_type == "cpp":
             self.outcomes = list(self._cpp_factory.create(self.class_name).get_outcomes())
         elif self.plugin_type == "xml":
-            file_path = os.path.join(
-                get_package_share_path(self.package_name),
-                "state_machines",
-                self.file_name,
-            )
+            package_path = get_package_share_path(self.package_name)
+            file_path = ""
+            for root, dirs, files in os.walk(package_path):
+                if self.file_name in files:
+                    file_path = os.path.join(root, self.file_name)
+                    break
+            if not file_path:
+                raise ValueError(
+                    f"Could not find XML file {self.file_name} in package {self.package_name}"
+                )
             tree = ET.parse(file_path)
             root = tree.getroot()
             outcomes_str: str = root.attrib.get("outcomes", "")

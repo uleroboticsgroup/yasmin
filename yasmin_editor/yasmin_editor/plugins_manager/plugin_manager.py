@@ -49,39 +49,44 @@ class PluginManager:
 
     def load_cpp_plugins_from_package(self, package_name: str) -> None:
         package_share_path = get_package_share_path(package_name)
-        xml_file: str = os.path.join(package_share_path, "resource", "plugins.xml")
 
-        if not os.path.exists(xml_file):
-            return
+        for root, dirs, files in os.walk(package_share_path):
+            for filename in files:
+                if filename.endswith(".xml"):
+                    xml_file = os.path.join(root, filename)
+                    try:
+                        with open(xml_file, "r", encoding="utf-8") as f:
+                            content: str = f.read().strip()
+                    except (IOError, UnicodeDecodeError):
+                        continue
 
-        with open(xml_file, "r", encoding="utf-8") as f:
-            content: str = f.read().strip()
+                    # Check if this XML contains plugin definitions
+                    if "<library" in content and "yasmin" in content.lower():
+                        libraries_content: List[str] = []
+                        start: int = 0
 
-        libraries_content: List[str] = []
-        start: int = 0
+                        while True:
+                            lib_start: int = content.find("<library", start)
+                            if lib_start == -1:
+                                break
 
-        while True:
-            lib_start: int = content.find("<library", start)
-            if lib_start == -1:
-                break
+                            lib_end: int = content.find("</library>", lib_start)
+                            if lib_end == -1:
+                                break
 
-            lib_end: int = content.find("</library>", lib_start)
-            if lib_end == -1:
-                break
+                            lib_end += len("</library>")
+                            libraries_content.append(content[lib_start:lib_end])
+                            start = lib_end
 
-            lib_end += len("</library>")
-            libraries_content.append(content[lib_start:lib_end])
-            start = lib_end
+                        for library_content in libraries_content:
+                            library_xml: str = f"<root>{library_content}</root>"
+                            root_elem = ET.fromstring(library_xml)
 
-        for library_content in libraries_content:
-            library_xml: str = f"<root>{library_content}</root>"
-            root = ET.fromstring(library_xml)
-
-            for library in root.findall("library"):
-                for class_elem in library.findall("class"):
-                    class_name: str = class_elem.get("name")
-                    if class_name:
-                        self.load_cpp_plugin(class_name)
+                            for library in root_elem.findall("library"):
+                                for class_elem in library.findall("class"):
+                                    class_name: str = class_elem.get("name")
+                                    if class_name and "yasmin" in class_name.lower():
+                                        self.load_cpp_plugin(class_name)
 
     def load_python_plugins_from_package(self, package_name: str) -> None:
         skip_packages: set = {
@@ -156,16 +161,18 @@ class PluginManager:
 
     def load_xml_state_machines_from_package(self, package_name: str) -> None:
         package_share_path = get_package_share_path(package_name)
-        state_machines_path: str = os.path.join(package_share_path, "state_machines")
 
-        if not os.path.exists(state_machines_path):
-            return
-
-        for filename in os.listdir(state_machines_path):
-            if filename.endswith(".xml"):
-                xml_file: str = os.path.join(state_machines_path, filename)
-                filename = os.path.basename(xml_file)
-                self.load_xml_state_machine(filename, package_name)
+        for root, dirs, files in os.walk(package_share_path):
+            for filename in files:
+                if filename.endswith(".xml"):
+                    xml_file: str = os.path.join(root, filename)
+                    try:
+                        tree = ET.parse(xml_file)
+                        xml_root = tree.getroot()
+                        if xml_root.tag == "StateMachine":
+                            self.load_xml_state_machine(filename, package_name)
+                    except (ET.ParseError, IOError):
+                        continue
 
     def load_cpp_plugin(self, class_name: str) -> None:
         try:
@@ -194,9 +201,10 @@ class PluginManager:
             plugin_info: PluginInfo = PluginInfo(
                 plugin_type="xml", file_name=xml_file, package_name=package_name
             )
-        except Exception:
+        except Exception as e:
             yasmin.YASMIN_LOG_ERROR(
-                f"Failed to load XML state machine: {xml_file} of package {package_name}"
+                f'Failed to load XML state machine: {xml_file} of package {package_name}. Error: "{e}"'
             )
+
             return
         self.xml_files.append(plugin_info)
