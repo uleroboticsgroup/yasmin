@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YASMIN Factory Documentation</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="sidebar.js"></script>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="dark_mode.js"></script>
+</head>
+  <body>
+    <header>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="YASMIN Logo">
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="index.html">Introduction</a></li>
+                <li><a href="main_concepts.html">Main Concepts</a></li>
+                <li><a href="packages.html">Packages Overview</a></li>
+                <li><a href="docker.html">Docker</a></li>
+                <li><a href="xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="tutorials/cpp/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="tutorials/cpp/service_client_demo.html">Service Client</a></li>
+                <li><a href="tutorials/cpp/action_client_demo.html">Action Client</a></li>
+                <li><a href="tutorials/cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+                <li><a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="tutorials/python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="tutorials/python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="tutorials/python/service_client_demo.html">Service Client</a></li>
+                <li><a href="tutorials/python/action_client_demo.html">Action Client</a></li>
+                <li><a href="tutorials/python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="tutorials/python/publisher_demo.html">Publisher</a></li>
+                <li><a href="tutorials/python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="tutorials/python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1>YASMIN Factory</h1>
+
+            <div class="overview">
+                <p>
+                    <strong>YASMIN Factory</strong> provides a powerful framework for creating state machines from XML definitions. It enables declarative state machine construction by parsing XML files and dynamically instantiating states from both Python and C++ implementations.
+                </p>
+                <h3>Key Features:</h3>
+                <ul>
+                    <li><strong>XML-Based Definition:</strong> Define entire state machines including nested hierarchies in XML format</li>
+                    <li><strong>Multi-Language Support:</strong> Integrate Python and C++ states in the same state machine</li>
+                    <li><strong>Plugin Architecture:</strong> Dynamic loading of C++ states via pluginlib and Python states via importlib</li>
+                    <li><strong>Hierarchical Composition:</strong> Support for nested State Machines and Concurrence states</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Usage Example</h2>
+                <p>The YASMIN Factory node provides a convenient way to execute state machines directly from XML files without writing any additional code. This is particularly useful for:</p>
+                <ul>
+                    <li><strong>Rapid testing:</strong> Quickly test state machine definitions without compilation</li>
+                    <li><strong>Configuration-based deployment:</strong> Deploy different behaviors by simply changing XML files</li>
+                    <li><strong>Non-programmer friendly:</strong> Allow team members to modify robot behaviors without coding</li>
+                    <li><strong>Version control:</strong> Track state machine changes through XML file versioning</li>
+                </ul>
+                <p>You can launch a state machine defined in an XML file using the <code>yasmin_factory_node</code>:</p>
+                <pre><code class="language-bash">ros2 run yasmin_factory yasmin_factory_node --ros-args -p state_machine_file:=/path/to/file.xml</code></pre>
+            </div>
+
+            <div class="page-navigation">
+                <a href="yasmin_editor.html" class="nav-button prev">YASMIN Editor</a>
+                <a href="yasmin_viewer.html" class="nav-button next">YASMIN Viewer</a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+  </body>
+</html>

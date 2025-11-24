@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nav2 Demo (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../python/service_client_demo.html">Service Client</a></li>
+                <li><a href="../python/action_client_demo.html">Action Client</a></li>
+                <li><a href="../python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../python/publisher_demo.html">Publisher</a></li>
+                <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1>Nav2 Demo (Hierarchical FSM + ROS 2 Action)</h1>
+            <p>This tutorial demonstrates how to integrate YASMIN with ROS 2 Navigation (Nav2) using a hierarchical state machine in C++. Hierarchical FSMs allow you to nest state machines within states, creating modular and reusable navigation behaviors. This pattern is ideal for complex robot tasks where high-level planning (waypoint selection) is separated from low-level execution (navigation to each point).</p>
+
+            <h2>Overview</h2>
+            <p>The demo creates a two-level hierarchical state machine. The parent state machine handles waypoint management: it creates a dictionary of named waypoint coordinates (entrance, bathroom, livingroom, kitchen, bedroom), randomly selects a subset for the mission, and delegates navigation to a child state machine. The child state machine implements the navigation loop: it retrieves the next waypoint from the list, converts coordinates to a <code>Pose</code> message, sends it to Nav2's <code>NavigateToPose</code> action server, and repeats until all waypoints are visited. This structure demonstrates state machine composition, shared blackboard data between levels, and ROS 2 action integration for real robot navigation.</p>
+            <p>The workflow consists of:</p>
+            <ol>
+                <li><strong>Create Waypoints:</strong> Initialize a dictionary with 5 predefined locations (x, y, orientation_z, orientation_w).</li>
+                <li><strong>Select Random Subset:</strong> Choose N random waypoints from the dictionary based on <code>waypoints_num</code> blackboard parameter.</li>
+                <li><strong>Navigate (Hierarchical):</strong> Enter the nested navigation state machine that loops through selected waypoints, sending each to Nav2's action server.</li>
+            </ol>
+
+            <h2>Running the Demo</h2>
+            <pre><code class="language-bash">ros2 run yasmin_demos nav2_demo</code></pre>
+
+            <h2>Source Code</h2>
+            <p>You can find the full source code in the <a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/nav2_demo.cpp" target="_blank">yasmin_demos</a> package.</p>
+
+            <pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;memory&gt;
+#include &lt;random&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+#include "geometry_msgs/msg/pose.hpp"
+#include "nav2_msgs/action/navigate_to_pose.hpp"
+
+#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/action_state.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using std::placeholders::_1;
+using std::placeholders::_2;
+using NavigateToPose = nav2_msgs::action::NavigateToPose;
+using Pose = geometry_msgs::msg::Pose;
+
+// Constants for state outcomes
+const std::string HAS_NEXT = "has_next"; ///< Indicates there are more waypoints
+const std::string END = "end";           ///< Indicates no more waypoints
+
+class Nav2State : public yasmin_ros::ActionState<NavigateToPose> {
+public:
+  Nav2State()
+      : yasmin_ros::ActionState<NavigateToPose>(
+            "/navigate_to_pose",
+            std::bind(&Nav2State::create_goal_handler, this, _1)) {}
+
+  NavigateToPose::Goal create_goal_handler(
+      std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+    NavigateToPose::Goal goal;
+    goal.pose.pose = blackboard->get<Pose>("pose");
+    goal.pose.header.frame_id = "map"; // Set the reference frame to 'map'
+    return goal;
+  }
+};
+
+std::string
+create_waypoints(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+  std::map<std::string, std::vector<double>> waypoints = {
+      {"entrance", {1.25, 6.30, -0.78, 0.67}},
+      {"bathroom", {4.89, 1.64, 0.0, 1.0}},
+      {"livingroom", {1.55, 4.03, -0.69, 0.72}},
+      {"kitchen", {3.79, 6.77, 0.99, 0.12}},
+      {"bedroom", {7.50, 4.89, 0.76, 0.65}}};
+  blackboard->set<std::map<std::string, std::vector<double>>>("waypoints",
+                                                              waypoints);
+  return yasmin_ros::basic_outcomes::SUCCEED;
+}
+
+std::string take_random_waypoint(
+    std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+  auto waypoints =
+      blackboard->get<std::map<std::string, std::vector<double>>>("waypoints");
+  int waypoints_num = blackboard->get<int>("waypoints_num");
+
+  std::vector<std::string> waypoint_names;
+  for (const auto &pair : waypoints) {
+    waypoint_names.push_back(pair.first);
+  }
+
+  std::random_device rd;
+  std::mt19937 g(rd());
+  std::shuffle(waypoint_names.begin(), waypoint_names.end(), g);
+  std::vector<std::string> random_waypoints(
+      waypoint_names.begin(), waypoint_names.begin() + waypoints_num);
+
+  blackboard->set<std::vector<std::string>>("random_waypoints",
+                                            random_waypoints);
+  return yasmin_ros::basic_outcomes::SUCCEED;
+}
+
+std::string
+get_next_waypoint(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+  auto random_waypoints =
+      blackboard->get<std::vector<std::string>>("random_waypoints");
+  auto waypoints =
+      blackboard->get<std::map<std::string, std::vector<double>>>("waypoints");
+
+  if (random_waypoints.empty()) {
+    return END;
+  }
+
+  std::string wp_name = random_waypoints.back();
+  random_waypoints.pop_back();
+  blackboard->set<std::vector<std::string>>("random_waypoints",
+                                            random_waypoints);
+
+  auto wp = waypoints.at(wp_name);
+
+  Pose pose;
+  pose.position.x = wp[0];
+  pose.position.y = wp[1];
+  pose.orientation.z = wp[2];
+  pose.orientation.w = wp[3];
+
+  blackboard->set<Pose>("pose", pose);
+  blackboard->set<std::string>("text", "I have reached waypoint " + wp_name);
+
+  return HAS_NEXT;
+}
+
+int main(int argc, char *argv[]) {
+  YASMIN_LOG_INFO("yasmin_nav2_demo");
+  rclcpp::init(argc, argv);
+  yasmin_ros::set_ros_loggers();
+
+  auto sm = std::make_shared<yasmin::StateMachine>(
+      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED,
+                                         yasmin_ros::basic_outcomes::ABORT,
+                                         yasmin_ros::basic_outcomes::CANCEL});
+  auto nav_sm = std::make_shared<yasmin::StateMachine>(
+      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED,
+                                         yasmin_ros::basic_outcomes::ABORT,
+                                         yasmin_ros::basic_outcomes::CANCEL});
+
+  rclcpp::on_shutdown([sm, nav_sm]() {
+    if (sm->is_running()) {
+      sm->cancel_state();
+    }
+    if (nav_sm->is_running()) {
+      nav_sm->cancel_state();
+    }
+  });
+
+  sm->add_state(
+      "CREATING_WAYPOINTS",
+      std::make_shared<yasmin::CbState>(
+          std::initializer_list<std::string>{
+              yasmin_ros::basic_outcomes::SUCCEED},
+          create_waypoints),
+      std::map<std::string, std::string>{
+          {yasmin_ros::basic_outcomes::SUCCEED, "TAKING_RANDOM_WAYPOINTS"}});
+  sm->add_state("TAKING_RANDOM_WAYPOINTS",
+                std::make_shared<yasmin::CbState>(
+                    std::initializer_list<std::string>{
+                        yasmin_ros::basic_outcomes::SUCCEED},
+                    take_random_waypoint),
+                std::map<std::string, std::string>{
+                    {yasmin_ros::basic_outcomes::SUCCEED, "NAVIGATING"}});
+
+  nav_sm->add_state(
+      "GETTING_NEXT_WAYPOINT",
+      std::make_shared<yasmin::CbState>(
+          std::initializer_list<std::string>{END, HAS_NEXT}, get_next_waypoint),
+      std::map<std::string, std::string>{
+          {END, yasmin_ros::basic_outcomes::SUCCEED},
+          {HAS_NEXT, "NAVIGATING"}});
+  nav_sm->add_state(
+      "NAVIGATING", std::make_shared<Nav2State>(),
+      std::map<std::string, std::string>{
+          {yasmin_ros::basic_outcomes::SUCCEED, "GETTING_NEXT_WAYPOINT"},
+          {yasmin_ros::basic_outcomes::CANCEL,
+           yasmin_ros::basic_outcomes::CANCEL},
+          {yasmin_ros::basic_outcomes::ABORT,
+           yasmin_ros::basic_outcomes::ABORT}});
+
+  sm->add_state(
+      "NAVIGATING", nav_sm,
+      std::map<std::string, std::string>{{yasmin_ros::basic_outcomes::SUCCEED,
+                                          yasmin_ros::basic_outcomes::SUCCEED},
+                                         {yasmin_ros::basic_outcomes::CANCEL,
+                                          yasmin_ros::basic_outcomes::CANCEL},
+                                         {yasmin_ros::basic_outcomes::ABORT,
+                                          yasmin_ros::basic_outcomes::ABORT}});
+
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_NAV2_DEMO");
+
+  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  blackboard->set<int>("waypoints_num", 2);
+
+  try {
+    std::string outcome = (*sm.get())(blackboard);
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  rclcpp::shutdown();
+
+  return 0;
+}</code></pre>
+
+    <div class="page-navigation">
+        <a href="parameters_demo.html" class="nav-button prev">C++: ROS Parameters</a>
+        <a href="factory_demo.html" class="nav-button next">C++: Factory (XML)</a>
+    </div>
+        </main>
+        
+        <aside class="toc">
+            <h3>On this page</h3>
+            <ul>
+                <!-- TOC generated by JS -->
+            </ul>
+        </aside>
+    </div>
+</body>
+</html>

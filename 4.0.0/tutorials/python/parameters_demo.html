@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parameters Demo (Python) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                        <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
+                <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
+                <li><a href="../cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
+                <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/parameters_demo.py" target="_blank" style="color: inherit; text-decoration: none;">ROS Parameters Demo (Python)</a></h1>
+            <p>This tutorial shows how to use ROS 2 parameters within a YASMIN state machine using the <code>GetParametersState</code>. Parameters allow you to configure your state machine behavior at runtime without modifying code. This is essential for creating flexible, reusable robot behaviors that can be adapted to different scenarios, robots, or environments simply by changing parameter values. Instead of hardcoding values like loop counts, thresholds, or names, you can expose them as parameters that can be set via launch files, command-line arguments, or parameter files.</p>
+
+            <h2>Background</h2>
+            <p>ROS 2 parameters provide a way to:</p>
+            <ul>
+                <li>Configure node behavior at launch time (set values before execution)</li>
+                <li>Dynamically reconfigure settings (change values during execution)</li>
+                <li>Share configuration across nodes (maintain consistency)</li>
+                <li>Set defaults with command-line overrides (flexible deployment)</li>
+                <li>Document configurable aspects of your system (self-documenting code)</li>
+                <li>Version control configuration separately from code (cleaner repositories)</li>
+            </ul>
+
+            <h2>1. Create Custom States</h2>
+            <p>Define states that use parameters from the blackboard. Notice how FooState retrieves <code>max_counter</code> and <code>counter_str</code> from the blackboard instead of using hardcoded values. This makes the state's behavior configurable - you can change how many iterations it performs or what prefix it uses in log messages without modifying the state's code. The same state class can be used in different state machines with different parameter values, promoting reusability. BarState simply logs the formatted string, demonstrating how parameter-driven data flows through the state machine naturally.</p>
+
+            <pre><code class="language-python">class FooState(State):
+    """
+    Represents the Foo state in the state machine.
+
+    Attributes:
+        counter (int): Counter to track the number of executions of this state.
+    """
+
+    def __init__(self) -> None:
+        """
+        Initializes the FooState instance, setting up the outcomes.
+
+        Outcomes:
+            outcome1: Indicates the state should continue to the Bar state.
+            outcome2: Indicates the state should finish execution and return.
+        """
+        super().__init__(["outcome1", "outcome2"])
+        self.counter = 0
+
+    def execute(self, blackboard: Blackboard) -> str:
+        """
+        Executes the logic for the Foo state.
+
+        Args:
+            blackboard (Blackboard): The shared data structure for states.
+
+        Returns:
+            str: The outcome of the execution, which can be "outcome1" or "outcome2".
+
+        Raises:
+            Exception: May raise exceptions related to state execution.
+        """
+        yasmin.YASMIN_LOG_INFO("Executing state FOO")
+        time.sleep(3)  # Simulate work by sleeping
+
+        if self.counter < blackboard["max_counter"]:
+            self.counter += 1
+            blackboard["foo_str"] = f"{blackboard['counter_str']}: {self.counter}"
+            return "outcome1"
+        else:
+            return "outcome2"
+
+class BarState(State):
+    """
+    Represents the Bar state in the state machine.
+    """
+
+    def __init__(self) -> None:
+        """
+        Initializes the BarState instance, setting up the outcome.
+
+        Outcomes:
+            outcome3: Indicates the state should transition back to the Foo state.
+        """
+        super().__init__(outcomes=["outcome3"])
+
+    def execute(self, blackboard: Blackboard) -> str:
+        """
+        Executes the logic for the Bar state.
+
+        Args:
+            blackboard (Blackboard): The shared data structure for states.
+
+        Returns:
+            str: The outcome of the execution, which will always be "outcome3".
+
+        Raises:
+            Exception: May raise exceptions related to state execution.
+        """
+        yasmin.YASMIN_LOG_INFO("Executing state BAR")
+        time.sleep(3)  # Simulate work by sleeping
+
+        yasmin.YASMIN_LOG_INFO(blackboard["foo_str"])
+        return "outcome3"</code></pre>
+
+            <h2>2. Use GetParametersState</h2>
+            <p>Create a state that retrieves ROS parameters and stores them in the blackboard. The <code>GetParametersState</code> is initialized with a dictionary mapping parameter names to default values. When executed, it attempts to retrieve each parameter from the ROS 2 parameter server. If a parameter is set (via command line with <code>--ros-args -p max_counter:=5</code>, in a YAML file, or programmatically), it uses that value. If not found, it falls back to the default value provided in the dictionary. All retrieved parameters are then stored in the blackboard, making them available to subsequent states. This pattern - retrieve configuration before execution - ensures your state machine is properly configured before running and provides clear error handling if required parameters are missing.</p>
+
+            <pre><code class="language-python">from yasmin_ros import GetParametersState
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+
+rclpy.init()
+set_ros_loggers()
+
+sm = StateMachine(outcomes=["outcome4"])
+
+# Add parameter getter as first state
+sm.add_state(
+    "GETTING_PARAMETERS",
+    GetParametersState(
+        parameters={
+            "max_counter": 3,  # Parameter name with default value
+            "counter_str": "Counter",  # Another parameter with default
+        },
+    ),
+    transitions={
+        SUCCEED: "FOO",
+        ABORT: "outcome4",
+    },
+)</code></pre>
+
+            <h2>3. Build the Rest of the FSM</h2>
+            <p>Add the FooState and BarState to complete the state machine. These states use the parameters retrieved by the GetParametersState to control their behavior dynamically.</p>
+            <pre><code class="language-python">sm.add_state(
+    "FOO",
+    FooState(),
+    transitions={
+        "outcome1": "BAR",
+        "outcome2": "outcome4",
+    },
+)
+sm.add_state(
+    "BAR",
+    BarState(),
+    transitions={"outcome3": "FOO"},
+)
+
+YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")</code></pre>
+
+            <h2>4. Execute</h2>
+            <p>Run the state machine and handle any interruptions gracefully with proper ROS shutdown procedures.</p>
+            <pre><code class="language-python">    # Publish FSM information for visualization
+    viewer = YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
+
+    # Execute the FSM
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        if sm.is_running():
+            sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
+
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+
+            <h2>5. Run with Default Parameters</h2>
+            <p>Run the demo using the default parameter values defined in the code.</p>
+            <pre><code>ros2 run yasmin_demos parameters_demo.py</code></pre>
+            <p>This will use the defaults: <code>max_counter=3</code> and <code>counter_str="Counter"</code>.</p>
+
+            <h2>6. Run with Custom Parameters</h2>
+            <p>Override the default parameter values at runtime using ROS 2 command-line arguments to customize the state machine behavior:</p>
+            <pre><code>ros2 run yasmin_demos parameters_demo.py --ros-args -p max_counter:=5 -p counter_str:="Iteration"</code></pre>
+
+            <h2>Expected Behavior</h2>
+            <ul>
+                <li>The FSM retrieves <code>max_counter</code> and <code>counter_str</code> from ROS parameters</li>
+                <li>FooState loops until the counter reaches <code>max_counter</code></li>
+                <li>BarState prints the formatted counter string using <code>counter_str</code></li>
+            </ul>
+
+            <h2>Key Points</h2>
+            <ul>
+                <li>Parameters are retrieved once at the start by <code>GetParametersState</code></li>
+                <li>Parameters are stored in the blackboard with the same key names</li>
+                <li>Default values are used if parameters are not set</li>
+                <li>Returns <code>SUCCEED</code> if all parameters are retrieved, <code>ABORT</code> otherwise</li>
+            </ul>
+
+
+    <div class="page-navigation">
+        <a href="../python/publisher_demo.html" class="nav-button prev">Python: Publisher Demo</a>
+        <a href="../python/factory_demo.html" class="nav-button next">Python: Factory Demo</a>
+    </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+</body>
+</html>
