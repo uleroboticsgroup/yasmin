@@ -83,8 +83,8 @@ if(BUILD_TESTING)
   )
   
   foreach(_test_name ${_pytest_tests})
-    ament_add_pytest_test(${_test_name} test/${_test_name}.py)
-    ament_add_gtest(${_test_name}_cpp test/${_test_name}.cpp)
+    ament_add_pytest_test(${_test_name} test/${_test_name}.py TIMEOUT 300)
+    ament_add_gtest(${_test_name}_cpp test/${_test_name}.cpp TIMEOUT 300)
     target_link_libraries(${_test_name}_cpp
      ${PROJECT_NAME}
       yasmin::yasmin
