@@ -3,6 +3,24 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.0.0 (2025-11-24)
+------------------
+* removing ament_target_dependencies form yasmin_ros
+* Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
+  [New Greate Version] Pybinding + Plugins + Editor
+* adding rcl init to yasmin node
+* fixing Python imports
+* adding const&
+* adding const&
+* fixing const std::string & in yasmin_ros
+* removing clear client cache from yasmin_ros C++ tests
+* adding type registry toblackboard
+* fixing c++ monitor state
+* new yasmin_ros tests for each state
+* fixing license name in package.xml files
+* adding python logging
+* Contributors: Miguel Ángel González Santamarta
+
 3.5.1 (2025-10-23)
 ------------------
 * renaming ROSCommunicationsCache to ROSClientsCache
