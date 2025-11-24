@@ -3,6 +3,30 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.0.0 (2025-11-24)
+------------------
+* adding cleanup to python demos
+* removing resource directory from demos
+* moving #include <pluginlib/class_list_macros.hpp> to the bottom of files
+* removing nav_demo due to rolling buildfarm
+* fixing C++ format
+* removing comments from main functions
+* creating C++ nav_demo
+* Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
+  [New Greate Version] Pybinding + Plugins + Editor
+* fixing Python imports
+* fixing clang version
+* cancling SM created by factoy in C++
+* removing unused namespace yasmin
+* adding name to SM class for root SM
+* fixing Python blackboard set to much data types
+* creating tests for yasmin_factory
+* C++ factory
+* fixing yasmin factory functions names
+* initial files fo yasmin_factory
+* fixing license name in package.xml files
+* Contributors: Miguel Ángel González Santamarta
+
 3.5.1 (2025-10-23)
 ------------------
 

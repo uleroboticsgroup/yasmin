@@ -3,6 +3,42 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.0.0 (2025-11-24)
+------------------
+* adding destructor to state machine and cleanup to viewer pub
+* adding attr test to python blackboard
+* removing comments from python stub files of yasmin package
+* Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
+  [New Greate Version] Pybinding + Plugins + Editor
+* adding set and get attr to blackboard pybinding
+* setting input/output remappings
+* fixing clang version
+* stub files for yasmin pybind11
+* new tests for state machine name and remappings in factory
+* adding const&
+* adding const&
+* removing unused namespace yasmin
+* adding name to SM class for root SM
+* treating python list, dict, tuples and set as py::object in set function of Python blackboard
+* fixing Python blackboard set to much data types
+* remapping renamed to remappings
+* adding type registry toblackboard
+* replacing static constexpr bool with static bool in BlackboardPyWrapper
+* reverting only-one-workflow
+* fixing BlackboardPyWrapper to improve the type check in Python
+* initial files fo yasmin_factory
+* fixing license name in package.xml files
+* fixing python logging
+* adding python logging
+* pybind11-dev for package.xml
+* buildtool_depend for pybind11
+* pybind checks for foxy
+* python3-pybind11for package.xml
+* adding pybind11-vendor to yasmin pacakge.xml
+* fixing yasmin cmakelists
+* yasmin pybindings created
+* Contributors: Miguel Ángel González Santamarta
+
 3.5.1 (2025-10-23)
 ------------------
 * test exception messages in C++ tests
