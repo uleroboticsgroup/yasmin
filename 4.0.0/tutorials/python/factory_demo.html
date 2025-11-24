@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory (XML) (Python) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                        <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
+                <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
+                <li><a href="../cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
+                <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/factory_demo.py" target="_blank" style="color: inherit; text-decoration: none;">Factory Demo (Python)</a></h1>
+            <p>This tutorial demonstrates how to load YASMIN state machines from XML files using the <code>YasminFactory</code>. This approach separates the FSM structure from the code, making it easier to design, share, and modify state machines without recompiling.</p>
+
+            <h2>Background</h2>
+            <p>The YASMIN Factory provides:</p>
+            <ul>
+                <li>Declarative FSM definition using XML</li>
+                <li>Plugin-based state loading (Python and C++ states)</li>
+                <li>Visual editing with YASMIN Editor</li>
+                <li>Reusable state machine configurations</li>
+            </ul>
+
+            <h2>1. Create an XML State Machine</h2>
+            <p>Define your state machine structure in an XML file (e.g., <code>demo_1.xml</code>):</p>
+
+            <pre><code class="language-xml">&lt;StateMachine outcomes="outcome4"&gt;
+    &lt;State name="Foo" type="py" module="yasmin_demos.foo_state" class="FooState"&gt;
+        &lt;Outcome name="outcome1" target="Bar"/&gt;
+        &lt;Outcome name="outcome2" target="outcome4"/&gt;
+    &lt;/State&gt;
+    
+    &lt;State name="Bar" type="py" module="yasmin_demos.bar_state" class="BarState"&gt;
+        &lt;Outcome name="outcome3" target="Foo"/&gt;
+    &lt;/State&gt;
+&lt;/StateMachine&gt;</code></pre>
+
+            <h2>2. Load the State Machine with YasminFactory</h2>
+            <p>Use the factory to create the FSM from the XML file. The <code>YasminFactory</code> class parses the XML structure and dynamically loads the state classes using Python's plugin system. It reads the XML file from the package's shared directory using <code>get_package_share_directory</code>, which ensures the path works regardless of installation location. The factory instantiates each state class specified in the XML (<code>FooState</code> and <code>BarState</code>), creates the transitions between states based on the <code>&lt;Outcome&gt;</code> tags, and assembles them into a fully functional <code>StateMachine</code> object. This approach separates FSM logic (in Python/C++ state classes) from FSM structure (in XML), enabling non-programmers to modify behavior by editing XML files while developers maintain reusable state implementations.</p>
+
+            <pre><code class="language-python">import os
+import rclpy
+import yasmin
+from yasmin_ros import set_ros_loggers
+from yasmin_viewer import YasminViewerPub
+from yasmin_factory import YasminFactory
+from ament_index_python import get_package_share_directory
+
+yasmin.YASMIN_LOG_INFO("YASMIN_FACTORY_DEMO")
+
+rclpy.init()
+set_ros_loggers()
+
+# Create factory and load state machine from XML
+factory = YasminFactory()
+sm = factory.create_sm_from_file(
+    os.path.join(
+        get_package_share_directory("yasmin_demos"), 
+        "state_machines", 
+        "demo_1.xml"
+    )
+)</code></pre>
+
+            <h2>3. Execute the State Machine</h2>
+            <p>Run the state machine created from the XML file. The <code>YasminViewerPub</code> publishes the FSM structure to a ROS 2 topic, allowing the YASMIN Viewer web interface to display real-time execution flow. The execution follows the standard pattern: the <code>try</code> block runs the state machine through its states (Foo ↔ Bar transitions) until reaching a terminal outcome, the <code>except</code> catches keyboard interrupts and gracefully cancels execution, and the <code>finally</code> block ensures all resources are freed - the viewer's background publishing thread is stopped, the state machine is deleted to release memory, and ROS 2 is properly shut down. This demonstrates how XML-defined state machines execute identically to code-defined ones, with the same monitoring and error handling capabilities.</p>
+            <pre><code class="language-python">    # Publish FSM information for visualization
+    viewer = YasminViewerPub(sm, "plugin_demo")
+
+    # Execute the FSM
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except KeyboardInterrupt:
+        if sm.is_running():
+            sm.cancel_state()
+    finally:
+        viewer.cleanup()
+        del sm
+
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+
+            <h2>4. Run the Demo</h2>
+            <p>Execute the factory demo to see how state machines can be dynamically constructed from XML definitions, enabling configuration-driven behavior without code changes.</p>
+            <pre><code>ros2 run yasmin_demos factory_demo.py</code></pre>
+
+            <h2>XML State Attributes</h2>
+            <table>
+                <tr>
+                    <th>Attribute</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>name</code></td>
+                    <td>Unique identifier for the state</td>
+                </tr>
+                <tr>
+                    <td><code>type</code></td>
+                    <td>"py" for Python or "cpp" for C++ states</td>
+                </tr>
+                <tr>
+                    <td><code>module</code></td>
+                    <td>Python module path (for Python states)</td>
+                </tr>
+                <tr>
+                    <td><code>class</code></td>
+                    <td>Class name of the state</td>
+                </tr>
+            </table>
+
+            <h2>Benefits of XML-Based FSMs</h2>
+            <ul>
+                <li><strong>Visual Design:</strong> Use YASMIN Editor to create FSMs graphically</li>
+                <li><strong>Separation of Concerns:</strong> Structure defined separately from implementation</li>
+                <li><strong>Reusability:</strong> Share XML files across projects</li>
+                <li><strong>Mixed Languages:</strong> Combine Python and C++ states in the same FSM</li>
+            </ul>
+
+            <h2>See Also</h2>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a> - Visual state machine designer</li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a> - Complete API documentation</li>
+            </ul>
+
+
+    <div class="page-navigation">
+        <a href="../python/parameters_demo.html" class="nav-button prev">Python: Parameters Demo</a>
+        <div class="nav-button-placeholder"></div>
+    </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+</body>
+</html>

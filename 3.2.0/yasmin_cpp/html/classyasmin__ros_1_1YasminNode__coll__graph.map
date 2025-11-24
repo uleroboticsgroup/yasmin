@@ -1,0 +1,9 @@
+<map id="yasmin_ros::YasminNode" name="yasmin_ros::YasminNode">
+<area shape="rect" id="Node000001" title="A ROS 2 node for managing and handling YASMIN&#45;based applications." alt="" coords="13,198,182,223"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,102,99,127"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="67,140,94,196,89,198,62,142"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="122,94,256,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="161,148,111,199,107,196,158,144"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="149,5,230,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="192,46,192,93,187,93,187,46"/>
+</map>

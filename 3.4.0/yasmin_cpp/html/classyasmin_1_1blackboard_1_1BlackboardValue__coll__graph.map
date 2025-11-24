@@ -1,0 +1,7 @@
+<map id="yasmin::blackboard::BlackboardValue&lt; T &gt;" name="yasmin::blackboard::BlackboardValue&lt; T &gt;">
+<area shape="rect" id="Node000001" title="A template class that wraps a value of type T." alt="" coords="81,109,236,150"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1blackboard_1_1BlackboardValueInterface.html" title="Interface for blackboard value types." alt="" coords="5,5,182,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,58,149,107,144,110,112,61"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="206,13,245,38"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="212,53,174,110,170,107,207,50"/>
+</map>

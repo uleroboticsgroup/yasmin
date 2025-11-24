@@ -1,0 +1,18 @@
+<map id="yasmin_ros::MonitorState&lt; MsgT &gt;" name="yasmin_ros::MonitorState&lt; MsgT &gt;">
+<area shape="rect" id="Node000001" title="Template class to monitor a ROS 2 topic and process incoming messages." alt="" coords="878,70,1045,110"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="646,48,745,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="761,65,878,78,877,83,760,70"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="343,48,485,73"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="500,58,645,58,645,63,500,63"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="178,22,255,48"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="270,26,279,26,309,26,441,23,544,19,647,19,778,33,846,47,907,66,905,71,844,52,778,38,647,24,545,24,442,29,309,31,279,31,271,32"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="271,40,280,41,343,49,342,54,279,46,270,45"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,15,129,56"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="144,33,178,33,178,38,144,38"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="613,98,778,138"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="793,108,854,102,877,99,878,105,854,107,794,113"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="618,163,773,204"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="774,155,853,128,905,108,907,113,855,133,776,160"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="333,170,495,196"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="510,181,617,181,617,186,510,186"/>
+</map>

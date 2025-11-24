@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../python/service_client_demo.html">Service Client</a></li>
+                <li><a href="../python/action_client_demo.html">Action Client</a></li>
+                <li><a href="../python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../python/publisher_demo.html">Publisher</a></li>
+                <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/monitor_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">Monitor Demo (C++)</a></h1>
+            <p>This tutorial demonstrates how to monitor ROS 2 topics using YASMIN's <code>MonitorState</code> in C++. This state subscribes to a topic and processes incoming messages, allowing your state machine to react to sensor data or other published information. The MonitorState is particularly valuable in robotics applications where you need to wait for specific sensor readings, check for environmental conditions, or synchronize with external events before proceeding with other tasks.</p>
+
+            <h2>Background</h2>
+            <p>The <code>MonitorState</code> is useful when you need to:</p>
+            <ul>
+                <li>Wait for a specific message to arrive on a topic</li>
+                <li>Process a certain number of messages before transitioning</li>
+                <li>React to changing data from sensors or other ROS nodes</li>
+                <li>Implement timeout behavior if no messages arrive within a time limit</li>
+                <li>Monitor robot state (odometry, battery, sensors) for decision making</li>
+            </ul>
+
+            <h2>1. Define the Monitor State</h2>
+            <p>Create a class inheriting from <code>yasmin_ros::MonitorState</code>, templated with the message type <code>nav_msgs::msg::Odometry</code>. The constructor takes six parameters: the topic name (<code>"odom"</code>), a list of possible outcomes, the monitor handler callback, QoS settings (quality of service for subscription reliability), message queue size, and timeout in seconds. The <code>monitor_handler</code> method is called for each received message. It logs the robot's position coordinates (x, y, z) from the odometry message, decrements the counter, and returns <code>"outcome2"</code> when the desired number of messages have been processed, or <code>"outcome1"</code> to continue monitoring. If no message arrives within the timeout period, the state automatically returns the <code>TIMEOUT</code> outcome.</p>
+
+            <pre><code class="language-cpp">class PrintOdometryState
+    : public yasmin_ros::MonitorState&lt;nav_msgs::msg::Odometry&gt; {
+
+public:
+  int times;
+
+  PrintOdometryState(int times)
+      : yasmin_ros::MonitorState&lt;nav_msgs::msg::Odometry&gt;(
+            "odom",                   // topic name
+            {"outcome1", "outcome2"}, // possible outcomes
+            std::bind(&PrintOdometryState::monitor_handler, this, _1,
+                      _2), // monitor handler callback
+            10,            // QoS for the topic subscription
+            10,            // queue size for the callback
+            10             // timeout for receiving messages
+        ) {
+    this-&gt;times = times;
+  };
+
+  std::string
+  monitor_handler(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,
+                  std::shared_ptr&lt;nav_msgs::msg::Odometry&gt; msg) {
+
+    (void)blackboard;
+
+    YASMIN_LOG_INFO("x: %f", msg-&gt;pose.pose.position.x);
+    YASMIN_LOG_INFO("y: %f", msg-&gt;pose.pose.position.y);
+    YASMIN_LOG_INFO("z: %f", msg-&gt;pose.pose.position.z);
+
+    this-&gt;times--;
+
+    if (this-&gt;times &lt;= 0) {
+      return "outcome2";
+    }
+
+    return "outcome1";
+  };
+};</code></pre>
+
+            <h2>2. Create the State Machine</h2>
+            <p>In the main function, we create a simple state machine with one state that monitors odometry messages. The <code>PrintOdometryState</code> is initialized to process 5 messages before transitioning. The state machine defines four possible transitions: <code>"outcome1"</code> loops back to continue monitoring, <code>"outcome2"</code> exits successfully after processing all messages, <code>TIMEOUT</code> exits if no messages are received within 10 seconds, and <code>CANCEL</code> exits if the state is cancelled externally. This setup ensures the program handles all possible scenarios gracefully. The loop-back transition (<code>"outcome1" → "PRINTING_ODOM"</code>) allows the state to process multiple messages without recreating the state object, which is efficient for continuous monitoring tasks.</p>
+            <pre><code class="language-cpp">int main(int argc, char *argv[]) {
+
+  YASMIN_LOG_INFO("yasmin_monitor_demo");
+  rclcpp::init(argc, argv);
+  yasmin_ros::set_ros_loggers();
+
+  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+      std::initializer_list&lt;std::string&gt;{"outcome4"});
+
+  rclcpp::on_shutdown([sm]() {
+    if (sm-&gt;is_running()) {
+      sm-&gt;cancel_state();
+    }
+  });
+
+  sm-&gt;add_state(
+      "PRINTING_ODOM", std::make_shared&lt;PrintOdometryState&gt;(5),
+      {
+          {"outcome1", "PRINTING_ODOM"},
+          {"outcome2", "outcome4"},
+          {yasmin_ros::basic_outcomes::TIMEOUT, "outcome4"},
+          {yasmin_ros::basic_outcomes::CANCEL, "outcome4"},
+      });
+
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MONITOR_DEMO");
+
+  try {
+    std::string outcome = (*sm.get())();
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  rclcpp::shutdown();
+  return 0;
+}</code></pre>
+
+            <h2>3. Run the Demo</h2>
+            <p>Run the monitor demo to observe how the state processes incoming odometry messages. Make sure a source is publishing to the <code>/odom</code> topic, or run a navigation simulation that provides odometry data.</p>
+            <pre><code class="language-bash">ros2 run yasmin_demos monitor_demo</code></pre>
+
+    <div class="page-navigation">
+        <a href="action_client_demo.html" class="nav-button prev">C++: Action Client</a>
+        <a href="publisher_demo.html" class="nav-button next">C++: Publisher Demo</a>
+    </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+</body>
+</html>

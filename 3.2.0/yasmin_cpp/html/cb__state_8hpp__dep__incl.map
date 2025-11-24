@@ -1,0 +1,9 @@
+<map id="yasmin/include/yasmin/cb_state.hpp" name="yasmin/include/yasmin/cb_state.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="186,5,338,46"/>
+<area shape="rect" id="Node000002" href="$cb__state_8cpp.html" title=" " alt="" coords="5,94,153,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,55,121,96,119,91,206,50"/>
+<area shape="rect" id="Node000003" href="$action__client__demo_8cpp.html" title=" " alt="" coords="177,94,346,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="264,62,264,94,259,94,259,62"/>
+<area shape="rect" id="Node000004" href="$service__client__demo_8cpp.html" title=" " alt="" coords="371,94,547,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="321,50,415,91,413,96,319,55"/>
+</map>

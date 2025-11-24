@@ -1,0 +1,11 @@
+<map id="yasmin_demos.concurrence_demo.BarState" name="yasmin_demos.concurrence_demo.BarState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,244,188,285"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="32,169,161,195"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,210,99,244,94,244,94,210"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="51,80,99,106"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="84,121,96,168,91,169,79,122"/>
+<area shape="rect" id="Node000004" href="$classyasmin_1_1state_1_1StateStatus.html" title=" " alt="" coords="124,80,290,106"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="182,118,114,170,110,166,179,113"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="180,5,234,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="210,46,210,80,204,80,204,46"/>
+</map>

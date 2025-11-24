@@ -1,0 +1,11 @@
+<map id="test_concurrence.BarState" name="test_concurrence.BarState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,244,181,270"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="29,169,157,195"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,210,96,244,90,244,90,210"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="48,80,96,106"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="81,121,93,168,87,169,76,122"/>
+<area shape="rect" id="Node000004" href="$classyasmin_1_1state_1_1StateStatus.html" title=" " alt="" coords="120,80,287,106"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="178,118,110,170,107,166,175,113"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="176,5,231,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="206,46,206,80,201,80,201,46"/>
+</map>

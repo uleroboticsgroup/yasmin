@@ -1,0 +1,9 @@
+<map id="yasmin_ros.publisher_state.PublisherState" name="yasmin_ros.publisher_state.PublisherState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="14,153,160,193"/>
+<area shape="rect" id="Node000004" href="$classyasmin__demos_1_1publisher__demo_1_1PublishIntState.html" title=" " alt="" coords="5,241,169,282"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="90,209,90,241,84,241,84,209"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="23,79,151,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,120,90,152,84,152,84,120"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="63,5,111,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="90,46,90,79,84,79,84,46"/>
+</map>

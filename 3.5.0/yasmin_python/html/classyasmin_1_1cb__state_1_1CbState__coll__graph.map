@@ -1,0 +1,11 @@
+<map id="yasmin.cb_state.CbState" name="yasmin.cb_state.CbState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,244,171,270"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="24,169,152,195"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,210,91,244,85,244,85,210"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="42,80,91,106"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,121,88,168,82,169,71,122"/>
+<area shape="rect" id="Node000004" href="$classyasmin_1_1state_1_1StateStatus.html" title=" " alt="" coords="116,80,282,106"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="173,118,105,170,102,166,170,113"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="172,5,226,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="201,46,201,80,196,80,196,46"/>
+</map>
