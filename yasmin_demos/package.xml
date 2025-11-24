@@ -10,6 +10,8 @@
   <buildtool_depend>ament_cmake_python</buildtool_depend>
   <depend>rclpy</depend>
   <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
+  <depend>pluginlib</depend>
   <depend>yasmin</depend>
   <depend>yasmin_ros</depend>
   <depend>yasmin_viewer</depend>
