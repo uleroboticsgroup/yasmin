@@ -1,9 +1,0 @@
-<map id="yasmin.state.State" name="yasmin.state.State">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,169,134,195"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="24,80,72,106"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="57,121,69,168,64,169,52,122"/>
-<area shape="rect" id="Node000003" href="$classyasmin_1_1state_1_1StateStatus.html" title=" " alt="" coords="97,80,263,106"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="155,118,87,170,83,166,152,113"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="153,5,207,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="183,46,183,80,178,80,178,46"/>
-</map>

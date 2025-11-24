@@ -1,5 +1,0 @@
-<map id="yasmin_ros::PublisherState&lt; MsgT &gt;" name="yasmin_ros::PublisherState&lt; MsgT &gt;">
-<area shape="rect" id="Node000001" title="Template class to publish ROS 2 messages." alt="" coords="5,79,184,120"/>
-<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="45,5,144,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,46,97,79,92,79,92,46"/>
-</map>

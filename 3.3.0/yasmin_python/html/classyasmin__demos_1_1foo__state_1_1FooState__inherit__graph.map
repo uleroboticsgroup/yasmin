@@ -1,7 +1,0 @@
-<map id="yasmin_demos.foo_state.FooState" name="yasmin_demos.foo_state.FooState">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,196,193"/>
-<area shape="rect" id="Node000002" href="$classyasmin_1_1state_1_1State.html" title=" " alt="" coords="36,79,165,105"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,120,103,152,98,152,98,120"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="76,5,125,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,46,103,79,98,79,98,46"/>
-</map>
