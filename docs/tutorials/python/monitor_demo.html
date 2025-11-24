@@ -1,105 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Monitor Demo (Python) - YASMIN</title>
-    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../../style.css" />
     <script src="../../sidebar.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    <script>
+      hljs.highlightAll();
+    </script>
     <script src="../../dark_mode.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <a href="../../index.html" class="logo">
-            <img src="../../logo.png" alt="YASMIN Logo">
-            YASMIN
-        </a>
-        <div class="nav-links">
-            <a href="../../index.html">Docs</a>
-            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
-            <a href="../../doxygen.html" target="_blank">Doxygen</a>
-            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
-        </div>
+      <a href="../../index.html" class="logo">
+        <img src="../../logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="../../doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
     </header>
 
     <div class="container">
-                        <nav class="sidebar">
-            <h3>Getting Started</h3>
-            <ul>
-                <li><a href="../../index.html">Introduction</a></li>
-                <li><a href="../../main_concepts.html">Main Concepts</a></li>
-                <li><a href="../../packages.html">Packages Overview</a></li>
-                <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML</a></li>
-            </ul>
-            
-            <h3>Tutorials</h3>
-            <ul>
-                <li><a href="../../tutorials.html">All Tutorials</a></li>
-            </ul>
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="../../index.html">Introduction</a></li>
+          <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../docker.html">Docker</a></li>
+          <li><a href="../../xml_factory.html">XML</a></li>
+        </ul>
 
-            <h3 class="collapsible">C++ Tutorials</h3>
-            <ul>
-                <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
-                <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
-                <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
-                <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
-                <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
-                <li><a href="../cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
-                <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
-                <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
-                <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
-                <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
-            </ul>
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="../../tutorials.html">All Tutorials</a></li>
+        </ul>
 
-            <h3 class="collapsible">Python Tutorials</h3>
-            <ul>
-                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
-                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
-                <li><a href="concurrence_demo.html">Concurrence</a></li>
-                <li><a href="service_client_demo.html">Service Client</a></li>
-                <li><a href="action_client_demo.html">Action Client</a></li>
-                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
-                <li><a href="publisher_demo.html">Publisher</a></li>
-                <li><a href="parameters_demo.html">ROS Parameters</a></li>
-                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
-                <li><a href="factory_demo.html">Factory (XML)</a></li>
-            </ul>
-            
-            <h3>Tools</h3>
-            <ul>
-                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
-                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
-                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
-            </ul>
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+          <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
+          <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
+          <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
+          <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
+          <li><a href="../cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
+          <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
+          <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
+          <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
+          <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
+        </ul>
 
-            <h3>Resources</h3>
-            <ul>
-                <li><a href="../../citations.html">Citations</a></li>
-            </ul>
-        </nav>
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+          <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+          <li><a href="concurrence_demo.html">Concurrence</a></li>
+          <li><a href="service_client_demo.html">Service Client</a></li>
+          <li><a href="action_client_demo.html">Action Client</a></li>
+          <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+          <li><a href="publisher_demo.html">Publisher</a></li>
+          <li><a href="parameters_demo.html">ROS Parameters</a></li>
+          <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+          <li><a href="factory_demo.html">Factory (XML)</a></li>
+        </ul>
 
-        <main class="main-content content">
-            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/monitor_demo.py" target="_blank" style="color: inherit; text-decoration: none;">Monitor Demo (Python)</a></h1>
-            <p>This tutorial demonstrates how to monitor ROS 2 topics using YASMIN's <code>MonitorState</code>. This state subscribes to a topic and processes incoming messages, allowing your state machine to react to sensor data or other published information. The MonitorState is particularly valuable in robotics applications where you need to wait for specific sensor readings, check for environmental conditions, or synchronize with external events before proceeding with other tasks.</p>
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
 
-            <h2>Background</h2>
-            <p>The <code>MonitorState</code> is useful when you need to:</p>
-            <ul>
-                <li>Wait for a specific message to arrive on a topic</li>
-                <li>Process a certain number of messages before transitioning</li>
-                <li>React to changing data from sensors or other ROS nodes</li>
-                <li>Implement timeout behavior if no messages arrive within a time limit</li>
-                <li>Monitor robot state (odometry, battery, sensors) for decision making</li>
-            </ul>
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="../../citations.html">Citations</a></li>
+        </ul>
+      </nav>
 
-            <h2>1. Create the MonitorState</h2>
-            <p>Create a custom monitor state that subscribes to the <code>/odom</code> topic. The constructor takes seven parameters: the message type (<code>Odometry</code>), the topic name (<code>"odom"</code>), a list of custom outcomes, the monitor handler callback, QoS profile for subscription (we use <code>qos_profile_sensor_data</code> for reliable sensor data), message queue size, and timeout in seconds. The <code>monitor_handler</code> method is invoked for each received message. It logs the entire odometry message, decrements a counter, and returns <code>"outcome2"</code> when the target number of messages have been processed, or <code>"outcome1"</code> to continue monitoring. If no message arrives within the timeout period, the state automatically returns the <code>TIMEOUT</code> outcome.</p>
+      <main class="main-content content">
+        <h1>
+          <a
+            href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/monitor_demo.py"
+            target="_blank"
+            style="color: inherit; text-decoration: none"
+            >Monitor Demo (Python)</a
+          >
+        </h1>
+        <p>
+          This tutorial demonstrates how to monitor ROS 2 topics using YASMIN's
+          <code>MonitorState</code>. This state subscribes to a topic and
+          processes incoming messages, allowing your state machine to react to
+          sensor data or other published information. The MonitorState is
+          particularly valuable in robotics applications where you need to wait
+          for specific sensor readings, check for environmental conditions, or
+          synchronize with external events before proceeding with other tasks.
+        </p>
 
-            <pre><code class="language-python">from yasmin_ros import MonitorState
+        <h2>Background</h2>
+        <p>The <code>MonitorState</code> is useful when you need to:</p>
+        <ul>
+          <li>Wait for a specific message to arrive on a topic</li>
+          <li>Process a certain number of messages before transitioning</li>
+          <li>React to changing data from sensors or other ROS nodes</li>
+          <li>
+            Implement timeout behavior if no messages arrive within a time limit
+          </li>
+          <li>
+            Monitor robot state (odometry, battery, sensors) for decision making
+          </li>
+        </ul>
+
+        <h2>1. Create the MonitorState</h2>
+        <p>
+          Create a custom monitor state that subscribes to the
+          <code>/odom</code> topic. The constructor takes seven parameters: the
+          message type (<code>Odometry</code>), the topic name
+          (<code>"odom"</code>), a list of custom outcomes, the monitor handler
+          callback, QoS profile for subscription (we use
+          <code>qos_profile_sensor_data</code> for reliable sensor data),
+          message queue size, and timeout in seconds. The
+          <code>monitor_handler</code> method is invoked for each received
+          message. It logs the entire odometry message, decrements a counter,
+          and returns <code>"outcome2"</code> when the target number of messages
+          have been processed, or <code>"outcome1"</code> to continue
+          monitoring. If no message arrives within the timeout period, the state
+          automatically returns the <code>TIMEOUT</code> outcome.
+        </p>
+
+        <pre><code class="language-python">from yasmin_ros import MonitorState
 from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
 from nav_msgs.msg import Odometry
 from rclpy.qos import qos_profile_sensor_data
@@ -120,12 +160,12 @@ class PrintOdometryState(MonitorState):
                      process before changing state.
 
     Methods:
-        monitor_handler(blackboard: Blackboard, msg: Odometry) -> str:
+        monitor_handler(blackboard: Blackboard, msg: Odometry) -&gt; str:
             Handles incoming Odometry messages, logging the message and
             returning the appropriate outcome based on the remaining count.
     """
 
-    def __init__(self, times: int) -> None:
+    def __init__(self, times: int) -&gt; None:
         """
         Initializes the PrintOdometryState.
 
@@ -144,7 +184,7 @@ class PrintOdometryState(MonitorState):
         )
         self.times = times
 
-    def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -> str:
+    def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -&gt; str:
         """
         Handles incoming Odometry messages.
 
@@ -167,15 +207,26 @@ class PrintOdometryState(MonitorState):
 
         self.times -= 1
 
-        if self.times <= 0:
+        if self.times &lt;= 0:
             return "outcome2"
 
         return "outcome1"</code></pre>
 
-            <h2>2. Build the State Machine</h2>
-            <p>Initialize ROS 2 and configure the state machine with the monitor state, defining transitions for all possible outcomes. The state loops back to itself with <code>outcome1</code> to continue monitoring messages, exits with <code>outcome2</code> when the target number of messages is reached, and handles error conditions like <code>TIMEOUT</code> (no messages received within the timeout period) and <code>CANCEL</code> (manual cancellation) by transitioning to the terminal outcome <code>outcome4</code>. This comprehensive transition mapping ensures graceful handling of all execution paths - successful completion, timeout scenarios, and user interruption.</p>
+        <h2>2. Build the State Machine</h2>
+        <p>
+          Initialize ROS 2 and configure the state machine with the monitor
+          state, defining transitions for all possible outcomes. The state loops
+          back to itself with <code>outcome1</code> to continue monitoring
+          messages, exits with <code>outcome2</code> when the target number of
+          messages is reached, and handles error conditions like
+          <code>TIMEOUT</code> (no messages received within the timeout period)
+          and <code>CANCEL</code> (manual cancellation) by transitioning to the
+          terminal outcome <code>outcome4</code>. This comprehensive transition
+          mapping ensures graceful handling of all execution paths - successful
+          completion, timeout scenarios, and user interruption.
+        </p>
 
-            <pre><code class="language-python">rclpy.init()
+        <pre><code class="language-python">rclpy.init()
 set_ros_loggers()
 
 sm = StateMachine(outcomes=["outcome4"])
@@ -193,9 +244,12 @@ sm.add_state(
 
 YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")</code></pre>
 
-            <h2>3. Execute</h2>
-            <p>Execute the state machine with proper exception handling to manage keyboard interrupts and ensure clean shutdown.</p>
-            <pre><code class="language-python">    # Publish FSM information
+        <h2>3. Execute</h2>
+        <p>
+          Execute the state machine with proper exception handling to manage
+          keyboard interrupts and ensure clean shutdown.
+        </p>
+        <pre><code class="language-python">    # Publish FSM information
     viewer = YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
     # Execute FSM
@@ -217,48 +271,63 @@ YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")</code></pre>
 if __name__ == "__main__":
     main()</code></pre>
 
-            <h2>4. Run the Demo</h2>
-            <p>Ensure you have a node publishing odometry data (e.g., from a robot simulator or real robot), then run:</p>
-            <pre><code>ros2 run yasmin_demos monitor_demo.py</code></pre>
+        <h2>4. Run the Demo</h2>
+        <p>
+          Ensure you have a node publishing odometry data (e.g., from a robot
+          simulator or real robot), then run:
+        </p>
+        <pre><code>ros2 run yasmin_demos monitor_demo.py</code></pre>
 
-            <h2>Expected Behavior</h2>
-            <ul>
-                <li>The state will wait for messages on the <code>/odom</code> topic</li>
-                <li>Each message is logged and the counter decrements</li>
-                <li>After 5 messages, the state returns "outcome2" and the FSM exits</li>
-                <li>If no messages arrive within 10 seconds, the state returns TIMEOUT</li>
-            </ul>
+        <h2>Expected Behavior</h2>
+        <ul>
+          <li>
+            The state will wait for messages on the <code>/odom</code> topic
+          </li>
+          <li>Each message is logged and the counter decrements</li>
+          <li>
+            After 5 messages, the state returns "outcome2" and the FSM exits
+          </li>
+          <li>
+            If no messages arrive within 10 seconds, the state returns TIMEOUT
+          </li>
+        </ul>
 
-            <h2>Key Parameters</h2>
-            <table>
-                <tr>
-                    <th>Parameter</th>
-                    <th>Description</th>
-                </tr>
-                <tr>
-                    <td><code>qos</code></td>
-                    <td>Quality of Service profile for the subscription</td>
-                </tr>
-                <tr>
-                    <td><code>msg_queue</code></td>
-                    <td>Number of messages to buffer</td>
-                </tr>
-                <tr>
-                    <td><code>timeout</code></td>
-                    <td>Seconds to wait before returning TIMEOUT</td>
-                </tr>
-            </table>
+        <h2>Key Parameters</h2>
+        <table>
+          <tr>
+            <th>Parameter</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>qos</code></td>
+            <td>Quality of Service profile for the subscription</td>
+          </tr>
+          <tr>
+            <td><code>msg_queue</code></td>
+            <td>Number of messages to buffer</td>
+          </tr>
+          <tr>
+            <td><code>timeout</code></td>
+            <td>Seconds to wait before returning TIMEOUT</td>
+          </tr>
+        </table>
 
-
-    <div class="page-navigation">
-        <a href="../python/action_client_demo.html" class="nav-button prev">Python: Action Client Demo</a>
-        <a href="../python/publisher_demo.html" class="nav-button next">Python: Publisher Demo</a>
-    </div>
-        </main>
+        <div class="page-navigation">
+          <a href="../python/action_client_demo.html" class="nav-button prev"
+            >Python: Action Client Demo</a
+          >
+          <a href="../python/publisher_demo.html" class="nav-button next"
+            >Python: Publisher Demo</a
+          >
+        </div>
+      </main>
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
+      <p>
+        &copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation
+        generated with <a href="../../doxygen.html" target="_blank">Doxygen</a>
+      </p>
     </footer>
-</body>
+  </body>
 </html>
