@@ -1,107 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nav2 Demo (Python) - YASMIN</title>
-    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../../style.css" />
     <script src="../../sidebar.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    <script>
+      hljs.highlightAll();
+    </script>
     <script src="../../dark_mode.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <a href="../../index.html" class="logo">
-            <img src="../../logo.png" alt="YASMIN Logo">
-            YASMIN
-        </a>
-        <div class="nav-links">
-            <a href="../../index.html">Docs</a>
-            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
-            <a href="../../doxygen.html" target="_blank">Doxygen</a>
-            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
-        </div>
+      <a href="../../index.html" class="logo">
+        <img src="../../logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="../../doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
     </header>
 
     <div class="container">
-                <nav class="sidebar">
-            <h3>Getting Started</h3>
-            <ul>
-                <li><a href="../../index.html">Introduction</a></li>
-                <li><a href="../../main_concepts.html">Main Concepts</a></li>
-                <li><a href="../../packages.html">Packages Overview</a></li>
-                <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML</a></li>
-            </ul>
-            
-            <h3>Tutorials</h3>
-            <ul>
-                <li><a href="../../tutorials.html">All Tutorials</a></li>
-            </ul>
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="../../index.html">Introduction</a></li>
+          <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../docker.html">Docker</a></li>
+          <li><a href="../../xml_factory.html">XML</a></li>
+        </ul>
 
-            <h3 class="collapsible">C++ Tutorials</h3>
-            <ul>
-                <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
-                <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
-                <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
-                <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
-                <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
-                <li><a href="../cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
-                <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
-                <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
-                <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
-                <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
-            </ul>
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="../../tutorials.html">All Tutorials</a></li>
+        </ul>
 
-            <h3 class="collapsible">Python Tutorials</h3>
-            <ul>
-                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
-                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
-                <li><a href="concurrence_demo.html">Concurrence</a></li>
-                <li><a href="service_client_demo.html">Service Client</a></li>
-                <li><a href="action_client_demo.html">Action Client</a></li>
-                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
-                <li><a href="publisher_demo.html">Publisher</a></li>
-                <li><a href="parameters_demo.html">ROS Parameters</a></li>
-                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
-                <li><a href="factory_demo.html">Factory (XML)</a></li>
-            </ul>
-            
-            <h3>Tools</h3>
-            <ul>
-                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
-                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
-                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
-            </ul>
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+          <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
+          <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
+          <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
+          <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
+          <li><a href="../cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
+          <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
+          <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
+          <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
+          <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
+        </ul>
 
-            <h3>Resources</h3>
-            <ul>
-                <li><a href="../../citations.html">Citations</a></li>
-            </ul>
-        </nav>
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+          <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+          <li><a href="concurrence_demo.html">Concurrence</a></li>
+          <li><a href="service_client_demo.html">Service Client</a></li>
+          <li><a href="action_client_demo.html">Action Client</a></li>
+          <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+          <li><a href="publisher_demo.html">Publisher</a></li>
+          <li><a href="parameters_demo.html">ROS Parameters</a></li>
+          <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+          <li><a href="factory_demo.html">Factory (XML)</a></li>
+        </ul>
 
-        <main class="main-content content">
-            <h1>Nav2 Demo (Hierarchical FSM + ROS 2 Action)</h1>
-            <p>This tutorial demonstrates how to integrate YASMIN with ROS 2 Navigation (Nav2) using a hierarchical state machine. Hierarchical FSMs allow you to nest state machines within states, creating modular and reusable navigation behaviors. This pattern is ideal for complex robot tasks where high-level planning (waypoint selection) is separated from low-level execution (navigation to each point).</p>
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
 
-            <h2>Overview</h2>
-            <p>The demo creates a two-level hierarchical state machine. The parent state machine handles waypoint management: it creates a dictionary of named waypoint coordinates (entrance, bathroom, livingroom, kitchen, bedroom), randomly selects a subset for the mission, and delegates navigation to a child state machine. The child state machine implements the navigation loop: it retrieves the next waypoint from the list, converts coordinates to a <code>Pose</code> message, sends it to Nav2's <code>NavigateToPose</code> action server, and repeats until all waypoints are visited. This structure demonstrates state machine composition, shared blackboard data between levels, and ROS 2 action integration for real robot navigation.</p>
-            <p>The workflow consists of:</p>
-            <ol>
-                <li><strong>Create Waypoints:</strong> Initialize a dictionary with 5 predefined locations (x, y, orientation_z, orientation_w).</li>
-                <li><strong>Select Random Subset:</strong> Choose N random waypoints from the dictionary based on <code>waypoints_num</code> blackboard parameter.</li>
-                <li><strong>Navigate (Hierarchical):</strong> Enter the nested navigation state machine that loops through selected waypoints, sending each to Nav2's action server.</li>
-            </ol>
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="../../citations.html">Citations</a></li>
+        </ul>
+      </nav>
 
-            <h2>Running the Demo</h2>
-            <pre><code class="language-bash">ros2 run yasmin_demos nav2_demo.py</code></pre>
+      <main class="main-content content">
+        <h1>Nav2 Demo (Hierarchical FSM + ROS 2 Action)</h1>
+        <p>
+          This tutorial demonstrates how to integrate YASMIN with ROS 2
+          Navigation (Nav2) using a hierarchical state machine. Hierarchical
+          FSMs allow you to nest state machines within states, creating modular
+          and reusable navigation behaviors. This pattern is ideal for complex
+          robot tasks where high-level planning (waypoint selection) is
+          separated from low-level execution (navigation to each point).
+        </p>
 
-            <h2>Source Code</h2>
-            <p>You can find the full source code in the <a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/nav2_demo.py" target="_blank">yasmin_demos</a> package.</p>
+        <h2>Overview</h2>
+        <p>
+          The demo creates a two-level hierarchical state machine. The parent
+          state machine handles waypoint management: it creates a dictionary of
+          named waypoint coordinates (entrance, bathroom, livingroom, kitchen,
+          bedroom), randomly selects a subset for the mission, and delegates
+          navigation to a child state machine. The child state machine
+          implements the navigation loop: it retrieves the next waypoint from
+          the list, converts coordinates to a <code>Pose</code> message, sends
+          it to Nav2's <code>NavigateToPose</code> action server, and repeats
+          until all waypoints are visited. This structure demonstrates state
+          machine composition, shared blackboard data between levels, and ROS 2
+          action integration for real robot navigation.
+        </p>
+        <p>The workflow consists of:</p>
+        <ol>
+          <li>
+            <strong>Create Waypoints:</strong> Initialize a dictionary with 5
+            predefined locations (x, y, orientation_z, orientation_w).
+          </li>
+          <li>
+            <strong>Select Random Subset:</strong> Choose N random waypoints
+            from the dictionary based on <code>waypoints_num</code> blackboard
+            parameter.
+          </li>
+          <li>
+            <strong>Navigate (Hierarchical):</strong> Enter the nested
+            navigation state machine that loops through selected waypoints,
+            sending each to Nav2's action server.
+          </li>
+        </ol>
 
-            <pre><code class="language-python">import random
+        <h2>Running the Demo</h2>
+        <pre><code class="language-bash">ros2 run yasmin_demos nav2_demo.py</code></pre>
+
+        <h2>Source Code</h2>
+        <p>
+          You can find the full source code in the
+          <a
+            href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/nav2_demo.py"
+            target="_blank"
+            >yasmin_demos</a
+          >
+          package.
+        </p>
+
+        <pre><code class="language-python">import random
 import rclpy
 from geometry_msgs.msg import Pose
 from nav2_msgs.action import NavigateToPose
@@ -114,8 +159,8 @@ from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
 from yasmin_viewer import YasminViewerPub
 
 # Constants for state outcomes
-HAS_NEXT = "has_next"  ##< Indicates there are more waypoints
-END = "end"  ##< Indicates no more waypoints
+HAS_NEXT = "has_next"  ##&lt; Indicates there are more waypoints
+END = "end"  ##&lt; Indicates no more waypoints
 
 
 class Nav2State(ActionState):
@@ -126,11 +171,11 @@ class Nav2State(ActionState):
         None
 
     Methods:
-        create_goal_handler(blackboard: Blackboard) -> NavigateToPose.Goal:
+        create_goal_handler(blackboard: Blackboard) -&gt; NavigateToPose.Goal:
             Creates the navigation goal from the blackboard.
     """
 
-    def __init__(self) -> None:
+    def __init__(self) -&gt; None:
         """
         Initializes the Nav2State.
 
@@ -148,7 +193,7 @@ class Nav2State(ActionState):
             None,  # callback to process the response
         )
 
-    def create_goal_handler(self, blackboard: Blackboard) -> NavigateToPose.Goal:
+    def create_goal_handler(self, blackboard: Blackboard) -&gt; NavigateToPose.Goal:
         """
         Creates a goal for navigation based on the current pose in the blackboard.
 
@@ -164,7 +209,7 @@ class Nav2State(ActionState):
         return goal
 
 
-def create_waypoints(blackboard: Blackboard) -> str:
+def create_waypoints(blackboard: Blackboard) -&gt; str:
     """
     Initializes waypoints in the blackboard for navigation.
 
@@ -183,7 +228,7 @@ def create_waypoints(blackboard: Blackboard) -> str:
     }
     return SUCCEED
 
-def take_random_waypoint(blackboard: Blackboard) -> str:
+def take_random_waypoint(blackboard: Blackboard) -&gt; str:
     """
     Selects a random set of waypoints from the available waypoints.
 
@@ -198,7 +243,7 @@ def take_random_waypoint(blackboard: Blackboard) -> str:
     )
     return SUCCEED
 
-def get_next_waypoint(blackboard: Blackboard) -> str:
+def get_next_waypoint(blackboard: Blackboard) -&gt; str:
     """
     Retrieves the next waypoint from the list of random waypoints.
 
@@ -229,7 +274,7 @@ def get_next_waypoint(blackboard: Blackboard) -> str:
     return HAS_NEXT
 
 
-def main() -> None:
+def main() -&gt; None:
     yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
     rclpy.init()
     set_ros_loggers()
@@ -309,24 +354,24 @@ def main() -> None:
 if __name__ == "__main__":
     main()</code></pre>
 
-            <div class="nav-buttons">
-                <a href="parameters_demo.html" class="nav-button prev">
-                    <span class="icon">&larr;</span>
-                    <span class="text">Previous: ROS Parameters</span>
-                </a>
-                <a href="factory_demo.html" class="nav-button next">
-                    <span class="text">Next: Factory (XML)</span>
-                    <span class="icon">&rarr;</span>
-                </a>
-            </div>
-        </main>
-        
-        <aside class="toc">
-            <h3>On this page</h3>
-            <ul>
-                <!-- TOC generated by JS -->
-            </ul>
-        </aside>
+        <div class="nav-buttons">
+          <a href="parameters_demo.html" class="nav-button prev">
+            <span class="icon">&larr;</span>
+            <span class="text">Previous: ROS Parameters</span>
+          </a>
+          <a href="factory_demo.html" class="nav-button next">
+            <span class="text">Next: Factory (XML)</span>
+            <span class="icon">&rarr;</span>
+          </a>
+        </div>
+      </main>
+
+      <aside class="toc">
+        <h3>On this page</h3>
+        <ul>
+          <!-- TOC generated by JS -->
+        </ul>
+      </aside>
     </div>
-</body>
+  </body>
 </html>
