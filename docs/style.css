@@ -139,6 +139,52 @@ html.dark-mode #theme-toggle:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Hamburger Menu Button */
+.hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+    color: var(--text-color);
+    margin-right: 10px;
+}
+
+.hamburger:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+html.dark-mode .hamburger:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Sidebar Close Button */
+.sidebar-close {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.sidebar-close:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+html.dark-mode .sidebar-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 /* Layout */
 .container {
     display: flex;
@@ -607,16 +653,106 @@ footer a:hover {
 @media (max-width: 768px) {
     .sidebar {
         display: none;
+        position: fixed;
+        top: var(--header-height);
+        left: -100%;
+        width: 280px;
+        height: calc(100vh - var(--header-height));
+        z-index: 1001;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        border-radius: 0 8px 8px 0;
+    }
+    .sidebar.sidebar-open {
+        display: block;
+        left: 0;
+    }
+    .sidebar-close {
+        display: block !important;
+    }
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: 100%;
+        height: calc(100vh - var(--header-height));
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .sidebar-backdrop.show {
+        display: block;
+        opacity: 1;
     }
     .main-content {
         margin-left: 0;
         margin-right: 0;
         padding: 20px;
+        width: 100%;
     }
     .toc {
         display: none;
     }
     footer {
         margin-left: 0;
+    }
+    .hamburger {
+        display: block;
+    }
+    .nav-links {
+        gap: 15px;
+    }
+    header {
+        padding: 0 15px;
+    }
+    .logo {
+        font-size: 1.1rem;
+    }
+    .logo img {
+        height: 25px;
+    }
+    h1 {
+        font-size: 2rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+    .nav-links a {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .nav-links {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .nav-links a {
+        font-size: 0.8rem;
+    }
+    .hamburger {
+        font-size: 1.3rem;
+    }
+    #theme-toggle {
+        font-size: 1rem;
+    }
+    .main-content {
+        padding: 15px;
+    }
+    h1 {
+        font-size: 1.8rem;
+    }
+    h2 {
+        font-size: 1.3rem;
+    }
+    p, ul, ol {
+        font-size: 1rem;
     }
 }
