@@ -15,7 +15,7 @@ jobs:
       - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.4
         with:
-          package-name: yasmin yasmin_ros
+          package-name: yasmin yasmin_ros yasmin_factory
           target-ros2-distro: galactic
           skip-tests: true
           coverage-result: false

@@ -72,7 +72,11 @@ void YasminFactory::initialize_python() {
     // Import sys to ensure Python path is set up
     try {
       py::gil_scoped_acquire acquire;
+#if __has_include("rclcpp/version.h")
       py::module_::import("sys");
+#else
+      py::module::import("sys");
+#endif
     } catch (const py::error_already_set &e) {
       throw std::runtime_error("Failed to initialize Python: " +
                                std::string(e.what()));
@@ -85,12 +89,14 @@ YasminFactory::create_python_state(const std::string &module_name,
                                    const std::string &class_name) {
   try {
     py::gil_scoped_acquire acquire;
-
     // Import the yasmin.state module to ensure the State class is registered
+#if __has_include("rclcpp/version.h")
     py::module_::import("yasmin.state");
-
-    // Import the user's module
     py::module_ module = py::module_::import(module_name.c_str());
+#else
+    py::module::import("yasmin.state");
+    py::module module = py::module::import(module_name.c_str());
+#endif
 
     // Get the class
     py::object state_class = module.attr(class_name.c_str());
