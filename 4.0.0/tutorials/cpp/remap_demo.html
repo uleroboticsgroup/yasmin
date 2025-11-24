@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackboard Remapping (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                        <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../python/service_client_demo.html">Service Client</a></li>
+                <li><a href="../python/action_client_demo.html">Action Client</a></li>
+                <li><a href="../python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../python/publisher_demo.html">Publisher</a></li>
+                <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/remap_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">Blackboard Remapping (C++)</a></h1>
+            <p>This tutorial demonstrates how to use blackboard remapping in YASMIN to share data between states using different variable names in C++. Remapping is a powerful feature that allows you to reuse states with different data without modifying the state code. This is particularly valuable when you have generic, reusable states (like data processors or validators) that you want to apply to different blackboard variables. Remapping promotes code reuse and makes state machines more modular and maintainable.</p>
+
+            <h2>1. Create the FooState</h2>
+            <p>Define the FooState that reads from <code>foo_data</code> and writes to <code>foo_out_data</code>. This state is designed to be generic - it doesn't know or care what actual data it's processing. It simply reads from a blackboard key named <code>foo_data</code>, logs it, and writes it to <code>foo_out_data</code>. The beauty of this design is that we can use the same state class multiple times with different actual data by using remapping, avoiding code duplication and making the state more flexible and testable.</p>
+
+            <pre><code class="language-cpp">class FooState : public yasmin::State {
+public:
+  FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {};
+
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    std::string data = blackboard->get<std::string>("foo_data");
+    YASMIN_LOG_INFO("%s", data.c_str());
+    blackboard->set<std::string>("foo_out_data", data);
+    return yasmin_ros::basic_outcomes::SUCCEED;
+  };
+};</code></pre>
+
+            <h2>2. Create the BarState</h2>
+            <p>The BarState is similar to FooState but reads from <code>bar_data</code> instead. This state demonstrates how different states can work with their own blackboard keys, which will later be remapped to share data between them without modifying the state classes themselves.</p>
+            <pre><code class="language-cpp">class BarState : public yasmin::State {
+public:
+  BarState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {}
+
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    std::string data = blackboard->get<std::string>("bar_data");
+    YASMIN_LOG_INFO("%s", data.c_str());
+    return yasmin_ros::basic_outcomes::SUCCEED;
+  }
+};</code></pre>
+
+            <h2>3. Setup with Remapping</h2>
+            <p>In the main function, we create a blackboard with two messages: <code>msg1="test1"</code> and <code>msg2="test2"</code>. Then we add three states to the state machine, each using remapping (the fourth parameter in <code>add_state</code>). In STATE1, we remap <code>foo_data</code> to <code>msg1</code>, so when FooState reads <code>foo_data</code>, it actually gets <code>msg1</code> from the blackboard. In STATE2, we reuse the same FooState class but remap <code>foo_data</code> to <code>msg2</code>, so it processes different data. In STATE3, we use BarState and remap <code>bar_data</code> to <code>foo_out_data</code> (the output from the previous FooState), creating a data pipeline. This demonstrates how remapping enables: state reuse, data flow between states with incompatible key names, and clear separation between state logic and data sources.</p>
+            <pre><code class="language-cpp">yasmin_ros::set_ros_loggers();
+
+auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+blackboard->set<std::string>("msg1", "test1");
+blackboard->set<std::string>("msg2", "test2");
+
+auto sm = std::make_shared<yasmin::StateMachine>(
+    std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED});
+
+  // Cancel state machine on ROS 2 shutdown
+  rclcpp::on_shutdown([sm]() {
+    if (sm->is_running()) {
+      sm->cancel_state();
+    }
+  });
+
+// STATE1: remap foo_data to msg1
+sm->add_state("STATE1", std::make_shared<FooState>(),
+              {
+                  {yasmin_ros::basic_outcomes::SUCCEED, "STATE2"},
+              },
+              {
+                  {"foo_data", "msg1"},
+              });
+
+// STATE2: remap foo_data to msg2
+sm->add_state("STATE2", std::make_shared<FooState>(),
+              {
+                  {yasmin_ros::basic_outcomes::SUCCEED, "STATE3"},
+              },
+              {
+                  {"foo_data", "msg2"},
+              });
+
+// STATE3: remap bar_data to foo_out_data
+sm->add_state("STATE3", std::make_shared<BarState>(),
+              {
+                  {yasmin_ros::basic_outcomes::SUCCEED,
+                   yasmin_ros::basic_outcomes::SUCCEED},
+              },
+              {
+                  {"bar_data", "foo_out_data"},
+              });</code></pre>
+
+            <h2>4. Execute</h2>
+            <p>Execute the state machine and observe how the same state classes process different data through remapping. The viewer tool helps visualize the state transitions and data flow in real-time.</p>
+            <pre><code class="language-cpp">yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_REMAPPING_DEMO");
+
+try {
+    std::string outcome = (*sm.get())(blackboard);
+    YASMIN_LOG_INFO(outcome.c_str());
+} catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+}
+
+rclcpp::shutdown();</code></pre>
+
+            <h2>5. Run the Demo</h2>
+            <p>Compile and execute the remapping demonstration to see how states can be reused with different data sources.</p>
+            <pre><code>ros2 run yasmin_demos remap_demo</code></pre>
+
+
+    <div class="page-navigation">
+        <a href="basic_fsm.html" class="nav-button prev">C++: Writing a Simple FSM</a>
+        <a href="concurrence_demo.html" class="nav-button next">C++: Concurrence Demo</a>
+    </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+</body>
+</html>

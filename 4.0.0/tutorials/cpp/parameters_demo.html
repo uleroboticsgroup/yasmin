@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parameters (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../python/service_client_demo.html">Service Client</a></li>
+                <li><a href="../python/action_client_demo.html">Action Client</a></li>
+                <li><a href="../python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../python/publisher_demo.html">Publisher</a></li>
+                <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/parameters_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">ROS Parameters Demo (C++)</a></h1>
+            <p>This tutorial shows how to use ROS 2 parameters within a YASMIN state machine using the <code>GetParametersState</code> in C++. Parameters allow you to configure your state machine behavior at runtime without modifying code. This is essential for creating flexible, reusable robot behaviors that can be adapted to different scenarios, robots, or environments simply by changing parameter values. Instead of hardcoding values like loop counts, thresholds, or names, you can expose them as parameters that can be set via launch files, command-line arguments, or parameter files.</p>
+
+            <h2>Background</h2>
+            <p>ROS 2 parameters provide a way to:</p>
+            <ul>
+                <li>Configure node behavior at launch time (set values before execution)</li>
+                <li>Dynamically reconfigure settings (change values during execution)</li>
+                <li>Share configuration across nodes (maintain consistency)</li>
+                <li>Set defaults with command-line overrides (flexible deployment)</li>
+                <li>Document configurable aspects of your system (self-documenting code)</li>
+                <li>Version control configuration separately from code (cleaner repositories)</li>
+            </ul>
+
+            <h2>1. Define the States</h2>
+            <p>We define two simple states, <code>FooState</code> and <code>BarState</code>, that use the parameters retrieved from the blackboard. In FooState, instead of using hardcoded values, we retrieve <code>max_counter</code> from the blackboard to control how many iterations to perform. We also use the <code>counter_str</code> parameter to customize the log message prefix. This makes the state's behavior configurable - you can change how many iterations it performs or what prefix it uses in log messages without modifying the state's code. The same state class can be used in different state machines with different parameter values, promoting reusability. BarState simply logs the formatted string, demonstrating how parameter-driven data flows through the state machine naturally.</p>
+
+            <pre><code class="language-cpp">class FooState : public yasmin::State {
+public:
+  int counter;
+
+  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {};
+
+  std::string
+  execute(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) override {
+    YASMIN_LOG_INFO("Executing state FOO");
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    if (this-&gt;counter &lt; blackboard-&gt;get&lt;int&gt;("max_counter")) {
+      this-&gt;counter += 1;
+      blackboard-&gt;set&lt;std::string&gt;("foo_str",
+                                   blackboard-&gt;get&lt;std::string&gt;("counter_str") +
+                                       ": " + std::to_string(this-&gt;counter));
+      return "outcome1";
+
+    } else {
+      return "outcome2";
+    }
+  };
+};
+
+class BarState : public yasmin::State {
+public:
+  BarState() : yasmin::State({"outcome3"}) {}
+
+  std::string
+  execute(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) override {
+    YASMIN_LOG_INFO("Executing state BAR");
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    YASMIN_LOG_INFO(blackboard-&gt;get&lt;std::string&gt;("foo_str").c_str());
+
+    return "outcome3";
+  }
+};</code></pre>
+
+            <h2>2. Create the State Machine</h2>
+            <p>In the main function, we create a state machine that starts with a <code>GetParametersState</code>. This state is initialized with a map of parameter names and their default values: <code>max_counter</code> defaults to 3, and <code>counter_str</code> defaults to "Counter". The GetParametersState will first try to retrieve these parameters from the ROS 2 parameter server. If a parameter is set (via command line with <code>--ros-args -p max_counter:=5</code> or in a parameter file), it uses that value; otherwise, it falls back to the default. Upon success, it stores all retrieved parameters in the blackboard and transitions to the FOO state. This pattern - parameter retrieval followed by execution - ensures your state machine is configured before running, preventing errors from missing configuration values.</p>
+            <pre><code class="language-cpp">int main(int argc, char *argv[]) {
+  YASMIN_LOG_INFO("yasmin_parameters_demo");
+  rclcpp::init(argc, argv);
+  yasmin_ros::set_ros_loggers();
+
+  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+      std::initializer_list&lt;std::string&gt;{"outcome4"});
+
+  rclcpp::on_shutdown([sm]() {
+    if (sm-&gt;is_running()) {
+      sm-&gt;cancel_state();
+    }
+  });
+
+  // Add GetParametersState to retrieve parameters
+  sm-&gt;add_state("GETTING_PARAMETERS",
+                std::make_shared&lt;yasmin_ros::GetParametersState&gt;(
+                    std::map&lt;std::string, std::any&gt;{
+                        {"max_counter", 3},
+                        {"counter_str", std::string("Counter")},
+                    }),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "FOO"},
+                    {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
+                });
+
+  sm-&gt;add_state("FOO", std::make_shared&lt;FooState&gt;(),
+                {
+                    {"outcome1", "BAR"},
+                    {"outcome2", "outcome4"},
+                });
+  sm-&gt;add_state("BAR", std::make_shared&lt;BarState&gt;(),
+                {
+                    {"outcome3", "FOO"},
+                });
+
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PARAMETERS_DEMO");
+
+  try {
+    std::string outcome = (*sm.get())();
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  rclcpp::shutdown();
+  return 0;
+}</code></pre>
+
+            <h2>3. Run the Demo</h2>
+            <p>Run the parameters demo to see how the state machine retrieves and uses ROS 2 parameters. Try running with and without custom parameters to observe the default value behavior.</p>
+            <pre><code class="language-bash">ros2 run yasmin_demos parameters_demo</code></pre>
+
+    <div class="page-navigation">
+        <a href="publisher_demo.html" class="nav-button prev">C++: Publisher Demo</a>
+        <a href="nav2_demo.html" class="nav-button next">C++: Nav2 Demo</a>
+    </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+</body>
+</html>

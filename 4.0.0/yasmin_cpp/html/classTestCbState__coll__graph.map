@@ -1,0 +1,21 @@
+<map id="TestCbState" name="TestCbState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1241,63,1335,88"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="991,5,1083,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1099,27,1218,53,1243,60,1241,65,1216,58,1098,32"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="958,55,1116,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1132,73,1240,73,1240,78,1132,78"/>
+<area shape="rect" id="Node000004" href="$classyasmin_1_1CbState.html" title="Represents a state that executes a callback function." alt="" coords="765,63,881,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="896,73,957,73,957,78,896,78"/>
+<area shape="rect" id="Node000005" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="617,63,716,88"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="732,73,765,73,765,78,732,78"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="350,36,492,62"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="507,55,617,67,616,73,506,61"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="178,36,255,62"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="271,46,350,46,350,52,271,52"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="5,28,129,69"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="144,46,178,46,178,52,144,52"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="333,85,509,111"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="524,98,592,93,624,86,625,92,593,98,525,104"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="947,120,1127,161"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="1138,114,1216,93,1241,86,1242,92,1218,98,1140,119"/>
+</map>
