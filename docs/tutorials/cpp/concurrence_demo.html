@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concurrence (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                        <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../python/service_client_demo.html">Service Client</a></li>
+                <li><a href="../python/action_client_demo.html">Action Client</a></li>
+                <li><a href="../python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../python/publisher_demo.html">Publisher</a></li>
+                <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/concurrence_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">Concurrence Demo (C++)</a></h1>
+            <p>This tutorial demonstrates how to run multiple states concurrently in C++ using YASMIN's <code>Concurrence</code> container. Concurrency is essential in robotics for coordinating parallel operations like simultaneously monitoring sensors while executing actions, waiting for multiple conditions to be met, or performing independent tasks in parallel. The Concurrence container manages thread synchronization, outcome resolution, and blackboard access automatically, making it safe and easy to implement parallel state execution.</p>
+
+            <h2>Background</h2>
+            <p>The <strong>Concurrence</strong> container enables parallel execution of multiple states. It is useful when you need to:</p>
+            <ul>
+                <li>Execute independent tasks simultaneously without blocking each other</li>
+                <li>Wait for multiple conditions to be met (AND/OR logic)</li>
+                <li>Coordinate parallel behaviors with custom outcome logic</li>
+                <li>Implement timeout patterns where one state monitors time while another performs work</li>
+                <li>Monitor sensors while executing actions (e.g., watch for obstacles while navigating)</li>
+            </ul>
+
+            <h2>1. Create the FooState</h2>
+            <p>This state increments a counter and returns different outcomes based on the counter value. It executes relatively quickly (2 seconds) and stores a formatted string in the blackboard. The three different outcomes (<code>"outcome1"</code>, <code>"outcome2"</code>, <code>"outcome3"</code>) demonstrate how concurrent states can progress through stages and produce varying results. The counter is incremented after determining the outcome, so the state's behavior evolves with each execution. This pattern is useful for tasks that have distinct phases or thresholds, like collecting sensor samples, performing iterations of a computation, or tracking progress toward a goal.</p>
+            <pre><code class="language-cpp">class FooState : public yasmin::State {
+public:
+  int counter;
+
+  FooState()
+      : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {};
+
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    YASMIN_LOG_INFO("Executing state FOO");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    std::string outcome;
+
+    blackboard->set<std::string>("foo_str",
+                                 "Counter: " + std::to_string(this->counter));
+
+    if (this->counter < 3) {
+      outcome = "outcome1";
+    } else if (this->counter < 5) {
+      outcome = "outcome2";
+    } else {
+      outcome = "outcome3";
+    }
+
+    YASMIN_LOG_INFO("Finishing state FOO");
+    this->counter += 1;
+    return outcome;
+  };
+};</code></pre>
+
+            <h2>2. Create the BarState</h2>
+            <p>Define a slower state (4 seconds) that checks if FooState has written to the blackboard. This demonstrates a key aspect of concurrent execution: timing matters. Since BarState takes longer than FooState, there's a race condition - sometimes BarState will execute before FooState has written <code>foo_str</code> to the blackboard. The <code>contains()</code> check safely handles this by checking if the key exists before accessing it. This pattern is crucial in concurrent systems where you need to handle asynchronous data availability. BarState always returns <code>"outcome3"</code>, providing a consistent counterpoint to FooState's variable outcomes.</p>
+            <pre><code class="language-cpp">class BarState : public yasmin::State {
+public:
+  BarState() : yasmin::State({"outcome3"}) {}
+
+  std::string
+  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+    YASMIN_LOG_INFO("Executing state BAR");
+    std::this_thread::sleep_for(std::chrono::seconds(4));
+
+    if (blackboard->contains("foo_str")) {
+      YASMIN_LOG_INFO(blackboard->get<std::string>("foo_str").c_str());
+    } else {
+      YASMIN_LOG_INFO("blackboard does not yet contains 'foo_str'");
+    }
+
+    YASMIN_LOG_INFO("Finishing state BAR");
+    return "outcome3";
+  }
+};</code></pre>
+
+            <h2>3. Create Concurrence Container</h2>
+            <p>Create a Concurrence container that runs FooState and BarState in parallel. The constructor takes three parameters: a map of state names to state objects, a default outcome (returned when no outcome map matches), and an outcome map that defines how concurrent results map to container outcomes. The outcome map specifies: if FOO returns <code>"outcome1"</code> AND BAR returns <code>"outcome3"</code>, the concurrence returns <code>"outcome1"</code>; if FOO returns <code>"outcome2"</code> AND BAR returns <code>"outcome3"</code>, return <code>"outcome2"</code>. If neither condition matches (e.g., FOO returns <code>"outcome3"</code>), the concurrence returns the default outcome <code>"defaulted"</code>. This flexible outcome mapping allows you to implement AND, OR, or custom logic for combining parallel state results.</p>
+            <pre><code class="language-cpp">int main(int argc, char *argv[]) {
+  YASMIN_LOG_INFO("yasmin_concurrence_demo");
+  rclcpp::init(argc, argv);
+  yasmin_ros::set_ros_loggers();
+
+auto sm = std::make_shared<yasmin::StateMachine>(
+    std::initializer_list<std::string>{"outcome4"});
+
+  // Cancel state machine on ROS 2 shutdown
+  rclcpp::on_shutdown([sm]() {
+    if (sm->is_running()) {
+      sm->cancel_state();
+    }
+  });
+
+auto foo_state = std::make_shared<FooState>();
+auto bar_state = std::make_shared<BarState>();
+
+auto concurrent_state = std::make_shared<yasmin::Concurrence>(
+    std::map<std::string, std::shared_ptr<yasmin::State>>{
+        {"FOO", foo_state},
+        {"BAR", bar_state}
+    },
+    "defaulted",
+    yasmin::Concurrence::OutcomeMap{
+        {"outcome1",
+         yasmin::Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
+                                              {"BAR", "outcome3"}}},
+        {"outcome2", yasmin::Concurrence::StateOutcomeMap{
+                         {"FOO", "outcome2"}, {"BAR", "outcome3"}}}
+    });</code></pre>
+
+            <h2>4. Add to State Machine</h2>
+            <p>Add the concurrence container to the state machine with self-loops for <code>outcome1</code> and <code>outcome2</code>, allowing it to execute multiple times. When the default outcome (<code>"defaulted"</code>) is reached, the state machine exits with <code>outcome4</code>. This setup enables the demonstration to run through several concurrent executions before terminating.</p>
+            <pre><code class="language-cpp">sm->add_state("CONCURRENCE", concurrent_state,
+              {
+                  {"outcome1", "CONCURRENCE"},
+                  {"outcome2", "CONCURRENCE"},
+                  {"defaulted", "outcome4"},
+              });
+
+yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_CONCURRENCE_DEMO");
+
+try {
+    std::string outcome = (*sm.get())();
+    YASMIN_LOG_INFO(outcome.c_str());
+} catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+}
+
+rclcpp::shutdown();</code></pre>
+
+            <h2>5. Run the Demo</h2>
+            <p>Execute the concurrence demonstration to observe parallel state execution and outcome resolution.</p>
+            <pre><code>ros2 run yasmin_demos concurrence_demo</code></pre>
+
+
+    <div class="page-navigation">
+        <a href="remap_demo.html" class="nav-button prev">C++: Remapping Demo</a>
+        <a href="service_client_demo.html" class="nav-button next">C++: Service Client</a>
+    </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+</body>
+</html>

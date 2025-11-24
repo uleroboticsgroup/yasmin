@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Demo (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../python/service_client_demo.html">Service Client</a></li>
+                <li><a href="../python/action_client_demo.html">Action Client</a></li>
+                <li><a href="../python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../python/publisher_demo.html">Publisher</a></li>
+                <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/factory_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">Factory Demo (C++)</a></h1>
+            <p>This tutorial demonstrates how to load YASMIN state machines from XML files using the <code>YasminFactory</code> in C++. This approach separates the FSM structure from the code, making it easier to design, share, and modify state machines without recompiling.</p>
+
+            <h2>Background</h2>
+            <p>The YASMIN Factory provides:</p>
+            <ul>
+                <li>Declarative FSM definition using XML</li>
+                <li>Plugin-based state loading (Python and C++ states)</li>
+                <li>Visual editing with YASMIN Editor</li>
+                <li>Reusable state machine configurations</li>
+            </ul>
+
+            <h2>1. Create an XML State Machine</h2>
+            <p>Define your state machine structure in an XML file (e.g., <code>demo_1.xml</code>):</p>
+            <pre><code class="language-xml">&lt;StateMachine outcomes="outcome4"&gt;
+    &lt;State name="Foo" type="py" module="yasmin_demos.foo_state" class="FooState"&gt;
+        &lt;Transition from="outcome1" to="Bar"/&gt;
+        &lt;Transition from="outcome2" to="outcome4"/&gt;
+    &lt;/State&gt;
+    &lt;State name="Bar" type="cpp" class="yasmin_demos/BarState"&gt;
+        &lt;Transition from="outcome3" to="Foo"/&gt;
+    &lt;/State&gt;
+&lt;/StateMachine&gt;</code></pre>
+
+            <h2>Running the Demo</h2>
+            <pre><code class="language-bash">ros2 run yasmin_demos factory_demo</code></pre>
+
+            <h2>Source Code</h2>
+            <p>You can find the full source code in the <a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/factory_demo.cpp" target="_blank">yasmin_demos</a> package.</p>
+
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+
+#include "ament_index_cpp/get_package_share_directory.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_factory/yasmin_factory.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+
+int main(int argc, char *argv[]) {
+  YASMIN_LOG_INFO("yasmin_factory_demo");
+  rclcpp::init(argc, argv);
+
+  // Set up ROS 2 loggers
+  yasmin_ros::set_ros_loggers();
+
+  std::string outcome;
+
+  // Create the factory in a scope
+  yasmin_factory::YasminFactory factory;
+
+  // Load state machine from XML file
+  std::string xml_file =
+      ament_index_cpp::get_package_share_directory("yasmin_demos") +
+      "/state_machines/demo_2.xml";
+
+  // Create the state machine from the XML file
+  auto sm = factory.create_sm_from_file(xml_file);
+
+  // Execute the state machine
+  try {
+    std::string outcome = (*sm.get())();
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  // Shutdown ROS 2
+  rclcpp::shutdown();
+  return 0;
+}</code></pre>
+
+    <div class="page-navigation">
+        <a href="nav2_demo.html" class="nav-button prev">C++: Nav2 Demo</a>
+    </div>
+        </main>
+        
+        <aside class="toc">
+            <h3>On this page</h3>
+            <ul>
+                <!-- TOC generated by JS -->
+            </ul>
+        </aside>
+    </div>
+</body>
+</html>

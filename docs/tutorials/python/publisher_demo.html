@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publisher (Python) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                        <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
+                <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
+                <li><a href="../cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
+                <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/publisher_demo.py" target="_blank" style="color: inherit; text-decoration: none;">Publisher Demo (Python)</a></h1>
+            <p>This tutorial demonstrates how to publish ROS 2 messages from within a YASMIN state machine using the <code>PublisherState</code>. This is useful for sending commands to actuators, broadcasting status updates, or generating test data. Publishing states integrate with other state machine logic, allowing you to coordinate complex behaviors that involve both sensing (subscribing) and acting (publishing).</p>
+
+            <h2>Background</h2>
+            <p>The <code>PublisherState</code> allows states to:</p>
+            <ul>
+                <li>Publish messages to ROS 2 topics as part of state execution</li>
+                <li>Generate message content dynamically from the blackboard</li>
+                <li>Send periodic updates or commands as part of a control loop</li>
+                <li>Coordinate publishing with other state machine operations</li>
+                <li>Maintain state across multiple publish operations</li>
+            </ul>
+
+            <h2>1. Create the PublisherState</h2>
+            <p>Create a custom publisher state that publishes integer messages to the <code>count</code> topic. The constructor takes three parameters: the message type (<code>Int32</code>), the topic name (<code>"count"</code>), and a callback function that creates the message. The <code>create_int_msg</code> method is called each time the state executes. It retrieves the current counter from the blackboard using <code>blackboard.get()</code>, increments it, stores it back with <code>blackboard.set()</code>, and creates an Int32 message with the new value. This demonstrates stateful publishing - the counter persists across state executions thanks to the blackboard, allowing you to track progress or maintain sequences.</p>
+
+            <pre><code class="language-python">from yasmin_ros import PublisherState
+from std_msgs.msg import Int32
+
+class PublishIntState(PublisherState):
+    """
+    PublishIntState is a YASMIN ROS publisher state that sends incrementing integers
+    to the 'count' topic using std_msgs.msg.Int32 messages.
+
+    This state increments a counter on the blackboard and publishes it.
+    """
+
+    def __init__(self):
+        """
+        Initializes the PublishIntState with the topic 'count' and a message creation callback.
+        """
+        super().__init__(Int32, "count", self.create_int_msg)
+
+    def create_int_msg(self, blackboard: Blackboard) -> Int32:
+        """
+        Generates a std_msgs.msg.Int32 message with an incremented counter value.
+
+        Args:
+            blackboard (Blackboard): The shared data store between states.
+
+        Returns:
+            Int32: A ROS message containing the updated counter.
+        """
+        # Get and increment the counter from the blackboard
+        counter = blackboard.get("counter")
+        counter += 1
+        blackboard.set("counter", counter)
+
+        # Log the message creation
+        yasmin.YASMIN_LOG_INFO(f"Creating message {counter}")
+
+        # Create and return the message
+        msg = Int32()
+        msg.data = counter
+        return msg</code></pre>
+
+            <h2>2. Create a Check State</h2>
+            <p>Create a callback state to decide when to stop publishing. The <code>check_count</code> function retrieves both the current counter and maximum count from the blackboard, adds a 1-second delay to simulate processing, and compares them. It returns <code>"outcome1"</code> when the maximum is reached (signaling completion), or <code>"outcome2"</code> to continue the publish-check loop. This pattern of alternating between action (publishing) and evaluation (checking) is common in state machines for implementing controlled sequences, rate-limited operations, or conditional loops based on accumulated state.</p>
+
+            <pre><code class="language-python">from yasmin import CbState
+from yasmin_ros.basic_outcomes import SUCCEED
+
+def check_count(blackboard: Blackboard) -> str:
+    """
+    Checks the current counter against a max threshold to determine state transition.
+
+    Args:
+        blackboard (Blackboard): The shared data store between states.
+
+    Returns:
+        str: The outcome string ('outcome1' or 'outcome2').
+    """
+    # Simulate processing time
+    time.sleep(1)
+
+    # Retrieve the counter and max value from blackboard
+    count = blackboard.get("counter")
+    max_count = blackboard.get("max_count")
+
+    yasmin.YASMIN_LOG_INFO(f"Checking count: {count}")
+
+    # Determine and return the outcome based on the counter value
+    if count >= max_count:
+        return "outcome1"  # Done
+    else:
+        return "outcome2"  # Continue</code></pre>
+
+            <h2>3. Build and Execute State Machine</h2>
+            <p>Define the complete main function that initializes ROS 2, creates the state machine with publishing and checking states, sets up the viewer with an on_shutdown handler for proper cleanup, and executes with error handling.</p>
+            <pre><code class="language-python">def main() -> None:
+    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
+    rclpy.init()
+
+    # Configure YASMIN to use ROS-based logging
+    set_ros_loggers()
+
+    # Create the state machine with 'SUCCEED' as the terminal outcome
+    sm = StateMachine([SUCCEED])
+
+    # Ensure the state machine cancels on shutdown
+    def on_shutdown():
+        if sm.is_running():
+            sm.cancel_state()
+
+    rclpy.get_default_context().on_shutdown(on_shutdown)
+
+    # Add the publishing state which loops until the condition is met
+    sm.add_state(
+        "PUBLISHING_INT",
+        PublishIntState(),
+        {
+            SUCCEED: "CHECKING_COUNTS",
+        },
+    )
+
+    # Add the conditional check state
+    sm.add_state(
+        "CHECKING_COUNTS",
+        CbState(["outcome1", "outcome2"], check_count),
+        {
+            "outcome1": SUCCEED,
+            "outcome2": "PUBLISHING_INT",
+        },
+    )
+
+    # Launch YASMIN Viewer publisher for state visualization
+    viewer = YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
+
+    # Initialize blackboard with counter values
+    blackboard = Blackboard()
+    blackboard.set("counter", 0)
+    blackboard.set("max_count", 10)
+
+    # Run the state machine and log the outcome
+    try:
+        outcome = sm(blackboard)
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except Exception as e:
+        yasmin.YASMIN_LOG_INFO(str(e))
+    finally:
+        viewer.cleanup()
+        del sm
+
+        # Shutdown ROS 2 if it's running
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+
+            <h2>4. Run the Demo</h2>
+            <p>Execute the publisher demo to observe the state machine publishing sequential integer messages.</p>
+            <pre><code>ros2 run yasmin_demos publisher_demo.py</code></pre>
+
+            <h2>5. Monitor Published Messages</h2>
+            <p>In another terminal, echo the topic to see the published messages:</p>
+            <pre><code>ros2 topic echo /count</code></pre>
+
+            <h2>Expected Behavior</h2>
+            <ul>
+                <li>The state machine publishes incrementing integers (1-10) to <code>/count</code></li>
+                <li>After each publish, it checks if the max count is reached</li>
+                <li>Once <code>counter >= max_count</code>, the FSM exits with SUCCEED</li>
+            </ul>
+
+
+    <div class="page-navigation">
+        <a href="../python/monitor_demo.html" class="nav-button prev">Python: Monitor Demo</a>
+        <a href="../python/parameters_demo.html" class="nav-button next">Python: Parameters Demo</a>
+    </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+</body>
+</html>

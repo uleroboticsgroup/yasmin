@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packages - YASMIN</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <img src="logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="index.html">Introduction</a></li>
+                <li><a href="main_concepts.html">Main Concepts</a></li>
+                <li><a href="packages.html">Packages Overview</a></li>
+                <li><a href="docker.html">Docker</a></li>
+                <li><a href="xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="tutorials/cpp/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="tutorials/cpp/service_client_demo.html">Service Client</a></li>
+                <li><a href="tutorials/cpp/action_client_demo.html">Action Client</a></li>
+                <li><a href="tutorials/cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+                <li><a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="tutorials/python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="tutorials/python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="tutorials/python/service_client_demo.html">Service Client</a></li>
+                <li><a href="tutorials/python/action_client_demo.html">Action Client</a></li>
+                <li><a href="tutorials/python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="tutorials/python/publisher_demo.html">Publisher</a></li>
+                <li><a href="tutorials/python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="tutorials/python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1>Packages Overview</h1>
+            <p>The YASMIN project is organized into several packages, each serving a specific purpose:</p>
+            
+            <h3><a href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin" target="_blank">yasmin</a></h3>
+            <p>The core library containing the base classes for State, StateMachine, Blackboard, and other fundamental components. It provides the logic for FSM execution independent of ROS 2.</p>
+
+            <h3><a href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_ros" target="_blank">yasmin_ros</a></h3>
+            <p>Provides ROS 2 specific implementations and integrations. It includes specialized states for:</p>
+            <ul>
+                <li><strong>ActionState:</strong> For interacting with ROS 2 Actions.</li>
+                <li><strong>ServiceState:</strong> For calling ROS 2 Services.</li>
+                <li><strong>PublisherState:</strong> For publishing to ROS 2 Topics.</li>
+                <li><strong>MonitorState:</strong> For subscribing and monitoring ROS 2 Topics.</li>
+            </ul>
+
+            <h3><a href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_msgs" target="_blank">yasmin_msgs</a></h3>
+            <p>Contains the ROS 2 message definitions used by YASMIN for communication and visualization.</p>
+
+            <h3><a href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_viewer" target="_blank">yasmin_viewer</a></h3>
+            <p>A web-based visualization tool that allows you to monitor the state of your FSM in real-time. It subscribes to the FSM status topics and displays the active state and transitions.</p>
+
+            <h3><a href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_factory" target="_blank">yasmin_factory</a></h3>
+            <p>Enables the creation of State Machines from XML configuration files. This allows for separating the FSM structure definition from the code logic.</p>
+
+            <h3><a href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_editor" target="_blank">yasmin_editor</a></h3>
+            <p>A graphical editor for designing YASMIN state machines. It allows you to visually create states, transitions, and export them to XML for use with <code>yasmin_factory</code>.</p>
+
+            <h3><a href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_demos" target="_blank">yasmin_demos</a></h3>
+            <p>Contains a collection of examples and demos showcasing various features of YASMIN in both C++ and Python. This is a great place to start learning by example.</p>
+
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+</body>
+</html>

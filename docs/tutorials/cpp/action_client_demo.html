@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Action Client (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../sidebar.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../dark_mode.js"></script>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">
+            <img src="../../logo.png" alt="YASMIN Logo">
+            YASMIN
+        </a>
+        <div class="nav-links">
+            <a href="../../index.html">Docs</a>
+            <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
+            <a href="../../doxygen.html" target="_blank">Doxygen</a>
+            <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+                <nav class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="../../index.html">Introduction</a></li>
+                <li><a href="../../main_concepts.html">Main Concepts</a></li>
+                <li><a href="../../packages.html">Packages Overview</a></li>
+                <li><a href="../../docker.html">Docker</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
+            </ul>
+            
+            <h3>Tutorials</h3>
+            <ul>
+                <li><a href="../../tutorials.html">All Tutorials</a></li>
+            </ul>
+
+            <h3 class="collapsible">C++ Tutorials</h3>
+            <ul>
+                <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="concurrence_demo.html">Concurrence</a></li>
+                <li><a href="service_client_demo.html">Service Client</a></li>
+                <li><a href="action_client_demo.html">Action Client</a></li>
+                <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="publisher_demo.html">Publisher</a></li>
+                <li><a href="parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+
+            <h3 class="collapsible">Python Tutorials</h3>
+            <ul>
+                <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
+                <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+                <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+                <li><a href="../python/service_client_demo.html">Service Client</a></li>
+                <li><a href="../python/action_client_demo.html">Action Client</a></li>
+                <li><a href="../python/monitor_demo.html">Monitor (Subscriber)</a></li>
+                <li><a href="../python/publisher_demo.html">Publisher</a></li>
+                <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+                <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+                <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+            
+            <h3>Tools</h3>
+            <ul>
+                <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+                <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+                <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+            </ul>
+
+            <h3>Resources</h3>
+            <ul>
+                <li><a href="../../citations.html">Citations</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content content">
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/action_client_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">Action Client (C++)</a></h1>
+            <p>This tutorial demonstrates how to integrate ROS 2 actions into a YASMIN state machine using the <code>ActionState</code> class in C++. Actions are perfect for long-running tasks that need to provide feedback during execution and can be canceled if needed - such as navigation, manipulation, or data processing tasks. We'll use the <code>Fibonacci</code> action as an example to show how to send goals, monitor feedback, and handle results. The ActionState automatically manages the action client lifecycle, handles timeouts, and provides clean integration with the state machine.</p>
+
+            <h2>Prerequisites</h2>
+            <p>Start the Fibonacci action server in a separate terminal before running this demo:</p>
+            <pre><code>ros2 run yasmin_demos fibonacci_action_server</code></pre>
+
+            <h2>1. Define the Action State</h2>
+            <p>Create a class inheriting from <code>yasmin_ros::ActionState&lt;Fibonacci&gt;</code>, specifying the Fibonacci action type as a template parameter. The constructor takes four parameters: the action name (<code>"/fibonacci"</code>), and three callback functions bound using <code>std::bind</code>. The <code>create_goal_handler</code> retrieves the Fibonacci order from the blackboard and creates a goal request. The <code>response_handler</code> processes the result by storing the computed sequence in the blackboard and returning <code>SUCCEED</code>. The <code>print_feedback</code> callback is invoked periodically during execution to display the partial sequence - this is one of the key advantages of actions over services, allowing us to monitor progress in real-time.</p>
+
+            <pre><code class="language-cpp">class FibonacciState : public yasmin_ros::ActionState&lt;Fibonacci&gt; {
+
+public:
+  FibonacciState()
+      : yasmin_ros::ActionState&lt;Fibonacci&gt;(
+            "/fibonacci",
+            std::bind(&FibonacciState::create_goal_handler, this, _1),
+            std::bind(&FibonacciState::response_handler, this, _1, _2),
+            std::bind(&FibonacciState::print_feedback, this, _1, _2)) {};
+
+  Fibonacci::Goal create_goal_handler(
+      std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard) {
+
+    auto goal = Fibonacci::Goal();
+    goal.order = blackboard-&gt;get&lt;int&gt;("n");
+    return goal;
+  };
+
+  std::string
+  response_handler(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,
+                   Fibonacci::Result::SharedPtr response) {
+
+    blackboard-&gt;set&lt;std::vector&lt;int&gt;&gt;("fibo_res", response-&gt;sequence);
+    return yasmin_ros::basic_outcomes::SUCCEED;
+  };
+
+  void
+  print_feedback(std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard,
+                 std::shared_ptr&lt;const Fibonacci::Feedback&gt; feedback) {
+    (void)blackboard;
+
+    std::stringstream ss;
+    ss &lt;&lt; "Received feedback: [";
+    for (size_t i = 0; i &lt; feedback-&gt;sequence.size(); i++) {
+      ss &lt;&lt; feedback-&gt;sequence[i];
+      if (i &lt; feedback-&gt;sequence.size() - 1) {
+        ss &lt;&lt; ", ";
+      }
+    }
+    ss &lt;&lt; "]";
+
+    YASMIN_LOG_INFO(ss.str().c_str());
+  };
+};</code></pre>
+
+            <h2>2. Create the State Machine</h2>
+            <p>In the main function, we build a state machine with two states. The first state, <code>CALLING_FIBONACCI</code>, uses our FibonacciState to send the action goal and wait for completion. It can transition to <code>PRINTING_RESULT</code> on success, or exit with <code>outcome4</code> if cancelled or aborted. The second state uses a <code>CbState</code> (callback state) to print the final result. We initialize the blackboard with <code>n = 10</code> to request the first 10 Fibonacci numbers. The <code>rclcpp::on_shutdown</code> callback ensures graceful cancellation if the program is interrupted.</p>
+            <pre><code class="language-cpp">int main(int argc, char *argv[]) {
+
+  YASMIN_LOG_INFO("yasmin_action_client_demo");
+  rclcpp::init(argc, argv);
+  yasmin_ros::set_ros_loggers();
+
+  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+      std::initializer_list&lt;std::string&gt;{"outcome4"});
+
+  rclcpp::on_shutdown([sm]() {
+    if (sm-&gt;is_running()) {
+      sm-&gt;cancel_state();
+    }
+  });
+
+  sm-&gt;add_state("CALLING_FIBONACCI", std::make_shared&lt;FibonacciState&gt;(),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "PRINTING_RESULT"},
+                    {yasmin_ros::basic_outcomes::CANCEL, "outcome4"},
+                    {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
+                });
+
+  sm-&gt;add_state("PRINTING_RESULT",
+                std::make_shared&lt;yasmin::CbState&gt;(
+                    std::initializer_list&lt;std::string&gt;{
+                        yasmin_ros::basic_outcomes::SUCCEED},
+                    print_result),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
+                });
+
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
+
+  std::shared_ptr&lt;yasmin::blackboard::Blackboard&gt; blackboard =
+      std::make_shared&lt;yasmin::blackboard::Blackboard&gt;();
+  blackboard-&gt;set&lt;int&gt;("n", 10);
+
+  try {
+    std::string outcome = (*sm.get())(blackboard);
+    YASMIN_LOG_INFO(outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN(e.what());
+  }
+
+  rclcpp::shutdown();
+  return 0;
+}</code></pre>
+
+            <h2>3. Run the Demo</h2>
+            <p>First, start the Fibonacci action server, then run the client demo. The state machine will send the goal, display feedback during execution, and print the final result.</p>
+            <pre><code class="language-bash">ros2 run yasmin_demos action_client_demo</code></pre>
+
+    <div class="page-navigation">
+        <a href="service_client_demo.html" class="nav-button prev">C++: Service Client</a>
+        <a href="monitor_demo.html" class="nav-button next">C++: Monitor Demo</a>
+    </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
+    </footer>
+</body>
+</html>
