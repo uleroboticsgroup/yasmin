@@ -1,11 +1,11 @@
-name: Doxygen Deployment
+name: Documentation Deployment
 
 on:
   release:
     types: [published]
 
 jobs:
-  doxygen_generation:
+  documentation_deployment:
     runs-on: ubuntu-latest
 
     permissions:
@@ -27,12 +27,12 @@ jobs:
         with:
           doxyfile-path: ".github/Doxyfile-python"
 
-      - name: Create redirect for root
+      - name: Create redirect for /latest/
         run: |
           mkdir -p redirect
-          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=${{ github.event.release.tag_name }}/"/></head></html>' > redirect/index.html
+          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=../${{ github.event.release.tag_name }}/"/></head></html>' > redirect/index.html
 
-      - name: Deploy Doxygen page
+      - name: Deploy documentation page
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -41,9 +41,10 @@ jobs:
           destination_dir: ${{ github.event.release.tag_name }}
           keep_files: true
 
-      - name: Deploy redirect to root
+      - name: Deploy redirect to /latest/
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: redirect
+          destination_dir: latest
