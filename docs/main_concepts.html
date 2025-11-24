@@ -125,10 +125,6 @@
             </ul>
             <p>When you add a state to a state machine using <code>add_state()</code>, you can provide a <code>remappings</code> dictionary that maps the state's internal key names to the actual blackboard keys. This is particularly useful when building complex state machines from reusable components or when integrating third-party states into your application.</p>
 
-            <h3>Outcomes</h3>
-            <p>Every state execution concludes with an outcome (a string). This outcome determines which transition is triggered. Common outcomes include "success", "failure", "aborted", or custom events like "target_detected". Outcomes are the glue that connects states together - they define the flow of execution through your state machine.</p>
-            <p>You can define custom outcomes for your states to represent different completion scenarios. For example, a "GraspObject" state might have outcomes like "grasped", "object_not_found", "gripper_error", each leading to different next states or recovery behaviors. This flexibility allows you to model complex decision trees and error handling logic in a clear, explicit way.</p>
-
             <h2>State Machine Composition</h2>
             <p>YASMIN supports building complex behaviors by composing multiple state machines. You can nest state machines within other state machines, creating hierarchical structures. This composition allows you to:</p>
             <ul>
