@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -83,7 +83,7 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Service Client Demo (Python)</h1>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/service_client_demo.py" target="_blank" style="color: inherit; text-decoration: none;">Service Client Demo (Python)</a></h1>
             <p>This tutorial shows how to integrate ROS 2 services into a YASMIN state machine using the <code>ServiceState</code> class. Services in ROS 2 provide request-response communication - ideal for computations, queries, or triggering specific actions that complete quickly. Unlike actions, services don't provide feedback during execution and can't be canceled. We'll create a state that calls the <code>AddTwoInts</code> service to demonstrate the complete workflow: preparing a request from blackboard data, calling the service, and processing the response.</p>
 
             <h2>Prerequisites</h2>
@@ -196,46 +196,47 @@ def print_sum(blackboard: Blackboard) -> str:
     return SUCCEED</code></pre>
 
             <h2>3. Build the State Machine</h2>
-            <p>Assemble the states into a state machine that sets input values, calls the service, and prints the result in sequence:</p>
+            <p>Assemble the states into a state machine that orchestrates the complete service call workflow. The state machine initializes ROS 2, creates three states with defined transitions, and sets up the YASMIN viewer for real-time visualization. The <code>SETTING_INTS</code> state prepares the input data and transitions to <code>ADD_TWO_INTS</code> on success. The <code>ADD_TWO_INTS</code> service state can produce three outcomes: <code>"outcome1"</code> if the service returns successfully (transitioning to <code>PRINTING_SUM</code>), <code>SUCCEED</code> if completed without errors, or <code>ABORT</code> if the service fails (both terminating with <code>"outcome4"</code>). Finally, <code>PRINTING_SUM</code> logs the result and transitions to the final outcome. This sequential flow ensures proper data preparation, service execution, and result handling with graceful error management.</p>
 
-            <pre><code class="language-python">rclpy.init()
-set_ros_loggers()
+            <pre><code class="language-python">def main() -> None:
+    yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
 
-sm = StateMachine(outcomes=["outcome4"])
+    # Init ROS 2
+    rclpy.init()
 
-sm.add_state(
-    "SETTING_INTS",
-    CbState([SUCCEED], set_ints),
-    transitions={SUCCEED: "ADD_TWO_INTS"},
-)
-sm.add_state(
-    "ADD_TWO_INTS",
-    AddTwoIntsState(),
-    transitions={
-        "outcome1": "PRINTING_SUM",
-        SUCCEED: "outcome4",
-        ABORT: "outcome4",
-    },
-)
-sm.add_state(
-    "PRINTING_SUM",
-    CbState([SUCCEED], print_sum),
-    transitions={SUCCEED: "outcome4"},
-)
+    # Set ROS 2 logs
+    set_ros_loggers()
 
-YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")</code></pre>
+    # Create a FSM
+    sm = StateMachine(outcomes=["outcome4"])
 
-            <h2>4. Execute</h2>
-            <p>Run the state machine and handle interruptions gracefully to ensure proper shutdown of all ROS resources.</p>
-            <pre><code class="language-python">
-    # Publish FSM information for visualization
-    viewer =
+    # Add states
+    sm.add_state(
+        "SETTING_INTS",
+        CbState([SUCCEED], set_ints),
+        transitions={SUCCEED: "ADD_TWO_INTS"},
+    )
+    sm.add_state(
+        "ADD_TWO_INTS",
+        AddTwoIntsState(),
+        transitions={
+            "outcome1": "PRINTING_SUM",
+            SUCCEED: "outcome4",
+            ABORT: "outcome4",
+        },
+    )
+    sm.add_state(
+        "PRINTING_SUM",
+        CbState([SUCCEED], print_sum),
+        transitions={
+            SUCCEED: "outcome4",
+        },
+    )
 
-    # Execute the FSM
-    # Publish FSM information for visualization
+    # Publish FSM info
     viewer = YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
 
-    # Execute the FSM
+    # Execute FSM
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
@@ -248,9 +249,13 @@ YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")</code></pre>
 
         # Shutdown ROS 2 if it's running
         if rclpy.ok():
-            rclpy.shutdown()</code></pre>
+            rclpy.shutdown()
 
-            <h2>5. Run the Demo</h2>
+
+if __name__ == "__main__":
+    main()</code></pre>
+
+            <h2>4. Run the Demo</h2>
             <p>First, start the service server that provides the integer addition functionality:</p>
             <pre><code>ros2 run yasmin_demos add_two_ints_server</code></pre>
             <p>Then run the client demo to execute the state machine that calls the service and displays the result:</p>
@@ -273,7 +278,7 @@ YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")</code></pre>
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

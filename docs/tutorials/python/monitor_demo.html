@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -83,7 +83,7 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Monitor Demo (Python)</h1>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/monitor_demo.py" target="_blank" style="color: inherit; text-decoration: none;">Monitor Demo (Python)</a></h1>
             <p>This tutorial demonstrates how to monitor ROS 2 topics using YASMIN's <code>MonitorState</code>. This state subscribes to a topic and processes incoming messages, allowing your state machine to react to sensor data or other published information. The MonitorState is particularly valuable in robotics applications where you need to wait for specific sensor readings, check for environmental conditions, or synchronize with external events before proceeding with other tasks.</p>
 
             <h2>Background</h2>
@@ -173,7 +173,7 @@ class PrintOdometryState(MonitorState):
         return "outcome1"</code></pre>
 
             <h2>2. Build the State Machine</h2>
-            <p>Add the monitor state and handle different outcomes:</p>
+            <p>Initialize ROS 2 and configure the state machine with the monitor state, defining transitions for all possible outcomes. The state loops back to itself with <code>outcome1</code> to continue monitoring messages, exits with <code>outcome2</code> when the target number of messages is reached, and handles error conditions like <code>TIMEOUT</code> (no messages received within the timeout period) and <code>CANCEL</code> (manual cancellation) by transitioning to the terminal outcome <code>outcome4</code>. This comprehensive transition mapping ensures graceful handling of all execution paths - successful completion, timeout scenarios, and user interruption.</p>
 
             <pre><code class="language-python">rclpy.init()
 set_ros_loggers()
@@ -195,15 +195,10 @@ YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")</code></pre>
 
             <h2>3. Execute</h2>
             <p>Execute the state machine with proper exception handling to manage keyboard interrupts and ensure clean shutdown.</p>
-            <pre><code class="language-python">
-    # Publish FSM information for visualization
-    viewer =
-
-    # Execute the FSM
-    # Publish FSM information for visualization
+            <pre><code class="language-python">    # Publish FSM information
     viewer = YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
-    # Execute the FSM
+    # Execute FSM
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
@@ -216,7 +211,11 @@ YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")</code></pre>
 
         # Shutdown ROS 2 if it's running
         if rclpy.ok():
-            rclpy.shutdown()</code></pre>
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()</code></pre>
 
             <h2>4. Run the Demo</h2>
             <p>Ensure you have a node publishing odometry data (e.g., from a robot simulator or real robot), then run:</p>
@@ -259,7 +258,7 @@ YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")</code></pre>
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
@@ -83,11 +83,21 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Publisher (C++)</h1>
-            <p>This tutorial demonstrates how to use the <code>PublisherState</code> in C++ to publish messages to a ROS 2 topic. Publishing states are useful for sending commands to actuators, broadcasting status updates, or generating test data. In this example, we'll create a state machine that publishes incrementing integers to demonstrate how to integrate publishing into a state machine workflow with conditional logic.</p>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/publisher_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">Publisher Demo (C++)</a></h1>
+            <p>This tutorial demonstrates how to publish ROS 2 messages from within a YASMIN state machine using the <code>PublisherState</code> in C++. This is useful for sending commands to actuators, broadcasting status updates, or generating test data. Publishing states integrate with other state machine logic, allowing you to coordinate complex behaviors that involve both sensing (subscribing) and acting (publishing).</p>
+
+            <h2>Background</h2>
+            <p>The <code>PublisherState</code> allows states to:</p>
+            <ul>
+                <li>Publish messages to ROS 2 topics as part of state execution</li>
+                <li>Generate message content dynamically from the blackboard</li>
+                <li>Send periodic updates or commands as part of a control loop</li>
+                <li>Coordinate publishing with other state machine operations</li>
+                <li>Maintain state across multiple publish operations</li>
+            </ul>
 
             <h2>1. Define the Publisher State</h2>
-            <p>Create a class inheriting from <code>yasmin_ros::PublisherState</code>, templated with the message type <code>std_msgs::msg::Int32</code>. The constructor requires two parameters: the topic name (<code>"count"</code>) and a callback function that creates the message to publish. The <code>create_int_msg</code> method is invoked each time the state executes. It retrieves the current counter from the blackboard, increments it, stores the updated value back in the blackboard, and creates an Int32 message with the new counter value. This demonstrates how to maintain state across executions using the blackboard - essential for tasks like tracking progress, accumulating sensor readings, or managing sequences of commands.</p>
+            <p>Create a class inheriting from <code>yasmin_ros::PublisherState</code>, templated with the message type <code>std_msgs::msg::Int32</code>. The constructor requires two parameters: the topic name (<code>"count"</code>) and a callback function that creates the message to publish. The <code>create_int_msg</code> method is invoked each time the state executes. It retrieves the current counter from the blackboard, increments it, stores the updated value back in the blackboard, and creates an Int32 message with the new counter value. This demonstrates stateful publishing - the counter persists across state executions thanks to the blackboard, allowing you to track progress or maintain sequences.</p>
 
             <pre><code class="language-cpp">class PublishIntState
     : public yasmin_ros::PublisherState&lt;std_msgs::msg::Int32&gt; {
@@ -186,7 +196,7 @@ int main(int argc, char *argv[]) {
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

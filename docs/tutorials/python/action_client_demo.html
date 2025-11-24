@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -83,7 +83,7 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Action Client Demo (Python)</h1>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/action_client_demo.py" target="_blank" style="color: inherit; text-decoration: none;">Action Client Demo (Python)</a></h1>
             <p>This tutorial demonstrates how to integrate ROS 2 actions into a YASMIN state machine using the <code>ActionState</code> class. Actions are perfect for long-running tasks that need to provide feedback during execution and can be canceled if needed - such as navigation, manipulation, or data processing tasks. We'll use the <code>Fibonacci</code> action as an example to show how to send goals, monitor feedback, and handle results. The ActionState automatically manages the action client lifecycle, handles timeouts, and provides clean integration with the state machine.</p>
 
             <h2>Prerequisites</h2>
@@ -245,28 +245,31 @@ blackboard["n"] = 10  # Fibonacci order</code></pre>
 
             <h2>4. Execute</h2>
             <p>Run the state machine with proper exception handling to gracefully handle interruptions and ensure clean shutdown of ROS resources.</p>
-            <pre><code class="language-python">
-    # Publish FSM information for visualization
-    viewer =
-
-    # Execute the FSM
-    # Publish FSM information for visualization
+            <pre><code class="language-python">    # Publish FSM information
     viewer = YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
+
+    # Create an initial blackboard with the input value
+    blackboard = Blackboard()
+    blackboard["n"] = 10  # Set the Fibonacci order to 10
 
     # Execute the FSM
     try:
-        outcome = sm()
+        outcome = sm(blackboard)
         yasmin.YASMIN_LOG_INFO(outcome)
     except KeyboardInterrupt:
         if sm.is_running():
-            sm.cancel_state()
+            sm.cancel_state()  # Cancel the state if interrupted
     finally:
         viewer.cleanup()
         del sm
 
         # Shutdown ROS 2 if it's running
         if rclpy.ok():
-            rclpy.shutdown()</code></pre>
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()</code></pre>
 
             <h2>5. Run the Demo</h2>
             <p>Start the action server first to provide the Fibonacci computation service:</p>
@@ -290,7 +293,7 @@ blackboard["n"] = 10  # Fibonacci order</code></pre>
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

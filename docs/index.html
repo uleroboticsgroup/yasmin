@@ -20,7 +20,7 @@
         <div class="nav-links">
             <a href="index.html">Docs</a>
             <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
-            <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank">Doxygen</a>
+            <a href="doxygen.html" target="_blank">Doxygen</a>
             <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
         </div>
     </header>
@@ -33,7 +33,7 @@
                 <li><a href="main_concepts.html">Main Concepts</a></li>
                 <li><a href="packages.html">Packages Overview</a></li>
                 <li><a href="docker.html">Docker</a></li>
-                <li><a href="xml_factory.html">XML Factory</a></li>
+                <li><a href="xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="tutorials/python/remap_demo.html">Blackboard Remapping</a></li>
@@ -96,10 +96,12 @@
                 <li><strong>Rapid Prototyping:</strong> Designed for fast iteration of behaviors.</li>
                 <li><strong>Predefined States:</strong> Includes states for ROS 2 actions, services, and topics.</li>
                 <li><strong>Web Viewer:</strong> Integrated web viewer for real-time monitoring.</li>
-                <li><strong>XML Factory:</strong> Load and create state machines from XML files.</li>
+                <li><strong>XML:</strong> Load and create state machines from XML files.</li>
             </ul>
 
             <h2>ROS 2 Integration</h2>
+            
+            <p><em>Note: The following examples are shown in Python. All features are also available in C++. See the <a href="tutorials.html">tutorials section</a> for examples in both languages.</em></p>
             
             <h3>Action States</h3>
             <p><code>ActionState</code> encapsulates ROS 2 action client operations within a state machine. It manages goal creation, feedback processing, and result handling with built-in timeout and retry mechanisms.</p>
@@ -162,7 +164,9 @@ publisher_state = PublisherState(
                     <tr>
                         <th style="text-align: center;">ROS 2 Distro</th>
                         <th style="text-align: center;">Branch</th>
-                        <th style="text-align: center;">Build Status</th>
+                        <th style="text-align: center;">Build and Test</th>
+                        <th style="text-align: center;">Docker Image</th>
+                        <th style="text-align: center;">Documentation</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -170,36 +174,50 @@ publisher_state = PublisherState(
                         <td style="text-align: center;">Foxy</td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main">main</a></td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/foxy-build-test.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/foxy-build-test.yml/badge.svg?branch=main" alt="Foxy Build"></a></td>
+                        <td style="text-align: center;"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=foxy"><img src="https://img.shields.io/badge/docker-foxy-blue?logo=docker" alt="Docker Image"></a></td>
+                        <td style="text-align: center;"><a href="doxygen.html" target="_blank"><img src="https://img.shields.io/badge/docs-foxy-informational" alt="Doxygen Deployment"></a></td>
                     </tr>
                     <tr>
                         <td style="text-align: center;">Galactic</td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main">main</a></td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/galactic-build-test.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/galactic-build-test.yml/badge.svg?branch=main" alt="Galactic Build"></a></td>
+                        <td style="text-align: center;"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=galactic"><img src="https://img.shields.io/badge/docker-galactic-blue?logo=docker" alt="Docker Image"></a></td>
+                        <td style="text-align: center;"><a href="doxygen.html" target="_blank"><img src="https://img.shields.io/badge/docs-galactic-informational" alt="Doxygen Deployment"></a></td>
                     </tr>
                     <tr>
                         <td style="text-align: center;">Humble</td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main">main</a></td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/humble-build-test.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/humble-build-test.yml/badge.svg?branch=main" alt="Humble Build"></a></td>
+                        <td style="text-align: center;"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=humble"><img src="https://img.shields.io/badge/docker-humble-blue?logo=docker" alt="Docker Image"></a></td>
+                        <td style="text-align: center;"><a href="doxygen.html" target="_blank"><img src="https://img.shields.io/badge/docs-humble-informational" alt="Doxygen Deployment"></a></td>
                     </tr>
                     <tr>
                         <td style="text-align: center;">Iron</td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main">main</a></td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/iron-build-test.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/iron-build-test.yml/badge.svg?branch=main" alt="Iron Build"></a></td>
+                        <td style="text-align: center;"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=iron"><img src="https://img.shields.io/badge/docker-iron-blue?logo=docker" alt="Docker Image"></a></td>
+                        <td style="text-align: center;"><a href="doxygen.html" target="_blank"><img src="https://img.shields.io/badge/docs-iron-informational" alt="Doxygen Deployment"></a></td>
                     </tr>
                     <tr>
                         <td style="text-align: center;">Jazzy</td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main">main</a></td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/jazzy-build-test.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/jazzy-build-test.yml/badge.svg?branch=main" alt="Jazzy Build"></a></td>
+                        <td style="text-align: center;"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=jazzy"><img src="https://img.shields.io/badge/docker-jazzy-blue?logo=docker" alt="Docker Image"></a></td>
+                        <td style="text-align: center;"><a href="doxygen.html" target="_blank"><img src="https://img.shields.io/badge/docs-jazzy-informational" alt="Doxygen Deployment"></a></td>
                     </tr>
                     <tr>
                         <td style="text-align: center;">Kilted</td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main">main</a></td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/kilted-build-test.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/kilted-build-test.yml/badge.svg?branch=main" alt="Kilted Build"></a></td>
+                        <td style="text-align: center;"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=kilted"><img src="https://img.shields.io/badge/docker-kilted-blue?logo=docker" alt="Docker Image"></a></td>
+                        <td style="text-align: center;"><a href="doxygen.html" target="_blank"><img src="https://img.shields.io/badge/docs-kilted-informational" alt="Doxygen Deployment"></a></td>
                     </tr>
                     <tr>
                         <td style="text-align: center;">Rolling</td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/tree/main">main</a></td>
                         <td style="text-align: center;"><a href="https://github.com/uleroboticsgroup/yasmin/actions/workflows/rolling-build-test.yml?branch=main"><img src="https://github.com/uleroboticsgroup/yasmin/actions/workflows/rolling-build-test.yml/badge.svg?branch=main" alt="Rolling Build"></a></td>
+                        <td style="text-align: center;"><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=rolling"><img src="https://img.shields.io/badge/docker-rolling-blue?logo=docker" alt="Docker Image"></a></td>
+                        <td style="text-align: center;"><a href="doxygen.html" target="_blank"><img src="https://img.shields.io/badge/docs-rolling-informational" alt="Doxygen Deployment"></a></td>
                     </tr>
                 </tbody>
             </table>
@@ -225,8 +243,8 @@ colcon build</code></pre>
         </main>
     </div>
 
-    <footer style="border-top: 1px solid #ddd; text-align: center; padding: 20px; color: #666;">
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

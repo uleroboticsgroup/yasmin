@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
@@ -83,11 +83,21 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Monitor (C++)</h1>
-            <p>This tutorial demonstrates how to use the <code>MonitorState</code> in C++ to subscribe to a ROS 2 topic and monitor incoming messages. The MonitorState is particularly useful for waiting for specific conditions on a topic, such as receiving a certain number of messages, detecting a value threshold, or monitoring sensor data until a desired state is reached. This pattern is common in robotics for waiting for navigation goals, checking sensor readings, or synchronizing with external events.</p>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/monitor_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">Monitor Demo (C++)</a></h1>
+            <p>This tutorial demonstrates how to monitor ROS 2 topics using YASMIN's <code>MonitorState</code> in C++. This state subscribes to a topic and processes incoming messages, allowing your state machine to react to sensor data or other published information. The MonitorState is particularly valuable in robotics applications where you need to wait for specific sensor readings, check for environmental conditions, or synchronize with external events before proceeding with other tasks.</p>
+
+            <h2>Background</h2>
+            <p>The <code>MonitorState</code> is useful when you need to:</p>
+            <ul>
+                <li>Wait for a specific message to arrive on a topic</li>
+                <li>Process a certain number of messages before transitioning</li>
+                <li>React to changing data from sensors or other ROS nodes</li>
+                <li>Implement timeout behavior if no messages arrive within a time limit</li>
+                <li>Monitor robot state (odometry, battery, sensors) for decision making</li>
+            </ul>
 
             <h2>1. Define the Monitor State</h2>
-            <p>Create a class inheriting from <code>yasmin_ros::MonitorState</code>, templated with the message type <code>nav_msgs::msg::Odometry</code>. The constructor takes six parameters: the topic name (<code>"odom"</code>), a list of possible outcomes, the monitor handler callback, QoS settings (quality of service for subscription reliability), message queue size, and timeout in seconds. The <code>monitor_handler</code> method is called for each received message. It logs the robot's position coordinates (x, y, z) from the odometry message, decrements the counter, and returns <code>"outcome2"</code> when the desired number of messages have been processed, or <code>"outcome1"</code> to continue monitoring. The timeout outcome is automatically returned if no messages are received within the specified time.</p>
+            <p>Create a class inheriting from <code>yasmin_ros::MonitorState</code>, templated with the message type <code>nav_msgs::msg::Odometry</code>. The constructor takes six parameters: the topic name (<code>"odom"</code>), a list of possible outcomes, the monitor handler callback, QoS settings (quality of service for subscription reliability), message queue size, and timeout in seconds. The <code>monitor_handler</code> method is called for each received message. It logs the robot's position coordinates (x, y, z) from the odometry message, decrements the counter, and returns <code>"outcome2"</code> when the desired number of messages have been processed, or <code>"outcome1"</code> to continue monitoring. If no message arrives within the timeout period, the state automatically returns the <code>TIMEOUT</code> outcome.</p>
 
             <pre><code class="language-cpp">class PrintOdometryState
     : public yasmin_ros::MonitorState&lt;nav_msgs::msg::Odometry&gt; {
@@ -179,7 +189,7 @@ public:
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
@@ -84,14 +84,15 @@
 
         <main class="main-content content">
             <h1>Nav2 Demo (Hierarchical FSM + ROS 2 Action)</h1>
-            <p>This tutorial demonstrates how to integrate YASMIN with ROS 2 Navigation (Nav2) using a hierarchical state machine in C++.</p>
+            <p>This tutorial demonstrates how to integrate YASMIN with ROS 2 Navigation (Nav2) using a hierarchical state machine in C++. Hierarchical FSMs allow you to nest state machines within states, creating modular and reusable navigation behaviors. This pattern is ideal for complex robot tasks where high-level planning (waypoint selection) is separated from low-level execution (navigation to each point).</p>
 
             <h2>Overview</h2>
-            <p>The demo creates a state machine that:</p>
+            <p>The demo creates a two-level hierarchical state machine. The parent state machine handles waypoint management: it creates a dictionary of named waypoint coordinates (entrance, bathroom, livingroom, kitchen, bedroom), randomly selects a subset for the mission, and delegates navigation to a child state machine. The child state machine implements the navigation loop: it retrieves the next waypoint from the list, converts coordinates to a <code>Pose</code> message, sends it to Nav2's <code>NavigateToPose</code> action server, and repeats until all waypoints are visited. This structure demonstrates state machine composition, shared blackboard data between levels, and ROS 2 action integration for real robot navigation.</p>
+            <p>The workflow consists of:</p>
             <ol>
-                <li>Generates a set of waypoints.</li>
-                <li>Selects a random subset of waypoints.</li>
-                <li>Navigates to each selected waypoint using the Nav2 <code>NavigateToPose</code> action.</li>
+                <li><strong>Create Waypoints:</strong> Initialize a dictionary with 5 predefined locations (x, y, orientation_z, orientation_w).</li>
+                <li><strong>Select Random Subset:</strong> Choose N random waypoints from the dictionary based on <code>waypoints_num</code> blackboard parameter.</li>
+                <li><strong>Navigate (Hierarchical):</strong> Enter the nested navigation state machine that loops through selected waypoints, sending each to Nav2's action server.</li>
             </ol>
 
             <h2>Running the Demo</h2>
@@ -100,13 +101,13 @@
             <h2>Source Code</h2>
             <p>You can find the full source code in the <a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/nav2_demo.cpp" target="_blank">yasmin_demos</a> package.</p>
 
-            <pre><code class="language-cpp">#include <algorithm>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <random>
-#include <string>
-#include <vector>
+            <pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;memory&gt;
+#include &lt;random&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
 
 #include "geometry_msgs/msg/pose.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"

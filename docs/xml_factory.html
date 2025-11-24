@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XML Factory - YASMIN</title>
+    <title>XML - YASMIN</title>
     <link rel="stylesheet" href="style.css">
     <script src="sidebar.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
@@ -20,7 +20,7 @@
         <div class="nav-links">
             <a href="index.html">Docs</a>
             <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
-            <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank">Doxygen</a>
+            <a href="doxygen.html" target="_blank">Doxygen</a>
             <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
         </div>
     </header>
@@ -33,7 +33,7 @@
                 <li><a href="main_concepts.html">Main Concepts</a></li>
                 <li><a href="packages.html">Packages Overview</a></li>
                 <li><a href="docker.html">Docker</a></li>
-                <li><a href="xml_factory.html">XML Factory</a></li>
+                <li><a href="xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="tutorials/python/remap_demo.html">Blackboard Remapping</a></li>
@@ -93,7 +93,13 @@
             </ul>
 
             <h2>XML Structure</h2>
-            <p>A YASMIN XML state machine definition includes state declarations, transitions, and optional remapping:</p>
+            <p>A YASMIN XML state machine definition includes state declarations, transitions, and optional remapping. The example below shows a simple state machine with two states:</p>
+            <ul>
+                <li><strong>StateMachine element:</strong> Root container with <code>id</code> and <code>default_outcome</code> attributes</li>
+                <li><strong>State elements:</strong> Define individual states with their type (<code>py</code> or <code>cpp</code>), module/class information</li>
+                <li><strong>Transition elements:</strong> Specify how states connect - which outcome leads to which target state</li>
+                <li><strong>Self-loops:</strong> Notice <code>state1</code> can transition back to itself on <code>fail</code> outcome, useful for retry logic</li>
+            </ul>
             
             <pre><code class="language-xml">&lt;StateMachine id="example_sm" default_outcome="finish"&gt;
     &lt;State id="state1" type="py" module="my_package.states" class="MyState"&gt;
@@ -108,6 +114,18 @@
 
             <h2>State Types</h2>
             <p>YASMIN Factory supports both Python and C++ states in the same state machine, enabling you to leverage existing code in either language or mix implementations based on performance needs and developer expertise. The factory automatically handles the language-specific loading and instantiation mechanisms.</p>
+
+            <div class="info-box" style="background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%); border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; color: #000;">
+                <strong style="color: #856404;">⚠️ Important - Cross-Language Communication:</strong>
+                <p style="color: #856404;">When mixing Python and C++ states in the same state machine, they can communicate through the blackboard, but <strong>only with primitive data types</strong>:</p>
+                <ul style="margin: 10px 0 0 20px; color: #856404;">
+                    <li><code style="background-color: rgba(0,0,0,0.1); color: #000; padding: 2px 4px; border-radius: 3px;">int</code> - Integer numbers</li>
+                    <li><code style="background-color: rgba(0,0,0,0.1); color: #000; padding: 2px 4px; border-radius: 3px;">float</code> - Floating-point numbers</li>
+                    <li><code style="background-color: rgba(0,0,0,0.1); color: #000; padding: 2px 4px; border-radius: 3px;">bool</code> - Boolean values</li>
+                    <li><code style="background-color: rgba(0,0,0,0.1); color: #000; padding: 2px 4px; border-radius: 3px;">string</code> - Text strings</li>
+                </ul>
+                <p style="margin-top: 10px; color: #856404;">Complex objects, custom classes, or ROS messages cannot be directly shared between Python and C++ states through the blackboard.</p>
+            </div>
 
             <h3>Python States</h3>
             <p>Python states are loaded dynamically from the specified module and class. The <code>type="py"</code> attribute tells the factory to use Python's import system to locate and instantiate the state class.</p>
@@ -202,7 +220,7 @@ YASMIN_LOG_INFO(outcome.c_str());</code></pre>
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

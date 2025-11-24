@@ -20,7 +20,7 @@
         <div class="nav-links">
             <a href="index.html">Docs</a>
             <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
-            <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank">Doxygen</a>
+            <a href="doxygen.html" target="_blank">Doxygen</a>
             <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
         </div>
     </header>
@@ -33,7 +33,7 @@
                 <li><a href="main_concepts.html">Main Concepts</a></li>
                 <li><a href="packages.html">Packages Overview</a></li>
                 <li><a href="docker.html">Docker</a></li>
-                <li><a href="xml_factory.html">XML Factory</a></li>
+                <li><a href="xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="tutorials/python/remap_demo.html">Blackboard Remapping</a></li>
@@ -84,21 +84,22 @@
 
         <main class="main-content content">
             <h1>YASMIN Tutorials</h1>
-            <p>Welcome to the YASMIN tutorials. These guides will help you get started with creating Finite State Machines for your robots.</p>
+            <p>Welcome to the YASMIN tutorials. These comprehensive guides will help you master creating Finite State Machines for your robots, from basic concepts to advanced patterns. Each tutorial includes complete, runnable code examples with detailed explanations.</p>
+            <p>Whether you're new to state machines or an experienced developer, these tutorials cover everything from simple FSMs to complex hierarchical behaviors, ROS 2 integration, and multi-language state composition.</p>
 
             <div class="tutorial-section">
                 <h2>C++ Tutorials</h2>
-                <p>Learn how to use YASMIN with C++.</p>
+                <p>Learn how to use YASMIN with C++ for high-performance state machine execution. These tutorials cover the complete C++ API, from basic state creation to advanced features like pluginlib integration and hierarchical FSMs.</p>
                 <ul>
-                    <li><a href="tutorials/cpp/basic_fsm.html"><strong>Writing a Simple FSM:</strong></a> Create your first state machine with custom states.</li>
+                    <li><a href="tutorials/cpp/basic_fsm.html"><strong>Writing a Simple FSM:</strong></a> Create your first state machine with custom states, learn the fundamental concepts of outcomes and transitions.</li>
                 </ul>
             </div>
 
             <div class="tutorial-section">
                 <h2>Python Tutorials</h2>
-                <p>Learn how to use YASMIN with Python.</p>
+                <p>Learn how to use YASMIN with Python for rapid prototyping and flexible state machine development. These tutorials demonstrate Python's ease of use combined with YASMIN's powerful FSM capabilities.</p>
                 <ul>
-                    <li><a href="tutorials/python/basic_fsm.html"><strong>Writing a Simple FSM:</strong></a> Create your first state machine with custom states.</li>
+                    <li><a href="tutorials/python/basic_fsm.html"><strong>Writing a Simple FSM:</strong></a> Create your first state machine with custom states, understand the State and StateMachine classes.</li>
                 </ul>
             </div>
 
@@ -117,8 +118,8 @@
         </main>
     </div>
 
-    <footer style="border-top: 1px solid #ddd; text-align: center; padding: 20px; color: #666;">
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+    <footer>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

@@ -34,7 +34,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -42,7 +42,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -56,7 +56,7 @@
                 <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -84,7 +84,7 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Factory Demo (Python)</h1>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/factory_demo.py" target="_blank" style="color: inherit; text-decoration: none;">Factory Demo (Python)</a></h1>
             <p>This tutorial demonstrates how to load YASMIN state machines from XML files using the <code>YasminFactory</code>. This approach separates the FSM structure from the code, making it easier to design, share, and modify state machines without recompiling.</p>
 
             <h2>Background</h2>
@@ -111,7 +111,7 @@
 &lt;/StateMachine&gt;</code></pre>
 
             <h2>2. Load the State Machine with YasminFactory</h2>
-            <p>Use the factory to create the FSM from the XML file:</p>
+            <p>Use the factory to create the FSM from the XML file. The <code>YasminFactory</code> class parses the XML structure and dynamically loads the state classes using Python's plugin system. It reads the XML file from the package's shared directory using <code>get_package_share_directory</code>, which ensures the path works regardless of installation location. The factory instantiates each state class specified in the XML (<code>FooState</code> and <code>BarState</code>), creates the transitions between states based on the <code>&lt;Outcome&gt;</code> tags, and assembles them into a fully functional <code>StateMachine</code> object. This approach separates FSM logic (in Python/C++ state classes) from FSM structure (in XML), enabling non-programmers to modify behavior by editing XML files while developers maintain reusable state implementations.</p>
 
             <pre><code class="language-python">import os
 import rclpy
@@ -137,13 +137,8 @@ sm = factory.create_sm_from_file(
 )</code></pre>
 
             <h2>3. Execute the State Machine</h2>
-            <p>Run the state machine created from the XML file. The viewer tool allows real-time monitoring of the execution flow through the states defined in the XML configuration.</p>
-            <pre><code class="language-python">
-    # Publish FSM information for visualization
-    viewer =
-
-    # Execute the FSM
-    # Publish FSM information for visualization
+            <p>Run the state machine created from the XML file. The <code>YasminViewerPub</code> publishes the FSM structure to a ROS 2 topic, allowing the YASMIN Viewer web interface to display real-time execution flow. The execution follows the standard pattern: the <code>try</code> block runs the state machine through its states (Foo ↔ Bar transitions) until reaching a terminal outcome, the <code>except</code> catches keyboard interrupts and gracefully cancels execution, and the <code>finally</code> block ensures all resources are freed - the viewer's background publishing thread is stopped, the state machine is deleted to release memory, and ROS 2 is properly shut down. This demonstrates how XML-defined state machines execute identically to code-defined ones, with the same monitoring and error handling capabilities.</p>
+            <pre><code class="language-python">    # Publish FSM information for visualization
     viewer = YasminViewerPub(sm, "plugin_demo")
 
     # Execute the FSM
@@ -159,7 +154,11 @@ sm = factory.create_sm_from_file(
 
         # Shutdown ROS 2 if it's running
         if rclpy.ok():
-            rclpy.shutdown()</code></pre>
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()</code></pre>
 
             <h2>4. Run the Demo</h2>
             <p>Execute the factory demo to see how state machines can be dynamically constructed from XML definitions, enabling configuration-driven behavior without code changes.</p>
@@ -212,7 +211,7 @@ sm = factory.create_sm_from_file(
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

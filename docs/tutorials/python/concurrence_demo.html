@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -83,7 +83,7 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Concurrence Demo (Python)</h1>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/concurrence_demo.py" target="_blank" style="color: inherit; text-decoration: none;">Concurrence Demo (Python)</a></h1>
             <p>This tutorial demonstrates how to run multiple states concurrently using YASMIN's <code>Concurrence</code> container. Concurrence allows you to execute multiple states in parallel and define outcome mappings based on the results of these states. This is essential in robotics for scenarios like monitoring multiple sensors simultaneously, executing independent behaviors in parallel, or waiting for multiple conditions to be satisfied before proceeding. The Concurrence container handles all the complexity of thread management, synchronization, and outcome resolution, providing a clean interface for parallel state execution.</p>
 
             <h2>Background</h2>
@@ -190,7 +190,7 @@
         return "outcome3"</code></pre>
 
             <h2>3. Create the Concurrence Container</h2>
-            <p>Define which states run concurrently and map their outcomes:</p>
+            <p>Initialize ROS 2 and create a <code>Concurrence</code> container that executes FooState and BarState simultaneously. The <code>outcome_map</code> parameter defines how the combined outcomes are determined - in this case, we specify that when BarState produces <code>outcome3</code> and FooState produces <code>outcome2</code>, the concurrence should output <code>outcome5</code> to end execution. The <code>outcome_cb</code> callback provides additional control by allowing you to inspect individual state outcomes and make custom decisions. This two-level outcome resolution (map + callback) gives you flexibility: use the map for simple AND/OR logic, and the callback for complex conditional logic based on runtime state.</p>
 
             <pre><code class="language-python">rclpy.init()
 set_ros_loggers()
@@ -234,12 +234,7 @@ YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")</code></pre>
 
             <h2>5. Execute the State Machine</h2>
             <p>Execute the state machine with exception handling to manage interruptions and ensure proper cleanup of resources.</p>
-            <pre><code class="language-python">
-    # Publish FSM information for visualization
-    viewer =
-
-    # Execute the FSM
-    # Publish FSM information for visualization
+            <pre><code class="language-python">    # Publish FSM information for visualization
     viewer = YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
 
     # Execute the FSM
@@ -255,7 +250,11 @@ YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")</code></pre>
 
         # Shutdown ROS 2 if it's running
         if rclpy.ok():
-            rclpy.shutdown()</code></pre>
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()</code></pre>
 
             <h2>6. Run the Demo</h2>
             <p>Execute the concurrence demonstration to observe how multiple states run in parallel and how their outcomes are combined.</p>
@@ -278,7 +277,7 @@ YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")</code></pre>
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

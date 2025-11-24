@@ -4,10 +4,10 @@
     --secondary-color: #004494;
     --text-color: #333;
     --bg-color: #fff;
-    --sidebar-bg: #fff;
-    --sidebar-border: #e0e0e0;
-    --header-bg: #fff;
-    --header-border: #e0e0e0;
+    --sidebar-bg: #f8f9fa;
+    --sidebar-border: #d0d5dd;
+    --header-bg: #e8ecf1;
+    --header-border: #d0d5dd;
     --code-bg: #282c34;
     --code-text: #abb2bf;
     --link-color: #0056b3;
@@ -18,8 +18,9 @@
     --citation-text: #555;
     --table-header-bg: #f8f9fa;
     --table-border: #e0e0e0;
-    --sidebar-width: 280px;
+    --sidebar-width: 320px;
     --header-height: 60px;
+    --footer-height: 60px;
     --h4-bg: #f0f7ff;
     --h4-border: #0056b3;
     --h4-text: #0056b3;
@@ -63,6 +64,7 @@ body {
     flex-direction: column;
     min-height: 100vh;
     transition: background-color 0.3s, color 0.3s;
+    font-size: 17px;
 }
 
 /* Header */
@@ -75,6 +77,8 @@ header {
     padding: 0 20px;
     position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     width: 100%;
     z-index: 1000;
     box-sizing: border-box;
@@ -105,7 +109,7 @@ header {
 .nav-links a {
     text-decoration: none;
     color: var(--text-color);
-    font-weight: 500;
+    font-weight: 700;
 }
 
 .nav-links a:hover {
@@ -150,28 +154,54 @@ html.dark-mode #theme-toggle:hover {
     padding: 20px;
     position: fixed;
     top: var(--header-height);
-    height: calc(100vh - var(--header-height));
+    left: 0;
+    height: calc(100vh - var(--header-height) - var(--footer-height));
     overflow-y: auto;
     box-sizing: border-box;
     scroll-behavior: smooth;
     transition: background-color 0.3s, border-color 0.3s;
+    z-index: 900;
 }
 
+/* H3 sections normal styling */
 .sidebar h3 {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     text-transform: uppercase;
     color: var(--text-color);
-    opacity: 0.7;
+    opacity: 0.85;
     margin-top: 20px;
     margin-bottom: 10px;
     position: relative;
+    font-weight: 600;
 }
 
-/* Only Tutorials and Tools h3 are collapsible - apply cursor and padding */
+/* Main collapsible sections (Tutorials only) */
 .sidebar h3.collapsible {
     cursor: pointer;
     user-select: none;
     padding-left: 20px;
+}
+
+/* Nested collapsibles (C++ Tutorials, Python Tutorials inside Tutorials section) */
+.sidebar ul + h3.collapsible {
+    font-size: 0.95rem;
+    text-transform: none;
+    color: var(--h4-text);
+    margin: 12px 0 8px 10px;
+    margin-left: 15px;
+    font-weight: 600;
+    border-left: 3px solid var(--h4-border);
+    background: var(--h4-bg);
+    padding: 8px 10px 8px 25px;
+    border-radius: 4px;
+    opacity: 1;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* UL following nested collapsible h3 should also be indented */
+.sidebar ul + h3.collapsible + ul {
+    margin-left: 15px;
 }
 
 .sidebar h3::before {
@@ -184,7 +214,7 @@ html.dark-mode #theme-toggle:hover {
     position: absolute;
     left: 0;
     font-size: 0.7rem;
-    transition: transform 0.2s;
+    transition: transform 0.3s ease;
     margin-right: 8px;
 }
 
@@ -192,9 +222,22 @@ html.dark-mode #theme-toggle:hover {
     transform: rotate(-90deg);
 }
 
+/* Smooth transitions for collapsible content */
+.sidebar h3.collapsible + ul,
+.sidebar ul + h3.collapsible + ul {
+    transition: opacity 0.2s ease, max-height 0.3s ease;
+    overflow: hidden;
+}
+
+/* Remove transition delays that might cause flicker */
+.sidebar * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 /* H4 subsections styling with better visual separation */
 .sidebar h4 {
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: var(--h4-text);
     margin: 15px 0 8px 0;
     padding-left: 10px;
@@ -212,17 +255,19 @@ html.dark-mode #theme-toggle:hover {
 }
 
 .sidebar li {
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 
 .sidebar a {
     text-decoration: none;
     color: var(--text-color);
     display: block;
-    padding: 5px 10px;
+    padding: 6px 12px;
     border-radius: 4px;
-    font-size: 0.95rem;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    font-size: 1.05rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    line-height: 1.5;
+    will-change: background-color, color;
 }
 
 .sidebar a:hover {
@@ -243,9 +288,10 @@ html.dark-mode #theme-toggle:hover {
 /* Main Content */
 .main-content {
     margin-left: var(--sidebar-width);
-    margin-right: 260px;
-    padding: 40px 60px;
-    width: calc(100% - var(--sidebar-width) - 260px);
+    margin-right: 220px;
+    margin-bottom: var(--footer-height);
+    padding: 40px 45px;
+    width: calc(100% - var(--sidebar-width) - 220px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -261,6 +307,18 @@ h1 {
     font-size: 2.5rem;
     margin-bottom: 20px;
     color: var(--primary-color);
+}
+
+/* Tutorial title links */
+h1 a {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+h1 a:hover {
+    opacity: 0.7;
+    text-decoration: underline;
 }
 
 h2 {
@@ -279,14 +337,16 @@ h3 {
 }
 
 p {
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: 15px;
+    font-size: 1.08rem;
 }
 
 ul, ol {
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: 15px;
     padding-left: 20px;
+    font-size: 1.06rem;
 }
 
 li {
@@ -397,37 +457,29 @@ th {
     color: var(--link-hover);
 }
 
-/* Footer */
-footer {
-    margin-top: auto;
-    padding: 20px;
-    text-align: center;
-    border-top: 1px solid var(--header-border);
-    background-color: var(--header-bg);
-    margin-left: var(--sidebar-width);
-    transition: background-color 0.3s, border-color 0.3s;
-}
+
 
 /* Table of Contents */
 .toc {
     position: fixed;
     right: 20px;
-    top: 100px;
-    width: 220px;
-    max-height: calc(100vh - 150px);
+    top: calc(var(--header-height) + 20px);
+    width: 240px;
+    max-height: calc(100vh - var(--header-height) - 40px);
     overflow-y: auto;
-    background: var(--toc-bg);
-    border: 1px solid var(--toc-border);
-    border-radius: 8px;
-    padding: 15px;
-    font-size: 0.85rem;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--sidebar-border);
+    border-radius: 0;
+    padding: 20px;
+    font-size: 0.98rem;
     transition: background-color 0.3s, border-color 0.3s;
 }
 
 .toc h4 {
     margin: 0 0 10px 0;
     font-size: 0.9rem;
-    color: var(--primary-color);
+    color: var(--text-color);
+    opacity: 0.7;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -446,9 +498,9 @@ footer {
     color: var(--text-color);
     text-decoration: none;
     display: block;
-    padding: 4px 8px;
+    padding: 5px 10px;
     border-radius: 4px;
-    transition: background 0.2s;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .toc a:hover {
@@ -519,6 +571,36 @@ footer {
     white-space: pre-wrap;
     word-wrap: break-word;
     border-radius: 0 4px 4px 0;
+}
+
+/* Footer */
+footer {
+    background-color: var(--sidebar-bg);
+    border-top: 1px solid var(--sidebar-border);
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+footer p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
 }
 
 /* Responsive */

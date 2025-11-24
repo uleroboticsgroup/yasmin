@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -83,7 +83,7 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Blackboard Remapping (Python)</h1>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/remap_demo.py" target="_blank" style="color: inherit; text-decoration: none;">Blackboard Remapping (Python)</a></h1>
             <p>This tutorial demonstrates how to use blackboard remapping in YASMIN to share data between states using different variable names. Remapping allows you to connect state outputs to different blackboard keys, enabling flexible data flow in your state machine. This is a powerful feature for creating reusable, modular states that can work with different data sources without code modification - essential for building maintainable and scalable robot behaviors.</p>
 
             <h2>Background</h2>
@@ -205,17 +205,12 @@ sm.add_state(
 
             <h2>4. Execute the State Machine</h2>
             <p>Execute the state machine with the initialized blackboard. Observe how remapping allows the same state class to work with different data without code modification.</p>
-            <pre><code class="language-python">
-    # Publish FSM information for visualization
-    viewer =
-
-    # Execute the FSM
-    # Publish FSM information for visualization
+            <pre><code class="language-python">    # Launch YASMIN Viewer publisher for state visualization
     viewer = YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
 
     # Execute the FSM
     try:
-        outcome = sm()
+        outcome = sm(bb)
         yasmin.YASMIN_LOG_INFO(outcome)
     except KeyboardInterrupt:
         if sm.is_running():
@@ -226,7 +221,11 @@ sm.add_state(
 
         # Shutdown ROS 2 if it's running
         if rclpy.ok():
-            rclpy.shutdown()</code></pre>
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()</code></pre>
 
             <h2>5. Run the Demo</h2>
             <p>Run the remapping demonstration to see how blackboard key remapping enables state reuse with different data sources.</p>
@@ -249,7 +248,7 @@ sm.add_state(
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

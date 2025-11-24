@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
@@ -83,17 +83,20 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Factory Demo (XML + Plugins)</h1>
-            <p>This tutorial demonstrates how to use the YASMIN Factory to load state machines defined in XML files, including mixed Python and C++ states.</p>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/factory_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">Factory Demo (C++)</a></h1>
+            <p>This tutorial demonstrates how to load YASMIN state machines from XML files using the <code>YasminFactory</code> in C++. This approach separates the FSM structure from the code, making it easier to design, share, and modify state machines without recompiling.</p>
 
-            <h2>Overview</h2>
-            <p>The demo loads an XML file that defines a state machine with:</p>
+            <h2>Background</h2>
+            <p>The YASMIN Factory provides:</p>
             <ul>
-                <li>A Python state (<code>FooState</code>)</li>
-                <li>A C++ state (<code>BarState</code>)</li>
+                <li>Declarative FSM definition using XML</li>
+                <li>Plugin-based state loading (Python and C++ states)</li>
+                <li>Visual editing with YASMIN Editor</li>
+                <li>Reusable state machine configurations</li>
             </ul>
 
-            <h2>XML Definition</h2>
+            <h2>1. Create an XML State Machine</h2>
+            <p>Define your state machine structure in an XML file (e.g., <code>demo_1.xml</code>):</p>
             <pre><code class="language-xml">&lt;StateMachine outcomes="outcome4"&gt;
     &lt;State name="Foo" type="py" module="yasmin_demos.foo_state" class="FooState"&gt;
         &lt;Transition from="outcome1" to="Bar"/&gt;
@@ -110,9 +113,9 @@
             <h2>Source Code</h2>
             <p>You can find the full source code in the <a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/factory_demo.cpp" target="_blank">yasmin_demos</a> package.</p>
 
-            <pre><code class="language-cpp">#include <iostream>
-#include <memory>
-#include <string>
+            <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
 
 #include "ament_index_cpp/get_package_share_directory.hpp"
 #include "rclcpp/rclcpp.hpp"

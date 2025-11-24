@@ -20,7 +20,7 @@
         <div class="nav-links">
             <a href="index.html">Docs</a>
             <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">GitHub</a>
-            <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank">Doxygen</a>
+            <a href="doxygen.html" target="_blank">Doxygen</a>
             <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
         </div>
     </header>
@@ -33,7 +33,7 @@
                 <li><a href="main_concepts.html">Main Concepts</a></li>
                 <li><a href="packages.html">Packages Overview</a></li>
                 <li><a href="docker.html">Docker</a></li>
-                <li><a href="xml_factory.html">XML Factory</a></li>
+                <li><a href="xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="tutorials/python/remap_demo.html">Blackboard Remapping</a></li>
@@ -87,14 +87,16 @@
             <p>If your operating system doesn't support ROS 2, Docker is a great alternative. You can use pre-built images from <a href="https://hub.docker.com/r/mgons/yasmin/" target="_blank">DockerHub</a> or create your own custom images.</p>
 
             <h2>Building the Docker Image</h2>
-            <p>To build the YASMIN Docker image from source, navigate to the YASMIN project directory and run:</p>
+            <p>To build the YASMIN Docker image from source, navigate to the YASMIN project directory and run the following command. This process will download the base ROS 2 image, install all YASMIN dependencies, and compile the packages. The build typically takes 5-10 minutes depending on your system:</p>
             <pre><code class="language-bash">docker build -t yasmin .</code></pre>
 
-            <p>Alternatively, you can use the Makefile shortcut:</p>
+            <p>Alternatively, you can use the Makefile shortcut for a more convenient build process:</p>
             <pre><code class="language-bash">make docker_build</code></pre>
+            
+            <p><strong>Note:</strong> The Dockerfile uses multi-stage builds to optimize the final image size. Ensure you have at least 10GB of free disk space for the build process.</p>
 
             <h2>Running the Docker Container</h2>
-            <p>After building the image, start a Docker container with the following command:</p>
+            <p>After building the image, start a Docker container with full GUI support and network access. The command below configures X11 forwarding for graphical applications like the YASMIN Viewer and Editor, enables host networking for ROS 2 communication, and provides necessary permissions:</p>
             <pre><code class="language-bash">docker run -it --net=host --ipc=host --privileged \
   --env="DISPLAY" \
   --env="QT_X11_NO_MITSHM=1" \
@@ -102,25 +104,35 @@
   --volume="${XAUTHORITY}:/root/.Xauthority" \
   --entrypoint /bin/bash yasmin</code></pre>
 
-            <p>Or use the Makefile shortcut:</p>
+            <p>Or use the Makefile shortcut for a simpler command:</p>
             <pre><code class="language-bash">make docker_run</code></pre>
+            
+            <p><strong>What the flags do:</strong></p>
+            <ul>
+                <li><code>--net=host</code>: Shares the host's network stack, enabling seamless ROS 2 node communication</li>
+                <li><code>--ipc=host</code>: Allows shared memory communication for better performance</li>
+                <li><code>--privileged</code>: Grants extended privileges (required for some hardware access)</li>
+                <li><code>DISPLAY</code> and X11 volumes: Enable GUI applications to display on your host</li>
+            </ul>
 
             <h2>Available Docker Images</h2>
-            <p>Pre-built images are available for multiple ROS 2 distributions:</p>
+            <p>Pre-built images are available for multiple ROS 2 distributions on <a href="https://hub.docker.com/r/mgons/yasmin/" target="_blank">DockerHub</a>. These images include all YASMIN packages pre-compiled and ready to use, saving you build time:</p>
             <ul>
-                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=foxy" target="_blank">Foxy</a></li>
-                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=galactic" target="_blank">Galactic</a></li>
-                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=humble" target="_blank">Humble</a></li>
-                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=iron" target="_blank">Iron</a></li>
-                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=jazzy" target="_blank">Jazzy</a></li>
-                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=kilted" target="_blank">Kilted</a></li>
-                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=rolling" target="_blank">Rolling</a></li>
+                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=foxy" target="_blank">Foxy</a> - ROS 2 LTS (Long Term Support)</li>
+                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=galactic" target="_blank">Galactic</a> - Standard release</li>
+                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=humble" target="_blank">Humble</a> - ROS 2 LTS (Recommended for production)</li>
+                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=iron" target="_blank">Iron</a> - Standard release</li>
+                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=jazzy" target="_blank">Jazzy</a> - ROS 2 LTS</li>
+                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=kilted" target="_blank">Kilted</a> - Standard release</li>
+                <li><a href="https://hub.docker.com/r/mgons/yasmin/tags?name=rolling" target="_blank">Rolling</a> - Latest development version (unstable)</li>
             </ul>
 
             <h2>Using Pre-built Images</h2>
-            <p>To pull and run a specific ROS 2 distribution image:</p>
+            <p>Skip the build process entirely by using pre-built images. Simply pull the image for your desired ROS 2 distribution and run it. This is the fastest way to get started with YASMIN:</p>
             <pre><code class="language-bash">docker pull mgons/yasmin:humble
 docker run -it --net=host mgons/yasmin:humble</code></pre>
+            
+            <p><strong>Tip:</strong> Replace <code>humble</code> with any supported ROS 2 distribution tag (foxy, galactic, iron, jazzy, kilted, or rolling) to use a different version.</p>
 
             <h2>Notes</h2>
             <ul>
@@ -132,7 +144,7 @@ docker run -it --net=host mgons/yasmin:humble</code></pre>
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="https://uleroboticsgroup.github.io/yasmin/latest" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

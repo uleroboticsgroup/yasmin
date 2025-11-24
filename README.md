@@ -1668,6 +1668,8 @@ if __name__ == "__main__":
 <details>
 <summary>Click to expand</summary>
 
+> **Note:** When mixing Python and C++ states in the same state machine, they can communicate through the blackboard, but only with primitive data types: `int`, `float`, `bool`, and `string`. Complex objects or ROS messages cannot be directly shared between Python and C++ states.
+
 ```shell
 ros2 run yasmin_demos factory_demo.py
 ```
@@ -3306,6 +3308,8 @@ int main(int argc, char *argv[]) {
 
 <details>
 <summary>Click to expand</summary>
+
+> **Note:** When mixing Python and C++ states in the same state machine, they can communicate through the blackboard, but only with primitive data types: `int`, `float`, `bool`, and `string`. Complex objects or ROS messages cannot be directly shared between Python and C++ states.
 
 ```shell
 ros2 run yasmin_demos factory_demo

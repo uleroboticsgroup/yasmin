@@ -33,7 +33,7 @@
                 <li><a href="../../main_concepts.html">Main Concepts</a></li>
                 <li><a href="../../packages.html">Packages Overview</a></li>
                 <li><a href="../../docker.html">Docker</a></li>
-                <li><a href="../../xml_factory.html">XML Factory</a></li>
+                <li><a href="../../xml_factory.html">XML</a></li>
             </ul>
             
             <h3>Tutorials</h3>
@@ -41,7 +41,7 @@
                 <li><a href="../../tutorials.html">All Tutorials</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">C++ Tutorials</h4>
+            <h3 class="collapsible">C++ Tutorials</h3>
             <ul>
                 <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="remap_demo.html">Blackboard Remapping</a></li>
@@ -55,7 +55,7 @@
                 <li><a href="factory_demo.html">Factory (XML)</a></li>
             </ul>
 
-            <h4 style="font-size: 0.85rem; color: #888; margin: 15px 0 8px 10px; font-weight: 600;">Python Tutorials</h4>
+            <h3 class="collapsible">Python Tutorials</h3>
             <ul>
                 <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
                 <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
@@ -83,11 +83,21 @@
         </nav>
 
         <main class="main-content content">
-            <h1>Concurrence Demo (C++)</h1>
+            <h1><a href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/concurrence_demo.cpp" target="_blank" style="color: inherit; text-decoration: none;">Concurrence Demo (C++)</a></h1>
             <p>This tutorial demonstrates how to run multiple states concurrently in C++ using YASMIN's <code>Concurrence</code> container. Concurrency is essential in robotics for coordinating parallel operations like simultaneously monitoring sensors while executing actions, waiting for multiple conditions to be met, or performing independent tasks in parallel. The Concurrence container manages thread synchronization, outcome resolution, and blackboard access automatically, making it safe and easy to implement parallel state execution.</p>
 
+            <h2>Background</h2>
+            <p>The <strong>Concurrence</strong> container enables parallel execution of multiple states. It is useful when you need to:</p>
+            <ul>
+                <li>Execute independent tasks simultaneously without blocking each other</li>
+                <li>Wait for multiple conditions to be met (AND/OR logic)</li>
+                <li>Coordinate parallel behaviors with custom outcome logic</li>
+                <li>Implement timeout patterns where one state monitors time while another performs work</li>
+                <li>Monitor sensors while executing actions (e.g., watch for obstacles while navigating)</li>
+            </ul>
+
             <h2>1. Create the FooState</h2>
-            <p>Define a state with three possible outcomes that change based on a counter. This state executes relatively quickly (2 seconds) and stores a counter string in the blackboard. The different outcomes (<code>"outcome1"</code>, <code>"outcome2"</code>, <code>"outcome3"</code>) demonstrate how concurrent states can have varying results that affect the overall concurrence outcome. The counter is incremented after determining the outcome, so the state's behavior changes across multiple executions. This pattern is useful for representing tasks that progress through stages or have different completion criteria.</p>
+            <p>This state increments a counter and returns different outcomes based on the counter value. It executes relatively quickly (2 seconds) and stores a formatted string in the blackboard. The three different outcomes (<code>"outcome1"</code>, <code>"outcome2"</code>, <code>"outcome3"</code>) demonstrate how concurrent states can progress through stages and produce varying results. The counter is incremented after determining the outcome, so the state's behavior evolves with each execution. This pattern is useful for tasks that have distinct phases or thresholds, like collecting sensor samples, performing iterations of a computation, or tracking progress toward a goal.</p>
             <pre><code class="language-cpp">class FooState : public yasmin::State {
 public:
   int counter;
@@ -208,7 +218,7 @@ rclcpp::shutdown();</code></pre>
     </div>
 
     <footer>
-        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank" style="color: #0066cc;">Doxygen</a></p>
+        <p>&copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation generated with <a href="../../doxygen.html" target="_blank">Doxygen</a></p>
     </footer>
 </body>
 </html>

@@ -23,21 +23,29 @@ document.addEventListener('DOMContentLoaded', function() {
     sidebarHeaders.forEach(header => {
         const headerText = header.textContent.trim();
         
-        // Only make "Tutorials" and "Tools" sections collapsible
-        if (headerText !== 'Tutorials' && headerText !== 'Tools') {
+        // Only make "C++ Tutorials" and "Python Tutorials" sections collapsible
+        if (!['C++ Tutorials', 'Python Tutorials'].includes(headerText)) {
             return;
         }
         
-        // Mark as collapsible to show arrow
-        header.classList.add('collapsible');
+        // Mark as collapsible to show arrow (if not already marked in HTML)
+        if (!header.classList.contains('collapsible')) {
+            header.classList.add('collapsible');
+        }
+        
+        // All of these are nested collapsibles
+        const isNested = true;
         
         // Check if any child section contains the active link
         let hasActiveLink = false;
         let currentElement = header.nextElementSibling;
         
-        // Collect all elements until next h3
+        // Collect all elements until next h3 (simple for nested collapsibles)
         const childElements = [];
-        while (currentElement && currentElement.tagName !== 'H3') {
+        while (currentElement) {
+            if (currentElement.tagName === 'H3') {
+                break;
+            }
             childElements.push(currentElement);
             if (currentElement.tagName === 'UL') {
                 const activeLink = currentElement.querySelector('a.active');
@@ -64,7 +72,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Add click handler
-        header.addEventListener('click', function() {
+        header.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent default anchor behavior
+            e.stopPropagation(); // Prevent event bubbling
+            
             this.classList.toggle('collapsed');
             const isNowCollapsed = this.classList.contains('collapsed');
             
@@ -72,14 +83,13 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebarState[headerText] = isNowCollapsed;
             sessionStorage.setItem('sidebarState', JSON.stringify(sidebarState));
             
-            // Toggle all child elements until next h3
+            // Toggle child elements
             let nextElement = this.nextElementSibling;
-            while (nextElement && nextElement.tagName !== 'H3') {
-                if (nextElement.style.display === 'none') {
-                    nextElement.style.display = 'block';
-                } else {
-                    nextElement.style.display = 'none';
+            while (nextElement) {
+                if (nextElement.tagName === 'H3') {
+                    break;
                 }
+                nextElement.style.display = isNowCollapsed ? 'none' : 'block';
                 nextElement = nextElement.nextElementSibling;
             }
         });
