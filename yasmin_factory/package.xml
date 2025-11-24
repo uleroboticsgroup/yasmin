@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
     <name>yasmin_factory</name>
-    <version>3.5.2</version>
+    <version>3.5.3</version>
     <description>YASMIN factory to create FSMs from XML files</description>
     <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
     <license>GPL-3.0</license>
