@@ -6,6 +6,7 @@
     <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
     <license>GPL-3.0</license>
     <buildtool_depend>ament_cmake</buildtool_depend>
+    <buildtool_depend>ament_cmake_python</buildtool_depend>
     <depend>pluginlib</depend>
     <depend>pybind11-dev</depend>
     <depend>class_loader</depend>
