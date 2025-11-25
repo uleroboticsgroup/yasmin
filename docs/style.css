@@ -294,6 +294,21 @@ html.dark-mode .sidebar-close:hover {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     opacity: 0.9;
+    cursor: pointer; /* Make it look clickable */
+    position: relative;
+}
+
+.sidebar .tutorial-level::before {
+    content: '▼';
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 0.7em;
+    transition: transform 0.2s ease;
+    color: var(--h4-text);
+}
+
+.sidebar .tutorial-level.collapsed::before {
+    transform: rotate(-90deg);
 }
 
 /* Nested ULs under tutorial-level */
@@ -303,6 +318,7 @@ html.dark-mode .sidebar-close:hover {
     margin-bottom: 15px;
     border-left: 2px solid var(--sidebar-border);
     padding-left: 10px;
+    text-transform: none; /* Prevent uppercase inheritance for links */
 }
 
 .sidebar ul {
@@ -629,6 +645,58 @@ th {
     white-space: pre-wrap;
     word-wrap: break-word;
     border-radius: 0 4px 4px 0;
+}
+
+/* Warning/Info Box for tutorials */
+.warning-box {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+    border-left: 4px solid #ffc107;
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.warning-box strong {
+    color: #856404;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.warning-box p {
+    color: #856404;
+    margin: 10px 0;
+}
+
+.warning-box pre {
+    background-color: rgba(0, 0, 0, 0.1);
+    border: none;
+    margin: 10px 0;
+}
+
+.warning-box code {
+    color: #664d03;
+    background: transparent;
+}
+
+html.dark-mode .warning-box {
+    background: linear-gradient(135deg, #3d3520 0%, #4a4020 100%);
+    border-left-color: #ffca2c;
+}
+
+html.dark-mode .warning-box strong {
+    color: #ffc107;
+}
+
+html.dark-mode .warning-box p {
+    color: #e0c97a;
+}
+
+html.dark-mode .warning-box pre {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .warning-box code {
+    color: #ffe69c;
 }
 
 /* Footer */

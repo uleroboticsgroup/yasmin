@@ -125,30 +125,19 @@
           point).
         </p>
 
-        <div
-          class="info-box"
-          style="
-            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
-            color: #000;
-          "
-        >
-          <strong style="color: #856404"
-            >⚠️ Prerequisites - Create a ROS 2 Package First:</strong
-          >
-          <p style="color: #856404; margin-top: 5px;">
+        <div class="info-box warning-box">
+          <strong>⚠️ Prerequisites - Create a ROS 2 Package First:</strong>
+          <p>
             Before following this tutorial, you need to create a new ROS 2 package 
             to contain your Nav2 state machine code. The nav2_demo source files shown 
             here are not included in the default yasmin_demos package.
           </p>
-          <p style="color: #856404; margin-top: 10px;">
+          <p>
             Create your package with:
           </p>
-          <pre style="background-color: rgba(0, 0, 0, 0.1); padding: 10px; margin: 10px 0;"><code style="color: #000;">ros2 pkg create --build-type ament_cmake my_nav2_demo \
+          <pre><code>ros2 pkg create --build-type ament_cmake my_nav2_demo \
   --dependencies yasmin yasmin_ros nav2_msgs geometry_msgs</code></pre>
-          <p style="color: #856404; margin-top: 10px;">
+          <p>
             Then add the source code from this tutorial to your new package.
           </p>
         </div>
@@ -183,7 +172,18 @@
         </ol>
 
         <h2>Running the Demo</h2>
-        <pre><code class="language-bash">ros2 run yasmin_demos nav2_demo</code></pre>
+        <p>
+          After creating your package and adding the source code, build and run:
+        </p>
+        <pre><code class="language-bash"># Build your package
+colcon build --packages-select my_nav2_demo
+source install/setup.bash
+
+# Run the demo
+ros2 run my_nav2_demo nav2_demo</code></pre>
+        <p>
+          <em>Note: Make sure you have Nav2 running with a valid map before executing this demo.</em>
+        </p>
 
         <h2>Source Code</h2>
         <p>

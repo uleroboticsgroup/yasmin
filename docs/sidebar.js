@@ -88,6 +88,65 @@ document.addEventListener("DOMContentLoaded", function () {
   // Handle h4 collapsible sections (Beginner, Intermediate, Advanced)
   // REMOVED: No longer using h4 collapsible sections
 
+  // Handle tutorial levels (Beginner, Intermediate, Advanced) as collapsible
+  const tutorialLevels = document.querySelectorAll(".sidebar .tutorial-level");
+  tutorialLevels.forEach((level) => {
+    // Get the text content (e.g., "Beginner") - it's the first text node
+    let levelName = "";
+    for (let node of level.childNodes) {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {
+        levelName = node.textContent.trim();
+        break;
+      }
+    }
+    
+    // Find parent h3 for unique key context
+    let parentContext = "";
+    const parentUl = level.closest("ul");
+    if (parentUl && parentUl.previousElementSibling && parentUl.previousElementSibling.tagName === "H3") {
+      parentContext = parentUl.previousElementSibling.textContent.trim() + " > ";
+    }
+    
+    const key = parentContext + levelName;
+    
+    // Check if active link is inside
+    const hasActiveLink = level.querySelector("a.active") !== null;
+    
+    // Determine initial state
+    const isCollapsed = sidebarState[key] !== undefined ? sidebarState[key] : !hasActiveLink;
+    
+    const ul = level.querySelector("ul");
+    if (!ul) return; // Should have a ul
+    
+    if (isCollapsed) {
+      level.classList.add("collapsed");
+      ul.style.display = "none";
+    } else {
+      level.classList.remove("collapsed");
+      ul.style.display = "block";
+    }
+    
+    // Add click handler
+    level.addEventListener("click", function(e) {
+      // Don't toggle if clicking on a link
+      if (e.target.tagName === "A") return;
+      
+      e.stopPropagation();
+      
+      if (level.classList.contains("collapsed")) {
+        level.classList.remove("collapsed");
+        ul.style.display = "block";
+        sidebarState[key] = false;
+      } else {
+        level.classList.add("collapsed");
+        ul.style.display = "none";
+        sidebarState[key] = true;
+      }
+      
+      sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
+    });
+  });
+
   sidebarHeaders.forEach((header) => {
     const headerText = header.textContent.trim();
 

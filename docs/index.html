@@ -136,9 +136,9 @@
 
         <h2>Example State Machine</h2>
         <p>
-          The following diagram shows a basic example of a finite state machine
-          implemented with YASMIN. This navigation state machine demonstrates
-          how different states can be combined to create complex robot behavior:
+          The following diagram shows a navigation state machine example
+          implemented with YASMIN. This demonstrates how different states can be
+          combined to create complex robot behavior with multiple possible outcomes:
         </p>
 
         <div style="text-align: center; margin: 20px 0">
@@ -152,28 +152,24 @@
         <h3>States Description</h3>
         <ul>
           <li>
-            <strong>GETTING_INITIAL_DATA (XML):</strong> The initial state that
-            reads configuration data from an XML file. Once the data is loaded
-            successfully, it transitions to ORDERING_LOCATIONS.
+            <strong>GET_INITIAL_DATA (XML):</strong> The initial state that
+            reads configuration data from an XML file. It can transition to
+            ORDER_LOCATION on success, or end with <code>aborted</code> on failure.
           </li>
           <li>
-            <strong>ORDERING_LOCATIONS (C++):</strong> Processes and orders the
-            target locations. After ordering, it transitions to
-            GETTING_NEXT_LOCATION.
+            <strong>ORDER_LOCATION (C++):</strong> Processes and orders the
+            target locations. After ordering, it transitions to NEXT_LOCATION.
           </li>
           <li>
-            <strong>GETTING_NEXT_LOCATION (C++):</strong> Retrieves the next
-            waypoint from the list of locations. If there are more locations, it
-            transitions to NAVIGATING with the outcome <code>next</code>. If all
-            locations have been visited, it ends the state machine with
-            <code>end</code>.
+            <strong>NEXT_LOCATION (C++):</strong> Retrieves the next waypoint
+            from the list of locations. If there are more locations, it
+            transitions to NAVIGATING with <code>next</code>. If all locations
+            have been visited, it ends with <code>succeeded</code>.
           </li>
           <li>
             <strong>NAVIGATING (C++):</strong> Executes the navigation to the
-            current target location using ROS 2 navigation stack. This state can
-            result in <code>succeeded</code> (navigation complete),
-            <code>aborted</code> (navigation failed), or <code>canceled</code>
-            (navigation was canceled).
+            current target location. On success, it returns to NEXT_LOCATION.
+            It can also end with <code>aborted</code> or <code>canceled</code>.
           </li>
         </ul>
 
@@ -181,42 +177,35 @@
         <p>The state machine follows this flow:</p>
         <ol>
           <li>
-            Start → <strong>GETTING_INITIAL_DATA</strong>: Machine begins by
-            loading initial configuration.
+            Start → <strong>GET_INITIAL_DATA</strong>: Machine begins by
+            loading initial configuration from XML.
           </li>
           <li>
-            GETTING_INITIAL_DATA →
-            <strong>ORDERING_LOCATIONS</strong> (<code>succeeded</code>):
+            GET_INITIAL_DATA → <strong>ORDER_LOCATION</strong> (<code>succeeded</code>):
             Configuration loaded successfully.
           </li>
           <li>
-            ORDERING_LOCATIONS →
-            <strong>GETTING_NEXT_LOCATION</strong> (<code>succeeded</code>):
+            ORDER_LOCATION → <strong>NEXT_LOCATION</strong> (<code>succeeded</code>):
             Locations have been ordered.
           </li>
           <li>
-            GETTING_NEXT_LOCATION →
-            <strong>NAVIGATING</strong> (<code>next</code>): A new location is
-            available to navigate to.
+            NEXT_LOCATION → <strong>NAVIGATING</strong> (<code>next</code>):
+            A new location is available to navigate to.
           </li>
           <li>
-            NAVIGATING →
-            <strong>GETTING_NEXT_LOCATION</strong> (<code>succeeded</code>):
+            NAVIGATING → <strong>NEXT_LOCATION</strong> (<code>succeeded</code>):
             Navigation completed, get next location.
           </li>
           <li>
-            GETTING_NEXT_LOCATION →
-            <strong>End</strong> (<code>end</code>): All locations visited,
-            mission complete.
+            NEXT_LOCATION → <strong>End</strong> (<code>end</code>): All locations
+            visited, mission complete with <code>succeeded</code>.
           </li>
         </ol>
 
         <p>
-          <em
-            >This example showcases how YASMIN allows combining states written
+          <em>This example showcases how YASMIN allows combining states written
             in different languages (XML configuration, C++ processing) within
-            the same state machine, providing flexibility in implementation.</em
-          >
+            the same state machine, providing flexibility in implementation.</em>
         </p>
 
         <h2>Features</h2>
