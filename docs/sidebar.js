@@ -63,6 +63,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const savedState = sessionStorage.getItem("sidebarState");
   let sidebarState = savedState ? JSON.parse(savedState) : {};
 
+  // Add version check to clear old state if needed
+  const currentVersion = "1.1";
+  const savedVersion = sessionStorage.getItem("sidebarVersion");
+  if (savedVersion !== currentVersion) {
+    sidebarState = {};
+    sessionStorage.setItem("sidebarVersion", currentVersion);
+    sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
+  }
+
   // Highlight active link based on current URL
   const links = document.querySelectorAll(".sidebar a");
   const currentUrl = window.location.href.split("#")[0].split("?")[0];
@@ -74,6 +83,68 @@ document.addEventListener("DOMContentLoaded", function () {
     if (linkUrl === currentUrl) {
       link.classList.add("active");
     }
+  });
+
+  // Handle h4 collapsible sections (Beginner, Intermediate, Advanced)
+  // REMOVED: No longer using h4 collapsible sections
+
+  // Handle tutorial levels (Beginner, Intermediate, Advanced) as collapsible
+  const tutorialLevels = document.querySelectorAll(".sidebar .tutorial-level");
+  tutorialLevels.forEach((level) => {
+    // Get the text content (e.g., "Beginner") - it's the first text node
+    let levelName = "";
+    for (let node of level.childNodes) {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {
+        levelName = node.textContent.trim();
+        break;
+      }
+    }
+    
+    // Find parent h3 for unique key context
+    let parentContext = "";
+    const parentUl = level.closest("ul");
+    if (parentUl && parentUl.previousElementSibling && parentUl.previousElementSibling.tagName === "H3") {
+      parentContext = parentUl.previousElementSibling.textContent.trim() + " > ";
+    }
+    
+    const key = parentContext + levelName;
+    
+    // Check if active link is inside
+    const hasActiveLink = level.querySelector("a.active") !== null;
+    
+    // Determine initial state
+    const isCollapsed = sidebarState[key] !== undefined ? sidebarState[key] : !hasActiveLink;
+    
+    const ul = level.querySelector("ul");
+    if (!ul) return; // Should have a ul
+    
+    if (isCollapsed) {
+      level.classList.add("collapsed");
+      ul.style.display = "none";
+    } else {
+      level.classList.remove("collapsed");
+      ul.style.display = "block";
+    }
+    
+    // Add click handler
+    level.addEventListener("click", function(e) {
+      // Don't toggle if clicking on a link
+      if (e.target.tagName === "A") return;
+      
+      e.stopPropagation();
+      
+      if (level.classList.contains("collapsed")) {
+        level.classList.remove("collapsed");
+        ul.style.display = "block";
+        sidebarState[key] = false;
+      } else {
+        level.classList.add("collapsed");
+        ul.style.display = "none";
+        sidebarState[key] = true;
+      }
+      
+      sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
+    });
   });
 
   sidebarHeaders.forEach((header) => {
@@ -112,9 +183,10 @@ document.addEventListener("DOMContentLoaded", function () {
       currentElement = currentElement.nextElementSibling;
     }
 
-    // Check saved state or default to collapsed
-    const isCollapsed =
-      sidebarState[headerText] !== undefined ? sidebarState[headerText] : true;
+    // Check saved state or default to collapsed (unless has active link)
+    const isCollapsed = sidebarState[headerText] !== undefined 
+      ? sidebarState[headerText] 
+      : !hasActiveLink;
 
     if (isCollapsed) {
       header.classList.add("collapsed");
@@ -133,22 +205,25 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault(); // Prevent default anchor behavior
       e.stopPropagation(); // Prevent event bubbling
 
-      this.classList.toggle("collapsed");
-      const isNowCollapsed = this.classList.contains("collapsed");
+      const currentlyCollapsed = this.classList.contains("collapsed");
 
-      // Save state
-      sidebarState[headerText] = isNowCollapsed;
-      sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
-
-      // Toggle child elements
-      let nextElement = this.nextElementSibling;
-      while (nextElement) {
-        if (nextElement.tagName === "H3") {
-          break;
-        }
-        nextElement.style.display = isNowCollapsed ? "none" : "block";
-        nextElement = nextElement.nextElementSibling;
+      if (currentlyCollapsed) {
+        // Expand
+        this.classList.remove("collapsed");
+        childElements.forEach((el) => {
+          el.style.display = "block";
+        });
+        sidebarState[headerText] = false;
+      } else {
+        // Collapse
+        this.classList.add("collapsed");
+        childElements.forEach((el) => {
+          el.style.display = "none";
+        });
+        sidebarState[headerText] = true;
       }
+
+      sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
     });
   });
 

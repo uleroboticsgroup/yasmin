@@ -33,14 +33,14 @@
     </header>
 
     <div class="container">
-      <nav class="sidebar">
+            <nav class="sidebar">
         <h3>Getting Started</h3>
         <ul>
           <li><a href="../../index.html">Introduction</a></li>
+          <li><a href="../../docker.html">Docker Environment</a></li>
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
-          <li><a href="../../docker.html">Docker</a></li>
-          <li><a href="../../xml_factory.html">XML</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -50,34 +50,54 @@
 
         <h3 class="collapsible">C++ Tutorials</h3>
         <ul>
-          <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
-          <li><a href="remap_demo.html">Blackboard Remapping</a></li>
-          <li><a href="concurrence_demo.html">Concurrence</a></li>
-          <li><a href="service_client_demo.html">Service Client</a></li>
-          <li><a href="action_client_demo.html">Action Client</a></li>
-          <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
-          <li><a href="publisher_demo.html">Publisher</a></li>
-          <li><a href="parameters_demo.html">ROS Parameters</a></li>
-          <li><a href="nav2_demo.html">Nav2 Demo</a></li>
-          <li><a href="factory_demo.html">Factory (XML)</a></li>
+          <li class="tutorial-level">Beginner
+            <ul>
+              <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">Intermediate
+            <ul>
+              <li><a href="publisher_demo.html">Publisher</a></li>
+              <li><a href="monitor_demo.html">Monitor</a></li>
+              <li><a href="service_client_demo.html">Service Client</a></li>
+              <li><a href="action_client_demo.html">Action Client</a></li>
+              <li><a href="parameters_demo.html">ROS Parameters</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">Advanced
+            <ul>
+              <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+          </li>
         </ul>
 
         <h3 class="collapsible">Python Tutorials</h3>
         <ul>
-          <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
-          <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
-          <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
-          <li>
-            <a href="../python/service_client_demo.html">Service Client</a>
+          <li class="tutorial-level">Beginner
+            <ul>
+              <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+            </ul>
           </li>
-          <li><a href="../python/action_client_demo.html">Action Client</a></li>
-          <li>
-            <a href="../python/monitor_demo.html">Monitor (Subscriber)</a>
+          <li class="tutorial-level">Intermediate
+            <ul>
+              <li><a href="../python/publisher_demo.html">Publisher</a></li>
+              <li><a href="../python/monitor_demo.html">Monitor</a></li>
+              <li><a href="../python/service_client_demo.html">Service Client</a></li>
+              <li><a href="../python/action_client_demo.html">Action Client</a></li>
+              <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+            </ul>
           </li>
-          <li><a href="../python/publisher_demo.html">Publisher</a></li>
-          <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
-          <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
-          <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+          <li class="tutorial-level">Advanced
+            <ul>
+              <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+          </li>
         </ul>
 
         <h3>Tools</h3>
@@ -119,20 +139,18 @@
           of multiple states. It is useful when you need to:
         </p>
         <ul>
-          <li>
             Execute independent tasks simultaneously without blocking each other
           </li>
           <li>Wait for multiple conditions to be met (AND/OR logic)</li>
           <li>Coordinate parallel behaviors with custom outcome logic</li>
-          <li>
             Implement timeout patterns where one state monitors time while
             another performs work
           </li>
-          <li>
             Monitor sensors while executing actions (e.g., watch for obstacles
             while navigating)
           </li>
         </ul>
+          </li>
 
         <h2>1. Create the FooState</h2>
         <p>
