@@ -63,6 +63,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const savedState = sessionStorage.getItem("sidebarState");
   let sidebarState = savedState ? JSON.parse(savedState) : {};
 
+  // Add version check to clear old state if needed
+  const currentVersion = "1.1";
+  const savedVersion = sessionStorage.getItem("sidebarVersion");
+  if (savedVersion !== currentVersion) {
+    sidebarState = {};
+    sessionStorage.setItem("sidebarVersion", currentVersion);
+    sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
+  }
+
   // Highlight active link based on current URL
   const links = document.querySelectorAll(".sidebar a");
   const currentUrl = window.location.href.split("#")[0].split("?")[0];
@@ -75,6 +84,9 @@ document.addEventListener("DOMContentLoaded", function () {
       link.classList.add("active");
     }
   });
+
+  // Handle h4 collapsible sections (Beginner, Intermediate, Advanced)
+  // REMOVED: No longer using h4 collapsible sections
 
   sidebarHeaders.forEach((header) => {
     const headerText = header.textContent.trim();
@@ -112,9 +124,10 @@ document.addEventListener("DOMContentLoaded", function () {
       currentElement = currentElement.nextElementSibling;
     }
 
-    // Check saved state or default to collapsed
-    const isCollapsed =
-      sidebarState[headerText] !== undefined ? sidebarState[headerText] : true;
+    // Check saved state or default to collapsed (unless has active link)
+    const isCollapsed = sidebarState[headerText] !== undefined 
+      ? sidebarState[headerText] 
+      : !hasActiveLink;
 
     if (isCollapsed) {
       header.classList.add("collapsed");
@@ -133,22 +146,25 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault(); // Prevent default anchor behavior
       e.stopPropagation(); // Prevent event bubbling
 
-      this.classList.toggle("collapsed");
-      const isNowCollapsed = this.classList.contains("collapsed");
+      const currentlyCollapsed = this.classList.contains("collapsed");
 
-      // Save state
-      sidebarState[headerText] = isNowCollapsed;
-      sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
-
-      // Toggle child elements
-      let nextElement = this.nextElementSibling;
-      while (nextElement) {
-        if (nextElement.tagName === "H3") {
-          break;
-        }
-        nextElement.style.display = isNowCollapsed ? "none" : "block";
-        nextElement = nextElement.nextElementSibling;
+      if (currentlyCollapsed) {
+        // Expand
+        this.classList.remove("collapsed");
+        childElements.forEach((el) => {
+          el.style.display = "block";
+        });
+        sidebarState[headerText] = false;
+      } else {
+        // Collapse
+        this.classList.add("collapsed");
+        childElements.forEach((el) => {
+          el.style.display = "none";
+        });
+        sidebarState[headerText] = true;
       }
+
+      sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
     });
   });
 

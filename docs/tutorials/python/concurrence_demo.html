@@ -33,14 +33,14 @@
     </header>
 
     <div class="container">
-      <nav class="sidebar">
+            <nav class="sidebar">
         <h3>Getting Started</h3>
         <ul>
           <li><a href="../../index.html">Introduction</a></li>
+          <li><a href="../../docker.html">Docker Environment</a></li>
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
-          <li><a href="../../docker.html">Docker</a></li>
-          <li><a href="../../xml_factory.html">XML</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -50,30 +50,54 @@
 
         <h3 class="collapsible">C++ Tutorials</h3>
         <ul>
-          <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
-          <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
-          <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
-          <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
-          <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
-          <li><a href="../cpp/monitor_demo.html">Monitor (Subscriber)</a></li>
-          <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
-          <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
-          <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
-          <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
+          <li class="tutorial-level">Beginner
+            <ul>
+              <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">Intermediate
+            <ul>
+              <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="../cpp/monitor_demo.html">Monitor</a></li>
+              <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
+              <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
+              <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">Advanced
+            <ul>
+              <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
+            </ul>
+          </li>
         </ul>
 
         <h3 class="collapsible">Python Tutorials</h3>
         <ul>
-          <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
-          <li><a href="remap_demo.html">Blackboard Remapping</a></li>
-          <li><a href="concurrence_demo.html">Concurrence</a></li>
-          <li><a href="service_client_demo.html">Service Client</a></li>
-          <li><a href="action_client_demo.html">Action Client</a></li>
-          <li><a href="monitor_demo.html">Monitor (Subscriber)</a></li>
-          <li><a href="publisher_demo.html">Publisher</a></li>
-          <li><a href="parameters_demo.html">ROS Parameters</a></li>
-          <li><a href="nav2_demo.html">Nav2 Demo</a></li>
-          <li><a href="factory_demo.html">Factory (XML)</a></li>
+          <li class="tutorial-level">Beginner
+            <ul>
+              <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">Intermediate
+            <ul>
+              <li><a href="publisher_demo.html">Publisher</a></li>
+              <li><a href="monitor_demo.html">Monitor</a></li>
+              <li><a href="service_client_demo.html">Service Client</a></li>
+              <li><a href="action_client_demo.html">Action Client</a></li>
+              <li><a href="parameters_demo.html">ROS Parameters</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">Advanced
+            <ul>
+              <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="factory_demo.html">Factory (XML)</a></li>
+            </ul>
+          </li>
         </ul>
 
         <h3>Tools</h3>
@@ -117,20 +141,18 @@
           of multiple states. It is useful when you need to:
         </p>
         <ul>
-          <li>
             Execute independent tasks simultaneously without blocking each other
           </li>
           <li>Wait for multiple conditions to be met (AND/OR logic)</li>
           <li>Coordinate parallel behaviors with custom outcome logic</li>
-          <li>
             Implement timeout patterns where one state monitors time while
             another performs work
           </li>
-          <li>
             Monitor sensors while executing actions (e.g., watch for obstacles
             while navigating)
           </li>
         </ul>
+          </li>
 
         <h2>1. Create the FooState</h2>
         <p>
@@ -350,16 +372,15 @@ if __name__ == "__main__":
           The <code>outcome_map</code> defines when the concurrence completes:
         </p>
         <ul>
-          <li>
             If FOO returns "outcome1" AND BAR returns "outcome3" → concurrence
             returns "outcome1" and loops
           </li>
-          <li>
             If FOO returns "outcome2" AND BAR returns "outcome3" → concurrence
             returns "outcome2" and loops
           </li>
           <li>Otherwise → returns "defaulted" and exits to "outcome4"</li>
         </ul>
+          </li>
 
         <div class="page-navigation">
           <a href="../python/remap_demo.html" class="nav-button prev"

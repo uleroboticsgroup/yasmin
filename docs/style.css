@@ -273,6 +273,7 @@ html.dark-mode .sidebar-close:hover {
 .sidebar ul + h3.collapsible + ul {
     transition: opacity 0.2s ease, max-height 0.3s ease;
     overflow: hidden;
+    margin-left: 20px; /* Indent content of collapsible sections */
 }
 
 /* Remove transition delays that might cause flicker */
@@ -281,17 +282,27 @@ html.dark-mode .sidebar-close:hover {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* H4 subsections styling with better visual separation */
-.sidebar h4 {
-    font-size: 1rem;
-    color: var(--h4-text);
-    margin: 15px 0 8px 0;
-    padding-left: 10px;
+/* Tutorial levels (Beginner, Intermediate, Advanced) */
+.sidebar .tutorial-level {
     font-weight: 600;
-    border-left: 3px solid var(--h4-border);
-    background: var(--h4-bg);
-    padding: 8px 10px;
-    border-radius: 4px;
+    color: var(--h4-text);
+    margin-top: 12px;
+    margin-bottom: 5px;
+    list-style: none;
+    padding-left: 15px; /* Indentation relative to parent */
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+}
+
+/* Nested ULs under tutorial-level */
+.sidebar .tutorial-level ul {
+    margin-left: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border-left: 2px solid var(--sidebar-border);
+    padding-left: 10px;
 }
 
 .sidebar ul {

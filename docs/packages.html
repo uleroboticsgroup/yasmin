@@ -33,14 +33,14 @@
     </header>
 
     <div class="container">
-      <nav class="sidebar">
+            <nav class="sidebar">
         <h3>Getting Started</h3>
         <ul>
           <li><a href="index.html">Introduction</a></li>
+          <li><a href="docker.html">Docker Environment</a></li>
           <li><a href="main_concepts.html">Main Concepts</a></li>
+          <li><a href="xml_factory.html">XML State Machines</a></li>
           <li><a href="packages.html">Packages Overview</a></li>
-          <li><a href="docker.html">Docker</a></li>
-          <li><a href="xml_factory.html">XML</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -50,61 +50,53 @@
 
         <h3 class="collapsible">C++ Tutorials</h3>
         <ul>
-          <li>
-            <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+          <li class="tutorial-level">Beginner
+            <ul>
+              <li><a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="tutorials/cpp/concurrence_demo.html">Concurrence</a></li>
+            </ul>
           </li>
-          <li>
-            <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+          <li class="tutorial-level">Intermediate
+            <ul>
+              <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
+              <li><a href="tutorials/cpp/service_client_demo.html">Service Client</a></li>
+              <li><a href="tutorials/cpp/action_client_demo.html">Action Client</a></li>
+              <li><a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a></li>
+            </ul>
           </li>
-          <li><a href="tutorials/cpp/concurrence_demo.html">Concurrence</a></li>
-          <li>
-            <a href="tutorials/cpp/service_client_demo.html">Service Client</a>
+          <li class="tutorial-level">Advanced
+            <ul>
+              <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
+            </ul>
           </li>
-          <li>
-            <a href="tutorials/cpp/action_client_demo.html">Action Client</a>
-          </li>
-          <li>
-            <a href="tutorials/cpp/monitor_demo.html">Monitor (Subscriber)</a>
-          </li>
-          <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
-          <li>
-            <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
-          </li>
-          <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
-          <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
         </ul>
 
         <h3 class="collapsible">Python Tutorials</h3>
         <ul>
-          <li>
-            <a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a>
+          <li class="tutorial-level">Beginner
+            <ul>
+              <li><a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="tutorials/python/remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="tutorials/python/concurrence_demo.html">Concurrence</a></li>
+            </ul>
           </li>
-          <li>
-            <a href="tutorials/python/remap_demo.html">Blackboard Remapping</a>
+          <li class="tutorial-level">Intermediate
+            <ul>
+              <li><a href="tutorials/python/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
+              <li><a href="tutorials/python/service_client_demo.html">Service Client</a></li>
+              <li><a href="tutorials/python/action_client_demo.html">Action Client</a></li>
+              <li><a href="tutorials/python/parameters_demo.html">ROS Parameters</a></li>
+            </ul>
           </li>
-          <li>
-            <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
-          </li>
-          <li>
-            <a href="tutorials/python/service_client_demo.html"
-              >Service Client</a
-            >
-          </li>
-          <li>
-            <a href="tutorials/python/action_client_demo.html">Action Client</a>
-          </li>
-          <li>
-            <a href="tutorials/python/monitor_demo.html"
-              >Monitor (Subscriber)</a
-            >
-          </li>
-          <li><a href="tutorials/python/publisher_demo.html">Publisher</a></li>
-          <li>
-            <a href="tutorials/python/parameters_demo.html">ROS Parameters</a>
-          </li>
-          <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
-          <li>
-            <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+          <li class="tutorial-level">Advanced
+            <ul>
+              <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="tutorials/python/factory_demo.html">Factory (XML)</a></li>
+            </ul>
           </li>
         </ul>
 
@@ -125,7 +117,13 @@
         <h1>Packages Overview</h1>
         <p>
           The YASMIN project is organized into several packages, each serving a
-          specific purpose:
+          specific purpose. The packages are divided into three main categories:
+        </p>
+
+        <h2>Core</h2>
+        <p>
+          The core packages provide the fundamental building blocks for creating
+          state machines and integrating with ROS 2.
         </p>
 
         <h3>
@@ -178,6 +176,12 @@
           communication and visualization.
         </p>
 
+        <h2>Tools</h2>
+        <p>
+          The tools packages provide utilities for visualization, design, and 
+          XML-based configuration of state machines.
+        </p>
+
         <h3>
           <a
             href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_viewer"
@@ -215,6 +219,12 @@
           A graphical editor for designing YASMIN state machines. It allows you
           to visually create states, transitions, and export them to XML for use
           with <code>yasmin_factory</code>.
+        </p>
+
+        <h2>Demos</h2>
+        <p>
+          Example packages that demonstrate how to use YASMIN features in 
+          real-world scenarios.
         </p>
 
         <h3>
