@@ -107,15 +107,17 @@ public:
       this->type_registry.erase(key);
     }
 
-    // Insert or update the value
+    // Insert value and type information if key does not exist
     if (!this->contains(key)) {
       this->values[key] = std::make_shared<T>(value);
       this->type_registry[key] = demangle_type(typeid(T).name());
 
     } else {
+      // Check if the type is the same before updating
       if (this->type_registry.at(key) != demangle_type(typeid(T).name())) {
         this->values[key] = std::make_shared<T>(value);
         this->type_registry[key] = demangle_type(typeid(T).name());
+        // Update the existing value
       } else {
         *(std::static_pointer_cast<T>(this->values.at(key))) = value;
       }
@@ -135,11 +137,13 @@ public:
 
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
+    // Check if the key exists
     if (!this->contains(key)) {
       throw std::runtime_error("Element '" + key +
                                "' does not exist in the blackboard");
     }
 
+    // Return the value casted to the requested type
     return *(std::static_pointer_cast<T>(this->values.at(this->remap(key))));
   }
 

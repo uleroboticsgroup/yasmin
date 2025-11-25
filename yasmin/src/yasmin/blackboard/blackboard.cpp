@@ -57,6 +57,7 @@ std::string Blackboard::get_type(const std::string &key) {
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
   auto remapped_key = this->remap(key);
 
+  // Check if the key exists
   if (!this->contains(key)) {
     throw std::runtime_error("Element '" + key +
                              "' does not exist in the blackboard");
@@ -70,6 +71,7 @@ std::string Blackboard::to_string() {
 
   std::string result = "Blackboard\n";
 
+  // Iterate through all key-value pairs and append to the result string
   for (const auto &ele : this->values) {
     result +=
         "\t" + ele.first + " (" + this->type_registry.at(ele.first) + ")\n";
@@ -79,6 +81,8 @@ std::string Blackboard::to_string() {
 }
 
 const std::string &Blackboard::remap(const std::string &key) {
+
+  // Check if the key has a remapping
   if (this->remappings.find(key) != this->remappings.end()) {
     return this->remappings.at(key);
   }
