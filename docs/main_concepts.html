@@ -352,6 +352,141 @@
           blackboard operations, but you should design your states to avoid
           conflicts when reading and writing shared data concurrently.
         </p>
+
+        <h2>Complex FSM Example</h2>
+        <p>
+          The following diagram shows a complex hierarchical state machine for a waste 
+          collection robot. This example demonstrates how YASMIN can be used to build 
+          sophisticated robot behaviors by combining flat FSM patterns with nested 
+          state machines.
+        </p>
+
+        <div style="text-align: center; margin: 20px 0">
+          <img
+            src="complex_fsm.png"
+            alt="Complex FSM Example - Hierarchical State Machine"
+            style="max-width: 100%; height: auto; border-radius: 8px"
+          />
+        </div>
+
+        <h3>Understanding the Diagram</h3>
+        <p>
+          The visualization uses different visual elements to convey information:
+        </p>
+        <ul>
+          <li>
+            <strong>Ellipses (ovals):</strong> Represent <strong>states</strong>. Each
+            state performs a specific task and returns an outcome.
+          </li>
+          <li>
+            <strong>Rectangles (red boxes):</strong> Represent <strong>terminal outcomes</strong> 
+            of the state machine. These are the final results: <code>succeeded</code>, 
+            <code>aborted</code>, or <code>canceled</code>.
+          </li>
+          <li>
+            <strong>Arrows:</strong> Represent <strong>transitions</strong> between states. 
+            Each arrow is labeled with the outcome that triggers the transition.
+          </li>
+          <li>
+            <strong>Blue container (right side):</strong> Represents a <strong>nested state 
+            machine</strong> called "TAKING_WASTES". This is a complete FSM embedded within 
+            the parent state machine.
+          </li>
+        </ul>
+
+        <h3>States in the Parent FSM (Left Side)</h3>
+        <ul>
+          <li>
+            <strong>GETTING_INITIAL_DATA (XML):</strong> The initial state that loads 
+            configuration data (waypoints, parameters) from an XML file. On success, 
+            it transitions to ORDERING_LOCATIONS. On failure, it ends with <code>aborted</code>.
+          </li>
+          <li>
+            <strong>ORDERING_LOCATIONS (C++):</strong> Processes and orders the target 
+            locations for optimal navigation. Transitions to GETTING_NEXT_LOCATION on success.
+          </li>
+          <li>
+            <strong>GETTING_NEXT_LOCATION (C++):</strong> Retrieves the next waypoint from 
+            the list. If there are more locations (<code>next</code>), it transitions to 
+            CHECKING_DUMPSTER_LOCATION. If all are visited (<code>end</code>), it ends with 
+            <code>succeeded</code>.
+          </li>
+          <li>
+            <strong>CHECKING_DUMPSTER_LOCATION (C++):</strong> Determines if the current 
+            location is a dumpster (<code>yes</code>) or not (<code>no</code>). This creates 
+            a branch in the state machine flow.
+          </li>
+          <li>
+            <strong>NAVIGATING (C++):</strong> Executes navigation to the current target 
+            using Nav2. Can result in <code>succeeded</code>, <code>aborted</code>, or 
+            <code>canceled</code>.
+          </li>
+          <li>
+            <strong>DETECTING_OBJECTS (C++):</strong> Uses perception to detect waste 
+            objects at the current location. Transitions to the nested TAKING_WASTES 
+            state machine on success.
+          </li>
+        </ul>
+
+        <h3>Nested State Machine: TAKING_WASTES (Right Side)</h3>
+        <p>
+          The blue container shows a nested state machine that handles the waste collection 
+          subprocess. This demonstrates the power of hierarchical FSMs - the parent machine 
+          sees "TAKING_WASTES" as a single state, but internally it contains a complete FSM:
+        </p>
+        <ul>
+          <li>
+            <strong>GETTING_NEXT_OBJECT (C++):</strong> The initial state of the nested 
+            machine. Retrieves the next detected object to collect. Returns <code>next</code> 
+            if there are more objects, or <code>end</code> when all objects are collected.
+          </li>
+          <li>
+            <strong>NAVIGATE_TO_OBJECT (C++):</strong> Navigates to the position of the 
+            detected object for pickup.
+          </li>
+          <li>
+            <strong>PICKING_OBJECT (C++):</strong> Controls the manipulator to grasp and 
+            pick up the waste object.
+          </li>
+          <li>
+            <strong>NAVIGATING_TO_DUMPSTER (C++):</strong> Navigates to the dumpster 
+            location while carrying the object.
+          </li>
+          <li>
+            <strong>PLACING_OBJECT (C++):</strong> Releases the object into the dumpster. 
+            On success, returns to GETTING_NEXT_OBJECT for the next waste item.
+          </li>
+        </ul>
+
+        <h3>Transitions and Flow</h3>
+        <p>
+          The arrows show how the state machine flows based on outcomes:
+        </p>
+        <ul>
+          <li>
+            <strong><code>succeeded</code>:</strong> Normal completion of a state's task. 
+            Typically advances to the next logical step.
+          </li>
+          <li>
+            <strong><code>next</code>:</strong> Indicates there are more items to process 
+            (locations or objects).
+          </li>
+          <li>
+            <strong><code>end</code>:</strong> Indicates all items have been processed.
+          </li>
+          <li>
+            <strong><code>yes</code>/<code>no</code>:</strong> Boolean decision outcomes 
+            used for branching logic.
+          </li>
+          <li>
+            <strong><code>aborted</code>:</strong> Error condition - something went wrong 
+            that cannot be recovered.
+          </li>
+          <li>
+            <strong><code>canceled</code>:</strong> The operation was intentionally stopped 
+            (e.g., by user command or preemption).
+          </li>
+        </ul>
       </main>
     </div>
 
