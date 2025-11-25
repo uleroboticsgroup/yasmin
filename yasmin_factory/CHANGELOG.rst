@@ -2,6 +2,15 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.0.1 (2025-11-25)
+------------------
+* adding ament_cmake_python to factory package.xml
+* Revert "removing Python3_INCLUDE_DIRS"
+  This reverts commit a12378ab6fa1c36661832f8ad7db16a1a3440e95.
+* removing Python3_INCLUDE_DIRS
+* fixing dependencies in package.xml of demos and factory
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.0 (2025-11-24)
 ------------------
 * adding boos dependency to factory for Foxy

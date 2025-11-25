@@ -3,6 +3,9 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.0.1 (2025-11-25)
+------------------
+
 4.0.0 (2025-11-24)
 ------------------
 * adding destructor to state machine and cleanup to viewer pub

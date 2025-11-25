@@ -3,6 +3,11 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.0.1 (2025-11-25)
+------------------
+* setting timeout for yasmin_ros tests
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.0 (2025-11-24)
 ------------------
 * removing ament_target_dependencies form yasmin_ros

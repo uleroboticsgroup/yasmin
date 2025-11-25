@@ -3,6 +3,11 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.0.1 (2025-11-25)
+------------------
+* fixing dependencies in package.xml of demos and factory
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.0 (2025-11-24)
 ------------------
 * adding cleanup to python demos

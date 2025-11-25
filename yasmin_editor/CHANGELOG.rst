@@ -2,6 +2,9 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.0.1 (2025-11-25)
+------------------
+
 4.0.0 (2025-11-24)
 ------------------
 * removing directories "state_mahcines" and "resource" from editor

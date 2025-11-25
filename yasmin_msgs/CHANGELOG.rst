@@ -3,6 +3,9 @@ Changelog for package yasmin_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.0.1 (2025-11-25)
+------------------
+
 4.0.0 (2025-11-24)
 ------------------
 * Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
