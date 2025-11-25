@@ -28,7 +28,6 @@
 #include <vector>
 
 #include "yasmin/blackboard/blackboard.hpp"
-#include "yasmin/blackboard/blackboard_value.hpp"
 
 namespace py = pybind11;
 

@@ -16,18 +16,41 @@
 #ifndef YASMIN__BLACKBOARD__BLACKBOARD_HPP
 #define YASMIN__BLACKBOARD__BLACKBOARD_HPP
 
+#include <cxxabi.h>
 #include <exception>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <string>
 
-#include "yasmin/blackboard/blackboard_value.hpp"
-#include "yasmin/blackboard/blackboard_value_interface.hpp"
 #include "yasmin/logs.hpp"
 
 namespace yasmin {
 namespace blackboard {
+
+/**
+ * @brief Demangle a C++ type name to a human-readable format.
+ * @param mangled_name The mangled type name.
+ * @return The demangled type name.
+ */
+inline std::string demangle_type(const std::string &mangled_name) {
+
+  std::string name = mangled_name;
+
+#ifdef __GNUG__ // If using GCC/G++
+  int status;
+  // Demangle the name using GCC's demangling function
+  char *demangled =
+      abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
+  if (status == 0) {
+    name = demangled;
+  }
+  free(demangled);
+#endif
+
+  return name; // Return the demangled type name
+}
 
 /**
  * @class Blackboard
@@ -35,15 +58,14 @@ namespace blackboard {
  *
  * The Blackboard class allows storing, retrieving, and managing
  * values associated with string keys in a thread-safe manner using
- * a recursive mutex. Values are stored as pointers to
- * BlackboardValueInterface instances.
+ * a recursive mutex.
  */
 class Blackboard {
 private:
   /// Mutex for thread safety.
   std::recursive_mutex mutex;
   /// Storage for key-value pairs.
-  std::map<std::string, BlackboardValueInterface *> values;
+  std::map<std::string, std::shared_ptr<void>> values;
   /// Storage for type information for each key.
   std::map<std::string, std::string> type_registry;
   /// Storage for key remappings.
@@ -64,9 +86,6 @@ public:
    */
   Blackboard(const Blackboard &other);
 
-  /** @brief Virtual destructor for Blackboard. */
-  virtual ~Blackboard();
-
   /**
    * @brief Set a value in the blackboard.
    * @tparam T The type of the value to store.
@@ -79,8 +98,6 @@ public:
 
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
-    BlackboardValue<T> *b_value = new BlackboardValue<T>(value);
-
     // Apply remapping if exists
     std::string key = this->remap(name);
 
@@ -92,13 +109,16 @@ public:
 
     // Insert or update the value
     if (!this->contains(key)) {
-      this->values.insert({key, b_value});
-      this->type_registry.insert({key, b_value->get_type()});
+      this->values[key] = std::make_shared<T>(value);
+      this->type_registry[key] = demangle_type(typeid(T).name());
 
     } else {
-      b_value = (BlackboardValue<T> *)this->values.at(key);
-      b_value->set(value);
-      this->type_registry[key] = b_value->get_type();
+      if (this->type_registry.at(key) != demangle_type(typeid(T).name())) {
+        this->values[key] = std::make_shared<T>(value);
+        this->type_registry[key] = demangle_type(typeid(T).name());
+      } else {
+        *(std::static_pointer_cast<T>(this->values.at(key))) = value;
+      }
     }
   }
 
@@ -120,9 +140,7 @@ public:
                                "' does not exist in the blackboard");
     }
 
-    BlackboardValue<T> *b_value =
-        (BlackboardValue<T> *)this->values.at(this->remap(key));
-    return b_value->get();
+    return *(std::static_pointer_cast<T>(this->values.at(this->remap(key))));
   }
 
   /**

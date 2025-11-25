@@ -29,21 +29,13 @@ Blackboard::Blackboard(const Blackboard &other) {
   this->type_registry = other.type_registry;
 }
 
-Blackboard::~Blackboard() {
-  // Deallocate memory for each value stored in the blackboard
-  for (const auto &ele : this->values) {
-    delete this->values.at(ele.first);
-  }
-}
-
 void Blackboard::remove(const std::string &key) {
   YASMIN_LOG_DEBUG("Removing '%s' from the blackboard", key.c_str());
 
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
   auto remapped_key = this->remap(key);
-  delete this->values.at(remapped_key);    // Free memory of the value
-  this->values.erase(remapped_key);        // Remove the entry from the map
-  this->type_registry.erase(remapped_key); // Remove the type info
+  this->values.erase(remapped_key);
+  this->type_registry.erase(remapped_key);
 }
 
 bool Blackboard::contains(const std::string &key) {
@@ -51,13 +43,12 @@ bool Blackboard::contains(const std::string &key) {
 
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
   auto remapped_key = this->remap(key);
-  return (this->values.find(remapped_key) !=
-          this->values.end()); // Check if key exists
+  return (this->values.find(remapped_key) != this->values.end());
 }
 
 int Blackboard::size() {
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
-  return this->values.size(); // Return the number of key-value pairs
+  return this->values.size();
 }
 
 std::string Blackboard::get_type(const std::string &key) {
@@ -79,12 +70,12 @@ std::string Blackboard::to_string() {
 
   std::string result = "Blackboard\n";
 
-  // Iterate through each value and append its string representation
   for (const auto &ele : this->values) {
-    result += "\t" + ele.first + " (" + ele.second->to_string() + ")\n";
+    result +=
+        "\t" + ele.first + " (" + this->type_registry.at(ele.first) + ")\n";
   }
 
-  return result; // Return the complete string representation
+  return result;
 }
 
 const std::string &Blackboard::remap(const std::string &key) {
