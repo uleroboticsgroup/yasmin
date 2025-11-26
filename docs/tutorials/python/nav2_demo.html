@@ -215,13 +215,6 @@ END = "end"  ##&lt; Indicates no more waypoints
 class Nav2State(ActionState):
     """
     ActionState for navigating to a specified pose using ROS 2 Navigation.
-
-    Attributes:
-        None
-
-    Methods:
-        create_goal_handler(blackboard: Blackboard) -&gt; NavigateToPose.Goal:
-            Creates the navigation goal from the blackboard.
     """
 
     def __init__(self) -&gt; None:

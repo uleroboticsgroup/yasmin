@@ -37,22 +37,6 @@ class ActionState(State):
     This class encapsulates the behavior of a ROS 2 action client within a YASMIN
     state. It allows the creation and management of goals, feedback, and results
     associated with an action server.
-
-    Attributes:
-        _node (Node): Shared pointer to the ROS 2 node.
-        _action_name (str): Name of the action to communicate with.
-        _action_client (ActionClient): Shared pointer to the action client.
-        _action_done_event (Event): Event used to wait for action completion.
-        _action_result (Any): Shared pointer to the action result.
-        _action_status (GoalStatus): Status of the action execution.
-        _goal_handle (ClientGoalHandle): Handle for the current goal.
-        _goal_handle_lock (RLock): Lock to manage access to the goal handle.
-        _create_goal_handler (Callable[[Blackboard], Any]): Handler function for creating goals.
-        _result_handler (Callable[[Blackboard, Any], str]): Handler function for processing results.
-        _feedback_handler (Callable[[Blackboard, Any], None]): Handler function for processing feedback.
-        _wait_timeout (float): Maximum time to wait for the action server.
-        _response_timeout (float): Timeout for the action response.
-        _maximum_retry (int): Maximum number of retries.
     """
 
     def __init__(

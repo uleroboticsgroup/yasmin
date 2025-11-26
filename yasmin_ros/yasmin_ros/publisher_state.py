@@ -33,12 +33,6 @@ class PublisherState(State):
 
     This class provides functionality to publish to a ROS 2 topic
     and create custom messages.
-
-    Attributes:
-        _node (Node): Shared pointer to the ROS 2 node.
-        _pub (Publisher): Publisher to the ROS 2 topic.
-        _topic_name (str): Name of the topic to publish to.
-        _create_message_handler (Callable[[Blackboard], Any]): Callback handler to create messages.
     """
 
     def __init__(

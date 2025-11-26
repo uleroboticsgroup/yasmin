@@ -173,19 +173,6 @@ class PrintOdometryState(MonitorState):
 
     This state monitors Odometry messages from the specified ROS topic,
     logging them and transitioning based on the number of messages received.
-
-    Attributes:
-        times (int): The number of messages to monitor before transitioning
-                     to the next outcome.
-
-    Args:
-        times (int): The initial count of how many Odometry messages to
-                     process before changing state.
-
-    Methods:
-        monitor_handler(blackboard: Blackboard, msg: Odometry) -&gt; str:
-            Handles incoming Odometry messages, logging the message and
-            returning the appropriate outcome based on the remaining count.
     """
 
     def __init__(self, times: int) -&gt; None:

@@ -33,11 +33,6 @@ class AddTwoIntsState(ServiceState):
     This class is a state in a finite state machine that sends a request
     to the AddTwoInts service, retrieves the response, and updates the
     blackboard with the result.
-
-    Attributes:
-        service_type (type): The service type being used (AddTwoInts).
-        service_name (str): The name of the service.
-        outcomes (list): The list of possible outcomes for this state.
     """
 
     def __init__(self) -> None:

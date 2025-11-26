@@ -35,18 +35,6 @@ class ServiceState(State):
     This class manages communication with a specified ROS 2 service,
     allowing it to send requests and handle responses. It extends
     the base State class.
-
-    Attributes:
-        _node (Node): The ROS 2 node used to communicate with the service.
-        _srv_name (str): The name of the service to call.
-        _service_client (Client): The client used to call the service.
-        _create_request_handler (Callable[[Blackboard], Any]): Function to create service requests.
-        _response (Any): The response received from the service.
-        _response_handler (Callable[[Blackboard, Any], str]): Function to handle service responses.
-        _wait_timeout (float): Maximum wait time for service availability.
-        _response_timeout (float): Timeout for the service response.
-        _maximum_retry (int): Maximum number of retries.
-        _response_received_event (Event): Event to signal when the service response is received.
     """
 
     def __init__(

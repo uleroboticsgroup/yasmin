@@ -152,9 +152,6 @@ from yasmin_viewer import YasminViewerPub
 class FooState(State):
     """
     Represents the Foo state in the state machine.
-
-    Attributes:
-        counter (int): Counter to track the number of executions of this state.
     """
 
     def __init__(self) -> None:
@@ -443,9 +440,6 @@ from yasmin_viewer import YasminViewerPub
 class FooState(State):
     """
     Represents the Foo state in the state machine.
-
-    Attributes:
-        counter (int): Counter to track the number of executions of this state.
     """
 
     def __init__(self) -> None:
@@ -636,11 +630,6 @@ class AddTwoIntsState(ServiceState):
     This class is a state in a finite state machine that sends a request
     to the AddTwoInts service, retrieves the response, and updates the
     blackboard with the result.
-
-    Attributes:
-        service_type (type): The service type being used (AddTwoInts).
-        service_name (str): The name of the service.
-        outcomes (list): The list of possible outcomes for this state.
     """
 
     def __init__(self) -> None:
@@ -816,9 +805,6 @@ class FibonacciState(ActionState):
 
     Inherits from ActionState and implements methods to handle the
     Fibonacci action in a finite state machine.
-
-    Attributes:
-        None
     """
 
     def __init__(self) -> None:
@@ -828,12 +814,6 @@ class FibonacciState(ActionState):
         Sets up the action type and the action name for the Fibonacci
         action. Initializes goal, response handler, and feedback
         processing callbacks.
-
-        Args:
-            None
-
-        Returns:
-            None
         """
         super().__init__(
             Fibonacci,  # action type
@@ -1014,19 +994,6 @@ class PrintOdometryState(MonitorState):
 
     This state monitors Odometry messages from the specified ROS topic,
     logging them and transitioning based on the number of messages received.
-
-    Attributes:
-        times (int): The number of messages to monitor before transitioning
-                     to the next outcome.
-
-    Args:
-        times (int): The initial count of how many Odometry messages to
-                     process before changing state.
-
-    Methods:
-        monitor_handler(blackboard: Blackboard, msg: Odometry) -> str:
-            Handles incoming Odometry messages, logging the message and
-            returning the appropriate outcome based on the remaining count.
     """
 
     def __init__(self, times: int) -> None:
@@ -1301,9 +1268,6 @@ from yasmin_viewer import YasminViewerPub
 class FooState(State):
     """
     Represents the Foo state in the state machine.
-
-    Attributes:
-        counter (int): Counter to track the number of executions of this state.
     """
 
     def __init__(self) -> None:
@@ -1470,13 +1434,6 @@ END = "end"  ##< Indicates no more waypoints
 class Nav2State(ActionState):
     """
     ActionState for navigating to a specified pose using ROS 2 Navigation.
-
-    Attributes:
-        None
-
-    Methods:
-        create_goal_handler(blackboard: Blackboard) -> NavigateToPose.Goal:
-            Creates the navigation goal from the blackboard.
     """
 
     def __init__(self) -> None:

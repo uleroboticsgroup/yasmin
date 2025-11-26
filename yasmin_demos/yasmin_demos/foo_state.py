@@ -24,9 +24,6 @@ from yasmin import State, Blackboard
 class FooState(State):
     """
     Represents the Foo state in the state machine.
-
-    Attributes:
-        counter (int): Counter to track the number of executions of this state.
     """
 
     def __init__(self) -> None:

@@ -30,11 +30,6 @@ class GetParametersState(State):
 
     This state retrieves parameters from the ROS 2 parameter server and stores
     them in the blackboard.
-
-    Attributes:
-        _parameters (Dict[str, Any]): Map of parameters to retrieve, where the key is the parameter name
-            and the value is the default value.
-        _node (Node): Shared pointer to the ROS 2 node.
     """
 
     def __init__(

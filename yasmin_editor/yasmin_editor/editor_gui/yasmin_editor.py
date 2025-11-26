@@ -58,16 +58,6 @@ class YasminEditor(QMainWindow):
 
     Provides a graphical interface for creating, editing, and managing
     hierarchical state machines with support for Python, C++, and XML states.
-
-    Attributes:
-        plugin_manager: Manager for loading and handling plugins.
-        state_nodes: Dictionary mapping state names to StateNode objects.
-        final_outcomes: Dictionary mapping outcome names to FinalOutcomeNode objects.
-        connections: List of ConnectionLine objects representing transitions.
-        root_sm_name: Name of the root state machine.
-        start_state: Name of the initial state.
-        layout_seed: Seed for deterministic layout generation.
-        layout_rng: Random number generator for layout.
     """
 
     def __init__(self, manager: PluginManager) -> None:

@@ -34,17 +34,6 @@ class MonitorState(State):
     This class provides functionality to subscribe to a ROS 2 topic,
     execute a custom monitoring handler, and return specific outcomes
     based on the messages received.
-
-    Attributes:
-        _node (Node): Shared pointer to the ROS 2 node.
-        _sub (Subscription): Subscription to the ROS 2 topic.
-        _monitor_handler (Callable[[Blackboard, Any], str]): Function to handle incoming messages.
-        _topic_name (str): Name of the topic to monitor.
-        msg_list (List[Any]): List to store queued messages.
-        msg_queue (int): Maximum number of messages to queue.
-        _timeout (int): Timeout in seconds for message reception.
-        _maximum_retry (int): Maximum number of retries.
-        _msg_event (Event): Event for message reception.
     """
 
     def __init__(

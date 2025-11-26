@@ -27,15 +27,6 @@ class YasminNode(Node):
 
     YasminNode is a singleton class derived from Node and integrates
     custom functionalities for executing specific tasks in a ROS 2 environment.
-
-    Attributes:
-        _instance (YasminNode): The single instance of YasminNode.
-        _lock (RLock): A reentrant lock for thread safety.
-        _executor (MultiThreadedExecutor): Executor for managing multiple threads.
-        _spin_thread (Thread): Thread for spinning the node.
-
-    Raises:
-        RuntimeError: Raised when attempting to instantiate the node more than once.
     """
 
     ## The single instance of YasminNode.
