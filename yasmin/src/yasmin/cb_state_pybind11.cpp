@@ -55,9 +55,11 @@ PYBIND11_MODULE(cb_state, m) {
            py::arg("outcomes"), py::arg("callback"),
            "Constructs a CbState object with outcomes (list) and a callback "
            "function")
+      // Execute method
       .def("execute", &yasmin::CbState::execute,
            "Execute the callback function with the provided blackboard",
            py::arg("blackboard"))
+      // String representation
       .def("to_string", &yasmin::CbState::to_string,
            "Convert the CbState to a string representation")
       .def("__str__", &yasmin::CbState::to_string);

@@ -110,12 +110,13 @@ protected:
   rclcpp::Node::SharedPtr node_;
 
 private:
-  std::shared_ptr<rclcpp::Publisher<MsgT>>
-      pub; /**< Publisher to the ROS 2 topic. */
+  /// Publisher to the ROS 2 topic.
+  std::shared_ptr<rclcpp::Publisher<MsgT>> pub;
 
-  std::string topic_name; /**< Name of the topic to monitor. */
-  CreateMessageHandler
-      create_message_handler; /**< Callback handler to create messages. */
+  /// Name of the topic to monitor.
+  std::string topic_name;
+  /// Callback handler to create messages.
+  CreateMessageHandler create_message_handler;
 };
 
 } // namespace yasmin_ros

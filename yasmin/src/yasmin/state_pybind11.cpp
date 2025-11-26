@@ -132,6 +132,7 @@ PYBIND11_MODULE(state, m) {
                  std::set<std::string>(outcomes.begin(), outcomes.end()));
            }),
            py::arg("outcomes"))
+      // Status methods
       .def("get_status", &yasmin::State::get_status,
            "Gets the current status of the state")
       .def("is_idle", &yasmin::State::is_idle, "Checks if the state is idle")
@@ -141,13 +142,16 @@ PYBIND11_MODULE(state, m) {
            "Checks if the state has been canceled")
       .def("is_completed", &yasmin::State::is_completed,
            "Checks if the state has completed execution")
+      // Execute and cancel methods
       .def("execute", &yasmin::State::execute,
            "Execute the state's specific logic (override in subclass)",
            py::arg("blackboard"))
       .def("cancel_state", &yasmin::State::cancel_state,
            "Cancel the current state execution")
+      // Get outcomes method
       .def("get_outcomes", &yasmin::State::get_outcomes,
            "Get the set of possible outcomes for this state")
+      // String representation
       .def("to_string", &yasmin::State::to_string,
            "Convert the state to a string representation")
       .def("__str__", &yasmin::State::to_string);

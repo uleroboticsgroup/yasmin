@@ -213,19 +213,24 @@ protected:
   rclcpp::Node::SharedPtr node_;
 
 private:
-  std::shared_ptr<rclcpp::Subscription<MsgT>>
-      sub; /**< Subscription to the ROS 2 topic. */
+  /// Subscription to the ROS 2 topic.
+  std::shared_ptr<rclcpp::Subscription<MsgT>> sub;
 
-  std::string topic_name; /**< Name of the topic to monitor. */
-  rclcpp::QoS qos;        /**< Quality of Service settings for the topic. */
+  /// Name of the topic to monitor.
+  std::string topic_name;
+  /// Quality of Service settings for the topic.
+  rclcpp::QoS qos;
 
-  std::vector<std::shared_ptr<MsgT>>
-      msg_list; /**< List to store queued messages. */
-  MonitorHandler
-      monitor_handler; /**< Callback function to handle incoming messages. */
-  int msg_queue;       /**< Maximum number of messages to queue. */
-  int timeout;         /**< Timeout in seconds for message reception. */
-  int maximum_retry;   /**< Maximum number of retries. */
+  /// List to store queued messages.
+  std::vector<std::shared_ptr<MsgT>> msg_list;
+  /// Callback function to handle incoming messages.
+  MonitorHandler monitor_handler;
+  /// Maximum number of messages to queue.
+  int msg_queue;
+  /// Timeout in seconds for message reception.
+  int timeout;
+  /// Maximum number of retries.
+  int maximum_retry;
 
   /// Condition variable for action completion.
   std::condition_variable msg_cond;

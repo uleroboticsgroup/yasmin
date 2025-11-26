@@ -25,6 +25,7 @@ PYBIND11_MODULE(blackboard, m) {
 
   py::class_<yasmin::BlackboardPyWrapper>(m, "Blackboard")
       .def(py::init<>())
+      // Setters using set method and __setitem__/__setattr__
       .def("set", &yasmin::BlackboardPyWrapper::set,
            "Set a value in the blackboard", py::arg("key"), py::arg("value"))
       .def("__setitem__", &yasmin::BlackboardPyWrapper::set,
@@ -35,6 +36,7 @@ PYBIND11_MODULE(blackboard, m) {
              py::object value) { self.set(name, value); },
           "Set a value in the blackboard using attribute access",
           py::arg("name"), py::arg("value"))
+      // Getters using get method and __getitem__/__getattr__
       .def("get", &yasmin::BlackboardPyWrapper::get,
            "Get a value from the blackboard", py::arg("key"))
       .def("__getitem__", &yasmin::BlackboardPyWrapper::get,
@@ -45,22 +47,27 @@ PYBIND11_MODULE(blackboard, m) {
              const std::string &name) -> py::object { return self.get(name); },
           "Get a value from the blackboard using attribute access",
           py::arg("name"))
+      // Remove method and __delitem__
       .def("remove", &yasmin::BlackboardPyWrapper::remove,
            "Remove a value from the blackboard", py::arg("key"))
       .def("__delitem__", &yasmin::BlackboardPyWrapper::remove,
            "Remove a value from the blackboard", py::arg("key"))
+      // Contain method and __contains__
       .def("contains", &yasmin::BlackboardPyWrapper::contains,
            "Check if a key exists in the blackboard", py::arg("key"))
       .def("__contains__", &yasmin::BlackboardPyWrapper::contains,
            "Check if a key exists in the blackboard", py::arg("key"))
+      // Size method and __len__
       .def("size", &yasmin::BlackboardPyWrapper::size,
            "Get the number of key-value pairs in the blackboard")
       .def("__len__", &yasmin::BlackboardPyWrapper::size,
            "Get the number of key-value pairs in the blackboard")
+      // String representation
       .def("to_string", &yasmin::BlackboardPyWrapper::to_string,
            "Convert the blackboard to a string representation")
       .def("__str__", &yasmin::BlackboardPyWrapper::to_string,
            "Convert the blackboard to a string representation")
+      // Remappings
       .def("set_remappings", &yasmin::BlackboardPyWrapper::set_remappings,
            "Set the key remappings", py::arg("remappings"))
       .def("get_remappings", &yasmin::BlackboardPyWrapper::get_remappings,

@@ -43,6 +43,7 @@ PYBIND11_MODULE(state_machine, m) {
            py::arg("outcomes"))
       // Add destructor from StateMachine
       .def("__del__", [](yasmin::StateMachine *self) { delete self; })
+      // Add state method with keep_alive to manage object lifetime
       .def(
           "add_state",
           [](yasmin::StateMachine &self, const std::string &name,
@@ -58,6 +59,7 @@ PYBIND11_MODULE(state_machine, m) {
           py::arg("remappings") = std::map<std::string, std::string>(),
           py::keep_alive<1, 3>()) // Keep state (arg 3) alive as long as self
                                   // (arg 1) is alive
+      // Setters and getters for name and start state
       .def("set_name", &yasmin::StateMachine::set_name,
            "Set the name of the state machine", py::arg("name"))
       .def("get_name", &yasmin::StateMachine::get_name,
@@ -66,6 +68,7 @@ PYBIND11_MODULE(state_machine, m) {
            "Set the initial state for the state machine", py::arg("state_name"))
       .def("get_start_state", &yasmin::StateMachine::get_start_state,
            "Get the name of the start state")
+      // Methods to get states, transitions, current state
       .def(
           "get_states",
           [](yasmin::StateMachine &self) {
@@ -101,6 +104,7 @@ PYBIND11_MODULE(state_machine, m) {
            py::return_value_policy::reference_internal)
       .def("get_current_state", &yasmin::StateMachine::get_current_state,
            "Get the name of the current state being executed")
+      // Callback registration methods
       .def(
           "add_start_cb",
           [](yasmin::StateMachine &self, py::function cb,
@@ -141,11 +145,13 @@ PYBIND11_MODULE(state_machine, m) {
           },
           "Add a callback to be called when the state machine ends",
           py::arg("cb"), py::arg("args") = std::vector<std::string>())
+      // Validation and cancellation methods
       .def("validate", &yasmin::StateMachine::validate,
            "Validate the state machine configuration",
            py::arg("strict_mode") = false)
       .def("cancel_state", &yasmin::StateMachine::cancel_state,
            "Cancel the current state execution")
+      // String representation
       .def("to_string", &yasmin::StateMachine::to_string,
            "Convert the state machine to a string representation")
       .def("__str__", &yasmin::StateMachine::to_string);
