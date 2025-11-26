@@ -16,7 +16,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "yasmin/blackboard/blackboard_pywrapper.hpp"
+#include "yasmin/blackboard_pywrapper.hpp"
 #include "yasmin/pybind11_utils.hpp"
 #include "yasmin/state.hpp"
 
@@ -24,7 +24,7 @@ namespace py = pybind11;
 
 // Declare that BlackboardPyWrapper is defined in another module
 // This allows us to use it without re-registering it
-PYBIND11_MAKE_OPAQUE(yasmin::blackboard::BlackboardPyWrapper);
+PYBIND11_MAKE_OPAQUE(yasmin::BlackboardPyWrapper);
 
 namespace yasmin {
 
@@ -45,13 +45,12 @@ public:
    * We wrap the C++ Blackboard in BlackboardPyWrapper before passing to Python.
    * The GIL must be acquired before calling into Python.
    */
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     // Acquire GIL before calling Python code
     py::gil_scoped_acquire acquire;
 
     // Wrap the C++ Blackboard in BlackboardPyWrapper for Python
-    blackboard::BlackboardPyWrapper wrapper(blackboard);
+    yasmin::BlackboardPyWrapper wrapper(blackboard);
 
 #if __has_include("rclcpp/version.h")
     PYBIND11_OVERRIDE_PURE(std::string, // Return type

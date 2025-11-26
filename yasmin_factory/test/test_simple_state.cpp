@@ -16,7 +16,7 @@
 #include <memory>
 #include <string>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 
 /**
@@ -26,8 +26,7 @@ class TestSimpleState : public yasmin::State {
 public:
   TestSimpleState() : yasmin::State({"outcome1", "outcome2"}) {}
 
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
 
     if (!blackboard->contains("counter")) {
       blackboard->set<int>("counter", 0);
@@ -46,8 +45,7 @@ class TestRemappingState : public yasmin::State {
 public:
   TestRemappingState() : yasmin::State({"success", "failure"}) {}
 
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
 
     if (blackboard->contains("input_key")) {
       std::string value = blackboard->get<std::string>("input_key");

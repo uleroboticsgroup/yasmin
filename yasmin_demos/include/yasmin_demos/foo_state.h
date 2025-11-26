@@ -23,8 +23,7 @@ public:
   FooState();
   ~FooState();
 
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard);
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard);
   int counter;
 };
 

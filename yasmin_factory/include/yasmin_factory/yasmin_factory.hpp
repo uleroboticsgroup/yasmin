@@ -28,7 +28,7 @@
 #include <pybind11/stl.h>
 #include <tinyxml2.h>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/concurrence.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
@@ -59,8 +59,7 @@ public:
   /**
    * @brief Delegates execution to the underlying Python state.
    */
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override;
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override;
 
   /**
    * @brief Delegates cancellation to the underlying Python state.

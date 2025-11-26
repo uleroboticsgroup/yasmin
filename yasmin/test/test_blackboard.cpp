@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 
-using namespace yasmin::blackboard;
+using namespace yasmin;
 
 class TestBlackboard : public ::testing::Test {
 protected:

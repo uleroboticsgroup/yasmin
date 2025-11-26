@@ -20,7 +20,7 @@
 #include <string>
 #include <thread>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/concurrence.hpp"
 #include "yasmin/state.hpp"
 
@@ -30,8 +30,7 @@ class FooState : public State {
 public:
   FooState() : State({"outcome1"}) {}
 
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     std::cout << "Foo state ticked." << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -44,8 +43,7 @@ class BarState : public State {
 public:
   BarState() : State({"outcome1", "outcome2"}) {}
 
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     std::cout << "Bar state ticked." << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -60,13 +58,13 @@ protected:
   std::shared_ptr<FooState> foo2_state;
   std::shared_ptr<BarState> bar_state;
   std::shared_ptr<Concurrence> state;
-  std::shared_ptr<blackboard::Blackboard> blackboard;
+  std::shared_ptr<yasmin::Blackboard> blackboard;
 
   void SetUp() override {
     foo_state = std::make_shared<FooState>();
     foo2_state = std::make_shared<FooState>();
     bar_state = std::make_shared<BarState>();
-    blackboard = std::make_shared<blackboard::Blackboard>();
+    blackboard = std::make_shared<yasmin::Blackboard>();
 
     std::map<std::string, std::shared_ptr<State>> states = {
         {"FOO", foo_state}, {"FOO2", foo2_state}, {"BAR", bar_state}};

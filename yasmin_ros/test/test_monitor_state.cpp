@@ -88,11 +88,11 @@ std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>
 std::thread TestMonitorState::spin_thread;
 
 TEST_F(TestMonitorState, TestMonitorTimeout) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state = std::make_shared<MonitorState<std_msgs::msg::String>>(
       "test1", std::set<std::string>{std::string(SUCCEED)},
-      [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+      [](std::shared_ptr<yasmin::Blackboard> blackboard,
          std::shared_ptr<std_msgs::msg::String> msg) {
         return std::string(SUCCEED);
       },
@@ -102,11 +102,11 @@ TEST_F(TestMonitorState, TestMonitorTimeout) {
 }
 
 TEST_F(TestMonitorState, TestMonitorRetryTimeout) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state = std::make_shared<MonitorState<std_msgs::msg::String>>(
       "test1", std::set<std::string>{std::string(SUCCEED)},
-      [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+      [](std::shared_ptr<yasmin::Blackboard> blackboard,
          std::shared_ptr<std_msgs::msg::String> msg) {
         return std::string(SUCCEED);
       },

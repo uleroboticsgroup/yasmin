@@ -25,7 +25,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
@@ -53,10 +53,10 @@ template <typename ServiceT> class ServiceState : public yasmin::State {
 
   /// Function type for creating a request.
   using CreateRequestHandler =
-      std::function<Request(std::shared_ptr<yasmin::blackboard::Blackboard>)>;
+      std::function<Request(std::shared_ptr<yasmin::Blackboard>)>;
   /// Function type for handling a response.
-  using ResponseHandler = std::function<std::string(
-      std::shared_ptr<yasmin::blackboard::Blackboard>, Response)>;
+  using ResponseHandler =
+      std::function<std::string(std::shared_ptr<yasmin::Blackboard>, Response)>;
 
 public:
   /**
@@ -239,8 +239,7 @@ public:
    * @return std::string The outcome of the service call, which can be SUCCEED,
    * ABORT, or TIMEOUT.
    */
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     Request request = this->create_request(blackboard);
     std::unique_lock<std::mutex> lock(this->response_done_mutex);
     int retry_count = 0;
@@ -342,8 +341,7 @@ private:
    * request creation.
    * @return Request The created service request.
    */
-  Request
-  create_request(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+  Request create_request(std::shared_ptr<yasmin::Blackboard> blackboard) {
     return this->create_request_handler(blackboard);
   }
 

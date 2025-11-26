@@ -42,8 +42,7 @@ BarState::BarState() : yasmin::State({"outcome3"}) {};
  * @param blackboard Shared pointer to the blackboard for state communication.
  * @return std::string The outcome of the execution: "outcome3".
  */
-std::string
-BarState::execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+std::string BarState::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
   YASMIN_LOG_INFO("Executing state BAR");
   std::this_thread::sleep_for(std::chrono::seconds(3));
 

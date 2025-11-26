@@ -22,7 +22,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 

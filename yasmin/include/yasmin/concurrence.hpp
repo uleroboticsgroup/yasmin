@@ -31,7 +31,7 @@
 #include <cxxabi.h> // For abi::__cxa_demangle
 #endif
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 
 namespace yasmin {
@@ -103,8 +103,7 @@ public:
    * This method is intended to be overridden by derived classes to provide
    * specific execution logic.
    */
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override;
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override;
 
   /**
    * @brief Cancels the current state execution.

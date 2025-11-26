@@ -16,14 +16,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "yasmin/blackboard/blackboard_pywrapper.hpp"
+#include "yasmin/blackboard_pywrapper.hpp"
 #include "yasmin/concurrence.hpp"
 #include "yasmin/pybind11_utils.hpp"
 
 namespace py = pybind11;
 
 // Declare that BlackboardPyWrapper is defined in another module
-PYBIND11_MAKE_OPAQUE(yasmin::blackboard::BlackboardPyWrapper);
+PYBIND11_MAKE_OPAQUE(yasmin::BlackboardPyWrapper);
 
 PYBIND11_MODULE(concurrence, m) {
   m.doc() = "Python bindings for yasmin::Concurrence";

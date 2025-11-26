@@ -77,9 +77,8 @@ public:
    * @return A string representing the outcome: "outcome1" to stay in the state,
    *         or "outcome2" to transition out of the state.
    */
-  std::string
-  monitor_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-                  std::shared_ptr<nav_msgs::msg::Odometry> msg) {
+  std::string monitor_handler(std::shared_ptr<yasmin::Blackboard> blackboard,
+                              std::shared_ptr<nav_msgs::msg::Odometry> msg) {
 
     (void)blackboard; // blackboard is not used in this implementation
 

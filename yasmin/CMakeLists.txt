@@ -29,7 +29,7 @@ include_directories(src)
 include_directories(include)
 
 set(SOURCES
-  src/yasmin/blackboard/blackboard.cpp
+  src/yasmin/blackboard.cpp
   src/yasmin/logs.cpp
   src/yasmin/state.cpp
   src/yasmin/cb_state.cpp
@@ -62,7 +62,7 @@ ament_export_dependencies(${DEPENDENCIES_PACKAGE})
 
 # Python bindings for Blackboard
 pybind11_add_module(blackboard 
-  src/yasmin/blackboard/blackboard_pybind11.cpp
+  src/yasmin/blackboard_pybind11.cpp
 )
 target_link_libraries(blackboard PRIVATE ${PROJECT_NAME})
 target_include_directories(blackboard PUBLIC

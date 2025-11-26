@@ -46,8 +46,7 @@ bool State::is_completed() const {
   return this->status.load() == StateStatus::COMPLETED;
 }
 
-std::string
-State::operator()(std::shared_ptr<blackboard::Blackboard> blackboard) {
+std::string State::operator()(std::shared_ptr<yasmin::Blackboard> blackboard) {
   YASMIN_LOG_DEBUG("Executing state '%s'", this->to_string().c_str());
 
   this->status.store(StateStatus::RUNNING);

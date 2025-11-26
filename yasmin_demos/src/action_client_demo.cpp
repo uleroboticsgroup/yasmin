@@ -42,8 +42,7 @@ using Fibonacci = example_interfaces::action::Fibonacci;
  * sequence.
  * @return The outcome status indicating success.
  */
-std::string
-print_result(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+std::string print_result(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
   auto fibo_res = blackboard->get<std::vector<int>>("fibo_res");
 
@@ -90,8 +89,8 @@ public:
    * @param blackboard Shared pointer to the blackboard.
    * @return The Fibonacci goal with the specified order.
    */
-  Fibonacci::Goal create_goal_handler(
-      std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+  Fibonacci::Goal
+  create_goal_handler(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
     auto goal = Fibonacci::Goal();
     goal.order = blackboard->get<int>("n");
@@ -108,9 +107,8 @@ public:
    * sequence.
    * @return The outcome status indicating success.
    */
-  std::string
-  response_handler(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-                   Fibonacci::Result::SharedPtr response) {
+  std::string response_handler(std::shared_ptr<yasmin::Blackboard> blackboard,
+                               Fibonacci::Result::SharedPtr response) {
 
     blackboard->set<std::vector<int>>("fibo_res", response->sequence);
     return yasmin_ros::basic_outcomes::SUCCEED;
@@ -126,9 +124,8 @@ public:
    * @param feedback Shared pointer to the feedback message with partial
    * sequence.
    */
-  void
-  print_feedback(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-                 std::shared_ptr<const Fibonacci::Feedback> feedback) {
+  void print_feedback(std::shared_ptr<yasmin::Blackboard> blackboard,
+                      std::shared_ptr<const Fibonacci::Feedback> feedback) {
     (void)blackboard;
 
     std::stringstream ss;
@@ -184,8 +181,8 @@ int main(int argc, char *argv[]) {
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
 
   // Create an initial blackboard and set the Fibonacci order
-  std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =
-      std::make_shared<yasmin::blackboard::Blackboard>();
+  std::shared_ptr<yasmin::Blackboard> blackboard =
+      std::make_shared<yasmin::Blackboard>();
   blackboard->set<int>("n", 10);
 
   // Execute the state machine

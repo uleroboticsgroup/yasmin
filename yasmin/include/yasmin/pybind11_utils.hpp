@@ -19,8 +19,8 @@
 #include <memory>
 #include <pybind11/pybind11.h>
 
-#include "yasmin/blackboard/blackboard.hpp"
-#include "yasmin/blackboard/blackboard_pywrapper.hpp"
+#include "yasmin/blackboard.hpp"
+#include "yasmin/blackboard_pywrapper.hpp"
 
 namespace py = pybind11;
 
@@ -37,32 +37,29 @@ namespace pybind11_utils {
  * - Other types: creates a new Blackboard
  *
  * @param blackboard_obj Python object that may contain a blackboard
- * @return std::shared_ptr<yasmin::blackboard::Blackboard> The C++ blackboard
+ * @return std::shared_ptr<yasmin::Blackboard> The C++ blackboard
  */
-inline std::shared_ptr<yasmin::blackboard::Blackboard>
+inline std::shared_ptr<yasmin::Blackboard>
 convert_blackboard_from_python(py::object blackboard_obj) {
-  std::shared_ptr<yasmin::blackboard::Blackboard> blackboard;
+  std::shared_ptr<yasmin::Blackboard> blackboard;
 
   // Case 1: None or not provided - create new Blackboard
   if (blackboard_obj.is_none()) {
-    blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+    blackboard = std::make_shared<yasmin::Blackboard>();
   }
   // Case 2: Check if it's a BlackboardPyWrapper
-  else if (py::isinstance<yasmin::blackboard::BlackboardPyWrapper>(
-               blackboard_obj)) {
-    auto wrapper =
-        blackboard_obj.cast<yasmin::blackboard::BlackboardPyWrapper>();
+  else if (py::isinstance<yasmin::BlackboardPyWrapper>(blackboard_obj)) {
+    auto wrapper = blackboard_obj.cast<yasmin::BlackboardPyWrapper>();
     // Get the shared pointer directly instead of copying
     blackboard = wrapper.get_cpp_blackboard();
   }
   // Case 3: Check if it's a Blackboard
-  else if (py::isinstance<yasmin::blackboard::Blackboard>(blackboard_obj)) {
-    blackboard =
-        blackboard_obj.cast<std::shared_ptr<yasmin::blackboard::Blackboard>>();
+  else if (py::isinstance<yasmin::Blackboard>(blackboard_obj)) {
+    blackboard = blackboard_obj.cast<std::shared_ptr<yasmin::Blackboard>>();
   }
   // Case 4: Unknown type - create a new blackboard
   else {
-    blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+    blackboard = std::make_shared<yasmin::Blackboard>();
   }
 
   return blackboard;
@@ -81,10 +78,9 @@ convert_blackboard_from_python(py::object blackboard_obj) {
  * BlackboardPyWrapper
  */
 template <typename Func> inline auto wrap_blackboard_callback(py::function cb) {
-  return [cb](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-              auto... args) {
+  return [cb](std::shared_ptr<yasmin::Blackboard> blackboard, auto... args) {
     py::gil_scoped_acquire acquire;
-    yasmin::blackboard::BlackboardPyWrapper wrapper(blackboard);
+    yasmin::BlackboardPyWrapper wrapper(blackboard);
     cb(wrapper, args...);
   };
 }
@@ -103,10 +99,9 @@ template <typename Func> inline auto wrap_blackboard_callback(py::function cb) {
  */
 template <typename ReturnType>
 inline auto wrap_blackboard_callback_with_return(py::function cb) {
-  return [cb](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard)
-             -> ReturnType {
+  return [cb](std::shared_ptr<yasmin::Blackboard> blackboard) -> ReturnType {
     py::gil_scoped_acquire acquire;
-    yasmin::blackboard::BlackboardPyWrapper wrapper(blackboard);
+    yasmin::BlackboardPyWrapper wrapper(blackboard);
     return cb(wrapper).cast<ReturnType>();
   };
 }

@@ -81,7 +81,7 @@ Concurrence::Concurrence(
 }
 
 std::string
-Concurrence::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
+Concurrence::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
   std::vector<std::thread> state_threads;
 
   // Initialize the parallel execution of all the states

@@ -18,7 +18,7 @@
 #include <set>
 #include <string>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 
 using namespace yasmin;
@@ -27,8 +27,7 @@ class FooState : public State {
 public:
   FooState() : State({"outcome1"}) {}
 
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     return "outcome1";
   }
 };
@@ -37,8 +36,7 @@ class BarState : public State {
 public:
   BarState() : State({}) {}
 
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     return "outcome2";
   }
 };
@@ -46,11 +44,11 @@ public:
 class TestState : public ::testing::Test {
 protected:
   std::shared_ptr<FooState> state;
-  std::shared_ptr<blackboard::Blackboard> blackboard;
+  std::shared_ptr<yasmin::Blackboard> blackboard;
 
   void SetUp() override {
     state = std::make_shared<FooState>();
-    blackboard = std::make_shared<blackboard::Blackboard>();
+    blackboard = std::make_shared<yasmin::Blackboard>();
   }
 };
 

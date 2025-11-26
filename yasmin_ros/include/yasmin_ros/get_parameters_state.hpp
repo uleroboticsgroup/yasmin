@@ -20,7 +20,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -50,8 +50,7 @@ public:
    * @param blackboard A reference to the Yasmin blackboard.
    * @return A string representing the outcome of the execution.
    */
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override;
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override;
 
 private:
   /// Map of parameters to retrieve, where the key is the parameter name

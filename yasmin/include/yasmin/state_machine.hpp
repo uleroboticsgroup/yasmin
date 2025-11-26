@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 
 namespace yasmin {
@@ -44,16 +44,16 @@ class StateMachine : public State {
 
   /// Alias for a callback function executed before running the state machine.
   using StartCallbackType = std::function<void(
-      std::shared_ptr<yasmin::blackboard::Blackboard>, const std::string &,
+      std::shared_ptr<yasmin::Blackboard>, const std::string &,
       const std::vector<std::string> &)>;
   /// Alias for a callback function executed before changing the state.
   using TransitionCallbackType = std::function<void(
-      std::shared_ptr<yasmin::blackboard::Blackboard>, const std::string &,
+      std::shared_ptr<yasmin::Blackboard>, const std::string &,
       const std::string &, const std::string &,
       const std::vector<std::string> &)>;
   /// Alias for a callback function executed after running the state machine.
   using EndCallbackType = std::function<void(
-      std::shared_ptr<yasmin::blackboard::Blackboard>, const std::string &,
+      std::shared_ptr<yasmin::Blackboard>, const std::string &,
       const std::vector<std::string> &)>;
 
 public:
@@ -179,9 +179,8 @@ public:
    * @param blackboard A shared pointer to the blackboard.
    * @param start_state The name of the start state.
    */
-  void
-  call_start_cbs(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-                 const std::string &start_state);
+  void call_start_cbs(std::shared_ptr<yasmin::Blackboard> blackboard,
+                      const std::string &start_state);
 
   /**
    * @brief Calls transition callbacks when transitioning between states.
@@ -191,10 +190,10 @@ public:
    * @param to_state The state being transitioned to.
    * @param outcome The outcome that triggered the transition.
    */
-  void call_transition_cbs(
-      std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-      const std::string &from_state, const std::string &to_state,
-      const std::string &outcome);
+  void call_transition_cbs(std::shared_ptr<yasmin::Blackboard> blackboard,
+                           const std::string &from_state,
+                           const std::string &to_state,
+                           const std::string &outcome);
 
   /**
    * @brief Calls end callbacks with the given blackboard and outcome.
@@ -202,7 +201,7 @@ public:
    * @param blackboard A shared pointer to the blackboard.
    * @param outcome The outcome when the state machine ends.
    */
-  void call_end_cbs(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+  void call_end_cbs(std::shared_ptr<yasmin::Blackboard> blackboard,
                     const std::string &outcome);
 
   /**
@@ -222,8 +221,7 @@ public:
    * @throws std::runtime_error If the execution cannot be completed due to
    *                            invalid states or transitions.
    */
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override;
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override;
 
   /**
    * @brief Executes the state machine using a default blackboard.

@@ -15,7 +15,7 @@
 
 from typing import Callable, List, Set, overload
 from yasmin.state import State
-from yasmin.blackboard import Blackboard
+from yasmin import Blackboard
 
 class CbState(State):
     @overload

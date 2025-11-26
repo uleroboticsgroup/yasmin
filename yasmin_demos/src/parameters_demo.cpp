@@ -54,8 +54,7 @@ public:
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome1" or "outcome2".
    */
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     YASMIN_LOG_INFO("Executing state FOO");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
@@ -94,8 +93,7 @@ public:
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome3".
    */
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     YASMIN_LOG_INFO("Executing state BAR");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 

@@ -17,7 +17,7 @@
 #include <memory>
 #include <string>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/cb_state.hpp"
 
 using namespace yasmin;
@@ -25,12 +25,12 @@ using namespace yasmin;
 class TestCbState : public ::testing::Test {
 protected:
   std::shared_ptr<CbState> state;
-  std::shared_ptr<blackboard::Blackboard> blackboard;
+  std::shared_ptr<yasmin::Blackboard> blackboard;
 
   void SetUp() override {
-    blackboard = std::make_shared<blackboard::Blackboard>();
+    blackboard = std::make_shared<yasmin::Blackboard>();
 
-    auto execute = [](std::shared_ptr<blackboard::Blackboard> bb) {
+    auto execute = [](std::shared_ptr<yasmin::Blackboard> bb) {
       return std::string("outcome1");
     };
 

@@ -15,7 +15,7 @@
 
 from enum import Enum
 from typing import List, Set, overload
-from yasmin.blackboard import Blackboard
+from yasmin import Blackboard
 
 class StateStatus(Enum):
     IDLE: int

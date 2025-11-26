@@ -40,10 +40,10 @@ protected:
 };
 
 TEST_F(TestPublisherState, TestPublisher) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state = std::make_shared<PublisherState<std_msgs::msg::String>>(
-      "test", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+      "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
         auto msg = std_msgs::msg::String();
         msg.data = "data";
         return msg;
@@ -57,7 +57,7 @@ TEST_F(TestPublisherState, TestPublisherCache) {
   EXPECT_EQ(ROSClientsCache::get_publishers_count(), 0);
 
   auto state1 = std::make_shared<PublisherState<std_msgs::msg::String>>(
-      "test", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+      "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
         auto msg = std_msgs::msg::String();
         msg.data = "data";
         return msg;
@@ -65,7 +65,7 @@ TEST_F(TestPublisherState, TestPublisherCache) {
   EXPECT_EQ(ROSClientsCache::get_publishers_count(), 1);
 
   auto state2 = std::make_shared<PublisherState<std_msgs::msg::String>>(
-      "test", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+      "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
         auto msg = std_msgs::msg::String();
         msg.data = "data";
         return msg;
@@ -73,7 +73,7 @@ TEST_F(TestPublisherState, TestPublisherCache) {
   EXPECT_EQ(ROSClientsCache::get_publishers_count(), 1);
 
   auto state3 = std::make_shared<PublisherState<std_msgs::msg::String>>(
-      "test2", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+      "test2", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
         auto msg = std_msgs::msg::String();
         msg.data = "data";
         return msg;

@@ -16,56 +16,53 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "yasmin/blackboard/blackboard_pywrapper.hpp"
+#include "yasmin/blackboard_pywrapper.hpp"
 
 namespace py = pybind11;
 
 PYBIND11_MODULE(blackboard, m) {
-  m.doc() = "Python bindings for yasmin::blackboard::Blackboard";
+  m.doc() = "Python bindings for yasmin::Blackboard";
 
-  py::class_<yasmin::blackboard::BlackboardPyWrapper>(m, "Blackboard")
+  py::class_<yasmin::BlackboardPyWrapper>(m, "Blackboard")
       .def(py::init<>())
-      .def("set", &yasmin::blackboard::BlackboardPyWrapper::set,
+      .def("set", &yasmin::BlackboardPyWrapper::set,
            "Set a value in the blackboard", py::arg("key"), py::arg("value"))
-      .def("__setitem__", &yasmin::blackboard::BlackboardPyWrapper::set,
+      .def("__setitem__", &yasmin::BlackboardPyWrapper::set,
            "Set a value in the blackboard", py::arg("key"), py::arg("value"))
       .def(
           "__setattr__",
-          [](yasmin::blackboard::BlackboardPyWrapper &self,
-             const std::string &name,
+          [](yasmin::BlackboardPyWrapper &self, const std::string &name,
              py::object value) { self.set(name, value); },
           "Set a value in the blackboard using attribute access",
           py::arg("name"), py::arg("value"))
-      .def("get", &yasmin::blackboard::BlackboardPyWrapper::get,
+      .def("get", &yasmin::BlackboardPyWrapper::get,
            "Get a value from the blackboard", py::arg("key"))
-      .def("__getitem__", &yasmin::blackboard::BlackboardPyWrapper::get,
+      .def("__getitem__", &yasmin::BlackboardPyWrapper::get,
            "Get a value from the blackboard", py::arg("key"))
       .def(
           "__getattr__",
-          [](yasmin::blackboard::BlackboardPyWrapper &self,
+          [](yasmin::BlackboardPyWrapper &self,
              const std::string &name) -> py::object { return self.get(name); },
           "Get a value from the blackboard using attribute access",
           py::arg("name"))
-      .def("remove", &yasmin::blackboard::BlackboardPyWrapper::remove,
+      .def("remove", &yasmin::BlackboardPyWrapper::remove,
            "Remove a value from the blackboard", py::arg("key"))
-      .def("__delitem__", &yasmin::blackboard::BlackboardPyWrapper::remove,
+      .def("__delitem__", &yasmin::BlackboardPyWrapper::remove,
            "Remove a value from the blackboard", py::arg("key"))
-      .def("contains", &yasmin::blackboard::BlackboardPyWrapper::contains,
+      .def("contains", &yasmin::BlackboardPyWrapper::contains,
            "Check if a key exists in the blackboard", py::arg("key"))
-      .def("__contains__", &yasmin::blackboard::BlackboardPyWrapper::contains,
+      .def("__contains__", &yasmin::BlackboardPyWrapper::contains,
            "Check if a key exists in the blackboard", py::arg("key"))
-      .def("size", &yasmin::blackboard::BlackboardPyWrapper::size,
+      .def("size", &yasmin::BlackboardPyWrapper::size,
            "Get the number of key-value pairs in the blackboard")
-      .def("__len__", &yasmin::blackboard::BlackboardPyWrapper::size,
+      .def("__len__", &yasmin::BlackboardPyWrapper::size,
            "Get the number of key-value pairs in the blackboard")
-      .def("to_string", &yasmin::blackboard::BlackboardPyWrapper::to_string,
+      .def("to_string", &yasmin::BlackboardPyWrapper::to_string,
            "Convert the blackboard to a string representation")
-      .def("__str__", &yasmin::blackboard::BlackboardPyWrapper::to_string,
+      .def("__str__", &yasmin::BlackboardPyWrapper::to_string,
            "Convert the blackboard to a string representation")
-      .def("set_remappings",
-           &yasmin::blackboard::BlackboardPyWrapper::set_remappings,
+      .def("set_remappings", &yasmin::BlackboardPyWrapper::set_remappings,
            "Set the key remappings", py::arg("remappings"))
-      .def("get_remappings",
-           &yasmin::blackboard::BlackboardPyWrapper::get_remappings,
+      .def("get_remappings", &yasmin::BlackboardPyWrapper::get_remappings,
            "Get the key remappings");
 }

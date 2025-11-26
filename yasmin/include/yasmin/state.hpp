@@ -26,7 +26,7 @@
 #include <cxxabi.h> // For abi::__cxa_demangle
 #endif
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 
 namespace yasmin {
@@ -108,7 +108,7 @@ public:
    * valid, a std::logic_error is thrown.
    * @throws std::logic_error If the outcome is not in the set of outcomes.
    */
-  std::string operator()(std::shared_ptr<blackboard::Blackboard> blackboard);
+  std::string operator()(std::shared_ptr<yasmin::Blackboard> blackboard);
 
   /**
    * @brief Executes the state's specific logic.
@@ -119,8 +119,7 @@ public:
    * This method is intended to be overridden by derived classes to provide
    * specific execution logic.
    */
-  virtual std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
+  virtual std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
     (void)blackboard; // Suppress unused parameter warning
     return "";
   }

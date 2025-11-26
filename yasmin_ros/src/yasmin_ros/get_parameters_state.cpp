@@ -33,8 +33,8 @@ GetParametersState::GetParametersState(
   }
 }
 
-std::string GetParametersState::execute(
-    std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+std::string
+GetParametersState::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
   for (const auto &param : this->parameters_) {
     const std::string &param_name = param.first;
     const std::any &default_value = param.second;

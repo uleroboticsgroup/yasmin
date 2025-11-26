@@ -22,7 +22,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
@@ -43,7 +43,7 @@ template <typename MsgT> class PublisherState : public yasmin::State {
 
   /// Function type for creating messages for topic.
   using CreateMessageHandler =
-      std::function<MsgT(std::shared_ptr<yasmin::blackboard::Blackboard>)>;
+      std::function<MsgT(std::shared_ptr<yasmin::Blackboard>)>;
 
 public:
   /**
@@ -97,8 +97,7 @@ public:
    * @param blackboard A shared pointer to the blackboard for data storage.
    * @return A string outcome indicating the result of the monitoring operation.
    */
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
 
     YASMIN_LOG_DEBUG("Publishing to topic '%s'", this->topic_name.c_str());
     MsgT msg = this->create_message_handler(blackboard);

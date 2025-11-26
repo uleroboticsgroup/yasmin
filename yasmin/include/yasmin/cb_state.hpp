@@ -21,7 +21,7 @@
 #include <set>
 #include <string>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 
 namespace yasmin {
@@ -38,7 +38,7 @@ class CbState : public State {
 
 private:
   /// Pointer to the callback function to be executed.
-  std::function<std::string(std::shared_ptr<blackboard::Blackboard>)> callback;
+  std::function<std::string(std::shared_ptr<yasmin::Blackboard>)> callback;
 
 public:
   /**
@@ -50,9 +50,9 @@ public:
    *
    * @throw std::invalid_argument If the outcomes set is empty.
    */
-  CbState(const std::set<std::string> &outcomes,
-          std::function<std::string(std::shared_ptr<blackboard::Blackboard>)>
-              callback);
+  CbState(
+      const std::set<std::string> &outcomes,
+      std::function<std::string(std::shared_ptr<yasmin::Blackboard>)> callback);
 
   /**
    * @brief Executes the callback function.
@@ -67,8 +67,7 @@ public:
    *
    * @throw std::runtime_error If the callback execution fails.
    */
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override;
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override;
 };
 
 } // namespace yasmin

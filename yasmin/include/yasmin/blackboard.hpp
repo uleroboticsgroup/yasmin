@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN__BLACKBOARD__BLACKBOARD_HPP
-#define YASMIN__BLACKBOARD__BLACKBOARD_HPP
+#ifndef YASMIN__BLACKBOARD_HPP
+#define YASMIN__BLACKBOARD_HPP
 
 #include <cxxabi.h>
 #include <exception>
@@ -27,7 +27,6 @@
 #include "yasmin/logs.hpp"
 
 namespace yasmin {
-namespace blackboard {
 
 /**
  * @brief Demangle a C++ type name to a human-readable format.
@@ -193,7 +192,6 @@ public:
   const std::map<std::string, std::string> &get_remappings();
 };
 
-} // namespace blackboard
 } // namespace yasmin
 
 #endif // YASMIN__BLACKBOARD_HPP

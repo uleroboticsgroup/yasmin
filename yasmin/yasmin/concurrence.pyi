@@ -15,7 +15,7 @@
 
 from typing import Dict
 from yasmin.state import State
-from yasmin.blackboard import Blackboard
+from yasmin import Blackboard
 
 class Concurrence(State):
     def __init__(

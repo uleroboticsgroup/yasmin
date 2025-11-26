@@ -26,7 +26,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
@@ -49,7 +49,7 @@ template <typename MsgT> class MonitorState : public yasmin::State {
 
   /// Function type for handling messages from topic.
   using MonitorHandler = std::function<std::string(
-      std::shared_ptr<yasmin::blackboard::Blackboard>, std::shared_ptr<MsgT>)>;
+      std::shared_ptr<yasmin::Blackboard>, std::shared_ptr<MsgT>)>;
 
 public:
   /**
@@ -151,8 +151,7 @@ public:
    * @param blackboard A shared pointer to the blackboard for data storage.
    * @return A string outcome indicating the result of the monitoring operation.
    */
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     int retry_count = 0;
 
     while (this->msg_list.empty()) {

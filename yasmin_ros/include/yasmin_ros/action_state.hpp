@@ -25,7 +25,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
@@ -62,14 +62,13 @@ template <typename ActionT> class ActionState : public yasmin::State {
   using GoalHandle = rclcpp_action::ClientGoalHandle<ActionT>;
   /// Function type for creating a goal.
   using CreateGoalHandler =
-      std::function<Goal(std::shared_ptr<yasmin::blackboard::Blackboard>)>;
+      std::function<Goal(std::shared_ptr<yasmin::Blackboard>)>;
   /// Function type for handling results.
-  using ResultHandler = std::function<std::string(
-      std::shared_ptr<yasmin::blackboard::Blackboard>, Result)>;
+  using ResultHandler =
+      std::function<std::string(std::shared_ptr<yasmin::Blackboard>, Result)>;
   /// Function type for handling feedback.
-  using FeedbackHandler =
-      std::function<void(std::shared_ptr<yasmin::blackboard::Blackboard>,
-                         std::shared_ptr<const Feedback>)>;
+  using FeedbackHandler = std::function<void(
+      std::shared_ptr<yasmin::Blackboard>, std::shared_ptr<const Feedback>)>;
 
 public:
   /**
@@ -298,8 +297,7 @@ public:
    * - `basic_outcomes::CANCEL`: The action was canceled.
    * - `basic_outcomes::TIMEOUT`: The action server was not available in time.
    */
-  std::string
-  execute(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
     std::unique_lock<std::mutex> lock(this->action_done_mutex);
     int retry_count = 0;

@@ -61,7 +61,7 @@ public:
    * @return A new Int message.
    */
   std_msgs::msg::Int32
-  create_int_msg(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+  create_int_msg(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
     int counter = blackboard->get<int>("counter");
     counter++;
@@ -84,8 +84,7 @@ public:
  * @param blackboard Shared pointer to the blackboard.
  * @return A string representing the outcome.
  */
-std::string
-check_count(std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+std::string check_count(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
   // Sleep for 1 second to simulate some processing time
   rclcpp::sleep_for(std::chrono::seconds(1));
@@ -134,8 +133,8 @@ int main(int argc, char *argv[]) {
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
 
   // Execute the state machine
-  std::shared_ptr<yasmin::blackboard::Blackboard> blackboard =
-      std::make_shared<yasmin::blackboard::Blackboard>();
+  std::shared_ptr<yasmin::Blackboard> blackboard =
+      std::make_shared<yasmin::Blackboard>();
   blackboard->set<int>("counter", 0);
   blackboard->set<int>("max_count", 10);
   try {

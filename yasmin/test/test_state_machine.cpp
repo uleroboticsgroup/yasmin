@@ -17,7 +17,7 @@
 #include <memory>
 #include <string>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 
@@ -30,8 +30,7 @@ private:
 public:
   FooState() : State({"outcome1", "outcome2"}), counter(0) {}
 
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     if (counter < 3) {
       counter++;
       blackboard->set<std::string>("foo_str",
@@ -47,8 +46,7 @@ class BarState : public State {
 public:
   BarState() : State({"outcome2", "outcome3"}) {}
 
-  std::string
-  execute(std::shared_ptr<blackboard::Blackboard> blackboard) override {
+  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     return "outcome2";
   }
 };
@@ -56,12 +54,12 @@ public:
 class TestStateMachine : public ::testing::Test {
 protected:
   std::shared_ptr<StateMachine> sm;
-  std::shared_ptr<blackboard::Blackboard> blackboard;
+  std::shared_ptr<yasmin::Blackboard> blackboard;
 
   void SetUp() override {
     sm = std::make_shared<StateMachine>(
         std::set<std::string>{"outcome4", "outcome5"});
-    blackboard = std::make_shared<blackboard::Blackboard>();
+    blackboard = std::make_shared<yasmin::Blackboard>();
 
     sm->add_state("FOO", std::make_shared<FooState>(),
                   std::map<std::string, std::string>{{"outcome1", "BAR"},

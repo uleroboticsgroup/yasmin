@@ -17,14 +17,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "yasmin/blackboard/blackboard_pywrapper.hpp"
+#include "yasmin/blackboard_pywrapper.hpp"
 #include "yasmin/pybind11_utils.hpp"
 #include "yasmin/state_machine.hpp"
 
 namespace py = pybind11;
 
 // Declare that BlackboardPyWrapper is defined in another module
-PYBIND11_MAKE_OPAQUE(yasmin::blackboard::BlackboardPyWrapper);
+PYBIND11_MAKE_OPAQUE(yasmin::BlackboardPyWrapper);
 
 PYBIND11_MODULE(state_machine, m) {
   m.doc() = "Python bindings for yasmin::StateMachine";
@@ -108,8 +108,8 @@ PYBIND11_MODULE(state_machine, m) {
             // Wrap Python callback using utility function
             auto wrapped_cb =
                 yasmin::pybind11_utils::wrap_blackboard_callback<void (*)(
-                    std::shared_ptr<yasmin::blackboard::Blackboard>,
-                    const std::string &, const std::vector<std::string> &)>(cb);
+                    std::shared_ptr<yasmin::Blackboard>, const std::string &,
+                    const std::vector<std::string> &)>(cb);
             self.add_start_cb(wrapped_cb, args);
           },
           "Add a callback to be called when the state machine starts",
@@ -121,9 +121,9 @@ PYBIND11_MODULE(state_machine, m) {
             // Wrap Python callback using utility function
             auto wrapped_cb =
                 yasmin::pybind11_utils::wrap_blackboard_callback<void (*)(
-                    std::shared_ptr<yasmin::blackboard::Blackboard>,
+                    std::shared_ptr<yasmin::Blackboard>, const std::string &,
                     const std::string &, const std::string &,
-                    const std::string &, const std::vector<std::string> &)>(cb);
+                    const std::vector<std::string> &)>(cb);
             self.add_transition_cb(wrapped_cb, args);
           },
           "Add a callback to be called during state transitions", py::arg("cb"),
@@ -135,8 +135,8 @@ PYBIND11_MODULE(state_machine, m) {
             // Wrap Python callback using utility function
             auto wrapped_cb =
                 yasmin::pybind11_utils::wrap_blackboard_callback<void (*)(
-                    std::shared_ptr<yasmin::blackboard::Blackboard>,
-                    const std::string &, const std::vector<std::string> &)>(cb);
+                    std::shared_ptr<yasmin::Blackboard>, const std::string &,
+                    const std::vector<std::string> &)>(cb);
             self.add_end_cb(wrapped_cb, args);
           },
           "Add a callback to be called when the state machine ends",

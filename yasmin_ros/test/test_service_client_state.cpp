@@ -82,12 +82,12 @@ std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>
 std::thread TestServiceClientState::spin_thread;
 
 TEST_F(TestServiceClientState, TestServiceClient) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
           "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto request = std::make_shared<
                 example_interfaces::srv::AddTwoInts::Request>();
             request->a = 2;
@@ -103,47 +103,47 @@ TEST_F(TestServiceClientState, TestServiceClientCache) {
   ROSClientsCache::clear_all();
   EXPECT_EQ(ROSClientsCache::get_service_clients_count(), 0);
 
-  auto state1 = std::make_shared<
-      ServiceState<example_interfaces::srv::AddTwoInts>>(
-      "test", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-        auto request =
-            std::make_shared<example_interfaces::srv::AddTwoInts::Request>();
-        request->a = 2;
-        request->b = 3;
-        return request;
-      });
+  auto state1 =
+      std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
+          "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
+            auto request = std::make_shared<
+                example_interfaces::srv::AddTwoInts::Request>();
+            request->a = 2;
+            request->b = 3;
+            return request;
+          });
   EXPECT_EQ(ROSClientsCache::get_service_clients_count(), 1);
 
-  auto state2 = std::make_shared<
-      ServiceState<example_interfaces::srv::AddTwoInts>>(
-      "test", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-        auto request =
-            std::make_shared<example_interfaces::srv::AddTwoInts::Request>();
-        request->a = 2;
-        request->b = 3;
-        return request;
-      });
+  auto state2 =
+      std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
+          "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
+            auto request = std::make_shared<
+                example_interfaces::srv::AddTwoInts::Request>();
+            request->a = 2;
+            request->b = 3;
+            return request;
+          });
   EXPECT_EQ(ROSClientsCache::get_service_clients_count(), 1);
 
-  auto state3 = std::make_shared<
-      ServiceState<example_interfaces::srv::AddTwoInts>>(
-      "test2", [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
-        auto request =
-            std::make_shared<example_interfaces::srv::AddTwoInts::Request>();
-        request->a = 2;
-        request->b = 3;
-        return request;
-      });
+  auto state3 =
+      std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
+          "test2", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
+            auto request = std::make_shared<
+                example_interfaces::srv::AddTwoInts::Request>();
+            request->a = 2;
+            request->b = 3;
+            return request;
+          });
   EXPECT_EQ(ROSClientsCache::get_service_clients_count(), 2);
 }
 
 TEST_F(TestServiceClientState, TestServiceClientResponseHandler) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
           "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto request = std::make_shared<
                 example_interfaces::srv::AddTwoInts::Request>();
             request->a = 2;
@@ -151,7 +151,7 @@ TEST_F(TestServiceClientState, TestServiceClientResponseHandler) {
             return request;
           },
           std::set<std::string>{"new_outcome"},
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+          [](std::shared_ptr<yasmin::Blackboard> blackboard,
              std::shared_ptr<example_interfaces::srv::AddTwoInts::Response>
                  response) { return "new_outcome"; });
 
@@ -159,12 +159,12 @@ TEST_F(TestServiceClientState, TestServiceClientResponseHandler) {
 }
 
 TEST_F(TestServiceClientState, TestServiceClientRetryWaitTimeout) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
           "test_retry",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto request = std::make_shared<
                 example_interfaces::srv::AddTwoInts::Request>();
             request->a = 2;
@@ -177,12 +177,12 @@ TEST_F(TestServiceClientState, TestServiceClientRetryWaitTimeout) {
 }
 
 TEST_F(TestServiceClientState, TestServiceClientRetryResponseTimeout) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
           "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto request = std::make_shared<
                 example_interfaces::srv::AddTwoInts::Request>();
             request->a = 2;

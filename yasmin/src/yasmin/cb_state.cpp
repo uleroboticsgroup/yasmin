@@ -19,16 +19,14 @@ namespace yasmin {
 
 CbState::CbState(
     const std::set<std::string> &outcomes,
-    std::function<std::string(std::shared_ptr<blackboard::Blackboard>)>
-        callback)
+    std::function<std::string(std::shared_ptr<yasmin::Blackboard>)> callback)
     : State(outcomes), callback(callback) {
   if (outcomes.empty()) {
     throw std::invalid_argument("Outcomes set cannot be empty.");
   }
 }
 
-std::string
-CbState::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
+std::string CbState::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
   try {
     // Call the callback function and return the result

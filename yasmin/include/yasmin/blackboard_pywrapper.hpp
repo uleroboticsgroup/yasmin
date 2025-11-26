@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN__BLACKBOARD__BLACKBOARD_PYWRAPPER_HPP
-#define YASMIN__BLACKBOARD__BLACKBOARD_PYWRAPPER_HPP
+#ifndef YASMIN__BLACKBOARD_PYWRAPPER_HPP
+#define YASMIN__BLACKBOARD_PYWRAPPER_HPP
 
 #include <list>
 #include <map>
@@ -27,12 +27,11 @@
 #include <typeinfo>
 #include <vector>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 
 namespace py = pybind11;
 
 namespace yasmin {
-namespace blackboard {
 
 // Forward declaration
 class BlackboardPyWrapper;
@@ -228,7 +227,6 @@ public:
   std::shared_ptr<Blackboard> get_cpp_blackboard() { return this->blackboard; }
 };
 
-} // namespace blackboard
 } // namespace yasmin
 
-#endif // YASMIN__BLACKBOARD__BLACKBOARD_PYWRAPPER_HPP
+#endif // YASMIN__BLACKBOARD_PYWRAPPER_HPP

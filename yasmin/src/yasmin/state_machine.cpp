@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include "yasmin/blackboard/blackboard.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
@@ -170,7 +170,7 @@ void StateMachine::add_end_cb(EndCallbackType cb,
 }
 
 void StateMachine::call_start_cbs(
-    std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+    std::shared_ptr<yasmin::Blackboard> blackboard,
     const std::string &start_state) {
 
   try {
@@ -187,7 +187,7 @@ void StateMachine::call_start_cbs(
 }
 
 void StateMachine::call_transition_cbs(
-    std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+    std::shared_ptr<yasmin::Blackboard> blackboard,
     const std::string &from_state, const std::string &to_state,
     const std::string &outcome) {
 
@@ -204,9 +204,8 @@ void StateMachine::call_transition_cbs(
   }
 }
 
-void StateMachine::call_end_cbs(
-    std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
-    const std::string &outcome) {
+void StateMachine::call_end_cbs(std::shared_ptr<yasmin::Blackboard> blackboard,
+                                const std::string &outcome) {
 
   try {
     for (const auto &callback_pair : this->end_cbs) {
@@ -309,7 +308,7 @@ void StateMachine::validate(bool strict_mode) {
 }
 
 std::string
-StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
+StateMachine::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
   this->validate();
 
@@ -382,15 +381,15 @@ StateMachine::execute(std::shared_ptr<blackboard::Blackboard> blackboard) {
 
 std::string StateMachine::execute() {
 
-  std::shared_ptr<blackboard::Blackboard> blackboard =
-      std::make_shared<blackboard::Blackboard>();
+  std::shared_ptr<yasmin::Blackboard> blackboard =
+      std::make_shared<yasmin::Blackboard>();
 
   return this->execute(blackboard);
 }
 
 std::string StateMachine::operator()() {
-  std::shared_ptr<blackboard::Blackboard> blackboard =
-      std::make_shared<blackboard::Blackboard>();
+  std::shared_ptr<yasmin::Blackboard> blackboard =
+      std::make_shared<yasmin::Blackboard>();
 
   return this->operator()(blackboard);
 }

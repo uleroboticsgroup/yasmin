@@ -120,12 +120,11 @@ std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>
 std::thread TestActionClientState::spin_thread;
 
 TEST_F(TestActionClientState, TestActionClientStateSucceed) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
-          "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto goal = example_interfaces::action::Fibonacci::Goal();
             goal.order = 0;
             return goal;
@@ -140,8 +139,7 @@ TEST_F(TestActionClientState, TestActionClientStateCache) {
 
   auto state1 =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
-          "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto goal = example_interfaces::action::Fibonacci::Goal();
             goal.order = 0;
             return goal;
@@ -150,8 +148,7 @@ TEST_F(TestActionClientState, TestActionClientStateCache) {
 
   auto state2 =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
-          "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto goal = example_interfaces::action::Fibonacci::Goal();
             goal.order = 0;
             return goal;
@@ -160,8 +157,7 @@ TEST_F(TestActionClientState, TestActionClientStateCache) {
 
   auto state3 =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
-          "test2",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          "test2", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto goal = example_interfaces::action::Fibonacci::Goal();
             goal.order = 0;
             return goal;
@@ -170,18 +166,18 @@ TEST_F(TestActionClientState, TestActionClientStateCache) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateResultHandler) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
           "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto goal = example_interfaces::action::Fibonacci::Goal();
             goal.order = 0;
             return goal;
           },
           std::set<std::string>{"new_outcome"},
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard,
+          [](std::shared_ptr<yasmin::Blackboard> blackboard,
              std::shared_ptr<example_interfaces::action::Fibonacci::Result>
                  result) { return "new_outcome"; });
 
@@ -189,12 +185,11 @@ TEST_F(TestActionClientState, TestActionClientStateResultHandler) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateCancel) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
-          "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto goal = example_interfaces::action::Fibonacci::Goal();
             goal.order = 20;
             return goal;
@@ -210,12 +205,11 @@ TEST_F(TestActionClientState, TestActionClientStateCancel) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateAbort) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
-          "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto goal = example_interfaces::action::Fibonacci::Goal();
             goal.order = -1;
             return goal;
@@ -225,12 +219,12 @@ TEST_F(TestActionClientState, TestActionClientStateAbort) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateRetryWaitTimeout) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
           "test1",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto goal = example_interfaces::action::Fibonacci::Goal();
             goal.order = 3;
             return goal;
@@ -241,12 +235,12 @@ TEST_F(TestActionClientState, TestActionClientStateRetryWaitTimeout) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateRetryResponseTimeout) {
-  auto blackboard = std::make_shared<yasmin::blackboard::Blackboard>();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
           "test",
-          [](std::shared_ptr<yasmin::blackboard::Blackboard> blackboard) {
+          [](std::shared_ptr<yasmin::Blackboard> blackboard) {
             auto goal = example_interfaces::action::Fibonacci::Goal();
             goal.order = 3;
             return goal;
