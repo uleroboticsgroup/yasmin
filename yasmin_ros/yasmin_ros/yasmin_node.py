@@ -22,7 +22,7 @@ from rclpy.node import Node
 # Check if EventsExecutor is available
 try:
     from rclpy.executors import EventsExecutor as Executor
-except ImportError :
+except ImportError:
     from rclpy.executors import MultiThreadedExecutor as Executor
 
 
