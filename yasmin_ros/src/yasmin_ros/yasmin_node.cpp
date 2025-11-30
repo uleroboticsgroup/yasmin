@@ -53,7 +53,7 @@ YasminNode::YasminNode() : rclcpp::Node("yasmin_" + generateUUID() + "_node") {
 
   // Initialize and detach the spin thread to run the executor asynchronously.
   this->spin_thread = std::make_unique<std::thread>(
-      &rclcpp::executors::MultiThreadedExecutor::spin, &this->executor);
+      &rclcpp::Executor::spin, &this->executor);
 
   this->spin_thread
       ->detach(); // Detach the spin thread to allow background execution.

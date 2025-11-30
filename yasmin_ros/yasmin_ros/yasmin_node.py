@@ -18,7 +18,12 @@ from threading import Thread, RLock
 
 import rclpy
 from rclpy.node import Node
-from rclpy.executors import MultiThreadedExecutor
+
+# Check if EventsExecutor is available
+try:
+    from rclpy.executors import EventsExecutor as Executor
+except ImportError :
+    from rclpy.executors import MultiThreadedExecutor as Executor
 
 
 class YasminNode(Node):
@@ -61,7 +66,7 @@ class YasminNode(Node):
         Default constructor. Initializes the node with a unique name.
 
         This constructor initializes the ROS 2 Node and
-        starts a MultiThreadedExecutor for handling node callbacks.
+        starts an Executor for handling node callbacks.
         It raises a RuntimeError if an attempt is made to create a second instance
         of this Singleton class.
 
@@ -75,7 +80,7 @@ class YasminNode(Node):
         super().__init__(f"yasmin_{str(uuid.uuid4()).replace('-', '')[:16]}_node")
 
         ## Executor for managing node operations.
-        self._executor: MultiThreadedExecutor = MultiThreadedExecutor()
+        self._executor = Executor()
         self._executor.add_node(self)
 
         ## Thread to execute the spinning of the node.

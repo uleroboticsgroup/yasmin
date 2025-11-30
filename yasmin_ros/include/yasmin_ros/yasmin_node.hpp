@@ -81,7 +81,16 @@ public:
 
 private:
   /// Executor for managing multiple threads.
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
+#if RCLCPP_VERSION_GTE(28, 1, 1)
+  rclcpp::experimental::executors::EventsExecutor executor;
+#else
   rclcpp::executors::MultiThreadedExecutor executor;
+#endif
+#else
+  rclcpp::executors::MultiThreadedExecutor executor;
+#endif
   /// Thread for spinning the node.
   std::unique_ptr<std::thread> spin_thread;
 };
