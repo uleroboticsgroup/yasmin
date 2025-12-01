@@ -76,7 +76,8 @@ PYBIND11_MODULE(yasmin_pybind_bridge, m) {
 
 // Import the State class from yasmin.state module
 // This ensures pybind11 knows how to handle yasmin::State objects
-#if __has_include("rclcpp/version.h")
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
   auto state_module = py::module_::import("yasmin.state");
 #else
   auto state_module = py::module::import("yasmin.state");

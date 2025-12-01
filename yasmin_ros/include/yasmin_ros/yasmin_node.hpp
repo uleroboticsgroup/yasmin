@@ -83,12 +83,12 @@ private:
   /// Executor for managing multiple threads.
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(28, 1, 1)
+#if RCLCPP_VERSION_GTE(29, 5, 1) // Kilted and Rolling
   rclcpp::experimental::executors::EventsExecutor executor;
-#else
+#else // Humble, Iron and Jazzy
   rclcpp::executors::MultiThreadedExecutor executor;
 #endif
-#else
+#else // Foxy and Galactic
   rclcpp::executors::MultiThreadedExecutor executor;
 #endif
   /// Thread for spinning the node.

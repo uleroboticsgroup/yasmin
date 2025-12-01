@@ -52,7 +52,8 @@ public:
     // Wrap the C++ Blackboard in BlackboardPyWrapper for Python
     yasmin::BlackboardPyWrapper wrapper(blackboard);
 
-#if __has_include("rclcpp/version.h")
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
     PYBIND11_OVERRIDE_PURE(std::string, // Return type
                            State,       // Parent class
                            execute,     // Method name
@@ -75,7 +76,8 @@ public:
     // Acquire GIL before calling Python code
     py::gil_scoped_acquire acquire;
 
-#if __has_include("rclcpp/version.h")
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
     PYBIND11_OVERRIDE(void,        // Return type
                       State,       // Parent class
                       cancel_state // Method name (no arguments)
@@ -108,7 +110,8 @@ PYBIND11_MODULE(state, m) {
 
   // Import BlackboardPyWrapper from blackboard module
   // This allows us to use it without re-registering the type
-#if __has_include("rclcpp/version.h")
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
   py::module_ blackboard_module = py::module_::import("yasmin.blackboard");
 #else
   py::module blackboard_module = py::module::import("yasmin.blackboard");

@@ -429,7 +429,7 @@ private:
 
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(2, 4, 3)
+#if RCLCPP_VERSION_GTE(2, 4, 3) // Greater or equal to latest Foxy
   /**
    * @brief Callback for handling the goal response.
    *

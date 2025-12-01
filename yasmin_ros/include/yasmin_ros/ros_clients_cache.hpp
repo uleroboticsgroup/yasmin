@@ -141,13 +141,13 @@ public:
 
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(28, 1, 1)
+#if RCLCPP_VERSION_GTE(28, 1, 1) // Jazzy, Kilted and Rolling
     auto qos = rclcpp::QoS(
         rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default));
-#else
+#else // Humble and Iron
     auto qos = rmw_qos_profile_services_default;
 #endif
-#else
+#else // Foxy and Galactic
     auto qos = rmw_qos_profile_services_default;
 #endif
 
