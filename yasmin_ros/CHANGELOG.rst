@@ -3,6 +3,16 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.0.2 (2025-12-01)
+------------------
+* fixing macros using pybind and setting EventsExecutor for Kilted and Rolling
+* fixing code format
+* using macros for EventsExecutors
+* fixing python comments
+* improving comments in C++
+* removing directory in yasmin
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.1 (2025-11-25)
 ------------------
 * setting timeout for yasmin_ros tests

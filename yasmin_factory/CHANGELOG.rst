@@ -2,6 +2,12 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.0.2 (2025-12-01)
+------------------
+* fixing macros using pybind and setting EventsExecutor for Kilted and Rolling
+* removing directory in yasmin
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.1 (2025-11-25)
 ------------------
 * adding ament_cmake_python to factory package.xml

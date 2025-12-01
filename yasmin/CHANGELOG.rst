@@ -3,6 +3,15 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.0.2 (2025-12-01)
+------------------
+* fixing macros using pybind and setting EventsExecutor for Kilted and Rolling
+* improving comments in C++
+* removing directory in yasmin
+* fixing comments in blackboard
+* removing blackboard_value to simplify blackboard
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.1 (2025-11-25)
 ------------------
 
