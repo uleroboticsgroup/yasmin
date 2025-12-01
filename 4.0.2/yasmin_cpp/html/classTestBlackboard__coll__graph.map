@@ -1,0 +1,19 @@
+<map id="TestBlackboard" name="TestBlackboard">
+<area shape="rect" id="Node000001" title=" " alt="" coords="969,37,1081,63"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="742,13,834,39"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="850,30,969,42,968,47,850,35"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1Blackboard.html" title="A thread&#45;safe storage for key&#45;value pairs of varying types." alt="" coords="722,63,855,88"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="870,67,945,60,968,57,969,62,945,65,871,72"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="447,5,588,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="600,32,698,53,728,59,727,65,697,58,598,37"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="434,55,601,96"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="616,73,721,73,721,78,616,78"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="216,37,293,63"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="309,53,434,65,434,70,308,58"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="5,30,129,70"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="145,48,215,48,215,53,145,53"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="178,87,330,112"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="346,98,410,95,433,91,434,97,411,100,346,104"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="447,120,588,161"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="603,128,697,108,757,86,759,91,698,113,604,133"/>
+</map>
