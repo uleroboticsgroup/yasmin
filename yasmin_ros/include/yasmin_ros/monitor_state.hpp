@@ -153,11 +153,11 @@ public:
    */
   std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
     int retry_count = 0;
+    std::unique_lock<std::mutex> lock(this->msg_mutex);
+    std::cv_status wait_status = std::cv_status::no_timeout;
 
     while (this->msg_list.empty()) {
-      std::unique_lock<std::mutex> lock(this->msg_mutex);
 
-      std::cv_status wait_status = std::cv_status::no_timeout;
       if (this->timeout > 0) {
         wait_status =
             this->msg_cond.wait_for(lock, std::chrono::seconds(this->timeout));
