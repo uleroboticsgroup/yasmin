@@ -347,6 +347,10 @@ StateMachine::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
       outcome = transitions.at(outcome);
     }
 
+    YASMIN_LOG_INFO("State machine transitioning '%s' : '%s' --> '%s'",
+                    this->current_state.c_str(), old_outcome.c_str(),
+                    outcome.c_str());
+
     // Outcome is an outcome of the sm
     if (std::find(this->outcomes.begin(), this->outcomes.end(), outcome) !=
         this->outcomes.end()) {
@@ -359,10 +363,6 @@ StateMachine::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
       // Outcome is a state
     } else if (this->states.find(outcome) != this->states.end()) {
-
-      YASMIN_LOG_INFO("State machine transitioning '%s' : '%s' --> '%s'",
-                      this->current_state.c_str(), old_outcome.c_str(),
-                      outcome.c_str());
       this->call_transition_cbs(blackboard, this->current_state, outcome,
                                 old_outcome);
 

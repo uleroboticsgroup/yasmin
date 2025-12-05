@@ -111,6 +111,12 @@ private:
 
     auto result = std::make_shared<Fibonacci::Result>();
 
+    if (goal->order < 0) {
+      RCLCPP_ERROR(this->get_logger(), "Goal order must be non-negative");
+      goal_handle->abort(result);
+      return;
+    }
+
     // Generate the Fibonacci sequence up to the requested order.
     for (int i = 1; (i < goal->order) && rclcpp::ok(); ++i) {
 

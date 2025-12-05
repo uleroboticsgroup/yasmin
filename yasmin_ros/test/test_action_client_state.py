@@ -149,13 +149,7 @@ class TestActionClient(unittest.TestCase):
             state.cancel_state()
 
         state = ActionState(Fibonacci, "test", create_goal_cb)
-        thread = Thread(
-            target=cancel_state,
-            args=(
-                state,
-                1,
-            ),
-        )
+        thread = Thread(target=cancel_state, args=(state, 1))
         thread.start()
         self.assertEqual(CANCEL, state())
         thread.join()

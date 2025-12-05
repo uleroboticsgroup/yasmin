@@ -338,6 +338,10 @@ public:
       }
     }
 
+    if (this->is_canceled()) {
+      return basic_outcomes::CANCEL;
+    }
+
     // Prepare options for sending the goal
     SendGoalOptions send_goal_options;
     send_goal_options.goal_response_callback =

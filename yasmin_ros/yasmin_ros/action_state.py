@@ -183,6 +183,9 @@ class ActionState(State):
                 else:
                     return TIMEOUT
 
+        if self.is_canceled():
+            return CANCEL
+
         self._action_done_event.clear()
 
         yasmin.YASMIN_LOG_INFO(f"Sending goal to action '{self._action_name}'")
@@ -195,9 +198,6 @@ class ActionState(State):
             goal, feedback_callback=feedback_handler
         )
         send_goal_future.add_done_callback(self._goal_response_callback)
-
-        if self.is_canceled():
-            return CANCEL
 
         # Wait for action to be done
         while not self._action_done_event.wait(self._response_timeout):
