@@ -145,6 +145,7 @@ class ActionState(State):
             if self._goal_handle is not None:
                 self._goal_handle.cancel_goal()
         super().cancel_state()
+        self._action_done_event.set()
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -166,6 +167,9 @@ class ActionState(State):
         yasmin.YASMIN_LOG_INFO(f"Waiting for action '{self._action_name}'")
 
         while not self._action_client.wait_for_server(self._wait_timeout):
+            if self.is_canceled():
+                return CANCEL
+
             yasmin.YASMIN_LOG_WARN(
                 f"Timeout reached, action '{self._action_name}' is not available"
             )
@@ -197,6 +201,9 @@ class ActionState(State):
 
         # Wait for action to be done
         while not self._action_done_event.wait(self._response_timeout):
+            if self.is_canceled():
+                return CANCEL
+
             yasmin.YASMIN_LOG_WARN(
                 f"Timeout reached while waiting for response from action '{self._action_name}'"
             )
@@ -208,6 +215,9 @@ class ActionState(State):
                 )
             else:
                 return TIMEOUT
+
+        if self.is_canceled():
+            return CANCEL
 
         status = self._action_status
 

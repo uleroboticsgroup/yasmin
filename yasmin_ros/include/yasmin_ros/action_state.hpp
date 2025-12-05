@@ -259,18 +259,29 @@ public:
    * This function cancels the ongoing action and waits for the cancellation to
    * complete.
    */
-  void cancel_state() {
-    std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
+  void cancel_state() override {
 
-    if (this->goal_handle) {
-      this->action_client->async_cancel_goal(
-          this->goal_handle, std::bind(&ActionState::cancel_done, this));
+    bool waiting_for_cancel = false;
 
-      std::unique_lock<std::mutex> lock(this->action_cancel_mutex);
-      this->action_cancel_cond.wait(lock);
+    {
+      std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
+
+      if (this->goal_handle) {
+        auto future_cancel = this->action_client->async_cancel_goal(
+            this->goal_handle, std::bind(&ActionState::cancel_done, this));
+        waiting_for_cancel = true;
+      }
     }
 
+    // Wait for cancellation to complete outside of the goal_handle_mutex lock
+    if (waiting_for_cancel) {
+      std::unique_lock<std::mutex> cancel_lock(this->action_cancel_mutex);
+      this->action_cancel_cond.wait(cancel_lock);
+    }
+
+    // Wake up the execute() method if it's waiting
     yasmin::State::cancel_state();
+    this->action_done_cond.notify_all();
   }
 
   /**
@@ -309,6 +320,11 @@ public:
 
     while (!this->action_client->wait_for_action_server(
         std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout))) {
+
+      if (this->is_canceled()) {
+        return basic_outcomes::CANCEL;
+      }
+
       YASMIN_LOG_WARN("Timeout reached, action '%s' is not available",
                       this->action_name.c_str());
       if (retry_count < this->maximum_retry) {
@@ -326,7 +342,6 @@ public:
     SendGoalOptions send_goal_options;
     send_goal_options.goal_response_callback =
         std::bind(&ActionState::goal_response_callback, this, _1);
-
     send_goal_options.result_callback =
         std::bind(&ActionState::result_callback, this, _1);
 
@@ -338,6 +353,7 @@ public:
           };
     }
 
+    // Send the goal to the action server
     YASMIN_LOG_INFO("Sending goal to action '%s'", this->action_name.c_str());
     this->action_client->async_send_goal(goal, send_goal_options);
 
@@ -345,6 +361,11 @@ public:
       while (this->action_done_cond.wait_for(
                  lock, std::chrono::seconds(this->response_timeout)) ==
              std::cv_status::timeout) {
+
+        if (this->is_canceled()) {
+          return basic_outcomes::CANCEL;
+        }
+
         YASMIN_LOG_WARN(
             "Timeout reached while waiting for response from action '%s'",
             this->action_name.c_str());
@@ -357,6 +378,7 @@ public:
           return basic_outcomes::TIMEOUT;
         }
       }
+
     } else {
       this->action_done_cond.wait(lock);
     }
