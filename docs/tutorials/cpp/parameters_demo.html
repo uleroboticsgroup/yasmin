@@ -231,12 +231,6 @@ public:
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{"outcome4"});
 
-  rclcpp::on_shutdown([sm]() {
-    if (sm-&gt;is_running()) {
-      sm-&gt;cancel_state();
-    }
-  });
-
   // Add GetParametersState to retrieve parameters
   sm-&gt;add_state("GETTING_PARAMETERS",
                 std::make_shared&lt;yasmin_ros::GetParametersState&gt;(

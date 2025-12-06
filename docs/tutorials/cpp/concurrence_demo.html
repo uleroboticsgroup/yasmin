@@ -254,13 +254,6 @@ public:
 auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
     std::initializer_list&lt;std::string&gt;{"outcome4"});
 
-  // Cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() {
-    if (sm-&gt;is_running()) {
-      sm-&gt;cancel_state();
-    }
-  });
-
 auto foo_state = std::make_shared&lt;FooState&gt;();
 auto bar_state = std::make_shared&lt;BarState&gt;();
 

@@ -95,9 +95,9 @@ def main() -> None:
     rclpy.init()
     set_ros_loggers()
 
-    bb = Blackboard()
-    bb["msg1"] = "test1"
-    bb["msg2"] = "test2"
+    blackboard = Blackboard()
+    blackboard["msg1"] = "test1"
+    blackboard["msg2"] = "test2"
 
     sm = StateMachine(outcomes=[SUCCEED])
     sm.add_state(
@@ -124,18 +124,17 @@ def main() -> None:
 
     # Execute the FSM
     try:
-        outcome = sm(bb)
+        outcome = sm(blackboard)
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

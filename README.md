@@ -259,16 +259,15 @@ def main() -> None:
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -367,9 +366,9 @@ def main() -> None:
     rclpy.init()
     set_ros_loggers()
 
-    bb = Blackboard()
-    bb["msg1"] = "test1"
-    bb["msg2"] = "test2"
+    blackboard = Blackboard()
+    blackboard["msg1"] = "test1"
+    blackboard["msg2"] = "test2"
 
     sm = StateMachine(outcomes=[SUCCEED])
     sm.add_state(
@@ -396,18 +395,17 @@ def main() -> None:
 
     # Execute the FSM
     try:
-        outcome = sm(bb)
+        outcome = sm(blackboard)
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -579,16 +577,15 @@ def main() -> None:
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -726,19 +723,19 @@ def main() -> None:
     blackboard.set("counter", 0)
     blackboard.set("max_count", 10)
 
-    # Run the state machine and log the outcome
+    # Execute the FSM
     try:
-        outcome = sm(blackboard)
+        outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
-        yasmin.YASMIN_LOG_INFO(str(e))
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -850,20 +847,19 @@ def main() -> None:
     # Publish FSM information
     viewer = YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
-    # Execute FSM
+    # Execute the FSM
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1026,20 +1022,19 @@ def main() -> None:
     # Publish FSM info
     viewer = YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
 
-    # Execute FSM
+    # Execute the FSM
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1222,16 +1217,15 @@ def main() -> None:
     try:
         outcome = sm(blackboard)
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1389,16 +1383,15 @@ def main() -> None:
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1464,16 +1457,15 @@ def main() -> None:
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
@@ -1806,13 +1798,6 @@ int main(int argc, char *argv[]) {
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
 
-  // Cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-  });
-
   // Add states to the state machine
   sm->add_state("FOO", std::make_shared<FooState>(),
                 {
@@ -1934,13 +1919,6 @@ int main(int argc, char *argv[]) {
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED});
-
-  // Cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-  });
 
   // Add states to the state machine
   sm->add_state("STATE1", std::make_shared<FooState>(),
@@ -2110,13 +2088,6 @@ int main(int argc, char *argv[]) {
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
 
-  // Cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-  });
-
   // Create states to run concurrently
   auto foo_state = std::make_shared<FooState>();
   auto bar_state = std::make_shared<BarState>();
@@ -2267,13 +2238,6 @@ int main(int argc, char *argv[]) {
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED});
 
-  // Cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-  });
-
   // Add states to the state machine
   sm->add_state("PUBLISHING_INT", std::make_shared<PublishIntState>(),
                 {
@@ -2416,13 +2380,6 @@ int main(int argc, char *argv[]) {
   // Create a state machine with a final outcome
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
-
-  // Cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-  });
 
   // Add states to the state machine
   sm->add_state(
@@ -2592,13 +2549,6 @@ int main(int argc, char *argv[]) {
   // Create a state machine with a specified outcome.
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
-
-  // Cancel the state machine on ROS 2 shutdown.
-  rclcpp::on_shutdown([sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-  });
 
   // Add states to the state machine.
   sm->add_state("SETTING_INTS",
@@ -2801,13 +2751,6 @@ int main(int argc, char *argv[]) {
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
 
-  // Cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-  });
-
   // Add states to the state machine
   sm->add_state("CALLING_FIBONACCI", std::make_shared<FibonacciState>(),
                 {
@@ -2960,13 +2903,6 @@ int main(int argc, char *argv[]) {
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"});
-
-  // Cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-  });
 
   // Add states to the state machine
   sm->add_state("GETTING_PARAMETERS",

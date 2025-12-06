@@ -93,13 +93,6 @@ int main(int argc, char *argv[]) {
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED});
 
-  // Cancel state machine on ROS 2 shutdown
-  rclcpp::on_shutdown([sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-  });
-
   // Add states to the state machine
   sm->add_state("STATE1", std::make_shared<FooState>(),
                 {

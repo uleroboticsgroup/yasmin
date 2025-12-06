@@ -61,16 +61,22 @@ public:
    * @brief Construct a new StateMachine object.
    *
    * @param outcomes A set of possible outcomes for the state machine.
+   * @param handle_sigint Whether to handle SIGINT for canceling the state
+   * machine.
    */
-  StateMachine(const std::set<std::string> &outcomes);
+  StateMachine(const std::set<std::string> &outcomes,
+               bool handle_sigint = true);
 
   /**
    * @brief Construct a new StateMachine object.
    *
    * @param name The name of the state machine.
    * @param outcomes A set of possible outcomes for the state machine.
+   * @param handle_sigint Whether to handle SIGINT for canceling the state
+   * machine.
    */
-  StateMachine(const std::string &name, const std::set<std::string> &outcomes);
+  StateMachine(const std::string &name, const std::set<std::string> &outcomes,
+               bool handle_sigint = true);
 
   /**
    * @brief Destroy the StateMachine object.
@@ -243,6 +249,12 @@ public:
    * @brief Cancels the current state execution.
    */
   void cancel_state() override;
+
+  /**
+   * @brief Sets whether the state machine should handle SIGINT for cancel.
+   * @param handle True to handle SIGINT, false to ignore or reset the handler.
+   */
+  void set_sigint_handler(bool handle = true);
 
   /**
    * @brief Converts the state machine to a string representation.

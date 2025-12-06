@@ -281,7 +281,6 @@ public:
 
     // Wake up the execute() method if it's waiting
     yasmin::State::cancel_state();
-    this->action_done_cond.notify_all();
   }
 
   /**

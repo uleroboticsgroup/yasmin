@@ -141,19 +141,19 @@ def main() -> None:
     blackboard.set("counter", 0)
     blackboard.set("max_count", 10)
 
-    # Run the state machine and log the outcome
+    # Execute the FSM
     try:
         outcome = sm(blackboard)
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
-        yasmin.YASMIN_LOG_INFO(str(e))
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

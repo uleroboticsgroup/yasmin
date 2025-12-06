@@ -136,16 +136,15 @@ def main() -> None:
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        if sm.is_running():
-            sm.cancel_state()
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

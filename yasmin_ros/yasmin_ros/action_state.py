@@ -145,7 +145,6 @@ class ActionState(State):
             if self._goal_handle is not None:
                 self._goal_handle.cancel_goal()
         super().cancel_state()
-        self._action_done_event.set()
 
     def execute(self, blackboard: Blackboard) -> str:
         """

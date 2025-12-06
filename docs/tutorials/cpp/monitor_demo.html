@@ -226,12 +226,6 @@ public:
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{"outcome4"});
 
-  rclcpp::on_shutdown([sm]() {
-    if (sm-&gt;is_running()) {
-      sm-&gt;cancel_state();
-    }
-  });
-
   sm-&gt;add_state(
       "PRINTING_ODOM", std::make_shared&lt;PrintOdometryState&gt;(5),
       {

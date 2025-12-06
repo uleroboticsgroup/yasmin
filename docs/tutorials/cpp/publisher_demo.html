@@ -223,12 +223,6 @@ int main(int argc, char *argv[]) {
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED});
 
-  rclcpp::on_shutdown([sm]() {
-    if (sm-&gt;is_running()) {
-      sm-&gt;cancel_state();
-    }
-  });
-
   sm-&gt;add_state("PUBLISHING_INT", std::make_shared&lt;PublishIntState&gt;(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,

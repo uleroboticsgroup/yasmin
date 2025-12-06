@@ -36,11 +36,25 @@ PYBIND11_MODULE(state_machine, m) {
       sm_class(m, "StateMachine");
 
   sm_class.def(py::init<std::set<std::string>>(), py::arg("outcomes"))
-      .def(py::init([](const std::vector<std::string> &outcomes) {
+      .def(py::init([](const std::vector<std::string> &outcomes,
+                       bool handle_sigint) {
              return new yasmin::StateMachine(
-                 std::set<std::string>(outcomes.begin(), outcomes.end()));
+                 std::set<std::string>(outcomes.begin(), outcomes.end()),
+                 handle_sigint);
            }),
-           py::arg("outcomes"))
+           py::arg("outcomes"), py::arg("handle_sigint") = true)
+      .def(py::init<const std::string &, const std::set<std::string> &, bool>(),
+           py::arg("name"), py::arg("outcomes"),
+           py::arg("handle_sigint") = true)
+      .def(py::init([](const std::string &name,
+                       const std::vector<std::string> &outcomes,
+                       bool handle_sigint) {
+             return new yasmin::StateMachine(
+                 name, std::set<std::string>(outcomes.begin(), outcomes.end()),
+                 handle_sigint);
+           }),
+           py::arg("name"), py::arg("outcomes"),
+           py::arg("handle_sigint") = true)
       // Add destructor from StateMachine
       .def("__del__", [](yasmin::StateMachine *self) { delete self; })
       // Add state method with keep_alive to manage object lifetime
@@ -151,6 +165,9 @@ PYBIND11_MODULE(state_machine, m) {
            py::arg("strict_mode") = false)
       .def("cancel_state", &yasmin::StateMachine::cancel_state,
            "Cancel the current state execution")
+      .def("set_sigint_handler", &yasmin::StateMachine::set_sigint_handler,
+           "Set whether the state machine should handle SIGINT for cancel",
+           py::arg("handle") = true)
       // String representation
       .def("to_string", &yasmin::StateMachine::to_string,
            "Convert the state machine to a string representation")
