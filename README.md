@@ -689,13 +689,6 @@ def main() -> None:
     # Create the state machine with 'SUCCEED' as the terminal outcome
     sm = StateMachine([SUCCEED])
 
-    # Ensure the state machine cancels on shutdown
-    def on_shutdown():
-        if sm.is_running():
-            sm.cancel_state()
-
-    rclpy.get_default_context().on_shutdown(on_shutdown)
-
     # Add the publishing state which loops until the condition is met
     sm.add_state(
         "PUBLISHING_INT",
@@ -1667,18 +1660,19 @@ def main() -> None:
     blackboard = Blackboard()
     blackboard["waypoints_num"] = 2  # Set the number of waypoints to navigate
 
+    # Execute the FSM
     try:
-        outcome = sm(blackboard)  # Run the state machine with the blackboard
+        outcome = sm(blackboard)
         yasmin.YASMIN_LOG_INFO(outcome)
-    except KeyboardInterrupt:
-        sm.cancel_state()  # Handle manual interruption
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
     finally:
         viewer.cleanup()
         del sm
 
-        # Shutdown ROS 2 if it's running
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
@@ -3190,16 +3184,6 @@ int main(int argc, char *argv[]) {
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED,
                                          yasmin_ros::basic_outcomes::ABORT,
                                          yasmin_ros::basic_outcomes::CANCEL});
-
-  // Cancel state machines on ROS 2 shutdown
-  rclcpp::on_shutdown([sm, nav_sm]() {
-    if (sm->is_running()) {
-      sm->cancel_state();
-    }
-    if (nav_sm->is_running()) {
-      nav_sm->cancel_state();
-    }
-  });
 
   // Add states to the state machine
   sm->add_state(

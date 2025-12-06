@@ -107,13 +107,6 @@ def main() -> None:
     # Create the state machine with 'SUCCEED' as the terminal outcome
     sm = StateMachine([SUCCEED])
 
-    # Ensure the state machine cancels on shutdown
-    def on_shutdown():
-        if sm.is_running():
-            sm.cancel_state()
-
-    rclpy.get_default_context().on_shutdown(on_shutdown)
-
     # Add the publishing state which loops until the condition is met
     sm.add_state(
         "PUBLISHING_INT",
