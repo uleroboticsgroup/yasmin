@@ -245,8 +245,15 @@ public:
       this->node_ = node;
     }
 
+    this->callback_group = callback_group;
+
+    if (this->callback_group == nullptr) {
+      this->callback_group = this->node_->create_callback_group(
+          rclcpp::CallbackGroupType::Reentrant);
+    }
+
     this->action_client = ROSClientsCache::get_or_create_action_client<ActionT>(
-        this->node_, action_name, callback_group);
+        this->node_, action_name, this->callback_group);
 
     if (this->create_goal_handler == nullptr) {
       throw std::invalid_argument("create_goal_handler is needed");
@@ -416,9 +423,10 @@ protected:
 private:
   /// Name of the action to communicate with.
   std::string action_name;
-
   /// Shared pointer to the action client.
   ActionClient action_client;
+  /// Function to create a goal for the action.
+  rclcpp::CallbackGroup::SharedPtr callback_group;
 
   /// Condition variable for action completion.
   std::condition_variable action_done_cond;

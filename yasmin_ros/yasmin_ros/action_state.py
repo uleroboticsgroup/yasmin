@@ -20,7 +20,7 @@ from rclpy.node import Node
 from rclpy.task import Future
 from rclpy.action import ActionClient
 from rclpy.action.client import ClientGoalHandle
-from rclpy.callback_groups import CallbackGroup
+from rclpy.callback_groups import CallbackGroup, ReentrantCallbackGroup
 from action_msgs.msg import GoalStatus
 
 import yasmin
@@ -121,6 +121,9 @@ class ActionState(State):
 
         ## Action type for caching
         self._action_type: Type = action_type
+
+        if not callback_group:
+            callback_group = ReentrantCallbackGroup()
 
         ## Shared pointer to the action client (reused from cache if available).
         self._action_client: ActionClient = ROSClientsCache.get_or_create_action_client(

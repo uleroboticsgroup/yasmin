@@ -1224,7 +1224,7 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except KeyboardInterrupt:
         if sm.is_running():
-            sm.cancel_state()  # Cancel the state if interrupted
+            sm.cancel_state()
     finally:
         viewer.cleanup()
         del sm
