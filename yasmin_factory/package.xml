@@ -1,26 +1,26 @@
 <?xml version="1.0"?>
 <package format="3">
-    <name>yasmin_factory</name>
-    <version>4.0.2</version>
-    <description>YASMIN factory to create FSMs from XML files</description>
-    <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
-    <license>GPL-3.0</license>
-    <buildtool_depend>ament_cmake</buildtool_depend>
-    <buildtool_depend>ament_cmake_python</buildtool_depend>
-    <depend>python3-dev</depend>
-    <depend>pluginlib</depend>
-    <depend>pybind11-dev</depend>
-    <depend>class_loader</depend>
-    <depend>rclcpp</depend>
-    <depend>yasmin</depend>
-    <depend>yasmin_viewer</depend>
-    <depend>tinyxml2_vendor</depend>
-    <depend condition="$ROS_DISTRO == foxy">boost</depend>
-    <exec_depend>python3</exec_depend>
-    <exec_depend>python3-lxml</exec_depend>
-    <test_depend>ament_cmake_gtest</test_depend>
-    <test_depend>ament_cmake_pytest</test_depend>
-    <export>
-        <build_type>ament_cmake</build_type>
-    </export>
+  <name>yasmin_factory</name>
+  <version>4.1.0</version>
+  <description>YASMIN factory to create FSMs from XML files</description>
+  <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
+  <license>GPL-3.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <depend>python3-dev</depend>
+  <depend>pluginlib</depend>
+  <depend>pybind11-dev</depend>
+  <depend>class_loader</depend>
+  <depend>rclcpp</depend>
+  <depend>yasmin</depend>
+  <depend>yasmin_viewer</depend>
+  <depend>tinyxml2_vendor</depend>
+  <depend condition="$ROS_DISTRO == foxy">boost</depend>
+  <exec_depend>python3</exec_depend>
+  <exec_depend>python3-lxml</exec_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

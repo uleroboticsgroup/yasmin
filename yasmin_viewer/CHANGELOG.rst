@@ -3,6 +3,12 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.1.0 (2025-12-07)
+------------------
+* removing duplicated comments and setting generateUUID as inline
+* adding python-dev in deps and removing unused test deps for python
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.2 (2025-12-01)
 ------------------
 
@@ -14,7 +20,7 @@ Changelog for package yasmin_viewer
 * adding destructor to state machine and cleanup to viewer pub
 * removing comments from main functions
 * Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
-  [New Greate Version] Pybinding + Plugins + Editor
+  [New Great Version] Pybinding + Plugins + Editor
 * replacing bare HTTP with socket.io in viewer
 * adding const&
 * adding const&

@@ -2,6 +2,13 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.1.0 (2025-12-07)
+------------------
+* adding python-dev in deps and removing unused test deps for python
+* setting signing handle as false by default
+* adding SIGINT handler for YASMIN state machines in core package
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.2 (2025-12-01)
 ------------------
 * fixing macros using pybind and setting EventsExecutor for Kilted and Rolling
@@ -11,9 +18,6 @@ Changelog for package yasmin_factory
 4.0.1 (2025-11-25)
 ------------------
 * adding ament_cmake_python to factory package.xml
-* Revert "removing Python3_INCLUDE_DIRS"
-  This reverts commit a12378ab6fa1c36661832f8ad7db16a1a3440e95.
-* removing Python3_INCLUDE_DIRS
 * fixing dependencies in package.xml of demos and factory
 * Contributors: Miguel Ángel González Santamarta
 
@@ -30,7 +34,7 @@ Changelog for package yasmin_factory
 * removing ament_python from dependencies
 * removing comments from main functions
 * Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
-  [New Greate Version] Pybinding + Plugins + Editor
+  [New Great Version] Pybinding + Plugins + Editor
 * adding file_name + package to include XML state machines
 * fixing order to load included XML state machine in factory
 * replacing xml with lxml in Python

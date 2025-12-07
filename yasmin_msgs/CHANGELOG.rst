@@ -3,6 +3,9 @@ Changelog for package yasmin_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.1.0 (2025-12-07)
+------------------
+
 4.0.2 (2025-12-01)
 ------------------
 
@@ -12,7 +15,7 @@ Changelog for package yasmin_msgs
 4.0.0 (2025-11-24)
 ------------------
 * Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
-  [New Greate Version] Pybinding + Plugins + Editor
+  [New Great Version] Pybinding + Plugins + Editor
 * fixing license name in package.xml files
 * Contributors: Miguel Ángel González Santamarta
 

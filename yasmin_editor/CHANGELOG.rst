@@ -2,6 +2,9 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.1.0 (2025-12-07)
+------------------
+
 4.0.2 (2025-12-01)
 ------------------
 * fixing python comments
@@ -21,7 +24,7 @@ Changelog for package yasmin_editor
 * refactoring yasmin_editor
 * removing comments from main functions
 * Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
-  [New Greate Version] Pybinding + Plugins + Editor
+  [New Great Version] Pybinding + Plugins + Editor
 * new python files for load and save state machines in editor
 * removing transition dialog
 * restoring get_concurrence_data in concurrence dialog for editor

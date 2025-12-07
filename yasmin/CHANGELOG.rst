@@ -3,6 +3,14 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.1.0 (2025-12-07)
+------------------
+* adding python-dev in deps and removing unused test deps for python
+* setting signing handle as false by default
+* adding SIGINT handler for YASMIN state machines in core package
+* adding abort to fibonacci demo server
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.2 (2025-12-01)
 ------------------
 * fixing macros using pybind and setting EventsExecutor for Kilted and Rolling
@@ -21,7 +29,7 @@ Changelog for package yasmin
 * adding attr test to python blackboard
 * removing comments from python stub files of yasmin package
 * Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
-  [New Greate Version] Pybinding + Plugins + Editor
+  [New Great Version] Pybinding + Plugins + Editor
 * adding set and get attr to blackboard pybinding
 * setting input/output remappings
 * fixing clang version
@@ -36,7 +44,6 @@ Changelog for package yasmin
 * remapping renamed to remappings
 * adding type registry toblackboard
 * replacing static constexpr bool with static bool in BlackboardPyWrapper
-* reverting only-one-workflow
 * fixing BlackboardPyWrapper to improve the type check in Python
 * initial files fo yasmin_factory
 * fixing license name in package.xml files

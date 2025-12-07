@@ -3,6 +3,16 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.1.0 (2025-12-07)
+------------------
+* adding python-dev in deps and removing unused test deps for python
+* setting signing handle as false by default
+* updating nav demo in docs
+* adding SIGINT handler for YASMIN state machines in core package
+* adding Reentrant as default callback group in ActionState
+* adding abort to fibonacci demo server
+* Contributors: Miguel Ángel González Santamarta
+
 4.0.2 (2025-12-01)
 ------------------
 * fixing python comments
@@ -24,7 +34,7 @@ Changelog for package yasmin_demos
 * removing comments from main functions
 * creating C++ nav_demo
 * Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
-  [New Greate Version] Pybinding + Plugins + Editor
+  [New Great Version] Pybinding + Plugins + Editor
 * fixing Python imports
 * fixing clang version
 * cancling SM created by factoy in C++
