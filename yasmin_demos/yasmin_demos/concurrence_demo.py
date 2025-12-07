@@ -126,7 +126,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create a finite state machine (FSM)
-    sm = StateMachine(outcomes=["outcome4"])
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
     # Create states to run concurrently
     foo_state: State = FooState()

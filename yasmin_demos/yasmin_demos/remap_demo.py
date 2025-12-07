@@ -99,7 +99,7 @@ def main() -> None:
     blackboard["msg1"] = "test1"
     blackboard["msg2"] = "test2"
 
-    sm = StateMachine(outcomes=[SUCCEED])
+    sm = StateMachine(outcomes=[SUCCEED], handle_sigint=True)
     sm.add_state(
         "STATE1",
         Foo(),

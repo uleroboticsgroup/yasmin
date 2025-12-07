@@ -127,7 +127,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create a FSM
-    sm = StateMachine(outcomes=["outcome4"])
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
     # Add states
     sm.add_state(

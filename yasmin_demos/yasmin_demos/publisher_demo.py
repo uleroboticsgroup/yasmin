@@ -105,7 +105,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create the state machine with 'SUCCEED' as the terminal outcome
-    sm = StateMachine([SUCCEED])
+    sm = StateMachine([SUCCEED], handle_sigint=True)
 
     # Add the publishing state which loops until the condition is met
     sm.add_state(

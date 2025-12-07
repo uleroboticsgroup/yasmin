@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
 
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      std::initializer_list<std::string>{"outcome4"});
+      std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine
   sm->add_state("GETTING_PARAMETERS",

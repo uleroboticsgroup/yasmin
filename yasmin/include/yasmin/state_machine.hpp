@@ -65,7 +65,7 @@ public:
    * machine.
    */
   StateMachine(const std::set<std::string> &outcomes,
-               bool handle_sigint = true);
+               bool handle_sigint = false);
 
   /**
    * @brief Construct a new StateMachine object.
@@ -76,7 +76,7 @@ public:
    * machine.
    */
   StateMachine(const std::string &name, const std::set<std::string> &outcomes,
-               bool handle_sigint = true);
+               bool handle_sigint = false);
 
   /**
    * @brief Destroy the StateMachine object.

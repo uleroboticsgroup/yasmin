@@ -42,10 +42,10 @@ PYBIND11_MODULE(state_machine, m) {
                  std::set<std::string>(outcomes.begin(), outcomes.end()),
                  handle_sigint);
            }),
-           py::arg("outcomes"), py::arg("handle_sigint") = true)
+           py::arg("outcomes"), py::arg("handle_sigint") = false)
       .def(py::init<const std::string &, const std::set<std::string> &, bool>(),
            py::arg("name"), py::arg("outcomes"),
-           py::arg("handle_sigint") = true)
+           py::arg("handle_sigint") = false)
       .def(py::init([](const std::string &name,
                        const std::vector<std::string> &outcomes,
                        bool handle_sigint) {
@@ -54,7 +54,7 @@ PYBIND11_MODULE(state_machine, m) {
                  handle_sigint);
            }),
            py::arg("name"), py::arg("outcomes"),
-           py::arg("handle_sigint") = true)
+           py::arg("handle_sigint") = false)
       // Add destructor from StateMachine
       .def("__del__", [](yasmin::StateMachine *self) { delete self; })
       // Add state method with keep_alive to manage object lifetime

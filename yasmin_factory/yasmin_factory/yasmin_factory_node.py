@@ -40,6 +40,7 @@ def main() -> None:
     # Create a finite state machine (FSM)
     factory = YasminFactory()
     sm = factory.create_sm_from_file(sm_file)
+    sm.set_sigint_handler(True)
 
     # Publish FSM information for visualization
     viewer = YasminViewerPub(sm)

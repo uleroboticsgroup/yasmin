@@ -24,11 +24,11 @@ class StateMachine(State):
     def __init__(self, outcomes: List[str], handle_sigint: bool = True) -> None: ...
     @overload
     def __init__(
-        self, name: str, outcomes: Set[str], handle_sigint: bool = True
+        self, name: str, outcomes: Set[str], handle_sigint: bool = False
     ) -> None: ...
     @overload
     def __init__(
-        self, name: str, outcomes: List[str], handle_sigint: bool = True
+        self, name: str, outcomes: List[str], handle_sigint: bool = False
     ) -> None: ...
     def add_state(
         self,

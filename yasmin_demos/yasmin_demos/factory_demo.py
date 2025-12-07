@@ -40,6 +40,7 @@ def main() -> None:
             get_package_share_directory("yasmin_demos"), "state_machines", "demo_1.xml"
         )
     )
+    sm.set_sigint_handler(True)
 
     # Publish FSM information for visualization
     viewer = YasminViewerPub(sm, "plugin_demo")

@@ -233,7 +233,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create a finite state machine (FSM)
-    sm = StateMachine(outcomes=["outcome4"])
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
     # Add states to the FSM
     sm.add_state(
@@ -370,7 +370,7 @@ def main() -> None:
     blackboard["msg1"] = "test1"
     blackboard["msg2"] = "test2"
 
-    sm = StateMachine(outcomes=[SUCCEED])
+    sm = StateMachine(outcomes=[SUCCEED], handle_sigint=True)
     sm.add_state(
         "STATE1",
         Foo(),
@@ -534,7 +534,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create a finite state machine (FSM)
-    sm = StateMachine(outcomes=["outcome4"])
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
     # Create states to run concurrently
     foo_state: State = FooState()
@@ -687,7 +687,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create the state machine with 'SUCCEED' as the terminal outcome
-    sm = StateMachine([SUCCEED])
+    sm = StateMachine([SUCCEED], handle_sigint=True)
 
     # Add the publishing state which loops until the condition is met
     sm.add_state(
@@ -823,7 +823,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create a finite state machine (FSM)
-    sm = StateMachine(outcomes=["outcome4"])
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
     # Add states to the FSM
     sm.add_state(
@@ -987,7 +987,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create a FSM
-    sm = StateMachine(outcomes=["outcome4"])
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
     # Add states
     sm.add_state(
@@ -1179,7 +1179,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create a finite state machine (FSM)
-    sm = StateMachine(outcomes=["outcome4"])
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
     # Add states to the FSM
     sm.add_state(
@@ -1336,7 +1336,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create a finite state machine (FSM)
-    sm = StateMachine(outcomes=["outcome4"])
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
     # Add states to the FSM
     sm.add_state(
@@ -1442,6 +1442,7 @@ def main() -> None:
             get_package_share_directory("yasmin_demos"), "state_machines", "demo_1.xml"
         )
     )
+    sm.set_sigint_handler(True)
 
     # Publish FSM information for visualization
     viewer = YasminViewerPub(sm, "plugin_demo")
@@ -1606,7 +1607,7 @@ def main() -> None:
     set_ros_loggers()
 
     # Create state machines
-    sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])
+    sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL], handle_sigint=True)
     nav_sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])
 
     # Add states to the state machine
@@ -1790,7 +1791,7 @@ int main(int argc, char *argv[]) {
 
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      std::initializer_list<std::string>{"outcome4"});
+      std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine
   sm->add_state("FOO", std::make_shared<FooState>(),
@@ -1912,7 +1913,8 @@ int main(int argc, char *argv[]) {
 
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED});
+      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
+      true);
 
   // Add states to the state machine
   sm->add_state("STATE1", std::make_shared<FooState>(),
@@ -2080,7 +2082,7 @@ int main(int argc, char *argv[]) {
 
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      std::initializer_list<std::string>{"outcome4"});
+      std::initializer_list<std::string>{"outcome4"}, true);
 
   // Create states to run concurrently
   auto foo_state = std::make_shared<FooState>();
@@ -2230,7 +2232,8 @@ int main(int argc, char *argv[]) {
 
   // Create a state machine with a final outcome
   auto sm = std::make_shared<yasmin::StateMachine>(
-      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED});
+      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
+      true);
 
   // Add states to the state machine
   sm->add_state("PUBLISHING_INT", std::make_shared<PublishIntState>(),
@@ -2373,7 +2376,7 @@ int main(int argc, char *argv[]) {
 
   // Create a state machine with a final outcome
   auto sm = std::make_shared<yasmin::StateMachine>(
-      std::initializer_list<std::string>{"outcome4"});
+      std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine
   sm->add_state(
@@ -2542,7 +2545,7 @@ int main(int argc, char *argv[]) {
 
   // Create a state machine with a specified outcome.
   auto sm = std::make_shared<yasmin::StateMachine>(
-      std::initializer_list<std::string>{"outcome4"});
+      std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine.
   sm->add_state("SETTING_INTS",
@@ -2743,7 +2746,7 @@ int main(int argc, char *argv[]) {
 
   // Create the state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      std::initializer_list<std::string>{"outcome4"});
+      std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine
   sm->add_state("CALLING_FIBONACCI", std::make_shared<FibonacciState>(),
@@ -2896,7 +2899,7 @@ int main(int argc, char *argv[]) {
 
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
-      std::initializer_list<std::string>{"outcome4"});
+      std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine
   sm->add_state("GETTING_PARAMETERS",
@@ -2991,6 +2994,7 @@ int main(int argc, char *argv[]) {
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);
+  sm->set_sigint_handler(true);
 
   // Execute the state machine
   try {
@@ -3179,7 +3183,8 @@ int main(int argc, char *argv[]) {
   auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED,
                                          yasmin_ros::basic_outcomes::ABORT,
-                                         yasmin_ros::basic_outcomes::CANCEL});
+                                         yasmin_ros::basic_outcomes::CANCEL},
+      true);
   auto nav_sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED,
                                          yasmin_ros::basic_outcomes::ABORT,

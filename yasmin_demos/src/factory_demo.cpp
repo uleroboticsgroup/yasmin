@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);
+  sm->set_sigint_handler(true);
 
   // Publisher for visualizing the state machine
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_FACTORY_DEMO");
