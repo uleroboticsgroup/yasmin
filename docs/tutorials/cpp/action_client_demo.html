@@ -239,7 +239,7 @@ public:
   yasmin_ros::set_ros_loggers();
 
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
-      std::initializer_list&lt;std::string&gt;{"outcome4"});
+      std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   sm-&gt;add_state("CALLING_FIBONACCI", std::make_shared&lt;FibonacciState&gt;(),
                 {

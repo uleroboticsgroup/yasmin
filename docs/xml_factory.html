@@ -33,7 +33,7 @@
     </header>
 
     <div class="container">
-            <nav class="sidebar">
+      <nav class="sidebar">
         <h3>Getting Started</h3>
         <ul>
           <li><a href="index.html">Introduction</a></li>
@@ -50,25 +50,46 @@
 
         <h3 class="collapsible">C++ Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
-              <li><a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a></li>
-              <li><a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a></li>
-              <li><a href="tutorials/cpp/concurrence_demo.html">Concurrence</a></li>
+              <li>
+                <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/concurrence_demo.html">Concurrence</a>
+              </li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
               <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
               <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
-              <li><a href="tutorials/cpp/service_client_demo.html">Service Client</a></li>
-              <li><a href="tutorials/cpp/action_client_demo.html">Action Client</a></li>
-              <li><a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a></li>
+              <li>
+                <a href="tutorials/cpp/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
+              </li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
-              <li><a href="tutorials/cpp/factory_demo.html">Factory (XML)</a></li>
+              <li>
+                <a href="tutorials/cpp/factory_demo.html">Factory (XML)</a>
+              </li>
               <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
             </ul>
           </li>
@@ -76,25 +97,54 @@
 
         <h3 class="collapsible">Python Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
-              <li><a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a></li>
-              <li><a href="tutorials/python/remap_demo.html">Blackboard Remapping</a></li>
-              <li><a href="tutorials/python/concurrence_demo.html">Concurrence</a></li>
+              <li>
+                <a href="tutorials/python/basic_fsm.html"
+                  >Writing a Simple FSM</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/remap_demo.html"
+                  >Blackboard Remapping</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
+              </li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
-              <li><a href="tutorials/python/publisher_demo.html">Publisher</a></li>
+              <li>
+                <a href="tutorials/python/publisher_demo.html">Publisher</a>
+              </li>
               <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
-              <li><a href="tutorials/python/service_client_demo.html">Service Client</a></li>
-              <li><a href="tutorials/python/action_client_demo.html">Action Client</a></li>
-              <li><a href="tutorials/python/parameters_demo.html">ROS Parameters</a></li>
+              <li>
+                <a href="tutorials/python/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/parameters_demo.html"
+                  >ROS Parameters</a
+                >
+              </li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
-              <li><a href="tutorials/python/factory_demo.html">Factory (XML)</a></li>
+              <li>
+                <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+              </li>
               <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
             </ul>
           </li>
@@ -140,35 +190,42 @@
 
         <h2>What is a Plugin?</h2>
         <p>
-          A <strong>plugin</strong> is a dynamically loadable component that extends 
-          YASMIN's functionality without modifying the core library. In the context of 
-          YASMIN, plugins are primarily used for C++ states that can be loaded at runtime 
-          from shared libraries. This architecture enables:
+          A <strong>plugin</strong> is a dynamically loadable component that
+          extends YASMIN's functionality without modifying the core library. In
+          the context of YASMIN, plugins are primarily used for C++ states that
+          can be loaded at runtime from shared libraries. This architecture
+          enables:
         </p>
         <ul>
           <li>
-            <strong>Modularity:</strong> Develop and distribute states as separate packages
+            <strong>Modularity:</strong> Develop and distribute states as
+            separate packages
           </li>
           <li>
-            <strong>Runtime loading:</strong> States are loaded when needed, not compiled into the main application
+            <strong>Runtime loading:</strong> States are loaded when needed, not
+            compiled into the main application
           </li>
           <li>
-            <strong>Extensibility:</strong> Third parties can create custom states without access to core YASMIN source
+            <strong>Extensibility:</strong> Third parties can create custom
+            states without access to core YASMIN source
           </li>
           <li>
-            <strong>XML compatibility:</strong> C++ states defined as plugins can be referenced in XML state machine definitions
+            <strong>XML compatibility:</strong> C++ states defined as plugins
+            can be referenced in XML state machine definitions
           </li>
         </ul>
 
         <h3>How to Create a Plugin</h3>
         <p>
-          To create a C++ state plugin for use with YASMIN Factory XML, follow these steps:
+          To create a C++ state plugin for use with YASMIN Factory XML, follow
+          these steps:
         </p>
-        
+
         <h4>1. Create your State Class</h4>
         <p>
-          Define a class that inherits from <code>yasmin::State</code>. Implement the 
-          required <code>execute()</code> method and register outcomes.
+          Define a class that inherits from <code>yasmin::State</code>.
+          Implement the required <code>execute()</code> method and register
+          outcomes.
         </p>
         <pre><code class="language-cpp">// my_package/include/my_package/my_custom_state.hpp
 #ifndef MY_PACKAGE__MY_CUSTOM_STATE_HPP
@@ -191,7 +248,8 @@ public:
 
         <h4>2. Implement and Export the Plugin</h4>
         <p>
-          Implement your state and use the <code>PLUGINLIB_EXPORT_CLASS</code> macro to register it.
+          Implement your state and use the
+          <code>PLUGINLIB_EXPORT_CLASS</code> macro to register it.
         </p>
         <pre><code class="language-cpp">// my_package/src/my_custom_state.cpp
 #include "my_package/my_custom_state.hpp"
@@ -213,7 +271,8 @@ PLUGINLIB_EXPORT_CLASS(my_package::MyCustomState, yasmin::State)</code></pre>
 
         <h4>3. Create the Plugin Description XML</h4>
         <p>
-          Create a <code>plugins.xml</code> file in your package root that describes your plugin:
+          Create a <code>plugins.xml</code> file in your package root that
+          describes your plugin:
         </p>
         <pre><code class="language-xml">&lt;!-- my_package/plugins.xml --&gt;
 &lt;library path="my_package"&gt;
@@ -224,7 +283,8 @@ PLUGINLIB_EXPORT_CLASS(my_package::MyCustomState, yasmin::State)</code></pre>
 
         <h4>4. Update CMakeLists.txt</h4>
         <p>
-          Configure your CMakeLists.txt to build the plugin library and export the plugin description:
+          Configure your CMakeLists.txt to build the plugin library and export
+          the plugin description:
         </p>
         <pre><code class="language-cmake"># Add the library
 add_library(my_custom_state SHARED src/my_custom_state.cpp)
@@ -243,7 +303,8 @@ install(TARGETS my_custom_state
 
         <h4>5. Use in XML State Machine</h4>
         <p>
-          Reference your plugin in XML state machine definitions using the format 
+          Reference your plugin in XML state machine definitions using the
+          format
           <code>package_name/ClassName</code>:
         </p>
         <pre><code class="language-xml">&lt;State id="my_state" type="cpp" class="my_package/MyCustomState"&gt;
@@ -262,10 +323,10 @@ install(TARGETS my_custom_state
           "
         >
           <strong style="color: #0c5460">💡 Tip:</strong>
-          <p style="color: #0c5460; margin-top: 5px;">
-            For Python states, no plugin system is needed. Python states are loaded 
-            dynamically using Python's import system. Simply specify the module and 
-            class in the XML definition with <code>type="py"</code>.
+          <p style="color: #0c5460; margin-top: 5px">
+            For Python states, no plugin system is needed. Python states are
+            loaded dynamically using Python's import system. Simply specify the
+            module and class in the XML definition with <code>type="py"</code>.
           </p>
         </div>
 

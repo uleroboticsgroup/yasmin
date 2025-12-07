@@ -217,7 +217,8 @@ blackboard-&gt;set&lt;std::string&gt;("msg1", "test1");
 blackboard-&gt;set&lt;std::string&gt;("msg2", "test2");
 
 auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
-    std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED});
+    std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
+    true);
 
 // STATE1: remap foo_data to msg1
 sm-&gt;add_state("STATE1", std::make_shared&lt;FooState&gt;(),

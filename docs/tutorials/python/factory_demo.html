@@ -34,7 +34,7 @@
     </header>
 
     <div class="container">
-            <nav class="sidebar">
+      <nav class="sidebar">
         <h3>Getting Started</h3>
         <ul>
           <li><a href="../../index.html">Introduction</a></li>
@@ -51,23 +51,30 @@
 
         <h3 class="collapsible">C++ Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
               <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
               <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
               <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
               <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
               <li><a href="../cpp/monitor_demo.html">Monitor</a></li>
-              <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
-              <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
+              <li>
+                <a href="../cpp/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="../cpp/action_client_demo.html">Action Client</a>
+              </li>
               <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
               <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
               <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
@@ -77,14 +84,16 @@
 
         <h3 class="collapsible">Python Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
               <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
               <li><a href="remap_demo.html">Blackboard Remapping</a></li>
               <li><a href="concurrence_demo.html">Concurrence</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
               <li><a href="publisher_demo.html">Publisher</a></li>
               <li><a href="monitor_demo.html">Monitor</a></li>
@@ -93,7 +102,8 @@
               <li><a href="parameters_demo.html">ROS Parameters</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
               <li><a href="factory_demo.html">Factory (XML)</a></li>
               <li><a href="nav2_demo.html">Nav2 Demo</a></li>
@@ -138,7 +148,6 @@
           <li>Visual editing with YASMIN Editor</li>
           <li>Reusable state machine configurations</li>
         </ul>
-          </li>
 
         <h2>1. Create an XML State Machine</h2>
         <p>
@@ -195,7 +204,9 @@ sm = factory.create_sm_from_file(
         "state_machines", 
         "demo_1.xml"
     )
-)</code></pre>
+)
+sm.set_sigint_handler(True)
+</code></pre>
 
         <h2>3. Execute the State Machine</h2>
         <p>
@@ -268,29 +279,32 @@ if __name__ == "__main__":
 
         <h2>Benefits of XML-Based FSMs</h2>
         <ul>
+          <li>
             <strong>Visual Design:</strong> Use YASMIN Editor to create FSMs
             graphically
           </li>
+          <li>
             <strong>Separation of Concerns:</strong> Structure defined
             separately from implementation
           </li>
           <li><strong>Reusability:</strong> Share XML files across projects</li>
+          <li>
             <strong>Mixed Languages:</strong> Combine Python and C++ states in
             the same FSM
           </li>
         </ul>
-          </li>
 
         <h2>See Also</h2>
         <ul>
+          <li>
             <a href="../../yasmin_editor.html">YASMIN Editor</a> - Visual state
             machine designer
           </li>
+          <li>
             <a href="../../yasmin_factory.html">YASMIN Factory</a> - Complete
             API documentation
           </li>
         </ul>
-          </li>
 
         <div class="page-navigation">
           <a href="../python/parameters_demo.html" class="nav-button prev"

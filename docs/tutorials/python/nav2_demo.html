@@ -33,7 +33,7 @@
     </header>
 
     <div class="container">
-            <nav class="sidebar">
+      <nav class="sidebar">
         <h3>Getting Started</h3>
         <ul>
           <li><a href="../../index.html">Introduction</a></li>
@@ -50,23 +50,30 @@
 
         <h3 class="collapsible">C++ Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
               <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
               <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
               <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
               <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
               <li><a href="../cpp/monitor_demo.html">Monitor</a></li>
-              <li><a href="../cpp/service_client_demo.html">Service Client</a></li>
-              <li><a href="../cpp/action_client_demo.html">Action Client</a></li>
+              <li>
+                <a href="../cpp/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="../cpp/action_client_demo.html">Action Client</a>
+              </li>
               <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
               <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
               <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
@@ -76,14 +83,16 @@
 
         <h3 class="collapsible">Python Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
               <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
               <li><a href="remap_demo.html">Blackboard Remapping</a></li>
               <li><a href="concurrence_demo.html">Concurrence</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
               <li><a href="publisher_demo.html">Publisher</a></li>
               <li><a href="monitor_demo.html">Monitor</a></li>
@@ -92,7 +101,8 @@
               <li><a href="parameters_demo.html">ROS Parameters</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
               <li><a href="factory_demo.html">Factory (XML)</a></li>
               <li><a href="nav2_demo.html">Nav2 Demo</a></li>
@@ -127,13 +137,12 @@
         <div class="info-box warning-box">
           <strong>⚠️ Prerequisites - Create a ROS 2 Package First:</strong>
           <p>
-            Before following this tutorial, you need to create a new ROS 2 package 
-            to contain your Nav2 state machine code. The nav2_demo source files shown 
-            here are not included in the default yasmin_demos package.
+            Before following this tutorial, you need to create a new ROS 2
+            package to contain your Nav2 state machine code. The nav2_demo
+            source files shown here are not included in the default yasmin_demos
+            package.
           </p>
-          <p>
-            Create your package with:
-          </p>
+          <p>Create your package with:</p>
           <pre><code>ros2 pkg create --build-type ament_python my_nav2_demo \
   --dependencies yasmin yasmin_ros nav2_msgs geometry_msgs</code></pre>
           <p>
@@ -157,13 +166,16 @@
         </p>
         <p>The workflow consists of:</p>
         <ol>
+          <li>
             <strong>Create Waypoints:</strong> Initialize a dictionary with 5
             predefined locations (x, y, orientation_z, orientation_w).
           </li>
+          <li>
             <strong>Select Random Subset:</strong> Choose N random waypoints
             from the dictionary based on <code>waypoints_num</code> blackboard
             parameter.
           </li>
+          <li>
             <strong>Navigate (Hierarchical):</strong> Enter the nested
             navigation state machine that loops through selected waypoints,
             sending each to Nav2's action server.
@@ -181,7 +193,10 @@ source install/setup.bash
 # Run the demo
 ros2 run my_nav2_demo nav2_demo</code></pre>
         <p>
-          <em>Note: Make sure you have Nav2 running with a valid map before executing this demo.</em>
+          <em
+            >Note: Make sure you have Nav2 running with a valid map before
+            executing this demo.</em
+          >
         </p>
 
         <h2>Source Code</h2>
@@ -322,7 +337,7 @@ def main() -&gt; None:
     set_ros_loggers()
 
     # Create state machines
-    sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])
+    sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL], handle_sigint=True)
     nav_sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL])
 
     # Add states to the state machine
@@ -411,7 +426,6 @@ if __name__ == "__main__":
         <ul>
           <!-- TOC generated by JS -->
         </ul>
-          </li>
       </aside>
     </div>
   </body>

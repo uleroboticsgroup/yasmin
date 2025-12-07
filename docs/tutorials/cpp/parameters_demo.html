@@ -33,7 +33,7 @@
     </header>
 
     <div class="container">
-            <nav class="sidebar">
+      <nav class="sidebar">
         <h3>Getting Started</h3>
         <ul>
           <li><a href="../../index.html">Introduction</a></li>
@@ -50,14 +50,16 @@
 
         <h3 class="collapsible">C++ Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
               <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
               <li><a href="remap_demo.html">Blackboard Remapping</a></li>
               <li><a href="concurrence_demo.html">Concurrence</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
               <li><a href="publisher_demo.html">Publisher</a></li>
               <li><a href="monitor_demo.html">Monitor</a></li>
@@ -66,7 +68,8 @@
               <li><a href="parameters_demo.html">ROS Parameters</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
               <li><a href="factory_demo.html">Factory (XML)</a></li>
               <li><a href="nav2_demo.html">Nav2 Demo</a></li>
@@ -76,23 +79,36 @@
 
         <h3 class="collapsible">Python Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
-              <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
-              <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+              <li>
+                <a href="../python/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="../python/remap_demo.html">Blackboard Remapping</a>
+              </li>
               <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
               <li><a href="../python/publisher_demo.html">Publisher</a></li>
               <li><a href="../python/monitor_demo.html">Monitor</a></li>
-              <li><a href="../python/service_client_demo.html">Service Client</a></li>
-              <li><a href="../python/action_client_demo.html">Action Client</a></li>
-              <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+              <li>
+                <a href="../python/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="../python/action_client_demo.html">Action Client</a>
+              </li>
+              <li>
+                <a href="../python/parameters_demo.html">ROS Parameters</a>
+              </li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
               <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
               <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
@@ -137,20 +153,24 @@
         <h2>Background</h2>
         <p>ROS 2 parameters provide a way to:</p>
         <ul>
+          <li>
             Configure node behavior at launch time (set values before execution)
           </li>
+          <li>
             Dynamically reconfigure settings (change values during execution)
           </li>
           <li>Share configuration across nodes (maintain consistency)</li>
+          <li>
             Set defaults with command-line overrides (flexible deployment)
           </li>
+          <li>
             Document configurable aspects of your system (self-documenting code)
           </li>
+          <li>
             Version control configuration separately from code (cleaner
             repositories)
           </li>
         </ul>
-          </li>
 
         <h2>1. Define the States</h2>
         <p>
@@ -229,7 +249,7 @@ public:
   yasmin_ros::set_ros_loggers();
 
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
-      std::initializer_list&lt;std::string&gt;{"outcome4"});
+      std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   // Add GetParametersState to retrieve parameters
   sm-&gt;add_state("GETTING_PARAMETERS",

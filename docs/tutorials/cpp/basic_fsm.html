@@ -275,7 +275,7 @@ public:
 
   // Create a state machine
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
-      std::initializer_list&lt;std::string&gt;{"outcome4"});
+      std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   // Add states to the state machine
   sm-&gt;add_state("FOO", std::make_shared&lt;FooState&gt;(),

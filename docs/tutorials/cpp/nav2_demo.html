@@ -33,7 +33,7 @@
     </header>
 
     <div class="container">
-            <nav class="sidebar">
+      <nav class="sidebar">
         <h3>Getting Started</h3>
         <ul>
           <li><a href="../../index.html">Introduction</a></li>
@@ -50,14 +50,16 @@
 
         <h3 class="collapsible">C++ Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
               <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
               <li><a href="remap_demo.html">Blackboard Remapping</a></li>
               <li><a href="concurrence_demo.html">Concurrence</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
               <li><a href="publisher_demo.html">Publisher</a></li>
               <li><a href="monitor_demo.html">Monitor</a></li>
@@ -66,7 +68,8 @@
               <li><a href="parameters_demo.html">ROS Parameters</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
               <li><a href="factory_demo.html">Factory (XML)</a></li>
               <li><a href="nav2_demo.html">Nav2 Demo</a></li>
@@ -76,23 +79,36 @@
 
         <h3 class="collapsible">Python Tutorials</h3>
         <ul>
-          <li class="tutorial-level">Beginner
+          <li class="tutorial-level">
+            Beginner
             <ul>
-              <li><a href="../python/basic_fsm.html">Writing a Simple FSM</a></li>
-              <li><a href="../python/remap_demo.html">Blackboard Remapping</a></li>
+              <li>
+                <a href="../python/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="../python/remap_demo.html">Blackboard Remapping</a>
+              </li>
               <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
             </ul>
           </li>
-          <li class="tutorial-level">Intermediate
+          <li class="tutorial-level">
+            Intermediate
             <ul>
               <li><a href="../python/publisher_demo.html">Publisher</a></li>
               <li><a href="../python/monitor_demo.html">Monitor</a></li>
-              <li><a href="../python/service_client_demo.html">Service Client</a></li>
-              <li><a href="../python/action_client_demo.html">Action Client</a></li>
-              <li><a href="../python/parameters_demo.html">ROS Parameters</a></li>
+              <li>
+                <a href="../python/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="../python/action_client_demo.html">Action Client</a>
+              </li>
+              <li>
+                <a href="../python/parameters_demo.html">ROS Parameters</a>
+              </li>
             </ul>
           </li>
-          <li class="tutorial-level">Advanced
+          <li class="tutorial-level">
+            Advanced
             <ul>
               <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
               <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
@@ -128,13 +144,12 @@
         <div class="info-box warning-box">
           <strong>⚠️ Prerequisites - Create a ROS 2 Package First:</strong>
           <p>
-            Before following this tutorial, you need to create a new ROS 2 package 
-            to contain your Nav2 state machine code. The nav2_demo source files shown 
-            here are not included in the default yasmin_demos package.
+            Before following this tutorial, you need to create a new ROS 2
+            package to contain your Nav2 state machine code. The nav2_demo
+            source files shown here are not included in the default yasmin_demos
+            package.
           </p>
-          <p>
-            Create your package with:
-          </p>
+          <p>Create your package with:</p>
           <pre><code>ros2 pkg create --build-type ament_cmake my_nav2_demo \
   --dependencies yasmin yasmin_ros nav2_msgs geometry_msgs</code></pre>
           <p>
@@ -158,13 +173,16 @@
         </p>
         <p>The workflow consists of:</p>
         <ol>
+          <li>
             <strong>Create Waypoints:</strong> Initialize a dictionary with 5
             predefined locations (x, y, orientation_z, orientation_w).
           </li>
+          <li>
             <strong>Select Random Subset:</strong> Choose N random waypoints
             from the dictionary based on <code>waypoints_num</code> blackboard
             parameter.
           </li>
+          <li>
             <strong>Navigate (Hierarchical):</strong> Enter the nested
             navigation state machine that loops through selected waypoints,
             sending each to Nav2's action server.
@@ -182,7 +200,10 @@ source install/setup.bash
 # Run the demo
 ros2 run my_nav2_demo nav2_demo</code></pre>
         <p>
-          <em>Note: Make sure you have Nav2 running with a valid map before executing this demo.</em>
+          <em
+            >Note: Make sure you have Nav2 running with a valid map before
+            executing this demo.</em
+          >
         </p>
 
         <h2>Source Code</h2>
@@ -314,7 +335,8 @@ int main(int argc, char *argv[]) {
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED,
                                          yasmin_ros::basic_outcomes::ABORT,
-                                         yasmin_ros::basic_outcomes::CANCEL});
+                                         yasmin_ros::basic_outcomes::CANCEL},
+      true);
   auto nav_sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED,
                                          yasmin_ros::basic_outcomes::ABORT,
@@ -402,7 +424,6 @@ int main(int argc, char *argv[]) {
         <ul>
           <!-- TOC generated by JS -->
         </ul>
-          </li>
       </aside>
     </div>
   </body>
