@@ -7,6 +7,7 @@
     <license>GPL-3.0</license>
     <buildtool_depend>ament_cmake</buildtool_depend>
     <buildtool_depend>ament_cmake_python</buildtool_depend>
+    <depend>python3-dev</depend>
     <depend>pluginlib</depend>
     <depend>pybind11-dev</depend>
     <depend>class_loader</depend>
@@ -21,6 +22,5 @@
     <test_depend>ament_cmake_pytest</test_depend>
     <export>
         <build_type>ament_cmake</build_type>
-        <yasmin plugin="${prefix}/test/test_plugins.xml"/>
     </export>
 </package>
