@@ -57,13 +57,6 @@ YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
       250ms, std::bind(&YasminViewerPub::publish_data, this));
 }
 
-/**
- * @brief Parses a map of transition pairs (outcome, state) to a vector of
- * Transition messages.
- * @param transitions Map containing transition outcomes as keys and next states
- * as values.
- * @return Vector of yasmin_msgs::msg::Transition.
- */
 std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
     const std::map<std::string, std::string> &transitions) {
   std::vector<yasmin_msgs::msg::Transition> transitions_list;
@@ -77,12 +70,6 @@ std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
   return transitions_list;
 }
 
-/**
- * @brief Parses concurrence transitions from outcome map to transition-like
- * information.
- * @param concurrence Shared pointer to the Concurrence state.
- * @return Map of state names to their transition vectors.
- */
 std::map<std::string, std::vector<yasmin_msgs::msg::Transition>>
 YasminViewerPub::parse_concurrence_transitions(
     std::shared_ptr<yasmin::Concurrence> concurrence) {
@@ -105,16 +92,6 @@ YasminViewerPub::parse_concurrence_transitions(
   return transitions;
 }
 
-/**
- * @brief Parses a state and its transitions, adding it to the states list and
- * handling nested FSMs if applicable.
- * @param state_name Name of the state.
- * @param state Shared pointer to the State instance.
- * @param transitions Map of transitions related to the state.
- * @param states_list Reference to a vector of yasmin_msgs::msg::State to append
- * parsed states.
- * @param parent ID of the parent state; -1 for top-level states.
- */
 void YasminViewerPub::parse_state(
     const std::string &state_name, std::shared_ptr<yasmin::State> state,
     const std::map<std::string, std::string> &transitions,
@@ -198,10 +175,6 @@ void YasminViewerPub::parse_state(
   }
 }
 
-/**
- * @brief Publishes the state machine data if validation is successful.
- * @exception std::exception Thrown if the state machine fails validation.
- */
 void YasminViewerPub::publish_data() {
 
   try {
