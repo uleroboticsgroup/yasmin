@@ -1,0 +1,39 @@
+<map id="TestState" name="TestState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1472,85,1550,111"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="1255,36,1348,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1364,57,1449,76,1472,82,1471,88,1447,81,1362,62"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="1211,85,1392,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1407,96,1472,96,1472,101,1407,101"/>
+<area shape="rect" id="Node000004" href="$classFooState.html" title="Represents the &quot;Foo&quot; state in the state machine." alt="" coords="930,60,1004,86"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1020,74,1210,89,1210,94,1019,79"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="771,107,824,132"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="838,121,901,106,953,84,955,89,902,111,840,126"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="838,106,929,80,930,86,840,111"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="823,97,875,78,929,65,930,70,876,83,825,102"/>
+<area shape="rect" id="Node000006" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="748,13,847,39"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="818,47,871,70,930,83,929,88,870,76,816,51"/>
+<area shape="poly" id="edge12_Node000004_Node000006" title=" " alt="" coords="838,42,931,68,929,73,837,47"/>
+<area shape="poly" id="edge13_Node000004_Node000006" title=" " alt="" coords="863,33,942,57,941,62,861,38"/>
+<area shape="poly" id="edge14_Node000004_Node000006" title=" " alt="" coords="863,15,920,33,944,45,961,57,958,62,941,49,918,38,862,20"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="451,55,593,80"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="608,55,706,41,747,34,748,39,707,46,608,60"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="216,159,293,184"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="295,149,359,119,433,89,467,78,468,84,435,94,361,124,297,154"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="439,220,605,261"/>
+<area shape="poly" id="edge19_Node000014_Node000008" title=" " alt="" coords="309,183,441,217,440,222,308,188"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="5,151,129,192"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="145,169,215,169,215,174,145,174"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="434,5,610,31"/>
+<area shape="poly" id="edge11_Node000006_Node000010" title=" " alt="" coords="625,18,747,22,747,27,625,24"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="1028,134,1187,174"/>
+<area shape="poly" id="edge15_Node000001_Node000011" title=" " alt="" coords="1202,153,1294,149,1391,136,1437,124,1478,109,1479,114,1439,129,1393,141,1295,154,1202,158"/>
+<area shape="rect" id="Node000012" href="$classyasmin_1_1Blackboard.html" title="A thread&#45;safe storage for key&#45;value pairs of varying types." alt="" coords="731,165,864,191"/>
+<area shape="poly" id="edge16_Node000011_Node000012" title=" " alt="" coords="879,169,1028,158,1028,163,880,175"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="452,104,592,130"/>
+<area shape="poly" id="edge17_Node000012_Node000013" title=" " alt="" coords="608,124,707,144,764,162,762,167,706,149,607,130"/>
+<area shape="poly" id="edge18_Node000012_Node000014" title=" " alt="" coords="620,216,737,189,738,194,621,221"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="178,228,330,254"/>
+<area shape="poly" id="edge20_Node000014_Node000015" title=" " alt="" coords="346,238,438,238,438,244,346,244"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="451,155,593,196"/>
+<area shape="poly" id="edge21_Node000012_Node000016" title=" " alt="" coords="608,174,730,175,730,180,608,179"/>
+</map>
