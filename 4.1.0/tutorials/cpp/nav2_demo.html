@@ -342,15 +342,6 @@ int main(int argc, char *argv[]) {
                                          yasmin_ros::basic_outcomes::ABORT,
                                          yasmin_ros::basic_outcomes::CANCEL});
 
-  rclcpp::on_shutdown([sm, nav_sm]() {
-    if (sm-&gt;is_running()) {
-      sm-&gt;cancel_state();
-    }
-    if (nav_sm-&gt;is_running()) {
-      nav_sm-&gt;cancel_state();
-    }
-  });
-
   sm-&gt;add_state(
       "CREATING_WAYPOINTS",
       std::make_shared&lt;yasmin::CbState&gt;(

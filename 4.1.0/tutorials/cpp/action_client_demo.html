@@ -228,9 +228,7 @@ public:
           <code>outcome4</code> if cancelled or aborted. The second state uses a
           <code>CbState</code> (callback state) to print the final result. We
           initialize the blackboard with <code>n = 10</code> to request the
-          first 10 Fibonacci numbers. The
-          <code>rclcpp::on_shutdown</code> callback ensures graceful
-          cancellation if the program is interrupted.
+          first 10 Fibonacci numbers.
         </p>
         <pre><code class="language-cpp">int main(int argc, char *argv[]) {
 
