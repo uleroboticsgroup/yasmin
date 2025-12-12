@@ -177,8 +177,10 @@ class PluginManager:
     def load_cpp_plugin(self, class_name: str) -> None:
         try:
             plugin_info: PluginInfo = PluginInfo(plugin_type="cpp", class_name=class_name)
-        except Exception:
-            yasmin.YASMIN_LOG_ERROR(f"Failed to load C++ plugin: {class_name}")
+        except Exception as e:
+            yasmin.YASMIN_LOG_ERROR(
+                f'Failed to load C++ plugin: {class_name}. Error: "{e}"'
+            )
             return
         self.cpp_plugins.append(plugin_info)
 
@@ -187,9 +189,9 @@ class PluginManager:
             plugin_info: PluginInfo = PluginInfo(
                 plugin_type="python", class_name=class_name, module=module
             )
-        except Exception:
+        except Exception as e:
             yasmin.YASMIN_LOG_ERROR(
-                f"Failed to load Python plugin: {class_name} from module {module}"
+                f'Failed to load Python plugin: {class_name} from module {module}. Error: "{e}"'
             )
             return
         self.python_plugins.append(plugin_info)
