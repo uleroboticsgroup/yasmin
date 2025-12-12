@@ -50,7 +50,7 @@ public:
    * @brief Constructor for the PrintOdometryState class.
    * @param times Number of times to print odometry data before transitioning.
    */
-  PrintOdometryState(int times)
+  PrintOdometryState(int times = 5)
       : yasmin_ros::MonitorState<nav_msgs::msg::Odometry>(
             "odom",                   // topic name
             {"outcome1", "outcome2"}, // possible outcomes

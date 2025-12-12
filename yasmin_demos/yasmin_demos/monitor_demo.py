@@ -35,7 +35,7 @@ class PrintOdometryState(MonitorState):
     logging them and transitioning based on the number of messages received.
     """
 
-    def __init__(self, times: int) -> None:
+    def __init__(self, times: int = 5) -> None:
         """
         Initializes the PrintOdometryState.
 

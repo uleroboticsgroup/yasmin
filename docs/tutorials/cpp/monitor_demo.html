@@ -185,7 +185,7 @@
 public:
   int times;
 
-  PrintOdometryState(int times)
+  PrintOdometryState(int times = 5)
       : yasmin_ros::MonitorState&lt;nav_msgs::msg::Odometry&gt;(
             "odom",                   // topic name
             {"outcome1", "outcome2"}, // possible outcomes
