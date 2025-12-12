@@ -178,7 +178,13 @@ class ConnectionLine(QGraphicsPathItem):
 
         Recalculates the cubic Bezier curve path between nodes, including
         offset for multiple connections, arrow head position, and label placement.
+        For self-loops, draws a loop arc above the node.
         """
+        # Check if this is a self-loop
+        if self.from_node == self.to_node:
+            self._update_self_loop_position()
+            return
+
         from_center: QPointF = self.from_node.get_connection_point()
         to_center: QPointF = self.to_node.get_connection_point()
         from_pos: QPointF = self.from_node.get_edge_point(to_center)
@@ -225,6 +231,96 @@ class ConnectionLine(QGraphicsPathItem):
         self.arrow_head.setPolygon(arrow_polygon)
 
         mid_point: QPointF = path.pointAtPercent(0.5)
+        label_rect = self.label.boundingRect()
+        padding: float = 4
+
+        self.label_bg.setRect(
+            mid_point.x() - label_rect.width() / 2 - padding,
+            mid_point.y() - label_rect.height() / 2 - padding,
+            label_rect.width() + padding * 2,
+            label_rect.height() + padding * 2,
+        )
+        self.label.setPos(
+            mid_point.x() - label_rect.width() / 2,
+            mid_point.y() - label_rect.height() / 2,
+        )
+
+    def _update_self_loop_position(self) -> None:
+        """Update position for a self-loop (transition from a state to itself).
+
+        Draws a loop arc above the node with an arrow pointing back into the node.
+        Multiple self-loops on the same node are offset to avoid overlap.
+        """
+        node = self.from_node
+        center: QPointF = node.get_connection_point()
+
+        # Calculate offset for multiple self-loops on the same node
+        self_loops = [
+            conn
+            for conn in node.connections
+            if conn.from_node == conn.to_node and conn.from_node == node
+        ]
+        self_loops.sort(key=lambda c: c.outcome)
+
+        try:
+            loop_index: int = self_loops.index(self)
+        except ValueError:
+            loop_index = 0
+
+        num_loops: int = len(self_loops)
+
+        # Base loop parameters
+        loop_height: float = 80  # How far the loop extends above the node
+        loop_width: float = 60  # Width of the loop
+
+        # Offset multiple loops horizontally
+        horizontal_spacing: float = 50
+        if num_loops > 1:
+            center_offset = (num_loops - 1) / 2
+            horizontal_offset = (loop_index - center_offset) * horizontal_spacing
+        else:
+            horizontal_offset = 0
+
+        # Calculate start and end points on the top edge of the node
+        # Start point is slightly to the left, end point slightly to the right
+        start_x = center.x() + horizontal_offset - 20
+        end_x = center.x() + horizontal_offset + 20
+
+        # Get the top of the node (approximate)
+        node_top = center.y() - 40  # Approximate top of node
+
+        start_pos = QPointF(start_x, node_top)
+        end_pos = QPointF(end_x, node_top)
+
+        # Control points for the loop curve (above the node)
+        ctrl1 = QPointF(start_x - loop_width / 2, node_top - loop_height)
+        ctrl2 = QPointF(end_x + loop_width / 2, node_top - loop_height)
+
+        # Create the path
+        path: QPainterPath = QPainterPath()
+        path.moveTo(start_pos)
+        path.cubicTo(ctrl1, ctrl2, end_pos)
+        self.setPath(path)
+
+        # Arrow head pointing down into the node
+        arrow_size: float = 12
+        # Arrow points downward
+        angle = math.pi / 2  # 90 degrees (pointing down)
+
+        arrow_p1: QPointF = end_pos - QPointF(
+            math.cos(angle - math.pi / 6) * arrow_size,
+            math.sin(angle - math.pi / 6) * arrow_size,
+        )
+        arrow_p2: QPointF = end_pos - QPointF(
+            math.cos(angle + math.pi / 6) * arrow_size,
+            math.sin(angle + math.pi / 6) * arrow_size,
+        )
+
+        arrow_polygon: QPolygonF = QPolygonF([end_pos, arrow_p1, arrow_p2])
+        self.arrow_head.setPolygon(arrow_polygon)
+
+        # Position label at the top of the loop
+        mid_point = QPointF(center.x() + horizontal_offset, node_top - loop_height + 10)
         label_rect = self.label.boundingRect()
         padding: float = 4
 

@@ -57,11 +57,11 @@ class StateMachineCanvas(QGraphicsView):
     ) -> bool:
         """Validate if a connection between two nodes is allowed."""
         if source_node == target_node:
-            if isinstance(source_node, StateNode):
-                source_container = getattr(source_node, "parent_container", None)
-                if source_container and isinstance(source_container, ContainerStateNode):
-                    if source_container.is_concurrence:
-                        return True
+            # Allow self-loops for regular StateNodes (not containers or final outcomes)
+            if isinstance(source_node, StateNode) and not isinstance(
+                source_node, ContainerStateNode
+            ):
+                return True
             return False
 
         source_container: Optional["ContainerStateNode"] = getattr(
@@ -154,11 +154,7 @@ class StateMachineCanvas(QGraphicsView):
                 if isinstance(parent, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                     target = parent
 
-            if (
-                target
-                and target != self.drag_start_node
-                and self.is_valid_connection(self.drag_start_node, target)
-            ):
+            if target and self.is_valid_connection(self.drag_start_node, target):
                 target.setOpacity(0.6)
 
             event.accept()
