@@ -55,8 +55,6 @@ PYBIND11_MODULE(state_machine, m) {
            }),
            py::arg("name"), py::arg("outcomes"),
            py::arg("handle_sigint") = false)
-      // Add destructor from StateMachine
-      .def("__del__", [](yasmin::StateMachine *self) { delete self; })
       // Add state method with keep_alive to manage object lifetime
       .def(
           "add_state",

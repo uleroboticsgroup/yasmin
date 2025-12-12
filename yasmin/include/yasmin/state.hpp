@@ -68,6 +68,11 @@ public:
   State(const std::set<std::string> &outcomes);
 
   /**
+   * @brief Virtual destructor for proper polymorphic destruction.
+   */
+  virtual ~State() = default;
+
+  /**
    * @brief Gets the current status of the state.
    * @return The current StateStatus.
    */
