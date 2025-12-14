@@ -13,9 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <iomanip>
 #include <random>
-#include <sstream>
+#include <string>
 
 #include "yasmin_ros/yasmin_node.hpp"
 
@@ -30,20 +29,17 @@ using namespace yasmin_ros;
  * @return A string containing a 16-character hexadecimal UUID.
  */
 inline std::string generateUUID() {
+  static constexpr char hex_digits[] = "0123456789abcdef";
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> dis(0, 15);
 
-  auto rand_hex_digit = [&gen, &dis]() {
-    constexpr char hex_digits[] = "0123456789abcdef";
-    return hex_digits[dis(gen)];
-  };
-
-  std::stringstream ss;
+  std::string result;
+  result.reserve(16);
   for (int i = 0; i < 16; ++i) {
-    ss << rand_hex_digit();
+    result += hex_digits[dis(gen)];
   }
-  return ss.str();
+  return result;
 }
 
 YasminNode::YasminNode() : rclcpp::Node("yasmin_" + generateUUID() + "_node") {

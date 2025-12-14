@@ -94,7 +94,7 @@ public:
    * @brief Override to_string().
    * The GIL must be acquired before calling into Python.
    */
-  std::string to_string() override {
+  std::string to_string() const override {
     // Acquire GIL before calling Python code
     py::gil_scoped_acquire acquire;
 

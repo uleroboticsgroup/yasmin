@@ -42,7 +42,7 @@ PythonStateHolder::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
 void PythonStateHolder::cancel_state() { this->cpp_state_->cancel_state(); }
 
-std::string PythonStateHolder::to_string() {
+std::string PythonStateHolder::to_string() const {
   return this->cpp_state_->to_string();
 }
 
@@ -87,7 +87,7 @@ void YasminFactory::initialize_python() {
 
 std::shared_ptr<yasmin::State>
 YasminFactory::create_python_state(const std::string &module_name,
-                                   const std::string &class_name) {
+                                   const std::string &class_name) const {
   try {
     py::gil_scoped_acquire acquire;
     // Import the yasmin.state module to ensure the State class is registered
@@ -137,7 +137,7 @@ std::vector<std::string> YasminFactory::split_string(const std::string &str,
   while (std::getline(ss, token, delimiter)) {
     token = this->trim(token);
     if (!token.empty()) {
-      tokens.push_back(token);
+      tokens.emplace_back(std::move(token));
     }
   }
 
@@ -164,7 +164,7 @@ YasminFactory::get_optional_attribute(tinyxml2::XMLElement *element,
 }
 
 std::shared_ptr<yasmin::State>
-YasminFactory::create_state(tinyxml2::XMLElement *state_elem) {
+YasminFactory::create_state(tinyxml2::XMLElement *state_elem) const {
   std::string state_type =
       this->get_optional_attribute(state_elem, "type", "cpp");
   std::string class_name = this->get_required_attribute(state_elem, "class");

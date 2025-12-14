@@ -70,8 +70,7 @@ void StateMachine::add_state(
                            "' already registered in the state machine");
   }
 
-  if (std::find(this->outcomes.begin(), this->outcomes.end(), name) !=
-      this->outcomes.end()) {
+  if (this->outcomes.find(name) != this->outcomes.end()) {
     throw std::logic_error("State name '" + name +
                            "' is already registered as an outcome");
   }
@@ -90,14 +89,14 @@ void StateMachine::add_state(
                                   name + "'");
     }
 
-    if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
-                  key) == state->get_outcomes().end()) {
+    const auto &state_outcomes = state->get_outcomes();
+    if (state_outcomes.find(key) == state_outcomes.end()) {
       std::ostringstream oss;
       oss << "State '" << name << "' references unregistered outcomes '" << key
           << "', available outcomes are [";
-      for (const auto &outcome : state->get_outcomes()) {
+      for (const auto &outcome : state_outcomes) {
         oss << "'" << outcome << "'";
-        if (outcome != *state->get_outcomes().rbegin()) {
+        if (outcome != *state_outcomes.rbegin()) {
           oss << ", ";
         }
       }
@@ -146,19 +145,21 @@ void StateMachine::set_start_state(const std::string &state_name) {
   this->validated.store(false);
 }
 
-std::string StateMachine::get_start_state() { return this->start_state; }
+std::string const &StateMachine::get_start_state() const noexcept {
+  return this->start_state;
+}
 
 std::map<std::string, std::shared_ptr<State>> const &
-StateMachine::get_states() {
+StateMachine::get_states() const noexcept {
   return this->states;
 }
 
 std::map<std::string, std::map<std::string, std::string>> const &
-StateMachine::get_transitions() {
+StateMachine::get_transitions() const noexcept {
   return this->transitions;
 }
 
-std::string StateMachine::get_current_state() {
+std::string const &StateMachine::get_current_state() const {
   const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
   return this->current_state;
 }
@@ -264,20 +265,18 @@ void StateMachine::validate(bool strict_mode) {
 
     if (strict_mode) {
       // Check if all outcomes of the state are in transitions
+      const auto &sm_outcomes = this->get_outcomes();
       for (const std::string &o : outcomes) {
 
         if (transitions.find(o) == transitions.end() &&
-            std::find(this->get_outcomes().begin(), this->get_outcomes().end(),
-                      o) == this->get_outcomes().end()) {
+            sm_outcomes.find(o) == sm_outcomes.end()) {
 
           throw std::runtime_error("State '" + state_name + "' outcome '" + o +
                                    "' not registered in transitions");
 
           // Outcomes of the state that are in outcomes of the state machine
           // do not need transitions
-        } else if (std::find(this->get_outcomes().begin(),
-                             this->get_outcomes().end(),
-                             o) != this->get_outcomes().end()) {
+        } else if (sm_outcomes.find(o) != sm_outcomes.end()) {
           terminal_outcomes.insert(o);
         }
       }
@@ -350,8 +349,8 @@ StateMachine::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
     old_outcome = std::string(outcome);
 
     // Check outcome belongs to state
-    if (std::find(state->get_outcomes().begin(), state->get_outcomes().end(),
-                  outcome) == state->get_outcomes().end()) {
+    const auto &state_outcomes = state->get_outcomes();
+    if (state_outcomes.find(outcome) == state_outcomes.end()) {
       throw std::logic_error("Outcome '" + outcome +
                              "' is not registered in state " +
                              this->current_state);
@@ -367,8 +366,7 @@ StateMachine::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
                     outcome.c_str());
 
     // Outcome is an outcome of the sm
-    if (std::find(this->outcomes.begin(), this->outcomes.end(), outcome) !=
-        this->outcomes.end()) {
+    if (this->outcomes.find(outcome) != this->outcomes.end()) {
 
       this->set_current_state("");
       YASMIN_LOG_INFO("State machine ends with outcome '%s'", outcome.c_str());
@@ -448,7 +446,7 @@ void StateMachine::set_sigint_handler(bool handle) {
   }
 }
 
-std::string StateMachine::to_string() {
+std::string StateMachine::to_string() const {
 
   std::ostringstream oss;
   oss << "State Machine [";

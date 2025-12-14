@@ -94,7 +94,7 @@ public:
    * @return The Python object.
    * @throws std::runtime_error if the key does not exist.
    */
-  py::object get(const std::string &key) {
+  py::object get(const std::string &key) const {
     // Get the type of the stored value
     std::string type = this->blackboard->get_type(key);
 
@@ -143,7 +143,7 @@ public:
    * @param key The key to check.
    * @return True if the key exists, false otherwise.
    */
-  bool contains(const std::string &key) {
+  bool contains(const std::string &key) const {
     return this->blackboard->contains(key);
   }
 
@@ -151,13 +151,13 @@ public:
    * @brief Get the number of key-value pairs in the blackboard.
    * @return The size of the blackboard.
    */
-  int size() { return this->blackboard->size(); }
+  int size() const { return this->blackboard->size(); }
 
   /**
    * @brief Convert the contents of the blackboard to a string.
    * @return A string representation of the blackboard.
    */
-  std::string to_string() { return this->blackboard->to_string(); }
+  std::string to_string() const { return this->blackboard->to_string(); }
 
   /**
    * @brief Set the remappings of the blackboard.
@@ -171,7 +171,7 @@ public:
    * @brief Get the remappings of the blackboard.
    * @return The remappings of the blackboard.
    */
-  std::map<std::string, std::string> get_remappings() {
+  const std::map<std::string, std::string> &get_remappings() const {
     return this->blackboard->get_remappings();
   }
 
@@ -179,7 +179,9 @@ public:
    * @brief Get a shared pointer to the underlying C++ Blackboard
    * @return Shared pointer to the C++ Blackboard
    */
-  std::shared_ptr<Blackboard> get_cpp_blackboard() { return this->blackboard; }
+  std::shared_ptr<Blackboard> get_cpp_blackboard() const {
+    return this->blackboard;
+  }
 };
 
 } // namespace yasmin

@@ -58,34 +58,30 @@ YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
 }
 
 std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
-    const std::map<std::string, std::string> &transitions) {
+    const std::map<std::string, std::string> &transitions) const {
   std::vector<yasmin_msgs::msg::Transition> transitions_list;
+  transitions_list.reserve(transitions.size());
 
-  for (auto const &transition : transitions) {
-    auto transition_msg = yasmin_msgs::msg::Transition();
+  for (const auto &transition : transitions) {
+    auto &transition_msg = transitions_list.emplace_back();
     transition_msg.outcome = transition.first;
     transition_msg.state = transition.second;
-    transitions_list.push_back(transition_msg);
   }
   return transitions_list;
 }
 
 std::map<std::string, std::vector<yasmin_msgs::msg::Transition>>
 YasminViewerPub::parse_concurrence_transitions(
-    std::shared_ptr<yasmin::Concurrence> concurrence) {
+    std::shared_ptr<yasmin::Concurrence> concurrence) const {
   std::map<std::string, std::vector<yasmin_msgs::msg::Transition>> transitions;
-  auto outcome_map = concurrence->get_outcome_map();
+  const auto &outcome_map = concurrence->get_outcome_map();
 
   // Add transitions for each outcome in the outcome map
   for (const auto &[outcome, requirements] : outcome_map) {
     for (const auto &[state_name, state_outcome] : requirements) {
-      if (transitions.find(state_name) == transitions.end()) {
-        transitions[state_name] = std::vector<yasmin_msgs::msg::Transition>();
-      }
-      auto transition_msg = yasmin_msgs::msg::Transition();
+      auto &transition_msg = transitions[state_name].emplace_back();
       transition_msg.outcome = state_outcome;
       transition_msg.state = outcome;
-      transitions[state_name].push_back(transition_msg);
     }
   }
 

@@ -20,14 +20,11 @@
 
 using namespace yasmin;
 
-Blackboard::Blackboard() {}
+Blackboard::Blackboard() = default;
 
-Blackboard::Blackboard(const Blackboard &other) {
-  for (const auto &ele : other.values) {
-    this->values.insert({ele.first, ele.second});
-  }
-  this->type_registry = other.type_registry;
-}
+Blackboard::Blackboard(const Blackboard &other)
+    : values(other.values), type_registry(other.type_registry),
+      remappings(other.remappings) {}
 
 void Blackboard::remove(const std::string &key) {
   YASMIN_LOG_DEBUG("Removing '%s' from the blackboard", key.c_str());
@@ -38,7 +35,7 @@ void Blackboard::remove(const std::string &key) {
   this->type_registry.erase(remapped_key);
 }
 
-bool Blackboard::contains(const std::string &key) {
+bool Blackboard::contains(const std::string &key) const {
   YASMIN_LOG_DEBUG("Checking if '%s' is in the blackboard", key.c_str());
 
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
@@ -46,12 +43,12 @@ bool Blackboard::contains(const std::string &key) {
   return (this->values.find(remapped_key) != this->values.end());
 }
 
-int Blackboard::size() {
+int Blackboard::size() const {
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
   return this->values.size();
 }
 
-std::string Blackboard::get_type(const std::string &key) {
+std::string Blackboard::get_type(const std::string &key) const {
   YASMIN_LOG_DEBUG("Getting type of '%s' from the blackboard", key.c_str());
 
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
@@ -66,7 +63,7 @@ std::string Blackboard::get_type(const std::string &key) {
   return this->type_registry.at(remapped_key);
 }
 
-std::string Blackboard::to_string() {
+std::string Blackboard::to_string() const {
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
   std::string result = "Blackboard\n";
@@ -80,7 +77,7 @@ std::string Blackboard::to_string() {
   return result;
 }
 
-const std::string &Blackboard::remap(const std::string &key) {
+const std::string &Blackboard::remap(const std::string &key) const {
 
   // Check if the key has a remapping
   if (this->remappings.find(key) != this->remappings.end()) {
@@ -95,6 +92,7 @@ void Blackboard::set_remappings(
   this->remappings = remappings;
 }
 
-const std::map<std::string, std::string> &Blackboard::get_remappings() {
+const std::map<std::string, std::string> &
+Blackboard::get_remappings() const noexcept {
   return this->remappings;
 }

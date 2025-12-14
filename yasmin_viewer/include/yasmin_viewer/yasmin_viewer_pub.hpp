@@ -82,8 +82,8 @@ public:
    * the next states.
    * @return Vector of Transition messages.
    */
-  std::vector<yasmin_msgs::msg::Transition>
-  parse_transitions(const std::map<std::string, std::string> &transitions);
+  std::vector<yasmin_msgs::msg::Transition> parse_transitions(
+      const std::map<std::string, std::string> &transitions) const;
 
   /**
    * @brief Parses concurrence transitions from outcome map to transition-like
@@ -93,7 +93,7 @@ public:
    */
   std::map<std::string, std::vector<yasmin_msgs::msg::Transition>>
   parse_concurrence_transitions(
-      std::shared_ptr<yasmin::Concurrence> concurrence);
+      std::shared_ptr<yasmin::Concurrence> concurrence) const;
 
   /**
    * @brief Parses a state and its transitions to add it to the list of state

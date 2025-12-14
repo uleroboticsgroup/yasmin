@@ -62,7 +62,7 @@ inline std::string demangle_type(const std::string &mangled_name) {
 class Blackboard {
 private:
   /// Mutex for thread safety.
-  std::recursive_mutex mutex;
+  mutable std::recursive_mutex mutex;
   /// Storage for key-value pairs.
   std::map<std::string, std::shared_ptr<void>> values;
   /// Storage for type information for each key.
@@ -74,7 +74,7 @@ private:
    * not remaped, retruns the arg key.
    *  @param other The instance to copy from.
    */
-  const std::string &remap(const std::string &key);
+  const std::string &remap(const std::string &key) const;
 
 public:
   /** @brief Default constructor for Blackboard. */
@@ -130,7 +130,7 @@ public:
    * @return The value associated with the specified key.
    * @throws std::runtime_error if the key does not exist.
    */
-  template <class T> T get(const std::string &key) {
+  template <class T> T get(const std::string &key) const {
 
     YASMIN_LOG_DEBUG("Getting '%s' from the blackboard", key.c_str());
 
@@ -157,13 +157,13 @@ public:
    * @param key The key to check.
    * @return True if the key exists, false otherwise.
    */
-  bool contains(const std::string &key);
+  bool contains(const std::string &key) const;
 
   /**
    * @brief Get the number of key-value pairs in the blackboard.
    * @return The size of the blackboard.
    */
-  int size();
+  int size() const;
 
   /**
    * @brief Get the type of a value stored in the blackboard.
@@ -171,13 +171,13 @@ public:
    * @return A string representation of the type.
    * @throws std::runtime_error if the key does not exist.
    */
-  std::string get_type(const std::string &key);
+  std::string get_type(const std::string &key) const;
 
   /**
    * @brief Convert the contents of the blackboard to a string.
    * @return A string representation of the blackboard.
    */
-  std::string to_string();
+  std::string to_string() const;
 
   /**
    * @brief Set the remappings of the blackboard.
@@ -189,7 +189,7 @@ public:
    * @brief Get the remappings of the blackboard.
    * @return The remappings of the blackboard.
    */
-  const std::map<std::string, std::string> &get_remappings();
+  const std::map<std::string, std::string> &get_remappings() const noexcept;
 };
 
 } // namespace yasmin

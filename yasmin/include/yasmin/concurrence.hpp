@@ -116,40 +116,26 @@ public:
    * @brief Returns the map of states managed by this concurrence state.
    * @return A map of state names to states.
    */
-  const std::map<std::string, std::shared_ptr<State>> &get_states() const;
+  const std::map<std::string, std::shared_ptr<State>> &
+  get_states() const noexcept;
 
   /**
    * @brief Returns the outcome map for this concurrence state.
    * @return A map of outcome names to their requirements.
    */
-  const OutcomeMap &get_outcome_map() const;
+  const OutcomeMap &get_outcome_map() const noexcept;
 
   /**
    * @brief Returns the default outcome for this concurrence state.
    * @return The default outcome as a string.
    */
-  const std::string &get_default_outcome() const;
+  const std::string &get_default_outcome() const noexcept;
 
   /**
    * @brief Converts the state to a string representation.
    * @return A string representation of the state.
    */
-  std::string to_string() override {
-    std::string name = "Concurrence [";
-
-    for (auto it = states.begin(); it != states.end(); ++it) {
-      name += it->first + " (" + it->second->to_string() + ")";
-
-      // Add a comma if this is not the last element
-      if (std::next(it) != states.end()) {
-        name += ", ";
-      }
-    }
-
-    name += "]";
-
-    return name;
-  }
+  std::string to_string() const override;
 };
 
 } // namespace yasmin

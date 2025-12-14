@@ -112,7 +112,6 @@ protected:
 private:
   /// Publisher to the ROS 2 topic.
   std::shared_ptr<rclcpp::Publisher<MsgT>> pub;
-
   /// Name of the topic to monitor.
   std::string topic_name;
   /// Callback handler to create messages.

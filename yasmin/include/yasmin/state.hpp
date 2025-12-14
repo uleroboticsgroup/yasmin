@@ -22,10 +22,6 @@
 #include <string>
 #include <vector>
 
-#ifdef __GNUG__     // If using GCC/G++
-#include <cxxabi.h> // For abi::__cxa_demangle
-#endif
-
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 
@@ -88,25 +84,25 @@ public:
    * @brief Checks if the state is idle.
    * @return True if the state is idle, otherwise false.
    */
-  bool is_idle() const;
+  bool is_idle() const noexcept;
 
   /**
    * @brief Checks if the state is currently running.
    * @return True if the state is running, otherwise false.
    */
-  bool is_running() const;
+  bool is_running() const noexcept;
 
   /**
    * @brief Checks if the state has been canceled.
    * @return True if the state is canceled, otherwise false.
    */
-  bool is_canceled() const;
+  bool is_canceled() const noexcept;
 
   /**
    * @brief Checks if the state has completed execution.
    * @return True if the state is completed, otherwise false.
    */
-  bool is_completed() const;
+  bool is_completed() const noexcept;
 
   /**
    * @brief Executes the state and returns the outcome.
@@ -149,7 +145,7 @@ public:
    * @brief Gets the set of possible outcomes for this state.
    * @return A constant reference to the set of possible outcomes.
    */
-  std::set<std::string> const &get_outcomes();
+  std::set<std::string> const &get_outcomes() const noexcept;
 
   /**
    * @brief Converts the state to a string representation.
@@ -158,22 +154,7 @@ public:
    * This method retrieves the demangled name of the class for a readable
    * string representation.
    */
-  virtual std::string to_string() {
-    std::string name = typeid(*this).name();
-
-#ifdef __GNUG__ // If using GCC/G++
-    int status;
-    // Demangle the name using GCC's demangling function
-    char *demangled =
-        abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
-    if (status == 0) {
-      name = demangled;
-    }
-    free(demangled);
-#endif
-
-    return name; // Return the demangled class name
-  }
+  virtual std::string to_string() const;
 };
 
 } // namespace yasmin

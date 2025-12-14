@@ -159,15 +159,15 @@ void Concurrence::cancel_state() {
 }
 
 const std::map<std::string, std::shared_ptr<State>> &
-Concurrence::get_states() const {
+Concurrence::get_states() const noexcept {
   return this->states;
 }
 
-const Concurrence::OutcomeMap &Concurrence::get_outcome_map() const {
+const Concurrence::OutcomeMap &Concurrence::get_outcome_map() const noexcept {
   return this->outcome_map;
 }
 
-const std::string &Concurrence::get_default_outcome() const {
+const std::string &Concurrence::get_default_outcome() const noexcept {
   return this->default_outcome;
 }
 
@@ -183,4 +183,21 @@ Concurrence::generate_possible_outcomes(const OutcomeMap &outcome_map,
   }
 
   return possible_outcomes;
+}
+
+std::string Concurrence::to_string() const {
+  std::string name = "Concurrence [";
+
+  for (auto it = states.begin(); it != states.end(); ++it) {
+    name += it->first + " (" + it->second->to_string() + ")";
+
+    // Add a comma if this is not the last element
+    if (std::next(it) != states.end()) {
+      name += ", ";
+    }
+  }
+
+  name += "]";
+
+  return name;
 }

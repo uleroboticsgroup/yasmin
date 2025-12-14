@@ -69,7 +69,7 @@ public:
   /**
    * @brief Delegates string conversion to the underlying Python state.
    */
-  std::string to_string() override;
+  std::string to_string() const override;
 
 private:
   std::shared_ptr<yasmin::State> cpp_state_; ///< The C++ state pointer
@@ -105,7 +105,8 @@ public:
    * @throws std::runtime_error If the state type is unknown or required
    *         attributes are missing.
    */
-  std::shared_ptr<yasmin::State> create_state(tinyxml2::XMLElement *state_elem);
+  std::shared_ptr<yasmin::State>
+  create_state(tinyxml2::XMLElement *state_elem) const;
 
   /**
    * @brief Creates a concurrence from an XML element.
@@ -174,7 +175,7 @@ private:
    */
   std::shared_ptr<yasmin::State>
   create_python_state(const std::string &module_name,
-                      const std::string &class_name);
+                      const std::string &class_name) const;
 
   /**
    * @brief Helper function to split a string by a delimiter.
