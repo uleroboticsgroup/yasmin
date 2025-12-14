@@ -25,23 +25,8 @@
 #include "yasmin_demos/bar_state.h"
 #include "yasmin_ros/ros_logs.hpp"
 
-/**
- * @brief Represents the "Bar" state in the state machine.
- *
- * This state logs the value from the blackboard and provides
- * a single outcome to transition.
- */
 BarState::BarState() : yasmin::State({"outcome3"}) {};
 
-/**
- * @brief Executes the Bar state logic.
- *
- * This method logs the execution, waits for 3 seconds,
- * retrieves a string from the blackboard, and logs it.
- *
- * @param blackboard Shared pointer to the blackboard for state communication.
- * @return std::string The outcome of the execution: "outcome3".
- */
 std::string BarState::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
   YASMIN_LOG_INFO("Executing state BAR");
   std::this_thread::sleep_for(std::chrono::seconds(3));

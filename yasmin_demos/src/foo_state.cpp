@@ -25,25 +25,8 @@
 #include "yasmin_demos/foo_state.h"
 #include "yasmin_ros/ros_logs.hpp"
 
-/**
- * @brief Represents the "Foo" state in the state machine.
- *
- * This state increments a counter each time it is executed and
- * communicates the current count via the blackboard.
- */
 FooState::FooState() : yasmin::State({"outcome1", "outcome2"}) { counter = 0; };
 
-/**
- * @brief Executes the Foo state logic.
- *
- * This method logs the execution, waits for 3 seconds,
- * increments the counter, and sets a string in the blackboard.
- * The state will transition to either "outcome1" or "outcome2"
- * based on the current value of the counter.
- *
- * @param blackboard Shared pointer to the blackboard for state communication.
- * @return std::string The outcome of the execution: "outcome1" or "outcome2".
- */
 std::string FooState::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
   YASMIN_LOG_INFO("Executing state FOO");
   std::this_thread::sleep_for(std::chrono::seconds(3));
