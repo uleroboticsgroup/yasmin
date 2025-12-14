@@ -152,9 +152,10 @@ install(TARGETS
 )
 
 # plugins
+pluginlib_export_plugin_description_file(yasmin plugins.xml)
+
 add_library(foo_state SHARED src/foo_state.cpp)
 target_link_libraries(foo_state PUBLIC ${DEPENDENCIES})
-pluginlib_export_plugin_description_file(yasmin plugins.xml)
 install(TARGETS foo_state
   LIBRARY DESTINATION lib
 )
