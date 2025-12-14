@@ -30,26 +30,30 @@ State::State(const std::set<std::string> &outcomes) : outcomes(outcomes) {
   }
 }
 
+void State::set_status(StateStatus new_status) {
+  this->status.store(new_status);
+}
+
 StateStatus State::get_status() const { return this->status.load(); }
 
-bool State::is_idle() const { return this->status.load() == StateStatus::IDLE; }
+bool State::is_idle() const { return this->get_status() == StateStatus::IDLE; }
 
 bool State::is_running() const {
-  return this->status.load() == StateStatus::RUNNING;
+  return this->get_status() == StateStatus::RUNNING;
 }
 
 bool State::is_canceled() const {
-  return this->status.load() == StateStatus::CANCELED;
+  return this->get_status() == StateStatus::CANCELED;
 }
 
 bool State::is_completed() const {
-  return this->status.load() == StateStatus::COMPLETED;
+  return this->get_status() == StateStatus::COMPLETED;
 }
 
 std::string State::operator()(std::shared_ptr<yasmin::Blackboard> blackboard) {
   YASMIN_LOG_DEBUG("Executing state '%s'", this->to_string().c_str());
 
-  this->status.store(StateStatus::RUNNING);
+  this->set_status(StateStatus::RUNNING);
 
   // Execute the specific logic of the state
   std::string outcome = this->execute(blackboard);
@@ -75,7 +79,7 @@ std::string State::operator()(std::shared_ptr<yasmin::Blackboard> blackboard) {
     outcomes_string += "]";
 
     // Mark as idle before throwing exception
-    this->status.store(StateStatus::IDLE);
+    this->set_status(StateStatus::IDLE);
 
     // Throw an exception if the outcome is not valid
     throw std::logic_error("Outcome '" + outcome +
@@ -86,8 +90,8 @@ std::string State::operator()(std::shared_ptr<yasmin::Blackboard> blackboard) {
   }
 
   // Mark as completed if not canceled
-  if (this->status.load() != StateStatus::CANCELED) {
-    this->status.store(StateStatus::COMPLETED);
+  if (!this->is_canceled()) {
+    this->set_status(StateStatus::COMPLETED);
   }
 
   return outcome; // Return the valid outcome

@@ -117,14 +117,6 @@ PYBIND11_MODULE(state, m) {
   py::module blackboard_module = py::module::import("yasmin.blackboard");
 #endif
 
-  // Export StateStatus enum
-  py::enum_<yasmin::StateStatus>(m, "StateStatus")
-      .value("IDLE", yasmin::StateStatus::IDLE)
-      .value("RUNNING", yasmin::StateStatus::RUNNING)
-      .value("CANCELED", yasmin::StateStatus::CANCELED)
-      .value("COMPLETED", yasmin::StateStatus::COMPLETED)
-      .export_values();
-
   // Export State class with trampoline
   py::class_<yasmin::State, yasmin::PyState, std::shared_ptr<yasmin::State>>
       state_class(m, "State");
@@ -136,8 +128,6 @@ PYBIND11_MODULE(state, m) {
            }),
            py::arg("outcomes"))
       // Status methods
-      .def("get_status", &yasmin::State::get_status,
-           "Gets the current status of the state")
       .def("is_idle", &yasmin::State::is_idle, "Checks if the state is idle")
       .def("is_running", &yasmin::State::is_running,
            "Checks if the state is currently running")

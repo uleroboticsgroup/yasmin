@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (C) 2025 Pedro Edom Nunes
 #
 # This program is free software: you can redistribute it and/or modify
@@ -20,7 +18,6 @@ import yasmin
 from yasmin import State, Blackboard
 
 
-# Define the FooState class, inheriting from the State class
 class FooState(State):
     """
     Represents the Foo state in the state machine.

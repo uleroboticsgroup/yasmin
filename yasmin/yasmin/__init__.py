@@ -67,7 +67,6 @@ def py_default_log_message(
     @param line The line number in the source file.
     @param text The format string for the log message.
     """
-
     message = f"[{log_level_to_name(level)}] [{file}:{function}:{line}] {text}"
 
     if level == LogLevel.ERROR:

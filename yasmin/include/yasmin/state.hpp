@@ -60,6 +60,18 @@ private:
   /// Current status of the state
   std::atomic<StateStatus> status{StateStatus::IDLE};
 
+  /**
+   * @brief Sets the current status of the state.
+   * @param new_status The new status to set.
+   */
+  void set_status(StateStatus new_status);
+
+  /**
+   * @brief Gets the current status of the state.
+   * @return The current StateStatus.
+   */
+  StateStatus get_status() const;
+
 public:
   /**
    * @brief Constructs a State with a set of possible outcomes.
@@ -71,12 +83,6 @@ public:
    * @brief Virtual destructor for proper polymorphic destruction.
    */
   virtual ~State() = default;
-
-  /**
-   * @brief Gets the current status of the state.
-   * @return The current StateStatus.
-   */
-  StateStatus get_status() const;
 
   /**
    * @brief Checks if the state is idle.
@@ -136,7 +142,7 @@ public:
    */
   virtual void cancel_state() {
     YASMIN_LOG_INFO("Canceling state '%s'", this->to_string().c_str());
-    this->status.store(StateStatus::CANCELED);
+    this->set_status(StateStatus::CANCELED);
   }
 
   /**

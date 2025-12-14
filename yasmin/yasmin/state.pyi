@@ -13,22 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from enum import Enum
 from typing import List, Set, overload
 from yasmin import Blackboard
-
-class StateStatus(Enum):
-    IDLE: int
-    RUNNING: int
-    CANCELED: int
-    COMPLETED: int
 
 class State:
     @overload
     def __init__(self, outcomes: Set[str]) -> None: ...
     @overload
     def __init__(self, outcomes: List[str]) -> None: ...
-    def get_status(self) -> StateStatus: ...
     def is_idle(self) -> bool: ...
     def is_running(self) -> bool: ...
     def is_canceled(self) -> bool: ...
