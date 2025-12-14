@@ -17,7 +17,6 @@
 from rclpy.node import Node
 
 import yasmin
-import yasmin.logs
 import yasmin_ros
 from yasmin_ros.yasmin_node import YasminNode
 

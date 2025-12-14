@@ -25,10 +25,9 @@ from waitress import serve
 from expiringdict import ExpiringDict
 
 import rclpy
-from rclpy.executors import ExternalShutdownException
-from rclpy.node import Node
 import ament_index_python
-
+from rclpy.node import Node
+from rclpy.executors import ExternalShutdownException
 from yasmin_msgs.msg import StateMachine, State, Transition
 
 
@@ -92,7 +91,6 @@ class YasminViewerNode(Node):
 
         @app.route("/")
         def index():
-            """Serves the index.html file."""
             return app.send_static_file("index.html")
 
         @self.socketio.on("connect")

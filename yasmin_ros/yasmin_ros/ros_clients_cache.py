@@ -41,8 +41,6 @@ class ROSClientsCache:
     - Topic/Service/Action name
     - Callback group name
     - QoS profile
-
-    All methods are thread-safe using internal locking mechanisms.
     """
 
     ## Cache for action clients
