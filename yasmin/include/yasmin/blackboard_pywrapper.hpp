@@ -83,14 +83,6 @@ public:
       this->blackboard->set<double>(key, value.cast<double>());
     } else if (py::isinstance<py::str>(value)) {
       this->blackboard->set<std::string>(key, value.cast<std::string>());
-    } else if (py::isinstance<py::list>(value)) {
-      this->blackboard->set<py::object>(key, value);
-    } else if (py::isinstance<py::dict>(value)) {
-      this->blackboard->set<py::object>(key, value);
-    } else if (py::isinstance<py::tuple>(value)) {
-      this->blackboard->set<py::object>(key, value);
-    } else if (py::isinstance<py::set>(value)) {
-      this->blackboard->set<py::object>(key, value);
     } else {
       this->blackboard->set<py::object>(key, value);
     }
@@ -106,48 +98,11 @@ public:
     // Get the type of the stored value
     std::string type = this->blackboard->get_type(key);
 
-    // Check if it's a pybind11::object (Python object - includes all Python
-    // types)
-    if (type.find("pybind11::object") != std::string::npos ||
-        type.find("pybind11::int_") != std::string::npos ||
-        type.find("pybind11::float_") != std::string::npos ||
-        type.find("pybind11::str") != std::string::npos ||
-        type.find("pybind11::bool_") != std::string::npos ||
-        type.find("pybind11::list") != std::string::npos ||
-        type.find("pybind11::dict") != std::string::npos ||
-        type.find("pybind11::set") != std::string::npos ||
-        type.find("pybind11::tuple") != std::string::npos ||
-        type.find("pybind11::bytes") != std::string::npos ||
-        type.find("pybind11::none") != std::string::npos) {
-      return this->blackboard->get<py::object>(key);
-    }
     // Check if it's a std::string (C++ string) - convert to Python str
-    else if (type.find("std::string") != std::string::npos ||
-             type.find("std::__cxx11::basic_string") != std::string::npos) {
+    if (type.find("std::string") != std::string::npos ||
+        type.find("std::__cxx11::basic_string") != std::string::npos) {
       std::string cpp_value = this->blackboard->get<std::string>(key);
       return py::cast(cpp_value);
-    }
-    // Check if it's a std::vector (C++ vector) - convert to Python list
-    else if (type.find("std::vector") != std::string::npos) {
-      return this->blackboard->get<py::object>(key);
-    }
-    // Check if it's a std::map (C++ map) - convert to Python dict
-    else if (type.find("std::map") != std::string::npos ||
-             type.find("std::unordered_map") != std::string::npos) {
-      return this->blackboard->get<py::object>(key);
-    }
-    // Check if it's a std::set (C++ set) - convert to Python set
-    else if (type.find("std::set") != std::string::npos ||
-             type.find("std::unordered_set") != std::string::npos) {
-      return this->blackboard->get<py::object>(key);
-    }
-    // Check if it's a std::list (C++ list) - convert to Python list
-    else if (type.find("std::list") != std::string::npos) {
-      return this->blackboard->get<py::object>(key);
-    }
-    // Check if it's a std::tuple (C++ tuple) - convert to Python tuple
-    else if (type.find("std::tuple") != std::string::npos) {
-      return this->blackboard->get<py::object>(key);
     }
     // Check if it's an int (C++ int) - convert to Python int
     else if (type.find("int") != std::string::npos) {
