@@ -253,7 +253,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    viewer = YasminViewerPub(sm, "YASMIN_DEMO")
+    YasminViewerPub(sm, "YASMIN_DEMO")
 
     # Execute the FSM
     try:
@@ -261,9 +261,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
@@ -391,7 +388,7 @@ def main() -> None:
     )
 
     # Launch YASMIN Viewer publisher for state visualization
-    viewer = YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
+    YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
 
     # Execute the FSM
     try:
@@ -399,9 +396,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
@@ -571,7 +565,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    viewer = YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
+    YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
 
     # Execute the FSM
     try:
@@ -579,9 +573,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
@@ -709,7 +700,7 @@ def main() -> None:
     )
 
     # Launch YASMIN Viewer publisher for state visualization
-    viewer = YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
+    YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values
     blackboard = Blackboard()
@@ -722,9 +713,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
@@ -838,7 +826,7 @@ def main() -> None:
     )
 
     # Publish FSM information
-    viewer = YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
+    YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
     # Execute the FSM
     try:
@@ -846,9 +834,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
@@ -1013,7 +998,7 @@ def main() -> None:
     )
 
     # Publish FSM info
-    viewer = YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
+    YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
 
     # Execute the FSM
     try:
@@ -1021,9 +1006,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
@@ -1200,7 +1182,7 @@ def main() -> None:
     )
 
     # Publish FSM information
-    viewer = YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
+    YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
 
     # Create an initial blackboard with the input value
     blackboard = Blackboard()
@@ -1212,9 +1194,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
@@ -1370,7 +1349,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    viewer = YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
+    YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
 
     # Execute the FSM
     try:
@@ -1378,9 +1357,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
@@ -1445,7 +1421,7 @@ def main() -> None:
     sm.set_sigint_handler(True)
 
     # Publish FSM information for visualization
-    viewer = YasminViewerPub(sm, "plugin_demo")
+    YasminViewerPub(sm, "plugin_demo")
 
     # Execute the FSM
     try:
@@ -1453,9 +1429,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
@@ -1655,7 +1628,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    viewer = YasminViewerPub(sm, "YASMIN_NAV2_DEMO")
+    YasminViewerPub(sm, "YASMIN_NAV2_DEMO")
 
     # Execute the state machine
     blackboard = Blackboard()
@@ -1667,9 +1640,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():

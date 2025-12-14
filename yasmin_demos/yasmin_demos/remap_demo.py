@@ -120,7 +120,7 @@ def main() -> None:
     )
 
     # Launch YASMIN Viewer publisher for state visualization
-    viewer = YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
+    YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
 
     # Execute the FSM
     try:
@@ -128,9 +128,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():

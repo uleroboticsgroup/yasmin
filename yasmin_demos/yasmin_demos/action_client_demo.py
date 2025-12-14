@@ -165,7 +165,7 @@ def main() -> None:
     )
 
     # Publish FSM information
-    viewer = YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
+    YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
 
     # Create an initial blackboard with the input value
     blackboard = Blackboard()
@@ -177,9 +177,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        viewer.cleanup()
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
