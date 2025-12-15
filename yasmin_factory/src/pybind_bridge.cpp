@@ -41,7 +41,7 @@ public:
             "yasmin", "yasmin::State")) {}
 
   /**
-   * @brief Destructor that destroys the ClassLoader.
+   * @brief Destructor.
    */
   ~CppStateFactory() = default;
 
@@ -62,7 +62,15 @@ public:
    * instantiated.
    */
   std::shared_ptr<yasmin::State> create(const std::string &class_name) {
-    return this->loader_->createSharedInstance(class_name);
+    // Create an unmanaged instance of the specified class
+    auto state = this->loader_->createUnmanagedInstance(class_name);
+
+    // Wrap the raw pointer in a shared_ptr with a no-op deleter to avoid
+    // double deletion (Python will manage the lifetime)
+    std::shared_ptr<yasmin::State> state_ptr(state, [](yasmin::State *) {
+      // No-op deleter
+    });
+    return state_ptr;
   }
 
 private:

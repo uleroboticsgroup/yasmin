@@ -74,20 +74,6 @@ class YasminViewerPub(object):
         self._timer = self._node.create_timer(1 / rate, self._publish_data)
 
         ## Register shutdown callback to clean up the viewer.
-        self._node.context.on_shutdown(self._on_shutdown)
-
-    def _on_shutdown(self) -> None:
-        """
-        Callback executed on shutdown to clean the viewer.
-
-        Publishes an empty state machine message to clear the viewer display.
-
-        Returns:
-            None
-        """
-        self._pub = None
-        self._timer = None
-        self._fsm = None
 
     def parse_transitions(self, transitions: Dict[str, str]) -> List[TransitionMsg]:
         """

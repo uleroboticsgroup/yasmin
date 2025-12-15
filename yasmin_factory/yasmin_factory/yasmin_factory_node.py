@@ -51,8 +51,6 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
-    finally:
-        del sm
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
