@@ -24,8 +24,6 @@ from yasmin_factory import YasminFactory
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_factory_node")
-
     # Initialize ROS 2
     rclpy.init()
 
@@ -36,6 +34,7 @@ def main() -> None:
 
     # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_factory_node")
 
     # Create a finite state machine (FSM)
     factory = YasminFactory()

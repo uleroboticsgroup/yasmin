@@ -235,33 +235,42 @@ public:
           the state object, which is efficient for continuous monitoring tasks.
         </p>
         <pre><code class="language-cpp">int main(int argc, char *argv[]) {
-
-  YASMIN_LOG_INFO("yasmin_monitor_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
-  yasmin_ros::set_ros_loggers();
 
+  // Set up ROS 2 loggers
+  yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_monitor_demo");
+
+  // Create a state machine with a final outcome
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
+  // Add states to the state machine
   sm-&gt;add_state(
       "PRINTING_ODOM", std::make_shared&lt;PrintOdometryState&gt;(5),
       {
-          {"outcome1", "PRINTING_ODOM"},
-          {"outcome2", "outcome4"},
-          {yasmin_ros::basic_outcomes::TIMEOUT, "outcome4"},
-          {yasmin_ros::basic_outcomes::CANCEL, "outcome4"},
+          {"outcome1",
+           "PRINTING_ODOM"},        // Transition back to itself on outcome1
+          {"outcome2", "outcome4"}, // Transition to outcome4 on outcome2
+          {yasmin_ros::basic_outcomes::TIMEOUT,
+           "outcome4"}, // Timeout transition
+          {yasmin_ros::basic_outcomes::CANCEL, "outcome4"}, // Cancel transition
       });
 
+  // Publisher for visualizing the state machine's status
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MONITOR_DEMO");
 
+  // Execute the state machine
   try {
     std::string outcome = (*sm.get())();
     YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
+  } catch (const std::exception &amp;e) {
     YASMIN_LOG_WARN(e.what());
   }
 
   rclcpp::shutdown();
+
   return 0;
 }</code></pre>
 

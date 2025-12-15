@@ -115,13 +115,12 @@ class BarState(State):
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_concurrence_demo")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_concurrence_demo")
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)

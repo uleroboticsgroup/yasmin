@@ -118,13 +118,12 @@ def print_sum(blackboard: Blackboard) -> str:
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
-
     # Init ROS 2
     rclpy.init()
 
     # Set ROS 2 logs
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
 
     # Create a FSM
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)

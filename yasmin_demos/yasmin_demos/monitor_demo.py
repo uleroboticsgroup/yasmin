@@ -84,13 +84,12 @@ class PrintOdometryState(MonitorState):
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set ROS 2 logs
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
@@ -107,7 +106,7 @@ def main() -> None:
         },
     )
 
-    # Publish FSM information
+    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
     # Execute the FSM

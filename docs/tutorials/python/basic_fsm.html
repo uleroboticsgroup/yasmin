@@ -187,7 +187,7 @@
             Exception: May raise exceptions related to state execution.
         """
         yasmin.YASMIN_LOG_INFO("Executing state FOO")
-        time.sleep(3)
+        time.sleep(3)  # Simulate work by sleeping
 
         if self.counter &lt; 3:
             self.counter += 1
@@ -238,7 +238,7 @@
             Exception: May raise exceptions related to state execution.
         """
         yasmin.YASMIN_LOG_INFO("Executing state BAR")
-        time.sleep(3)
+        time.sleep(3)  # Simulate work by sleeping
 
         yasmin.YASMIN_LOG_INFO(blackboard["foo_str"])
         return "outcome3"</code></pre>
@@ -262,9 +262,12 @@
         </p>
 
         <pre><code class="language-python">def main() -&gt; None:
-    yasmin.YASMIN_LOG_INFO("yasmin_demo")
+    # Initialize ROS 2
     rclpy.init()
+
+    # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_demo")
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)

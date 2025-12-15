@@ -210,43 +210,52 @@ public:
           state reuse, data flow between states with incompatible key names, and
           clear separation between state logic and data sources.
         </p>
-        <pre><code class="language-cpp">yasmin_ros::set_ros_loggers();
+        <pre><code class="language-cpp">int main(int argc, char *argv[]) {
+  // Initialize ROS 2
+  rclcpp::init(argc, argv);
 
-auto blackboard = std::make_shared&lt;yasmin::Blackboard&gt;();
-blackboard-&gt;set&lt;std::string&gt;("msg1", "test1");
-blackboard-&gt;set&lt;std::string&gt;("msg2", "test2");
+  // Set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_remapping_demo");
 
-auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
-    std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
-    true);
+  // Create blackboard
+  auto blackboard = std::make_shared&lt;yasmin::Blackboard&gt;();
+  blackboard-&gt;set&lt;std::string&gt;("msg1", "test1");
+  blackboard-&gt;set&lt;std::string&gt;("msg2", "test2");
 
-// STATE1: remap foo_data to msg1
-sm-&gt;add_state("STATE1", std::make_shared&lt;FooState&gt;(),
-              {
-                  {yasmin_ros::basic_outcomes::SUCCEED, "STATE2"},
-              },
-              {
-                  {"foo_data", "msg1"},
-              });
+  // Create a state machine
+  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+      std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
+      true);
 
-// STATE2: remap foo_data to msg2
-sm-&gt;add_state("STATE2", std::make_shared&lt;FooState&gt;(),
-              {
-                  {yasmin_ros::basic_outcomes::SUCCEED, "STATE3"},
-              },
-              {
-                  {"foo_data", "msg2"},
-              });
+  // Add states to the state machine
+  // STATE1: remap foo_data to msg1
+  sm-&gt;add_state("STATE1", std::make_shared&lt;FooState&gt;(),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "STATE2"},
+                },
+                {
+                    {"foo_data", "msg1"},
+                });
 
-// STATE3: remap bar_data to foo_out_data
-sm-&gt;add_state("STATE3", std::make_shared&lt;BarState&gt;(),
-              {
-                  {yasmin_ros::basic_outcomes::SUCCEED,
-                   yasmin_ros::basic_outcomes::SUCCEED},
-              },
-              {
-                  {"bar_data", "foo_out_data"},
-              });</code></pre>
+  // STATE2: remap foo_data to msg2
+  sm-&gt;add_state("STATE2", std::make_shared&lt;FooState&gt;(),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED, "STATE3"},
+                },
+                {
+                    {"foo_data", "msg2"},
+                });
+
+  // STATE3: remap bar_data to foo_out_data
+  sm-&gt;add_state("STATE3", std::make_shared&lt;BarState&gt;(),
+                {
+                    {yasmin_ros::basic_outcomes::SUCCEED,
+                     yasmin_ros::basic_outcomes::SUCCEED},
+                },
+                {
+                    {"bar_data", "foo_out_data"},
+                });</code></pre>
 
         <h2>4. Execute</h2>
         <p>
@@ -254,16 +263,21 @@ sm-&gt;add_state("STATE3", std::make_shared&lt;BarState&gt;(),
           process different data through remapping. The viewer tool helps
           visualize the state transitions and data flow in real-time.
         </p>
-        <pre><code class="language-cpp">yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_REMAPPING_DEMO");
+        <pre><code class="language-cpp">  // Publish state machine updates
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_REMAPPING_DEMO");
 
-try {
+  // Execute the state machine
+  try {
     std::string outcome = (*sm.get())(blackboard);
     YASMIN_LOG_INFO(outcome.c_str());
-} catch (const std::exception &e) {
+  } catch (const std::exception &amp;e) {
     YASMIN_LOG_WARN(e.what());
-}
+  }
 
-rclcpp::shutdown();</code></pre>
+  rclcpp::shutdown();
+
+  return 0;
+}</code></pre>
 
         <h2>5. Run the Demo</h2>
         <p>

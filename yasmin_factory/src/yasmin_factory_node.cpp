@@ -26,11 +26,12 @@
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_factory_node");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 loggers
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_factory_node");
 
   // Get the state machine file parameter
   auto node = yasmin_ros::YasminNode::get_instance();

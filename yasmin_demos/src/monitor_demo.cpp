@@ -98,12 +98,12 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-
-  YASMIN_LOG_INFO("yasmin_monitor_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 loggers
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_monitor_demo");
 
   // Create a state machine with a final outcome
   auto sm = std::make_shared<yasmin::StateMachine>(

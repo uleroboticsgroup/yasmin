@@ -285,38 +285,41 @@
           flows through the remapped connections.
         </p>
 
-        <pre><code class="language-python">rclpy.init()
-set_ros_loggers()
+        <pre><code class="language-python">def main() -&gt; None:
+    # Initialize ROS 2
+    rclpy.init()
 
-blackboard = Blackboard()
-blackboard["msg1"] = "test1"
-blackboard["msg2"] = "test2"
+    # Set ROS 2 loggers
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_remapping_demo")
 
-sm = StateMachine(outcomes=[SUCCEED], handle_sigint=True)
+    # Create a blackboard with initial data
+    blackboard = Blackboard()
+    blackboard["msg1"] = "test1"
+    blackboard["msg2"] = "test2"
 
-# STATE1: remap foo_data to msg1
-sm.add_state(
-    "STATE1",
-    Foo(),
-    transitions={SUCCEED: "STATE2"},
-    remappings={"foo_data": "msg1"},
-)
+    # Create a finite state machine (FSM)
+    sm = StateMachine(outcomes=[SUCCEED], handle_sigint=True)
 
-# STATE2: remap foo_data to msg2
-sm.add_state(
-    "STATE2",
-    Foo(),
-    transitions={SUCCEED: "STATE3"},
-    remappings={"foo_data": "msg2"},
-)
-
-# STATE3: remap bar_data to foo_out_data (output from STATE2)
-sm.add_state(
-    "STATE3",
-    BarState(),
-    transitions={SUCCEED: SUCCEED},
-    remappings={"bar_data": "foo_out_data"},
-)</code></pre>
+    # Add states to the FSM
+    sm.add_state(
+        "STATE1",
+        Foo(),
+        transitions={SUCCEED: "STATE2"},
+        remappings={"foo_data": "msg1"},
+    )
+    sm.add_state(
+        "STATE2",
+        Foo(),
+        transitions={SUCCEED: "STATE3"},
+        remappings={"foo_data": "msg2"},
+    )
+    sm.add_state(
+        "STATE3",
+        BarState(),
+        transitions={SUCCEED: SUCCEED},
+        remappings={"bar_data": "foo_out_data"},
+    )</code></pre>
 
         <h2>4. Execute the State Machine</h2>
         <p>
@@ -324,7 +327,7 @@ sm.add_state(
           remapping allows the same state class to work with different data
           without code modification.
         </p>
-        <pre><code class="language-python">    # Launch YASMIN Viewer publisher for state visualization
+        <pre><code class="language-python">    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
 
     # Execute the FSM

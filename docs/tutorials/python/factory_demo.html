@@ -191,21 +191,23 @@ from yasmin_viewer import YasminViewerPub
 from yasmin_factory import YasminFactory
 from ament_index_python import get_package_share_directory
 
-yasmin.YASMIN_LOG_INFO("YASMIN_FACTORY_DEMO")
 
-rclpy.init()
-set_ros_loggers()
+def main() -&gt; None:
+    # Initialize ROS 2
+    rclpy.init()
 
-# Create factory and load state machine from XML
-factory = YasminFactory()
-sm = factory.create_sm_from_file(
-    os.path.join(
-        get_package_share_directory("yasmin_demos"), 
-        "state_machines", 
-        "demo_1.xml"
+    # Set ROS 2 loggers
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("YASMIN_FACTORY_DEMO")
+
+    # Create a finite state machine (FSM)
+    factory = YasminFactory()
+    sm = factory.create_sm_from_file(
+        os.path.join(
+            get_package_share_directory("yasmin_demos"), "state_machines", "demo_1.xml"
+        )
     )
-)
-sm.set_sigint_handler(True)
+    sm.set_sigint_handler(True)
 </code></pre>
 
         <h2>3. Execute the State Machine</h2>

@@ -248,10 +248,14 @@ public:
           planning, object recognition, or sensor calibration.
         </p>
         <pre><code class="language-cpp">int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_service_client_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
-  yasmin_ros::set_ros_loggers();
 
+  // Set up ROS 2 logging.
+  yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_service_client_demo");
+
+  // Create a state machine with a specified outcome.
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 

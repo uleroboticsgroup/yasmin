@@ -255,11 +255,12 @@ def check_count(blackboard: Blackboard) -&gt; str:
           error handling.
         </p>
         <pre><code class="language-python">def main() -&gt; None:
-    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
+    # Initialize ROS 2
     rclpy.init()
 
-    # Configure YASMIN to use ROS-based logging
+    # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_publisher_demo")
 
     # Create the state machine with 'SUCCEED' as the terminal outcome
     sm = StateMachine([SUCCEED], handle_sigint=True)
@@ -283,7 +284,7 @@ def check_count(blackboard: Blackboard) -&gt; str:
         },
     )
 
-    # Launch YASMIN Viewer publisher for state visualization
+    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values

@@ -25,11 +25,12 @@
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_multiple_states_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_multiple_states_demo");
 
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(

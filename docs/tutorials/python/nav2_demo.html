@@ -332,9 +332,12 @@ def get_next_waypoint(blackboard: Blackboard) -&gt; str:
 
 
 def main() -&gt; None:
-    yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
+    # Initialize ROS 2
     rclpy.init()
+
+    # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
 
     # Create state machines
     sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL], handle_sigint=True)
@@ -355,7 +358,6 @@ def main() -&gt; None:
             SUCCEED: "NAVIGATING",
         },
     )
-
     nav_sm.add_state(
         "GETTING_NEXT_WAYPOINT",
         CbState([END, HAS_NEXT], get_next_waypoint),
@@ -373,7 +375,6 @@ def main() -&gt; None:
             ABORT: ABORT,
         },
     )
-
     sm.add_state(
         "NAVIGATING",
         nav_sm,

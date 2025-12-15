@@ -91,23 +91,17 @@ def check_count(blackboard: Blackboard) -> str:
 
 
 def main() -> None:
-    """
-    Main function to initialize ROS 2, configure logging, build the YASMIN state machine,
-    and execute it until the max_count is reached.
-
-    Args:
-        args (list, optional): Command-line arguments passed to rclpy.init().
-    """
-    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
+    # Initialize ROS 2
     rclpy.init()
 
-    # Configure YASMIN to use ROS-based logging
+    # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_publisher_demo")
 
-    # Create the state machine with 'SUCCEED' as the terminal outcome
+    # Create a finite state machine (FSM)
     sm = StateMachine([SUCCEED], handle_sigint=True)
 
-    # Add the publishing state which loops until the condition is met
+    # Add states to the FSM
     sm.add_state(
         "PUBLISHING_INT",
         PublishIntState(),
@@ -115,8 +109,6 @@ def main() -> None:
             SUCCEED: "CHECKING_COUNTS",
         },
     )
-
-    # Add the conditional check state
     sm.add_state(
         "CHECKING_COUNTS",
         CbState(["outcome1", "outcome2"], check_count),
@@ -126,7 +118,7 @@ def main() -> None:
         },
     )
 
-    # Launch YASMIN Viewer publisher for state visualization
+    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values

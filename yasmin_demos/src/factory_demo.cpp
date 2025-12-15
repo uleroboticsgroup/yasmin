@@ -25,13 +25,12 @@
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_factory_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 loggers
   yasmin_ros::set_ros_loggers();
-
-  std::string outcome;
+  YASMIN_LOG_INFO("yasmin_factory_demo");
 
   // Create the factory and state machine in a scope to ensure proper cleanup
   yasmin_factory::YasminFactory factory;

@@ -291,37 +291,48 @@ def print_result(blackboard: Blackboard) -&gt; str:
           sequential state machine. Initialize the blackboard with the Fibonacci
           order value that will be sent as the action goal.
         </p>
-        <pre><code class="language-python">rclpy.init()
-set_ros_loggers()
+        <pre><code class="language-python">def main() -&gt; None:
+    # Initialize ROS 2
+    rclpy.init()
 
-sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    # Set up ROS 2 logs
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_action_client_demo")
 
-sm.add_state(
-    "CALLING_FIBONACCI",
-    FibonacciState(),
-    transitions={
-        SUCCEED: "PRINTING_RESULT",
-        CANCEL: "outcome4",
-        ABORT: "outcome4",
-    },
-)
-sm.add_state(
-    "PRINTING_RESULT",
-    CbState([SUCCEED], print_result),
-    transitions={SUCCEED: "outcome4"},
-)
+    # Create a finite state machine (FSM)
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
-YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
+    # Add states to the FSM
+    sm.add_state(
+        "CALLING_FIBONACCI",
+        FibonacciState(),
+        transitions={
+            SUCCEED: "PRINTING_RESULT",
+            CANCEL: "outcome4",
+            ABORT: "outcome4",
+        },
+    )
+    sm.add_state(
+        "PRINTING_RESULT",
+        CbState([SUCCEED], print_result),
+        transitions={
+            SUCCEED: "outcome4",
+        },
+    )
 
-blackboard = Blackboard()
-blackboard["n"] = 10  # Fibonacci order</code></pre>
+    # Publish FSM information for visualization
+    YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
+
+    # Create an initial blackboard with the input value
+    blackboard = Blackboard()
+    blackboard["n"] = 10  # Set the Fibonacci order to 10</code></pre>
 
         <h2>4. Execute</h2>
         <p>
           Run the state machine with proper exception, and ensure clean shutdown
           of ROS resources.
         </p>
-        <pre><code class="language-python">    # Publish FSM information
+        <pre><code class="language-python">    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
 
     # Create an initial blackboard with the input value

@@ -212,7 +212,7 @@
             Exception: May raise exceptions related to state execution.
         """
         yasmin.YASMIN_LOG_INFO("Executing state FOO")
-        time.sleep(2)
+        time.sleep(2)  # Simulate work by sleeping
 
         blackboard["foo_str"] = f"Counter: {self.counter}"
 
@@ -271,7 +271,7 @@
             Exception: May raise exceptions related to state execution.
         """
         yasmin.YASMIN_LOG_INFO("Executing state BAR")
-        time.sleep(4)
+        time.sleep(4)  # Simulate work by sleeping
 
         if "foo_str" in blackboard:
             yasmin.YASMIN_LOG_INFO(blackboard["foo_str"])
@@ -296,31 +296,39 @@
           for complex conditional logic based on runtime state.
         </p>
 
-        <pre><code class="language-python">rclpy.init()
-set_ros_loggers()
+        <pre><code class="language-python">def main() -&gt; None:
+    # Initialize ROS 2
+    rclpy.init()
 
-sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    # Set ROS 2 loggers
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_concurrence_demo")
 
-foo_state = FooState()
-bar_state = BarState()
+    # Create a finite state machine (FSM)
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
 
-concurrence_state = Concurrence(
-    states={
-        "FOO": foo_state,
-        "BAR": bar_state,
-    },
-    default_outcome="defaulted",
-    outcome_map={
-        "outcome1": {
-            "FOO": "outcome1",
-            "BAR": "outcome3",
+    # Create states to run concurrently
+    foo_state: State = FooState()
+    bar_state: State = BarState()
+
+    # Add concurrence state
+    concurrence_state = Concurrence(
+        states={
+            "FOO": foo_state,
+            "BAR": bar_state,
         },
-        "outcome2": {
-            "FOO": "outcome2",
-            "BAR": "outcome3",
+        default_outcome="defaulted",
+        outcome_map={
+            "outcome1": {
+                "FOO": "outcome1",
+                "BAR": "outcome3",
+            },
+            "outcome2": {
+                "FOO": "outcome2",
+                "BAR": "outcome3",
+            },
         },
-    },
-)</code></pre>
+    )</code></pre>
 
         <h2>4. Add Concurrence to State Machine</h2>
         <p>
@@ -330,17 +338,19 @@ concurrence_state = Concurrence(
           <code>defaulted</code> outcome exits the loop and terminates the state
           machine.
         </p>
-        <pre><code class="language-python">sm.add_state(
-    "CONCURRENCE",
-    concurrence_state,
-    transitions={
-        "outcome1": "CONCURRENCE",
-        "outcome2": "CONCURRENCE",
-        "defaulted": "outcome4",
-    },
-)
+        <pre><code class="language-python">    # Add concurrent state to the FSM
+    sm.add_state(
+        "CONCURRENCE",
+        concurrence_state,
+        transitions={
+            "outcome1": "CONCURRENCE",
+            "outcome2": "CONCURRENCE",
+            "defaulted": "outcome4",
+        },
+    )
 
-YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")</code></pre>
+    # Publish FSM information for visualization
+    YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")</code></pre>
 
         <h2>5. Execute the State Machine</h2>
         <p>

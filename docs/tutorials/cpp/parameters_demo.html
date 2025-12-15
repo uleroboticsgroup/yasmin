@@ -244,14 +244,18 @@ public:
           before running, preventing errors from missing configuration values.
         </p>
         <pre><code class="language-cpp">int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_parameters_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
-  yasmin_ros::set_ros_loggers();
 
+  // Set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_parameters_demo");
+
+  // Create a state machine
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
-  // Add GetParametersState to retrieve parameters
+  // Add states to the state machine
   sm-&gt;add_state("GETTING_PARAMETERS",
                 std::make_shared&lt;yasmin_ros::GetParametersState&gt;(
                     std::map&lt;std::string, std::any&gt;{
@@ -262,7 +266,6 @@ public:
                     {yasmin_ros::basic_outcomes::SUCCEED, "FOO"},
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
-
   sm-&gt;add_state("FOO", std::make_shared&lt;FooState&gt;(),
                 {
                     {"outcome1", "BAR"},
@@ -273,16 +276,19 @@ public:
                     {"outcome3", "FOO"},
                 });
 
+  // Publish state machine updates
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PARAMETERS_DEMO");
 
+  // Execute the state machine
   try {
     std::string outcome = (*sm.get())();
     YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
+  } catch (const std::exception &amp;e) {
     YASMIN_LOG_WARN(e.what());
   }
 
   rclcpp::shutdown();
+
   return 0;
 }</code></pre>
 

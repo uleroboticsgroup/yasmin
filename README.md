@@ -224,13 +224,12 @@ class BarState(State):
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_demo")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_demo")
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
@@ -359,15 +358,22 @@ class BarState(State):
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_remapping_demo")
+    # Initialize ROS 2
     rclpy.init()
-    set_ros_loggers()
 
+    # Set ROS 2 loggers
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_remapping_demo")
+
+    # Create a blackboard with initial data
     blackboard = Blackboard()
     blackboard["msg1"] = "test1"
     blackboard["msg2"] = "test2"
 
+    # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=[SUCCEED], handle_sigint=True)
+
+    # Add states to the FSM
     sm.add_state(
         "STATE1",
         Foo(),
@@ -387,7 +393,7 @@ def main() -> None:
         remappings={"bar_data": "foo_out_data"},
     )
 
-    # Launch YASMIN Viewer publisher for state visualization
+    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
 
     # Execute the FSM
@@ -519,13 +525,12 @@ class BarState(State):
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("CONCURRENCE_DEMO")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("CONCURRENCE_DEMO")
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
@@ -671,16 +676,17 @@ def check_count(blackboard: Blackboard) -> str:
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
+    # Initialize ROS 2
     rclpy.init()
 
-    # Configure YASMIN to use ROS-based logging
+    # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_publisher_demo")
 
-    # Create the state machine with 'SUCCEED' as the terminal outcome
+    # Create a finite state machine (FSM)
     sm = StateMachine([SUCCEED], handle_sigint=True)
 
-    # Add the publishing state which loops until the condition is met
+    # Add states to the FSM
     sm.add_state(
         "PUBLISHING_INT",
         PublishIntState(),
@@ -688,8 +694,6 @@ def main() -> None:
             SUCCEED: "CHECKING_COUNTS",
         },
     )
-
-    # Add the conditional check state
     sm.add_state(
         "CHECKING_COUNTS",
         CbState(["outcome1", "outcome2"], check_count),
@@ -699,7 +703,7 @@ def main() -> None:
         },
     )
 
-    # Launch YASMIN Viewer publisher for state visualization
+    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values
@@ -802,13 +806,12 @@ class PrintOdometryState(MonitorState):
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set ROS 2 logs
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_monitor_demo")
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
@@ -825,7 +828,7 @@ def main() -> None:
         },
     )
 
-    # Publish FSM information
+    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
     # Execute the FSM
@@ -963,13 +966,12 @@ def print_sum(blackboard: Blackboard) -> str:
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
-
     # Init ROS 2
     rclpy.init()
 
     # Set ROS 2 logs
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_service_client_demo")
 
     # Create a FSM
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
@@ -1152,13 +1154,12 @@ def print_result(blackboard: Blackboard) -> str:
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_action_client_demo")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set up ROS 2 logs
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_action_client_demo")
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
@@ -1181,7 +1182,7 @@ def main() -> None:
         },
     )
 
-    # Publish FSM information
+    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
 
     # Create an initial blackboard with the input value
@@ -1306,13 +1307,12 @@ class BarState(State):
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_parameters_demo")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_parameters_demo")
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
@@ -1403,13 +1403,12 @@ from ament_index_python import get_package_share_directory
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_demo")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set ROS 2 loggers
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_demo")
 
     # Create a finite state machine (FSM)
     factory = YasminFactory()
@@ -1571,13 +1570,12 @@ def get_next_waypoint(blackboard: Blackboard) -> str:
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set ROS 2 loggers for debugging
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_nav2_demo")
 
     # Create state machines
     sm = StateMachine(outcomes=[SUCCEED, ABORT, CANCEL], handle_sigint=True)
@@ -1598,7 +1596,6 @@ def main() -> None:
             SUCCEED: "NAVIGATING",
         },
     )
-
     nav_sm.add_state(
         "GETTING_NEXT_WAYPOINT",
         CbState([END, HAS_NEXT], get_next_waypoint),
@@ -1616,7 +1613,6 @@ def main() -> None:
             ABORT: ABORT,
         },
     )
-
     sm.add_state(
         "NAVIGATING",
         nav_sm,
@@ -1753,11 +1749,12 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_demo");
 
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
@@ -1870,11 +1867,12 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_remapping_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_remapping_demo");
 
   // Create blackboard
   auto blackboard = std::make_shared<yasmin::Blackboard>();
@@ -2044,11 +2042,12 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_concurrence_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_concurrence_demo");
 
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
@@ -2193,12 +2192,12 @@ check_count(std::shared_ptr<yasmin::Blackboard> blackboard) {
 }
 
 int main(int argc, char *argv[]) {
-
-  YASMIN_LOG_INFO("yasmin_publisher_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 loggers
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_publisher_demo");
 
   // Create a state machine with a final outcome
   auto sm = std::make_shared<yasmin::StateMachine>(
@@ -2337,12 +2336,12 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-
-  YASMIN_LOG_INFO("yasmin_monitor_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 loggers
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_monitor_demo");
 
   // Create a state machine with a final outcome
   auto sm = std::make_shared<yasmin::StateMachine>(
@@ -2507,11 +2506,12 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_service_client_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 logging.
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_service_client_demo");
 
   // Create a state machine with a specified outcome.
   auto sm = std::make_shared<yasmin::StateMachine>(
@@ -2707,12 +2707,12 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-
-  YASMIN_LOG_INFO("yasmin_action_client_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logging
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_action_client_demo");
 
   // Create the state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
@@ -2861,11 +2861,12 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_parameters_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_parameters_demo");
 
   // Create a state machine
   auto sm = std::make_shared<yasmin::StateMachine>(
@@ -2946,13 +2947,12 @@ ros2 run yasmin_demos factory_demo
 #include "yasmin_ros/ros_logs.hpp"
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_factory_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set up ROS 2 loggers
   yasmin_ros::set_ros_loggers();
-
-  std::string outcome;
+  YASMIN_LOG_INFO("yasmin_factory_demo");
 
   // Create the factory in a scope
   yasmin_factory::YasminFactory factory;
@@ -3143,11 +3143,12 @@ get_next_waypoint(std::shared_ptr<yasmin::Blackboard> blackboard) {
 }
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_nav2_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_nav2_demo");
 
   // Create state machines
   auto sm = std::make_shared<yasmin::StateMachine>(

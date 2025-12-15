@@ -91,15 +91,22 @@ class BarState(State):
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_remapping_demo")
+    # Initialize ROS 2
     rclpy.init()
-    set_ros_loggers()
 
+    # Set ROS 2 loggers
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_remapping_demo")
+
+    # Create a blackboard with initial data
     blackboard = Blackboard()
     blackboard["msg1"] = "test1"
     blackboard["msg2"] = "test2"
 
+    # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=[SUCCEED], handle_sigint=True)
+
+    # Add states to the FSM
     sm.add_state(
         "STATE1",
         Foo(),
@@ -119,7 +126,7 @@ def main() -> None:
         remappings={"bar_data": "foo_out_data"},
     )
 
-    # Launch YASMIN Viewer publisher for state visualization
+    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
 
     # Execute the FSM

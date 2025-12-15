@@ -271,25 +271,31 @@ class BarState(State):
         <pre><code class="language-python">from yasmin_ros import GetParametersState
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
 
-rclpy.init()
-set_ros_loggers()
+def main() -&gt; None:
+    # Initialize ROS 2
+    rclpy.init()
 
-sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    # Set ROS 2 loggers
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_parameters_demo")
 
-# Add parameter getter as first state
-sm.add_state(
-    "GETTING_PARAMETERS",
-    GetParametersState(
-        parameters={
-            "max_counter": 3,  # Parameter name with default value
-            "counter_str": "Counter",  # Another parameter with default
+    # Create a finite state machine (FSM)
+    sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+
+    # Add states to the FSM
+    sm.add_state(
+        "GETTING_PARAMETERS",
+        GetParametersState(
+            parameters={
+                "max_counter": 3,
+                "counter_str": "Counter",
+            },
+        ),
+        transitions={
+            SUCCEED: "FOO",
+            ABORT: "outcome4",
         },
-    ),
-    transitions={
-        SUCCEED: "FOO",
-        ABORT: "outcome4",
-    },
-)</code></pre>
+    )</code></pre>
 
         <h2>3. Build the Rest of the FSM</h2>
         <p>
@@ -297,21 +303,24 @@ sm.add_state(
           states use the parameters retrieved by the GetParametersState to
           control their behavior dynamically.
         </p>
-        <pre><code class="language-python">sm.add_state(
-    "FOO",
-    FooState(),
-    transitions={
-        "outcome1": "BAR",
-        "outcome2": "outcome4",
-    },
-)
-sm.add_state(
-    "BAR",
-    BarState(),
-    transitions={"outcome3": "FOO"},
-)
+        <pre><code class="language-python">    sm.add_state(
+        "FOO",
+        FooState(),
+        transitions={
+            "outcome1": "BAR",
+            "outcome2": "outcome4",
+        },
+    )
+    sm.add_state(
+        "BAR",
+        BarState(),
+        transitions={
+            "outcome3": "FOO",
+        },
+    )
 
-YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")</code></pre>
+    # Publish FSM information for visualization
+    YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")</code></pre>
 
         <h2>4. Execute</h2>
         <p>

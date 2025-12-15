@@ -219,6 +219,7 @@ public:
         <pre><code class="language-cpp">std::string
 check_count(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
 
+  // Sleep for 1 second to simulate some processing time
   rclcpp::sleep_for(std::chrono::seconds(1));
   YASMIN_LOG_INFO("Checking count: %d", blackboard-&gt;get&lt;int&gt;("counter"));
 
@@ -230,19 +231,23 @@ check_count(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
 }
 
 int main(int argc, char *argv[]) {
-
-  YASMIN_LOG_INFO("yasmin_publisher_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
-  yasmin_ros::set_ros_loggers();
 
+  // Set up ROS 2 loggers
+  yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_publisher_demo");
+
+  // Create a state machine with a final outcome
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
       true);
 
+  // Add states to the state machine
   sm-&gt;add_state("PUBLISHING_INT", std::make_shared&lt;PublishIntState&gt;(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
-                     "CHECKINNG_COUNTS"},
+                     "CHECKINNG_COUNTS"}, // Transition back to itself
                 });
   sm-&gt;add_state("CHECKINNG_COUNTS",
                 std::make_shared&lt;yasmin::CbState&gt;(
@@ -251,21 +256,23 @@ int main(int argc, char *argv[]) {
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
                  {"outcome2", "PUBLISHING_INT"}});
 
+  // Publisher for visualizing the state machine's status
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
 
+  // Execute the state machine
   std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard =
       std::make_shared&lt;yasmin::Blackboard&gt;();
   blackboard-&gt;set&lt;int&gt;("counter", 0);
   blackboard-&gt;set&lt;int&gt;("max_count", 10);
-
   try {
     std::string outcome = (*sm.get())(blackboard);
     YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
+  } catch (const std::exception &amp;e) {
     YASMIN_LOG_WARN(e.what());
   }
 
   rclcpp::shutdown();
+
   return 0;
 }</code></pre>
 

@@ -135,13 +135,12 @@ def print_result(blackboard: Blackboard) -> str:
 
 
 def main() -> None:
-    yasmin.YASMIN_LOG_INFO("yasmin_action_client_demo")
-
     # Initialize ROS 2
     rclpy.init()
 
     # Set up ROS 2 logs
     set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_action_client_demo")
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
@@ -164,7 +163,7 @@ def main() -> None:
         },
     )
 
-    # Publish FSM information
+    # Publish FSM information for visualization
     YasminViewerPub(sm, "YASMIN_ACTION_CLIENT_DEMO")
 
     # Create an initial blackboard with the input value

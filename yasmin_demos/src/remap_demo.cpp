@@ -78,11 +78,12 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_remapping_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_remapping_demo");
 
   // Create blackboard
   auto blackboard = std::make_shared<yasmin::Blackboard>();

@@ -267,11 +267,12 @@ public:
         </p>
 
         <pre><code class="language-cpp">int main(int argc, char *argv[]) {
-  YASMIN_LOG_INFO("yasmin_demo");
+  // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_demo");
 
   // Create a state machine
   auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
@@ -295,11 +296,12 @@ public:
   try {
     std::string outcome = (*sm.get())();
     YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
+  } catch (const std::exception &amp;e) {
     YASMIN_LOG_WARN(e.what());
   }
 
   rclcpp::shutdown();
+
   return 0;
 }</code></pre>
 
