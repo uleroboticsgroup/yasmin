@@ -147,7 +147,7 @@ class MonitorState(State):
             if self.is_canceled():
                 return CANCEL
 
-            while self._timeout is not None and not timeout_flag:
+            if self._timeout is not None and not timeout_flag:
                 yasmin.YASMIN_LOG_WARN(
                     f"Timeout reached, topic '{self._topic_name}' is not available"
                 )

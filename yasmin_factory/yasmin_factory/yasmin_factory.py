@@ -29,7 +29,7 @@ class YasminFactory:
         """
 
         self._cpp_factory = CppStateFactory()
-        self._xml_path = ""
+        self._xml_path: str = ""
 
     def create_state(self, state_elem: ET.Element) -> State:
         """
@@ -42,7 +42,6 @@ class YasminFactory:
             ValueError: If the state type is unknown or if required attributes
                         are missing.
         """
-
         state_type = state_elem.attrib.get("type", "py")
         class_name = state_elem.attrib["class"]
 
@@ -52,11 +51,10 @@ class YasminFactory:
             state_class = getattr(module, class_name)
             return state_class()
 
-        elif state_type == "cpp":
+        if state_type == "cpp":
             return self._cpp_factory.create(class_name)
 
-        else:
-            raise ValueError(f"Unknown state type: {state_type}")
+        raise ValueError(f"Unknown state type: {state_type}")
 
     def create_concurrence(self, conc_elem: ET.Element) -> Concurrence:
         """
@@ -121,11 +119,11 @@ class YasminFactory:
                 try:
                     package_path = get_package_share_path(package)
                     file_path = ""
-                    for root, dirs, files in os.walk(package_path):
+                    for dirpath, _, files in os.walk(package_path):
                         if file_name in files:
-                            file_path = os.path.join(root, file_name)
+                            file_path = os.path.join(dirpath, file_name)
                             break
-                except Exception as e:
+                except Exception:
                     file_path = ""
 
         if file_path:

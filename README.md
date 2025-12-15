@@ -439,7 +439,7 @@ class FooState(State):
 
         Outcomes:
             outcome1: Indicates the state should continue.
-            outcome2: Indicates the state should cotninue.
+            outcome2: Indicates the state should continue.
             outcome3: Indicates the state should finish execution and return.
         """
         super().__init__(["outcome1", "outcome2", "outcome3"])
