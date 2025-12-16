@@ -37,12 +37,13 @@ namespace yasmin_ros {
  */
 class YasminNode : public rclcpp::Node {
 
-public:
+protected:
   /**
    * @brief Default constructor. Initializes the node with a unique name.
    */
   explicit YasminNode();
 
+public:
   /**
    * @brief Deleted copy constructor to prevent copying of the singleton
    * instance.
@@ -52,16 +53,16 @@ public:
   YasminNode(YasminNode &other) = delete;
 
   /**
+   * @brief Destructor. Cleans up resources.
+   */
+  ~YasminNode() {}
+
+  /**
    * @brief Deleted assignment operator to enforce singleton pattern.
    *
    * @param other Another instance of YasminNode (unused).
    */
   void operator=(const YasminNode &) = delete;
-
-  /**
-   * @brief Destructor. Cleans up resources.
-   */
-  ~YasminNode() {}
 
   /**
    * @brief Provides access to the singleton instance of YasminNode.
@@ -75,7 +76,7 @@ public:
       rclcpp::init(0, nullptr);
     }
     static std::shared_ptr<YasminNode> instance =
-        std::make_shared<YasminNode>();
+        std::shared_ptr<YasminNode>(new YasminNode());
     return instance;
   }
 
