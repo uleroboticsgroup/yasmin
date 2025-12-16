@@ -26,6 +26,7 @@
 #include <unordered_map>
 
 #include "yasmin/logs.hpp"
+#include "yasmin/types.hpp"
 
 namespace yasmin {
 
@@ -67,9 +68,9 @@ private:
   /// Storage for key-value pairs.
   std::unordered_map<std::string, std::shared_ptr<void>> values;
   /// Storage for type information for each key.
-  std::unordered_map<std::string, std::string> type_registry;
+  TypeRegistry type_registry;
   /// Storage for key remappings.
-  std::map<std::string, std::string> remappings;
+  Remappings remappings;
 
   /** @brief Internal method that acquires the maped key. In the case the key is
    * not remaped, retruns the arg key.
@@ -78,11 +79,19 @@ private:
   const std::string &remap(const std::string &key) const;
 
 public:
-  /** @brief Default constructor for Blackboard. */
+  /**
+   * @brief Shared pointer type for Blackboard.
+   */
+  YASMIN_SHARED_PTR_ALIAS(Blackboard)
+
+  /**
+   * @brief Default constructor for Blackboard.
+   */
   Blackboard();
 
-  /** @brief Copy constructor for Blackboard.
-   *  @param other The instance to copy from.
+  /**
+   * @brief Copy constructor for Blackboard.
+   * @param other The instance to copy from.
    */
   Blackboard(const Blackboard &other);
 
@@ -184,13 +193,13 @@ public:
    * @brief Set the remappings of the blackboard.
    * @param remappings The remappings to set.
    */
-  void set_remappings(const std::map<std::string, std::string> &remappings);
+  void set_remappings(const Remappings &remappings);
 
   /**
    * @brief Get the remappings of the blackboard.
    * @return The remappings of the blackboard.
    */
-  const std::map<std::string, std::string> &get_remappings() const noexcept;
+  const Remappings &get_remappings() const noexcept;
 };
 
 } // namespace yasmin

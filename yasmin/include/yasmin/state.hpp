@@ -17,10 +17,7 @@
 #define YASMIN__STATE_HPP
 
 #include <atomic>
-#include <memory>
-#include <set>
 #include <string>
-#include <vector>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
@@ -50,7 +47,7 @@ class State {
 
 protected:
   /// The possible outcomes of this state.
-  std::set<std::string> outcomes;
+  Outcomes outcomes;
 
 private:
   /// Current status of the state
@@ -70,10 +67,15 @@ private:
 
 public:
   /**
+   * @brief Shared pointer type for State.
+   */
+  YASMIN_SHARED_PTR_ALIAS(State)
+
+  /**
    * @brief Constructs a State with a set of possible outcomes.
    * @param outcomes A set of possible outcomes for this state.
    */
-  State(const std::set<std::string> &outcomes);
+  State(const Outcomes &outcomes);
 
   /**
    * @brief Virtual destructor for proper polymorphic destruction.
@@ -115,7 +117,7 @@ public:
    * valid, a std::logic_error is thrown.
    * @throws std::logic_error If the outcome is not in the set of outcomes.
    */
-  std::string operator()(std::shared_ptr<yasmin::Blackboard> blackboard);
+  std::string operator()(Blackboard::SharedPtr blackboard);
 
   /**
    * @brief Executes the state's specific logic.
@@ -126,7 +128,7 @@ public:
    * This method is intended to be overridden by derived classes to provide
    * specific execution logic.
    */
-  virtual std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
+  virtual std::string execute(Blackboard::SharedPtr blackboard) {
     (void)blackboard; // Suppress unused parameter warning
     return "";
   }
@@ -145,7 +147,7 @@ public:
    * @brief Gets the set of possible outcomes for this state.
    * @return A constant reference to the set of possible outcomes.
    */
-  std::set<std::string> const &get_outcomes() const noexcept;
+  Outcomes const &get_outcomes() const noexcept;
 
   /**
    * @brief Converts the state to a string representation.

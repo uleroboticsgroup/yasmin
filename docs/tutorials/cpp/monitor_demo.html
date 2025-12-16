@@ -199,7 +199,7 @@ public:
   };
 
   std::string
-  monitor_handler(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard,
+  monitor_handler(yasmin::Blackboard::SharedPtr blackboard,
                   std::shared_ptr&lt;nav_msgs::msg::Odometry&gt; msg) {
 
     (void)blackboard;

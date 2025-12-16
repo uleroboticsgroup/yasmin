@@ -23,6 +23,7 @@
 #include "yasmin/blackboard.hpp"
 #include "yasmin/concurrence.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/types.hpp"
 
 using namespace yasmin;
 
@@ -30,7 +31,7 @@ class FooState : public State {
 public:
   FooState() : State({"outcome1"}) {}
 
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     std::cout << "Foo state ticked." << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -43,7 +44,7 @@ class BarState : public State {
 public:
   BarState() : State({"outcome1", "outcome2"}) {}
 
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     std::cout << "Bar state ticked." << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -54,11 +55,11 @@ public:
 
 class TestConcurrence : public ::testing::Test {
 protected:
-  std::shared_ptr<FooState> foo_state;
-  std::shared_ptr<FooState> foo2_state;
-  std::shared_ptr<BarState> bar_state;
-  std::shared_ptr<Concurrence> state;
-  std::shared_ptr<yasmin::Blackboard> blackboard;
+  yasmin::State::SharedPtr foo_state;
+  yasmin::State::SharedPtr foo2_state;
+  yasmin::State::SharedPtr bar_state;
+  yasmin::Concurrence::SharedPtr state;
+  yasmin::Blackboard::SharedPtr blackboard;
 
   void SetUp() override {
     foo_state = std::make_shared<FooState>();
@@ -66,10 +67,10 @@ protected:
     bar_state = std::make_shared<BarState>();
     blackboard = std::make_shared<yasmin::Blackboard>();
 
-    std::map<std::string, std::shared_ptr<State>> states = {
+    yasmin::StateMap states = {
         {"FOO", foo_state}, {"FOO2", foo2_state}, {"BAR", bar_state}};
 
-    Concurrence::OutcomeMap outcome_map = {
+    yasmin::OutcomeMap outcome_map = {
         {"outcome1", {{"FOO", "outcome1"}}},
         {"outcome2", {{"BAR", "outcome1"}, {"BAR", "outcome1"}}}};
 
@@ -90,8 +91,11 @@ TEST_F(TestConcurrence, TestCancel) {
 
 TEST_F(TestConcurrence, TestStr) {
   std::string state_str = state->to_string();
-  EXPECT_TRUE(state_str ==
-              "Concurrence [BAR (BarState), FOO (FooState), FOO2 (FooState)]");
+
+  // Check if "BAR (BarState)" is in the string
+  EXPECT_TRUE(state_str.find("BAR (BarState)") != std::string::npos);
+  EXPECT_TRUE(state_str.find("FOO (FooState)") != std::string::npos);
+  EXPECT_TRUE(state_str.find("FOO2 (FooState)") != std::string::npos);
 }
 
 int main(int argc, char **argv) {

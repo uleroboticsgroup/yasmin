@@ -21,6 +21,7 @@
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/blackboard_pywrapper.hpp"
+#include "yasmin/types.hpp"
 
 namespace py = pybind11;
 
@@ -37,11 +38,11 @@ namespace pybind11_utils {
  * - Other types: creates a new Blackboard
  *
  * @param blackboard_obj Python object that may contain a blackboard
- * @return std::shared_ptr<yasmin::Blackboard> The C++ blackboard
+ * @return yasmin::Blackboard::SharedPtr The C++ blackboard
  */
-inline std::shared_ptr<yasmin::Blackboard>
+inline Blackboard::SharedPtr
 convert_blackboard_from_python(py::object blackboard_obj) {
-  std::shared_ptr<yasmin::Blackboard> blackboard;
+  Blackboard::SharedPtr blackboard;
 
   // Case 1: None or not provided - create new Blackboard
   if (blackboard_obj.is_none()) {
@@ -55,7 +56,7 @@ convert_blackboard_from_python(py::object blackboard_obj) {
   }
   // Case 3: Check if it's a Blackboard
   else if (py::isinstance<yasmin::Blackboard>(blackboard_obj)) {
-    blackboard = blackboard_obj.cast<std::shared_ptr<yasmin::Blackboard>>();
+    blackboard = blackboard_obj.cast<Blackboard::SharedPtr>();
   }
   // Case 4: Unknown type - create a new blackboard
   else {
@@ -78,7 +79,7 @@ convert_blackboard_from_python(py::object blackboard_obj) {
  * BlackboardPyWrapper
  */
 template <typename Func> inline auto wrap_blackboard_callback(py::function cb) {
-  return [cb](std::shared_ptr<yasmin::Blackboard> blackboard, auto... args) {
+  return [cb](Blackboard::SharedPtr blackboard, auto... args) {
     py::gil_scoped_acquire acquire;
     yasmin::BlackboardPyWrapper wrapper(blackboard);
     cb(wrapper, args...);
@@ -99,7 +100,7 @@ template <typename Func> inline auto wrap_blackboard_callback(py::function cb) {
  */
 template <typename ReturnType>
 inline auto wrap_blackboard_callback_with_return(py::function cb) {
-  return [cb](std::shared_ptr<yasmin::Blackboard> blackboard) -> ReturnType {
+  return [cb](Blackboard::SharedPtr blackboard) -> ReturnType {
     py::gil_scoped_acquire acquire;
     yasmin::BlackboardPyWrapper wrapper(blackboard);
     return cb(wrapper).cast<ReturnType>();

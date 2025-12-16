@@ -29,6 +29,7 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin/types.hpp"
 
 using namespace yasmin;
 
@@ -42,12 +43,10 @@ void sigint_handler(int signum) {
 }
 } // namespace
 
-StateMachine::StateMachine(const std::set<std::string> &outcomes,
-                           bool handle_sigint)
+StateMachine::StateMachine(const Outcomes &outcomes, bool handle_sigint)
     : StateMachine("", outcomes, handle_sigint) {}
 
-StateMachine::StateMachine(const std::string &name,
-                           const std::set<std::string> &outcomes,
+StateMachine::StateMachine(const std::string &name, const Outcomes &outcomes,
                            bool handle_sigint)
     : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()),
       name(name) {
@@ -60,10 +59,9 @@ StateMachine::~StateMachine() {
   this->remappings.clear();
 }
 
-void StateMachine::add_state(
-    const std::string &name, std::shared_ptr<State> state,
-    const std::map<std::string, std::string> &transitions,
-    const std::map<std::string, std::string> &remappings) {
+void StateMachine::add_state(const std::string &name, State::SharedPtr state,
+                             const Transitions &transitions,
+                             const Remappings &remappings) {
 
   if (this->states.find(name) != this->states.end()) {
     throw std::logic_error("State '" + name +
@@ -149,13 +147,11 @@ std::string const &StateMachine::get_start_state() const noexcept {
   return this->start_state;
 }
 
-std::map<std::string, std::shared_ptr<State>> const &
-StateMachine::get_states() const noexcept {
+StateMap const &StateMachine::get_states() const noexcept {
   return this->states;
 }
 
-std::map<std::string, std::map<std::string, std::string>> const &
-StateMachine::get_transitions() const noexcept {
+TransitionsMap const &StateMachine::get_transitions() const noexcept {
   return this->transitions;
 }
 
@@ -185,9 +181,8 @@ void StateMachine::add_end_cb(EndCallbackType cb,
   this->end_cbs.emplace_back(cb, args);
 }
 
-void StateMachine::call_start_cbs(
-    std::shared_ptr<yasmin::Blackboard> blackboard,
-    const std::string &start_state) {
+void StateMachine::call_start_cbs(Blackboard::SharedPtr blackboard,
+                                  const std::string &start_state) {
 
   try {
     for (const auto &callback_pair : this->start_cbs) {
@@ -202,10 +197,10 @@ void StateMachine::call_start_cbs(
   }
 }
 
-void StateMachine::call_transition_cbs(
-    std::shared_ptr<yasmin::Blackboard> blackboard,
-    const std::string &from_state, const std::string &to_state,
-    const std::string &outcome) {
+void StateMachine::call_transition_cbs(Blackboard::SharedPtr blackboard,
+                                       const std::string &from_state,
+                                       const std::string &to_state,
+                                       const std::string &outcome) {
 
   try {
     for (const auto &callback_pair : this->transition_cbs) {
@@ -220,7 +215,7 @@ void StateMachine::call_transition_cbs(
   }
 }
 
-void StateMachine::call_end_cbs(std::shared_ptr<yasmin::Blackboard> blackboard,
+void StateMachine::call_end_cbs(Blackboard::SharedPtr blackboard,
                                 const std::string &outcome) {
 
   try {
@@ -257,11 +252,10 @@ void StateMachine::validate(bool strict_mode) {
   for (auto it = this->states.begin(); it != this->states.end(); ++it) {
 
     const std::string &state_name = it->first;
-    const std::shared_ptr<State> &state = it->second;
-    std::map<std::string, std::string> transitions =
-        this->transitions.at(state_name);
+    const State::SharedPtr &state = it->second;
+    Transitions transitions = this->transitions.at(state_name);
 
-    std::set<std::string> outcomes = state->get_outcomes();
+    Outcomes outcomes = state->get_outcomes();
 
     if (strict_mode) {
       // Check if all outcomes of the state are in transitions
@@ -321,8 +315,7 @@ void StateMachine::validate(bool strict_mode) {
   this->validated.store(true);
 }
 
-std::string
-StateMachine::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
+std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
 
   this->validate();
 
@@ -332,8 +325,8 @@ StateMachine::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
 
   this->set_current_state(this->start_state);
 
-  std::map<std::string, std::string> transitions;
-  std::map<std::string, std::string> remappings;
+  Transitions transitions;
+  Transitions remappings;
   std::string outcome;
   std::string old_outcome;
 
@@ -393,16 +386,13 @@ StateMachine::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
 }
 
 std::string StateMachine::execute() {
-
-  std::shared_ptr<yasmin::Blackboard> blackboard =
-      std::make_shared<yasmin::Blackboard>();
+  Blackboard::SharedPtr blackboard = std::make_shared<yasmin::Blackboard>();
 
   return this->execute(blackboard);
 }
 
 std::string StateMachine::operator()() {
-  std::shared_ptr<yasmin::Blackboard> blackboard =
-      std::make_shared<yasmin::Blackboard>();
+  Blackboard::SharedPtr blackboard = std::make_shared<yasmin::Blackboard>();
 
   return this->operator()(blackboard);
 }

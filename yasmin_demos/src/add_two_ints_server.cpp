@@ -42,10 +42,10 @@ public:
     auto handle_add_two_ints =
         [this](
             const std::shared_ptr<rmw_request_id_t> request_header,
-            const std::shared_ptr<example_interfaces::srv::AddTwoInts::Request>
+            const example_interfaces::srv::AddTwoInts::Request::SharedPtr
                 request,
-            std::shared_ptr<example_interfaces::srv::AddTwoInts::Response>
-                response) -> void {
+            example_interfaces::srv::AddTwoInts::Response::SharedPtr response)
+        -> void {
       (void)request_header;
       RCLCPP_INFO(this->get_logger(),
                   "Incoming request\na: %" PRId64 " b: %" PRId64, request->a,

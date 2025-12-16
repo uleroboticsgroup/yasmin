@@ -16,18 +16,15 @@
 #ifndef YASMIN__BLACKBOARD_PYWRAPPER_HPP
 #define YASMIN__BLACKBOARD_PYWRAPPER_HPP
 
-#include <list>
-#include <map>
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
-#include <tuple>
 #include <type_traits>
 #include <typeinfo>
-#include <vector>
 
 #include "yasmin/blackboard.hpp"
+#include "yasmin/types.hpp"
 
 namespace py = pybind11;
 
@@ -48,7 +45,7 @@ class BlackboardPyWrapper;
 class BlackboardPyWrapper {
 private:
   /// @brief Underlying C++ Blackboard instance
-  std::shared_ptr<Blackboard> blackboard;
+  Blackboard ::SharedPtr blackboard;
 
 public:
   BlackboardPyWrapper() : blackboard(std::make_shared<Blackboard>()) {}
@@ -62,7 +59,7 @@ public:
   /**
    * @brief Construct by wrapping a shared_ptr to a C++ Blackboard
    */
-  explicit BlackboardPyWrapper(std::shared_ptr<Blackboard> bb_ptr)
+  explicit BlackboardPyWrapper(Blackboard::SharedPtr bb_ptr)
       : blackboard(bb_ptr) {}
 
   /**
@@ -163,7 +160,7 @@ public:
    * @brief Set the remappings of the blackboard.
    * @param remappings The remappings to set.
    */
-  void set_remappings(const std::map<std::string, std::string> &remappings) {
+  void set_remappings(const Remappings &remappings) {
     this->blackboard->set_remappings(remappings);
   }
 
@@ -171,7 +168,7 @@ public:
    * @brief Get the remappings of the blackboard.
    * @return The remappings of the blackboard.
    */
-  const std::map<std::string, std::string> &get_remappings() const {
+  const Remappings &get_remappings() const {
     return this->blackboard->get_remappings();
   }
 
@@ -179,9 +176,7 @@ public:
    * @brief Get a shared pointer to the underlying C++ Blackboard
    * @return Shared pointer to the C++ Blackboard
    */
-  std::shared_ptr<Blackboard> get_cpp_blackboard() const {
-    return this->blackboard;
-  }
+  Blackboard::SharedPtr get_cpp_blackboard() const { return this->blackboard; }
 };
 
 } // namespace yasmin

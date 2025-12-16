@@ -185,7 +185,7 @@ public:
             std::bind(&FibonacciState::print_feedback, this, _1, _2)) {};
 
   Fibonacci::Goal create_goal_handler(
-      std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
+      yasmin::Blackboard::SharedPtr blackboard) {
 
     auto goal = Fibonacci::Goal();
     goal.order = blackboard-&gt;get&lt;int&gt;("n");
@@ -193,7 +193,7 @@ public:
   };
 
   std::string
-  response_handler(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard,
+  response_handler(yasmin::Blackboard::SharedPtr blackboard,
                    Fibonacci::Result::SharedPtr response) {
 
     blackboard-&gt;set&lt;std::vector&lt;int&gt;&gt;("fibo_res", response-&gt;sequence);
@@ -201,7 +201,7 @@ public:
   };
 
   void
-  print_feedback(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard,
+  print_feedback(yasmin::Blackboard::SharedPtr blackboard,
                  std::shared_ptr&lt;const Fibonacci::Feedback&gt; feedback) {
     (void)blackboard;
 
@@ -263,7 +263,7 @@ public:
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
 
   // Create an initial blackboard and set the Fibonacci order
-  std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard =
+  yasmin::Blackboard::SharedPtr blackboard =
       std::make_shared&lt;yasmin::Blackboard&gt;();
   blackboard-&gt;set&lt;int&gt;("n", 10);
 

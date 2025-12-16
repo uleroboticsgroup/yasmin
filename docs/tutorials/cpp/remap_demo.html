@@ -166,7 +166,7 @@ public:
   FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {};
 
   std::string
-  execute(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) override {
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     std::string data = blackboard-&gt;get&lt;std::string&gt;("foo_data");
     YASMIN_LOG_INFO("%s", data.c_str());
     blackboard-&gt;set&lt;std::string&gt;("foo_out_data", data);
@@ -187,7 +187,7 @@ public:
   BarState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {}
 
   std::string
-  execute(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) override {
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     std::string data = blackboard-&gt;get&lt;std::string&gt;("bar_data");
     YASMIN_LOG_INFO("%s", data.c_str());
     return yasmin_ros::basic_outcomes::SUCCEED;

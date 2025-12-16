@@ -19,13 +19,9 @@
 
 #include <atomic>
 #include <iostream>
-#include <map>
-#include <memory>
 #include <mutex>
-#include <set>
 #include <string>
 #include <thread>
-#include <vector>
 
 #ifdef __GNUG__     // If using GCC/G++
 #include <cxxabi.h> // For abi::__cxa_demangle
@@ -33,6 +29,7 @@
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/types.hpp"
 
 namespace yasmin {
 
@@ -47,13 +44,9 @@ namespace yasmin {
  */
 class Concurrence : public State {
 
-public:
-  typedef std::map<std::string, std::string> StateOutcomeMap;
-  typedef std::map<std::string, StateOutcomeMap> OutcomeMap;
-
 protected:
   /// The states to run concurrently (name -> state)
-  const std::map<std::string, std::shared_ptr<State>> states;
+  const StateMap states;
 
   /// Default outcome
   const std::string default_outcome;
@@ -63,10 +56,10 @@ protected:
   OutcomeMap outcome_map;
 
   /// Stores the intermediate outcomes of the concurrent states
-  std::map<std::string, std::string> intermediate_outcome_map;
+  StateOutcomeMap intermediate_outcome_map;
 
   /// The set of possible outcomes
-  std::set<std::string> possible_outcomes;
+  Outcomes possible_outcomes;
 
 private:
   /// Mutex for intermediate outcome map
@@ -77,11 +70,16 @@ private:
   /// @param outcome_map
   /// @param default_outcome
   /// @return The set of possible outcomes
-  static std::set<std::string>
+  static Outcomes
   generate_possible_outcomes(const OutcomeMap &outcome_map,
                              const std::string &default_outcome);
 
 public:
+  /**
+   * @brief Shared pointer type for Concurrence.
+   */
+  YASMIN_SHARED_PTR_ALIAS(Concurrence)
+
   /**
    * @brief Constructs a State with a set of possible outcomes.
    * @param states A map of state names to states that will run concurrently.
@@ -90,8 +88,7 @@ public:
    * @param outcome_map A map of outcome names to requirements for achieving
    * that outcome.
    */
-  Concurrence(const std::map<std::string, std::shared_ptr<State>> &states,
-              const std::string &default_outcome,
+  Concurrence(const StateMap &states, const std::string &default_outcome,
               const OutcomeMap &outcome_map);
 
   /**
@@ -103,7 +100,7 @@ public:
    * This method is intended to be overridden by derived classes to provide
    * specific execution logic.
    */
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override;
+  std::string execute(Blackboard::SharedPtr blackboard) override;
 
   /**
    * @brief Cancels the current state execution.
@@ -116,8 +113,7 @@ public:
    * @brief Returns the map of states managed by this concurrence state.
    * @return A map of state names to states.
    */
-  const std::map<std::string, std::shared_ptr<State>> &
-  get_states() const noexcept;
+  const StateMap &get_states() const noexcept;
 
   /**
    * @brief Returns the outcome map for this concurrence state.

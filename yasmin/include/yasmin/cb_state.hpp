@@ -17,12 +17,11 @@
 #define YASMIN__CB_STATE_HPP
 
 #include <functional>
-#include <memory>
-#include <set>
 #include <string>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/types.hpp"
 
 namespace yasmin {
 
@@ -38,9 +37,14 @@ class CbState : public State {
 
 private:
   /// Pointer to the callback function to be executed.
-  std::function<std::string(std::shared_ptr<yasmin::Blackboard>)> callback;
+  CbStateCallback callback;
 
 public:
+  /**
+   * @brief Shared pointer type for CbState.
+   */
+  YASMIN_SHARED_PTR_ALIAS(CbState)
+
   /**
    * @brief Constructs a CbState object.
    *
@@ -50,9 +54,7 @@ public:
    *
    * @throw std::invalid_argument If the outcomes set is empty.
    */
-  CbState(
-      const std::set<std::string> &outcomes,
-      std::function<std::string(std::shared_ptr<yasmin::Blackboard>)> callback);
+  CbState(const Outcomes &outcomes, CbStateCallback callback);
 
   /**
    * @brief Executes the callback function.
@@ -67,7 +69,7 @@ public:
    *
    * @throw std::runtime_error If the callback execution fails.
    */
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override;
+  std::string execute(Blackboard::SharedPtr blackboard) override;
 };
 
 } // namespace yasmin

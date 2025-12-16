@@ -17,6 +17,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "rclcpp/rclcpp.hpp"
 #include "yasmin/logs.hpp"
@@ -54,7 +55,7 @@ public:
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome1" or "outcome2".
    */
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     YASMIN_LOG_INFO("Executing state FOO");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
@@ -93,7 +94,7 @@ public:
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome3".
    */
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     YASMIN_LOG_INFO("Executing state BAR");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
@@ -118,7 +119,7 @@ int main(int argc, char *argv[]) {
   // Add states to the state machine
   sm->add_state("GETTING_PARAMETERS",
                 std::make_shared<yasmin_ros::GetParametersState>(
-                    std::map<std::string, std::any>{
+                    std::unordered_map<std::string, std::any>{
                         {"max_counter", 3},
                         {"counter_str", std::string("Counter")},
                     }),

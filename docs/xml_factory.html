@@ -239,7 +239,7 @@ namespace my_package {
 class MyCustomState : public yasmin::State {
 public:
   MyCustomState();
-  std::string execute(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) override;
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 };
 
 }  // namespace my_package
@@ -260,7 +260,7 @@ namespace my_package {
 MyCustomState::MyCustomState() : yasmin::State({"success", "failure"}) {}
 
 std::string MyCustomState::execute(
-    std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
+    yasmin::Blackboard::SharedPtr blackboard) {
   // Your state logic here
   return "success";
 }

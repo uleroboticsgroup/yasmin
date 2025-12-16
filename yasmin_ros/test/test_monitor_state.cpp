@@ -22,6 +22,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "yasmin/types.hpp"
 #include "yasmin_ros/action_state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/monitor_state.hpp"
@@ -91,11 +92,9 @@ TEST_F(TestMonitorState, TestMonitorTimeout) {
   auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state = std::make_shared<MonitorState<std_msgs::msg::String>>(
-      "test1", std::set<std::string>{std::string(SUCCEED)},
-      [](std::shared_ptr<yasmin::Blackboard> blackboard,
-         std::shared_ptr<std_msgs::msg::String> msg) {
-        return std::string(SUCCEED);
-      },
+      "test1", yasmin::Outcomes{std::string(SUCCEED)},
+      [](yasmin::Blackboard::SharedPtr blackboard,
+         std_msgs::msg::String::SharedPtr msg) { return std::string(SUCCEED); },
       rclcpp::QoS(10), 10, 2);
 
   EXPECT_EQ((*state)(blackboard), std::string(TIMEOUT));
@@ -105,8 +104,8 @@ TEST_F(TestMonitorState, TestMonitorRetryTimeout) {
   auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state = std::make_shared<MonitorState<std_msgs::msg::String>>(
-      "test1", std::set<std::string>{std::string(SUCCEED)},
-      [](std::shared_ptr<yasmin::Blackboard> blackboard,
+      "test1", yasmin::Outcomes{std::string(SUCCEED)},
+      [](yasmin::Blackboard::SharedPtr blackboard,
          std::shared_ptr<std_msgs::msg::String> msg) {
         return std::string(SUCCEED);
       },

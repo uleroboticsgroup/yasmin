@@ -20,6 +20,7 @@
 #include "yasmin/blackboard_pywrapper.hpp"
 #include "yasmin/cb_state.hpp"
 #include "yasmin/pybind11_utils.hpp"
+#include "yasmin/types.hpp"
 
 namespace py = pybind11;
 
@@ -30,23 +31,22 @@ PYBIND11_MODULE(cb_state, m) {
   m.doc() = "Python bindings for yasmin::CbState";
 
   // Export CbState class - inherits from State
-  py::class_<yasmin::CbState, yasmin::State, std::shared_ptr<yasmin::CbState>>
+  py::class_<yasmin::CbState, yasmin::State, yasmin::CbState::SharedPtr>
       cb_state_class(m, "CbState");
 
   cb_state_class
-      .def(py::init([](const std::set<std::string> &outcomes,
-                       py::function callback) {
-             return new yasmin::CbState(
-                 outcomes,
-                 yasmin::pybind11_utils::wrap_blackboard_callback_with_return<
-                     std::string>(callback));
-           }),
-           py::arg("outcomes"), py::arg("callback"),
-           "Constructs a CbState object with outcomes and a callback function")
+      .def(
+          py::init([](const yasmin::Outcomes &outcomes, py::function callback) {
+            return new yasmin::CbState(
+                outcomes,
+                yasmin::pybind11_utils::wrap_blackboard_callback_with_return<
+                    std::string>(callback));
+          }),
+          py::arg("outcomes"), py::arg("callback"),
+          "Constructs a CbState object with outcomes and a callback function")
       .def(py::init([](const std::vector<std::string> &outcomes,
                        py::function callback) {
-             std::set<std::string> outcomes_set(outcomes.begin(),
-                                                outcomes.end());
+             yasmin::Outcomes outcomes_set(outcomes.begin(), outcomes.end());
              return new yasmin::CbState(
                  outcomes_set,
                  yasmin::pybind11_utils::wrap_blackboard_callback_with_return<

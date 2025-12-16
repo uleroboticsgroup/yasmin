@@ -40,7 +40,7 @@ using std::placeholders::_2;
  * @param blackboard Shared pointer to the blackboard for setting values.
  * @return std::string Outcome indicating success or failure.
  */
-std::string set_ints(std::shared_ptr<yasmin::Blackboard> blackboard) {
+std::string set_ints(yasmin::Blackboard::SharedPtr blackboard) {
   blackboard->set<int>("a", 10);
   blackboard->set<int>("b", 5);
   return yasmin_ros::basic_outcomes::SUCCEED;
@@ -54,7 +54,7 @@ std::string set_ints(std::shared_ptr<yasmin::Blackboard> blackboard) {
  * @param blackboard Shared pointer to the blackboard for getting values.
  * @return std::string Outcome indicating success.
  */
-std::string print_sum(std::shared_ptr<yasmin::Blackboard> blackboard) {
+std::string print_sum(yasmin::Blackboard::SharedPtr blackboard) {
   std::stringstream ss;
   ss << "Sum: " << blackboard->get<int>("sum");
   YASMIN_LOG_INFO(ss.str().c_str());
@@ -95,7 +95,7 @@ public:
    * request.
    */
   example_interfaces::srv::AddTwoInts::Request::SharedPtr
-  create_request_handler(std::shared_ptr<yasmin::Blackboard> blackboard) {
+  create_request_handler(yasmin::Blackboard::SharedPtr blackboard) {
 
     auto request =
         std::make_shared<example_interfaces::srv::AddTwoInts::Request>();
@@ -116,7 +116,7 @@ public:
    * @return std::string Outcome indicating success.
    */
   std::string response_handler(
-      std::shared_ptr<yasmin::Blackboard> blackboard,
+      yasmin::Blackboard::SharedPtr blackboard,
       example_interfaces::srv::AddTwoInts::Response::SharedPtr response) {
 
     blackboard->set<int>("sum", response->sum);

@@ -19,7 +19,6 @@
 #include <condition_variable>
 #include <functional>
 #include <memory>
-#include <set>
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
@@ -28,6 +27,7 @@
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/types.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -61,14 +61,13 @@ template <typename ActionT> class ActionState : public yasmin::State {
   /// Handle for the action goal.
   using GoalHandle = rclcpp_action::ClientGoalHandle<ActionT>;
   /// Function type for creating a goal.
-  using CreateGoalHandler =
-      std::function<Goal(std::shared_ptr<yasmin::Blackboard>)>;
+  using CreateGoalHandler = std::function<Goal(yasmin::Blackboard::SharedPtr)>;
   /// Function type for handling results.
   using ResultHandler =
-      std::function<std::string(std::shared_ptr<yasmin::Blackboard>, Result)>;
+      std::function<std::string(yasmin::Blackboard::SharedPtr, Result)>;
   /// Function type for handling feedback.
-  using FeedbackHandler = std::function<void(
-      std::shared_ptr<yasmin::Blackboard>, std::shared_ptr<const Feedback>)>;
+  using FeedbackHandler = std::function<void(yasmin::Blackboard::SharedPtr,
+                                             std::shared_ptr<const Feedback>)>;
 
 public:
   /**
@@ -92,7 +91,7 @@ public:
    */
   ActionState(const std::string &action_name,
               CreateGoalHandler create_goal_handler,
-              const std::set<std::string> &outcomes, int wait_timeout = -1,
+              const yasmin::Outcomes &outcomes, int wait_timeout = -1,
               int response_timeout = -1, int maximum_retry = 3)
       : ActionState(nullptr, action_name, create_goal_handler, outcomes,
                     nullptr, nullptr, nullptr, wait_timeout, response_timeout,
@@ -120,7 +119,7 @@ public:
    */
   ActionState(const std::string &action_name,
               CreateGoalHandler create_goal_handler,
-              const std::set<std::string> &outcomes,
+              const yasmin::Outcomes &outcomes,
               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
               int wait_timeout = -1, int response_timeout = -1,
               int maximum_retry = 3)
@@ -181,7 +180,7 @@ public:
    */
   ActionState(const std::string &action_name,
               CreateGoalHandler create_goal_handler,
-              const std::set<std::string> &outcomes,
+              const yasmin::Outcomes &outcomes,
               ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr, int wait_timeout = -1,
               int response_timeout = -1, int maximum_retry = 3)
@@ -216,7 +215,7 @@ public:
   ActionState(const rclcpp::Node::SharedPtr &node,
               const std::string &action_name,
               CreateGoalHandler create_goal_handler,
-              const std::set<std::string> &outcomes,
+              const yasmin::Outcomes &outcomes,
               ResultHandler result_handler = nullptr,
               FeedbackHandler feedback_handler = nullptr,
               rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
@@ -307,7 +306,7 @@ public:
    * - `basic_outcomes::CANCEL`: The action was canceled.
    * - `basic_outcomes::TIMEOUT`: The action server was not available in time.
    */
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) {
 
     std::unique_lock<std::mutex> lock(this->action_done_mutex);
     int retry_count = 0;

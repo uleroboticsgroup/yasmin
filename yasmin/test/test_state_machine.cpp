@@ -20,6 +20,7 @@
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin/types.hpp"
 
 using namespace yasmin;
 
@@ -30,7 +31,7 @@ private:
 public:
   FooState() : State({"outcome1", "outcome2"}), counter(0) {}
 
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     if (counter < 3) {
       counter++;
       blackboard->set<std::string>("foo_str",
@@ -46,33 +47,35 @@ class BarState : public State {
 public:
   BarState() : State({"outcome2", "outcome3"}) {}
 
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     return "outcome2";
   }
 };
 
 class TestStateMachine : public ::testing::Test {
 protected:
-  std::shared_ptr<StateMachine> sm;
-  std::shared_ptr<yasmin::Blackboard> blackboard;
+  yasmin::StateMachine::SharedPtr sm;
+  yasmin::Blackboard::SharedPtr blackboard;
 
   void SetUp() override {
     sm = std::make_shared<StateMachine>(
-        std::set<std::string>{"outcome4", "outcome5"});
+        yasmin::Outcomes{"outcome4", "outcome5"});
     blackboard = std::make_shared<yasmin::Blackboard>();
 
-    sm->add_state("FOO", std::make_shared<FooState>(),
-                  std::map<std::string, std::string>{{"outcome1", "BAR"},
-                                                     {"outcome2", "outcome4"}});
+    sm->add_state(
+        "FOO", std::make_shared<FooState>(),
+        yasmin::Transitions{{"outcome1", "BAR"}, {"outcome2", "outcome4"}});
 
     sm->add_state("BAR", std::make_shared<BarState>(),
-                  std::map<std::string, std::string>{{"outcome2", "FOO"}});
+                  yasmin::Transitions{{"outcome2", "FOO"}});
   }
 };
 
 TEST_F(TestStateMachine, TestStr) {
   std::string sm_str = sm->to_string();
-  EXPECT_TRUE(sm_str == "State Machine [BAR (BarState), FOO (FooState)]");
+  // Check if "Bar (BarState)" and "Foo (FooState)" are in the string
+  EXPECT_TRUE(sm_str.find("BAR (BarState)") != std::string::npos);
+  EXPECT_TRUE(sm_str.find("FOO (FooState)") != std::string::npos);
 }
 
 TEST_F(TestStateMachine, TestGetNameEmpty) { EXPECT_EQ(sm->get_name(), ""); }
@@ -124,7 +127,7 @@ TEST_F(TestStateMachine, TestSetStartStateWrongState) {
 TEST_F(TestStateMachine, TestAddRepeatedState) {
   try {
     sm->add_state("FOO", std::make_shared<FooState>(),
-                  std::map<std::string, std::string>{{"outcome1", "BAR"}});
+                  yasmin::Transitions{{"outcome1", "BAR"}});
     FAIL() << "Expected std::logic_error";
   } catch (const std::logic_error &e) {
     EXPECT_STREQ("State 'FOO' already registered in the state machine",
@@ -135,7 +138,7 @@ TEST_F(TestStateMachine, TestAddRepeatedState) {
 TEST_F(TestStateMachine, TestAddOutcomeState) {
   try {
     sm->add_state("outcome4", std::make_shared<FooState>(),
-                  std::map<std::string, std::string>{{"outcome1", "BAR"}});
+                  yasmin::Transitions{{"outcome1", "BAR"}});
     FAIL() << "Expected std::logic_error";
   } catch (const std::logic_error &e) {
     EXPECT_STREQ("State name 'outcome4' is already registered as an outcome",
@@ -146,7 +149,7 @@ TEST_F(TestStateMachine, TestAddOutcomeState) {
 TEST_F(TestStateMachine, TestAddStateWithWrongOutcome) {
   try {
     sm->add_state("FOO1", std::make_shared<FooState>(),
-                  std::map<std::string, std::string>{{"outcome9", "BAR"}});
+                  yasmin::Transitions{{"outcome9", "BAR"}});
     FAIL() << "Expected std::invalid_argument";
   } catch (const std::invalid_argument &e) {
     std::string error_msg = e.what();
@@ -159,7 +162,7 @@ TEST_F(TestStateMachine, TestAddStateWithWrongOutcome) {
 TEST_F(TestStateMachine, TestAddWrongSourceTransition) {
   try {
     sm->add_state("FOO1", std::make_shared<FooState>(),
-                  std::map<std::string, std::string>{{"", "BAR"}});
+                  yasmin::Transitions{{"", "BAR"}});
     FAIL() << "Expected std::invalid_argument";
   } catch (const std::invalid_argument &e) {
     EXPECT_STREQ("Transitions with empty source in state 'FOO1'", e.what());
@@ -169,7 +172,7 @@ TEST_F(TestStateMachine, TestAddWrongSourceTransition) {
 TEST_F(TestStateMachine, TestAddWrongTargetTransition) {
   try {
     sm->add_state("FOO1", std::make_shared<FooState>(),
-                  std::map<std::string, std::string>{{"outcome1", ""}});
+                  yasmin::Transitions{{"outcome1", ""}});
     FAIL() << "Expected std::invalid_argument";
   } catch (const std::invalid_argument &e) {
     EXPECT_STREQ("Transitions with empty target in state 'FOO1'", e.what());
@@ -177,9 +180,9 @@ TEST_F(TestStateMachine, TestAddWrongTargetTransition) {
 }
 
 TEST_F(TestStateMachine, TestValidateOutcomeFromFsmNotUsed) {
-  auto sm1 = std::make_shared<StateMachine>(std::set<std::string>{"outcome4"});
-  auto sm2 = std::make_shared<StateMachine>(
-      std::set<std::string>{"outcome4", "outcome5"});
+  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm2 =
+      std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4", "outcome5"});
   sm1->add_state("FSM", sm2);
   sm2->add_state("FOO", std::make_shared<FooState>(),
                  {
@@ -197,8 +200,8 @@ TEST_F(TestStateMachine, TestValidateOutcomeFromFsmNotUsed) {
 }
 
 TEST_F(TestStateMachine, TestValidateOutcomeFromStateNotUsed) {
-  auto sm1 = std::make_shared<StateMachine>(std::set<std::string>{"outcome4"});
-  auto sm2 = std::make_shared<StateMachine>(std::set<std::string>{"outcome4"});
+  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm2 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
   sm1->add_state("FSM", sm2);
   sm2->add_state("FOO", std::make_shared<FooState>(),
                  {
@@ -215,9 +218,9 @@ TEST_F(TestStateMachine, TestValidateOutcomeFromStateNotUsed) {
 }
 
 TEST_F(TestStateMachine, TestValidateFsmOutcomeNotUsed) {
-  auto sm1 = std::make_shared<StateMachine>(std::set<std::string>{"outcome4"});
-  auto sm2 = std::make_shared<StateMachine>(
-      std::set<std::string>{"outcome4", "outcome5"});
+  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm2 =
+      std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4", "outcome5"});
   sm1->add_state("FSM", sm2,
                  {
                      {"outcome5", "outcome4"},
@@ -238,8 +241,8 @@ TEST_F(TestStateMachine, TestValidateFsmOutcomeNotUsed) {
 }
 
 TEST_F(TestStateMachine, TestValidateWrongState) {
-  auto sm1 = std::make_shared<StateMachine>(std::set<std::string>{"outcome4"});
-  auto sm2 = std::make_shared<StateMachine>(std::set<std::string>{"outcome4"});
+  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm2 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
   sm1->add_state("FSM", sm2,
                  {
                      {"outcome4", "outcome4"},

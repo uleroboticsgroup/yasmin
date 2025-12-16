@@ -14,19 +14,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "yasmin/cb_state.hpp"
+#include "yasmin/types.hpp"
 
 namespace yasmin {
 
-CbState::CbState(
-    const std::set<std::string> &outcomes,
-    std::function<std::string(std::shared_ptr<yasmin::Blackboard>)> callback)
+CbState::CbState(const Outcomes &outcomes, CbStateCallback callback)
     : State(outcomes), callback(callback) {
   if (outcomes.empty()) {
     throw std::invalid_argument("Outcomes set cannot be empty.");
   }
 }
 
-std::string CbState::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
+std::string CbState::execute(Blackboard::SharedPtr blackboard) {
 
   try {
     // Call the callback function and return the result

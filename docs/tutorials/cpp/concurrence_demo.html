@@ -192,7 +192,7 @@ public:
       : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {};
 
   std::string
-  execute(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) override {
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     YASMIN_LOG_INFO("Executing state FOO");
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -233,7 +233,7 @@ public:
   BarState() : yasmin::State({"outcome3"}) {}
 
   std::string
-  execute(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) override {
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     YASMIN_LOG_INFO("Executing state BAR");
     std::this_thread::sleep_for(std::chrono::seconds(4));
 

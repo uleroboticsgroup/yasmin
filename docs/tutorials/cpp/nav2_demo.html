@@ -254,7 +254,7 @@ public:
             std::bind(&Nav2State::create_goal_handler, this, _1)) {}
 
   NavigateToPose::Goal create_goal_handler(
-      std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
+      yasmin::Blackboard::SharedPtr blackboard) {
     NavigateToPose::Goal goal;
     goal.pose.pose = blackboard-&gt;get&lt;Pose&gt;("pose");
     goal.pose.header.frame_id = "map"; // Set the reference frame to 'map'
@@ -263,7 +263,7 @@ public:
 };
 
 std::string
-create_waypoints(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
+create_waypoints(yasmin::Blackboard::SharedPtr blackboard) {
   std::map&lt;std::string, std::vector&lt;double&gt;&gt; waypoints = {
       {"entrance", {1.25, 6.30, -0.78, 0.67}},
       {"bathroom", {4.89, 1.64, 0.0, 1.0}},
@@ -276,7 +276,7 @@ create_waypoints(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
 }
 
 std::string take_random_waypoint(
-    std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
+    yasmin::Blackboard::SharedPtr blackboard) {
   auto waypoints =
       blackboard-&gt;get&lt;std::map&lt;std::string, std::vector&lt;double&gt;&gt;&gt;("waypoints");
   int waypoints_num = blackboard-&gt;get&lt;int&gt;("waypoints_num");
@@ -298,7 +298,7 @@ std::string take_random_waypoint(
 }
 
 std::string
-get_next_waypoint(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
+get_next_waypoint(yasmin::Blackboard::SharedPtr blackboard) {
   auto random_waypoints =
       blackboard-&gt;get&lt;std::vector&lt;std::string&gt;&gt;("random_waypoints");
   auto waypoints =

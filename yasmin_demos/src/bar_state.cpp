@@ -27,7 +27,7 @@
 
 BarState::BarState() : yasmin::State({"outcome3"}) {};
 
-std::string BarState::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
+std::string BarState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   YASMIN_LOG_INFO("Executing state BAR");
   std::this_thread::sleep_for(std::chrono::seconds(3));
 

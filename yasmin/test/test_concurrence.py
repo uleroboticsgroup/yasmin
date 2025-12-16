@@ -74,10 +74,11 @@ class TestState(unittest.TestCase):
         self.assertTrue(self.state.is_canceled())
 
     def test_str(self):
-        self.assertEqual(
-            "Concurrence [BAR (BarState), FOO (FooState), FOO2 (FooState)]",
-            str(self.state),
-        )
+        string = str(self.state)
+        # Check if "Bar (BarState)" and "Foo (FooState)" are in the string
+        self.assertIn("BAR (BarState)", string)
+        self.assertIn("FOO (FooState)", string)
+        self.assertIn("FOO2 (FooState)", string)
 
 
 if __name__ == "__main__":

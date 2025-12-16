@@ -24,13 +24,13 @@ using namespace yasmin;
 
 class TestCbState : public ::testing::Test {
 protected:
-  std::shared_ptr<CbState> state;
-  std::shared_ptr<yasmin::Blackboard> blackboard;
+  CbState::SharedPtr state;
+  yasmin::Blackboard::SharedPtr blackboard;
 
   void SetUp() override {
     blackboard = std::make_shared<yasmin::Blackboard>();
 
-    auto execute = [](std::shared_ptr<yasmin::Blackboard> bb) {
+    auto execute = [](yasmin::Blackboard::SharedPtr bb) {
       return std::string("outcome1");
     };
 

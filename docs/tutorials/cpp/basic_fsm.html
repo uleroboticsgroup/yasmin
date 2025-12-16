@@ -190,7 +190,7 @@ public:
    * @return std::string The outcome of the execution: "outcome1" or "outcome2".
    */
   std::string
-  execute(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) override {
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     YASMIN_LOG_INFO("Executing state FOO");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
@@ -241,7 +241,7 @@ public:
    * @return std::string The outcome of the execution: "outcome3".
    */
   std::string
-  execute(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) override {
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     YASMIN_LOG_INFO("Executing state BAR");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 

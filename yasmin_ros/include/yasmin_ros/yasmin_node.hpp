@@ -71,12 +71,15 @@ public:
    *
    * @return A shared pointer to the singleton instance of YasminNode.
    */
-  static std::shared_ptr<YasminNode> get_instance() {
+  static YasminNode::SharedPtr get_instance() {
+    // Ensure ROS 2 is initialized
     if (!rclcpp::ok()) {
       rclcpp::init(0, nullptr);
     }
-    static std::shared_ptr<YasminNode> instance =
-        std::shared_ptr<YasminNode>(new YasminNode());
+
+    // Create the singleton instance if it doesn't exist
+    static YasminNode::SharedPtr instance =
+        YasminNode::SharedPtr(new YasminNode());
     return instance;
   }
 

@@ -169,14 +169,14 @@
         </p>
 
         <pre><code class="language-cpp">std::string
-set_ints(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
+set_ints(yasmin::Blackboard::SharedPtr blackboard) {
   blackboard-&gt;set&lt;int&gt;("a", 10);
   blackboard-&gt;set&lt;int&gt;("b", 5);
   return yasmin_ros::basic_outcomes::SUCCEED;
 }
 
 std::string
-print_sum(std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
+print_sum(yasmin::Blackboard::SharedPtr blackboard) {
   std::stringstream ss;
   ss &lt;&lt; "Sum: " &lt;&lt; blackboard-&gt;get&lt;int&gt;("sum");
   YASMIN_LOG_INFO(ss.str().c_str());
@@ -213,7 +213,7 @@ public:
 
   example_interfaces::srv::AddTwoInts::Request::SharedPtr
   create_request_handler(
-      std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard) {
+      yasmin::Blackboard::SharedPtr blackboard) {
 
     auto request =
         std::make_shared&lt;example_interfaces::srv::AddTwoInts::Request&gt;();
@@ -223,7 +223,7 @@ public:
   };
 
   std::string response_handler(
-      std::shared_ptr&lt;yasmin::Blackboard&gt; blackboard,
+      yasmin::Blackboard::SharedPtr blackboard,
       example_interfaces::srv::AddTwoInts::Response::SharedPtr response) {
 
     blackboard-&gt;set&lt;int&gt;("sum", response-&gt;sum);

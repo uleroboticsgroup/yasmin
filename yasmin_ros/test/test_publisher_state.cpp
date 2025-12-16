@@ -22,6 +22,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "yasmin/types.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/publisher_state.hpp"
 #include "yasmin_ros/ros_clients_cache.hpp"
@@ -43,7 +44,7 @@ TEST_F(TestPublisherState, TestPublisher) {
   auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state = std::make_shared<PublisherState<std_msgs::msg::String>>(
-      "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
+      "test", [](yasmin::Blackboard::SharedPtr blackboard) {
         auto msg = std_msgs::msg::String();
         msg.data = "data";
         return msg;
@@ -57,7 +58,7 @@ TEST_F(TestPublisherState, TestPublisherCache) {
   EXPECT_EQ(ROSClientsCache::get_publishers_count(), 0);
 
   auto state1 = std::make_shared<PublisherState<std_msgs::msg::String>>(
-      "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
+      "test", [](yasmin::Blackboard::SharedPtr blackboard) {
         auto msg = std_msgs::msg::String();
         msg.data = "data";
         return msg;
@@ -65,7 +66,7 @@ TEST_F(TestPublisherState, TestPublisherCache) {
   EXPECT_EQ(ROSClientsCache::get_publishers_count(), 1);
 
   auto state2 = std::make_shared<PublisherState<std_msgs::msg::String>>(
-      "test", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
+      "test", [](yasmin::Blackboard::SharedPtr blackboard) {
         auto msg = std_msgs::msg::String();
         msg.data = "data";
         return msg;
@@ -73,7 +74,7 @@ TEST_F(TestPublisherState, TestPublisherCache) {
   EXPECT_EQ(ROSClientsCache::get_publishers_count(), 1);
 
   auto state3 = std::make_shared<PublisherState<std_msgs::msg::String>>(
-      "test2", [](std::shared_ptr<yasmin::Blackboard> blackboard) {
+      "test2", [](yasmin::Blackboard::SharedPtr blackboard) {
         auto msg = std_msgs::msg::String();
         msg.data = "data";
         return msg;

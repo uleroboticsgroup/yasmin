@@ -18,6 +18,7 @@
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/types.hpp"
 
 /**
  * @brief Simple test state for testing purposes.
@@ -26,7 +27,7 @@ class TestSimpleState : public yasmin::State {
 public:
   TestSimpleState() : yasmin::State({"outcome1", "outcome2"}) {}
 
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
 
     if (!blackboard->contains("counter")) {
       blackboard->set<int>("counter", 0);
@@ -45,7 +46,7 @@ class TestRemappingState : public yasmin::State {
 public:
   TestRemappingState() : yasmin::State({"success", "failure"}) {}
 
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
 
     if (blackboard->contains("input_key")) {
       std::string value = blackboard->get<std::string>("input_key");

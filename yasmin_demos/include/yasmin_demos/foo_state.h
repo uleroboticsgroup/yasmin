@@ -47,7 +47,7 @@ public:
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome1" or "outcome2".
    */
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard);
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard);
 
   /// Counter to track the number of executions.
   int counter;

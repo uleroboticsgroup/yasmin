@@ -31,14 +31,13 @@ PYBIND11_MODULE(concurrence, m) {
   // Export Concurrence class - inherits from State
   py::class_<yasmin::Concurrence,
              yasmin::State, // Inherit from State
-             std::shared_ptr<yasmin::Concurrence>>
+             yasmin::Concurrence::SharedPtr>
       concurrence_class(m, "Concurrence");
 
   concurrence_class
-      .def(py::init<std::map<std::string, std::shared_ptr<yasmin::State>>,
-                    std::string, yasmin::Concurrence::OutcomeMap>(),
+      .def(py::init<yasmin::StateMap, std::string, yasmin::OutcomeMap>(),
            py::arg("states"), py::arg("default_outcome"),
-           py::arg("outcome_map") = yasmin::Concurrence::OutcomeMap(),
+           py::arg("outcome_map") = yasmin::OutcomeMap(),
            py::keep_alive<1, 2>()) // Keep states (arg 2) alive as long as self
                                    // (arg 1) is alive
       // Getters for states, outcome_map, and default_outcome

@@ -13,15 +13,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "rclcpp/rclcpp.hpp"
-#include "yasmin_ros/basic_outcomes.hpp"
+#include <any>
+#include <string>
+#include <unordered_map>
 
+#include "rclcpp/rclcpp.hpp"
+
+#include "yasmin/types.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/get_parameters_state.hpp"
 
 using namespace yasmin_ros;
 
 GetParametersState::GetParametersState(
-    const std::map<std::string, std::any> &parameters,
+    const std::unordered_map<std::string, std::any> &parameters,
     rclcpp::Node::SharedPtr node)
     : yasmin::State({basic_outcomes::SUCCEED, basic_outcomes::ABORT}),
       parameters_(parameters) {
@@ -34,7 +39,7 @@ GetParametersState::GetParametersState(
 }
 
 std::string
-GetParametersState::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
+GetParametersState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   for (const auto &param : this->parameters_) {
     const std::string &param_name = param.first;
     const std::any &default_value = param.second;

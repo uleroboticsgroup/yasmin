@@ -27,7 +27,7 @@ class FooState : public State {
 public:
   FooState() : State({"outcome1"}) {}
 
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     return "outcome1";
   }
 };
@@ -36,15 +36,15 @@ class BarState : public State {
 public:
   BarState() : State({}) {}
 
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     return "outcome2";
   }
 };
 
 class TestState : public ::testing::Test {
 protected:
-  std::shared_ptr<FooState> state;
-  std::shared_ptr<yasmin::Blackboard> blackboard;
+  FooState::SharedPtr state;
+  yasmin::Blackboard::SharedPtr blackboard;
 
   void SetUp() override {
     state = std::make_shared<FooState>();

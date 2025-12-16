@@ -25,10 +25,11 @@
 
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/types.hpp"
 
 using namespace yasmin;
 
-State::State(const std::set<std::string> &outcomes) : outcomes(outcomes) {
+State::State(const Outcomes &outcomes) : outcomes(outcomes) {
   if (outcomes.empty()) {
     throw std::logic_error("A state must have at least one possible outcome.");
   }
@@ -56,7 +57,7 @@ bool State::is_completed() const noexcept {
   return this->get_status() == StateStatus::COMPLETED;
 }
 
-std::string State::operator()(std::shared_ptr<yasmin::Blackboard> blackboard) {
+std::string State::operator()(Blackboard::SharedPtr blackboard) {
 
   YASMIN_LOG_DEBUG("Executing state '%s'", this->to_string().c_str());
   this->set_status(StateStatus::RUNNING);
@@ -102,9 +103,7 @@ std::string State::operator()(std::shared_ptr<yasmin::Blackboard> blackboard) {
   return outcome; // Return the valid outcome
 }
 
-std::set<std::string> const &State::get_outcomes() const noexcept {
-  return this->outcomes;
-}
+Outcomes const &State::get_outcomes() const noexcept { return this->outcomes; }
 
 std::string State::to_string() const {
   std::string name = typeid(*this).name();

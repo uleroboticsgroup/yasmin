@@ -20,7 +20,6 @@
 #include <condition_variable>
 #include <functional>
 #include <memory>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -29,6 +28,7 @@
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/types.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
@@ -49,7 +49,7 @@ template <typename MsgT> class MonitorState : public yasmin::State {
 
   /// Function type for handling messages from topic.
   using MonitorHandler = std::function<std::string(
-      std::shared_ptr<yasmin::Blackboard>, std::shared_ptr<MsgT>)>;
+      yasmin::Blackboard::SharedPtr, std::shared_ptr<MsgT>)>;
 
 public:
   /**
@@ -65,8 +65,7 @@ public:
    * @param maximum_retry Maximum retries of the service if it returns timeout.
    * Default is 3.
    */
-  MonitorState(const std::string &topic_name,
-               const std::set<std::string> &outcomes,
+  MonitorState(const std::string &topic_name, const yasmin::Outcomes &outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
                int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
       : MonitorState(nullptr, topic_name, outcomes, monitor_handler, qos,
@@ -87,8 +86,7 @@ public:
    * Default is 3.
    *
    */
-  MonitorState(const std::string &topic_name,
-               const std::set<std::string> &outcomes,
+  MonitorState(const std::string &topic_name, const yasmin::Outcomes &outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
@@ -110,8 +108,7 @@ public:
    * Default is 3.
    */
   MonitorState(const rclcpp::Node::SharedPtr &node,
-               const std::string &topic_name,
-               const std::set<std::string> &outcomes,
+               const std::string &topic_name, const yasmin::Outcomes &outcomes,
                MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
@@ -151,7 +148,7 @@ public:
    * @param blackboard A shared pointer to the blackboard for data storage.
    * @return A string outcome indicating the result of the monitoring operation.
    */
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     int retry_count = 0;
     std::unique_lock<std::mutex> lock(this->msg_mutex);
     std::cv_status wait_status = std::cv_status::no_timeout;

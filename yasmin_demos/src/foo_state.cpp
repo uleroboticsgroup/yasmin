@@ -27,7 +27,7 @@
 
 FooState::FooState() : yasmin::State({"outcome1", "outcome2"}) { counter = 0; };
 
-std::string FooState::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
+std::string FooState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   YASMIN_LOG_INFO("Executing state FOO");
   std::this_thread::sleep_for(std::chrono::seconds(3));
 

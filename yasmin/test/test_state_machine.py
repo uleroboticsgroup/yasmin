@@ -63,7 +63,10 @@ class TestStateMachine(unittest.TestCase):
         )
 
     def test_str(self):
-        self.assertEqual("State Machine [BAR (BarState), FOO (FooState)]", str(self.sm))
+        string = str(self.sm)
+        # Check if "Bar (BarState)" and "Foo (FooState)" are in the string
+        self.assertIn("BAR (BarState)", string)
+        self.assertIn("FOO (FooState)", string)
 
     def test_get_name_empty(self):
         self.assertEqual("", self.sm.get_name())

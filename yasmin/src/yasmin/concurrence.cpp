@@ -22,12 +22,14 @@
 
 #include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/types.hpp"
 
 using namespace yasmin;
 
-Concurrence::Concurrence(
-    const std::map<std::string, std::shared_ptr<State>> &states,
-    const std::string &default_outcome, const OutcomeMap &outcome_map)
+Concurrence::Concurrence(const StateMap &states,
+                         const std::string &default_outcome,
+                         const OutcomeMap &outcome_map)
     : State(generate_possible_outcomes(outcome_map, default_outcome)),
       states(states), default_outcome(default_outcome),
       outcome_map(outcome_map) {
@@ -65,7 +67,7 @@ Concurrence::Concurrence(
       }
 
       // Check if intermediate outcome is valid for the state
-      std::shared_ptr<State> state = state_it->second;
+      State::SharedPtr state = state_it->second;
       if (state->get_outcomes().find(intermediate_outcome) ==
           state->get_outcomes().end()) {
         throw std::invalid_argument(
@@ -80,8 +82,7 @@ Concurrence::Concurrence(
   }
 }
 
-std::string
-Concurrence::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
+std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
   std::vector<std::thread> state_threads;
 
   // Initialize the parallel execution of all the states
@@ -107,7 +108,7 @@ Concurrence::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
   }
 
   // Build final outcome
-  std::set<std::string> satisfied_outcomes;
+  Outcomes satisfied_outcomes;
   for (const auto &[outcome, requirements] : outcome_map) {
     bool satisfied = true;
     for (const auto &[state_name, expected_intermediate_outcome] :
@@ -156,12 +157,11 @@ void Concurrence::cancel_state() {
   yasmin::State::cancel_state();
 }
 
-const std::map<std::string, std::shared_ptr<State>> &
-Concurrence::get_states() const noexcept {
+const StateMap &Concurrence::get_states() const noexcept {
   return this->states;
 }
 
-const Concurrence::OutcomeMap &Concurrence::get_outcome_map() const noexcept {
+const OutcomeMap &Concurrence::get_outcome_map() const noexcept {
   return this->outcome_map;
 }
 
@@ -169,10 +169,10 @@ const std::string &Concurrence::get_default_outcome() const noexcept {
   return this->default_outcome;
 }
 
-std::set<std::string>
+Outcomes
 Concurrence::generate_possible_outcomes(const OutcomeMap &outcome_map,
                                         const std::string &default_outcome) {
-  std::set<std::string> possible_outcomes;
+  Outcomes possible_outcomes;
   possible_outcomes.insert(
       default_outcome); // Always include the default outcome
 

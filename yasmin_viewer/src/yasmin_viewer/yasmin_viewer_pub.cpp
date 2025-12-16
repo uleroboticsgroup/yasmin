@@ -16,24 +16,25 @@
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 #include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
+#include "yasmin/types.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
 using namespace yasmin_viewer;
 using namespace std::chrono_literals;
 
-YasminViewerPub::YasminViewerPub(std::shared_ptr<yasmin::StateMachine> fsm)
+YasminViewerPub::YasminViewerPub(yasmin::StateMachine::SharedPtr fsm)
     : YasminViewerPub(nullptr, fsm, "") {}
 
 YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
-                                 std::shared_ptr<yasmin::StateMachine> fsm)
+                                 yasmin::StateMachine::SharedPtr fsm)
     : YasminViewerPub(node, fsm, "") {}
 
-YasminViewerPub::YasminViewerPub(std::shared_ptr<yasmin::StateMachine> fsm,
+YasminViewerPub::YasminViewerPub(yasmin::StateMachine::SharedPtr fsm,
                                  const std::string &fsm_name)
     : YasminViewerPub(nullptr, fsm, fsm_name) {}
 
 YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
-                                 std::shared_ptr<yasmin::StateMachine> fsm,
+                                 yasmin::StateMachine::SharedPtr fsm,
                                  const std::string &fsm_name)
     : fsm(fsm), fsm_name(fsm_name) {
 
@@ -58,7 +59,7 @@ YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
 }
 
 std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
-    const std::map<std::string, std::string> &transitions) const {
+    const yasmin::Transitions &transitions) const {
   std::vector<yasmin_msgs::msg::Transition> transitions_list;
   transitions_list.reserve(transitions.size());
 
@@ -72,7 +73,7 @@ std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
 
 std::map<std::string, std::vector<yasmin_msgs::msg::Transition>>
 YasminViewerPub::parse_concurrence_transitions(
-    std::shared_ptr<yasmin::Concurrence> concurrence) const {
+    yasmin::Concurrence::SharedPtr concurrence) const {
   std::map<std::string, std::vector<yasmin_msgs::msg::Transition>> transitions;
   const auto &outcome_map = concurrence->get_outcome_map();
 
@@ -89,8 +90,8 @@ YasminViewerPub::parse_concurrence_transitions(
 }
 
 void YasminViewerPub::parse_state(
-    const std::string &state_name, std::shared_ptr<yasmin::State> state,
-    const std::map<std::string, std::string> &transitions,
+    const std::string &state_name, yasmin::State::SharedPtr state,
+    const yasmin::Transitions &transitions,
     std::vector<yasmin_msgs::msg::State> &states_list, int parent) {
 
   auto state_msg = yasmin_msgs::msg::State();
@@ -142,7 +143,7 @@ void YasminViewerPub::parse_state(
         -2; // Special marker for concurrence
 
     for (const auto &[child_state_name, child_state] : concurrent_states) {
-      std::map<std::string, std::string> empty_transitions;
+      yasmin::Transitions empty_transitions;
       this->parse_state(child_state_name, child_state, empty_transitions,
                         states_list, state_msg.id);
 

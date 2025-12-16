@@ -20,7 +20,6 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <set>
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
@@ -28,6 +27,7 @@
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/types.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -53,10 +53,10 @@ template <typename ServiceT> class ServiceState : public yasmin::State {
 
   /// Function type for creating a request.
   using CreateRequestHandler =
-      std::function<Request(std::shared_ptr<yasmin::Blackboard>)>;
+      std::function<Request(yasmin::Blackboard::SharedPtr)>;
   /// Function type for handling a response.
   using ResponseHandler =
-      std::function<std::string(std::shared_ptr<yasmin::Blackboard>, Response)>;
+      std::function<std::string(yasmin::Blackboard::SharedPtr, Response)>;
 
 public:
   /**
@@ -75,9 +75,8 @@ public:
                CreateRequestHandler create_request_handler,
                int wait_timeout = -1, int response_timeout = -1,
                int maximum_retry = 3)
-      : ServiceState(nullptr, srv_name, create_request_handler,
-                     std::set<std::string>(), nullptr, nullptr, wait_timeout,
-                     response_timeout, maximum_retry) {}
+      : ServiceState(nullptr, srv_name, create_request_handler, {}, nullptr,
+                     nullptr, wait_timeout, response_timeout, maximum_retry) {}
   /**
    * @brief Construct a ServiceState with a request handler and outcomes.
    *
@@ -93,7 +92,7 @@ public:
    */
   ServiceState(const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               const std::set<std::string> &outcomes, int wait_timeout = -1,
+               const yasmin::Outcomes &outcomes, int wait_timeout = -1,
                int response_timeout = -1, int maximum_retry = 3)
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
                      nullptr, nullptr, wait_timeout, response_timeout,
@@ -115,7 +114,7 @@ public:
    */
   ServiceState(const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               const std::set<std::string> &outcomes,
+               const yasmin::Outcomes &outcomes,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int wait_timeout = -1, int response_timeout = -1,
                int maximum_retry = 3)
@@ -162,7 +161,7 @@ public:
    */
   ServiceState(const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               const std::set<std::string> &outcomes,
+               const yasmin::Outcomes &outcomes,
                ResponseHandler response_handler, int wait_timeout = -1,
                int response_timeout = -1, int maximum_retry = 3)
       : ServiceState(nullptr, srv_name, create_request_handler, outcomes,
@@ -189,7 +188,7 @@ public:
    */
   ServiceState(const rclcpp::Node::SharedPtr &node, const std::string &srv_name,
                CreateRequestHandler create_request_handler,
-               const std::set<std::string> &outcomes,
+               const yasmin::Outcomes &outcomes,
                ResponseHandler response_handler,
                rclcpp::CallbackGroup::SharedPtr callback_group,
                int wait_timeout = -1, int response_timeout = -1,
@@ -239,7 +238,7 @@ public:
    * @return std::string The outcome of the service call, which can be SUCCEED,
    * ABORT, or TIMEOUT.
    */
-  std::string execute(std::shared_ptr<yasmin::Blackboard> blackboard) override {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     Request request = this->create_request(blackboard);
     std::unique_lock<std::mutex> lock(this->response_done_mutex);
     int retry_count = 0;
@@ -341,7 +340,7 @@ private:
    * request creation.
    * @return Request The created service request.
    */
-  Request create_request(std::shared_ptr<yasmin::Blackboard> blackboard) {
+  Request create_request(yasmin::Blackboard::SharedPtr blackboard) {
     return this->create_request_handler(blackboard);
   }
 

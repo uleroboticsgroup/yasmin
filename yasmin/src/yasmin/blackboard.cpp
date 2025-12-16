@@ -17,6 +17,8 @@
 #include <string>
 
 #include "yasmin/blackboard.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/types.hpp"
 
 using namespace yasmin;
 
@@ -87,12 +89,10 @@ const std::string &Blackboard::remap(const std::string &key) const {
   return key;
 }
 
-void Blackboard::set_remappings(
-    const std::map<std::string, std::string> &remappings) {
+void Blackboard::set_remappings(const Remappings &remappings) {
   this->remappings = remappings;
 }
 
-const std::map<std::string, std::string> &
-Blackboard::get_remappings() const noexcept {
+const Remappings &Blackboard::get_remappings() const noexcept {
   return this->remappings;
 }
