@@ -23,6 +23,7 @@
 #include <mutex>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 
 #include "yasmin/logs.hpp"
 
@@ -64,9 +65,9 @@ private:
   /// Mutex for thread safety.
   mutable std::recursive_mutex mutex;
   /// Storage for key-value pairs.
-  std::map<std::string, std::shared_ptr<void>> values;
+  std::unordered_map<std::string, std::shared_ptr<void>> values;
   /// Storage for type information for each key.
-  std::map<std::string, std::string> type_registry;
+  std::unordered_map<std::string, std::string> type_registry;
   /// Storage for key remappings.
   std::map<std::string, std::string> remappings;
 

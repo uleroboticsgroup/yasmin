@@ -75,7 +75,7 @@ Concurrence::Concurrence(
             state->to_string() + "'");
       }
 
-      intermediate_outcome_map.insert({state_name, nullptr});
+      intermediate_outcome_map.insert({state_name, ""});
     }
   }
 }
@@ -90,8 +90,7 @@ Concurrence::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
                                          blackboard]() {
       std::string outcome = (*state.get())(blackboard);
       const std::lock_guard<std::mutex> lock(this->intermediate_outcome_mutex);
-      this->intermediate_outcome_map[state_name] =
-          std::make_shared<std::string>(outcome);
+      this->intermediate_outcome_map[state_name] = outcome;
     }));
   }
 
@@ -113,14 +112,13 @@ Concurrence::execute(std::shared_ptr<yasmin::Blackboard> blackboard) {
     bool satisfied = true;
     for (const auto &[state_name, expected_intermediate_outcome] :
          requirements) {
-      std::shared_ptr<std::string> actual_intermediate_outcome =
+      std::string actual_intermediate_outcome =
           intermediate_outcome_map.find(state_name)->second;
-      if (actual_intermediate_outcome == nullptr) {
+      if (actual_intermediate_outcome.empty()) {
         throw std::runtime_error("An intermediate outcome for state '" +
                                  state_name + "' was not received.");
       }
-      satisfied &=
-          *actual_intermediate_outcome == expected_intermediate_outcome;
+      satisfied &= actual_intermediate_outcome == expected_intermediate_outcome;
     }
     if (satisfied) {
       satisfied_outcomes.insert(outcome);

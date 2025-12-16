@@ -63,7 +63,7 @@ protected:
   OutcomeMap outcome_map;
 
   /// Stores the intermediate outcomes of the concurrent states
-  std::map<std::string, std::shared_ptr<std::string>> intermediate_outcome_map;
+  std::map<std::string, std::string> intermediate_outcome_map;
 
   /// The set of possible outcomes
   std::set<std::string> possible_outcomes;

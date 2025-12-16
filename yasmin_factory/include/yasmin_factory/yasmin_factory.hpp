@@ -16,7 +16,6 @@
 #ifndef YASMIN_FACTORY__YASMIN_FACTORY_HPP
 #define YASMIN_FACTORY__YASMIN_FACTORY_HPP
 
-#include <map>
 #include <memory>
 #include <set>
 #include <string>
