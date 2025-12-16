@@ -2059,15 +2059,15 @@ int main(int argc, char *argv[]) {
 
   // Create concurrent state
   auto concurrent_state = std::make_shared<yasmin::Concurrence>(
-      std::map<std::string, std::shared_ptr<yasmin::State>>{{"FOO", foo_state},
-                                                            {"BAR", bar_state}},
+      yasmin::StateMap{
+          {"FOO", foo_state},
+          {"BAR", bar_state},
+      },
       "defaulted",
-      yasmin::Concurrence::OutcomeMap{
-          {"outcome1",
-           yasmin::Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
-                                                {"BAR", "outcome3"}}},
-          {"outcome2", yasmin::Concurrence::StateOutcomeMap{
-                           {"FOO", "outcome2"}, {"BAR", "outcome3"}}}});
+      yasmin::OutcomeMap{
+          {"outcome1", {{"FOO", "outcome1"}, {"BAR", "outcome3"}}},
+          {"outcome2", {{"FOO", "outcome2"}, {"BAR", "outcome3"}}},
+      });
 
   // Add concurrent state to the state machine
   sm->add_state("CONCURRENCE", concurrent_state,
@@ -2875,7 +2875,7 @@ int main(int argc, char *argv[]) {
   // Add states to the state machine
   sm->add_state("GETTING_PARAMETERS",
                 std::make_shared<yasmin_ros::GetParametersState>(
-                    std::map<std::string, std::any>{
+                    yasmin_ros::GetParametersState::Parameters{
                         {"max_counter", 3},
                         {"counter_str", std::string("Counter")},
                     }),

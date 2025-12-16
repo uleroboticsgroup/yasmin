@@ -200,7 +200,7 @@ public:
 
   std::string
   monitor_handler(yasmin::Blackboard::SharedPtr blackboard,
-                  std::shared_ptr&lt;nav_msgs::msg::Odometry&gt; msg) {
+                  nav_msgs::msg::Odometry::SharedPtr msg) {
 
     (void)blackboard;
 

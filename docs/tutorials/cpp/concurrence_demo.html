@@ -272,25 +272,25 @@ public:
   yasmin_ros::set_ros_loggers();
   YASMIN_LOG_INFO("yasmin_concurrence_demo");
 
-auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
-    std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
+  // Create a state machine
+  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+      std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
-auto foo_state = std::make_shared&lt;FooState&gt;();
-auto bar_state = std::make_shared&lt;BarState&gt;();
+  // Create states to run concurrently
+  auto foo_state = std::make_shared&lt;FooState&gt;();
+  auto bar_state = std::make_shared&lt;BarState&gt;();
 
-auto concurrent_state = std::make_shared&lt;yasmin::Concurrence&gt;(
-    std::map&lt;std::string, std::shared_ptr&lt;yasmin::State&gt;&gt;{
-        {"FOO", foo_state},
-        {"BAR", bar_state}
-    },
-    "defaulted",
-    yasmin::Concurrence::OutcomeMap{
-        {"outcome1",
-         yasmin::Concurrence::StateOutcomeMap{{"FOO", "outcome1"},
-                                              {"BAR", "outcome3"}}},
-        {"outcome2", yasmin::Concurrence::StateOutcomeMap{
-                         {"FOO", "outcome2"}, {"BAR", "outcome3"}}}
-    });</code></pre>
+  // Create concurrent state
+  auto concurrent_state = std::make_shared&lt;yasmin::Concurrence&gt;(
+      yasmin::StateMap{
+          {"FOO", foo_state},
+          {"BAR", bar_state},
+      },
+      "defaulted",
+      yasmin::OutcomeMap{
+          {"outcome1", {{"FOO", "outcome1"}, {"BAR", "outcome3"}}},
+          {"outcome2", {{"FOO", "outcome2"}, {"BAR", "outcome3"}}},
+      });</code></pre>
 
         <h2>4. Add to State Machine</h2>
         <p>
@@ -301,23 +301,29 @@ auto concurrent_state = std::make_shared&lt;yasmin::Concurrence&gt;(
           <code>outcome4</code>. This setup enables the demonstration to run
           through several concurrent executions before terminating.
         </p>
-        <pre><code class="language-cpp">sm-&gt;add_state("CONCURRENCE", concurrent_state,
-              {
-                  {"outcome1", "CONCURRENCE"},
-                  {"outcome2", "CONCURRENCE"},
-                  {"defaulted", "outcome4"},
-              });
+        <pre><code class="language-cpp">  // Add concurrent state to the state machine
+  sm-&gt;add_state("CONCURRENCE", concurrent_state,
+                {
+                    {"outcome1", "CONCURRENCE"},
+                    {"outcome2", "CONCURRENCE"},
+                    {"defaulted", "outcome4"},
+                });
 
-yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_CONCURRENCE_DEMO");
+  // Publish state machine updates
+  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_CONCURRENCE_DEMO");
 
-try {
+  // Execute the state machine
+  try {
     std::string outcome = (*sm.get())();
     YASMIN_LOG_INFO(outcome.c_str());
-} catch (const std::exception &e) {
+  } catch (const std::exception &amp;e) {
     YASMIN_LOG_WARN(e.what());
-}
+  }
 
-rclcpp::shutdown();</code></pre>
+  rclcpp::shutdown();
+
+  return 0;
+}</code></pre>
 
         <h2>5. Run the Demo</h2>
         <p>

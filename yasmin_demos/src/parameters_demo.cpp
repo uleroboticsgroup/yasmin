@@ -17,7 +17,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <unordered_map>
 
 #include "rclcpp/rclcpp.hpp"
 #include "yasmin/logs.hpp"
@@ -119,7 +118,7 @@ int main(int argc, char *argv[]) {
   // Add states to the state machine
   sm->add_state("GETTING_PARAMETERS",
                 std::make_shared<yasmin_ros::GetParametersState>(
-                    std::unordered_map<std::string, std::any>{
+                    yasmin_ros::GetParametersState::Parameters{
                         {"max_counter", 3},
                         {"counter_str", std::string("Counter")},
                     }),

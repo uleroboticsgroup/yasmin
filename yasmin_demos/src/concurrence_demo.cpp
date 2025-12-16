@@ -134,12 +134,15 @@ int main(int argc, char *argv[]) {
 
   // Create concurrent state
   auto concurrent_state = std::make_shared<yasmin::Concurrence>(
-      yasmin::StateMap{{"FOO", foo_state}, {"BAR", bar_state}}, "defaulted",
+      yasmin::StateMap{
+          {"FOO", foo_state},
+          {"BAR", bar_state},
+      },
+      "defaulted",
       yasmin::OutcomeMap{
-          {"outcome1",
-           yasmin::StateOutcomeMap{{"FOO", "outcome1"}, {"BAR", "outcome3"}}},
-          {"outcome2",
-           yasmin::StateOutcomeMap{{"FOO", "outcome2"}, {"BAR", "outcome3"}}}});
+          {"outcome1", {{"FOO", "outcome1"}, {"BAR", "outcome3"}}},
+          {"outcome2", {{"FOO", "outcome2"}, {"BAR", "outcome3"}}},
+      });
 
   // Add concurrent state to the state machine
   sm->add_state("CONCURRENCE", concurrent_state,

@@ -258,7 +258,7 @@ public:
   // Add states to the state machine
   sm-&gt;add_state("GETTING_PARAMETERS",
                 std::make_shared&lt;yasmin_ros::GetParametersState&gt;(
-                    std::map&lt;std::string, std::any&gt;{
+                    yasmin_ros::GetParametersState::Parameters{
                         {"max_counter", 3},
                         {"counter_str", std::string("Counter")},
                     }),

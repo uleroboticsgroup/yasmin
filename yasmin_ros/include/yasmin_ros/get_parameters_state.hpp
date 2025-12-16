@@ -37,14 +37,18 @@ namespace yasmin_ros {
 class GetParametersState : public yasmin::State {
 public:
   /**
+   * @brief Type alias for a map of parameters.
+   */
+  using Parameters = std::unordered_map<std::string, std::any>;
+
+  /**
    * @brief Constructs a GetParametersState with a map of parameters.
    *
    * @param parameters A map of parameter names to their default values.
    * @param node A shared pointer to the ROS 2 node.
    */
-  GetParametersState(
-      const std::unordered_map<std::string, std::any> &parameters,
-      rclcpp::Node::SharedPtr node = nullptr);
+  GetParametersState(const Parameters &parameters,
+                     rclcpp::Node::SharedPtr node = nullptr);
 
   /**
    * @brief Executes the state to retrieve parameters.
