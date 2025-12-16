@@ -84,7 +84,7 @@ private:
   /// Executor for managing multiple threads.
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(29, 5, 1) // Kilted and Rolling
+#if RCLCPP_VERSION_GTE(29, 1, 1) // Jazzy, Kilted and Rolling
   rclcpp::experimental::executors::EventsExecutor executor;
 #else // Humble, Iron and Jazzy
   rclcpp::executors::MultiThreadedExecutor executor;
