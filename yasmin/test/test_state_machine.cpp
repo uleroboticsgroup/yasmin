@@ -263,6 +263,103 @@ TEST_F(TestStateMachine, TestValidateWrongState) {
   }
 }
 
+TEST_F(TestStateMachine, TestStartCallback) {
+  bool start_called = false;
+  std::string start_state_called;
+
+  sm->add_start_cb([&](yasmin::Blackboard::SharedPtr blackboard,
+                       const std::string &start_state) {
+    start_called = true;
+    start_state_called = start_state;
+  });
+
+  EXPECT_EQ((*sm)(blackboard), "outcome4");
+  EXPECT_TRUE(start_called);
+  EXPECT_EQ(start_state_called, "FOO");
+}
+
+TEST_F(TestStateMachine, TestTransitionCallback) {
+  std::vector<std::tuple<std::string, std::string, std::string>>
+      transitions_called;
+
+  sm->add_transition_cb([&](yasmin::Blackboard::SharedPtr blackboard,
+                            const std::string &from_state,
+                            const std::string &to_state,
+                            const std::string &outcome) {
+    transitions_called.emplace_back(from_state, to_state, outcome);
+  });
+
+  EXPECT_EQ((*sm)(blackboard), "outcome4");
+
+  // Should have transitions: FOO -> BAR (outcome1), BAR -> FOO (outcome2), FOO
+  // -> BAR (outcome1), BAR -> FOO (outcome2), FOO -> BAR (outcome1), BAR -> FOO
+  // (outcome2)
+  EXPECT_EQ(transitions_called.size(), 6);
+  EXPECT_EQ(std::get<0>(transitions_called[0]), "FOO");
+  EXPECT_EQ(std::get<1>(transitions_called[0]), "BAR");
+  EXPECT_EQ(std::get<2>(transitions_called[0]), "outcome1");
+  EXPECT_EQ(std::get<0>(transitions_called[1]), "BAR");
+  EXPECT_EQ(std::get<1>(transitions_called[1]), "FOO");
+  EXPECT_EQ(std::get<2>(transitions_called[1]), "outcome2");
+  EXPECT_EQ(std::get<0>(transitions_called[2]), "FOO");
+  EXPECT_EQ(std::get<1>(transitions_called[2]), "BAR");
+  EXPECT_EQ(std::get<2>(transitions_called[2]), "outcome1");
+  EXPECT_EQ(std::get<0>(transitions_called[3]), "BAR");
+  EXPECT_EQ(std::get<1>(transitions_called[3]), "FOO");
+  EXPECT_EQ(std::get<2>(transitions_called[3]), "outcome2");
+  EXPECT_EQ(std::get<0>(transitions_called[4]), "FOO");
+  EXPECT_EQ(std::get<1>(transitions_called[4]), "BAR");
+  EXPECT_EQ(std::get<2>(transitions_called[4]), "outcome1");
+  EXPECT_EQ(std::get<0>(transitions_called[5]), "BAR");
+  EXPECT_EQ(std::get<1>(transitions_called[5]), "FOO");
+  EXPECT_EQ(std::get<2>(transitions_called[5]), "outcome2");
+}
+
+TEST_F(TestStateMachine, TestEndCallback) {
+  bool end_called = false;
+  std::string end_outcome_called;
+
+  sm->add_end_cb([&](yasmin::Blackboard::SharedPtr blackboard,
+                     const std::string &outcome) {
+    end_called = true;
+    end_outcome_called = outcome;
+  });
+
+  EXPECT_EQ((*sm)(blackboard), "outcome4");
+  EXPECT_TRUE(end_called);
+  EXPECT_EQ(end_outcome_called, "outcome4");
+}
+
+TEST_F(TestStateMachine, TestMultipleCallbacks) {
+  int start_count = 0;
+  int transition_count = 0;
+  int end_count = 0;
+
+  sm->add_start_cb([&](yasmin::Blackboard::SharedPtr, const std::string &) {
+    start_count++;
+  });
+  sm->add_start_cb([&](yasmin::Blackboard::SharedPtr, const std::string &) {
+    start_count++;
+  });
+
+  sm->add_transition_cb([&](yasmin::Blackboard::SharedPtr, const std::string &,
+                            const std::string &,
+                            const std::string &) { transition_count++; });
+  sm->add_transition_cb([&](yasmin::Blackboard::SharedPtr, const std::string &,
+                            const std::string &,
+                            const std::string &) { transition_count++; });
+
+  sm->add_end_cb(
+      [&](yasmin::Blackboard::SharedPtr, const std::string &) { end_count++; });
+  sm->add_end_cb(
+      [&](yasmin::Blackboard::SharedPtr, const std::string &) { end_count++; });
+
+  EXPECT_EQ((*sm)(blackboard), "outcome4");
+  EXPECT_EQ(start_count, 2);
+  EXPECT_EQ(transition_count, 12); // 6 transitions * 2 callbacks
+  EXPECT_EQ(end_count, 2);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

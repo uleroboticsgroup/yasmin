@@ -1,5 +1,5 @@
-.vscode
-log
-__pycache__
 .coverage
+.vscode
+__pycache__
 htmlcov
+log

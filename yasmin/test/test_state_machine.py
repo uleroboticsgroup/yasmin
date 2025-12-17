@@ -275,6 +275,91 @@ class TestStateMachine(unittest.TestCase):
             "State machine outcome 'BAR' not registered as outcome neither state",
         )
 
+    def test_start_callback(self):
+        start_called = False
+        start_state_called = None
+
+        def start_cb(blackboard, start_state):
+            nonlocal start_called, start_state_called
+            start_called = True
+            start_state_called = start_state
+
+        self.sm.add_start_cb(start_cb)
+        result = self.sm()
+        self.assertEqual(result, "outcome4")
+        self.assertTrue(start_called)
+        self.assertEqual(start_state_called, "FOO")
+
+    def test_transition_callback(self):
+        transitions_called = []
+
+        def transition_cb(blackboard, from_state, to_state, outcome):
+            transitions_called.append((from_state, to_state, outcome))
+
+        self.sm.add_transition_cb(transition_cb)
+        result = self.sm()
+        self.assertEqual(result, "outcome4")
+
+        # Should have transitions: FOO -> BAR (outcome1), BAR -> FOO (outcome2), FOO -> BAR (outcome1), BAR -> FOO (outcome2), FOO -> BAR (outcome1), BAR -> FOO (outcome2)
+        self.assertEqual(len(transitions_called), 6)
+        self.assertEqual(transitions_called[0], ("FOO", "BAR", "outcome1"))
+        self.assertEqual(transitions_called[1], ("BAR", "FOO", "outcome2"))
+        self.assertEqual(transitions_called[2], ("FOO", "BAR", "outcome1"))
+        self.assertEqual(transitions_called[3], ("BAR", "FOO", "outcome2"))
+        self.assertEqual(transitions_called[4], ("FOO", "BAR", "outcome1"))
+        self.assertEqual(transitions_called[5], ("BAR", "FOO", "outcome2"))
+
+    def test_end_callback(self):
+        end_called = False
+        end_outcome_called = None
+
+        def end_cb(blackboard, outcome):
+            nonlocal end_called, end_outcome_called
+            end_called = True
+            end_outcome_called = outcome
+
+        self.sm.add_end_cb(end_cb)
+        result = self.sm()
+        self.assertEqual(result, "outcome4")
+        self.assertTrue(end_called)
+        self.assertEqual(end_outcome_called, "outcome4")
+
+    def test_multiple_callbacks(self):
+        start_count = [0]
+        transition_count = [0]
+        end_count = [0]
+
+        self.sm.add_start_cb(
+            lambda blackboard, start_state: start_count.__setitem__(0, start_count[0] + 1)
+        )
+        self.sm.add_start_cb(
+            lambda blackboard, start_state: start_count.__setitem__(0, start_count[0] + 1)
+        )
+
+        self.sm.add_transition_cb(
+            lambda blackboard, from_state, to_state, outcome: transition_count.__setitem__(
+                0, transition_count[0] + 1
+            )
+        )
+        self.sm.add_transition_cb(
+            lambda blackboard, from_state, to_state, outcome: transition_count.__setitem__(
+                0, transition_count[0] + 1
+            )
+        )
+
+        self.sm.add_end_cb(
+            lambda blackboard, outcome: end_count.__setitem__(0, end_count[0] + 1)
+        )
+        self.sm.add_end_cb(
+            lambda blackboard, outcome: end_count.__setitem__(0, end_count[0] + 1)
+        )
+
+        result = self.sm()
+        self.assertEqual(result, "outcome4")
+        self.assertEqual(start_count[0], 2)
+        self.assertEqual(transition_count[0], 12)
+        self.assertEqual(end_count[0], 2)
+
 
 if __name__ == "__main__":
     unittest.main()
