@@ -23,12 +23,11 @@ from yasmin_ros.ros_clients_cache import ROSClientsCache
 from yasmin_ros import ServiceState
 from yasmin_ros.basic_outcomes import SUCCEED, TIMEOUT
 
-from example_interfaces.srv import AddTwoInts
-from std_msgs.msg import String
-
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
+from std_msgs.msg import String
+from example_interfaces.srv import AddTwoInts
 
 
 class AuxNode(Node):
@@ -121,7 +120,7 @@ class TestServiceClientState(unittest.TestCase):
         retries = 3
 
         ## Capture the logs
-        with self.assertLogs("root", level="WARNING") as captured:
+        with self.assertLogs(level="WARNING") as captured:
             state = ServiceState(
                 AddTwoInts,
                 "test_retry",
@@ -149,7 +148,7 @@ class TestServiceClientState(unittest.TestCase):
         retries = 3
 
         ## Capture the logs
-        with self.assertLogs("root", level="WARNING") as captured:
+        with self.assertLogs(level="WARNING") as captured:
             state = ServiceState(
                 AddTwoInts,
                 "test",

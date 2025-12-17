@@ -19,11 +19,9 @@ import unittest
 from threading import Thread
 
 from yasmin import set_py_loggers
-from yasmin_ros.ros_clients_cache import ROSClientsCache
 from yasmin_ros import ActionState
+from yasmin_ros.ros_clients_cache import ROSClientsCache
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
-
-from example_interfaces.action import Fibonacci
 
 import rclpy
 from rclpy.node import Node
@@ -31,6 +29,7 @@ from rclpy.action import ActionServer
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.action import CancelResponse, GoalResponse
+from example_interfaces.action import Fibonacci
 
 
 class AuxNode(Node):
@@ -173,7 +172,7 @@ class TestActionClient(unittest.TestCase):
         retries = 3
 
         ## Capture the logs
-        with self.assertLogs("root", level="WARNING") as captured:
+        with self.assertLogs(level="WARNING") as captured:
             state = ActionState(
                 Fibonacci,
                 "test1",
@@ -200,7 +199,7 @@ class TestActionClient(unittest.TestCase):
         retries = 3
 
         ## Capture the logs
-        with self.assertLogs("root", level="WARNING") as captured:
+        with self.assertLogs(level="WARNING") as captured:
             state = ActionState(
                 Fibonacci,
                 "test",

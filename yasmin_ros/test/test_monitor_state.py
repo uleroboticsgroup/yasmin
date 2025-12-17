@@ -21,11 +21,10 @@ from yasmin import set_py_loggers
 from yasmin_ros import MonitorState
 from yasmin_ros.basic_outcomes import SUCCEED, TIMEOUT
 
-from std_msgs.msg import String
-
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
+from std_msgs.msg import String
 
 
 class AuxNode(Node):
@@ -80,7 +79,7 @@ class TestYasminRos(unittest.TestCase):
         retries = 3
 
         ## Capture the logs
-        with self.assertLogs("root", level="WARNING") as captured:
+        with self.assertLogs(level="WARNING") as captured:
             state = MonitorState(
                 String,
                 "test1",

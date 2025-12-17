@@ -16,13 +16,12 @@
 
 import unittest
 
-from yasmin_ros.ros_clients_cache import ROSClientsCache
 from yasmin_ros import PublisherState
 from yasmin_ros.basic_outcomes import SUCCEED
-
-from std_msgs.msg import String
+from yasmin_ros.ros_clients_cache import ROSClientsCache
 
 import rclpy
+from std_msgs.msg import String
 
 
 class TestYasminRos(unittest.TestCase):

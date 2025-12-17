@@ -59,7 +59,7 @@ protected:
   static std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor;
   static std::thread spin_thread;
 
-  static void SetUpTestSuite() {
+  static void SetUpTestCase() {
     rclcpp::init(0, nullptr);
     aux_node = std::make_shared<AuxNode>();
     executor = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
@@ -67,7 +67,7 @@ protected:
     spin_thread = std::thread([&]() { executor->spin(); });
   }
 
-  static void TearDownTestSuite() {
+  static void TearDownTestCase() {
     executor->cancel();
     if (spin_thread.joinable()) {
       spin_thread.join();

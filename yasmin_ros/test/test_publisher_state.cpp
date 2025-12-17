@@ -35,9 +35,9 @@ using namespace std::chrono_literals;
 
 class TestPublisherState : public ::testing::Test {
 protected:
-  static void SetUpTestSuite() { rclcpp::init(0, nullptr); }
+  static void SetUpTestCase() { rclcpp::init(0, nullptr); }
 
-  static void TearDownTestSuite() { rclcpp::shutdown(); }
+  static void TearDownTestCase() { rclcpp::shutdown(); }
 };
 
 TEST_F(TestPublisherState, TestPublisher) {
