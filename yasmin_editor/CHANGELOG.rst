@@ -2,6 +2,13 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.2.0 (2025-12-17)
+------------------
+* adding Exception to logs in plugin_manager
+* fixing self-loops transitions in editor
+* removing wrong condition in plugin manager to check cpp plugins
+* Contributors: Miguel Ángel González Santamarta
+
 4.1.0 (2025-12-07)
 ------------------
 

@@ -3,6 +3,22 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.0 (2025-12-17)
+------------------
+* Adding unit tests for state machine callbacks
+* removing list of args form state machine callbacks
+* new macro YASMIN_PTR_ALIASES for all pointer aliases
+* Add new type aliases and macros to types.hpp and sync documentation examples with demo code
+  - Add YASMIN_UNIQUE_PTR_ALIAS and YASMIN_WEAK_PTR_ALIAS macros
+  - Add alias for Outcomes, Transitions, Remappings and more
+  - Update README.md and tutorial docs to use Blackboard::SharedPtr instead of std::shared_ptr<Blackboard> to match actual demo implementations
+* using unordered_map for values and registry of blackboard
+* optimizing C++ code (adding const and noexcept)
+* setting as private set_status and get_status in State
+* removing repeated checks in blackboard pywrapper
+* setting virtual destructor for state and removing __del__ from state machine pybind
+* Contributors: Miguel Ángel González Santamarta
+
 4.1.0 (2025-12-07)
 ------------------
 * adding python-dev in deps and removing unused test deps for python
@@ -175,8 +191,8 @@ Changelog for package yasmin
 * fixing C++ comments
 * validated flag for state machine
 * setting black formatter line length to 90
-* comments for Python attributes moved to __init\_\_
-* python attribute comments inside __init\_\_
+* comments for Python attributes moved to __init__
+* python attribute comments inside __init__
 * fixing documentation
 * improving Python comments for Doxygen
 * comments added to C++ files for Doxygen
@@ -267,7 +283,7 @@ Changelog for package yasmin
 * possible outcomes added to exception
 * python concat str fixed
 * typing fixes
-* blackboard included in yasmin __init\_\_
+* blackboard included in yasmin __init__
 * license added to files
 * upper calls removed
 * boost removed

@@ -3,6 +3,11 @@ Changelog for package yasmin_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.0 (2025-12-17)
+------------------
+* removing C++ from msgs package
+* Contributors: Miguel Ángel González Santamarta
+
 4.1.0 (2025-12-07)
 ------------------
 

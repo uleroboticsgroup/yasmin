@@ -2,6 +2,22 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.2.0 (2025-12-17)
+------------------
+* Add new type aliases and macros to types.hpp and sync documentation examples with demo code
+  - Add YASMIN_UNIQUE_PTR_ALIAS and YASMIN_WEAK_PTR_ALIAS macros
+  - Add alias for Outcomes, Transitions, Remappings and more
+  - Update README.md and tutorial docs to use Blackboard::SharedPtr instead of std::shared_ptr<Blackboard> to match actual demo implementations
+* using unordered_map for values and registry of blackboard
+* fixing comments and log order in demos
+* removing no-op deleted form pybind_bridge in factory
+* using createUnmanagedInstance in pybind_bridge to allow Python mange the lifetime of objects
+* improving Python + cleaning Python viewer pub on shutdown
+* optimizing C++ code (adding const and noexcept)
+* removing cleanup from Python viewer publisher
+* removing repeated checks in blackboard pywrapper
+* Contributors: Miguel Ángel González Santamarta
+
 4.1.0 (2025-12-07)
 ------------------
 * adding python-dev in deps and removing unused test deps for python

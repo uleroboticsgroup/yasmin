@@ -3,6 +3,20 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.0 (2025-12-17)
+------------------
+* creating alias for Parameters and fixing style of concurrence demo
+* Add new type aliases and macros to types.hpp and sync documentation examples with demo code
+  - Add YASMIN_UNIQUE_PTR_ALIAS and YASMIN_WEAK_PTR_ALIAS macros
+  - Add alias for Outcomes, Transitions, Remappings and more
+  - Update README.md and tutorial docs to use Blackboard::SharedPtr instead of std::shared_ptr<Blackboard> to match actual demo implementations
+* setting EventsExecutor for Jazzy
+* setting the YasminNode constructor as protected for Singleton
+* improving Python + cleaning Python viewer pub on shutdown
+* optimizing C++ code (adding const and noexcept)
+* minor fixes in Python comments and imports
+* Contributors: Miguel Ángel González Santamarta
+
 4.1.0 (2025-12-07)
 ------------------
 * removing duplicated comments and setting generateUUID as inline
@@ -181,7 +195,7 @@ Changelog for package yasmin_ros
 * fixing C++ comments
 * fixing C++ comments
 * setting black formatter line length to 90
-* comments for Python attributes moved to __init\_\_
+* comments for Python attributes moved to __init__
 * fixing documentation
 * improving Python comments for Doxygen
 * comments added to C++ files for Doxygen
@@ -279,7 +293,7 @@ Changelog for package yasmin_ros
 * Handling of undeclared transitions
 * action state fixed
 * service_state fixed
-* blackboard included in yasmin __init\_\_
+* blackboard included in yasmin __init__
 * license added to files
 * simple_node updated
 * boost removed

@@ -3,6 +3,23 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.0 (2025-12-17)
+------------------
+* creating alias for Parameters and fixing style of concurrence demo
+* Add new type aliases and macros to types.hpp and sync documentation examples with demo code
+  - Add YASMIN_UNIQUE_PTR_ALIAS and YASMIN_WEAK_PTR_ALIAS macros
+  - Add alias for Outcomes, Transitions, Remappings and more
+  - Update README.md and tutorial docs to use Blackboard::SharedPtr instead of std::shared_ptr<Blackboard> to match actual demo implementations
+* fixing comments and log order in demos
+* using createUnmanagedInstance in pybind_bridge to allow Python mange the lifetime of objects
+* improving Python + cleaning Python viewer pub on shutdown
+* setting as private set_status and get_status in State
+* improving comments on foo and bar states from demos
+* removing cleanup from Python viewer publisher
+* adding class_libraries to plugins
+* setting default value for PrintOdometryState times in demos
+* Contributors: Miguel Ángel González Santamarta
+
 4.1.0 (2025-12-07)
 ------------------
 * adding python-dev in deps and removing unused test deps for python

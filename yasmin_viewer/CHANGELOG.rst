@@ -3,6 +3,19 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.0 (2025-12-17)
+------------------
+* Add new type aliases and macros to types.hpp and sync documentation examples with demo code
+  - Add YASMIN_UNIQUE_PTR_ALIAS and YASMIN_WEAK_PTR_ALIAS macros
+  - Add alias for Outcomes, Transitions, Remappings and more
+  - Update README.md and tutorial docs to use Blackboard::SharedPtr instead of std::shared_ptr<Blackboard> to match actual demo implementations
+* using createUnmanagedInstance in pybind_bridge to allow Python mange the lifetime of objects
+* improving Python + cleaning Python viewer pub on shutdown
+* optimizing C++ code (adding const and noexcept)
+* minor fixes in Python comments and imports
+* removing cleanup from Python viewer publisher
+* Contributors: Miguel Ángel González Santamarta
+
 4.1.0 (2025-12-07)
 ------------------
 * removing duplicated comments and setting generateUUID as inline
@@ -79,7 +92,7 @@ Changelog for package yasmin_viewer
 * fixing C++ comments
 * started removed from viewer node
 * setting black formatter line length to 90
-* comments for Python attributes moved to __init\_\_
+* comments for Python attributes moved to __init__
 * fixing documentation
 * improving Python comments for Doxygen
 * comments added to C++ files for Doxygen
