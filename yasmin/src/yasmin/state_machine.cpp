@@ -166,29 +166,24 @@ void StateMachine::set_current_state(const std::string &state_name) {
   this->current_state_cond.notify_all();
 }
 
-void StateMachine::add_start_cb(StartCallbackType cb,
-                                const std::vector<std::string> &args) {
-  this->start_cbs.emplace_back(cb, args);
+void StateMachine::add_start_cb(StartCallbackType cb) {
+  this->start_cbs.emplace_back(cb);
 }
 
-void StateMachine::add_transition_cb(TransitionCallbackType cb,
-                                     const std::vector<std::string> &args) {
-  this->transition_cbs.emplace_back(cb, args);
+void StateMachine::add_transition_cb(TransitionCallbackType cb) {
+  this->transition_cbs.emplace_back(cb);
 }
 
-void StateMachine::add_end_cb(EndCallbackType cb,
-                              const std::vector<std::string> &args) {
-  this->end_cbs.emplace_back(cb, args);
+void StateMachine::add_end_cb(EndCallbackType cb) {
+  this->end_cbs.emplace_back(cb);
 }
 
 void StateMachine::call_start_cbs(Blackboard::SharedPtr blackboard,
                                   const std::string &start_state) {
 
   try {
-    for (const auto &callback_pair : this->start_cbs) {
-      const auto &cb = callback_pair.first;
-      const auto &args = callback_pair.second;
-      cb(blackboard, start_state, args);
+    for (const auto &callback : this->start_cbs) {
+      callback(blackboard, start_state);
     }
 
   } catch (const std::exception &e) {
@@ -203,10 +198,8 @@ void StateMachine::call_transition_cbs(Blackboard::SharedPtr blackboard,
                                        const std::string &outcome) {
 
   try {
-    for (const auto &callback_pair : this->transition_cbs) {
-      const auto &cb = callback_pair.first;
-      const auto &args = callback_pair.second;
-      cb(blackboard, from_state, to_state, outcome, args);
+    for (const auto &callback : this->transition_cbs) {
+      callback(blackboard, from_state, to_state, outcome);
     }
 
   } catch (const std::exception &e) {
@@ -219,10 +212,8 @@ void StateMachine::call_end_cbs(Blackboard::SharedPtr blackboard,
                                 const std::string &outcome) {
 
   try {
-    for (const auto &callback_pair : this->end_cbs) {
-      const auto &cb = callback_pair.first;
-      const auto &args = callback_pair.second;
-      cb(blackboard, outcome, args);
+    for (const auto &callback : this->end_cbs) {
+      callback(blackboard, outcome);
     }
 
   } catch (const std::exception &e) {

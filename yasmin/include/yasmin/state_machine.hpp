@@ -39,20 +39,18 @@ namespace yasmin {
  */
 class StateMachine : public State {
 
+public:
   /// Alias for a callback function executed before running the state machine.
   using StartCallbackType =
-      std::function<void(Blackboard::SharedPtr, const std::string &,
-                         const std::vector<std::string> &)>;
+      std::function<void(Blackboard::SharedPtr, const std::string &)>;
   /// Alias for a callback function executed before changing the state.
-  using TransitionCallbackType = std::function<void(
-      Blackboard::SharedPtr, const std::string &, const std::string &,
-      const std::string &, const std::vector<std::string> &)>;
+  using TransitionCallbackType =
+      std::function<void(Blackboard::SharedPtr, const std::string &,
+                         const std::string &, const std::string &)>;
   /// Alias for a callback function executed after running the state machine.
   using EndCallbackType =
-      std::function<void(Blackboard::SharedPtr, const std::string &,
-                         const std::vector<std::string> &)>;
+      std::function<void(Blackboard::SharedPtr, const std::string &)>;
 
-public:
   /**
    * @brief Shared pointer type for StateMachine.
    */
@@ -155,28 +153,22 @@ public:
    * @brief Adds a callback function to be called when the state machine starts.
    *
    * @param cb The callback function to execute.
-   * @param args Optional arguments to pass to the callback.
    */
-  void add_start_cb(StartCallbackType cb,
-                    const std::vector<std::string> &args = {});
+  void add_start_cb(StartCallbackType cb);
 
   /**
    * @brief Adds a callback function for state transitions.
    *
    * @param cb The callback function to execute.
-   * @param args Optional arguments to pass to the callback.
    */
-  void add_transition_cb(TransitionCallbackType cb,
-                         const std::vector<std::string> &args = {});
+  void add_transition_cb(TransitionCallbackType cb);
 
   /**
    * @brief Adds a callback function to be called when the state machine ends.
    *
    * @param cb The callback function to execute.
-   * @param args Optional arguments to pass to the callback.
    */
-  void add_end_cb(EndCallbackType cb,
-                  const std::vector<std::string> &args = {});
+  void add_end_cb(EndCallbackType cb);
 
   /**
    * @brief Validates the state machine configuration.
@@ -256,12 +248,11 @@ private:
   std::atomic_bool validated{false};
 
   /// Start callbacks executed before the state machine
-  std::vector<std::pair<StartCallbackType, std::vector<std::string>>> start_cbs;
+  std::vector<StartCallbackType> start_cbs;
   /// Transition callbacks executed before changing the state
-  std::vector<std::pair<TransitionCallbackType, std::vector<std::string>>>
-      transition_cbs;
+  std::vector<TransitionCallbackType> transition_cbs;
   /// End callbacks executed before the state machine
-  std::vector<std::pair<EndCallbackType, std::vector<std::string>>> end_cbs;
+  std::vector<EndCallbackType> end_cbs;
 
   /**
    * @brief Sets the current state name.
