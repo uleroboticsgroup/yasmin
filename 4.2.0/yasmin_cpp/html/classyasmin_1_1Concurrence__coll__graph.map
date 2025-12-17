@@ -1,0 +1,22 @@
+<map id="yasmin::Concurrence" name="yasmin::Concurrence">
+<area shape="rect" id="Node000001" title="Runs a series of states in parallel." alt="" coords="679,200,820,226"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="329,70,428,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="444,87,546,106,602,122,656,143,701,170,736,198,733,202,698,174,654,148,600,127,544,111,443,92"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="22,24,164,50"/>
+<area shape="poly" id="edge9_Node000001_Node000003" title=" " alt="" coords="179,23,282,18,406,23,471,33,536,48,598,70,656,100,685,123,710,150,743,198,739,201,706,153,682,127,654,105,596,75,534,53,470,38,405,29,282,23,179,29"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="179,48,329,72,328,77,179,53"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,88,181,114"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="196,100,264,98,328,89,329,94,265,103,196,106"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="305,120,452,176"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="467,158,655,191,688,197,687,202,655,196,466,164"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="340,200,417,226"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="432,210,678,210,678,216,432,216"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="31,193,155,233"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="171,210,339,210,339,216,171,216"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="289,251,468,306"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="483,260,655,231,688,224,689,229,655,236,484,265"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="311,331,446,386"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="460,341,555,316,605,298,654,278,697,251,732,224,735,228,701,256,656,283,607,303,557,321,462,346"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="338,411,418,437"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="434,423,484,421,542,413,600,397,653,369,688,336,714,295,732,256,742,225,747,227,737,258,718,298,692,339,657,373,602,402,543,419,485,427,434,429"/>
+</map>
