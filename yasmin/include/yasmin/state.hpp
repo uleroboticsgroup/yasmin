@@ -69,7 +69,7 @@ public:
   /**
    * @brief Shared pointer type for State.
    */
-  YASMIN_SHARED_PTR_ALIAS(State)
+  YASMIN_PTR_ALIASES(State)
 
   /**
    * @brief Constructs a State with a set of possible outcomes.

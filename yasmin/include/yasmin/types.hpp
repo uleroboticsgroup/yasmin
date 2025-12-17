@@ -37,6 +37,23 @@ namespace yasmin {
 #define YASMIN_WEAK_PTR_ALIAS(ClassName)                                       \
   using WeakPtr = std::weak_ptr<ClassName>;
 
+/** @brief Macro to define all pointer aliases for a class */
+#define YASMIN_PTR_ALIASES(ClassName)                                          \
+  /**                                                                          \
+   * @brief Shared pointer type for ClassName.                                 \
+   */                                                                          \
+  YASMIN_SHARED_PTR_ALIAS(ClassName)                                           \
+                                                                               \
+  /**                                                                          \
+   * @brief Unique pointer type for ClassName.                                 \
+   */                                                                          \
+  YASMIN_UNIQUE_PTR_ALIAS(ClassName)                                           \
+                                                                               \
+  /**                                                                          \
+   * @brief Weak pointer type for ClassName.                                   \
+   */                                                                          \
+  YASMIN_WEAK_PTR_ALIAS(ClassName)
+
 /** @brief Forward declaration for State class */
 class State;
 /** @brief Forward declaration for Blackboard class */

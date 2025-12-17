@@ -43,7 +43,7 @@ public:
   /**
    * @brief Shared pointer type for CbState.
    */
-  YASMIN_SHARED_PTR_ALIAS(CbState)
+  YASMIN_PTR_ALIASES(CbState)
 
   /**
    * @brief Constructs a CbState object.

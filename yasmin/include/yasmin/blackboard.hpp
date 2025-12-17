@@ -82,7 +82,7 @@ public:
   /**
    * @brief Shared pointer type for Blackboard.
    */
-  YASMIN_SHARED_PTR_ALIAS(Blackboard)
+  YASMIN_PTR_ALIASES(Blackboard)
 
   /**
    * @brief Default constructor for Blackboard.

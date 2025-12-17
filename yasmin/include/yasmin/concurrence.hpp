@@ -78,7 +78,7 @@ public:
   /**
    * @brief Shared pointer type for Concurrence.
    */
-  YASMIN_SHARED_PTR_ALIAS(Concurrence)
+  YASMIN_PTR_ALIASES(Concurrence)
 
   /**
    * @brief Constructs a State with a set of possible outcomes.

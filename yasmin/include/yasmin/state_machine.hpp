@@ -56,7 +56,7 @@ public:
   /**
    * @brief Shared pointer type for StateMachine.
    */
-  YASMIN_SHARED_PTR_ALIAS(StateMachine)
+  YASMIN_PTR_ALIASES(StateMachine)
 
   /**
    * @brief Construct a new StateMachine object.
