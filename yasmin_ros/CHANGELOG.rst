@@ -3,6 +3,12 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.1 (2025-12-19)
+------------------
+* minor fix in C++ header guards
+* Adapting tests for Foxy and Galactic
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.0 (2025-12-17)
 ------------------
 * creating alias for Parameters and fixing style of concurrence demo

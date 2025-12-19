@@ -3,6 +3,11 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.1 (2025-12-19)
+------------------
+* minor fix in C++ header guards
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.0 (2025-12-17)
 ------------------
 * Add new type aliases and macros to types.hpp and sync documentation examples with demo code

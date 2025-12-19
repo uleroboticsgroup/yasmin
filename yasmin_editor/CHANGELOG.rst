@@ -2,6 +2,9 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.2.1 (2025-12-19)
+------------------
+
 4.2.0 (2025-12-17)
 ------------------
 * adding Exception to logs in plugin_manager

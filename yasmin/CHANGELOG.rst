@@ -3,6 +3,11 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.1 (2025-12-19)
+------------------
+* minor fix in C++ header guards
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.0 (2025-12-17)
 ------------------
 * Adding unit tests for state machine callbacks

@@ -3,6 +3,9 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.1 (2025-12-19)
+------------------
+
 4.2.0 (2025-12-17)
 ------------------
 * creating alias for Parameters and fixing style of concurrence demo
