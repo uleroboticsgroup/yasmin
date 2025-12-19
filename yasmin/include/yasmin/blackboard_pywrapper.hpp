@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN__BLACKBOARD_PYWRAPPER_HPP
-#define YASMIN__BLACKBOARD_PYWRAPPER_HPP
+#ifndef YASMIN__BLACKBOARD_PYWRAPPER_HPP_
+#define YASMIN__BLACKBOARD_PYWRAPPER_HPP_
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
@@ -181,4 +181,4 @@ public:
 
 } // namespace yasmin
 
-#endif // YASMIN__BLACKBOARD_PYWRAPPER_HPP
+#endif // YASMIN__BLACKBOARD_PYWRAPPER_HPP_

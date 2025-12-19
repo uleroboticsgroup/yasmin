@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS__YASMIN_NODE_HPP
-#define YASMIN_ROS__YASMIN_NODE_HPP
+#ifndef YASMIN_ROS__YASMIN_NODE_HPP_
+#define YASMIN_ROS__YASMIN_NODE_HPP_
 
 #include <memory>
 #include <string>
@@ -101,4 +101,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS__YASMIN_NODE_HPP
+#endif // YASMIN_ROS__YASMIN_NODE_HPP_

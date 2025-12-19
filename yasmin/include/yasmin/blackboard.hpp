@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN__BLACKBOARD_HPP
-#define YASMIN__BLACKBOARD_HPP
+#ifndef YASMIN__BLACKBOARD_HPP_
+#define YASMIN__BLACKBOARD_HPP_
 
 #include <cxxabi.h>
 #include <exception>
@@ -204,4 +204,4 @@ public:
 
 } // namespace yasmin
 
-#endif // YASMIN__BLACKBOARD_HPP
+#endif // YASMIN__BLACKBOARD_HPP_

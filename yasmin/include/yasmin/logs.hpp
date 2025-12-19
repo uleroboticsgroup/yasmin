@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN__LOGS_HPP
-#define YASMIN__LOGS_HPP
+#ifndef YASMIN__LOGS_HPP_
+#define YASMIN__LOGS_HPP_
 
 #include <cstdarg>
 #include <cstring>
@@ -201,4 +201,4 @@ void set_default_loggers();
 
 } // namespace yasmin
 
-#endif // YASMIN__LOGS_HPP
+#endif // YASMIN__LOGS_HPP_

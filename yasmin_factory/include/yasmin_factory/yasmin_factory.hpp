@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_FACTORY__YASMIN_FACTORY_HPP
-#define YASMIN_FACTORY__YASMIN_FACTORY_HPP
+#ifndef YASMIN_FACTORY__YASMIN_FACTORY_HPP_
+#define YASMIN_FACTORY__YASMIN_FACTORY_HPP_
 
 #include <string>
 #include <vector>
@@ -218,4 +218,4 @@ private:
 
 } // namespace yasmin_factory
 
-#endif // YASMIN_FACTORY__YASMIN_FACTORY_HPP
+#endif // YASMIN_FACTORY__YASMIN_FACTORY_HPP_

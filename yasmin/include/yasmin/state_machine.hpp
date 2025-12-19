@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN__STATE_MACHINE_HPP
-#define YASMIN__STATE_MACHINE_HPP
+#ifndef YASMIN__STATE_MACHINE_HPP_
+#define YASMIN__STATE_MACHINE_HPP_
 
 #include <atomic>
 #include <condition_variable>
@@ -295,4 +295,4 @@ private:
 
 } // namespace yasmin
 
-#endif // YASMIN__STATE_MACHINE_HPP
+#endif // YASMIN__STATE_MACHINE_HPP_

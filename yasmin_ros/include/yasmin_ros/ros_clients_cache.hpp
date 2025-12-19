@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS__ROS_CLIENTS_CACHE_HPP
-#define YASMIN_ROS__ROS_CLIENTS_CACHE_HPP
+#ifndef YASMIN_ROS__ROS_CLIENTS_CACHE_HPP_
+#define YASMIN_ROS__ROS_CLIENTS_CACHE_HPP_
 
 #include <functional>
 #include <map>
@@ -323,4 +323,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS__ROS_CLIENTS_CACHE_HPP
+#endif // YASMIN_ROS__ROS_CLIENTS_CACHE_HPP_

@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN__TYPES_HPP
-#define YASMIN__TYPES_HPP
+#ifndef YASMIN__TYPES_HPP_
+#define YASMIN__TYPES_HPP_
 
 #include <functional>
 #include <memory>
@@ -103,4 +103,4 @@ using CbStateCallback = std::function<std::string(std::shared_ptr<Blackboard>)>;
 
 } // namespace yasmin
 
-#endif // YASMIN__TYPES_HPP
+#endif // YASMIN__TYPES_HPP_

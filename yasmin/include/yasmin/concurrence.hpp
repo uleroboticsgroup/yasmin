@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN__CONCURRENCE_HPP
-#define YASMIN__CONCURRENCE_HPP
+#ifndef YASMIN__CONCURRENCE_HPP_
+#define YASMIN__CONCURRENCE_HPP_
 
 #include <atomic>
 #include <iostream>
@@ -136,4 +136,4 @@ public:
 
 } // namespace yasmin
 
-#endif // YASMIN__CONCURRENCE_HPP
+#endif // YASMIN__CONCURRENCE_HPP_

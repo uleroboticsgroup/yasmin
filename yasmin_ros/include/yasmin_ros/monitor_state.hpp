@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS__MONITOR_STATE_HPP
-#define YASMIN_ROS__MONITOR_STATE_HPP
+#ifndef YASMIN_ROS__MONITOR_STATE_HPP_
+#define YASMIN_ROS__MONITOR_STATE_HPP_
 
 #include <chrono>
 #include <condition_variable>
@@ -256,4 +256,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS__MONITOR_STATE_HPP
+#endif // YASMIN_ROS__MONITOR_STATE_HPP_

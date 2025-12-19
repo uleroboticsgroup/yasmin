@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_PYBIND11_UTILS_HPP
-#define YASMIN_PYBIND11_UTILS_HPP
+#ifndef YASMIN_PYBIND11_UTILS_HPP_
+#define YASMIN_PYBIND11_UTILS_HPP_
 
 #include <memory>
 #include <pybind11/pybind11.h>
@@ -138,4 +138,4 @@ inline void add_call_operator(ClassType &cls) {
 } // namespace pybind11_utils
 } // namespace yasmin
 
-#endif // YASMIN_PYBIND11_UTILS_HPP
+#endif // YASMIN_PYBIND11_UTILS_HPP_
