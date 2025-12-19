@@ -1,0 +1,7 @@
+<map id="yasmin::State" name="yasmin::State">
+<area shape="rect" id="Node000001" title="Represents a state in a state machine." alt="" coords="117,94,216,120"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,147,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,40,156,92,152,96,98,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="171,5,346,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="237,44,181,96,178,92,233,40"/>
+</map>
