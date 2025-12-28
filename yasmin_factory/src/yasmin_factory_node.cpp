@@ -40,6 +40,12 @@ int main(int argc, char *argv[]) {
                             .get_parameter_value()
                             .get<std::string>();
 
+  // Get if enable viewer parameter
+  node->declare_parameter("enable_viewer_pub", true);
+  bool enable_viewer_pub = node->get_parameter("enable_viewer_pub")
+                               .get_parameter_value()
+                               .get<bool>();
+
   // Create the factory in a scope
   yasmin_factory::YasminFactory factory;
 
@@ -48,7 +54,9 @@ int main(int argc, char *argv[]) {
   sm->set_sigint_handler(true);
 
   // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm);
+  if (enable_viewer_pub) {
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm);
+  }
 
   // Execute the state machine
   try {

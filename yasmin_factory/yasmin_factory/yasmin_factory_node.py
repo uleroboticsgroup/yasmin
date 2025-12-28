@@ -32,6 +32,12 @@ def main() -> None:
     node.declare_parameter("state_machine_file", "")
     sm_file = node.get_parameter("state_machine_file").get_parameter_value().string_value
 
+    # Get if enable viewer parameter
+    node.declare_parameter("enable_viewer_pub", True)
+    enable_viewer_pub = (
+        node.get_parameter("enable_viewer_pub").get_parameter_value().bool_value
+    )
+
     # Set ROS 2 loggers
     set_ros_loggers()
     yasmin.YASMIN_LOG_INFO("yasmin_factory_node")
@@ -42,7 +48,8 @@ def main() -> None:
     sm.set_sigint_handler(True)
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm)
+    if enable_viewer_pub:
+        YasminViewerPub(sm)
 
     # Execute the FSM
     try:
