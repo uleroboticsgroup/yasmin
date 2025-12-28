@@ -84,9 +84,11 @@ class PluginManager:
 
                             for library in root_elem.findall("library"):
                                 for class_elem in library.findall("class"):
-                                    class_name: str = class_elem.get("name")
-                                    if class_name:
-                                        self.load_cpp_plugin(class_name)
+                                    base_class_type = class_elem.get("base_class_type")
+                                    if base_class_type == "yasmin::State":
+                                        class_name: str = class_elem.get("name")
+                                        if class_name:
+                                            self.load_cpp_plugin(class_name)
 
     def load_python_plugins_from_package(self, package_name: str) -> None:
         skip_packages: set = {
