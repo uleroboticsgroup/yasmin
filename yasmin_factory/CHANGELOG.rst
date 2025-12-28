@@ -2,6 +2,12 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.2.2 (2025-12-28)
+------------------
+* Adding enable_viewer_pub to factory nodes
+* minor fix in C++ header guards
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.1 (2025-12-19)
 ------------------
 * minor fix in C++ header guards

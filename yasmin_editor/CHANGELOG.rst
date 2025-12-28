@@ -2,6 +2,11 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.2.2 (2025-12-28)
+------------------
+* Improving editor C++ plugins filter using the base_class_type to avoid no-yasmin plugins
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.1 (2025-12-19)
 ------------------
 

@@ -3,6 +3,11 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.2 (2025-12-28)
+------------------
+* minor fix in C++ header guards
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.1 (2025-12-19)
 ------------------
 * minor fix in C++ header guards
