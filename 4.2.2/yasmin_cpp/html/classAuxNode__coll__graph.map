@@ -1,0 +1,7 @@
+<map id="AuxNode" name="AuxNode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="15,79,89,105"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,99,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="37,46,37,63,41,78,36,79,32,63,32,46"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="55,46,55,79,49,79,49,46"/>
+<area shape="poly" id="edge3_Node000001_Node000002" title=" " alt="" coords="72,46,72,63,68,79,63,78,67,63,67,46"/>
+</map>

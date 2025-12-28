@@ -1,0 +1,9 @@
+<map id="yasmin::PyState" name="yasmin::PyState">
+<area shape="rect" id="Node000001" title="Trampoline class to enable Python classes to inherit from C++ State." alt="" coords="110,169,224,195"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="117,94,216,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,135,169,169,164,169,164,135"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,147,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,40,156,92,152,96,98,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="171,5,346,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="237,44,181,96,178,92,233,40"/>
+</map>
