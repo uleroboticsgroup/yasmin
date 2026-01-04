@@ -4,7 +4,7 @@
   <name>yasmin_viewer</name>
   <version>4.2.2</version>
   <description>YASMIN viewer for FSM</description>
-  <maintainer email="mgons@unileon.es">miguel</maintainer>
+  <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
   <license>GPL-3.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
