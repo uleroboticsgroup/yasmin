@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_monitor_demo");
 
   // Create a state machine with a final outcome
-  auto sm = std::make_shared<yasmin::StateMachine>(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine

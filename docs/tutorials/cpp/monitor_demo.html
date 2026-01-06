@@ -243,7 +243,7 @@ public:
   YASMIN_LOG_INFO("yasmin_monitor_demo");
 
   // Create a state machine with a final outcome
-  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   // Add states to the state machine

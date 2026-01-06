@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_action_client_demo");
 
   // Create the state machine
-  auto sm = std::make_shared<yasmin::StateMachine>(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
   sm->add_state("PRINTING_RESULT",
-                std::make_shared<yasmin::CbState>(
+                yasmin::CbState::make_shared(
                     std::initializer_list<std::string>{
                         yasmin_ros::basic_outcomes::SUCCEED},
                     print_result),
@@ -175,8 +175,7 @@ int main(int argc, char *argv[]) {
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
 
   // Create an initial blackboard and set the Fibonacci order
-  yasmin::Blackboard::SharedPtr blackboard =
-      std::make_shared<yasmin::Blackboard>();
+  yasmin::Blackboard::SharedPtr blackboard = yasmin::Blackboard::make_shared();
   blackboard->set<int>("n", 10);
 
   // Execute the state machine

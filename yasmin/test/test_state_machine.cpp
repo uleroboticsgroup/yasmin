@@ -58,9 +58,8 @@ protected:
   yasmin::Blackboard::SharedPtr blackboard;
 
   void SetUp() override {
-    sm = std::make_shared<StateMachine>(
-        yasmin::Outcomes{"outcome4", "outcome5"});
-    blackboard = std::make_shared<yasmin::Blackboard>();
+    sm = StateMachine::make_shared(yasmin::Outcomes{"outcome4", "outcome5"});
+    blackboard = yasmin::Blackboard::make_shared();
 
     sm->add_state(
         "FOO", std::make_shared<FooState>(),
@@ -180,9 +179,9 @@ TEST_F(TestStateMachine, TestAddWrongTargetTransition) {
 }
 
 TEST_F(TestStateMachine, TestValidateOutcomeFromFsmNotUsed) {
-  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm1 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
   auto sm2 =
-      std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4", "outcome5"});
+      StateMachine::make_shared(yasmin::Outcomes{"outcome4", "outcome5"});
   sm1->add_state("FSM", sm2);
   sm2->add_state("FOO", std::make_shared<FooState>(),
                  {
@@ -200,8 +199,8 @@ TEST_F(TestStateMachine, TestValidateOutcomeFromFsmNotUsed) {
 }
 
 TEST_F(TestStateMachine, TestValidateOutcomeFromStateNotUsed) {
-  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
-  auto sm2 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm1 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
+  auto sm2 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
   sm1->add_state("FSM", sm2);
   sm2->add_state("FOO", std::make_shared<FooState>(),
                  {
@@ -218,9 +217,9 @@ TEST_F(TestStateMachine, TestValidateOutcomeFromStateNotUsed) {
 }
 
 TEST_F(TestStateMachine, TestValidateFsmOutcomeNotUsed) {
-  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm1 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
   auto sm2 =
-      std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4", "outcome5"});
+      StateMachine::make_shared(yasmin::Outcomes{"outcome4", "outcome5"});
   sm1->add_state("FSM", sm2,
                  {
                      {"outcome5", "outcome4"},
@@ -241,8 +240,8 @@ TEST_F(TestStateMachine, TestValidateFsmOutcomeNotUsed) {
 }
 
 TEST_F(TestStateMachine, TestValidateWrongState) {
-  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
-  auto sm2 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm1 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
+  auto sm2 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
   sm1->add_state("FSM", sm2,
                  {
                      {"outcome4", "outcome4"},

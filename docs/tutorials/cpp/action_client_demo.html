@@ -240,7 +240,7 @@ public:
   YASMIN_LOG_INFO("yasmin_action_client_demo");
 
   // Create the state machine
-  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   // Add states to the state machine
@@ -251,7 +251,7 @@ public:
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
   sm-&gt;add_state("PRINTING_RESULT",
-                std::make_shared&lt;yasmin::CbState&gt;(
+                yasmin::CbState::make_shared(
                     std::initializer_list&lt;std::string&gt;{
                         yasmin_ros::basic_outcomes::SUCCEED},
                     print_result),
@@ -264,7 +264,7 @@ public:
 
   // Create an initial blackboard and set the Fibonacci order
   yasmin::Blackboard::SharedPtr blackboard =
-      std::make_shared&lt;yasmin::Blackboard&gt;();
+      yasmin::Blackboard::make_shared();
   blackboard-&gt;set&lt;int&gt;("n", 10);
 
   // Execute the state machine

@@ -256,11 +256,11 @@ public:
   YASMIN_LOG_INFO("yasmin_service_client_demo");
 
   // Create a state machine with a specified outcome.
-  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   sm-&gt;add_state("SETTING_INTS",
-                std::make_shared&lt;yasmin::CbState&gt;(
+                yasmin::CbState::make_shared(
                     std::initializer_list&lt;std::string&gt;{
                         yasmin_ros::basic_outcomes::SUCCEED},
                     set_ints),
@@ -274,7 +274,7 @@ public:
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
   sm-&gt;add_state("PRINTING_SUM",
-                std::make_shared&lt;yasmin::CbState&gt;(
+                yasmin::CbState::make_shared(
                     std::initializer_list&lt;std::string&gt;{
                         yasmin_ros::basic_outcomes::SUCCEED},
                     print_sum),

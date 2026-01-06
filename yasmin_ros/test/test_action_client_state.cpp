@@ -121,7 +121,7 @@ std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>
 std::thread TestActionClientState::spin_thread;
 
 TEST_F(TestActionClientState, TestActionClientStateSucceed) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
@@ -167,7 +167,7 @@ TEST_F(TestActionClientState, TestActionClientStateCache) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateResultHandler) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
@@ -186,7 +186,7 @@ TEST_F(TestActionClientState, TestActionClientStateResultHandler) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateCancel) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
@@ -206,7 +206,7 @@ TEST_F(TestActionClientState, TestActionClientStateCancel) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateAbort) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
@@ -220,7 +220,7 @@ TEST_F(TestActionClientState, TestActionClientStateAbort) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateRetryWaitTimeout) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
@@ -236,7 +236,7 @@ TEST_F(TestActionClientState, TestActionClientStateRetryWaitTimeout) {
 }
 
 TEST_F(TestActionClientState, TestActionClientStateRetryResponseTimeout) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state =
       std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(

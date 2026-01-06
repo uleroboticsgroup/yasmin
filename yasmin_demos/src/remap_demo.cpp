@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
   blackboard->set<std::string>("msg2", "test2");
 
   // Create a state machine
-  auto sm = std::make_shared<yasmin::StateMachine>(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
       true);
 

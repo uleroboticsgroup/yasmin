@@ -222,7 +222,7 @@ TEST_F(TestYasminFactory, TestStateExecution) {
 
   try {
     auto state = factory->create_state(state_elem);
-    auto blackboard = std::make_shared<yasmin::Blackboard>();
+    auto blackboard = yasmin::Blackboard::make_shared();
 
     // Execute state multiple times
     std::string outcome1 = state->execute(blackboard);
@@ -304,7 +304,7 @@ TEST_F(TestYasminFactory, TestRemapping) {
     ASSERT_NE(sm, nullptr);
 
     // Set up initial input
-    auto blackboard = std::make_shared<yasmin::Blackboard>();
+    auto blackboard = yasmin::Blackboard::make_shared();
     blackboard->set<std::string>("initial_data", "start");
 
     std::string outcome = (*sm)(blackboard);
@@ -337,7 +337,7 @@ TEST_F(TestYasminFactory, TestFilePathMechanism) {
     EXPECT_NE(outcomes.find("final_end"), outcomes.end());
 
     // Execute the state machine
-    auto blackboard = std::make_shared<yasmin::Blackboard>();
+    auto blackboard = yasmin::Blackboard::make_shared();
     std::string outcome = (*sm)(blackboard);
 
     // The state machine should execute through FirstState -> IncludedSM ->

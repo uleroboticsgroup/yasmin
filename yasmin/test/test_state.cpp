@@ -48,7 +48,7 @@ protected:
 
   void SetUp() override {
     state = std::make_shared<FooState>();
-    blackboard = std::make_shared<yasmin::Blackboard>();
+    blackboard = yasmin::Blackboard::make_shared();
   }
 };
 

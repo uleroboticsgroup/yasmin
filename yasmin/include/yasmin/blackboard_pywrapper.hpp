@@ -48,13 +48,13 @@ private:
   Blackboard ::SharedPtr blackboard;
 
 public:
-  BlackboardPyWrapper() : blackboard(std::make_shared<Blackboard>()) {}
+  BlackboardPyWrapper() : blackboard(Blackboard::make_shared()) {}
 
   /**
    * @brief Construct from an existing C++ Blackboard (move constructor)
    */
   BlackboardPyWrapper(Blackboard &&other)
-      : blackboard(std::make_shared<Blackboard>(std::move(other))) {}
+      : blackboard(Blackboard::make_shared(std::move(other))) {}
 
   /**
    * @brief Construct by wrapping a shared_ptr to a C++ Blackboard

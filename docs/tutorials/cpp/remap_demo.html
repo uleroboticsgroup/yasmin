@@ -219,12 +219,12 @@ public:
   YASMIN_LOG_INFO("yasmin_remapping_demo");
 
   // Create blackboard
-  auto blackboard = std::make_shared&lt;yasmin::Blackboard&gt;();
+  auto blackboard = yasmin::Blackboard::make_shared();
   blackboard-&gt;set&lt;std::string&gt;("msg1", "test1");
   blackboard-&gt;set&lt;std::string&gt;("msg2", "test2");
 
   // Create a state machine
-  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
       true);
 

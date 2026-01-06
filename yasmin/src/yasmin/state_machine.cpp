@@ -377,13 +377,13 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
 }
 
 std::string StateMachine::execute() {
-  Blackboard::SharedPtr blackboard = std::make_shared<yasmin::Blackboard>();
+  Blackboard::SharedPtr blackboard = yasmin::Blackboard::make_shared();
 
   return this->execute(blackboard);
 }
 
 std::string StateMachine::operator()() {
-  Blackboard::SharedPtr blackboard = std::make_shared<yasmin::Blackboard>();
+  Blackboard::SharedPtr blackboard = yasmin::Blackboard::make_shared();
 
   return this->operator()(blackboard);
 }

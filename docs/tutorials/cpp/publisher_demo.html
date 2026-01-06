@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_publisher_demo");
 
   // Create a state machine with a final outcome
-  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
       true);
 
@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
                      "CHECKINNG_COUNTS"}, // Transition back to itself
                 });
   sm-&gt;add_state("CHECKINNG_COUNTS",
-                std::make_shared&lt;yasmin::CbState&gt;(
+                yasmin::CbState::make_shared(
                     std::initializer_list&lt;std::string&gt;{"outcome1", "outcome2"},
                     check_count),
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
 
   // Execute the state machine
   yasmin::Blackboard::SharedPtr blackboard =
-      std::make_shared&lt;yasmin::Blackboard&gt;();
+      yasmin::Blackboard::make_shared();
   blackboard-&gt;set&lt;int&gt;("counter", 0);
   blackboard-&gt;set&lt;int&gt;("max_count", 10);
   try {

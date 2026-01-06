@@ -273,7 +273,7 @@ public:
   YASMIN_LOG_INFO("yasmin_concurrence_demo");
 
   // Create a state machine
-  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   // Create states to run concurrently
@@ -281,7 +281,7 @@ public:
   auto bar_state = std::make_shared&lt;BarState&gt;();
 
   // Create concurrent state
-  auto concurrent_state = std::make_shared&lt;yasmin::Concurrence&gt;(
+  auto concurrent_state = yasmin::Concurrence::make_shared(
       yasmin::StateMap{
           {"FOO", foo_state},
           {"BAR", bar_state},

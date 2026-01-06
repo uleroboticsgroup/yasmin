@@ -84,7 +84,7 @@ std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>
 std::thread TestServiceClientState::spin_thread;
 
 TEST_F(TestServiceClientState, TestServiceClient) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state =
       std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
@@ -140,7 +140,7 @@ TEST_F(TestServiceClientState, TestServiceClientCache) {
 }
 
 TEST_F(TestServiceClientState, TestServiceClientResponseHandler) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state = std::make_shared<
       ServiceState<example_interfaces::srv::AddTwoInts>>(
@@ -162,7 +162,7 @@ TEST_F(TestServiceClientState, TestServiceClientResponseHandler) {
 }
 
 TEST_F(TestServiceClientState, TestServiceClientRetryWaitTimeout) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state =
       std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
@@ -180,7 +180,7 @@ TEST_F(TestServiceClientState, TestServiceClientRetryWaitTimeout) {
 }
 
 TEST_F(TestServiceClientState, TestServiceClientRetryResponseTimeout) {
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
 
   auto state =
       std::make_shared<ServiceState<example_interfaces::srv::AddTwoInts>>(
