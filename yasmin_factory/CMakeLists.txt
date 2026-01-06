@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(yasmin_factory)
 
+# Set C++ standard to 17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -10,8 +14,6 @@ find_package(yasmin_viewer REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(TinyXML2 REQUIRED)
-
-set(CMAKE_CXX_STANDARD 17)
 
 # Build C++ yasmin_factory library
 add_library(${PROJECT_NAME} SHARED

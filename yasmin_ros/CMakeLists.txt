@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(yasmin_ros)
 
-# Default to C++17
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
+# Set C++ standard to 17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find dependencies
 find_package(ament_cmake REQUIRED)
@@ -67,7 +66,6 @@ ament_export_include_directories("include/${PROJECT_NAME}")
 ament_export_libraries(${PROJECT_NAME})
 ament_export_targets(${PROJECT_NAME})
 ament_export_dependencies(${DEPENDENCIES_PACKAGE})
-
 
 # Python
 ament_python_install_package(${PROJECT_NAME})

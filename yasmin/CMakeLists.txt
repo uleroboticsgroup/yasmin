@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(yasmin)
 
-# Default to C++17
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
+# Set C++ standard to 17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find dependencies
 find_package(ament_cmake REQUIRED)
