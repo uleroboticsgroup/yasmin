@@ -1,0 +1,15 @@
+<map id="yasmin_ros::PublisherState&lt; MsgT &gt;" name="yasmin_ros::PublisherState&lt; MsgT &gt;">
+<area shape="rect" id="Node000001" title="Template class to publish ROS 2 messages." alt="" coords="262,213,440,253"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="152,116,251,142"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="233,149,323,210,320,214,230,153"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,13,147,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,46,188,114,185,118,101,51"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="171,13,346,38"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="247,54,210,117,206,115,242,51"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="274,109,427,150"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="353,165,353,212,348,212,348,165"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="451,116,528,142"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="462,154,379,214,376,210,459,149"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="428,5,551,46"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="492,61,492,116,487,116,487,61"/>
+</map>

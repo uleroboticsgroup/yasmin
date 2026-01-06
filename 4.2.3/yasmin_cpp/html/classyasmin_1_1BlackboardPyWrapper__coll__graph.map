@@ -1,0 +1,5 @@
+<map id="yasmin::BlackboardPyWrapper" name="yasmin::BlackboardPyWrapper">
+<area shape="rect" id="Node000001" title="A wrapper around the C++ Blackboard that stores Python objects and native types." alt="" coords="5,94,202,120"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="7,5,200,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,47,106,94,101,94,101,47"/>
+</map>
