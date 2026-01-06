@@ -185,7 +185,7 @@
 public:
   int times;
 
-  PrintOdometryState(int times = 5)
+  PrintOdometryState()
       : yasmin_ros::MonitorState&lt;nav_msgs::msg::Odometry&gt;(
             "odom",                   // topic name
             {"outcome1", "outcome2"}, // possible outcomes
@@ -195,7 +195,7 @@ public:
             10,            // queue size for the callback
             10             // timeout for receiving messages
         ) {
-    this-&gt;times = times;
+    this-&gt;times = 5;
   };
 
   std::string
@@ -248,7 +248,7 @@ public:
 
   // Add states to the state machine
   sm-&gt;add_state(
-      "PRINTING_ODOM", std::make_shared&lt;PrintOdometryState&gt;(5),
+      "PRINTING_ODOM", std::make_shared&lt;PrintOdometryState&gt;(),
       {
           {"outcome1",
            "PRINTING_ODOM"},        // Transition back to itself on outcome1

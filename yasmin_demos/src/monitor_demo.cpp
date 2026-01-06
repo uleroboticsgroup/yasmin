@@ -48,9 +48,8 @@ public:
 
   /**
    * @brief Constructor for the PrintOdometryState class.
-   * @param times Number of times to print odometry data before transitioning.
    */
-  PrintOdometryState(int times = 5)
+  PrintOdometryState()
       : yasmin_ros::MonitorState<nav_msgs::msg::Odometry>(
             "odom",                   // topic name
             {"outcome1", "outcome2"}, // possible outcomes
@@ -60,7 +59,7 @@ public:
             10,            // queue size for the callback
             10             // timeout for receiving messages
         ) {
-    this->times = times;
+    this->times = 5;
   };
 
   /**
@@ -111,7 +110,7 @@ int main(int argc, char *argv[]) {
 
   // Add states to the state machine
   sm->add_state(
-      "PRINTING_ODOM", std::make_shared<PrintOdometryState>(5),
+      "PRINTING_ODOM", std::make_shared<PrintOdometryState>(),
       {
           {"outcome1",
            "PRINTING_ODOM"},        // Transition back to itself on outcome1

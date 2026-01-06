@@ -757,13 +757,9 @@ class PrintOdometryState(MonitorState):
     logging them and transitioning based on the number of messages received.
     """
 
-    def __init__(self, times: int = 5) -> None:
+    def __init__(self) -> None:
         """
         Initializes the PrintOdometryState.
-
-        Args:
-            times (int): The number of Odometry messages to monitor before
-                         transitioning to the next outcome.
         """
         super().__init__(
             Odometry,  # msg type
@@ -774,7 +770,7 @@ class PrintOdometryState(MonitorState):
             msg_queue=10,  # queue for the monitor handler callback
             timeout=10,  # timeout to wait for messages in seconds
         )
-        self.times = times
+        self.times = 5
 
     def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -> str:
         """
@@ -819,7 +815,7 @@ def main() -> None:
     # Add states to the FSM
     sm.add_state(
         "PRINTING_ODOM",
-        PrintOdometryState(5),
+        PrintOdometryState(),
         transitions={
             "outcome1": "PRINTING_ODOM",
             "outcome2": "outcome4",
@@ -2285,9 +2281,8 @@ public:
 
   /**
    * @brief Constructor for the PrintOdometryState class.
-   * @param times Number of times to print odometry data before transitioning.
    */
-  PrintOdometryState(int times = 5)
+  PrintOdometryState()
       : yasmin_ros::MonitorState<nav_msgs::msg::Odometry>(
             "odom",                   // topic name
             {"outcome1", "outcome2"}, // possible outcomes
@@ -2297,7 +2292,7 @@ public:
             10,            // queue size for the callback
             10             // timeout for receiving messages
         ) {
-    this->times = times;
+    this->times = 5;
   };
 
   /**
@@ -2349,7 +2344,7 @@ int main(int argc, char *argv[]) {
 
   // Add states to the state machine
   sm->add_state(
-      "PRINTING_ODOM", std::make_shared<PrintOdometryState>(5),
+      "PRINTING_ODOM", std::make_shared<PrintOdometryState>(),
       {
           {"outcome1",
            "PRINTING_ODOM"},        // Transition back to itself on outcome1

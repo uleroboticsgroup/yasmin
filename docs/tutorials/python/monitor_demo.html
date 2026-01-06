@@ -186,13 +186,9 @@ class PrintOdometryState(MonitorState):
     logging them and transitioning based on the number of messages received.
     """
 
-    def __init__(self, times: int = 5) -&gt; None:
+    def __init__(self) -&gt; None:
         """
         Initializes the PrintOdometryState.
-
-        Args:
-            times (int): The number of Odometry messages to monitor before
-                         transitioning to the next outcome.
         """
         super().__init__(
             Odometry,  # msg type
@@ -203,7 +199,7 @@ class PrintOdometryState(MonitorState):
             msg_queue=10,  # queue for the monitor handler callback
             timeout=10,  # timeout to wait for messages in seconds
         )
-        self.times = times
+        self.times = 5
 
     def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -&gt; str:
         """
@@ -261,7 +257,7 @@ class PrintOdometryState(MonitorState):
     # Add states to the FSM
     sm.add_state(
         "PRINTING_ODOM",
-        PrintOdometryState(5),
+        PrintOdometryState(),
         transitions={
             "outcome1": "PRINTING_ODOM",
             "outcome2": "outcome4",
