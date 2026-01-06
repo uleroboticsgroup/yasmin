@@ -60,6 +60,11 @@ template <typename ServiceT> class ServiceState : public yasmin::State {
 
 public:
   /**
+   * @brief Shared pointer type for ServiceState.
+   */
+  YASMIN_PTR_ALIASES(ServiceState)
+
+  /**
    * @brief Construct a ServiceState with a request handler and outcomes.
    *
    * @param srv_name The name of the service to call.

@@ -42,6 +42,11 @@ public:
   using Parameters = std::unordered_map<std::string, std::any>;
 
   /**
+   * @brief Shared pointer type for GetParametersState.
+   */
+  YASMIN_PTR_ALIASES(GetParametersState)
+
+  /**
    * @brief Constructs a GetParametersState with a map of parameters.
    *
    * @param parameters A map of parameter names to their default values.

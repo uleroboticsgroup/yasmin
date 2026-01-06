@@ -48,6 +48,11 @@ template <typename MsgT> class PublisherState : public yasmin::State {
 
 public:
   /**
+   * @brief Shared pointer type for PublisherState.
+   */
+  YASMIN_PTR_ALIASES(PublisherState)
+
+  /**
    * @brief Construct a new PublisherState with ROS 2 node and specific QoS.
    *
    * @param topic_name The name of the topic to monitor.

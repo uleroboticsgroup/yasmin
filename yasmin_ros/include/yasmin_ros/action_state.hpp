@@ -71,6 +71,11 @@ template <typename ActionT> class ActionState : public yasmin::State {
 
 public:
   /**
+   * @brief Shared pointer type for ActionState.
+   */
+  YASMIN_PTR_ALIASES(ActionState)
+
+  /**
    * @brief Construct an ActionState with a specific action name and goal
    * handler.
    *

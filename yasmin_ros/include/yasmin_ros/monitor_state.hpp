@@ -53,6 +53,11 @@ template <typename MsgT> class MonitorState : public yasmin::State {
 
 public:
   /**
+   * @brief Shared pointer type for MonitorState.
+   */
+  YASMIN_PTR_ALIASES(MonitorState)
+
+  /**
    * @brief Construct a new MonitorState with specific QoS, message queue, and
    * timeout.
    *
