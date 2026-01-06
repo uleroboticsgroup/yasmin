@@ -2,6 +2,12 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.2.3 (2026-01-06)
+------------------
+* Setting C++ standard to 17
+* Applying new make_share
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.2 (2025-12-28)
 ------------------
 * Adding enable_viewer_pub to factory nodes

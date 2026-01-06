@@ -2,6 +2,11 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.2.3 (2026-01-06)
+------------------
+* Setting C++ standard to 17
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.2 (2025-12-28)
 ------------------
 * Improving editor C++ plugins filter using the base_class_type to avoid no-yasmin plugins

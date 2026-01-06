@@ -3,6 +3,13 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.3 (2026-01-06)
+------------------
+* Setting C++ standard to 17
+* Applying new make_share
+* Expanding ptr macros of types
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.2 (2025-12-28)
 ------------------
 * minor fix in C++ header guards

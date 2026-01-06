@@ -3,6 +3,12 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+4.2.3 (2026-01-06)
+------------------
+* Setting C++ standard to 17
+* Fixing maintainer name in viewer package
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.2 (2025-12-28)
 ------------------
 * minor fix in C++ header guards
