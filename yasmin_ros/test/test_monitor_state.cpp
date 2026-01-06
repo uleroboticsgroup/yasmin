@@ -89,7 +89,7 @@ std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>
 std::thread TestMonitorState::spin_thread;
 
 TEST_F(TestMonitorState, TestMonitorTimeout) {
-  auto blackboard = yasmin::Blackboard::make_shared();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state = std::make_shared<MonitorState<std_msgs::msg::String>>(
       "test1", yasmin::Outcomes{std::string(SUCCEED)},
@@ -101,7 +101,7 @@ TEST_F(TestMonitorState, TestMonitorTimeout) {
 }
 
 TEST_F(TestMonitorState, TestMonitorRetryTimeout) {
-  auto blackboard = yasmin::Blackboard::make_shared();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state = std::make_shared<MonitorState<std_msgs::msg::String>>(
       "test1", yasmin::Outcomes{std::string(SUCCEED)},

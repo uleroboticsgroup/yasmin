@@ -41,7 +41,7 @@ protected:
 };
 
 TEST_F(TestPublisherState, TestPublisher) {
-  auto blackboard = yasmin::Blackboard::make_shared();
+  auto blackboard = std::make_shared<yasmin::Blackboard>();
 
   auto state = std::make_shared<PublisherState<std_msgs::msg::String>>(
       "test", [](yasmin::Blackboard::SharedPtr blackboard) {

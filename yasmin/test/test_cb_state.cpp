@@ -28,14 +28,14 @@ protected:
   yasmin::Blackboard::SharedPtr blackboard;
 
   void SetUp() override {
-    blackboard = yasmin::Blackboard::make_shared();
+    blackboard = std::make_shared<yasmin::Blackboard>();
 
     auto execute = [](yasmin::Blackboard::SharedPtr bb) {
       return std::string("outcome1");
     };
 
-    state = yasmin::CbState::make_shared(std::set<std::string>{"outcome1"},
-                                         execute);
+    state =
+        std::make_shared<CbState>(std::set<std::string>{"outcome1"}, execute);
   }
 };
 

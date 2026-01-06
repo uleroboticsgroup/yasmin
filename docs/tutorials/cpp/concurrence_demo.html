@@ -191,7 +191,8 @@ public:
   FooState()
       : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {};
 
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+  std::string
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     YASMIN_LOG_INFO("Executing state FOO");
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -231,7 +232,8 @@ public:
 public:
   BarState() : yasmin::State({"outcome3"}) {}
 
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+  std::string
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     YASMIN_LOG_INFO("Executing state BAR");
     std::this_thread::sleep_for(std::chrono::seconds(4));
 
@@ -271,15 +273,15 @@ public:
   YASMIN_LOG_INFO("yasmin_concurrence_demo");
 
   // Create a state machine
-  auto sm = yasmin::StateMachine::make_shared(
+  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   // Create states to run concurrently
-  auto foo_state = FooState::make_shared();
-  auto bar_state = BarState::make_shared();
+  auto foo_state = std::make_shared&lt;FooState&gt;();
+  auto bar_state = std::make_shared&lt;BarState&gt;();
 
   // Create concurrent state
-  auto concurrent_state = yasmin::Concurrence::make_shared(
+  auto concurrent_state = std::make_shared&lt;yasmin::Concurrence&gt;(
       yasmin::StateMap{
           {"FOO", foo_state},
           {"BAR", bar_state},

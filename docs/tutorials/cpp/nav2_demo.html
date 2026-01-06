@@ -262,7 +262,8 @@ public:
   }
 };
 
-std::string create_waypoints(yasmin::Blackboard::SharedPtr blackboard) {
+std::string
+create_waypoints(yasmin::Blackboard::SharedPtr blackboard) {
   std::map&lt;std::string, std::vector&lt;double&gt;&gt; waypoints = {
       {"entrance", {1.25, 6.30, -0.78, 0.67}},
       {"bathroom", {4.89, 1.64, 0.0, 1.0}},
@@ -296,7 +297,8 @@ std::string take_random_waypoint(
   return yasmin_ros::basic_outcomes::SUCCEED;
 }
 
-std::string get_next_waypoint(yasmin::Blackboard::SharedPtr blackboard) {
+std::string
+get_next_waypoint(yasmin::Blackboard::SharedPtr blackboard) {
   auto random_waypoints =
       blackboard-&gt;get&lt;std::vector&lt;std::string&gt;&gt;("random_waypoints");
   auto waypoints =
@@ -330,26 +332,26 @@ int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   yasmin_ros::set_ros_loggers();
 
-  auto sm = yasmin::StateMachine::make_shared(
+  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED,
                                          yasmin_ros::basic_outcomes::ABORT,
                                          yasmin_ros::basic_outcomes::CANCEL},
       true);
-  auto nav_sm = yasmin::StateMachine::make_shared(
+  auto nav_sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED,
                                          yasmin_ros::basic_outcomes::ABORT,
                                          yasmin_ros::basic_outcomes::CANCEL});
 
   sm-&gt;add_state(
       "CREATING_WAYPOINTS",
-      yasmin::CbState::make_shared(
+      std::make_shared&lt;yasmin::CbState&gt;(
           std::initializer_list&lt;std::string&gt;{
               yasmin_ros::basic_outcomes::SUCCEED},
           create_waypoints),
       std::map&lt;std::string, std::string&gt;{
           {yasmin_ros::basic_outcomes::SUCCEED, "TAKING_RANDOM_WAYPOINTS"}});
   sm-&gt;add_state("TAKING_RANDOM_WAYPOINTS",
-                yasmin::CbState::make_shared(
+                std::make_shared&lt;yasmin::CbState&gt;(
                     std::initializer_list&lt;std::string&gt;{
                         yasmin_ros::basic_outcomes::SUCCEED},
                     take_random_waypoint),
@@ -358,13 +360,13 @@ int main(int argc, char *argv[]) {
 
   nav_sm-&gt;add_state(
       "GETTING_NEXT_WAYPOINT",
-      yasmin::CbState::make_shared(
+      std::make_shared&lt;yasmin::CbState&gt;(
           std::initializer_list&lt;std::string&gt;{END, HAS_NEXT}, get_next_waypoint),
       std::map&lt;std::string, std::string&gt;{
           {END, yasmin_ros::basic_outcomes::SUCCEED},
           {HAS_NEXT, "NAVIGATING"}});
   nav_sm-&gt;add_state(
-      "NAVIGATING", Nav2State::make_shared(),
+      "NAVIGATING", std::make_shared&lt;Nav2State&gt;(),
       std::map&lt;std::string, std::string&gt;{
           {yasmin_ros::basic_outcomes::SUCCEED, "GETTING_NEXT_WAYPOINT"},
           {yasmin_ros::basic_outcomes::CANCEL,
@@ -383,7 +385,7 @@ int main(int argc, char *argv[]) {
 
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_NAV2_DEMO");
 
-  auto blackboard = yasmin::Blackboard::make_shared();
+  auto blackboard = std::make_shared&lt;yasmin::Blackboard&gt;();
   blackboard-&gt;set&lt;int&gt;("waypoints_num", 2);
 
   try {

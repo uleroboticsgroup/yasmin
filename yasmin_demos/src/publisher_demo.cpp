@@ -106,18 +106,18 @@ int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_publisher_demo");
 
   // Create a state machine with a final outcome
-  auto sm = yasmin::StateMachine::make_shared(
+  auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
       true);
 
   // Add states to the state machine
-  sm->add_state("PUBLISHING_INT", PublishIntState::make_shared(),
+  sm->add_state("PUBLISHING_INT", std::make_shared<PublishIntState>(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
                      "CHECKINNG_COUNTS"}, // Transition back to itself
                 });
   sm->add_state("CHECKINNG_COUNTS",
-                yasmin::CbState::make_shared(
+                std::make_shared<yasmin::CbState>(
                     std::initializer_list<std::string>{"outcome1", "outcome2"},
                     check_count),
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
@@ -127,7 +127,8 @@ int main(int argc, char *argv[]) {
   yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
 
   // Execute the state machine
-  yasmin::Blackboard::SharedPtr blackboard = yasmin::Blackboard::make_shared();
+  yasmin::Blackboard::SharedPtr blackboard =
+      std::make_shared<yasmin::Blackboard>();
   blackboard->set<int>("counter", 0);
   blackboard->set<int>("max_count", 10);
   try {

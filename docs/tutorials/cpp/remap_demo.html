@@ -165,7 +165,8 @@
 public:
   FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {};
 
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+  std::string
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     std::string data = blackboard-&gt;get&lt;std::string&gt;("foo_data");
     YASMIN_LOG_INFO("%s", data.c_str());
     blackboard-&gt;set&lt;std::string&gt;("foo_out_data", data);
@@ -185,7 +186,8 @@ public:
 public:
   BarState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {}
 
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+  std::string
+  execute(yasmin::Blackboard::SharedPtr blackboard) override {
     std::string data = blackboard-&gt;get&lt;std::string&gt;("bar_data");
     YASMIN_LOG_INFO("%s", data.c_str());
     return yasmin_ros::basic_outcomes::SUCCEED;
@@ -217,18 +219,18 @@ public:
   YASMIN_LOG_INFO("yasmin_remapping_demo");
 
   // Create blackboard
-  auto blackboard = yasmin::Blackboard::make_shared();
+  auto blackboard = std::make_shared&lt;yasmin::Blackboard&gt;();
   blackboard-&gt;set&lt;std::string&gt;("msg1", "test1");
   blackboard-&gt;set&lt;std::string&gt;("msg2", "test2");
 
   // Create a state machine
-  auto sm = yasmin::StateMachine::make_shared(
+  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
       true);
 
   // Add states to the state machine
   // STATE1: remap foo_data to msg1
-  sm-&gt;add_state("STATE1", FooState::make_shared(),
+  sm-&gt;add_state("STATE1", std::make_shared&lt;FooState&gt;(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "STATE2"},
                 },
@@ -237,7 +239,7 @@ public:
                 });
 
   // STATE2: remap foo_data to msg2
-  sm-&gt;add_state("STATE2", FooState::make_shared(),
+  sm-&gt;add_state("STATE2", std::make_shared&lt;FooState&gt;(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "STATE3"},
                 },
@@ -246,7 +248,7 @@ public:
                 });
 
   // STATE3: remap bar_data to foo_out_data
-  sm-&gt;add_state("STATE3", BarState::make_shared(),
+  sm-&gt;add_state("STATE3", std::make_shared&lt;BarState&gt;(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
                      yasmin_ros::basic_outcomes::SUCCEED},

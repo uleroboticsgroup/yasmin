@@ -25,7 +25,6 @@
 using namespace yasmin;
 
 class FooState : public State {
-public:
 private:
   int counter;
 
@@ -59,14 +58,15 @@ protected:
   yasmin::Blackboard::SharedPtr blackboard;
 
   void SetUp() override {
-    sm = StateMachine::make_shared(yasmin::Outcomes{"outcome4", "outcome5"});
-    blackboard = yasmin::Blackboard::make_shared();
+    sm = std::make_shared<StateMachine>(
+        yasmin::Outcomes{"outcome4", "outcome5"});
+    blackboard = std::make_shared<yasmin::Blackboard>();
 
     sm->add_state(
-        "FOO", State::make_shared<FooState>(),
+        "FOO", std::make_shared<FooState>(),
         yasmin::Transitions{{"outcome1", "BAR"}, {"outcome2", "outcome4"}});
 
-    sm->add_state("BAR", State::make_shared<BarState>(),
+    sm->add_state("BAR", std::make_shared<BarState>(),
                   yasmin::Transitions{{"outcome2", "FOO"}});
   }
 };
@@ -126,7 +126,7 @@ TEST_F(TestStateMachine, TestSetStartStateWrongState) {
 
 TEST_F(TestStateMachine, TestAddRepeatedState) {
   try {
-    sm->add_state("FOO", State::make_shared<FooState>(),
+    sm->add_state("FOO", std::make_shared<FooState>(),
                   yasmin::Transitions{{"outcome1", "BAR"}});
     FAIL() << "Expected std::logic_error";
   } catch (const std::logic_error &e) {
@@ -137,7 +137,7 @@ TEST_F(TestStateMachine, TestAddRepeatedState) {
 
 TEST_F(TestStateMachine, TestAddOutcomeState) {
   try {
-    sm->add_state("outcome4", State::make_shared<FooState>(),
+    sm->add_state("outcome4", std::make_shared<FooState>(),
                   yasmin::Transitions{{"outcome1", "BAR"}});
     FAIL() << "Expected std::logic_error";
   } catch (const std::logic_error &e) {
@@ -148,7 +148,7 @@ TEST_F(TestStateMachine, TestAddOutcomeState) {
 
 TEST_F(TestStateMachine, TestAddStateWithWrongOutcome) {
   try {
-    sm->add_state("FOO1", State::make_shared<FooState>(),
+    sm->add_state("FOO1", std::make_shared<FooState>(),
                   yasmin::Transitions{{"outcome9", "BAR"}});
     FAIL() << "Expected std::invalid_argument";
   } catch (const std::invalid_argument &e) {
@@ -161,7 +161,7 @@ TEST_F(TestStateMachine, TestAddStateWithWrongOutcome) {
 
 TEST_F(TestStateMachine, TestAddWrongSourceTransition) {
   try {
-    sm->add_state("FOO1", State::make_shared<FooState>(),
+    sm->add_state("FOO1", std::make_shared<FooState>(),
                   yasmin::Transitions{{"", "BAR"}});
     FAIL() << "Expected std::invalid_argument";
   } catch (const std::invalid_argument &e) {
@@ -171,7 +171,7 @@ TEST_F(TestStateMachine, TestAddWrongSourceTransition) {
 
 TEST_F(TestStateMachine, TestAddWrongTargetTransition) {
   try {
-    sm->add_state("FOO1", State::make_shared<FooState>(),
+    sm->add_state("FOO1", std::make_shared<FooState>(),
                   yasmin::Transitions{{"outcome1", ""}});
     FAIL() << "Expected std::invalid_argument";
   } catch (const std::invalid_argument &e) {
@@ -180,11 +180,11 @@ TEST_F(TestStateMachine, TestAddWrongTargetTransition) {
 }
 
 TEST_F(TestStateMachine, TestValidateOutcomeFromFsmNotUsed) {
-  auto sm1 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
+  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
   auto sm2 =
-      StateMachine::make_shared(yasmin::Outcomes{"outcome4", "outcome5"});
+      std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4", "outcome5"});
   sm1->add_state("FSM", sm2);
-  sm2->add_state("FOO", State::make_shared<FooState>(),
+  sm2->add_state("FOO", std::make_shared<FooState>(),
                  {
                      {"outcome1", "outcome4"},
                      {"outcome2", "outcome4"},
@@ -200,10 +200,10 @@ TEST_F(TestStateMachine, TestValidateOutcomeFromFsmNotUsed) {
 }
 
 TEST_F(TestStateMachine, TestValidateOutcomeFromStateNotUsed) {
-  auto sm1 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
-  auto sm2 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
+  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm2 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
   sm1->add_state("FSM", sm2);
-  sm2->add_state("FOO", State::make_shared<FooState>(),
+  sm2->add_state("FOO", std::make_shared<FooState>(),
                  {
                      {"outcome1", "outcome4"},
                  });
@@ -218,14 +218,14 @@ TEST_F(TestStateMachine, TestValidateOutcomeFromStateNotUsed) {
 }
 
 TEST_F(TestStateMachine, TestValidateFsmOutcomeNotUsed) {
-  auto sm1 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
+  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
   auto sm2 =
-      StateMachine::make_shared(yasmin::Outcomes{"outcome4", "outcome5"});
+      std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4", "outcome5"});
   sm1->add_state("FSM", sm2,
                  {
                      {"outcome5", "outcome4"},
                  });
-  sm2->add_state("FOO", State::make_shared<FooState>(),
+  sm2->add_state("FOO", std::make_shared<FooState>(),
                  {
                      {"outcome1", "outcome4"},
                      {"outcome2", "outcome4"},
@@ -241,13 +241,13 @@ TEST_F(TestStateMachine, TestValidateFsmOutcomeNotUsed) {
 }
 
 TEST_F(TestStateMachine, TestValidateWrongState) {
-  auto sm1 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
-  auto sm2 = StateMachine::make_shared(yasmin::Outcomes{"outcome4"});
+  auto sm1 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
+  auto sm2 = std::make_shared<StateMachine>(yasmin::Outcomes{"outcome4"});
   sm1->add_state("FSM", sm2,
                  {
                      {"outcome4", "outcome4"},
                  });
-  sm2->add_state("FOO", State::make_shared<FooState>(),
+  sm2->add_state("FOO", std::make_shared<FooState>(),
                  {
                      {"outcome1", "BAR"},
                      {"outcome2", "outcome4"},

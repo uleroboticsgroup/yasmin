@@ -106,12 +106,12 @@ int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_monitor_demo");
 
   // Create a state machine with a final outcome
-  auto sm = yasmin::StateMachine::make_shared(
+  auto sm = std::make_shared<yasmin::StateMachine>(
       std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine
   sm->add_state(
-      "PRINTING_ODOM", PrintOdometryState::make_shared(5),
+      "PRINTING_ODOM", std::make_shared<PrintOdometryState>(5),
       {
           {"outcome1",
            "PRINTING_ODOM"},        // Transition back to itself on outcome1

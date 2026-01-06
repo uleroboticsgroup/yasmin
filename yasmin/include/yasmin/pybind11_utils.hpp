@@ -46,7 +46,7 @@ convert_blackboard_from_python(py::object blackboard_obj) {
 
   // Case 1: None or not provided - create new Blackboard
   if (blackboard_obj.is_none()) {
-    blackboard = yasmin::Blackboard::make_shared();
+    blackboard = std::make_shared<yasmin::Blackboard>();
   }
   // Case 2: Check if it's a BlackboardPyWrapper
   else if (py::isinstance<yasmin::BlackboardPyWrapper>(blackboard_obj)) {
@@ -60,7 +60,7 @@ convert_blackboard_from_python(py::object blackboard_obj) {
   }
   // Case 4: Unknown type - create a new blackboard
   else {
-    blackboard = yasmin::Blackboard::make_shared();
+    blackboard = std::make_shared<yasmin::Blackboard>();
   }
 
   return blackboard;
