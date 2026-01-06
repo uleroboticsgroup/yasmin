@@ -109,16 +109,16 @@ int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_demo");
 
   // Create a state machine
-  auto sm = std::make_shared<yasmin::StateMachine>(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine
-  sm->add_state("FOO", std::make_shared<FooState>(),
+  sm->add_state("FOO", FooState::make_shared(),
                 {
                     {"outcome1", "BAR"},
                     {"outcome2", "outcome4"},
                 });
-  sm->add_state("BAR", std::make_shared<BarState>(),
+  sm->add_state("BAR", BarState::make_shared(),
                 {
                     {"outcome3", "FOO"},
                 });

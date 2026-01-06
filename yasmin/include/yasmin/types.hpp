@@ -26,16 +26,24 @@
 namespace yasmin {
 
 /** @brief Macro to define a SharedPtr alias for a class */
-#define YASMIN_SHARED_PTR_ALIAS(ClassName)                                     \
-  using SharedPtr = std::shared_ptr<ClassName>;
+#define YASMIN_SHARED_PTR_ALIAS(...)                                           \
+  using SharedPtr = std::shared_ptr<__VA_ARGS__>;                              \
+  using ConstSharedPtr = std::shared_ptr<const __VA_ARGS__>;                   \
+  template <typename Derived = __VA_ARGS__, typename... Args>                  \
+  static std::shared_ptr<Derived> make_shared(Args &&...args) {                \
+    return std::shared_ptr<Derived>(new Derived(std::forward<Args>(args)...)); \
+  }
 
 /** @brief Macro to define a UniquePtr alias for a class */
-#define YASMIN_UNIQUE_PTR_ALIAS(ClassName)                                     \
-  using UniquePtr = std::unique_ptr<ClassName>;
+#define YASMIN_UNIQUE_PTR_ALIAS(...)                                           \
+  using UniquePtr = std::unique_ptr<__VA_ARGS__>;                              \
+  template <typename Derived = __VA_ARGS__, typename... Args>                  \
+  static std::unique_ptr<Derived> make_unique(Args &&...args) {                \
+    return std::unique_ptr<Derived>(new Derived(std::forward<Args>(args)...)); \
+  }
 
 /** @brief Macro to define a WeakPtr alias for a class */
-#define YASMIN_WEAK_PTR_ALIAS(ClassName)                                       \
-  using WeakPtr = std::weak_ptr<ClassName>;
+#define YASMIN_WEAK_PTR_ALIAS(...) using WeakPtr = std::weak_ptr<__VA_ARGS__>;
 
 /** @brief Macro to define all pointer aliases for a class */
 #define YASMIN_PTR_ALIASES(ClassName)                                          \

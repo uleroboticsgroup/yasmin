@@ -216,8 +216,7 @@ public:
           before completing. This pattern is useful for sending sequences of
           commands, periodic status updates, or controlled test data generation.
         </p>
-        <pre><code class="language-cpp">std::string
-check_count(yasmin::Blackboard::SharedPtr blackboard) {
+        <pre><code class="language-cpp">std::string check_count(yasmin::Blackboard::SharedPtr blackboard) {
 
   // Sleep for 1 second to simulate some processing time
   rclcpp::sleep_for(std::chrono::seconds(1));
@@ -239,18 +238,18 @@ int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_publisher_demo");
 
   // Create a state machine with a final outcome
-  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
       true);
 
   // Add states to the state machine
-  sm-&gt;add_state("PUBLISHING_INT", std::make_shared&lt;PublishIntState&gt;(),
+  sm-&gt;add_state("PUBLISHING_INT", PublishIntState::make_shared(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
                      "CHECKINNG_COUNTS"}, // Transition back to itself
                 });
   sm-&gt;add_state("CHECKINNG_COUNTS",
-                std::make_shared&lt;yasmin::CbState&gt;(
+                yasmin::CbState::make_shared(
                     std::initializer_list&lt;std::string&gt;{"outcome1", "outcome2"},
                     check_count),
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
@@ -261,7 +260,7 @@ int main(int argc, char *argv[]) {
 
   // Execute the state machine
   yasmin::Blackboard::SharedPtr blackboard =
-      std::make_shared&lt;yasmin::Blackboard&gt;();
+      yasmin::Blackboard::make_shared();
   blackboard-&gt;set&lt;int&gt;("counter", 0);
   blackboard-&gt;set&lt;int&gt;("max_count", 10);
   try {

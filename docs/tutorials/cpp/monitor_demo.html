@@ -198,9 +198,8 @@ public:
     this-&gt;times = times;
   };
 
-  std::string
-  monitor_handler(yasmin::Blackboard::SharedPtr blackboard,
-                  nav_msgs::msg::Odometry::SharedPtr msg) {
+  std::string monitor_handler(yasmin::Blackboard::SharedPtr blackboard,
+                              nav_msgs::msg::Odometry::SharedPtr msg) {
 
     (void)blackboard;
 
@@ -243,12 +242,12 @@ public:
   YASMIN_LOG_INFO("yasmin_monitor_demo");
 
   // Create a state machine with a final outcome
-  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   // Add states to the state machine
   sm-&gt;add_state(
-      "PRINTING_ODOM", std::make_shared&lt;PrintOdometryState&gt;(5),
+      "PRINTING_ODOM", PrintOdometryState::make_shared(5),
       {
           {"outcome1",
            "PRINTING_ODOM"},        // Transition back to itself on outcome1

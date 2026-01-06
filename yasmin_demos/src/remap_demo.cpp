@@ -86,31 +86,31 @@ int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_remapping_demo");
 
   // Create blackboard
-  auto blackboard = std::make_shared<yasmin::Blackboard>();
+  auto blackboard = yasmin::Blackboard::make_shared();
   blackboard->set<std::string>("msg1", "test1");
   blackboard->set<std::string>("msg2", "test2");
 
   // Create a state machine
-  auto sm = std::make_shared<yasmin::StateMachine>(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
       true);
 
   // Add states to the state machine
-  sm->add_state("STATE1", std::make_shared<FooState>(),
+  sm->add_state("STATE1", FooState::make_shared(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "STATE2"},
                 },
                 {
                     {"foo_data", "msg1"},
                 });
-  sm->add_state("STATE2", std::make_shared<FooState>(),
+  sm->add_state("STATE2", FooState::make_shared(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "STATE3"},
                 },
                 {
                     {"foo_data", "msg2"},
                 });
-  sm->add_state("STATE3", std::make_shared<BarState>(),
+  sm->add_state("STATE3", BarState::make_shared(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
                      yasmin_ros::basic_outcomes::SUCCEED},

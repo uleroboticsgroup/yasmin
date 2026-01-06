@@ -62,10 +62,10 @@ protected:
   yasmin::Blackboard::SharedPtr blackboard;
 
   void SetUp() override {
-    foo_state = std::make_shared<FooState>();
-    foo2_state = std::make_shared<FooState>();
-    bar_state = std::make_shared<BarState>();
-    blackboard = std::make_shared<yasmin::Blackboard>();
+    foo_state = State::make_shared<FooState>();
+    foo2_state = State::make_shared<FooState>();
+    bar_state = State::make_shared<BarState>();
+    blackboard = yasmin::Blackboard::make_shared();
 
     yasmin::StateMap states = {
         {"FOO", foo_state}, {"FOO2", foo2_state}, {"BAR", bar_state}};
@@ -74,8 +74,7 @@ protected:
         {"outcome1", {{"FOO", "outcome1"}}},
         {"outcome2", {{"BAR", "outcome1"}, {"BAR", "outcome1"}}}};
 
-    state =
-        std::make_shared<yasmin::Concurrence>(states, "default", outcome_map);
+    state = yasmin::Concurrence::make_shared(states, "default", outcome_map);
   }
 };
 

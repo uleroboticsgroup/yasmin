@@ -112,12 +112,12 @@ int main(int argc, char *argv[]) {
   YASMIN_LOG_INFO("yasmin_parameters_demo");
 
   // Create a state machine
-  auto sm = std::make_shared<yasmin::StateMachine>(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
 
   // Add states to the state machine
   sm->add_state("GETTING_PARAMETERS",
-                std::make_shared<yasmin_ros::GetParametersState>(
+                yasmin_ros::GetParametersState::make_shared(
                     yasmin_ros::GetParametersState::Parameters{
                         {"max_counter", 3},
                         {"counter_str", std::string("Counter")},
@@ -126,12 +126,12 @@ int main(int argc, char *argv[]) {
                     {yasmin_ros::basic_outcomes::SUCCEED, "FOO"},
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
-  sm->add_state("FOO", std::make_shared<FooState>(),
+  sm->add_state("FOO", FooState::make_shared(),
                 {
                     {"outcome1", "BAR"},
                     {"outcome2", "outcome4"},
                 });
-  sm->add_state("BAR", std::make_shared<BarState>(),
+  sm->add_state("BAR", BarState::make_shared(),
                 {
                     {"outcome3", "FOO"},
                 });

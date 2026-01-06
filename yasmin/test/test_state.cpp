@@ -34,7 +34,7 @@ public:
 
 class BarState : public State {
 public:
-  BarState() : State({}) {}
+  BarState() : State(Outcomes{}) {}
 
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
     return "outcome2";
@@ -47,8 +47,8 @@ protected:
   yasmin::Blackboard::SharedPtr blackboard;
 
   void SetUp() override {
-    state = std::make_shared<FooState>();
-    blackboard = std::make_shared<yasmin::Blackboard>();
+    state = FooState::make_shared();
+    blackboard = yasmin::Blackboard::make_shared();
   }
 };
 

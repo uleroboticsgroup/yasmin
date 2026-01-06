@@ -168,15 +168,13 @@
           simple conditional checks.
         </p>
 
-        <pre><code class="language-cpp">std::string
-set_ints(yasmin::Blackboard::SharedPtr blackboard) {
+        <pre><code class="language-cpp">std::string set_ints(yasmin::Blackboard::SharedPtr blackboard) {
   blackboard-&gt;set&lt;int&gt;("a", 10);
   blackboard-&gt;set&lt;int&gt;("b", 5);
   return yasmin_ros::basic_outcomes::SUCCEED;
 }
 
-std::string
-print_sum(yasmin::Blackboard::SharedPtr blackboard) {
+std::string print_sum(yasmin::Blackboard::SharedPtr blackboard) {
   std::stringstream ss;
   ss &lt;&lt; "Sum: " &lt;&lt; blackboard-&gt;get&lt;int&gt;("sum");
   YASMIN_LOG_INFO(ss.str().c_str());
@@ -212,8 +210,7 @@ public:
             std::bind(&amp;AddTwoIntsState::response_handler, this, _1, _2)) {};
 
   example_interfaces::srv::AddTwoInts::Request::SharedPtr
-  create_request_handler(
-      yasmin::Blackboard::SharedPtr blackboard) {
+  create_request_handler(yasmin::Blackboard::SharedPtr blackboard) {
 
     auto request =
         std::make_shared&lt;example_interfaces::srv::AddTwoInts::Request&gt;();
@@ -222,9 +219,10 @@ public:
     return request;
   };
 
-  std::string response_handler(
-      yasmin::Blackboard::SharedPtr blackboard,
-      example_interfaces::srv::AddTwoInts::Response::SharedPtr response) {
+  std::string
+  response_handler(yasmin::Blackboard::SharedPtr blackboard,
+                   example_interfaces::srv::AddTwoInts::Response::SharedPtr
+                       response) {
 
     blackboard-&gt;set&lt;int&gt;("sum", response-&gt;sum);
     return "outcome1";
@@ -256,25 +254,25 @@ public:
   YASMIN_LOG_INFO("yasmin_service_client_demo");
 
   // Create a state machine with a specified outcome.
-  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+  auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
 
   sm-&gt;add_state("SETTING_INTS",
-                std::make_shared&lt;yasmin::CbState&gt;(
+                yasmin::CbState::make_shared(
                     std::initializer_list&lt;std::string&gt;{
                         yasmin_ros::basic_outcomes::SUCCEED},
                     set_ints),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "ADD_TWO_INTS"},
                 });
-  sm-&gt;add_state("ADD_TWO_INTS", std::make_shared&lt;AddTwoIntsState&gt;(),
+  sm-&gt;add_state("ADD_TWO_INTS", AddTwoIntsState::make_shared(),
                 {
                     {"outcome1", "PRINTING_SUM"},
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
   sm-&gt;add_state("PRINTING_SUM",
-                std::make_shared&lt;yasmin::CbState&gt;(
+                yasmin::CbState::make_shared(
                     std::initializer_list&lt;std::string&gt;{
                         yasmin_ros::basic_outcomes::SUCCEED},
                     print_sum),

@@ -236,8 +236,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
     }
   }
 
-  return std::make_shared<yasmin::Concurrence>(states, default_outcome,
-                                               outcome_map);
+  return yasmin::Concurrence::make_shared(states, default_outcome, outcome_map);
 }
 
 yasmin::StateMachine::SharedPtr
@@ -285,7 +284,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
   std::vector<std::string> outcomes_vec = this->split_string(outcomes_str, ' ');
   yasmin::Outcomes outcomes(outcomes_vec.begin(), outcomes_vec.end());
 
-  auto sm = std::make_shared<yasmin::StateMachine>(outcomes);
+  auto sm = yasmin::StateMachine::make_shared(outcomes);
 
   // Parse all child elements
   for (tinyxml2::XMLElement *child = root->FirstChildElement(); child;

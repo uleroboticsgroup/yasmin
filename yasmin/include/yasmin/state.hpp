@@ -78,6 +78,11 @@ public:
   State(const Outcomes &outcomes);
 
   /**
+   * @brief Default constructor for State.
+   */
+  State() : State(Outcomes{}) {}
+
+  /**
    * @brief Virtual destructor for proper polymorphic destruction.
    */
   virtual ~State() = default;
