@@ -42,7 +42,7 @@ class ServiceState(State):
         srv_type: Type,
         srv_name: str,
         create_request_handler: Callable,
-        outcomes: Set[str] = None,
+        outcomes: Set[str] = set(),
         response_handler: Callable = None,
         callback_group: CallbackGroup = None,
         node: Node = None,
@@ -79,13 +79,12 @@ class ServiceState(State):
         ## Timeout for the service response.
         self._response_timeout: float = response_timeout
 
-        _outcomes = [SUCCEED, ABORT]
+        # Set outcomes
+        outcomes = set(outcomes)
+        outcomes.update({SUCCEED, ABORT})
 
         if self._wait_timeout or self._response_timeout:
-            _outcomes.append(TIMEOUT)
-
-        if outcomes:
-            _outcomes = _outcomes + outcomes
+            outcomes.add(TIMEOUT)
 
         ## The ROS 2 node used to communicate with the service.
         self._node = node
@@ -116,7 +115,7 @@ class ServiceState(State):
         ## Event to signal when the service response is received.
         self._response_received_event: Event = Event()
 
-        super().__init__(_outcomes)
+        super().__init__(outcomes)
 
     def execute(self, blackboard: Blackboard) -> str:
         """

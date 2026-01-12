@@ -117,14 +117,15 @@ public:
                MonitorHandler monitor_handler, rclcpp::QoS qos = 10,
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
-      : State({basic_outcomes::CANCEL}), topic_name(topic_name),
+      : State(outcomes), topic_name(topic_name),
         monitor_handler(monitor_handler), qos(qos), msg_queue(msg_queue),
         timeout(timeout), maximum_retry(maximum_retry) {
 
-    // set outcomes
+    // Set outcomes
     if (timeout > 0) {
       this->outcomes.insert(basic_outcomes::TIMEOUT);
     }
+    this->outcomes.insert(basic_outcomes::CANCEL);
 
     if (outcomes.size() > 0) {
       for (const std::string &outcome : outcomes) {

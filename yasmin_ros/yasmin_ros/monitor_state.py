@@ -77,9 +77,12 @@ class MonitorState(State):
         ## Timeout in seconds for message reception.
         self._timeout: int = timeout
 
+        # Set outcomes
+        outcomes = set(outcomes)
+        outcomes.update({CANCEL})
+
         if timeout is not None:
-            outcomes = [TIMEOUT] + outcomes
-        outcomes = [CANCEL] + outcomes
+            outcomes.add(TIMEOUT)
 
         ## Shared pointer to the ROS 2 node.
         self._node: Node = node

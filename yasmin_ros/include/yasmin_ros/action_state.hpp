@@ -311,7 +311,7 @@ public:
    * - `basic_outcomes::CANCEL`: The action was canceled.
    * - `basic_outcomes::TIMEOUT`: The action server was not available in time.
    */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) {
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
 
     std::unique_lock<std::mutex> lock(this->action_done_mutex);
     int retry_count = 0;

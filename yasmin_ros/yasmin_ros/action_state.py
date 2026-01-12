@@ -44,7 +44,7 @@ class ActionState(State):
         action_type: Type,
         action_name: str,
         create_goal_handler: Callable,
-        outcomes: Set[str] = None,
+        outcomes: Set[str] = set(),
         result_handler: Callable = None,
         feedback_handler: Callable = None,
         callback_group: CallbackGroup = None,
@@ -102,13 +102,12 @@ class ActionState(State):
         ## Maximum number of retries.
         self._maximum_retry: int = maximum_retry
 
-        _outcomes = [SUCCEED, ABORT, CANCEL]
+        # Set outcomes
+        outcomes = set(outcomes)
+        outcomes.update({SUCCEED, ABORT, CANCEL})
 
         if self._wait_timeout or self._response_timeout:
-            _outcomes.append(TIMEOUT)
-
-        if outcomes:
-            _outcomes = _outcomes + outcomes
+            outcomes.add(TIMEOUT)
 
         ## Shared pointer to the ROS 2 node.
         self._node: Node = node
@@ -133,7 +132,7 @@ class ActionState(State):
         if not self._create_goal_handler:
             raise ValueError("create_goal_handler is needed")
 
-        super().__init__(_outcomes)
+        super().__init__(outcomes)
 
     def cancel_state(self) -> None:
         """
