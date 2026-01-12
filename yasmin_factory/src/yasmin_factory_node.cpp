@@ -54,8 +54,9 @@ int main(int argc, char *argv[]) {
   sm->set_sigint_handler(true);
 
   // Publisher for visualizing the state machine
+  std::unique_ptr<yasmin_viewer::YasminViewerPub> yasmin_pub_ptr;
   if (enable_viewer_pub) {
-    yasmin_viewer::YasminViewerPub yasmin_pub(sm);
+    yasmin_pub_ptr = std::make_unique<yasmin_viewer::YasminViewerPub>(sm);
   }
 
   // Execute the state machine
