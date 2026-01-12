@@ -320,8 +320,9 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
   Transitions remappings;
   std::string outcome;
   std::string old_outcome;
+  bool state_machine_ends = false;
 
-  while (!this->is_canceled()) {
+  while (!state_machine_ends) {
 
     std::string current_state = this->get_current_state();
     auto state = this->states.at(current_state);
@@ -355,8 +356,7 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
       this->set_current_state("");
       YASMIN_LOG_INFO("State machine ends with outcome '%s'", outcome.c_str());
       this->call_end_cbs(blackboard, outcome);
-
-      return outcome;
+      state_machine_ends = true;
 
       // Outcome is a state
     } else if (this->states.find(outcome) != this->states.end()) {
@@ -372,8 +372,7 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
     }
   }
 
-  throw std::runtime_error("Ending canceled state machine '" +
-                           this->to_string() + "' with bad transition");
+  return outcome;
 }
 
 std::string StateMachine::execute() {
