@@ -2,6 +2,11 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.2.4 (2026-01-14)
+------------------
+* Creating viewer pub variable for C++ factory node
+* Contributors: Miguel Ángel González Santamarta
+
 4.2.3 (2026-01-06)
 ------------------
 * Setting C++ standard to 17
