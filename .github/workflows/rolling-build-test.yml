@@ -9,13 +9,12 @@ on:
 jobs:
   rolling_build_and_test:
     runs-on: ubuntu-latest
+    container:
+      image: ros:rolling
     steps:
-      - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@v0.7
-        with:
-          required-ros-distributions: rolling
       - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.4
         with:
           package-name: yasmin yasmin_ros yasmin_factory
           target-ros2-distro: rolling
+          coverage-result: false
