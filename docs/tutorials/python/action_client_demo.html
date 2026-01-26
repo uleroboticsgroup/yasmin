@@ -157,7 +157,7 @@
           constructor takes six parameters: the action type
           (<code>Fibonacci</code>), the action name (<code>"/fibonacci"</code>),
           a callback to create the goal, optional custom outcomes (we use
-          <code>None</code> to accept defaults: SUCCEED, ABORT, CANCEL), a
+          <code>set()</code> to accept defaults: SUCCEED, ABORT, CANCEL), a
           response handler, and a feedback handler. The
           <code>create_goal_handler</code> retrieves the Fibonacci order from
           the blackboard and creates a goal request. The
@@ -170,6 +170,7 @@
 
         <pre><code class="language-python">from yasmin_ros import ActionState
 from example_interfaces.action import Fibonacci
+from yasmin_ros.basic_outcomes import SUCCEED
 
 class FibonacciState(ActionState):
     """
@@ -191,7 +192,7 @@ class FibonacciState(ActionState):
             Fibonacci,  # action type
             "/fibonacci",  # action name
             self.create_goal_handler,  # callback to create the goal
-            None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
+            set(),  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
             self.response_handler,  # callback to process the response
             self.print_feedback,  # callback to process the feedback
         )

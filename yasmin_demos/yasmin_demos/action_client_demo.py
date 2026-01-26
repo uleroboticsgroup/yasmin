@@ -46,7 +46,7 @@ class FibonacciState(ActionState):
             Fibonacci,  # action type
             "/fibonacci",  # action name
             self.create_goal_handler,  # callback to create the goal
-            None,  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
+            set(),  # outcomes. Includes (SUCCEED, ABORT, CANCEL)
             self.response_handler,  # callback to process the response
             self.print_feedback,  # callback to process the feedback
         )
