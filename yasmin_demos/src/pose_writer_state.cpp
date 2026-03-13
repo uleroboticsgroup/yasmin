@@ -19,12 +19,11 @@
 
 #include "geometry_msgs/msg/pose.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp/serialization.hpp"
-#include "rclcpp/serialized_message.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_demos/pose_writer_state.h"
+#include "yasmin_ros/interface_serialization.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 
 PoseWriterState::PoseWriterState() : yasmin::State({"outcome1"}) {}
@@ -41,16 +40,8 @@ std::string PoseWriterState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   pose.orientation.z = 0.0;
   pose.orientation.w = 1.0;
 
-  rclcpp::Serialization<geometry_msgs::msg::Pose> serializer;
-  rclcpp::SerializedMessage serialized_message;
-  serializer.serialize_message(&pose, &serialized_message);
-
-  const auto &rcl_serialized_message =
-      serialized_message.get_rcl_serialized_message();
-
-  std::vector<uint8_t> pose_bytes(rcl_serialized_message.buffer,
-                                  rcl_serialized_message.buffer +
-                                      rcl_serialized_message.buffer_length);
+  const std::vector<uint8_t> pose_bytes =
+      yasmin_ros::serialize_interface<geometry_msgs::msg::Pose>(pose);
 
   blackboard->set<std::vector<uint8_t>>("pose_bytes", pose_bytes);
   blackboard->set<std::string>("pose_bytes__type", "geometry_msgs/msg/Pose");
