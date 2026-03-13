@@ -13,4 +13,11 @@
             <description>Bar state for YASMIN demos</description>
         </class>
     </library>
+    <library path="pose_writer_state">
+        <class name="yasmin_demos/PoseWriterState"
+         type="PoseWriterState"
+         base_class_type="yasmin::State">
+            <description>Pose writer state for YASMIN ROS serialization demo</description>
+        </class>
+    </library>
 </class_libraries>
