@@ -43,12 +43,13 @@
 3. [Demos](#demos)
    - [Python](#python)
    - [Cpp](#cpp)
-4. [YASMIN Editor](#yasmin-editor)
+4. [Cross-Language ROS Interface Communication](#cross-language-ros-interface-communication)
+5. [YASMIN Editor](#yasmin-editor)
    - [Getting Started](#getting-started)
-5. [YASMIN Viewer](#yasmin-viewer)
+6. [YASMIN Viewer](#yasmin-viewer)
    - [Getting Started](#getting-started-1)
    - [Custom Host and Port](#custom-host-and-port)
-6. [Citations](#citations)
+7. [Citations](#citations)
 
 ## Key Features
 
