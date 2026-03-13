@@ -3266,8 +3266,7 @@ pose.position.x = 1.0;
 pose.position.y = 2.0;
 pose.position.z = 3.0;
 
-auto bytes = yasmin_ros::serialize_interface(pose);
-
+auto bytes =yasmin_ros::serialize_interface<geometry_msgs::msg::Pose>(pose);
 blackboard->set<std::vector<uint8_t>>("pose_bytes", bytes);
 ```
 
