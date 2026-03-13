@@ -3236,11 +3236,11 @@ Type Description
 
 ---
 
-`int` Integer values
-`float` Floating‑point values
-`bool` Boolean values
-`string` UTF‑8 text
-`bytes` / `std::vector<uint8_t>` Binary data
+- `int` Integer values
+- `float` Floating‑point values
+- `bool` Boolean values
+- `string` UTF‑8 text
+- `bytes` / `std::vector<uint8_t>` Binary data
 
 ### Sharing ROS Interfaces Between Languages
 
@@ -3279,15 +3279,6 @@ from geometry_msgs.msg import Pose
 pose_bytes = blackboard["pose_bytes"]
 pose = rclpy.serialization.deserialize_message(pose_bytes, Pose)
 ```
-
-### Recommended Pattern
-
-When exchanging ROS interfaces across languages:
-
-1.  **Serialize the message** into `bytes` / `std::vector<uint8_t>`
-2.  **Store the serialized data** in the blackboard
-    dynamic deserialization
-3.  **Deserialize the message** in the receiving state
 
 ## YASMIN Editor
 
