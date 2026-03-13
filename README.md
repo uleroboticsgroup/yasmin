@@ -3246,8 +3246,7 @@ Type Description
 ### Sharing ROS Interfaces Between Languages
 
 ROS messages cannot be directly stored in the blackboard when
-communicating between Python and C++ states.\
-Instead, they should be **serialized into raw bytes**.
+communicating between Python and C++ states. Instead, they should be **serialized into raw bytes**.
 
 YASMIN provides helper utilities in:
 
