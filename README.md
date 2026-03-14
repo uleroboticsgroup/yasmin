@@ -43,12 +43,13 @@
 3. [Demos](#demos)
    - [Python](#python)
    - [Cpp](#cpp)
-4. [YASMIN Editor](#yasmin-editor)
+4. [Cross-Language ROS Interface Communication](#crosslanguage-ros-interface-communication)
+5. [YASMIN Editor](#yasmin-editor)
    - [Getting Started](#getting-started)
-5. [YASMIN Viewer](#yasmin-viewer)
+6. [YASMIN Viewer](#yasmin-viewer)
    - [Getting Started](#getting-started-1)
    - [Custom Host and Port](#custom-host-and-port)
-6. [Citations](#citations)
+7. [Citations](#citations)
 
 ## Key Features
 
@@ -3220,6 +3221,64 @@ int main(int argc, char *argv[]) {
 ```
 
 </details>
+
+## Cross‑Language ROS Interface Communication
+
+When mixing **Python** and **C++** states in the same YASMIN state
+machine, the blackboard can be used to exchange data between them.
+However, due to language boundaries, only data types that can be safely
+serialized across runtimes should be used.
+
+### Supported Blackboard Types
+
+The following types are guaranteed to work between Python and C++:
+
+Type Description
+
+---
+
+- `int` Integer values
+- `float` Floating‑point values
+- `bool` Boolean values
+- `string` UTF‑8 text
+- `bytes` / `std::vector<uint8_t>` Binary data
+
+### Sharing ROS Interfaces Between Languages
+
+ROS messages cannot be directly stored in the blackboard when
+communicating between Python and C++ states. Instead, they should be **serialized into raw bytes**.
+
+YASMIN provides helper utilities in:
+
+    yasmin_ros/interface_serialization.hpp
+
+These utilities allow converting ROS interfaces to binary data and
+restoring them later.
+
+### Example (C++)
+
+```cpp
+#include "geometry_msgs/msg/pose.hpp"
+#include "yasmin_ros/interface_serialization.hpp"
+
+geometry_msgs::msg::Pose pose;
+pose.position.x = 1.0;
+pose.position.y = 2.0;
+pose.position.z = 3.0;
+
+auto bytes = yasmin_ros::serialize_interface<geometry_msgs::msg::Pose>(pose);
+blackboard->set<std::vector<uint8_t>>("pose_bytes", bytes);
+```
+
+### Example (Python)
+
+```python
+import rclpy.serialization
+from geometry_msgs.msg import Pose
+
+pose_bytes = blackboard["pose_bytes"]
+pose = rclpy.serialization.deserialize_message(pose_bytes, Pose)
+```
 
 ## YASMIN Editor
 

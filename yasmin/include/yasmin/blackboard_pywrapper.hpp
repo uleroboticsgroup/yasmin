@@ -16,12 +16,14 @@
 #ifndef YASMIN__BLACKBOARD_PYWRAPPER_HPP_
 #define YASMIN__BLACKBOARD_PYWRAPPER_HPP_
 
+#include <cstdint>
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
 #include <type_traits>
 #include <typeinfo>
+#include <vector>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/types.hpp"
@@ -46,6 +48,16 @@ class BlackboardPyWrapper {
 private:
   /// @brief Underlying C++ Blackboard instance
   Blackboard ::SharedPtr blackboard;
+
+  static std::vector<uint8_t> py_bytes_to_vector(const py::bytes &value) {
+    const std::string data = value;
+    return std::vector<uint8_t>(data.begin(), data.end());
+  }
+
+  static py::bytes vector_to_py_bytes(const std::vector<uint8_t> &value) {
+    return py::bytes(reinterpret_cast<const char *>(value.data()),
+                     static_cast<py::ssize_t>(value.size()));
+  }
 
 public:
   BlackboardPyWrapper() : blackboard(Blackboard::make_shared()) {}
@@ -80,6 +92,9 @@ public:
       this->blackboard->set<double>(key, value.cast<double>());
     } else if (py::isinstance<py::str>(value)) {
       this->blackboard->set<std::string>(key, value.cast<std::string>());
+    } else if (py::isinstance<py::bytes>(value)) {
+      this->blackboard->set<std::vector<uint8_t>>(
+          key, py_bytes_to_vector(value.cast<py::bytes>()));
     } else {
       this->blackboard->set<py::object>(key, value);
     }
@@ -95,9 +110,17 @@ public:
     // Get the type of the stored value
     std::string type = this->blackboard->get_type(key);
 
+    // Check if it's a byte array (C++ std::vector<uint8_t>) - convert to Python
+    // bytes
+    if (type.find("std::vector<unsigned char") != std::string::npos ||
+        type.find("std::vector<uint8_t") != std::string::npos) {
+      std::vector<uint8_t> cpp_value =
+          this->blackboard->get<std::vector<uint8_t>>(key);
+      return vector_to_py_bytes(cpp_value);
+    }
     // Check if it's a std::string (C++ string) - convert to Python str
-    if (type.find("std::string") != std::string::npos ||
-        type.find("std::__cxx11::basic_string") != std::string::npos) {
+    else if (type.find("std::string") != std::string::npos ||
+             type.find("std::__cxx11::basic_string") != std::string::npos) {
       std::string cpp_value = this->blackboard->get<std::string>(key);
       return py::cast(cpp_value);
     }

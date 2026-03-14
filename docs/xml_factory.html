@@ -443,10 +443,44 @@ install(TARGETS my_custom_state
               >
               - Text strings
             </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >bytes</code
+              >
+              /
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::vector&lt;uint8_t&gt;</code
+              >
+              - Binary data (can be used to exchange serialized ROS interfaces)
+            </li>
           </ul>
           <p style="margin-top: 10px; color: #856404">
             Complex objects, custom classes, or ROS messages cannot be directly
             shared between Python and C++ states through the blackboard.
+            Instead, ROS interfaces can be serialized to
+            <code
+              style="
+                background-color: rgba(0, 0, 0, 0.1);
+                color: #000;
+                padding: 2px 4px;
+                border-radius: 3px;
+              "
+              >bytes</code
+            >
+            and stored in the blackboard, allowing Python and C++ states to
+            exchange ROS messages through serialized binary data.
           </p>
         </div>
 

@@ -1,0 +1,8 @@
+<StateMachine outcomes="outcome4" name="Demo3">
+    <State name="PoseWriter" type="cpp" class="yasmin_demos/PoseWriterState">
+        <Transition from="outcome1" to="PoseReader"/>
+    </State>
+    <State name="PoseReader" type="py" module="yasmin_demos.pose_reader_state" class="PoseReaderState">
+        <Transition from="outcome2" to="outcome4"/>
+    </State>
+</StateMachine>
