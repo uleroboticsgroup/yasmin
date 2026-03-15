@@ -15,7 +15,7 @@
 
 
 import unittest
-from yasmin import State
+from yasmin import Blackboard, State
 
 
 class FooState(State):
@@ -32,6 +32,16 @@ class BarState(State):
 
     def execute(self, blackboard):
         return "outcome2"
+
+
+class StateWithDefaults(State):
+    def __init__(self):
+        super().__init__(["done"])
+        self.add_input_key("counter", 42, "An integer counter")
+        self.add_input_key("label", "hello", "A string label")
+
+    def execute(self, blackboard):
+        return "done"
 
 
 class TestState(unittest.TestCase):
@@ -59,6 +69,69 @@ class TestState(unittest.TestCase):
         self.assertEqual(
             str(context.exception), "A state must have at least one possible outcome."
         )
+
+
+class TestStateMetadata(unittest.TestCase):
+
+    def test_default_value_injected_when_missing(self):
+        state = StateWithDefaults()
+        bb = Blackboard()
+        state(bb)
+        self.assertEqual(bb["counter"], 42)
+        self.assertEqual(bb["label"], "hello")
+
+    def test_default_value_not_overwritten_when_present(self):
+        state = StateWithDefaults()
+        bb = Blackboard()
+        bb["counter"] = 100
+        state(bb)
+        self.assertEqual(bb["counter"], 100)
+
+    def test_default_value_respects_mapped_key_exists(self):
+        state = StateWithDefaults()
+        bb = Blackboard()
+        bb.set_remappings({"counter": "my_counter"})
+        bb["my_counter"] = 99
+        state(bb)
+        self.assertEqual(bb["my_counter"], 99)
+
+    def test_default_value_injected_on_remapped_key(self):
+        state = StateWithDefaults()
+        bb = Blackboard()
+        bb.set_remappings({"counter": "my_counter"})
+        state(bb)
+        self.assertEqual(bb["my_counter"], 42)
+
+    def test_default_value_each_call_is_independent(self):
+        state = StateWithDefaults()
+        bb1 = Blackboard()
+        bb2 = Blackboard()
+        state(bb1)
+        bb1["counter"] = 7
+        state(bb2)
+        self.assertEqual(bb2["counter"], 42)
+
+    def test_key_description_field(self):
+        state = StateWithDefaults()
+        keys = state.get_input_keys()
+        counter_key = next(k for k in keys if k["name"] == "counter")
+        self.assertEqual(counter_key["description"], "An integer counter")
+        label_key = next(k for k in keys if k["name"] == "label")
+        self.assertEqual(label_key["description"], "A string label")
+
+    def test_add_input_key_description_no_default(self):
+        state = StateWithDefaults()
+        state.add_input_key("speed", description="Robot linear speed")
+        keys = state.get_input_keys()
+        speed_key = next(k for k in keys if k["name"] == "speed")
+        self.assertEqual(speed_key["description"], "Robot linear speed")
+        self.assertFalse(speed_key["has_default"])
+
+    def test_key_description_empty_by_default(self):
+        state = FooState()
+        state.add_input_key("raw_key")
+        keys = state.get_input_keys()
+        self.assertEqual(keys[0]["description"], "")
 
 
 if __name__ == "__main__":

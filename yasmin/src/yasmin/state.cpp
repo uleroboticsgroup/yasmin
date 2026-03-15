@@ -62,6 +62,16 @@ std::string State::operator()(Blackboard::SharedPtr blackboard) {
   YASMIN_LOG_DEBUG("Executing state '%s'", this->to_string().c_str());
   this->set_status(StateStatus::RUNNING);
 
+  // Inject default values for input keys that are missing from the blackboard
+  for (const auto &key_info : this->metadata.input_keys) {
+    if (key_info.has_default && !blackboard->contains(key_info.name)) {
+      YASMIN_LOG_DEBUG(
+          "Injecting default value for input key '%s' in state '%s'",
+          key_info.name.c_str(), this->to_string().c_str());
+      key_info.inject_default(*blackboard, key_info.name);
+    }
+  }
+
   // Execute the specific logic of the state
   std::string outcome = this->execute(blackboard);
 
@@ -104,6 +114,40 @@ std::string State::operator()(Blackboard::SharedPtr blackboard) {
 }
 
 Outcomes const &State::get_outcomes() const noexcept { return this->outcomes; }
+
+void State::set_description(const std::string &description) {
+  this->metadata.description = description;
+}
+
+const std::string &State::get_description() const {
+  return this->metadata.description;
+}
+
+void State::add_input_key(const BlackboardKeyInfo &key_info) {
+  this->metadata.input_keys.push_back(key_info);
+}
+
+void State::add_input_key(const std::string &key_name) {
+  this->metadata.input_keys.emplace_back(key_name);
+}
+
+void State::add_output_key(const BlackboardKeyInfo &key_info) {
+  this->metadata.output_keys.push_back(key_info);
+}
+
+void State::add_output_key(const std::string &key_name) {
+  this->metadata.output_keys.emplace_back(key_name);
+}
+
+const std::vector<BlackboardKeyInfo> &State::get_input_keys() const {
+  return this->metadata.input_keys;
+}
+
+const std::vector<BlackboardKeyInfo> &State::get_output_keys() const {
+  return this->metadata.output_keys;
+}
+
+const StateMetadata &State::get_metadata() const { return this->metadata; }
 
 std::string State::to_string() const {
   std::string name = typeid(*this).name();

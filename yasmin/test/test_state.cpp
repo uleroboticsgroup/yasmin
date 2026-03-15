@@ -80,6 +80,81 @@ TEST_F(TestState, TestInitException) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Metadata tests
+// ---------------------------------------------------------------------------
+class StateWithDefaults : public State {
+public:
+  StateWithDefaults() : State({"done"}) {
+    add_input_key<int>("counter", 42);
+    add_input_key<std::string>("label", std::string("hello"));
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    return "done";
+  }
+};
+
+TEST_F(TestState, TestDefaultValueInjectedWhenMissing) {
+  StateWithDefaults s;
+  auto bb = yasmin::Blackboard::make_shared();
+  s(bb);
+  EXPECT_EQ(bb->get<int>("counter"), 42);
+  EXPECT_EQ(bb->get<std::string>("label"), "hello");
+}
+
+TEST_F(TestState, TestDefaultValueNotOverwrittenWhenPresent) {
+  StateWithDefaults s;
+  auto bb = yasmin::Blackboard::make_shared();
+  bb->set<int>("counter", 100);
+  s(bb);
+  EXPECT_EQ(bb->get<int>("counter"), 100);
+}
+
+TEST_F(TestState, TestDefaultValueRespectsMappedKeyExists) {
+  StateWithDefaults s;
+  auto bb = yasmin::Blackboard::make_shared();
+  // "counter" is remapped to "my_counter"; the remapped key already exists
+  bb->set_remappings({{"counter", "my_counter"}});
+  bb->set<int>("my_counter", 99);
+  s(bb);
+  EXPECT_EQ(bb->get<int>("my_counter"), 99);
+}
+
+TEST_F(TestState, TestDefaultValueInjectedOnRemappedKey) {
+  StateWithDefaults s;
+  auto bb = yasmin::Blackboard::make_shared();
+  // "counter" remapped to "my_counter"; nothing in the blackboard yet
+  bb->set_remappings({{"counter", "my_counter"}});
+  s(bb);
+  EXPECT_EQ(bb->get<int>("my_counter"), 42);
+}
+
+TEST_F(TestState, TestDefaultValueEachCallIsIndependent) {
+  StateWithDefaults s;
+  auto bb1 = yasmin::Blackboard::make_shared();
+  auto bb2 = yasmin::Blackboard::make_shared();
+  s(bb1);
+  bb1->set<int>("counter", 7);
+  s(bb2);
+  // Modifying bb1 must not affect the injected default in bb2
+  EXPECT_EQ(bb2->get<int>("counter"), 42);
+}
+
+TEST_F(TestState, TestKeyInfoDescription) {
+  BlackboardKeyInfo info("speed", 1.5);
+  info.description = "Maximum robot speed in m/s";
+
+  auto s = std::make_shared<FooState>();
+  s->add_input_key(info);
+
+  const auto &keys = s->get_input_keys();
+  ASSERT_EQ(keys.size(), 1u);
+  EXPECT_EQ(keys[0].name, "speed");
+  EXPECT_EQ(keys[0].description, "Maximum robot speed in m/s");
+  EXPECT_TRUE(keys[0].has_default);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

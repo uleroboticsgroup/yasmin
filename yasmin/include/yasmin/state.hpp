@@ -17,12 +17,77 @@
 #define YASMIN__STATE_HPP_
 
 #include <atomic>
+#include <functional>
 #include <string>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 
 namespace yasmin {
+
+/**
+ * @struct BlackboardKeyInfo
+ * @brief Information about a blackboard key including name and optional default
+ * value.
+ */
+struct BlackboardKeyInfo {
+  /// The name of the key
+  std::string name;
+  /// Human-readable description of the key
+  std::string description;
+  /// Whether this key has a default value
+  bool has_default{false};
+  /// The default value stored as a shared pointer to void (similar to
+  /// Blackboard)
+  std::shared_ptr<void> default_value{};
+  /// The type name of the default value
+  std::string default_value_type{};
+  /// Function to inject the default value into a blackboard at the given key
+  std::function<void(Blackboard &, const std::string &)> inject_default{};
+
+  /**
+   * @brief Default constructor.
+   */
+  BlackboardKeyInfo() = default;
+
+  /**
+   * @brief Constructor with key name only.
+   * @param key_name The name of the blackboard key.
+   */
+  explicit BlackboardKeyInfo(std::string key_name)
+      : name(std::move(key_name)) {}
+
+  /**
+   * @brief Constructor with key name and default value.
+   * @tparam T The type of the default value.
+   * @param key_name The name of the blackboard key.
+   * @param value The default value.
+   */
+  template <typename T>
+  BlackboardKeyInfo(std::string key_name, T value)
+      : name(std::move(key_name)), has_default(true),
+        default_value(std::make_shared<T>(value)),
+        default_value_type(demangle_type(typeid(T).name())) {
+    auto stored = std::static_pointer_cast<T>(this->default_value);
+    inject_default = [stored](Blackboard &bb, const std::string &key) {
+      bb.set<T>(key, *stored);
+    };
+  }
+};
+
+/**
+ * @struct StateMetadata
+ * @brief Metadata for a state including description and blackboard key
+ * information.
+ */
+struct StateMetadata {
+  /// Description of the state
+  std::string description;
+  /// Information about input keys required by this state
+  std::vector<BlackboardKeyInfo> input_keys;
+  /// Information about output keys produced by this state
+  std::vector<BlackboardKeyInfo> output_keys;
+};
 
 /**
  * @enum StateStatus
@@ -48,6 +113,8 @@ class State {
 protected:
   /// The possible outcomes of this state.
   Outcomes outcomes;
+  /// Metadata for the state including description and key information.
+  StateMetadata metadata;
 
 private:
   /// Current status of the state
@@ -148,6 +215,82 @@ public:
    * @return A constant reference to the set of possible outcomes.
    */
   Outcomes const &get_outcomes() const noexcept;
+
+  /**
+   * @brief Sets the description for this state.
+   * @param description The description of the state.
+   */
+  void set_description(const std::string &description);
+
+  /**
+   * @brief Gets the description of this state.
+   * @return The description of the state.
+   */
+  const std::string &get_description() const;
+
+  /**
+   * @brief Adds an input key to the state's metadata.
+   * @param key_info Information about the input key.
+   */
+  void add_input_key(const BlackboardKeyInfo &key_info);
+
+  /**
+   * @brief Adds an input key with a name only.
+   * @param key_name The name of the input key.
+   */
+  void add_input_key(const std::string &key_name);
+
+  /**
+   * @brief Adds an input key with a name and default value.
+   * @tparam T The type of the default value.
+   * @param key_name The name of the input key.
+   * @param default_value The default value for the key.
+   */
+  template <typename T>
+  void add_input_key(const std::string &key_name, T default_value) {
+    this->metadata.input_keys.emplace_back(key_name, default_value);
+  }
+
+  /**
+   * @brief Adds an output key to the state's metadata.
+   * @param key_info Information about the output key.
+   */
+  void add_output_key(const BlackboardKeyInfo &key_info);
+
+  /**
+   * @brief Adds an output key with a name only.
+   * @param key_name The name of the output key.
+   */
+  void add_output_key(const std::string &key_name);
+
+  /**
+   * @brief Adds an output key with a name and default value.
+   * @tparam T The type of the default value.
+   * @param key_name The name of the output key.
+   * @param default_value The default value for the key.
+   */
+  template <typename T>
+  void add_output_key(const std::string &key_name, T default_value) {
+    this->metadata.output_keys.emplace_back(key_name, default_value);
+  }
+
+  /**
+   * @brief Gets the input keys metadata.
+   * @return A constant reference to the vector of input key information.
+   */
+  const std::vector<BlackboardKeyInfo> &get_input_keys() const;
+
+  /**
+   * @brief Gets the output keys metadata.
+   * @return A constant reference to the vector of output key information.
+   */
+  const std::vector<BlackboardKeyInfo> &get_output_keys() const;
+
+  /**
+   * @brief Gets the complete state metadata.
+   * @return A constant reference to the state metadata.
+   */
+  const StateMetadata &get_metadata() const;
 
   /**
    * @brief Converts the state to a string representation.
