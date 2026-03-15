@@ -37,6 +37,8 @@ class StateNode(QGraphicsEllipseItem):
         x: float,
         y: float,
         remappings: Optional[Dict[str, str]] = None,
+        description: str = "",
+        defaults: Optional[List[Dict[str, str]]] = None,
     ) -> None:
         super().__init__(-60, -40, 120, 80)
         self.name: str = name
@@ -46,6 +48,8 @@ class StateNode(QGraphicsEllipseItem):
         self.connections: List["ConnectionLine"] = []
         self.remappings: Dict[str, str] = remappings or {}
         self.parent_container: Optional["ContainerStateNode"] = None
+        self.description: str = description
+        self.defaults: List[Dict[str, str]] = defaults or []
 
         self.setPos(x, y)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)

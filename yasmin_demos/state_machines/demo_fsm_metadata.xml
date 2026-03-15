@@ -1,0 +1,16 @@
+<StateMachine outcomes="outcome4" name="DemoFsmMetadata" description="Demo FSM showing description and defaults on state machines">
+    <Default key="global_param" value="hello" type="str" description="A global string parameter"/>
+    <Default key="max_iterations" value="5" type="int" description="Maximum number of iterations"/>
+    <State name="Foo" type="cpp" class="yasmin_demos/FooState">
+        <Transition from="outcome1" to="NestedSM"/>
+        <Transition from="outcome2" to="outcome4"/>
+        <Default key="counter" value="0" type="int" description="Iteration counter"/>
+    </State>
+    <StateMachine name="NestedSM" outcomes="outcome3" description="Nested FSM that runs Bar state">
+        <Default key="nested_flag" value="true" type="bool" description="A flag for the nested FSM"/>
+        <State name="Bar" type="py" module="yasmin_demos.bar_state" class="BarState">
+            <Transition from="outcome3" to="outcome3"/>
+        </State>
+        <Transition from="outcome3" to="Foo"/>
+    </StateMachine>
+</StateMachine>

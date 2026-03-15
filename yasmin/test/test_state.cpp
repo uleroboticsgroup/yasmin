@@ -155,6 +155,103 @@ TEST_F(TestState, TestKeyInfoDescription) {
   EXPECT_TRUE(keys[0].has_default);
 }
 
+// ---------------------------------------------------------------------------
+// Additional metadata tests for various types and get_default_value
+// ---------------------------------------------------------------------------
+
+class StateWithAllTypes : public State {
+public:
+  StateWithAllTypes() : State({"done"}) {
+    set_description("State with various default types");
+    add_input_key<bool>("flag", true);
+    add_input_key<double>("speed", 3.14);
+    add_input_key<int>("count", 10);
+    add_input_key<std::string>("name", std::string("robot"));
+    add_output_key<int>("result", 0);
+    add_output_key("no_default");
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    return "done";
+  }
+};
+
+TEST_F(TestState, TestDescriptionSetAndGet) {
+  StateWithAllTypes s;
+  EXPECT_EQ(s.get_description(), "State with various default types");
+}
+
+TEST_F(TestState, TestMultipleInputKeyTypes) {
+  StateWithAllTypes s;
+  const auto &keys = s.get_input_keys();
+  ASSERT_EQ(keys.size(), 4u);
+
+  // bool
+  EXPECT_EQ(keys[0].name, "flag");
+  EXPECT_TRUE(keys[0].has_default);
+  EXPECT_EQ(keys[0].get_default_value<bool>(), true);
+
+  // double
+  EXPECT_EQ(keys[1].name, "speed");
+  EXPECT_TRUE(keys[1].has_default);
+  EXPECT_NEAR(keys[1].get_default_value<double>(), 3.14, 0.001);
+
+  // int
+  EXPECT_EQ(keys[2].name, "count");
+  EXPECT_TRUE(keys[2].has_default);
+  EXPECT_EQ(keys[2].get_default_value<int>(), 10);
+
+  // string
+  EXPECT_EQ(keys[3].name, "name");
+  EXPECT_TRUE(keys[3].has_default);
+  EXPECT_EQ(keys[3].get_default_value<std::string>(), "robot");
+}
+
+TEST_F(TestState, TestOutputKeyWithAndWithoutDefault) {
+  StateWithAllTypes s;
+  const auto &keys = s.get_output_keys();
+  ASSERT_EQ(keys.size(), 2u);
+
+  EXPECT_EQ(keys[0].name, "result");
+  EXPECT_TRUE(keys[0].has_default);
+  EXPECT_EQ(keys[0].get_default_value<int>(), 0);
+
+  EXPECT_EQ(keys[1].name, "no_default");
+  EXPECT_FALSE(keys[1].has_default);
+}
+
+TEST_F(TestState, TestAllDefaultsInjected) {
+  StateWithAllTypes s;
+  auto bb = yasmin::Blackboard::make_shared();
+  s(bb);
+
+  EXPECT_EQ(bb->get<bool>("flag"), true);
+  EXPECT_NEAR(bb->get<double>("speed"), 3.14, 0.001);
+  EXPECT_EQ(bb->get<int>("count"), 10);
+  EXPECT_EQ(bb->get<std::string>("name"), "robot");
+}
+
+TEST_F(TestState, TestGetMetadataComplete) {
+  StateWithAllTypes s;
+  const auto &meta = s.get_metadata();
+  EXPECT_EQ(meta.description, "State with various default types");
+  EXPECT_EQ(meta.input_keys.size(), 4u);
+  EXPECT_EQ(meta.output_keys.size(), 2u);
+}
+
+TEST_F(TestState, TestBlackboardKeyInfoCopy) {
+  BlackboardKeyInfo info("val", 42);
+  BlackboardKeyInfo copy = info;
+  EXPECT_EQ(copy.name, "val");
+  EXPECT_TRUE(copy.has_default);
+  EXPECT_EQ(copy.get_default_value<int>(), 42);
+
+  // Injection through copy should work
+  auto bb = yasmin::Blackboard::make_shared();
+  copy.inject_default(*bb, "val");
+  EXPECT_EQ(bb->get<int>("val"), 42);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

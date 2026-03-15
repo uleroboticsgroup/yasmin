@@ -49,12 +49,33 @@ class YasminFactory:
             module_name = state_elem.attrib["module"]
             module = importlib.import_module(module_name)
             state_class = getattr(module, class_name)
-            return state_class()
+            state = state_class()
 
-        if state_type == "cpp":
-            return self._cpp_factory.create(class_name)
+        elif state_type == "cpp":
+            state = self._cpp_factory.create(class_name)
 
-        raise ValueError(f"Unknown state type: {state_type}")
+        else:
+            raise ValueError(f"Unknown state type: {state_type}")
+
+        # Parse Default elements for input key default values
+        for def_elem in state_elem.findall("Default"):
+            key = def_elem.attrib["key"]
+            value_str = def_elem.attrib["value"]
+            type_str = def_elem.attrib.get("type", "str")
+            key_description = def_elem.attrib.get("description", "")
+
+            if type_str == "int":
+                value = int(value_str)
+            elif type_str in ("float", "double"):
+                value = float(value_str)
+            elif type_str == "bool":
+                value = value_str.lower() in ("true", "1")
+            else:
+                value = value_str
+
+            state.add_input_key(key, value, key_description)
+
+        return state
 
     def create_concurrence(self, conc_elem: ET.Element) -> Concurrence:
         """
@@ -167,6 +188,29 @@ class YasminFactory:
 
         if set_start_state:
             sm.set_start_state(set_start_state)
+
+        # Parse description attribute
+        description = root.attrib.get("description", "")
+        if description:
+            sm.set_description(description)
+
+        # Parse Default elements for input key default values
+        for def_elem in root.findall("Default"):
+            key = def_elem.attrib["key"]
+            value_str = def_elem.attrib["value"]
+            type_str = def_elem.attrib.get("type", "str")
+            key_description = def_elem.attrib.get("description", "")
+
+            if type_str == "int":
+                value = int(value_str)
+            elif type_str in ("float", "double"):
+                value = float(value_str)
+            elif type_str == "bool":
+                value = value_str.lower() in ("true", "1")
+            else:
+                value = value_str
+
+            sm.add_input_key(key, value, key_description)
 
         return sm
 

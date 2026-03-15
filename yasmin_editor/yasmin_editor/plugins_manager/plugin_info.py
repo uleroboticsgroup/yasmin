@@ -39,13 +39,30 @@ class PluginInfo:
         self.file_name: Optional[str] = file_name
         self.package_name: Optional[str] = package_name
         self.outcomes: List[str] = []
+        self.description: str = ""
+        self.input_keys: List[dict] = []
+        self.output_keys: List[dict] = []
 
         if self.plugin_type == "python":
             loaded_module = importlib.import_module(self.module)
             state_class = getattr(loaded_module, self.class_name)
-            self.outcomes = list(state_class().get_outcomes())
+            instance = state_class()
+            self.outcomes = list(instance.get_outcomes())
+            try:
+                self.description = instance.get_description()
+                self.input_keys = list(instance.get_input_keys())
+                self.output_keys = list(instance.get_output_keys())
+            except Exception:
+                pass
         elif self.plugin_type == "cpp":
-            self.outcomes = list(self._cpp_factory.create(self.class_name).get_outcomes())
+            instance = self._cpp_factory.create(self.class_name)
+            self.outcomes = list(instance.get_outcomes())
+            try:
+                self.description = instance.get_description()
+                self.input_keys = list(instance.get_input_keys())
+                self.output_keys = list(instance.get_output_keys())
+            except Exception:
+                pass
         elif self.plugin_type == "xml":
             package_path = get_package_share_path(self.package_name)
             file_path = ""

@@ -51,6 +51,7 @@ from yasmin_editor.editor_gui.state_properties_dialog import StatePropertiesDial
 from yasmin_editor.editor_gui.state_machine_dialog import StateMachineDialog
 from yasmin_editor.editor_gui.concurrence_dialog import ConcurrenceDialog
 from yasmin_editor.editor_gui.xml_manager import XmlManager
+from yasmin_editor.editor_gui.defaults_dialog import DefaultsDialog
 
 
 class YasminEditor(QMainWindow):
@@ -209,20 +210,36 @@ class YasminEditor(QMainWindow):
         right_layout = QVBoxLayout(right_panel)
 
         root_sm_widget = QWidget()
-        root_sm_layout = QHBoxLayout(root_sm_widget)
-        root_sm_layout.setContentsMargins(0, 0, 0, 0)
+        root_sm_vlayout = QVBoxLayout(root_sm_widget)
+        root_sm_vlayout.setContentsMargins(0, 0, 0, 0)
 
-        root_sm_layout.addWidget(QLabel("<b>State Machine Name:</b>"))
+        root_sm_row1 = QHBoxLayout()
+        root_sm_row1.addWidget(QLabel("<b>State Machine Name:</b>"))
         self.root_sm_name_edit = QLineEdit()
         self.root_sm_name_edit.setPlaceholderText("Enter root state machine name...")
         self.root_sm_name_edit.textChanged.connect(self.on_root_sm_name_changed)
-        root_sm_layout.addWidget(self.root_sm_name_edit)
+        root_sm_row1.addWidget(self.root_sm_name_edit)
 
-        root_sm_layout.addWidget(QLabel("<b>Start State:</b>"))
+        root_sm_row1.addWidget(QLabel("<b>Start State:</b>"))
         self.start_state_combo = QComboBox()
         self.start_state_combo.addItem("(None)")
         self.start_state_combo.currentTextChanged.connect(self.on_start_state_changed)
-        root_sm_layout.addWidget(self.start_state_combo)
+        root_sm_row1.addWidget(self.start_state_combo)
+        root_sm_vlayout.addLayout(root_sm_row1)
+
+        root_sm_row2 = QHBoxLayout()
+        root_sm_row2.addWidget(QLabel("<b>Description:</b>"))
+        self.root_sm_description_edit = QLineEdit()
+        self.root_sm_description_edit.setPlaceholderText("Enter FSM description...")
+        root_sm_row2.addWidget(self.root_sm_description_edit)
+
+        # Root defaults - stored internally, edited via dialog
+        self._root_defaults: list = []
+        open_defaults_btn = QPushButton("Edit Defaults...")
+        open_defaults_btn.clicked.connect(self.open_root_defaults_dialog)
+        root_sm_row2.addWidget(QLabel("<b>Defaults:</b>"))
+        root_sm_row2.addWidget(open_defaults_btn)
+        root_sm_vlayout.addLayout(root_sm_row2)
 
         right_layout.addWidget(root_sm_widget)
 
@@ -286,6 +303,24 @@ class YasminEditor(QMainWindow):
             self.start_state = None
         else:
             self.start_state = text
+
+    def open_root_defaults_dialog(self) -> None:
+        """Open the DefaultsDialog to edit root FSM defaults."""
+        dlg = DefaultsDialog(self._root_defaults, parent=self)
+        if dlg.exec_():
+            self._root_defaults = dlg.get_defaults()
+
+    def add_root_default_row(self) -> None:
+        pass  # kept for xml_manager compatibility
+
+    def remove_root_default_row(self) -> None:
+        pass  # kept for xml_manager compatibility
+
+    def add_root_default_row_with_data(self, data: dict) -> None:
+        self._root_defaults.append(data)
+
+    def get_root_defaults(self) -> list:
+        return list(self._root_defaults)
 
     def update_start_state_combo(self) -> None:
         """Update the initial state combo box with available states."""
@@ -373,6 +408,8 @@ class YasminEditor(QMainWindow):
         remappings: Dict[str, str] = None,
         start_state: str = None,
         default_outcome: str = None,
+        description: str = "",
+        defaults: List[Dict[str, str]] = None,
     ) -> None:
         """Create a new state node in the canvas.
 
@@ -406,9 +443,19 @@ class YasminEditor(QMainWindow):
                 outcomes,
                 start_state,
                 default_outcome,
+                description or "",
+                defaults,
             )
         else:
-            node = StateNode(name, plugin_info, pos.x(), pos.y(), remappings)
+            node = StateNode(
+                name,
+                plugin_info,
+                pos.x(),
+                pos.y(),
+                remappings,
+                description or "",
+                defaults,
+            )
 
         self.canvas.scene.addItem(node)
         self.state_nodes[name] = node
@@ -433,9 +480,14 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             result = dialog.get_state_data()
             if result[0]:
-                name, plugin, outcomes, remappings = result
+                name, plugin, outcomes, remappings, description, defaults = result
                 self.create_state_node(
-                    name, plugin, outcomes=outcomes, remappings=remappings
+                    name,
+                    plugin,
+                    outcomes=outcomes,
+                    remappings=remappings,
+                    description=description,
+                    defaults=defaults,
                 )
 
     def add_container(self, is_concurrence: bool = False) -> None:
@@ -452,7 +504,7 @@ class YasminEditor(QMainWindow):
                 else dialog.get_state_machine_data()
             )
             if result:
-                name, outcomes, param, remappings = result
+                name, outcomes, param, remappings, description, defaults = result
                 self.create_state_node(
                     name=name,
                     plugin_info=None,
@@ -462,6 +514,8 @@ class YasminEditor(QMainWindow):
                     remappings=remappings,
                     start_state=param if not is_concurrence else None,
                     default_outcome=param if is_concurrence else None,
+                    description=description,
+                    defaults=defaults,
                 )
 
     def add_state_machine(self) -> None:
@@ -504,12 +558,16 @@ class YasminEditor(QMainWindow):
                     child_states=child_state_names,
                     edit_mode=True,
                     parent=self,
+                    description=getattr(state_node, "description", ""),
+                    defaults=getattr(state_node, "defaults", []),
                 )
 
                 if dialog.exec_():
                     result = dialog.get_state_machine_data()
                     if result:
-                        name, outcomes, start_state, remappings = result
+                        name, outcomes, start_state, remappings, description, defaults = (
+                            result
+                        )
 
                         if name != old_name:
                             if name in self.state_nodes:
@@ -530,6 +588,8 @@ class YasminEditor(QMainWindow):
                             self.update_start_state_combo()
 
                         state_node.remappings = remappings
+                        state_node.description = description
+                        state_node.defaults = defaults
 
                         if start_state:
                             state_node.start_state = start_state
@@ -557,12 +617,21 @@ class YasminEditor(QMainWindow):
                     final_outcomes=final_outcome_names,
                     edit_mode=True,
                     parent=self,
+                    description=getattr(state_node, "description", ""),
+                    defaults=getattr(state_node, "defaults", []),
                 )
 
                 if dialog.exec_():
                     result = dialog.get_concurrence_data()
                     if result:
-                        name, outcomes, default_outcome, remappings = result
+                        (
+                            name,
+                            outcomes,
+                            default_outcome,
+                            remappings,
+                            description,
+                            defaults,
+                        ) = result
 
                         if name != old_name:
                             if name in self.state_nodes:
@@ -583,6 +652,8 @@ class YasminEditor(QMainWindow):
                             self.update_start_state_combo()
 
                         state_node.remappings = remappings
+                        state_node.description = description
+                        state_node.defaults = defaults
 
                         if default_outcome:
                             state_node.default_outcome = default_outcome
@@ -604,12 +675,14 @@ class YasminEditor(QMainWindow):
                 outcomes=None,
                 edit_mode=True,
                 parent=self,
+                description=getattr(state_node, "description", ""),
+                defaults=getattr(state_node, "defaults", []),
             )
 
             if dialog.exec_():
                 result = dialog.get_state_data()
                 if result[0]:
-                    name, plugin, outcomes, remappings = result
+                    name, plugin, outcomes, remappings, description, defaults = result
 
                     if name != old_name:
                         if name in self.state_nodes:
@@ -632,6 +705,8 @@ class YasminEditor(QMainWindow):
                         self.update_start_state_combo()
 
                     state_node.remappings = remappings
+                    state_node.description = description
+                    state_node.defaults = defaults
                     self.statusBar().showMessage(f"Updated state: {name}", 2000)
 
     def add_state_to_container(self) -> None:
@@ -662,7 +737,7 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             result = dialog.get_state_data()
             if result[0]:
-                name, plugin, outcomes, remappings = result
+                name, plugin, outcomes, remappings, description, defaults = result
 
                 if name in container.child_states:
                     QMessageBox.warning(
@@ -670,7 +745,9 @@ class YasminEditor(QMainWindow):
                     )
                     return
 
-                child_node = StateNode(name, plugin, 0, 0, remappings)
+                child_node = StateNode(
+                    name, plugin, 0, 0, remappings, description, defaults
+                )
                 container.add_child_state(child_node)
                 full_name = f"{container.name}.{name}"
                 self.state_nodes[full_name] = child_node
@@ -702,7 +779,7 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             result = dialog.get_state_machine_data()
             if result:
-                name, outcomes, start_state, remappings = result
+                name, outcomes, start_state, remappings, description, defaults = result
 
                 if name in container.child_states:
                     QMessageBox.warning(
@@ -711,7 +788,16 @@ class YasminEditor(QMainWindow):
                     return
 
                 child_sm = ContainerStateNode(
-                    name, 0, 0, False, remappings, outcomes, start_state, None
+                    name,
+                    0,
+                    0,
+                    False,
+                    remappings,
+                    outcomes,
+                    start_state,
+                    None,
+                    description=description,
+                    defaults=defaults,
                 )
                 container.add_child_state(child_sm)
                 full_name = f"{container.name}.{name}"
@@ -744,7 +830,9 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             result = dialog.get_concurrence_data()
             if result:
-                name, outcomes, default_outcome, remappings = result
+                name, outcomes, default_outcome, remappings, description, defaults = (
+                    result
+                )
 
                 if name in container.child_states:
                     QMessageBox.warning(
@@ -753,7 +841,16 @@ class YasminEditor(QMainWindow):
                     return
 
                 child_cc = ContainerStateNode(
-                    name, 0, 0, True, remappings, outcomes, None, default_outcome
+                    name,
+                    0,
+                    0,
+                    True,
+                    remappings,
+                    outcomes,
+                    None,
+                    default_outcome,
+                    description=description,
+                    defaults=defaults,
                 )
                 container.add_child_state(child_cc)
                 full_name = f"{container.name}.{name}"
@@ -1123,6 +1220,8 @@ class YasminEditor(QMainWindow):
             self.root_sm_name = ""
             self.start_state = None
             self.root_sm_name_edit.clear()
+            self.root_sm_description_edit.clear()
+            self._root_defaults = []
             self.update_start_state_combo()
             self.statusBar().showMessage("New state machine created", 2000)
             return True

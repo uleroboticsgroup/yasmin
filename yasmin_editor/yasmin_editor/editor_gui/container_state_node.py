@@ -45,6 +45,8 @@ class ContainerStateNode(QGraphicsRectItem):
         outcomes: Optional[List[str]] = None,
         start_state: Optional[str] = None,
         default_outcome: Optional[str] = None,
+        description: str = "",
+        defaults: Optional[List[Dict[str, str]]] = None,
     ) -> None:
         """Initialize a container state node.
 
@@ -70,6 +72,8 @@ class ContainerStateNode(QGraphicsRectItem):
         self.default_outcome = default_outcome
         self.child_states: Dict[str, Union["StateNode", "ContainerStateNode"]] = {}
         self.parent_container: Optional["ContainerStateNode"] = None
+        self.description: str = description
+        self.defaults: List[Dict[str, str]] = defaults or []
         self.min_width = 1000
         self.min_height = 800
         self.xml_file: Optional[str] = None

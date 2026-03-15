@@ -20,12 +20,20 @@ from PyQt5.QtWidgets import (
     QFormLayout,
     QLineEdit,
     QDialogButtonBox,
-    QTextEdit,
     QComboBox,
     QMessageBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
+    QPushButton,
+    QHBoxLayout,
+    QVBoxLayout,
+    QWidget,
+    QTextEdit,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
+from yasmin_editor.editor_gui.defaults_dialog import DefaultsDialog
 
 
 class ConcurrenceDialog(QDialog):
@@ -40,6 +48,8 @@ class ConcurrenceDialog(QDialog):
         final_outcomes: Optional[List[str]] = None,
         edit_mode: bool = False,
         parent: Optional[QDialog] = None,
+        description: str = "",
+        defaults: Optional[List[Dict[str, str]]] = None,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Edit Concurrence" if edit_mode else "Add Concurrence")
@@ -91,17 +101,48 @@ class ConcurrenceDialog(QDialog):
         self.outcomes_display.setMaximumHeight(base_height + max(3, num_outcomes) * 18)
         layout.addRow(self.outcomes_label, self.outcomes_display)
 
+        # Description
+        desc_label: QLabel = QLabel("<b>Description (optional):</b>")
+        self.description_edit: QTextEdit = QTextEdit()
+        self.description_edit.setMaximumHeight(60)
+        if description:
+            self.description_edit.setPlainText(description)
+        layout.addRow(desc_label, self.description_edit)
+
         # Remappings
         remappings_label: QLabel = QLabel("<b>Remappings (optional):</b>")
-        self.remappings_edit: QTextEdit = QTextEdit()
-        self.remappings_edit.setMaximumHeight(100)
-        self.remappings_edit.setPlaceholderText(
-            "old_key:new_key\nanother_key:another_value"
-        )
+        remappings_widget: QWidget = QWidget()
+        remappings_layout: QVBoxLayout = QVBoxLayout(remappings_widget)
+        remappings_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.remappings_table: QTableWidget = QTableWidget(0, 2)
+        self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
+        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.remappings_table.setMinimumHeight(80)
+        self.remappings_table.setMaximumHeight(150)
+        remappings_layout.addWidget(self.remappings_table)
+
+        remap_btn_layout: QHBoxLayout = QHBoxLayout()
+        add_remap_btn: QPushButton = QPushButton("Add Row")
+        add_remap_btn.clicked.connect(self.add_remapping_row)
+        remap_btn_layout.addWidget(add_remap_btn)
+        remove_remap_btn: QPushButton = QPushButton("Remove Row")
+        remove_remap_btn.clicked.connect(self.remove_remapping_row)
+        remap_btn_layout.addWidget(remove_remap_btn)
+        remap_btn_layout.addStretch()
+        remappings_layout.addLayout(remap_btn_layout)
+
         if remappings:
-            remap_text: str = "\n".join([f"{k}:{v}" for k, v in remappings.items()])
-            self.remappings_edit.setPlainText(remap_text)
-        layout.addRow(remappings_label, self.remappings_edit)
+            for old_key, new_key in remappings.items():
+                self._add_remapping_row_with_data(old_key, new_key)
+
+        layout.addRow(remappings_label, remappings_widget)
+
+        # Defaults - stored internally, edited via sub-dialog
+        self._defaults: List[Dict[str, str]] = list(defaults or [])
+        self._defaults_btn: QPushButton = QPushButton("Edit Defaults...")
+        self._defaults_btn.clicked.connect(self._open_defaults_dialog)
+        layout.addRow(QLabel("<b>Defaults (optional):</b>"), self._defaults_btn)
 
         # Buttons
         buttons: QDialogButtonBox = QDialogButtonBox(
@@ -111,8 +152,10 @@ class ConcurrenceDialog(QDialog):
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-    def get_concurrence_data(self) -> Tuple[str, List[str], str, Dict[str, str]]:
-        """Returns: (name, outcomes, default_outcome, remappings)"""
+    def get_concurrence_data(
+        self,
+    ) -> Tuple[str, List[str], str, Dict[str, str], str, List[Dict[str, str]]]:
+        """Returns: (name, outcomes, default_outcome, remappings, description, defaults)"""
         name = self.name_edit.text().strip()
         if not name:
             QMessageBox.warning(self, "Validation Error", "Concurrence name is required!")
@@ -128,13 +171,40 @@ class ConcurrenceDialog(QDialog):
             None if default_outcome_text == "(None)" else default_outcome_text
         )
 
-        # Parse remappings
+        # Parse remappings from table
         remappings = {}
-        remap_text = self.remappings_edit.toPlainText().strip()
-        if remap_text:
-            for line in remap_text.split("\n"):
-                if ":" in line:
-                    key, value = line.split(":", 1)
-                    remappings[key.strip()] = value.strip()
+        for row in range(self.remappings_table.rowCount()):
+            old_item = self.remappings_table.item(row, 0)
+            new_item = self.remappings_table.item(row, 1)
+            old_key = old_item.text().strip() if old_item else ""
+            new_key = new_item.text().strip() if new_item else ""
+            if old_key and new_key:
+                remappings[old_key] = new_key
 
-        return name, outcomes, default_outcome, remappings
+        description = self.description_edit.toPlainText().strip()
+
+        return name, outcomes, default_outcome, remappings, description, self._defaults
+
+    def _open_defaults_dialog(self) -> None:
+        """Open the DefaultsDialog to edit defaults."""
+        dlg = DefaultsDialog(self._defaults, parent=self)
+        if dlg.exec_():
+            self._defaults = dlg.get_defaults()
+
+    def add_remapping_row(self) -> None:
+        """Add an empty row to the remappings table."""
+        row = self.remappings_table.rowCount()
+        self.remappings_table.insertRow(row)
+
+    def remove_remapping_row(self) -> None:
+        """Remove the selected row from the remappings table."""
+        row = self.remappings_table.currentRow()
+        if row >= 0:
+            self.remappings_table.removeRow(row)
+
+    def _add_remapping_row_with_data(self, old_key: str, new_key: str) -> None:
+        """Add a row to the remappings table pre-filled with data."""
+        row = self.remappings_table.rowCount()
+        self.remappings_table.insertRow(row)
+        self.remappings_table.setItem(row, 0, QTableWidgetItem(old_key))
+        self.remappings_table.setItem(row, 1, QTableWidgetItem(new_key))

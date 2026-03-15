@@ -16,6 +16,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "yasmin/blackboard_key_info_py.hpp"
 #include "yasmin/blackboard_pywrapper.hpp"
 #include "yasmin/pybind11_utils.hpp"
 #include "yasmin/state.hpp"
@@ -153,45 +154,15 @@ PYBIND11_MODULE(state, m) {
       .def(
           "add_input_key",
           [](yasmin::State &state, const std::string &key_name,
-             int default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info(key_name, default_value);
+             py::object default_value, const std::string &description) {
+            yasmin::BlackboardKeyInfo info =
+                yasmin::BlackboardKeyInfoPy::from_pyobject(key_name,
+                                                           default_value);
             info.description = description;
             state.add_input_key(info);
           },
-          "Add an input key with int default value and optional description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
-      .def(
-          "add_input_key",
-          [](yasmin::State &state, const std::string &key_name,
-             double default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info(key_name, default_value);
-            info.description = description;
-            state.add_input_key(info);
-          },
-          "Add an input key with float default value and optional description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
-      .def(
-          "add_input_key",
-          [](yasmin::State &state, const std::string &key_name,
-             bool default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info(key_name, default_value);
-            info.description = description;
-            state.add_input_key(info);
-          },
-          "Add an input key with bool default value and optional description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
-      .def(
-          "add_input_key",
-          [](yasmin::State &state, const std::string &key_name,
-             const std::string &default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info(key_name, default_value);
-            info.description = description;
-            state.add_input_key(info);
-          },
-          "Add an input key with string default value and optional description",
+          "Add an input key with a default value of any type and optional "
+          "description",
           py::arg("key_name"), py::arg("default_value"),
           py::arg("description") = "")
       .def(
@@ -207,45 +178,14 @@ PYBIND11_MODULE(state, m) {
       .def(
           "add_output_key",
           [](yasmin::State &state, const std::string &key_name,
-             int default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info(key_name, default_value);
+             py::object default_value, const std::string &description) {
+            yasmin::BlackboardKeyInfo info =
+                yasmin::BlackboardKeyInfoPy::from_pyobject(key_name,
+                                                           default_value);
             info.description = description;
             state.add_output_key(info);
           },
-          "Add an output key with int default value and optional description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
-      .def(
-          "add_output_key",
-          [](yasmin::State &state, const std::string &key_name,
-             double default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info(key_name, default_value);
-            info.description = description;
-            state.add_output_key(info);
-          },
-          "Add an output key with float default value and optional description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
-      .def(
-          "add_output_key",
-          [](yasmin::State &state, const std::string &key_name,
-             bool default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info(key_name, default_value);
-            info.description = description;
-            state.add_output_key(info);
-          },
-          "Add an output key with bool default value and optional description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
-      .def(
-          "add_output_key",
-          [](yasmin::State &state, const std::string &key_name,
-             const std::string &default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info(key_name, default_value);
-            info.description = description;
-            state.add_output_key(info);
-          },
-          "Add an output key with string default value and optional "
+          "Add an output key with a default value of any type and optional "
           "description",
           py::arg("key_name"), py::arg("default_value"),
           py::arg("description") = "")
@@ -271,6 +211,8 @@ PYBIND11_MODULE(state, m) {
               key_dict["has_default"] = key.has_default;
               if (key.has_default) {
                 key_dict["default_value_type"] = key.default_value_type;
+                key_dict["default_value"] =
+                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
               }
               result.append(key_dict);
             }
@@ -289,6 +231,8 @@ PYBIND11_MODULE(state, m) {
               key_dict["has_default"] = key.has_default;
               if (key.has_default) {
                 key_dict["default_value_type"] = key.default_value_type;
+                key_dict["default_value"] =
+                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
               }
               result.append(key_dict);
             }
@@ -309,6 +253,8 @@ PYBIND11_MODULE(state, m) {
               key_dict["has_default"] = key.has_default;
               if (key.has_default) {
                 key_dict["default_value_type"] = key.default_value_type;
+                key_dict["default_value"] =
+                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
               }
               input_keys.append(key_dict);
             }
@@ -321,6 +267,8 @@ PYBIND11_MODULE(state, m) {
               key_dict["has_default"] = key.has_default;
               if (key.has_default) {
                 key_dict["default_value_type"] = key.default_value_type;
+                key_dict["default_value"] =
+                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
               }
               output_keys.append(key_dict);
             }

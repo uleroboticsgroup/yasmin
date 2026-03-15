@@ -49,6 +49,16 @@ class XmlManager:
             cont_elem.set("default_outcome", state_node.default_outcome)
         if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
             cont_elem.set("outcomes", " ".join(state_node.final_outcomes.keys()))
+        if getattr(state_node, "description", ""):
+            cont_elem.set("description", state_node.description)
+        for default in getattr(state_node, "defaults", []):
+            if default.get("key"):
+                def_elem = ET.SubElement(cont_elem, "Default")
+                def_elem.set("key", default["key"])
+                def_elem.set("value", default.get("value", ""))
+                def_elem.set("type", default.get("type", "str"))
+                if default.get("description"):
+                    def_elem.set("description", default["description"])
         if state_node.remappings:
             self.add_remappings(cont_elem, state_node.remappings)
         if hasattr(state_node, "child_states") and state_node.child_states:
@@ -71,6 +81,17 @@ class XmlManager:
         root.set("outcomes", " ".join(self.editor.final_outcomes.keys()))
         if self.editor.start_state:
             root.set("start_state", self.editor.start_state)
+        fsm_description = self.editor.root_sm_description_edit.text().strip()
+        if fsm_description:
+            root.set("description", fsm_description)
+        for default in self.editor.get_root_defaults():
+            if default.get("key"):
+                def_elem = ET.SubElement(root, "Default")
+                def_elem.set("key", default["key"])
+                def_elem.set("value", default.get("value", ""))
+                def_elem.set("type", default.get("type", "str"))
+                if default.get("description"):
+                    def_elem.set("description", default["description"])
         root_level_states = {
             name: node
             for name, node in self.editor.state_nodes.items()
@@ -118,6 +139,16 @@ class XmlManager:
                             state_elem.set("package", state_node.plugin_info.package_name)
                 if state_node.remappings:
                     self.add_remappings(state_elem, state_node.remappings)
+                if getattr(state_node, "description", ""):
+                    state_elem.set("description", state_node.description)
+                for default in getattr(state_node, "defaults", []):
+                    if default.get("key"):
+                        def_elem = ET.SubElement(state_elem, "Default")
+                        def_elem.set("key", default["key"])
+                        def_elem.set("value", default.get("value", ""))
+                        def_elem.set("type", default.get("type", "str"))
+                        if default.get("description"):
+                            def_elem.set("description", default["description"])
                 self.save_transitions(state_elem, state_node)
 
     def save_transitions(self, parent_elem: ET.Element, state_node: StateNode) -> None:
@@ -139,6 +170,14 @@ class XmlManager:
         if sm_name:
             self.editor.root_sm_name = sm_name
             self.editor.root_sm_name_edit.setText(sm_name)
+
+        fsm_description = root.get("description", "")
+        self.editor.root_sm_description_edit.setText(fsm_description)
+
+        # Load root defaults
+        root_defaults = self.load_defaults(root)
+        for default_data in root_defaults:
+            self.editor.add_root_default_row_with_data(default_data)
 
         start_state = root.get("start_state", "")
 
@@ -530,7 +569,11 @@ class XmlManager:
                     )
 
                 if plugin_info:
-                    node = StateNode(state_name, plugin_info, 0, 0, remappings)
+                    description = elem.get("description", "")
+                    defaults = self.load_defaults(elem)
+                    node = StateNode(
+                        state_name, plugin_info, 0, 0, remappings, description, defaults
+                    )
                     self.add_node_to_editor_or_container(
                         node, state_name, parent_container
                     )
@@ -541,9 +584,19 @@ class XmlManager:
                 init_state = elem.get("start_state", "")
                 remappings = self.load_remappings(elem)
                 outcomes = outcomes_str.split() if outcomes_str else []
+                description = elem.get("description", "")
+                defaults = self.load_defaults(elem)
 
                 node = ContainerStateNode(
-                    state_name, 0, 0, False, remappings, outcomes, init_state
+                    state_name,
+                    0,
+                    0,
+                    False,
+                    remappings,
+                    outcomes,
+                    init_state,
+                    description=description,
+                    defaults=defaults,
                 )
                 self.add_node_to_editor_or_container(node, state_name, parent_container)
 
@@ -560,9 +613,20 @@ class XmlManager:
                 default_outcome = elem.get("default_outcome", None)
                 remappings = self.load_remappings(elem)
                 outcomes = outcomes_str.split() if outcomes_str else []
+                description = elem.get("description", "")
+                defaults = self.load_defaults(elem)
 
                 node = ContainerStateNode(
-                    state_name, 0, 0, True, remappings, outcomes, None, default_outcome
+                    state_name,
+                    0,
+                    0,
+                    True,
+                    remappings,
+                    outcomes,
+                    None,
+                    default_outcome,
+                    description=description,
+                    defaults=defaults,
                 )
                 self.add_node_to_editor_or_container(node, state_name, parent_container)
 
@@ -582,6 +646,20 @@ class XmlManager:
             if from_key and to_key:
                 remappings[from_key] = to_key
         return remappings
+
+    def load_defaults(self, elem: ET.Element) -> list:
+        """Load default values from XML element."""
+        defaults = []
+        for def_elem in elem.findall("Default"):
+            defaults.append(
+                {
+                    "key": def_elem.get("key", ""),
+                    "value": def_elem.get("value", ""),
+                    "type": def_elem.get("type", "str"),
+                    "description": def_elem.get("description", ""),
+                }
+            )
+        return defaults
 
     def find_to_node(
         self, to_name: str, parent_container: ContainerStateNode = None

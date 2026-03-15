@@ -15,8 +15,10 @@
 
 #include <algorithm>
 #include <exception>
+#include <mutex>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #ifdef __GNUG__     // If using GCC/G++
@@ -29,10 +31,35 @@
 
 using namespace yasmin;
 
+// ---------------------------------------------------------------------------
+// External metadata storage — preserves ABI with plugins compiled against the
+// older State class layout that did not include a StateMetadata member.
+// ---------------------------------------------------------------------------
+namespace {
+std::mutex &metadata_mutex() {
+  static std::mutex mtx;
+  return mtx;
+}
+std::unordered_map<const State *, StateMetadata> &metadata_map() {
+  static std::unordered_map<const State *, StateMetadata> map;
+  return map;
+}
+} // namespace
+
+StateMetadata &State::get_metadata_ref() const {
+  std::lock_guard<std::mutex> lock(metadata_mutex());
+  return metadata_map()[this];
+}
+
 State::State(const Outcomes &outcomes) : outcomes(outcomes) {
   if (outcomes.empty()) {
     throw std::logic_error("A state must have at least one possible outcome.");
   }
+}
+
+State::~State() {
+  std::lock_guard<std::mutex> lock(metadata_mutex());
+  metadata_map().erase(this);
 }
 
 void State::set_status(StateStatus new_status) {
@@ -63,7 +90,8 @@ std::string State::operator()(Blackboard::SharedPtr blackboard) {
   this->set_status(StateStatus::RUNNING);
 
   // Inject default values for input keys that are missing from the blackboard
-  for (const auto &key_info : this->metadata.input_keys) {
+  const auto &input_keys = this->get_metadata_ref().input_keys;
+  for (const auto &key_info : input_keys) {
     if (key_info.has_default && !blackboard->contains(key_info.name)) {
       YASMIN_LOG_DEBUG(
           "Injecting default value for input key '%s' in state '%s'",
@@ -116,38 +144,40 @@ std::string State::operator()(Blackboard::SharedPtr blackboard) {
 Outcomes const &State::get_outcomes() const noexcept { return this->outcomes; }
 
 void State::set_description(const std::string &description) {
-  this->metadata.description = description;
+  this->get_metadata_ref().description = description;
 }
 
 const std::string &State::get_description() const {
-  return this->metadata.description;
+  return this->get_metadata_ref().description;
 }
 
 void State::add_input_key(const BlackboardKeyInfo &key_info) {
-  this->metadata.input_keys.push_back(key_info);
+  this->get_metadata_ref().input_keys.push_back(key_info);
 }
 
 void State::add_input_key(const std::string &key_name) {
-  this->metadata.input_keys.emplace_back(key_name);
+  this->get_metadata_ref().input_keys.emplace_back(key_name);
 }
 
 void State::add_output_key(const BlackboardKeyInfo &key_info) {
-  this->metadata.output_keys.push_back(key_info);
+  this->get_metadata_ref().output_keys.push_back(key_info);
 }
 
 void State::add_output_key(const std::string &key_name) {
-  this->metadata.output_keys.emplace_back(key_name);
+  this->get_metadata_ref().output_keys.emplace_back(key_name);
 }
 
 const std::vector<BlackboardKeyInfo> &State::get_input_keys() const {
-  return this->metadata.input_keys;
+  return this->get_metadata_ref().input_keys;
 }
 
 const std::vector<BlackboardKeyInfo> &State::get_output_keys() const {
-  return this->metadata.output_keys;
+  return this->get_metadata_ref().output_keys;
 }
 
-const StateMetadata &State::get_metadata() const { return this->metadata; }
+const StateMetadata &State::get_metadata() const {
+  return this->get_metadata_ref();
+}
 
 std::string State::to_string() const {
   std::string name = typeid(*this).name();

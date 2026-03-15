@@ -348,6 +348,166 @@ TEST_F(TestYasminFactory, TestFilePathMechanism) {
   }
 }
 
+TEST_F(TestYasminFactory, TestSmDescriptionFromXml) {
+  std::string xml_content = R"(
+    <StateMachine outcomes="end" description="Test SM description">
+      <State name="State1" type="cpp" class="yasmin_factory/TestSimpleState">
+        <Transition from="outcome1" to="State1"/>
+        <Transition from="outcome2" to="end"/>
+      </State>
+    </StateMachine>
+  )";
+
+  tinyxml2::XMLDocument doc;
+  doc.Parse(xml_content.c_str());
+  tinyxml2::XMLElement *root = doc.FirstChildElement("StateMachine");
+
+  ASSERT_NE(root, nullptr);
+
+  try {
+    auto sm = factory->create_sm(root);
+
+    ASSERT_NE(sm, nullptr);
+    EXPECT_EQ(sm->get_description(), "Test SM description");
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "C++ plugin not available: " << e.what();
+  }
+}
+
+TEST_F(TestYasminFactory, TestSmDefaultsFromXml) {
+  std::string xml_content = R"(
+    <StateMachine outcomes="end">
+      <Default key="param_int" value="42" type="int" description="An integer"/>
+      <Default key="param_str" value="hello" type="str" description="A string"/>
+      <Default key="param_float" value="3.14" type="float"/>
+      <Default key="param_bool" value="true" type="bool"/>
+      <State name="State1" type="cpp" class="yasmin_factory/TestSimpleState">
+        <Transition from="outcome1" to="State1"/>
+        <Transition from="outcome2" to="end"/>
+      </State>
+    </StateMachine>
+  )";
+
+  tinyxml2::XMLDocument doc;
+  doc.Parse(xml_content.c_str());
+  tinyxml2::XMLElement *root = doc.FirstChildElement("StateMachine");
+
+  ASSERT_NE(root, nullptr);
+
+  try {
+    auto sm = factory->create_sm(root);
+
+    ASSERT_NE(sm, nullptr);
+    auto input_keys = sm->get_input_keys();
+    EXPECT_EQ(input_keys.size(), 4);
+
+    // Check param_int
+    bool found_int = false;
+    for (const auto &key : input_keys) {
+      if (key.name == "param_int") {
+        found_int = true;
+        EXPECT_TRUE(key.has_default);
+        EXPECT_EQ(key.get_default_value<int>(), 42);
+        EXPECT_EQ(key.description, "An integer");
+        break;
+      }
+    }
+    EXPECT_TRUE(found_int);
+
+    // Check param_str
+    bool found_str = false;
+    for (const auto &key : input_keys) {
+      if (key.name == "param_str") {
+        found_str = true;
+        EXPECT_TRUE(key.has_default);
+        EXPECT_EQ(key.get_default_value<std::string>(), "hello");
+        EXPECT_EQ(key.description, "A string");
+        break;
+      }
+    }
+    EXPECT_TRUE(found_str);
+
+    // Check param_float
+    bool found_float = false;
+    for (const auto &key : input_keys) {
+      if (key.name == "param_float") {
+        found_float = true;
+        EXPECT_TRUE(key.has_default);
+        EXPECT_NEAR(key.get_default_value<double>(), 3.14, 0.001);
+        break;
+      }
+    }
+    EXPECT_TRUE(found_float);
+
+    // Check param_bool
+    bool found_bool = false;
+    for (const auto &key : input_keys) {
+      if (key.name == "param_bool") {
+        found_bool = true;
+        EXPECT_TRUE(key.has_default);
+        EXPECT_EQ(key.get_default_value<bool>(), true);
+        break;
+      }
+    }
+    EXPECT_TRUE(found_bool);
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "C++ plugin not available: " << e.what();
+  }
+}
+
+TEST_F(TestYasminFactory, TestNestedSmDescriptionAndDefaults) {
+  std::string xml_content = R"(
+    <StateMachine outcomes="end" description="Root description">
+      <Default key="root_key" value="root_val" type="str"/>
+      <StateMachine name="Inner" outcomes="inner_done" description="Inner description">
+        <Default key="inner_key" value="10" type="int"/>
+        <State name="S1" type="cpp" class="yasmin_factory/TestSimpleState">
+          <Transition from="outcome1" to="S1"/>
+          <Transition from="outcome2" to="inner_done"/>
+        </State>
+        <Transition from="inner_done" to="end"/>
+      </StateMachine>
+    </StateMachine>
+  )";
+
+  tinyxml2::XMLDocument doc;
+  doc.Parse(xml_content.c_str());
+  tinyxml2::XMLElement *root = doc.FirstChildElement("StateMachine");
+
+  ASSERT_NE(root, nullptr);
+
+  try {
+    auto sm = factory->create_sm(root);
+
+    ASSERT_NE(sm, nullptr);
+    EXPECT_EQ(sm->get_description(), "Root description");
+
+    auto root_keys = sm->get_input_keys();
+    EXPECT_EQ(root_keys.size(), 1);
+    EXPECT_EQ(root_keys[0].name, "root_key");
+    EXPECT_EQ(root_keys[0].get_default_value<std::string>(), "root_val");
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "C++ plugin not available: " << e.what();
+  }
+}
+
+TEST_F(TestYasminFactory, TestFsmMetadataFromFile) {
+  std::string xml_file = test_dir + "/test_fsm_metadata.xml";
+
+  try {
+    auto sm = factory->create_sm_from_file(xml_file);
+
+    ASSERT_NE(sm, nullptr);
+    EXPECT_EQ(sm->get_name(), "TestFsmMetadata");
+    EXPECT_EQ(sm->get_description(), "Root SM description");
+
+    auto root_keys = sm->get_input_keys();
+    EXPECT_EQ(root_keys.size(), 2);
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "XML file not available or plugin missing: " << e.what();
+  }
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

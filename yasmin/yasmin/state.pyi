@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Dict, List, Optional, Set, overload
+from typing import Any, Dict, List, Optional, Set, overload
 from yasmin import Blackboard
 
 class State:
@@ -34,37 +34,13 @@ class State:
     def add_input_key(self, key_name: str, description: str = "") -> None: ...
     @overload
     def add_input_key(
-        self, key_name: str, default_value: int, description: str = ""
-    ) -> None: ...
-    @overload
-    def add_input_key(
-        self, key_name: str, default_value: float, description: str = ""
-    ) -> None: ...
-    @overload
-    def add_input_key(
-        self, key_name: str, default_value: bool, description: str = ""
-    ) -> None: ...
-    @overload
-    def add_input_key(
-        self, key_name: str, default_value: str, description: str = ""
+        self, key_name: str, default_value: Any, description: str = ""
     ) -> None: ...
     @overload
     def add_output_key(self, key_name: str, description: str = "") -> None: ...
     @overload
     def add_output_key(
-        self, key_name: str, default_value: int, description: str = ""
-    ) -> None: ...
-    @overload
-    def add_output_key(
-        self, key_name: str, default_value: float, description: str = ""
-    ) -> None: ...
-    @overload
-    def add_output_key(
-        self, key_name: str, default_value: bool, description: str = ""
-    ) -> None: ...
-    @overload
-    def add_output_key(
-        self, key_name: str, default_value: str, description: str = ""
+        self, key_name: str, default_value: Any, description: str = ""
     ) -> None: ...
     def get_input_keys(self) -> List[Dict]: ...
     def get_output_keys(self) -> List[Dict]: ...

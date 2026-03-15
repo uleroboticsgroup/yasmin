@@ -21,73 +21,10 @@
 #include <string>
 
 #include "yasmin/blackboard.hpp"
+#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/logs.hpp"
 
 namespace yasmin {
-
-/**
- * @struct BlackboardKeyInfo
- * @brief Information about a blackboard key including name and optional default
- * value.
- */
-struct BlackboardKeyInfo {
-  /// The name of the key
-  std::string name;
-  /// Human-readable description of the key
-  std::string description;
-  /// Whether this key has a default value
-  bool has_default{false};
-  /// The default value stored as a shared pointer to void (similar to
-  /// Blackboard)
-  std::shared_ptr<void> default_value{};
-  /// The type name of the default value
-  std::string default_value_type{};
-  /// Function to inject the default value into a blackboard at the given key
-  std::function<void(Blackboard &, const std::string &)> inject_default{};
-
-  /**
-   * @brief Default constructor.
-   */
-  BlackboardKeyInfo() = default;
-
-  /**
-   * @brief Constructor with key name only.
-   * @param key_name The name of the blackboard key.
-   */
-  explicit BlackboardKeyInfo(std::string key_name)
-      : name(std::move(key_name)) {}
-
-  /**
-   * @brief Constructor with key name and default value.
-   * @tparam T The type of the default value.
-   * @param key_name The name of the blackboard key.
-   * @param value The default value.
-   */
-  template <typename T>
-  BlackboardKeyInfo(std::string key_name, T value)
-      : name(std::move(key_name)), has_default(true),
-        default_value(std::make_shared<T>(value)),
-        default_value_type(demangle_type(typeid(T).name())) {
-    auto stored = std::static_pointer_cast<T>(this->default_value);
-    inject_default = [stored](Blackboard &bb, const std::string &key) {
-      bb.set<T>(key, *stored);
-    };
-  }
-};
-
-/**
- * @struct StateMetadata
- * @brief Metadata for a state including description and blackboard key
- * information.
- */
-struct StateMetadata {
-  /// Description of the state
-  std::string description;
-  /// Information about input keys required by this state
-  std::vector<BlackboardKeyInfo> input_keys;
-  /// Information about output keys produced by this state
-  std::vector<BlackboardKeyInfo> output_keys;
-};
 
 /**
  * @enum StateStatus
@@ -113,10 +50,16 @@ class State {
 protected:
   /// The possible outcomes of this state.
   Outcomes outcomes;
-  /// Metadata for the state including description and key information.
-  StateMetadata metadata;
 
 private:
+  /**
+   * @brief Gets a mutable reference to this state's metadata.
+   *
+   * Metadata is stored externally (not as a direct member) to preserve
+   * ABI compatibility with plugins compiled against earlier versions of
+   * the State class.
+   */
+  StateMetadata &get_metadata_ref() const;
   /// Current status of the state
   std::atomic<StateStatus> status{StateStatus::IDLE};
 
@@ -145,9 +88,11 @@ public:
   State(const Outcomes &outcomes);
 
   /**
-   * @brief Virtual destructor for proper polymorphic destruction.
+   * @brief Virtual destructor.
+   *
+   * Cleans up externally-stored metadata for this instance.
    */
-  virtual ~State() = default;
+  virtual ~State();
 
   /**
    * @brief Checks if the state is idle.
@@ -248,7 +193,7 @@ public:
    */
   template <typename T>
   void add_input_key(const std::string &key_name, T default_value) {
-    this->metadata.input_keys.emplace_back(key_name, default_value);
+    add_input_key(BlackboardKeyInfo(key_name, default_value));
   }
 
   /**
@@ -271,7 +216,7 @@ public:
    */
   template <typename T>
   void add_output_key(const std::string &key_name, T default_value) {
-    this->metadata.output_keys.emplace_back(key_name, default_value);
+    add_output_key(BlackboardKeyInfo(key_name, default_value));
   }
 
   /**

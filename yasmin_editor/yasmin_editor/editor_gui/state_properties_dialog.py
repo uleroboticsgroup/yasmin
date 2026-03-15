@@ -23,6 +23,13 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QDialogButtonBox,
     QTextEdit,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
+    QPushButton,
+    QHBoxLayout,
+    QVBoxLayout,
+    QWidget,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
@@ -42,10 +49,12 @@ class StatePropertiesDialog(QDialog):
         outcomes: Optional[List[str]] = None,
         edit_mode: bool = False,
         parent: Optional[QDialog] = None,
+        description: str = "",
+        defaults: Optional[List[Dict[str, str]]] = None,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Edit State Properties" if edit_mode else "Add State")
-        self.resize(500, 500)
+        self.resize(600, 650)
         self.edit_mode: bool = edit_mode
 
         layout: QFormLayout = QFormLayout(self)
@@ -121,18 +130,98 @@ class StatePropertiesDialog(QDialog):
         self.outcomes_display.setMaximumHeight(base_height + max(3, num_outcomes) * 18)
         layout.addRow(self.outcomes_label, self.outcomes_display)
 
+        # State description (read-only — loaded from plugin metadata)
+        desc_label: QLabel = QLabel("<b>Description:</b>")
+        self.description_edit: QTextEdit = QTextEdit()
+        self.description_edit.setMaximumHeight(60)
+        self.description_edit.setReadOnly(True)
+        self.description_edit.setStyleSheet(
+            "background: #f0f0f0; border: 1px solid #ccc; color: #333;"
+        )
+        init_desc = description
+        if not init_desc and plugin_info:
+            init_desc = getattr(plugin_info, "description", "")
+        if init_desc:
+            self.description_edit.setPlainText(init_desc)
+        layout.addRow(desc_label, self.description_edit)
+
+        # Default values table
+        defaults_label: QLabel = QLabel("<b>Default Values (optional):</b>")
+        defaults_widget: QWidget = QWidget()
+        defaults_layout: QVBoxLayout = QVBoxLayout(defaults_widget)
+        defaults_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.defaults_table: QTableWidget = QTableWidget(0, 4)
+        self.defaults_table.setHorizontalHeaderLabels(
+            ["Key", "Value", "Type", "Description"]
+        )
+        self.defaults_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.defaults_table.setMinimumHeight(100)
+        self.defaults_table.setMaximumHeight(200)
+        defaults_layout.addWidget(self.defaults_table)
+
+        btn_layout: QHBoxLayout = QHBoxLayout()
+        add_default_btn: QPushButton = QPushButton("Add Row")
+        add_default_btn.clicked.connect(self.add_default_row)
+        btn_layout.addWidget(add_default_btn)
+        remove_default_btn: QPushButton = QPushButton("Remove Row")
+        remove_default_btn.clicked.connect(self.remove_default_row)
+        btn_layout.addWidget(remove_default_btn)
+        btn_layout.addStretch()
+        defaults_layout.addLayout(btn_layout)
+
+        layout.addRow(defaults_label, defaults_widget)
+
+        # Populate defaults table from plugin metadata or provided defaults
+        init_defaults = defaults or []
+        if not init_defaults and plugin_info:
+            for key_info in getattr(plugin_info, "input_keys", []):
+                row_data = {
+                    "key": key_info.get("name", ""),
+                    "value": (
+                        str(key_info.get("default_value", ""))
+                        if key_info.get("has_default")
+                        else ""
+                    ),
+                    "type": (
+                        key_info.get("default_value_type", "str")
+                        if key_info.get("has_default")
+                        else "str"
+                    ),
+                    "description": key_info.get("description", ""),
+                }
+                init_defaults.append(row_data)
+        for row_data in init_defaults:
+            self._add_default_row_with_data(row_data)
+
         # Remappings
         remappings_label: QLabel = QLabel("<b>Remappings (optional):</b>")
+        remappings_widget: QWidget = QWidget()
+        remappings_layout: QVBoxLayout = QVBoxLayout(remappings_widget)
+        remappings_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.remappings_edit: QTextEdit = QTextEdit()
-        self.remappings_edit.setMaximumHeight(100)
-        self.remappings_edit.setPlaceholderText(
-            "old_key:new_key\nanother_key:another_value"
-        )
+        self.remappings_table: QTableWidget = QTableWidget(0, 2)
+        self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
+        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.remappings_table.setMinimumHeight(80)
+        self.remappings_table.setMaximumHeight(150)
+        remappings_layout.addWidget(self.remappings_table)
+
+        remap_btn_layout: QHBoxLayout = QHBoxLayout()
+        add_remap_btn: QPushButton = QPushButton("Add Row")
+        add_remap_btn.clicked.connect(self.add_remapping_row)
+        remap_btn_layout.addWidget(add_remap_btn)
+        remove_remap_btn: QPushButton = QPushButton("Remove Row")
+        remove_remap_btn.clicked.connect(self.remove_remapping_row)
+        remap_btn_layout.addWidget(remove_remap_btn)
+        remap_btn_layout.addStretch()
+        remappings_layout.addLayout(remap_btn_layout)
+
         if remappings:
-            remap_text: str = "\n".join([f"{k}:{v}" for k, v in remappings.items()])
-            self.remappings_edit.setPlainText(remap_text)
-        layout.addRow(remappings_label, self.remappings_edit)
+            for old_key, new_key in remappings.items():
+                self._add_remapping_row_with_data(old_key, new_key)
+
+        layout.addRow(remappings_label, remappings_widget)
 
         self.update_plugin_list()
         self.update_outcome_list()
@@ -144,6 +233,55 @@ class StatePropertiesDialog(QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+    def add_default_row(self) -> None:
+        """Add an empty row to the defaults table."""
+        row = self.defaults_table.rowCount()
+        self.defaults_table.insertRow(row)
+        type_combo = QComboBox()
+        type_combo.addItems(["str", "int", "float", "bool"])
+        self.defaults_table.setCellWidget(row, 2, type_combo)
+
+    def remove_default_row(self) -> None:
+        """Remove the selected row from the defaults table."""
+        row = self.defaults_table.currentRow()
+        if row >= 0:
+            self.defaults_table.removeRow(row)
+
+    def add_remapping_row(self) -> None:
+        """Add an empty row to the remappings table."""
+        row = self.remappings_table.rowCount()
+        self.remappings_table.insertRow(row)
+
+    def remove_remapping_row(self) -> None:
+        """Remove the selected row from the remappings table."""
+        row = self.remappings_table.currentRow()
+        if row >= 0:
+            self.remappings_table.removeRow(row)
+
+    def _add_remapping_row_with_data(self, old_key: str, new_key: str) -> None:
+        """Add a row to the remappings table pre-filled with data."""
+        row = self.remappings_table.rowCount()
+        self.remappings_table.insertRow(row)
+        self.remappings_table.setItem(row, 0, QTableWidgetItem(old_key))
+        self.remappings_table.setItem(row, 1, QTableWidgetItem(new_key))
+
+    def _add_default_row_with_data(self, data: Dict[str, str]) -> None:
+        """Add a row to the defaults table pre-filled with data."""
+        row = self.defaults_table.rowCount()
+        self.defaults_table.insertRow(row)
+        self.defaults_table.setItem(row, 0, QTableWidgetItem(data.get("key", "")))
+        self.defaults_table.setItem(row, 1, QTableWidgetItem(data.get("value", "")))
+        type_combo = QComboBox()
+        type_combo.addItems(["str", "int", "float", "bool"])
+        type_str = data.get("type", "str")
+        # Normalize type name
+        for i in range(type_combo.count()):
+            if type_combo.itemText(i) in type_str:
+                type_combo.setCurrentIndex(i)
+                break
+        self.defaults_table.setCellWidget(row, 2, type_combo)
+        self.defaults_table.setItem(row, 3, QTableWidgetItem(data.get("description", "")))
 
     def update_outcome_list(self) -> None:
         current_type: int = self.type_combo.currentIndex()
@@ -189,22 +327,40 @@ class StatePropertiesDialog(QDialog):
         Optional[PluginInfo],
         List[str],
         Dict[str, str],
+        str,
+        List[Dict[str, str]],
     ]:
-        """Returns: (name, plugin_info, outcomes, remappings)"""
+        """Returns: (name, plugin_info, outcomes, remappings, description, defaults)"""
         name: str = self.name_edit.text().strip()
         plugin: Optional[PluginInfo] = self.plugin_combo.currentData()
 
         remappings: Dict[str, str] = {}
-        remap_text: str = self.remappings_edit.toPlainText().strip()
-        for line in remap_text.split("\n"):
-            line = line.strip()
-            if ":" in line:
-                key: str
-                value: str
-                key, value = line.split(":", 1)
-                remappings[key.strip()] = value.strip()
+        for row in range(self.remappings_table.rowCount()):
+            old_item = self.remappings_table.item(row, 0)
+            new_item = self.remappings_table.item(row, 1)
+            old_key = old_item.text().strip() if old_item else ""
+            new_key = new_item.text().strip() if new_item else ""
+            if old_key and new_key:
+                remappings[old_key] = new_key
 
         outcomes: str = self.outcomes_display.text().strip()
         outcomes_list: List[str] = [o.strip() for o in outcomes.split(",") if o.strip()]
 
-        return name, plugin, outcomes_list, remappings
+        description: str = self.description_edit.toPlainText().strip()
+
+        defaults: List[Dict[str, str]] = []
+        for row in range(self.defaults_table.rowCount()):
+            key_item = self.defaults_table.item(row, 0)
+            value_item = self.defaults_table.item(row, 1)
+            type_widget = self.defaults_table.cellWidget(row, 2)
+            desc_item = self.defaults_table.item(row, 3)
+            key = key_item.text().strip() if key_item else ""
+            value = value_item.text().strip() if value_item else ""
+            type_str = type_widget.currentText() if type_widget else "str"
+            desc = desc_item.text().strip() if desc_item else ""
+            if key:
+                defaults.append(
+                    {"key": key, "value": value, "type": type_str, "description": desc}
+                )
+
+        return name, plugin, outcomes_list, remappings, description, defaults

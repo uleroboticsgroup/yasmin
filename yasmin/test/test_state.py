@@ -134,5 +134,104 @@ class TestStateMetadata(unittest.TestCase):
         self.assertEqual(keys[0]["description"], "")
 
 
+class StateWithAllTypes(State):
+    def __init__(self):
+        super().__init__(["done"])
+        self.set_description("State with various default types")
+        self.add_input_key("flag", True, "A boolean flag")
+        self.add_input_key("speed", 3.14, "Speed value")
+        self.add_input_key("count", 10, "An integer count")
+        self.add_input_key("name", "robot", "Name string")
+        self.add_output_key("result", 0, "Result value")
+        self.add_output_key("no_default")
+
+    def execute(self, blackboard):
+        return "done"
+
+
+class TestStateMetadataExtended(unittest.TestCase):
+
+    def test_description_set_and_get(self):
+        state = StateWithAllTypes()
+        self.assertEqual(state.get_description(), "State with various default types")
+
+    def test_description_default_empty(self):
+        state = FooState()
+        self.assertEqual(state.get_description(), "")
+
+    def test_multiple_input_key_types(self):
+        state = StateWithAllTypes()
+        keys = state.get_input_keys()
+        self.assertEqual(len(keys), 4)
+
+        flag_key = next(k for k in keys if k["name"] == "flag")
+        self.assertTrue(flag_key["has_default"])
+        self.assertEqual(flag_key["default_value"], True)
+        self.assertIsInstance(flag_key["default_value"], bool)
+
+        speed_key = next(k for k in keys if k["name"] == "speed")
+        self.assertTrue(speed_key["has_default"])
+        self.assertAlmostEqual(speed_key["default_value"], 3.14, places=2)
+
+        count_key = next(k for k in keys if k["name"] == "count")
+        self.assertTrue(count_key["has_default"])
+        self.assertEqual(count_key["default_value"], 10)
+
+        name_key = next(k for k in keys if k["name"] == "name")
+        self.assertTrue(name_key["has_default"])
+        self.assertEqual(name_key["default_value"], "robot")
+
+    def test_output_key_with_and_without_default(self):
+        state = StateWithAllTypes()
+        keys = state.get_output_keys()
+        self.assertEqual(len(keys), 2)
+
+        result_key = next(k for k in keys if k["name"] == "result")
+        self.assertTrue(result_key["has_default"])
+        self.assertEqual(result_key["default_value"], 0)
+
+        no_default_key = next(k for k in keys if k["name"] == "no_default")
+        self.assertFalse(no_default_key["has_default"])
+
+    def test_all_defaults_injected(self):
+        state = StateWithAllTypes()
+        bb = Blackboard()
+        state(bb)
+        self.assertEqual(bb["flag"], True)
+        self.assertAlmostEqual(bb["speed"], 3.14, places=2)
+        self.assertEqual(bb["count"], 10)
+        self.assertEqual(bb["name"], "robot")
+
+    def test_get_metadata_complete(self):
+        state = StateWithAllTypes()
+        meta = state.get_metadata()
+        self.assertEqual(meta["description"], "State with various default types")
+        self.assertEqual(len(meta["input_keys"]), 4)
+        self.assertEqual(len(meta["output_keys"]), 2)
+
+    def test_add_input_key_with_list_default(self):
+        state = FooState()
+        state.add_input_key("items", [1, 2, 3], "A list")
+        keys = state.get_input_keys()
+        item_key = next(k for k in keys if k["name"] == "items")
+        self.assertTrue(item_key["has_default"])
+        self.assertEqual(item_key["default_value"], [1, 2, 3])
+
+    def test_add_input_key_with_dict_default(self):
+        state = FooState()
+        state.add_input_key("config", {"a": 1}, "A dict")
+        keys = state.get_input_keys()
+        config_key = next(k for k in keys if k["name"] == "config")
+        self.assertTrue(config_key["has_default"])
+        self.assertEqual(config_key["default_value"], {"a": 1})
+
+    def test_default_injection_with_complex_type(self):
+        state = FooState()
+        state.add_input_key("items", [1, 2, 3])
+        bb = Blackboard()
+        state(bb)
+        self.assertEqual(bb["items"], [1, 2, 3])
+
+
 if __name__ == "__main__":
     unittest.main()
