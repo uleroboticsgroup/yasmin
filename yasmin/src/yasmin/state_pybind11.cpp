@@ -164,7 +164,7 @@ PYBIND11_MODULE(state, m) {
           },
           "Add an input key with a default value of any type and optional "
           "description",
-          py::arg("key_name"), py::arg("default_value"), py::kw_only(),
+          py::arg("key_name"), py::arg("default_value"),
           py::arg("description") = "")
 
       .def(
