@@ -55,7 +55,19 @@ blackboard_key_info_from_pyobject(const std::string &key_name,
     return BlackboardKeyInfo(key_name,
                              std::vector<uint8_t>(data.begin(), data.end()));
   } else {
-    return BlackboardKeyInfo(key_name, py::object(value));
+    BlackboardKeyInfo info(key_name);
+    info.has_default = true;
+    info.default_value_type = "py::object";
+
+    // Keep the Python object alive via a shared_ptr to py::object.
+    auto stored = std::make_shared<py::object>(value);
+    info.default_value = stored;
+    info.inject_default = [stored](Blackboard &bb, const std::string &key) {
+      py::gil_scoped_acquire gil;
+      bb.set<py::object>(key, *stored);
+    };
+
+    return info;
   }
 }
 
