@@ -39,7 +39,7 @@ def main() -> None:
     )
     sm.add_output_key(
         "foo_str",
-        "Formatted counter string produced by FooState and read by BarState.",
+        description="Formatted counter string produced by FooState and read by BarState.",
     )
 
     # Add states to the FSM

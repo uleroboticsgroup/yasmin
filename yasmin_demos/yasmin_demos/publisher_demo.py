@@ -46,11 +46,11 @@ class PublishIntState(PublisherState):
         self.add_input_key(
             "counter",
             0,
-            "Current counter value stored in the blackboard.",
+            description="Current counter value stored in the blackboard.",
         )
         self.add_output_key(
             "counter",
-            "Updated counter value after incrementing.",
+            description="Updated counter value after incrementing.",
         )
 
     def create_int_msg(self, blackboard: Blackboard) -> Int32:
@@ -119,16 +119,16 @@ def main() -> None:
     sm.add_input_key(
         "counter",
         0,
-        "Current counter value stored in the blackboard.",
+        description="Current counter value stored in the blackboard.",
     )
     sm.add_input_key(
         "max_count",
         10,
-        "Maximum counter threshold used to stop publishing.",
+        description="Maximum counter threshold used to stop publishing.",
     )
     sm.add_output_key(
         "counter",
-        "Updated counter value after each publish step.",
+        description="Updated counter value after each publish step.",
     )
 
     checking_counts_state = CbState(["outcome1", "outcome2"], check_count)
@@ -138,12 +138,12 @@ def main() -> None:
     checking_counts_state.add_input_key(
         "counter",
         0,
-        "Current counter value.",
+        description="Current counter value.",
     )
     checking_counts_state.add_input_key(
         "max_count",
         10,
-        "Maximum counter threshold used to stop publishing.",
+        description="Maximum counter threshold used to stop publishing.",
     )
 
     # Add states to the FSM

@@ -42,11 +42,11 @@ class Foo(State):
         )
         self.add_input_key(
             "foo_data",
-            "Input data read by the Foo state.",
+            description="Input data read by the Foo state.",
         )
         self.add_output_key(
             "foo_out_data",
-            "Output data written by the Foo state.",
+            description="Output data written by the Foo state.",
         )
 
     def execute(self, blackboard: Blackboard):
@@ -87,7 +87,7 @@ class BarState(State):
         )
         self.add_input_key(
             "bar_data",
-            "Input data read by the Bar state.",
+            description="Input data read by the Bar state.",
         )
 
     def execute(self, blackboard: Blackboard):
@@ -128,15 +128,15 @@ def main() -> None:
     )
     sm.add_input_key(
         "msg1",
-        "Initial input value remapped to the first Foo state.",
+        description="Initial input value remapped to the first Foo state.",
     )
     sm.add_input_key(
         "msg2",
-        "Initial input value remapped to the second Foo state.",
+        description="Initial input value remapped to the second Foo state.",
     )
     sm.add_output_key(
         "foo_out_data",
-        "Output data written by Foo and forwarded to Bar through remapping.",
+        description="Output data written by Foo and forwarded to Bar through remapping.",
     )
 
     # Add states to the FSM

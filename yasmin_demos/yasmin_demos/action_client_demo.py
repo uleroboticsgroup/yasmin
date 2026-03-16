@@ -52,10 +52,12 @@ class FibonacciState(ActionState):
         self.set_description(
             "Calls the ROS2 Fibonacci action server and computes the Fibonacci sequence up to the requested order."
         )
-        self.add_input_key("n", 10, "Order of the Fibonacci sequence to compute.")
+        self.add_input_key(
+            "n", 10, description="Order of the Fibonacci sequence to compute."
+        )
         self.add_output_key(
             "fibo_res",
-            "Computed Fibonacci sequence returned by the action server.",
+            description="Computed Fibonacci sequence returned by the action server.",
         )
 
     def create_goal_handler(self, blackboard: Blackboard) -> Fibonacci.Goal:
@@ -156,10 +158,10 @@ def main() -> None:
     sm.set_description(
         "Calls a Fibonacci action server, stores the resulting sequence in the blackboard, and prints the result."
     )
-    sm.add_input_key("n", 10, "Order of the Fibonacci sequence to compute.")
+    sm.add_input_key("n", 10, description="Order of the Fibonacci sequence to compute.")
     sm.add_output_key(
         "fibo_res",
-        "Computed Fibonacci sequence returned by the action server.",
+        description="Computed Fibonacci sequence returned by the action server.",
     )
 
     printing_result_state = CbState([SUCCEED], print_result)
@@ -168,7 +170,7 @@ def main() -> None:
     )
     printing_result_state.add_input_key(
         "fibo_res",
-        "Computed Fibonacci sequence returned by the action server.",
+        description="Computed Fibonacci sequence returned by the action server.",
     )
 
     # Add states to the FSM

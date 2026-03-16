@@ -46,7 +46,7 @@ class FooState(State):
         )
         self.add_output_key(
             "foo_str",
-            "Formatted counter string written by FooState.",
+            description="Formatted counter string written by FooState.",
         )
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -92,7 +92,7 @@ class BarState(State):
         )
         self.add_input_key(
             "foo_str",
-            "Formatted counter string produced by FooState.",
+            description="Formatted counter string produced by FooState.",
         )
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -130,7 +130,7 @@ def main() -> None:
     )
     sm.add_output_key(
         "foo_str",
-        "Formatted counter string produced by FooState and read by BarState.",
+        description="Formatted counter string produced by FooState and read by BarState.",
     )
 
     # Add states to the FSM

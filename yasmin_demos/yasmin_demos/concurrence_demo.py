@@ -48,7 +48,7 @@ class FooState(State):
         )
         self.add_output_key(
             "foo_str",
-            "String containing the current counter value produced by FooState.",
+            description="String containing the current counter value produced by FooState.",
         )
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -100,7 +100,7 @@ class BarState(State):
         )
         self.add_input_key(
             "foo_str",
-            "String produced by FooState containing the counter value.",
+            description="String produced by FooState containing the counter value.",
         )
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -144,7 +144,7 @@ def main() -> None:
     )
     sm.add_output_key(
         "foo_str",
-        "String containing the current counter value produced during the concurrent execution.",
+        description="String containing the current counter value produced during the concurrent execution.",
     )
 
     # Create states to run concurrently
@@ -174,11 +174,11 @@ def main() -> None:
     )
     concurrence_state.add_input_key(
         "foo_str",
-        "String read by BarState during the concurrent execution.",
+        description="String read by BarState during the concurrent execution.",
     )
     concurrence_state.add_output_key(
         "foo_str",
-        "String written by FooState during the concurrent execution.",
+        description="String written by FooState during the concurrent execution.",
     )
 
     # Add concurrent state to the FSM

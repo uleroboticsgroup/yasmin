@@ -53,7 +53,7 @@ class PrintOdometryState(MonitorState):
         )
         self.add_input_key(
             "odom",
-            "Odometry message received from the monitored ROS topic.",
+            description="Odometry message received from the monitored ROS topic.",
         )
 
     def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -> str:
@@ -100,7 +100,7 @@ def main() -> None:
     )
     sm.add_input_key(
         "odom",
-        "Odometry messages received from the monitored ROS topic.",
+        description="Odometry messages received from the monitored ROS topic.",
     )
 
     # Add states to the FSM

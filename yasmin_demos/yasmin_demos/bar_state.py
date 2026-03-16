@@ -37,7 +37,7 @@ class BarState(State):
         )
         self.add_input_key(
             "foo_str",
-            "String produced by FooState and printed by this state.",
+            description="String produced by FooState and printed by this state.",
         )
 
     def execute(self, blackboard: Blackboard) -> str:

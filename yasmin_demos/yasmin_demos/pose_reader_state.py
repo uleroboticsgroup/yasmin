@@ -41,12 +41,12 @@ class PoseReaderState(State):
         )
         self.add_input_key(
             "pose_bytes",
-            "Serialized Pose message stored as bytes in the blackboard.",
+            description="Serialized Pose message stored as bytes in the blackboard.",
         )
         self.add_input_key(
             "pose_bytes__type",
             "geometry_msgs/msg/Pose",
-            "Type information for the serialized Pose message.",
+            description="Type information for the serialized Pose message.",
         )
 
     def execute(self, blackboard: Blackboard) -> str:
