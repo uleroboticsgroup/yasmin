@@ -16,7 +16,6 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
@@ -39,9 +38,9 @@ int main(int argc, char *argv[]) {
   sm->set_description(
       "Runs a simple loop between FooState and BarState demonstrating how "
       "states can be organized across multiple files.");
-  sm->add_output_key(yasmin::BlackboardKeyInfo(
+  sm->add_output_key(
       "foo_str",
-      "Formatted counter string produced by FooState and read by BarState."));
+      "Formatted counter string produced by FooState and read by BarState.");
 
   // Add states to the state machine
   sm->add_state("FOO", std::make_shared<FooState>(),

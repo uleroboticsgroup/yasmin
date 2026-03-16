@@ -20,7 +20,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/int32.hpp"
 
-#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/cb_state.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
@@ -54,10 +53,10 @@ public:
         ) {
     this->set_description("Publishes an incrementing integer to the 'count' "
                           "topic using values stored in the blackboard.");
-    this->add_input_key(yasmin::BlackboardKeyInfo(
-        "counter", 0, "Current counter value stored in the blackboard."));
-    this->add_output_key(yasmin::BlackboardKeyInfo(
-        "counter", "Updated counter value after incrementing."));
+    this->add_input_key("counter", 0,
+                        "Current counter value stored in the blackboard.");
+    this->add_output_key("counter",
+                         "Updated counter value after incrementing.");
   };
 
   /**
@@ -119,22 +118,21 @@ int main(int argc, char *argv[]) {
       true);
   sm->set_description("Publishes incrementing integers until the configured "
                       "maximum count is reached.");
-  sm->add_input_key(yasmin::BlackboardKeyInfo(
-      "counter", 0, "Current counter value stored in the blackboard."));
-  sm->add_input_key(yasmin::BlackboardKeyInfo(
-      "max_count", 10, "Maximum counter threshold used to stop publishing."));
-  sm->add_output_key(yasmin::BlackboardKeyInfo(
-      "counter", "Updated counter value after each publish step."));
+  sm->add_input_key("counter", 0,
+                    "Current counter value stored in the blackboard.");
+  sm->add_input_key("max_count", 10,
+                    "Maximum counter threshold used to stop publishing.");
+  sm->add_output_key("counter",
+                     "Updated counter value after each publish step.");
 
   auto checking_counts_state = yasmin::CbState::make_shared(
       std::initializer_list<std::string>{"outcome1", "outcome2"}, check_count);
   checking_counts_state->set_description(
       "Checks whether the counter stored in the blackboard reached the "
       "configured maximum.");
+  checking_counts_state->add_input_key("counter", 0, "Current counter value.");
   checking_counts_state->add_input_key(
-      yasmin::BlackboardKeyInfo("counter", 0, "Current counter value."));
-  checking_counts_state->add_input_key(yasmin::BlackboardKeyInfo(
-      "max_count", 10, "Maximum counter threshold used to stop publishing."));
+      "max_count", 10, "Maximum counter threshold used to stop publishing.");
 
   // Add states to the state machine
   sm->add_state("PUBLISHING_INT", std::make_shared<PublishIntState>(),

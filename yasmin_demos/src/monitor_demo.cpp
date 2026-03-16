@@ -20,7 +20,6 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
@@ -63,8 +62,8 @@ public:
     this->times = 5;
     this->set_description("Monitors odometry messages from the 'odom' topic "
                           "and logs the received positions.");
-    this->add_input_key(yasmin::BlackboardKeyInfo(
-        "odom", "Odometry message received from the monitored ROS topic."));
+    this->add_input_key(
+        "odom", "Odometry message received from the monitored ROS topic.");
   };
 
   /**
@@ -115,8 +114,8 @@ int main(int argc, char *argv[]) {
   sm->set_description(
       "Continuously monitors the 'odom' topic and logs received odometry "
       "messages until a fixed number of messages has been processed.");
-  sm->add_input_key(yasmin::BlackboardKeyInfo(
-      "odom", "Odometry messages received from the monitored ROS topic."));
+  sm->add_input_key("odom",
+                    "Odometry messages received from the monitored ROS topic.");
 
   // Add states to the state machine
   sm->add_state(

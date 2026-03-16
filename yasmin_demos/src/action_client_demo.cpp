@@ -19,7 +19,6 @@
 
 #include "example_interfaces/action/fibonacci.hpp"
 
-#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/cb_state.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
@@ -83,10 +82,9 @@ public:
             std::bind(&FibonacciState::print_feedback, this, _1, _2)) {
     this->set_description("Calls the Fibonacci action server and stores the "
                           "resulting sequence in the blackboard.");
-    this->add_input_key(yasmin::BlackboardKeyInfo(
-        "n", 10, "Order of the Fibonacci sequence to compute."));
-    this->add_output_key(yasmin::BlackboardKeyInfo(
-        "fibo_res", "Computed Fibonacci sequence returned by the action."));
+    this->add_input_key("n", 10, "Order of the Fibonacci sequence to compute.");
+    this->add_output_key("fibo_res",
+                         "Computed Fibonacci sequence returned by the action.");
   };
 
   /**
@@ -164,10 +162,9 @@ int main(int argc, char *argv[]) {
       std::initializer_list<std::string>{"outcome4"}, true);
   sm->set_description("Calls the Fibonacci action server, stores the resulting "
                       "sequence, and prints it.");
-  sm->add_input_key(yasmin::BlackboardKeyInfo(
-      "n", 10, "Order of the Fibonacci sequence to compute."));
-  sm->add_output_key(yasmin::BlackboardKeyInfo(
-      "fibo_res", "Computed Fibonacci sequence returned by the action."));
+  sm->add_input_key("n", 10, "Order of the Fibonacci sequence to compute.");
+  sm->add_output_key("fibo_res",
+                     "Computed Fibonacci sequence returned by the action.");
 
   auto printing_result_state = yasmin::CbState::make_shared(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
@@ -175,8 +172,8 @@ int main(int argc, char *argv[]) {
   printing_result_state->set_description(
       "Reads the computed Fibonacci sequence from the blackboard and prints "
       "it.");
-  printing_result_state->add_input_key(yasmin::BlackboardKeyInfo(
-      "fibo_res", "Computed Fibonacci sequence returned by the action."));
+  printing_result_state->add_input_key(
+      "fibo_res", "Computed Fibonacci sequence returned by the action.");
 
   // Add states to the state machine
   sm->add_state("CALLING_FIBONACCI", std::make_shared<FibonacciState>(),
