@@ -16,10 +16,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
+
 import rclpy
 
 import yasmin
-from yasmin import State, Blackboard, StateMachine
+from yasmin import Blackboard, State, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
@@ -40,6 +41,13 @@ class FooState(State):
         """
         super().__init__(["outcome1", "outcome2"])
         self.counter = 0
+        self.set_description(
+            "Increments an internal counter, writes the formatted counter string to the blackboard, and controls the loop outcome."
+        )
+        self.add_output_key(
+            "foo_str",
+            "Formatted counter string written by FooState.",
+        )
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -79,6 +87,13 @@ class BarState(State):
             outcome3: Indicates the state should transition back to the Foo state.
         """
         super().__init__(outcomes=["outcome3"])
+        self.set_description(
+            "Reads the counter string from the blackboard, logs it, and transitions back to FooState."
+        )
+        self.add_input_key(
+            "foo_str",
+            "Formatted counter string produced by FooState.",
+        )
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -110,6 +125,13 @@ def main() -> None:
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Runs a simple loop between FooState and BarState until FooState reaches its terminal outcome."
+    )
+    sm.add_output_key(
+        "foo_str",
+        "Formatted counter string produced by FooState and read by BarState.",
+    )
 
     # Add states to the FSM
     sm.add_state(

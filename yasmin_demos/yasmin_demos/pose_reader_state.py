@@ -36,6 +36,18 @@ class PoseReaderState(State):
             outcome2: Indicates the serialized Pose was read successfully.
         """
         super().__init__(outcomes=["outcome2"])
+        self.set_description(
+            "Reads a serialized Pose message from the blackboard, deserializes it, and logs the position and orientation."
+        )
+        self.add_input_key(
+            "pose_bytes",
+            "Serialized Pose message stored as bytes in the blackboard.",
+        )
+        self.add_input_key(
+            "pose_bytes__type",
+            "geometry_msgs/msg/Pose",
+            "Type information for the serialized Pose message.",
+        )
 
     def execute(self, blackboard: Blackboard) -> str:
         """

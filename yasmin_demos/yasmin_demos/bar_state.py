@@ -14,8 +14,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
+
 import yasmin
-from yasmin import State, Blackboard
+from yasmin import Blackboard, State
 
 
 class BarState(State):
@@ -31,6 +32,13 @@ class BarState(State):
             outcome3: Indicates the state should transition back to the Foo state.
         """
         super().__init__(outcomes=["outcome3"])
+        self.set_description(
+            "Prints the value stored in 'foo_str' from the blackboard and transitions back to the Foo state."
+        )
+        self.add_input_key(
+            "foo_str",
+            "String produced by FooState and printed by this state.",
+        )
 
     def execute(self, blackboard: Blackboard) -> str:
         """

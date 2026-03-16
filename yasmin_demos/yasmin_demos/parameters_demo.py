@@ -16,13 +16,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
+
 import rclpy
+from yasmin_ros.basic_outcomes import ABORT, SUCCEED
 
 import yasmin
-from yasmin import State, Blackboard, StateMachine
-from yasmin_ros import set_ros_loggers
-from yasmin_ros import GetParametersState
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+from yasmin import Blackboard, State, StateMachine
+from yasmin_ros import GetParametersState, set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
 
@@ -42,6 +42,22 @@ class FooState(State):
         """
         super().__init__(["outcome1", "outcome2"])
         self.counter = 0
+        self.set_description(
+            "Increments a counter until the value from 'max_counter' is reached and writes the formatted counter string to the blackboard."
+        )
+        self.add_input_key(
+            "max_counter",
+            "Maximum number of iterations before the state finishes.",
+        )
+        self.add_input_key(
+            "counter_str",
+            "Counter",
+            "Prefix used when formatting the counter string.",
+        )
+        self.add_output_key(
+            "foo_str",
+            "Formatted counter string written to the blackboard.",
+        )
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -81,6 +97,13 @@ class BarState(State):
             outcome3: Indicates the state should transition back to the Foo state.
         """
         super().__init__(outcomes=["outcome3"])
+        self.set_description(
+            "Reads and prints the formatted counter string stored in 'foo_str' from the blackboard."
+        )
+        self.add_input_key(
+            "foo_str",
+            "Formatted counter string produced by FooState.",
+        )
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -112,16 +135,48 @@ def main() -> None:
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Loads configuration values into the blackboard and then runs a loop that formats and prints a counter string until the configured maximum is reached."
+    )
+    sm.add_input_key(
+        "max_counter",
+        3,
+        "Maximum number of iterations before the state machine finishes.",
+    )
+    sm.add_input_key(
+        "counter_str",
+        "Counter",
+        "Prefix used when formatting the counter string.",
+    )
+    sm.add_output_key(
+        "foo_str",
+        "Formatted counter string produced during execution.",
+    )
+
+    getting_parameters_state = GetParametersState(
+        parameters={
+            "max_counter": 3,
+            "counter_str": "Counter",
+        },
+    )
+    getting_parameters_state.set_description(
+        "Loads the configured parameters and stores them in the blackboard."
+    )
+    getting_parameters_state.add_output_key(
+        "max_counter",
+        3,
+        "Maximum number of iterations before the state machine finishes.",
+    )
+    getting_parameters_state.add_output_key(
+        "counter_str",
+        "Counter",
+        "Prefix used when formatting the counter string.",
+    )
 
     # Add states to the FSM
     sm.add_state(
         "GETTING_PARAMETERS",
-        GetParametersState(
-            parameters={
-                "max_counter": 3,
-                "counter_str": "Counter",
-            },
-        ),
+        getting_parameters_state,
         transitions={
             SUCCEED: "FOO",
             ABORT: "outcome4",

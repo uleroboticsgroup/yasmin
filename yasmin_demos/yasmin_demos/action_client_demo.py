@@ -17,12 +17,11 @@
 
 import rclpy
 from example_interfaces.action import Fibonacci
+from yasmin_ros.basic_outcomes import ABORT, CANCEL, SUCCEED
 
 import yasmin
-from yasmin import CbState, Blackboard, StateMachine
-from yasmin_ros import ActionState
-from yasmin_ros import set_ros_loggers
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
+from yasmin import Blackboard, CbState, StateMachine
+from yasmin_ros import ActionState, set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
 
@@ -50,6 +49,14 @@ class FibonacciState(ActionState):
             self.response_handler,  # callback to process the response
             self.print_feedback,  # callback to process the feedback
         )
+        self.set_description(
+            "Calls the ROS2 Fibonacci action server and computes the Fibonacci sequence up to the requested order."
+        )
+        self.add_input_key("n", 10, "Order of the Fibonacci sequence to compute.")
+        self.add_output_key(
+            "fibo_res",
+            "Computed Fibonacci sequence returned by the action server.",
+        )
 
     def create_goal_handler(self, blackboard: Blackboard) -> Fibonacci.Goal:
         """
@@ -72,7 +79,9 @@ class FibonacciState(ActionState):
         goal.order = blackboard["n"]  # Retrieve the input value 'n' from the blackboard
         return goal
 
-    def response_handler(self, blackboard: Blackboard, response: Fibonacci.Result) -> str:
+    def response_handler(
+        self, blackboard: Blackboard, response: Fibonacci.Result
+    ) -> str:
         """
         Handles the response from the Fibonacci action.
 
@@ -144,6 +153,23 @@ def main() -> None:
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Calls a Fibonacci action server, stores the resulting sequence in the blackboard, and prints the result."
+    )
+    sm.add_input_key("n", 10, "Order of the Fibonacci sequence to compute.")
+    sm.add_output_key(
+        "fibo_res",
+        "Computed Fibonacci sequence returned by the action server.",
+    )
+
+    printing_result_state = CbState([SUCCEED], print_result)
+    printing_result_state.set_description(
+        "Reads the computed Fibonacci sequence from the blackboard and logs it."
+    )
+    printing_result_state.add_input_key(
+        "fibo_res",
+        "Computed Fibonacci sequence returned by the action server.",
+    )
 
     # Add states to the FSM
     sm.add_state(
@@ -157,7 +183,7 @@ def main() -> None:
     )
     sm.add_state(
         "PRINTING_RESULT",
-        CbState([SUCCEED], print_result),
+        printing_result_state,
         transitions={
             SUCCEED: "outcome4",
         },
