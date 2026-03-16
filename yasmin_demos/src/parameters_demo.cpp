@@ -19,6 +19,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
@@ -41,7 +42,19 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {};
+  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {
+    this->set_description(
+        "Increments a counter until the value from 'max_counter' is reached "
+        "and writes the formatted counter string to the blackboard.");
+    this->add_input_key(yasmin::BlackboardKeyInfo(
+        "max_counter",
+        "Maximum number of iterations before the state finishes."));
+    this->add_input_key(yasmin::BlackboardKeyInfo(
+        "counter_str", std::string("Counter"),
+        "Prefix used when formatting the counter string."));
+    this->add_output_key(yasmin::BlackboardKeyInfo(
+        "foo_str", "Formatted counter string written to the blackboard."));
+  };
 
   /**
    * @brief Executes the Foo state logic.
@@ -82,7 +95,12 @@ public:
   /**
    * @brief Constructs a BarState object.
    */
-  BarState() : yasmin::State({"outcome3"}) {}
+  BarState() : yasmin::State({"outcome3"}) {
+    this->set_description("Reads and prints the formatted counter string "
+                          "stored in 'foo_str' from the blackboard.");
+    this->add_input_key(yasmin::BlackboardKeyInfo(
+        "foo_str", "Formatted counter string produced by FooState."));
+  }
 
   /**
    * @brief Executes the Bar state logic.
@@ -114,14 +132,34 @@ int main(int argc, char *argv[]) {
   // Create a state machine
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
+  sm->set_description("Loads configuration values into the blackboard and then "
+                      "runs a loop that formats and prints a counter string "
+                      "until the configured maximum is reached.");
+  sm->add_input_key(yasmin::BlackboardKeyInfo(
+      "max_counter", 3,
+      "Maximum number of iterations before the state machine finishes."));
+  sm->add_input_key(yasmin::BlackboardKeyInfo(
+      "counter_str", std::string("Counter"),
+      "Prefix used when formatting the counter string."));
+  sm->add_output_key(yasmin::BlackboardKeyInfo(
+      "foo_str", "Formatted counter string produced during execution."));
+
+  auto getting_parameters_state = yasmin_ros::GetParametersState::make_shared(
+      yasmin_ros::GetParametersState::Parameters{
+          {"max_counter", 3},
+          {"counter_str", std::string("Counter")},
+      });
+  getting_parameters_state->set_description(
+      "Loads the configured parameters and stores them in the blackboard.");
+  getting_parameters_state->add_output_key(yasmin::BlackboardKeyInfo(
+      "max_counter", 3,
+      "Maximum number of iterations before the state machine finishes."));
+  getting_parameters_state->add_output_key(yasmin::BlackboardKeyInfo(
+      "counter_str", std::string("Counter"),
+      "Prefix used when formatting the counter string."));
 
   // Add states to the state machine
-  sm->add_state("GETTING_PARAMETERS",
-                yasmin_ros::GetParametersState::make_shared(
-                    yasmin_ros::GetParametersState::Parameters{
-                        {"max_counter", 3},
-                        {"counter_str", std::string("Counter")},
-                    }),
+  sm->add_state("GETTING_PARAMETERS", getting_parameters_state,
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "FOO"},
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},

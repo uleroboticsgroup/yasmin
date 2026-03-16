@@ -20,6 +20,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
@@ -41,8 +42,14 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState()
-      : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {};
+  FooState() : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {
+    this->set_description(
+        "Produces a counter string and stores it in the blackboard while "
+        "cycling through outcomes based on the internal counter.");
+    this->add_output_key(yasmin::BlackboardKeyInfo(
+        "foo_str",
+        "String containing the current counter value produced by FooState."));
+  };
 
   /**
    * @brief Executes the Foo state logic.
@@ -89,7 +96,13 @@ public:
   /**
    * @brief Constructs a BarState object.
    */
-  BarState() : yasmin::State({"outcome3"}) {}
+  BarState() : yasmin::State({"outcome3"}) {
+    this->set_description(
+        "Reads and prints the value stored in 'foo_str' from the blackboard.");
+    this->add_input_key(yasmin::BlackboardKeyInfo(
+        "foo_str",
+        "String produced by FooState containing the counter value."));
+  }
 
   /**
    * @brief Executes the Bar state logic.
@@ -127,6 +140,12 @@ int main(int argc, char *argv[]) {
   // Create a state machine
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
+  sm->set_description(
+      "Runs FooState and BarState concurrently until the concurrence state no "
+      "longer matches the configured outcome map.");
+  sm->add_output_key(yasmin::BlackboardKeyInfo(
+      "foo_str", "String containing the current counter value produced during "
+                 "the concurrent execution."));
 
   // Create states to run concurrently
   auto foo_state = std::make_shared<FooState>();
@@ -143,6 +162,14 @@ int main(int argc, char *argv[]) {
           {"outcome1", {{"FOO", "outcome1"}, {"BAR", "outcome3"}}},
           {"outcome2", {{"FOO", "outcome2"}, {"BAR", "outcome3"}}},
       });
+  concurrent_state->set_description(
+      "Executes FooState and BarState in parallel and maps their combined "
+      "outcomes to the next transition.");
+  concurrent_state->add_input_key(yasmin::BlackboardKeyInfo(
+      "foo_str", "String read by BarState during the concurrent execution."));
+  concurrent_state->add_output_key(yasmin::BlackboardKeyInfo(
+      "foo_str",
+      "String written by FooState during the concurrent execution."));
 
   // Add concurrent state to the state machine
   sm->add_state("CONCURRENCE", concurrent_state,

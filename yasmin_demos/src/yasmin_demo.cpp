@@ -19,6 +19,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
@@ -39,7 +40,13 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {};
+  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {
+    this->set_description(
+        "Increments an internal counter, writes the formatted counter string "
+        "to the blackboard, and controls the loop outcome.");
+    this->add_output_key(yasmin::BlackboardKeyInfo(
+        "foo_str", "Formatted counter string written by FooState."));
+  };
 
   /**
    * @brief Executes the Foo state logic.
@@ -79,7 +86,12 @@ public:
   /**
    * @brief Constructs a BarState object.
    */
-  BarState() : yasmin::State({"outcome3"}) {}
+  BarState() : yasmin::State({"outcome3"}) {
+    this->set_description("Reads the counter string from the blackboard, logs "
+                          "it, and transitions back to FooState.");
+    this->add_input_key(yasmin::BlackboardKeyInfo(
+        "foo_str", "Formatted counter string produced by FooState."));
+  }
 
   /**
    * @brief Executes the Bar state logic.
@@ -111,6 +123,11 @@ int main(int argc, char *argv[]) {
   // Create a state machine
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
+  sm->set_description("Runs a simple loop between FooState and BarState until "
+                      "FooState reaches its terminal outcome.");
+  sm->add_output_key(yasmin::BlackboardKeyInfo(
+      "foo_str",
+      "Formatted counter string produced by FooState and read by BarState."));
 
   // Add states to the state machine
   sm->add_state("FOO", std::make_shared<FooState>(),

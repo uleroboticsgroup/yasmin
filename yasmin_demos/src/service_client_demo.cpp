@@ -20,6 +20,7 @@
 #include "example_interfaces/srv/add_two_ints.hpp"
 #include "rclcpp/rclcpp.hpp"
 
+#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/cb_state.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state_machine.hpp"
@@ -82,7 +83,17 @@ public:
             "/add_two_ints",
             std::bind(&AddTwoIntsState::create_request_handler, this, _1),
             {"outcome1"},
-            std::bind(&AddTwoIntsState::response_handler, this, _1, _2)) {};
+            std::bind(&AddTwoIntsState::response_handler, this, _1, _2)) {
+    this->set_description(
+        "Calls the AddTwoInts service using the values stored in the "
+        "blackboard and writes the resulting sum back to the blackboard.");
+    this->add_input_key(yasmin::BlackboardKeyInfo(
+        "a", "First integer used for the service request."));
+    this->add_input_key(yasmin::BlackboardKeyInfo(
+        "b", "Second integer used for the service request."));
+    this->add_output_key(yasmin::BlackboardKeyInfo(
+        "sum", "Sum returned by the AddTwoInts service."));
+  };
 
   /**
    * @brief Creates a service request using values from the blackboard.
@@ -135,13 +146,36 @@ int main(int argc, char *argv[]) {
   // Create a state machine with a specified outcome.
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
+  sm->set_description("Sets two integers in the blackboard, calls the "
+                      "AddTwoInts service, and prints the resulting sum.");
+  sm->add_output_key(yasmin::BlackboardKeyInfo(
+      "a", 10, "First integer used for the service request."));
+  sm->add_output_key(yasmin::BlackboardKeyInfo(
+      "b", 5, "Second integer used for the service request."));
+  sm->add_output_key(yasmin::BlackboardKeyInfo(
+      "sum", "Sum returned by the AddTwoInts service."));
+
+  auto setting_ints_state = yasmin::CbState::make_shared(
+      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
+      set_ints);
+  setting_ints_state->set_description(
+      "Writes the two input integers for the AddTwoInts service into the "
+      "blackboard.");
+  setting_ints_state->add_output_key(yasmin::BlackboardKeyInfo(
+      "a", 10, "First integer used for the service request."));
+  setting_ints_state->add_output_key(yasmin::BlackboardKeyInfo(
+      "b", 5, "Second integer used for the service request."));
+
+  auto printing_sum_state = yasmin::CbState::make_shared(
+      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
+      print_sum);
+  printing_sum_state->set_description(
+      "Reads the computed sum from the blackboard and prints it.");
+  printing_sum_state->add_input_key(yasmin::BlackboardKeyInfo(
+      "sum", "Sum previously written to the blackboard by the service state."));
 
   // Add states to the state machine.
-  sm->add_state("SETTING_INTS",
-                yasmin::CbState::make_shared(
-                    std::initializer_list<std::string>{
-                        yasmin_ros::basic_outcomes::SUCCEED},
-                    set_ints),
+  sm->add_state("SETTING_INTS", setting_ints_state,
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "ADD_TWO_INTS"},
                 });
@@ -151,11 +185,7 @@ int main(int argc, char *argv[]) {
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
-  sm->add_state("PRINTING_SUM",
-                yasmin::CbState::make_shared(
-                    std::initializer_list<std::string>{
-                        yasmin_ros::basic_outcomes::SUCCEED},
-                    print_sum),
+  sm->add_state("PRINTING_SUM", printing_sum_state,
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                 });
