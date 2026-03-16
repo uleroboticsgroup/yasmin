@@ -58,14 +58,6 @@ struct BlackboardKeyInfo {
       : name(std::move(key_name)) {}
 
   /**
-   * @brief Constructor with key name and description.
-   * @param key_name The name of the blackboard key.
-   * @param key_description Human-readable description of the blackboard key.
-   */
-  BlackboardKeyInfo(std::string key_name, std::string key_description)
-      : name(std::move(key_name)), description(std::move(key_description)) {}
-
-  /**
    * @brief Constructor with key name and default value.
    * @tparam T The type of the default value.
    * @param key_name The name of the blackboard key.
@@ -75,24 +67,6 @@ struct BlackboardKeyInfo {
   BlackboardKeyInfo(std::string key_name, T value)
       : name(std::move(key_name)), has_default(true),
         default_value(std::make_shared<T>(value)),
-        default_value_type(demangle_type(typeid(T).name())) {
-    auto stored = std::static_pointer_cast<T>(this->default_value);
-    inject_default = [stored](Blackboard &bb, const std::string &key) {
-      bb.set<T>(key, *stored);
-    };
-  }
-
-  /**
-   * @brief Constructor with key name, default value and description.
-   * @tparam T The type of the default value.
-   * @param key_name The name of the blackboard key.
-   * @param value The default value.
-   * @param key_description Human-readable description of the blackboard key.
-   */
-  template <typename T>
-  BlackboardKeyInfo(std::string key_name, T value, std::string key_description)
-      : name(std::move(key_name)), description(std::move(key_description)),
-        has_default(true), default_value(std::make_shared<T>(value)),
         default_value_type(demangle_type(typeid(T).name())) {
     auto stored = std::static_pointer_cast<T>(this->default_value);
     inject_default = [stored](Blackboard &bb, const std::string &key) {

@@ -167,8 +167,7 @@ public:
     add_input_key<double>("speed", 3.14);
     add_input_key<int>("count", 10);
     add_input_key<std::string>("name", std::string("robot"));
-    add_output_key<int>("result", 0);
-    add_output_key("no_default");
+    add_output_key("result");
   }
 
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
@@ -207,17 +206,13 @@ TEST_F(TestState, TestMultipleInputKeyTypes) {
   EXPECT_EQ(keys[3].get_default_value<std::string>(), "robot");
 }
 
-TEST_F(TestState, TestOutputKeyWithAndWithoutDefault) {
+TEST_F(TestState, TestOutputKey) {
   StateWithAllTypes s;
   const auto &keys = s.get_output_keys();
-  ASSERT_EQ(keys.size(), 2u);
+  ASSERT_EQ(keys.size(), 1u);
 
   EXPECT_EQ(keys[0].name, "result");
-  EXPECT_TRUE(keys[0].has_default);
-  EXPECT_EQ(keys[0].get_default_value<int>(), 0);
-
-  EXPECT_EQ(keys[1].name, "no_default");
-  EXPECT_FALSE(keys[1].has_default);
+  EXPECT_FALSE(keys[0].has_default);
 }
 
 TEST_F(TestState, TestAllDefaultsInjected) {
@@ -236,7 +231,7 @@ TEST_F(TestState, TestGetMetadataComplete) {
   const auto &meta = s.get_metadata();
   EXPECT_EQ(meta.description, "State with various default types");
   EXPECT_EQ(meta.input_keys.size(), 4u);
-  EXPECT_EQ(meta.output_keys.size(), 2u);
+  EXPECT_EQ(meta.output_keys.size(), 1u);
 }
 
 TEST_F(TestState, TestBlackboardKeyInfoCopy) {

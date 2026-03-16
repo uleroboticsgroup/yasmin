@@ -186,6 +186,14 @@ public:
   void add_input_key(const std::string &key_name);
 
   /**
+   * @brief Adds an input key with a name and description.
+   * @param key_name The name of the input key.
+   * @param description Human-readable description of the input key.
+   */
+  void add_input_key(const std::string &key_name,
+                     const std::string &description);
+
+  /**
    * @brief Adds an input key with a name and default value.
    * @tparam T The type of the default value.
    * @param key_name The name of the input key.
@@ -194,6 +202,21 @@ public:
   template <typename T>
   void add_input_key(const std::string &key_name, T default_value) {
     add_input_key(BlackboardKeyInfo(key_name, default_value));
+  }
+
+  /**
+   * @brief Adds an input key with a name, default value and description.
+   * @tparam T The type of the default value.
+   * @param key_name The name of the input key.
+   * @param default_value The default value for the key.
+   * @param description Human-readable description of the input key.
+   */
+  template <typename T>
+  void add_input_key(const std::string &key_name, T default_value,
+                     const std::string &description) {
+    BlackboardKeyInfo info(key_name, default_value);
+    info.description = description;
+    add_input_key(info);
   }
 
   /**
@@ -209,15 +232,12 @@ public:
   void add_output_key(const std::string &key_name);
 
   /**
-   * @brief Adds an output key with a name and default value.
-   * @tparam T The type of the default value.
+   * @brief Adds an output key with a name and description.
    * @param key_name The name of the output key.
-   * @param default_value The default value for the key.
+   * @param description Human-readable description of the output key.
    */
-  template <typename T>
-  void add_output_key(const std::string &key_name, T default_value) {
-    add_output_key(BlackboardKeyInfo(key_name, default_value));
-  }
+  void add_output_key(const std::string &key_name,
+                      const std::string &description);
 
   /**
    * @brief Gets the input keys metadata.

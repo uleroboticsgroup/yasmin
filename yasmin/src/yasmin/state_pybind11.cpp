@@ -154,29 +154,41 @@ PYBIND11_MODULE(state, m) {
 
       .def(
           "add_input_key",
-          [](yasmin::State &state, const std::string &key_name,
-             py::object default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info =
-                yasmin::BlackboardKeyInfoPy::from_pyobject(key_name,
-                                                           default_value);
-            info.description = description;
-            state.add_input_key(info);
+          [](yasmin::State &state, const std::string &key_name) {
+            state.add_input_key(key_name);
           },
-          "Add an input key with a default value of any type and optional "
-          "description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
+          "Add an input key with name only", py::arg("key_name"))
 
       .def(
           "add_input_key",
           [](yasmin::State &state, const std::string &key_name,
-             const std::string &description) {
-            yasmin::BlackboardKeyInfo info(key_name);
+             py::object value_or_description, const std::string &description) {
+            if (description.empty() &&
+                py::isinstance<py::str>(value_or_description)) {
+              yasmin::BlackboardKeyInfo info(key_name);
+              info.description = value_or_description.cast<std::string>();
+              state.add_input_key(info);
+              return;
+            }
+
+            yasmin::BlackboardKeyInfo info =
+                yasmin::BlackboardKeyInfoPy::from_pyobject(
+                    key_name, value_or_description);
             info.description = description;
             state.add_input_key(info);
           },
-          "Add an input key with name and optional description",
-          py::arg("key_name"), py::arg("description") = "")
+          "Add an input key with a default value of any type and optional "
+          "description. If only a string is passed as second argument, it is "
+          "treated as the description.",
+          py::arg("key_name"), py::arg("value_or_description"),
+          py::arg("description") = "")
+
+      .def(
+          "add_output_key",
+          [](yasmin::State &state, const std::string &key_name) {
+            state.add_output_key(key_name);
+          },
+          "Add an output key with name only", py::arg("key_name"))
 
       .def(
           "add_output_key",
@@ -187,7 +199,7 @@ PYBIND11_MODULE(state, m) {
             state.add_output_key(info);
           },
           "Add an output key with name and optional description",
-          py::arg("key_name"), py::arg("description") = "")
+          py::arg("key_name"), py::arg("description"))
 
       .def(
           "get_input_keys",
