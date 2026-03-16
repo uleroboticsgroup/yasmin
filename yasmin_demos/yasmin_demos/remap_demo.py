@@ -82,9 +82,7 @@ class BarState(State):
             SUCCEDED: Indicates the state should continue to the next state.
         """
         super().__init__(outcomes=[SUCCEED])
-        self.set_description(
-            "Reads remapped input data from the blackboard and logs it."
-        )
+        self.set_description("Reads remapped input data from the blackboard and logs it.")
         self.add_input_key(
             "bar_data",
             description="Input data read by the Bar state.",

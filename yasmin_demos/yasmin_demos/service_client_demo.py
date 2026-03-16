@@ -51,15 +51,11 @@ class AddTwoIntsState(ServiceState):
         self.set_description(
             "Calls the AddTwoInts service using the values stored in the blackboard and writes the resulting sum back to the blackboard."
         )
-        self.add_input_key(
-            "a", description="First integer used for the service request."
-        )
+        self.add_input_key("a", description="First integer used for the service request.")
         self.add_input_key(
             "b", description="Second integer used for the service request."
         )
-        self.add_output_key(
-            "sum", description="Sum returned by the AddTwoInts service."
-        )
+        self.add_output_key("sum", description="Sum returned by the AddTwoInts service.")
 
     def create_request_handler(self, blackboard: Blackboard) -> AddTwoInts.Request:
         """
