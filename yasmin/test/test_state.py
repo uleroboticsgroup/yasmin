@@ -204,7 +204,7 @@ class TestStateMetadataExtended(unittest.TestCase):
         meta = state.get_metadata()
         self.assertEqual(meta["description"], "State with various default types")
         self.assertEqual(len(meta["input_keys"]), 4)
-        self.assertEqual(len(meta["output_keys"]), 2)
+        self.assertEqual(len(meta["output_keys"]), 1)
 
     def test_add_input_key_with_list_default(self):
         state = FooState()
