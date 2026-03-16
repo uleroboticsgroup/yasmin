@@ -15,6 +15,7 @@
 
 
 import unittest
+
 from yasmin import Blackboard, State
 
 
@@ -37,8 +38,8 @@ class BarState(State):
 class StateWithDefaults(State):
     def __init__(self):
         super().__init__(["done"])
-        self.add_input_key("counter", 42, "An integer counter")
-        self.add_input_key("label", "hello", "A string label")
+        self.add_input_key("counter", 42, description="An integer counter")
+        self.add_input_key("label", "hello", description="A string label")
 
     def execute(self, blackboard):
         return "done"
@@ -138,11 +139,11 @@ class StateWithAllTypes(State):
     def __init__(self):
         super().__init__(["done"])
         self.set_description("State with various default types")
-        self.add_input_key("flag", True, "A boolean flag")
-        self.add_input_key("speed", 3.14, "Speed value")
-        self.add_input_key("count", 10, "An integer count")
-        self.add_input_key("name", "robot", "Name string")
-        self.add_output_key("result", 0, "Result value")
+        self.add_input_key("flag", True, description="A boolean flag")
+        self.add_input_key("speed", 3.14, description="Speed value")
+        self.add_input_key("count", 10, description="An integer count")
+        self.add_input_key("name", "robot", description="Name string")
+        self.add_output_key("result", 0, description="Result value")
         self.add_output_key("no_default")
 
     def execute(self, blackboard):
@@ -211,7 +212,7 @@ class TestStateMetadataExtended(unittest.TestCase):
 
     def test_add_input_key_with_list_default(self):
         state = FooState()
-        state.add_input_key("items", [1, 2, 3], "A list")
+        state.add_input_key("items", [1, 2, 3], description="A list")
         keys = state.get_input_keys()
         item_key = next(k for k in keys if k["name"] == "items")
         self.assertTrue(item_key["has_default"])
@@ -219,7 +220,7 @@ class TestStateMetadataExtended(unittest.TestCase):
 
     def test_add_input_key_with_dict_default(self):
         state = FooState()
-        state.add_input_key("config", {"a": 1}, "A dict")
+        state.add_input_key("config", {"a": 1}, description="A dict")
         keys = state.get_input_keys()
         config_key = next(k for k in keys if k["name"] == "config")
         self.assertTrue(config_key["has_default"])
