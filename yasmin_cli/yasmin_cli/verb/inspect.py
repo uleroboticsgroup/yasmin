@@ -23,10 +23,9 @@ def _plugin_summary(plugin) -> str:
 
 
 def _print_key_block(title: str, keys: list[dict]) -> None:
-    print(f"{title}:")
     if not keys:
-        print("  - none")
         return
+    print(f"{title}:")
 
     for key in keys:
         name = key.get("name", "")
