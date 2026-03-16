@@ -143,8 +143,7 @@ class StateWithAllTypes(State):
         self.add_input_key("speed", 3.14, description="Speed value")
         self.add_input_key("count", 10, description="An integer count")
         self.add_input_key("name", "robot", description="Name string")
-        self.add_output_key("result", 0, description="Result value")
-        self.add_output_key("no_default")
+        self.add_output_key("result", description="Result value")
 
     def execute(self, blackboard):
         return "done"
@@ -182,17 +181,14 @@ class TestStateMetadataExtended(unittest.TestCase):
         self.assertTrue(name_key["has_default"])
         self.assertEqual(name_key["default_value"], "robot")
 
-    def test_output_key_with_and_without_default(self):
+    def test_output_key(self):
         state = StateWithAllTypes()
         keys = state.get_output_keys()
-        self.assertEqual(len(keys), 2)
+        self.assertEqual(len(keys), 1)
 
         result_key = next(k for k in keys if k["name"] == "result")
-        self.assertTrue(result_key["has_default"])
-        self.assertEqual(result_key["default_value"], 0)
-
-        no_default_key = next(k for k in keys if k["name"] == "no_default")
-        self.assertFalse(no_default_key["has_default"])
+        # Output keys are not allowed to have defaults
+        self.assertFalse(result_key["has_default"])
 
     def test_all_defaults_injected(self):
         state = StateWithAllTypes()
