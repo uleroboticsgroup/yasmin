@@ -141,12 +141,8 @@ def main() -> None:
     sm.set_description(
         "Sets two integers in the blackboard, calls the AddTwoInts service, and prints the resulting sum."
     )
-    sm.add_output_key(
-        "a", 10, description="First integer used for the service request."
-    )
-    sm.add_output_key(
-        "b", 5, description="Second integer used for the service request."
-    )
+    sm.add_output_key("a", description="First integer used for the service request.")
+    sm.add_output_key("b", description="Second integer used for the service request.")
     sm.add_output_key("sum", description="Sum returned by the AddTwoInts service.")
 
     setting_ints_state = CbState([SUCCEED], set_ints)
@@ -155,12 +151,10 @@ def main() -> None:
     )
     setting_ints_state.add_output_key(
         "a",
-        10,
         description="First integer used for the service request.",
     )
     setting_ints_state.add_output_key(
         "b",
-        5,
         description="Second integer used for the service request.",
     )
 

@@ -164,12 +164,10 @@ def main() -> None:
     )
     getting_parameters_state.add_output_key(
         "max_counter",
-        3,
         description="Maximum number of iterations before the state machine finishes.",
     )
     getting_parameters_state.add_output_key(
         "counter_str",
-        "Counter",
         description="Prefix used when formatting the counter string.",
     )
 
