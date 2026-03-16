@@ -35,8 +35,7 @@ PoseWriterState::PoseWriterState() : yasmin::State({"outcome1"}) {
       "pose_bytes",
       "Serialized Pose message stored as bytes in the blackboard."));
   this->add_output_key(yasmin::BlackboardKeyInfo(
-      "pose_bytes__type", std::string("geometry_msgs/msg/Pose"),
-      "Type information for the serialized Pose message."));
+      "pose_bytes__type", "Type information for the serialized Pose message."));
 }
 
 std::string PoseWriterState::execute(yasmin::Blackboard::SharedPtr blackboard) {

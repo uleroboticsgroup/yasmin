@@ -149,9 +149,9 @@ int main(int argc, char *argv[]) {
   sm->set_description("Sets two integers in the blackboard, calls the "
                       "AddTwoInts service, and prints the resulting sum.");
   sm->add_output_key(yasmin::BlackboardKeyInfo(
-      "a", 10, "First integer used for the service request."));
+      "a", "First integer used for the service request."));
   sm->add_output_key(yasmin::BlackboardKeyInfo(
-      "b", 5, "Second integer used for the service request."));
+      "b", "Second integer used for the service request."));
   sm->add_output_key(yasmin::BlackboardKeyInfo(
       "sum", "Sum returned by the AddTwoInts service."));
 
@@ -162,9 +162,9 @@ int main(int argc, char *argv[]) {
       "Writes the two input integers for the AddTwoInts service into the "
       "blackboard.");
   setting_ints_state->add_output_key(yasmin::BlackboardKeyInfo(
-      "a", 10, "First integer used for the service request."));
+      "a", "First integer used for the service request."));
   setting_ints_state->add_output_key(yasmin::BlackboardKeyInfo(
-      "b", 5, "Second integer used for the service request."));
+      "b", "Second integer used for the service request."));
 
   auto printing_sum_state = yasmin::CbState::make_shared(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},

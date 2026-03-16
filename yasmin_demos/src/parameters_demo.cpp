@@ -152,11 +152,10 @@ int main(int argc, char *argv[]) {
   getting_parameters_state->set_description(
       "Loads the configured parameters and stores them in the blackboard.");
   getting_parameters_state->add_output_key(yasmin::BlackboardKeyInfo(
-      "max_counter", 3,
+      "max_counter",
       "Maximum number of iterations before the state machine finishes."));
   getting_parameters_state->add_output_key(yasmin::BlackboardKeyInfo(
-      "counter_str", std::string("Counter"),
-      "Prefix used when formatting the counter string."));
+      "counter_str", "Prefix used when formatting the counter string."));
 
   // Add states to the state machine
   sm->add_state("GETTING_PARAMETERS", getting_parameters_state,
