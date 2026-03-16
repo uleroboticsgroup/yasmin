@@ -102,9 +102,12 @@ blackboard_key_info_get_py_default(const BlackboardKeyInfo &info) {
     auto vec = info.get_default_value<std::vector<uint8_t>>();
     return py::bytes(reinterpret_cast<const char *>(vec.data()),
                      static_cast<py::ssize_t>(vec.size()));
-  } else {
-    // Stored as py::object
+  } else if (type == "py::object") {
     return info.get_default_value<py::object>();
+  } else {
+    throw std::runtime_error("Unsupported BlackboardKeyInfo default value type "
+                             "for Python conversion: " +
+                             type);
   }
 }
 
