@@ -27,10 +27,11 @@
 #include "yasmin_ros/ros_logs.hpp"
 
 BarState::BarState() : yasmin::State({"outcome3"}) {
-  this->set_description(
-      "Prints the value stored in 'foo_str' from the blackboard and transitions back to the Foo state.");
+  this->set_description("Prints the value stored in 'foo_str' from the "
+                        "blackboard and transitions back to the Foo state.");
   this->add_input_key(yasmin::BlackboardKeyInfo(
-      "foo_str", "String produced by FooState and printed by this state."));
+      "foo_str",
+      "String produced by FooState and printed by this state."));
 };
 
 std::string BarState::execute(yasmin::Blackboard::SharedPtr blackboard) {
