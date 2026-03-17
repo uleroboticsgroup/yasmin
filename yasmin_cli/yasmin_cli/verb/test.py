@@ -4,8 +4,12 @@ import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from yasmin_cli.completer import (find_plugin, input_completer, plugin_id,
-                                  test_plugin_completer)
+from yasmin_cli.completer import (
+    find_plugin, 
+    input_completer, 
+    plugin_id,
+    test_plugin_completer,
+)
 from yasmin_cli.verb.factory import run_factory_node
 
 

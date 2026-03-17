@@ -1,5 +1,4 @@
-from yasmin_cli.completer import (filter_plugins, load_plugins,
-                                  plugin_completer, plugin_id)
+from yasmin_cli.completer import (filter_plugins, load_plugins, plugin_completer, plugin_id)
 
 
 def _plugin_summary(plugin) -> str:
