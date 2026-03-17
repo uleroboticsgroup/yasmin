@@ -200,17 +200,18 @@ YasminFactory::create_state(tinyxml2::XMLElement *state_elem) const {
 
     yasmin::BlackboardKeyInfo info;
     if (type_str == "int") {
-      info = yasmin::BlackboardKeyInfo(key, std::stoi(value_str));
+      info =
+          yasmin::BlackboardKeyInfo(key, key_description, std::stoi(value_str));
     } else if (type_str == "float" || type_str == "double") {
-      info = yasmin::BlackboardKeyInfo(key, std::stod(value_str));
+      info =
+          yasmin::BlackboardKeyInfo(key, key_description, std::stod(value_str));
     } else if (type_str == "bool") {
       info = yasmin::BlackboardKeyInfo(
-          key,
+          key, key_description,
           (value_str == "true" || value_str == "True" || value_str == "1"));
     } else {
-      info = yasmin::BlackboardKeyInfo(key, value_str);
+      info = yasmin::BlackboardKeyInfo(key, key_description, value_str);
     }
-    info.description = key_description;
     state->add_input_key(info);
   }
 
@@ -389,17 +390,18 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
     yasmin::BlackboardKeyInfo info;
     if (type_str == "int") {
-      info = yasmin::BlackboardKeyInfo(key, std::stoi(value_str));
+      info =
+          yasmin::BlackboardKeyInfo(key, key_description, std::stoi(value_str));
     } else if (type_str == "float" || type_str == "double") {
-      info = yasmin::BlackboardKeyInfo(key, std::stod(value_str));
+      info =
+          yasmin::BlackboardKeyInfo(key, key_description, std::stod(value_str));
     } else if (type_str == "bool") {
       info = yasmin::BlackboardKeyInfo(
-          key,
+          key, key_description,
           (value_str == "true" || value_str == "True" || value_str == "1"));
     } else {
-      info = yasmin::BlackboardKeyInfo(key, value_str);
+      info = yasmin::BlackboardKeyInfo(key, key_description, value_str);
     }
-    info.description = key_description;
     sm->add_input_key(info);
   }
 

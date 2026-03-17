@@ -26,7 +26,16 @@
 #include "yasmin_ros/interface_serialization.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 
-PoseWriterState::PoseWriterState() : yasmin::State({"outcome1"}) {}
+PoseWriterState::PoseWriterState() : yasmin::State({"outcome1"}) {
+  this->set_description(
+      "Creates a Pose message, serializes it, and stores the serialized bytes "
+      "and type information in the blackboard.");
+  this->add_output_key(
+      "pose_bytes",
+      "Serialized Pose message stored as bytes in the blackboard.");
+  this->add_output_key("pose_bytes__type",
+                       "Type information for the serialized Pose message.");
+}
 
 std::string PoseWriterState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   YASMIN_LOG_INFO("Executing state POSE_WRITER");

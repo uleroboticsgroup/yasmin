@@ -15,6 +15,7 @@
 
 
 import unittest
+
 from yasmin import Blackboard, State
 
 
@@ -37,8 +38,8 @@ class BarState(State):
 class StateWithDefaults(State):
     def __init__(self):
         super().__init__(["done"])
-        self.add_input_key("counter", 42, "An integer counter")
-        self.add_input_key("label", "hello", "A string label")
+        self.add_input_key("counter", "An integer counter", 42)
+        self.add_input_key("label", "A string label", "hello")
 
     def execute(self, blackboard):
         return "done"
@@ -121,7 +122,7 @@ class TestStateMetadata(unittest.TestCase):
 
     def test_add_input_key_description_no_default(self):
         state = StateWithDefaults()
-        state.add_input_key("speed", description="Robot linear speed")
+        state.add_input_key("speed", "Robot linear speed")
         keys = state.get_input_keys()
         speed_key = next(k for k in keys if k["name"] == "speed")
         self.assertEqual(speed_key["description"], "Robot linear speed")
@@ -138,12 +139,11 @@ class StateWithAllTypes(State):
     def __init__(self):
         super().__init__(["done"])
         self.set_description("State with various default types")
-        self.add_input_key("flag", True, "A boolean flag")
-        self.add_input_key("speed", 3.14, "Speed value")
-        self.add_input_key("count", 10, "An integer count")
-        self.add_input_key("name", "robot", "Name string")
-        self.add_output_key("result", 0, "Result value")
-        self.add_output_key("no_default")
+        self.add_input_key("flag", "A boolean flag", True)
+        self.add_input_key("speed", "Speed value", 3.14)
+        self.add_input_key("count", "An integer count", 10)
+        self.add_input_key("name", "Name string", "robot")
+        self.add_output_key("result", "Result value")
 
     def execute(self, blackboard):
         return "done"
@@ -181,17 +181,14 @@ class TestStateMetadataExtended(unittest.TestCase):
         self.assertTrue(name_key["has_default"])
         self.assertEqual(name_key["default_value"], "robot")
 
-    def test_output_key_with_and_without_default(self):
+    def test_output_key(self):
         state = StateWithAllTypes()
         keys = state.get_output_keys()
-        self.assertEqual(len(keys), 2)
+        self.assertEqual(len(keys), 1)
 
         result_key = next(k for k in keys if k["name"] == "result")
-        self.assertTrue(result_key["has_default"])
-        self.assertEqual(result_key["default_value"], 0)
-
-        no_default_key = next(k for k in keys if k["name"] == "no_default")
-        self.assertFalse(no_default_key["has_default"])
+        # Output keys are not allowed to have defaults
+        self.assertFalse(result_key["has_default"])
 
     def test_all_defaults_injected(self):
         state = StateWithAllTypes()
@@ -207,11 +204,11 @@ class TestStateMetadataExtended(unittest.TestCase):
         meta = state.get_metadata()
         self.assertEqual(meta["description"], "State with various default types")
         self.assertEqual(len(meta["input_keys"]), 4)
-        self.assertEqual(len(meta["output_keys"]), 2)
+        self.assertEqual(len(meta["output_keys"]), 1)
 
     def test_add_input_key_with_list_default(self):
         state = FooState()
-        state.add_input_key("items", [1, 2, 3], "A list")
+        state.add_input_key("items", "A list", [1, 2, 3])
         keys = state.get_input_keys()
         item_key = next(k for k in keys if k["name"] == "items")
         self.assertTrue(item_key["has_default"])
@@ -219,7 +216,7 @@ class TestStateMetadataExtended(unittest.TestCase):
 
     def test_add_input_key_with_dict_default(self):
         state = FooState()
-        state.add_input_key("config", {"a": 1}, "A dict")
+        state.add_input_key("config", "A dict", {"a": 1})
         keys = state.get_input_keys()
         config_key = next(k for k in keys if k["name"] == "config")
         self.assertTrue(config_key["has_default"])
@@ -227,7 +224,7 @@ class TestStateMetadataExtended(unittest.TestCase):
 
     def test_default_injection_with_complex_type(self):
         state = FooState()
-        state.add_input_key("items", [1, 2, 3])
+        state.add_input_key("items", "A list", [1, 2, 3])
         bb = Blackboard()
         state(bb)
         self.assertEqual(bb["items"], [1, 2, 3])

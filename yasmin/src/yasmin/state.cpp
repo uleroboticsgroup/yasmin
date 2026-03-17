@@ -159,12 +159,31 @@ void State::add_input_key(const std::string &key_name) {
   this->get_metadata_ref().input_keys.emplace_back(key_name);
 }
 
+void State::add_input_key(const std::string &key_name,
+                          const std::string &description) {
+  BlackboardKeyInfo info(key_name);
+  info.description = description;
+  this->get_metadata_ref().input_keys.push_back(info);
+}
+
 void State::add_output_key(const BlackboardKeyInfo &key_info) {
-  this->get_metadata_ref().output_keys.push_back(key_info);
+  BlackboardKeyInfo info = key_info;
+  info.has_default = false;
+  info.default_value.reset();
+  info.default_value_type.clear();
+  info.inject_default = {};
+  this->get_metadata_ref().output_keys.push_back(info);
 }
 
 void State::add_output_key(const std::string &key_name) {
   this->get_metadata_ref().output_keys.emplace_back(key_name);
+}
+
+void State::add_output_key(const std::string &key_name,
+                           const std::string &description) {
+  BlackboardKeyInfo info(key_name);
+  info.description = description;
+  this->get_metadata_ref().output_keys.push_back(info);
 }
 
 const std::vector<BlackboardKeyInfo> &State::get_input_keys() const {

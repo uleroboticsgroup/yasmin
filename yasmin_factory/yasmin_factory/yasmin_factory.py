@@ -13,12 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 import importlib
-from lxml import etree as ET
-from yasmin import State, StateMachine, Concurrence
-from yasmin_pybind_bridge import CppStateFactory
+import os
+
 from ament_index_python import get_package_share_path
+from lxml import etree as ET
+from yasmin_pybind_bridge import CppStateFactory
+
+from yasmin import Concurrence, State, StateMachine
 
 
 class YasminFactory:
@@ -73,7 +75,7 @@ class YasminFactory:
             else:
                 value = value_str
 
-            state.add_input_key(key, value, key_description)
+            state.add_input_key(key, key_description, value)
 
         return state
 
@@ -210,7 +212,7 @@ class YasminFactory:
             else:
                 value = value_str
 
-            sm.add_input_key(key, value, key_description)
+            sm.add_input_key(key, key_description, value)
 
         return sm
 

@@ -14,8 +14,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
+
 import yasmin
-from yasmin import State, Blackboard
+from yasmin import Blackboard, State
 
 
 class FooState(State):
@@ -33,6 +34,13 @@ class FooState(State):
         """
         super().__init__(["outcome1", "outcome2"])
         self.counter = 0
+        self.set_description(
+            "Produces a counter string and stores it in the blackboard while the counter is below the threshold."
+        )
+        self.add_output_key(
+            "foo_str",
+            "String containing the current counter value produced by FooState.",
+        )
 
     def execute(self, blackboard: Blackboard) -> str:
         """

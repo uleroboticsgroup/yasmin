@@ -16,13 +16,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
+
 import rclpy
 from std_msgs.msg import Int32
+from yasmin_ros.basic_outcomes import SUCCEED
 
 import yasmin
-from yasmin import CbState, StateMachine, Blackboard
+from yasmin import Blackboard, CbState, StateMachine
 from yasmin_ros import PublisherState, set_ros_loggers
-from yasmin_ros.basic_outcomes import SUCCEED
 from yasmin_viewer import YasminViewerPub
 
 
@@ -39,6 +40,18 @@ class PublishIntState(PublisherState):
         Initializes the PublishIntState with the topic 'count' and a message creation callback.
         """
         super().__init__(Int32, "count", self.create_int_msg)
+        self.set_description(
+            "Publishes an incrementing integer to the 'count' topic using values stored in the blackboard."
+        )
+        self.add_input_key(
+            "counter",
+            "Current counter value stored in the blackboard.",
+            0,
+        )
+        self.add_output_key(
+            "counter",
+            "Updated counter value after incrementing.",
+        )
 
     def create_int_msg(self, blackboard: Blackboard) -> Int32:
         """
@@ -100,6 +113,38 @@ def main() -> None:
 
     # Create a finite state machine (FSM)
     sm = StateMachine([SUCCEED], handle_sigint=True)
+    sm.set_description(
+        "Publishes incrementing integers until the configured maximum count is reached."
+    )
+    sm.add_input_key(
+        "counter",
+        "Current counter value stored in the blackboard.",
+        0,
+    )
+    sm.add_input_key(
+        "max_count",
+        "Maximum counter threshold used to stop publishing.",
+        10,
+    )
+    sm.add_output_key(
+        "counter",
+        "Updated counter value after each publish step.",
+    )
+
+    checking_counts_state = CbState(["outcome1", "outcome2"], check_count)
+    checking_counts_state.set_description(
+        "Checks whether the counter stored in the blackboard reached the configured maximum."
+    )
+    checking_counts_state.add_input_key(
+        "counter",
+        "Current counter value.",
+        0,
+    )
+    checking_counts_state.add_input_key(
+        "max_count",
+        "Maximum counter threshold used to stop publishing.",
+        10,
+    )
 
     # Add states to the FSM
     sm.add_state(
@@ -111,7 +156,7 @@ def main() -> None:
     )
     sm.add_state(
         "CHECKING_COUNTS",
-        CbState(["outcome1", "outcome2"], check_count),
+        checking_counts_state,
         {
             "outcome1": SUCCEED,
             "outcome2": "PUBLISHING_INT",

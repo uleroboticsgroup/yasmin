@@ -16,11 +16,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import rclpy
+
 import yasmin
 from yasmin import StateMachine
+from yasmin_demos import BarState, FooState
 from yasmin_ros import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
-from yasmin_demos import FooState, BarState
 
 
 def main() -> None:
@@ -33,6 +34,13 @@ def main() -> None:
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Runs a simple loop between FooState and BarState demonstrating how states can be organized across multiple files."
+    )
+    sm.add_output_key(
+        "foo_str",
+        "Formatted counter string produced by FooState and read by BarState.",
+    )
 
     # Add states to the FSM
     sm.add_state(

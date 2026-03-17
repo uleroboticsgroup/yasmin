@@ -151,20 +151,14 @@ PYBIND11_MODULE(state, m) {
            "Set the description for this state", py::arg("description"))
       .def("get_description", &yasmin::State::get_description,
            "Get the description of this state")
+
       .def(
           "add_input_key",
-          [](yasmin::State &state, const std::string &key_name,
-             py::object default_value, const std::string &description) {
-            yasmin::BlackboardKeyInfo info =
-                yasmin::BlackboardKeyInfoPy::from_pyobject(key_name,
-                                                           default_value);
-            info.description = description;
-            state.add_input_key(info);
+          [](yasmin::State &state, const std::string &key_name) {
+            state.add_input_key(key_name);
           },
-          "Add an input key with a default value of any type and optional "
-          "description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
+          "Add an input key with name only", py::arg("key_name"))
+
       .def(
           "add_input_key",
           [](yasmin::State &state, const std::string &key_name,
@@ -173,22 +167,29 @@ PYBIND11_MODULE(state, m) {
             info.description = description;
             state.add_input_key(info);
           },
-          "Add an input key with name and optional description",
-          py::arg("key_name"), py::arg("description") = "")
+          "Add an input key with name and description", py::arg("key_name"),
+          py::arg("description"))
+
       .def(
-          "add_output_key",
+          "add_input_key",
           [](yasmin::State &state, const std::string &key_name,
-             py::object default_value, const std::string &description) {
+             const std::string &description, py::object default_value) {
             yasmin::BlackboardKeyInfo info =
                 yasmin::BlackboardKeyInfoPy::from_pyobject(key_name,
                                                            default_value);
             info.description = description;
-            state.add_output_key(info);
+            state.add_input_key(info);
           },
-          "Add an output key with a default value of any type and optional "
-          "description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
+          "Add an input key with a default value of any type and description",
+          py::arg("key_name"), py::arg("description"), py::arg("default_value"))
+
+      .def(
+          "add_output_key",
+          [](yasmin::State &state, const std::string &key_name) {
+            state.add_output_key(key_name);
+          },
+          "Add an output key with name only", py::arg("key_name"))
+
       .def(
           "add_output_key",
           [](yasmin::State &state, const std::string &key_name,
@@ -197,8 +198,9 @@ PYBIND11_MODULE(state, m) {
             info.description = description;
             state.add_output_key(info);
           },
-          "Add an output key with name and optional description",
-          py::arg("key_name"), py::arg("description") = "")
+          "Add an output key with name and description", py::arg("key_name"),
+          py::arg("description"))
+
       .def(
           "get_input_keys",
           [](const yasmin::State &state) {
@@ -219,6 +221,7 @@ PYBIND11_MODULE(state, m) {
             return result;
           },
           "Get the input keys metadata")
+
       .def(
           "get_output_keys",
           [](const yasmin::State &state) {
@@ -239,12 +242,14 @@ PYBIND11_MODULE(state, m) {
             return result;
           },
           "Get the output keys metadata")
+
       .def(
           "get_metadata",
           [](const yasmin::State &state) {
             const auto &metadata = state.get_metadata();
             py::dict result;
             result["description"] = metadata.description;
+
             py::list input_keys;
             for (const auto &key : metadata.input_keys) {
               py::dict key_dict;
@@ -258,7 +263,9 @@ PYBIND11_MODULE(state, m) {
               }
               input_keys.append(key_dict);
             }
+
             result["input_keys"] = input_keys;
+
             py::list output_keys;
             for (const auto &key : metadata.output_keys) {
               py::dict key_dict;
@@ -272,10 +279,12 @@ PYBIND11_MODULE(state, m) {
               }
               output_keys.append(key_dict);
             }
+
             result["output_keys"] = output_keys;
             return result;
           },
           "Get the complete state metadata")
+
       // String representation
       .def("to_string", &yasmin::State::to_string,
            "Convert the state to a string representation")

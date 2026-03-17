@@ -34,7 +34,13 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {};
+  FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {
+    this->set_description("Reads input data from the blackboard, logs it, and "
+                          "writes it back as output.");
+    this->add_input_key("foo_data", "Input data read by the Foo state.");
+    this->add_output_key("foo_out_data",
+                         "Output data written by the Foo state.");
+  };
 
   /**
    * @brief Executes the Foo state logic.
@@ -60,7 +66,11 @@ public:
   /**
    * @brief Constructs a BarState object.
    */
-  BarState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {}
+  BarState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {
+    this->set_description(
+        "Reads remapped input data from the blackboard and logs it.");
+    this->add_input_key("bar_data", "Input data read by the Bar state.");
+  }
 
   /**
    * @brief Executes the Bar state logic.
@@ -94,6 +104,15 @@ int main(int argc, char *argv[]) {
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
       true);
+  sm->set_description("Demonstrates blackboard remapping by forwarding values "
+                      "through multiple states.");
+  sm->add_input_key("msg1",
+                    "Initial input value remapped to the first Foo state.");
+  sm->add_input_key("msg2",
+                    "Initial input value remapped to the second Foo state.");
+  sm->add_output_key(
+      "foo_out_data",
+      "Output data written by Foo and forwarded to Bar through remapping.");
 
   // Add states to the state machine
   sm->add_state("STATE1", std::make_shared<FooState>(),

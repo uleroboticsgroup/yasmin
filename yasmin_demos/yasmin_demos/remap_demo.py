@@ -16,11 +16,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import rclpy
+from yasmin_ros.basic_outcomes import SUCCEED
 
 import yasmin
-from yasmin import State, Blackboard, StateMachine
+from yasmin import Blackboard, State, StateMachine
 from yasmin_ros import set_ros_loggers
-from yasmin_ros.basic_outcomes import SUCCEED
 from yasmin_viewer import YasminViewerPub
 
 
@@ -37,6 +37,17 @@ class Foo(State):
             SUCCEED: Indicates the state should continue to the next state.
         """
         super().__init__(outcomes=[SUCCEED])
+        self.set_description(
+            "Reads input data from the blackboard, logs it, and writes it back as output."
+        )
+        self.add_input_key(
+            "foo_data",
+            "Input data read by the Foo state.",
+        )
+        self.add_output_key(
+            "foo_out_data",
+            "Output data written by the Foo state.",
+        )
 
     def execute(self, blackboard: Blackboard):
         """
@@ -71,6 +82,11 @@ class BarState(State):
             SUCCEDED: Indicates the state should continue to the next state.
         """
         super().__init__(outcomes=[SUCCEED])
+        self.set_description("Reads remapped input data from the blackboard and logs it.")
+        self.add_input_key(
+            "bar_data",
+            "Input data read by the Bar state.",
+        )
 
     def execute(self, blackboard: Blackboard):
         """
@@ -105,6 +121,21 @@ def main() -> None:
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=[SUCCEED], handle_sigint=True)
+    sm.set_description(
+        "Demonstrates blackboard remapping by forwarding values through multiple states."
+    )
+    sm.add_input_key(
+        "msg1",
+        "Initial input value remapped to the first Foo state.",
+    )
+    sm.add_input_key(
+        "msg2",
+        "Initial input value remapped to the second Foo state.",
+    )
+    sm.add_output_key(
+        "foo_out_data",
+        "Output data written by Foo and forwarded to Bar through remapping.",
+    )
 
     # Add states to the FSM
     sm.add_state(

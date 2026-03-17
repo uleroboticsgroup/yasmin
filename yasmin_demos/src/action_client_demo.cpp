@@ -79,7 +79,14 @@ public:
             "/fibonacci",
             std::bind(&FibonacciState::create_goal_handler, this, _1),
             std::bind(&FibonacciState::response_handler, this, _1, _2),
-            std::bind(&FibonacciState::print_feedback, this, _1, _2)) {};
+            std::bind(&FibonacciState::print_feedback, this, _1, _2)) {
+    this->set_description("Calls the Fibonacci action server and stores the "
+                          "resulting sequence in the blackboard.");
+    this->add_input_key<int>("n", "Order of the Fibonacci sequence to compute.",
+                             10);
+    this->add_output_key("fibo_res",
+                         "Computed Fibonacci sequence returned by the action.");
+  };
 
   /**
    * @brief Callback for creating the Fibonacci action goal.
@@ -154,6 +161,21 @@ int main(int argc, char *argv[]) {
   // Create the state machine
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
+  sm->set_description("Calls the Fibonacci action server, stores the resulting "
+                      "sequence, and prints it.");
+  sm->add_input_key<int>("n", "Order of the Fibonacci sequence to compute.",
+                         10);
+  sm->add_output_key("fibo_res",
+                     "Computed Fibonacci sequence returned by the action.");
+
+  auto printing_result_state = yasmin::CbState::make_shared(
+      std::initializer_list<std::string>{yasmin_ros::basic_outcomes::SUCCEED},
+      print_result);
+  printing_result_state->set_description(
+      "Reads the computed Fibonacci sequence from the blackboard and prints "
+      "it.");
+  printing_result_state->add_input_key(
+      "fibo_res", "Computed Fibonacci sequence returned by the action.");
 
   // Add states to the state machine
   sm->add_state("CALLING_FIBONACCI", std::make_shared<FibonacciState>(),
@@ -162,11 +184,7 @@ int main(int argc, char *argv[]) {
                     {yasmin_ros::basic_outcomes::CANCEL, "outcome4"},
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
-  sm->add_state("PRINTING_RESULT",
-                yasmin::CbState::make_shared(
-                    std::initializer_list<std::string>{
-                        yasmin_ros::basic_outcomes::SUCCEED},
-                    print_result),
+  sm->add_state("PRINTING_RESULT", printing_result_state,
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                 });

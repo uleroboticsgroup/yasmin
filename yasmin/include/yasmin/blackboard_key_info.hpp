@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "yasmin/blackboard.hpp"
@@ -58,19 +59,48 @@ struct BlackboardKeyInfo {
       : name(std::move(key_name)) {}
 
   /**
-   * @brief Constructor with key name and default value.
+   * @brief Constructor with key name and description.
+   * @param key_name The name of the blackboard key.
+   * @param key_description Human-readable description of the blackboard key.
+   */
+  BlackboardKeyInfo(std::string key_name, std::string key_description)
+      : name(std::move(key_name)), description(std::move(key_description)) {}
+
+  /**
+   * @brief Constructor with key name, default value and description.
    * @tparam T The type of the default value.
    * @param key_name The name of the blackboard key.
+   * @param key_description Human-readable description of the blackboard key.
    * @param value The default value.
    */
   template <typename T>
-  BlackboardKeyInfo(std::string key_name, T value)
-      : name(std::move(key_name)), has_default(true),
-        default_value(std::make_shared<T>(value)),
-        default_value_type(demangle_type(typeid(T).name())) {
-    auto stored = std::static_pointer_cast<T>(this->default_value);
+  BlackboardKeyInfo(std::string key_name, std::string key_description, T value)
+      : name(std::move(key_name)), description(std::move(key_description)),
+        has_default(true), default_value(std::make_shared<std::decay_t<T>>(
+                               std::forward<T>(value))),
+        default_value_type(demangle_type(typeid(std::decay_t<T>).name())) {
+    using ValueType = std::decay_t<T>;
+    auto stored = std::static_pointer_cast<ValueType>(this->default_value);
     inject_default = [stored](Blackboard &bb, const std::string &key) {
-      bb.set<T>(key, *stored);
+      bb.set<ValueType>(key, *stored);
+    };
+  }
+
+  /**
+   * @brief Constructor with key name, default value and description for const
+   * char *.
+   * @param key_name The name of the blackboard key.
+   * @param key_description Human-readable description of the blackboard key.
+   * @param value The default value.
+   */
+  BlackboardKeyInfo(std::string key_name, std::string key_description,
+                    const char *value)
+      : name(std::move(key_name)), description(std::move(key_description)),
+        has_default(true), default_value(std::make_shared<std::string>(value)),
+        default_value_type(demangle_type(typeid(std::string).name())) {
+    auto stored = std::static_pointer_cast<std::string>(this->default_value);
+    inject_default = [stored](Blackboard &bb, const std::string &key) {
+      bb.set<std::string>(key, *stored);
     };
   }
 

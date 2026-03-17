@@ -16,14 +16,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import rclpy
-from rclpy.qos import qos_profile_sensor_data
 from nav_msgs.msg import Odometry
+from rclpy.qos import qos_profile_sensor_data
+from yasmin_ros.basic_outcomes import CANCEL, TIMEOUT
 
 import yasmin
 from yasmin import Blackboard, StateMachine
-from yasmin_ros import MonitorState
-from yasmin_ros import set_ros_loggers
-from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
+from yasmin_ros import MonitorState, set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
 
@@ -49,6 +48,13 @@ class PrintOdometryState(MonitorState):
             timeout=10,  # timeout to wait for messages in seconds
         )
         self.times = 5
+        self.set_description(
+            "Monitors Odometry messages from the 'odom' topic and logs them until a predefined number of messages has been received."
+        )
+        self.add_input_key(
+            "odom",
+            "Odometry message received from the monitored ROS topic.",
+        )
 
     def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -> str:
         """
@@ -89,6 +95,13 @@ def main() -> None:
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Continuously monitors the 'odom' topic and logs received Odometry messages until a fixed number of messages has been processed."
+    )
+    sm.add_input_key(
+        "odom",
+        "Odometry messages received from the monitored ROS topic.",
+    )
 
     # Add states to the FSM
     sm.add_state(

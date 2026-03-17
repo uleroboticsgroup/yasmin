@@ -86,8 +86,8 @@ TEST_F(TestState, TestInitException) {
 class StateWithDefaults : public State {
 public:
   StateWithDefaults() : State({"done"}) {
-    add_input_key<int>("counter", 42);
-    add_input_key<std::string>("label", std::string("hello"));
+    add_input_key<int>("counter", "A counter", 42);
+    add_input_key<std::string>("label", "A Label", std::string("hello"));
   }
 
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
@@ -142,8 +142,7 @@ TEST_F(TestState, TestDefaultValueEachCallIsIndependent) {
 }
 
 TEST_F(TestState, TestKeyInfoDescription) {
-  BlackboardKeyInfo info("speed", 1.5);
-  info.description = "Maximum robot speed in m/s";
+  BlackboardKeyInfo info("speed", "Maximum robot speed in m/s", 1.5);
 
   auto s = std::make_shared<FooState>();
   s->add_input_key(info);
@@ -163,12 +162,11 @@ class StateWithAllTypes : public State {
 public:
   StateWithAllTypes() : State({"done"}) {
     set_description("State with various default types");
-    add_input_key<bool>("flag", true);
-    add_input_key<double>("speed", 3.14);
-    add_input_key<int>("count", 10);
-    add_input_key<std::string>("name", std::string("robot"));
-    add_output_key<int>("result", 0);
-    add_output_key("no_default");
+    add_input_key<bool>("flag", "A flag", true);
+    add_input_key<double>("speed", "Speed", 3.14);
+    add_input_key<int>("count", "A counter", 10);
+    add_input_key<std::string>("name", "Name", std::string("robot"));
+    add_output_key("result");
   }
 
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
@@ -207,17 +205,13 @@ TEST_F(TestState, TestMultipleInputKeyTypes) {
   EXPECT_EQ(keys[3].get_default_value<std::string>(), "robot");
 }
 
-TEST_F(TestState, TestOutputKeyWithAndWithoutDefault) {
+TEST_F(TestState, TestOutputKey) {
   StateWithAllTypes s;
   const auto &keys = s.get_output_keys();
-  ASSERT_EQ(keys.size(), 2u);
+  ASSERT_EQ(keys.size(), 1u);
 
   EXPECT_EQ(keys[0].name, "result");
-  EXPECT_TRUE(keys[0].has_default);
-  EXPECT_EQ(keys[0].get_default_value<int>(), 0);
-
-  EXPECT_EQ(keys[1].name, "no_default");
-  EXPECT_FALSE(keys[1].has_default);
+  EXPECT_FALSE(keys[0].has_default);
 }
 
 TEST_F(TestState, TestAllDefaultsInjected) {
@@ -236,11 +230,11 @@ TEST_F(TestState, TestGetMetadataComplete) {
   const auto &meta = s.get_metadata();
   EXPECT_EQ(meta.description, "State with various default types");
   EXPECT_EQ(meta.input_keys.size(), 4u);
-  EXPECT_EQ(meta.output_keys.size(), 2u);
+  EXPECT_EQ(meta.output_keys.size(), 1u);
 }
 
 TEST_F(TestState, TestBlackboardKeyInfoCopy) {
-  BlackboardKeyInfo info("val", 42);
+  BlackboardKeyInfo info("val", "A value", 42);
   BlackboardKeyInfo copy = info;
   EXPECT_EQ(copy.name, "val");
   EXPECT_TRUE(copy.has_default);
