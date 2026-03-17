@@ -17,7 +17,7 @@
 
 from ros2cli.command import CommandExtension
 
-from yasmin_cli.verb.factory import add_factory_verb
+from yasmin_cli.verb.run import add_run_verb
 from yasmin_cli.verb.inspect import add_inspect_verb
 from yasmin_cli.verb.test import add_test_verb
 
@@ -30,7 +30,7 @@ class YasminCommand(CommandExtension):
         subparsers.required = True
 
         add_inspect_verb(subparsers)
-        add_factory_verb(subparsers)
+        add_run_verb(subparsers)
         add_test_verb(subparsers)
 
         self._parser = parser

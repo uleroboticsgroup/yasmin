@@ -27,7 +27,7 @@ from yasmin_cli.completer import (
     plugin_id,
     test_plugin_completer,
 )
-from yasmin_cli.verb.factory import run_factory_node
+from yasmin_cli.verb.run import run_factory_node
 
 
 def _parse_input_assignments(values: list[str]) -> dict[str, str]:

@@ -51,9 +51,9 @@ def run_factory_node(
         return 1
 
 
-def add_factory_verb(subparsers):
+def add_run_verb(subparsers):
     parser = subparsers.add_parser(
-        "factory",
+        "run",
         help="Run a YASMIN state machine from an XML file",
         description="Run a YASMIN state machine from an XML file",
     )
@@ -75,10 +75,10 @@ def add_factory_verb(subparsers):
         help="Use the Python factory node instead of the C++ factory node",
     )
 
-    parser.set_defaults(main=_main_factory)
+    parser.set_defaults(main=_main_run)
 
 
-def _main_factory(args):
+def _main_run(args):
     return run_factory_node(
         state_machine_file=args.state_machine_file,
         disable_viewer_pub=args.disable_viewer_pub,
