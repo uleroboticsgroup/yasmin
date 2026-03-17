@@ -93,8 +93,8 @@ struct BlackboardKeyInfo {
    * @param key_description Human-readable description of the blackboard key.
    * @param value The default value.
    */
-  BlackboardKeyInfo(std::string key_name, const char *value,
-                    std::string key_description)
+  BlackboardKeyInfo(std::string key_name, std::string key_description,
+                    const char *value)
       : name(std::move(key_name)), description(std::move(key_description)),
         has_default(true), default_value(std::make_shared<std::string>(value)),
         default_value_type(demangle_type(typeid(std::string).name())) {
