@@ -1,5 +1,6 @@
 from ros2cli.command import CommandExtension
 
+from yasmin_cli.verb.factory import add_factory_verb
 from yasmin_cli.verb.inspect import add_inspect_verb
 
 
@@ -11,11 +12,13 @@ class YasminCommand(CommandExtension):
         subparsers.required = True
 
         add_inspect_verb(subparsers)
+        add_factory_verb(subparsers)
 
         self._parser = parser
 
     def main(self, *, parser, args):
         if hasattr(args, "main"):
             return args.main(args)
+
         self._parser.print_help()
         return 0

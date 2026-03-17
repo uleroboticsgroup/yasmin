@@ -12,6 +12,7 @@
   <exec_depend>ament_index_python</exec_depend>
 
   <exec_depend>yasmin</exec_depend>
+  <exec_depend>yasmin_factory</exec_depend>
   <exec_depend>yasmin_editor</exec_depend>
 
   <export>
