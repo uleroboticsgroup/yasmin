@@ -48,8 +48,9 @@ public:
     this->add_input_key(
         "max_counter",
         "Maximum number of iterations before the state finishes.");
-    this->add_input_key("counter_str", std::string("Counter"),
-                        "Prefix used when formatting the counter string.");
+    this->add_input_key<std::string>(
+        "counter_str", "Prefix used when formatting the counter string.",
+        std::string("Counter"));
     this->add_output_key("foo_str",
                          "Formatted counter string written to the blackboard.");
   };
@@ -133,11 +134,12 @@ int main(int argc, char *argv[]) {
   sm->set_description("Loads configuration values into the blackboard and then "
                       "runs a loop that formats and prints a counter string "
                       "until the configured maximum is reached.");
-  sm->add_input_key(
-      "max_counter", 3,
-      "Maximum number of iterations before the state machine finishes.");
-  sm->add_input_key("counter_str", std::string("Counter"),
-                    "Prefix used when formatting the counter string.");
+  sm->add_input_key<int>(
+      "max_counter",
+      "Maximum number of iterations before the state machine finishes.", 3);
+  sm->add_input_key<std::string>(
+      "counter_str", "Prefix used when formatting the counter string.",
+      std::string("Counter"));
   sm->add_output_key("foo_str",
                      "Formatted counter string produced during execution.");
 

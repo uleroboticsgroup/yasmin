@@ -47,16 +47,16 @@ class FooState(State):
         )
         self.add_input_key(
             "max_counter",
-            description="Maximum number of iterations before the state finishes.",
+            "Maximum number of iterations before the state finishes.",
         )
         self.add_input_key(
             "counter_str",
+            "Prefix used when formatting the counter string.",
             "Counter",
-            description="Prefix used when formatting the counter string.",
         )
         self.add_output_key(
             "foo_str",
-            description="Formatted counter string written to the blackboard.",
+            "Formatted counter string written to the blackboard.",
         )
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -102,7 +102,7 @@ class BarState(State):
         )
         self.add_input_key(
             "foo_str",
-            description="Formatted counter string produced by FooState.",
+            "Formatted counter string produced by FooState.",
         )
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -140,17 +140,17 @@ def main() -> None:
     )
     sm.add_input_key(
         "max_counter",
+        "Maximum number of iterations before the state machine finishes.",
         3,
-        description="Maximum number of iterations before the state machine finishes.",
     )
     sm.add_input_key(
         "counter_str",
+        "Prefix used when formatting the counter string.",
         "Counter",
-        description="Prefix used when formatting the counter string.",
     )
     sm.add_output_key(
         "foo_str",
-        description="Formatted counter string produced during execution.",
+        "Formatted counter string produced during execution.",
     )
 
     getting_parameters_state = GetParametersState(
@@ -164,11 +164,11 @@ def main() -> None:
     )
     getting_parameters_state.add_output_key(
         "max_counter",
-        description="Maximum number of iterations before the state machine finishes.",
+        "Maximum number of iterations before the state machine finishes.",
     )
     getting_parameters_state.add_output_key(
         "counter_str",
-        description="Prefix used when formatting the counter string.",
+        "Prefix used when formatting the counter string.",
     )
 
     # Add states to the FSM

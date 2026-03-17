@@ -39,7 +39,7 @@ class FooState(State):
         )
         self.add_output_key(
             "foo_str",
-            description="String containing the current counter value produced by FooState.",
+            "String containing the current counter value produced by FooState.",
         )
 
     def execute(self, blackboard: Blackboard) -> str:

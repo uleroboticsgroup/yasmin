@@ -82,7 +82,8 @@ public:
             std::bind(&FibonacciState::print_feedback, this, _1, _2)) {
     this->set_description("Calls the Fibonacci action server and stores the "
                           "resulting sequence in the blackboard.");
-    this->add_input_key("n", 10, "Order of the Fibonacci sequence to compute.");
+    this->add_input_key<int>("n", "Order of the Fibonacci sequence to compute.",
+                             10);
     this->add_output_key("fibo_res",
                          "Computed Fibonacci sequence returned by the action.");
   };
@@ -162,7 +163,8 @@ int main(int argc, char *argv[]) {
       std::initializer_list<std::string>{"outcome4"}, true);
   sm->set_description("Calls the Fibonacci action server, stores the resulting "
                       "sequence, and prints it.");
-  sm->add_input_key("n", 10, "Order of the Fibonacci sequence to compute.");
+  sm->add_input_key<int>("n", "Order of the Fibonacci sequence to compute.",
+                         10);
   sm->add_output_key("fibo_res",
                      "Computed Fibonacci sequence returned by the action.");
 

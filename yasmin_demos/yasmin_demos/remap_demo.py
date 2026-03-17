@@ -42,11 +42,11 @@ class Foo(State):
         )
         self.add_input_key(
             "foo_data",
-            description="Input data read by the Foo state.",
+            "Input data read by the Foo state.",
         )
         self.add_output_key(
             "foo_out_data",
-            description="Output data written by the Foo state.",
+            "Output data written by the Foo state.",
         )
 
     def execute(self, blackboard: Blackboard):
@@ -82,10 +82,12 @@ class BarState(State):
             SUCCEDED: Indicates the state should continue to the next state.
         """
         super().__init__(outcomes=[SUCCEED])
-        self.set_description("Reads remapped input data from the blackboard and logs it.")
+        self.set_description(
+            "Reads remapped input data from the blackboard and logs it."
+        )
         self.add_input_key(
             "bar_data",
-            description="Input data read by the Bar state.",
+            "Input data read by the Bar state.",
         )
 
     def execute(self, blackboard: Blackboard):
@@ -126,15 +128,15 @@ def main() -> None:
     )
     sm.add_input_key(
         "msg1",
-        description="Initial input value remapped to the first Foo state.",
+        "Initial input value remapped to the first Foo state.",
     )
     sm.add_input_key(
         "msg2",
-        description="Initial input value remapped to the second Foo state.",
+        "Initial input value remapped to the second Foo state.",
     )
     sm.add_output_key(
         "foo_out_data",
-        description="Output data written by Foo and forwarded to Bar through remapping.",
+        "Output data written by Foo and forwarded to Bar through remapping.",
     )
 
     # Add states to the FSM

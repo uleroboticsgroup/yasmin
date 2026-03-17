@@ -86,8 +86,8 @@ TEST_F(TestState, TestInitException) {
 class StateWithDefaults : public State {
 public:
   StateWithDefaults() : State({"done"}) {
-    add_input_key<int>("counter", 42);
-    add_input_key<std::string>("label", std::string("hello"));
+    add_input_key<int>("counter", "A counter", 42);
+    add_input_key<std::string>("label", "A Label", std::string("hello"));
   }
 
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
@@ -163,10 +163,10 @@ class StateWithAllTypes : public State {
 public:
   StateWithAllTypes() : State({"done"}) {
     set_description("State with various default types");
-    add_input_key<bool>("flag", true);
-    add_input_key<double>("speed", 3.14);
-    add_input_key<int>("count", 10);
-    add_input_key<std::string>("name", std::string("robot"));
+    add_input_key<bool>("flag", "A flag", true);
+    add_input_key<double>("speed", "Speed", 3.14);
+    add_input_key<int>("count", "A counter", 10);
+    add_input_key<std::string>("name", "Name", std::string("robot"));
     add_output_key("result");
   }
 

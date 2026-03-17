@@ -53,8 +53,8 @@ public:
         ) {
     this->set_description("Publishes an incrementing integer to the 'count' "
                           "topic using values stored in the blackboard.");
-    this->add_input_key("counter", 0,
-                        "Current counter value stored in the blackboard.");
+    this->add_input_key<int>(
+        "counter", "Current counter value stored in the blackboard.", 0);
     this->add_output_key("counter",
                          "Updated counter value after incrementing.");
   };
@@ -118,10 +118,10 @@ int main(int argc, char *argv[]) {
       true);
   sm->set_description("Publishes incrementing integers until the configured "
                       "maximum count is reached.");
-  sm->add_input_key("counter", 0,
-                    "Current counter value stored in the blackboard.");
-  sm->add_input_key("max_count", 10,
-                    "Maximum counter threshold used to stop publishing.");
+  sm->add_input_key<int>("counter",
+                         "Current counter value stored in the blackboard.", 0);
+  sm->add_input_key<int>(
+      "max_count", "Maximum counter threshold used to stop publishing.", 10);
   sm->add_output_key("counter",
                      "Updated counter value after each publish step.");
 
@@ -130,9 +130,10 @@ int main(int argc, char *argv[]) {
   checking_counts_state->set_description(
       "Checks whether the counter stored in the blackboard reached the "
       "configured maximum.");
-  checking_counts_state->add_input_key("counter", 0, "Current counter value.");
-  checking_counts_state->add_input_key(
-      "max_count", 10, "Maximum counter threshold used to stop publishing.");
+  checking_counts_state->add_input_key<int>("counter", "Current counter value.",
+                                            0);
+  checking_counts_state->add_input_key<int>(
+      "max_count", "Maximum counter threshold used to stop publishing.", 10);
 
   // Add states to the state machine
   sm->add_state("PUBLISHING_INT", std::make_shared<PublishIntState>(),

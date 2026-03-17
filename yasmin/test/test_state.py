@@ -38,8 +38,8 @@ class BarState(State):
 class StateWithDefaults(State):
     def __init__(self):
         super().__init__(["done"])
-        self.add_input_key("counter", 42, description="An integer counter")
-        self.add_input_key("label", "hello", description="A string label")
+        self.add_input_key("counter", "An integer counter", 42)
+        self.add_input_key("label", "A string label", "hello")
 
     def execute(self, blackboard):
         return "done"
@@ -78,8 +78,8 @@ class TestStateMetadata(unittest.TestCase):
         state = StateWithDefaults()
         bb = Blackboard()
         state(bb)
-        self.assertEqual(bb["counter"], 42)
-        self.assertEqual(bb["label"], "hello")
+        self.assertEqual(bb["counter"], "A counter", 42)
+        self.assertEqual(bb["label"], "A label", "hello")
 
     def test_default_value_not_overwritten_when_present(self):
         state = StateWithDefaults()
@@ -122,7 +122,7 @@ class TestStateMetadata(unittest.TestCase):
 
     def test_add_input_key_description_no_default(self):
         state = StateWithDefaults()
-        state.add_input_key("speed", description="Robot linear speed")
+        state.add_input_key("speed", "Robot linear speed")
         keys = state.get_input_keys()
         speed_key = next(k for k in keys if k["name"] == "speed")
         self.assertEqual(speed_key["description"], "Robot linear speed")
@@ -139,11 +139,11 @@ class StateWithAllTypes(State):
     def __init__(self):
         super().__init__(["done"])
         self.set_description("State with various default types")
-        self.add_input_key("flag", True, description="A boolean flag")
-        self.add_input_key("speed", 3.14, description="Speed value")
-        self.add_input_key("count", 10, description="An integer count")
-        self.add_input_key("name", "robot", description="Name string")
-        self.add_output_key("result", description="Result value")
+        self.add_input_key("flag", "A boolean flag", True)
+        self.add_input_key("speed", "Speed value", 4.14)
+        self.add_input_key("count", "An integer count", 10)
+        self.add_input_key("name", "Name string", "robot")
+        self.add_output_key("result", "Result value")
 
     def execute(self, blackboard):
         return "done"
@@ -208,7 +208,7 @@ class TestStateMetadataExtended(unittest.TestCase):
 
     def test_add_input_key_with_list_default(self):
         state = FooState()
-        state.add_input_key("items", [1, 2, 3], description="A list")
+        state.add_input_key("items", "A list", [1, 2, 3])
         keys = state.get_input_keys()
         item_key = next(k for k in keys if k["name"] == "items")
         self.assertTrue(item_key["has_default"])
@@ -216,7 +216,7 @@ class TestStateMetadataExtended(unittest.TestCase):
 
     def test_add_input_key_with_dict_default(self):
         state = FooState()
-        state.add_input_key("config", {"a": 1}, description="A dict")
+        state.add_input_key("config", "A dict", {"a": 1})
         keys = state.get_input_keys()
         config_key = next(k for k in keys if k["name"] == "config")
         self.assertTrue(config_key["has_default"])

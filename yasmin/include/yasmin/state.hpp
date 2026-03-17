@@ -194,26 +194,15 @@ public:
                      const std::string &description);
 
   /**
-   * @brief Adds an input key with a name and default value.
-   * @tparam T The type of the default value.
-   * @param key_name The name of the input key.
-   * @param default_value The default value for the key.
-   */
-  template <typename T>
-  void add_input_key(const std::string &key_name, T default_value) {
-    add_input_key(BlackboardKeyInfo(key_name, default_value));
-  }
-
-  /**
    * @brief Adds an input key with a name, default value and description.
    * @tparam T The type of the default value.
    * @param key_name The name of the input key.
-   * @param default_value The default value for the key.
    * @param description Human-readable description of the input key.
+   * @param default_value The default value for the key.
    */
   template <typename T>
-  void add_input_key(const std::string &key_name, T default_value,
-                     const std::string &description) {
+  void add_input_key(const std::string &key_name,
+                     const std::string &description, T default_value) {
     BlackboardKeyInfo info(key_name, default_value);
     info.description = description;
     add_input_key(info);

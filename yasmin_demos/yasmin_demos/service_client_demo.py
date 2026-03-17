@@ -51,11 +51,9 @@ class AddTwoIntsState(ServiceState):
         self.set_description(
             "Calls the AddTwoInts service using the values stored in the blackboard and writes the resulting sum back to the blackboard."
         )
-        self.add_input_key("a", description="First integer used for the service request.")
-        self.add_input_key(
-            "b", description="Second integer used for the service request."
-        )
-        self.add_output_key("sum", description="Sum returned by the AddTwoInts service.")
+        self.add_input_key("a", "First integer used for the service request.")
+        self.add_input_key("b", "Second integer used for the service request.")
+        self.add_output_key("sum", "Sum returned by the AddTwoInts service.")
 
     def create_request_handler(self, blackboard: Blackboard) -> AddTwoInts.Request:
         """
@@ -137,9 +135,9 @@ def main() -> None:
     sm.set_description(
         "Sets two integers in the blackboard, calls the AddTwoInts service, and prints the resulting sum."
     )
-    sm.add_output_key("a", description="First integer used for the service request.")
-    sm.add_output_key("b", description="Second integer used for the service request.")
-    sm.add_output_key("sum", description="Sum returned by the AddTwoInts service.")
+    sm.add_output_key("a", "First integer used for the service request.")
+    sm.add_output_key("b", "Second integer used for the service request.")
+    sm.add_output_key("sum", "Sum returned by the AddTwoInts service.")
 
     setting_ints_state = CbState([SUCCEED], set_ints)
     setting_ints_state.set_description(
@@ -147,11 +145,11 @@ def main() -> None:
     )
     setting_ints_state.add_output_key(
         "a",
-        description="First integer used for the service request.",
+        "First integer used for the service request.",
     )
     setting_ints_state.add_output_key(
         "b",
-        description="Second integer used for the service request.",
+        "Second integer used for the service request.",
     )
 
     printing_sum_state = CbState([SUCCEED], print_sum)
@@ -160,7 +158,7 @@ def main() -> None:
     )
     printing_sum_state.add_input_key(
         "sum",
-        description="Sum previously written to the blackboard by the service state.",
+        "Sum previously written to the blackboard by the service state.",
     )
 
     # Add states

@@ -173,17 +173,15 @@ PYBIND11_MODULE(state, m) {
       .def(
           "add_input_key",
           [](yasmin::State &state, const std::string &key_name,
-             py::object default_value, const std::string &description) {
+             const std::string &description, py::object default_value) {
             yasmin::BlackboardKeyInfo info =
                 yasmin::BlackboardKeyInfoPy::from_pyobject(key_name,
                                                            default_value);
             info.description = description;
             state.add_input_key(info);
           },
-          "Add an input key with a default value of any type and optional "
-          "description",
-          py::arg("key_name"), py::arg("default_value"),
-          py::arg("description") = "")
+          "Add an input key with a default value of any type and description",
+          py::arg("key_name"), py::arg("description"), py::arg("default_value"))
 
       .def(
           "add_output_key",
