@@ -203,9 +203,8 @@ public:
   template <typename T>
   void add_input_key(const std::string &key_name,
                      const std::string &description, T default_value) {
-    BlackboardKeyInfo info(key_name, default_value);
-    info.description = description;
-    add_input_key(info);
+    this->add_input_key(
+        BlackboardKeyInfo(key_name, description, default_value));
   }
 
   /**

@@ -39,31 +39,20 @@ inline BlackboardKeyInfo
 blackboard_key_info_from_pyobject(const std::string &key_name,
                                   py::object value) {
   if (py::isinstance<py::bool_>(value)) {
-    return BlackboardKeyInfo(key_name, value.cast<bool>());
+    return BlackboardKeyInfo(key_name, "", value.cast<bool>());
   } else if (py::isinstance<py::int_>(value)) {
     try {
-      return BlackboardKeyInfo(key_name, value.cast<int>());
+      return BlackboardKeyInfo(key_name, "", value.cast<int>());
     } catch (...) {
-      return BlackboardKeyInfo(key_name, value.cast<long>());
+      return BlackboardKeyInfo(key_name, "", value.cast<long>());
     }
   } else if (py::isinstance<py::float_>(value)) {
-    return BlackboardKeyInfo(key_name, value.cast<double>());
+    return BlackboardKeyInfo(key_name, "", value.cast<double>());
   } else if (py::isinstance<py::str>(value)) {
-    BlackboardKeyInfo info(key_name);
-    info.has_default = true;
-    info.default_value =
-        std::make_shared<std::string>(value.cast<std::string>());
-    info.default_value_type = demangle_type(typeid(std::string).name());
-
-    auto stored = std::static_pointer_cast<std::string>(info.default_value);
-    info.inject_default = [stored](Blackboard &bb, const std::string &key) {
-      bb.set<std::string>(key, *stored);
-    };
-
-    return info;
+    return BlackboardKeyInfo(key_name, "", value.cast<std::string>());
   } else if (py::isinstance<py::bytes>(value)) {
     std::string data = value.cast<std::string>();
-    return BlackboardKeyInfo(key_name,
+    return BlackboardKeyInfo(key_name, "",
                              std::vector<uint8_t>(data.begin(), data.end()));
   }
   BlackboardKeyInfo info(key_name);

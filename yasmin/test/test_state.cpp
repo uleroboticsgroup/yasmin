@@ -142,8 +142,7 @@ TEST_F(TestState, TestDefaultValueEachCallIsIndependent) {
 }
 
 TEST_F(TestState, TestKeyInfoDescription) {
-  BlackboardKeyInfo info("speed", 1.5);
-  info.description = "Maximum robot speed in m/s";
+  BlackboardKeyInfo info("speed", "Maximum robot speed in m/s", 1.5);
 
   auto s = std::make_shared<FooState>();
   s->add_input_key(info);
@@ -235,7 +234,7 @@ TEST_F(TestState, TestGetMetadataComplete) {
 }
 
 TEST_F(TestState, TestBlackboardKeyInfoCopy) {
-  BlackboardKeyInfo info("val", 42);
+  BlackboardKeyInfo info("val", "A value", 42);
   BlackboardKeyInfo copy = info;
   EXPECT_EQ(copy.name, "val");
   EXPECT_TRUE(copy.has_default);
