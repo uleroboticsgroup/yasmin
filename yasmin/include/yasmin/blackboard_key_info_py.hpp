@@ -49,26 +49,36 @@ blackboard_key_info_from_pyobject(const std::string &key_name,
   } else if (py::isinstance<py::float_>(value)) {
     return BlackboardKeyInfo(key_name, value.cast<double>());
   } else if (py::isinstance<py::str>(value)) {
-    return BlackboardKeyInfo(key_name, value.cast<std::string>());
+    BlackboardKeyInfo info(key_name);
+    info.has_default = true;
+    info.default_value =
+        std::make_shared<std::string>(value.cast<std::string>());
+    info.default_value_type = demangle_type(typeid(std::string).name());
+
+    auto stored = std::static_pointer_cast<std::string>(info.default_value);
+    info.inject_default = [stored](Blackboard &bb, const std::string &key) {
+      bb.set<std::string>(key, *stored);
+    };
+
+    return info;
   } else if (py::isinstance<py::bytes>(value)) {
     std::string data = value.cast<std::string>();
     return BlackboardKeyInfo(key_name,
                              std::vector<uint8_t>(data.begin(), data.end()));
-  } else {
-    BlackboardKeyInfo info(key_name);
-    info.has_default = true;
-    info.default_value_type = "py::object";
-
-    // Keep the Python object alive via a shared_ptr to py::object.
-    auto stored = std::make_shared<py::object>(value);
-    info.default_value = stored;
-    info.inject_default = [stored](Blackboard &bb, const std::string &key) {
-      py::gil_scoped_acquire gil;
-      bb.set<py::object>(key, *stored);
-    };
-
-    return info;
   }
+  BlackboardKeyInfo info(key_name);
+  info.has_default = true;
+  info.default_value_type = "py::object";
+
+  // Keep the Python object alive via a shared_ptr to py::object.
+  auto stored = std::make_shared<py::object>(value);
+  info.default_value = stored;
+  info.inject_default = [stored](Blackboard &bb, const std::string &key) {
+    py::gil_scoped_acquire gil;
+    bb.set<py::object>(key, *stored);
+  };
+
+  return info;
 }
 
 /**
