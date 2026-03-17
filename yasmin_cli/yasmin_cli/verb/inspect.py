@@ -1,21 +1,10 @@
-from yasmin_editor.plugins_manager.plugin_manager import PluginManager
-
-
-def _plugin_id(plugin) -> str:
-    if plugin.plugin_type == "python":
-        return f"{plugin.module}.{plugin.class_name}"
-    if plugin.plugin_type == "cpp":
-        return plugin.class_name or ""
-    if plugin.plugin_type == "xml":
-        if plugin.package_name:
-            return f"{plugin.package_name}/{plugin.file_name}"
-        return plugin.file_name or ""
-    return ""
+from yasmin_cli.completer import (filter_plugins, load_plugins,
+                                  plugin_completer, plugin_id)
 
 
 def _plugin_summary(plugin) -> str:
     return (
-        f"[{plugin.plugin_type:<6}] {_plugin_id(plugin)} | "
+        f"[{plugin.plugin_type:<6}] {plugin_id(plugin)} | "
         f"outcomes={len(plugin.outcomes)}, "
         f"inputs={len(plugin.input_keys)}, "
         f"outputs={len(plugin.output_keys)}"
@@ -44,7 +33,7 @@ def _print_key_block(title: str, keys: list[dict]) -> None:
 
 
 def _print_plugin_details(plugin) -> None:
-    print(f"Plugin:      {_plugin_id(plugin)}")
+    print(f"Plugin:      {plugin_id(plugin)}")
     print(f"Type:        {plugin.plugin_type}")
     print(f"Description: {plugin.description if plugin.description else '-'}")
     print(f"Outcomes:    {', '.join(plugin.outcomes) if plugin.outcomes else '-'}")
@@ -70,11 +59,12 @@ def add_inspect_verb(subparsers):
         default=None,
         help="Filter by substring",
     )
-    parser.add_argument(
+    plugin_arg = parser.add_argument(
         "--plugin",
         default=None,
         help="Show one exact plugin id",
     )
+    plugin_arg.completer = plugin_completer
     parser.add_argument(
         "--show-all",
         action="store_true",
@@ -85,37 +75,10 @@ def add_inspect_verb(subparsers):
 
 
 def _main_inspect(args):
-    manager = PluginManager()
-    manager.load_all_plugins()
-
-    plugins = []
-
-    if args.type in ("all", "cpp"):
-        plugins.extend(manager.cpp_plugins)
-    if args.type in ("all", "python"):
-        plugins.extend(manager.python_plugins)
-    if args.type in ("all", "xml"):
-        plugins.extend(manager.xml_files)
-
-    if args.search:
-        search = args.search.lower()
-        filtered = []
-        for plugin in plugins:
-            haystack = [
-                _plugin_id(plugin),
-                plugin.description or "",
-                " ".join(plugin.outcomes),
-                " ".join(key.get("name", "") for key in plugin.input_keys),
-                " ".join(key.get("name", "") for key in plugin.output_keys),
-            ]
-            if any(search in entry.lower() for entry in haystack):
-                filtered.append(plugin)
-        plugins = filtered
-
-    plugins = sorted(plugins, key=_plugin_id)
+    plugins = filter_plugins(load_plugins(include_xml=True), args.type, args.search)
 
     if args.plugin:
-        plugin = next((p for p in plugins if _plugin_id(p) == args.plugin), None)
+        plugin = next((p for p in plugins if plugin_id(p) == args.plugin), None)
         if plugin is None:
             print(f"Plugin not found: {args.plugin}")
             return 1

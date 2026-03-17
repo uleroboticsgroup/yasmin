@@ -4,80 +4,9 @@ import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from yasmin_editor.plugins_manager.plugin_manager import PluginManager
-
+from yasmin_cli.completer import (find_plugin, input_completer, plugin_id,
+                                  test_plugin_completer)
 from yasmin_cli.verb.factory import run_factory_node
-
-
-def _plugin_id(plugin) -> str:
-    if plugin.plugin_type == "python":
-        return f"{plugin.module}.{plugin.class_name}"
-    if plugin.plugin_type == "cpp":
-        return plugin.class_name or ""
-    if plugin.plugin_type == "xml":
-        if plugin.package_name:
-            return f"{plugin.package_name}/{plugin.file_name}"
-        return plugin.file_name or ""
-    return ""
-
-
-def _load_plugins():
-    manager = PluginManager()
-    manager.load_all_plugins()
-
-    plugins = []
-    plugins.extend(manager.cpp_plugins)
-    plugins.extend(manager.python_plugins)
-    return sorted(plugins, key=_plugin_id)
-
-
-def _find_plugin(plugin_id: str):
-    for plugin in _load_plugins():
-        if _plugin_id(plugin) == plugin_id:
-            return plugin
-    return None
-
-
-def _plugin_id_completer(prefix, parsed_args, **kwargs):
-    matches: list[str] = []
-
-    for plugin in _load_plugins():
-        plugin_id = _plugin_id(plugin)
-        if plugin_id.startswith(prefix):
-            matches.append(plugin_id)
-
-    return matches
-
-
-def _input_completer(prefix, parsed_args, **kwargs):
-    plugin_id = getattr(parsed_args, "plugin_id", None)
-    if not plugin_id:
-        return []
-
-    plugin = _find_plugin(plugin_id)
-    if plugin is None:
-        return []
-
-    already_used = set()
-    raw_inputs = getattr(parsed_args, "input", None) or []
-
-    for entry in raw_inputs:
-        if "=" not in entry:
-            continue
-        key, _ = entry.split("=", 1)
-        already_used.add(key.strip())
-
-    matches: list[str] = []
-    for key in plugin.input_keys:
-        name = key.get("name", "")
-        if not name or name in already_used:
-            continue
-
-        suggestion = f"{name}="
-        if suggestion.startswith(prefix):
-            matches.append(suggestion)
-
-    return matches
 
 
 def _parse_input_assignments(values: list[str]) -> dict[str, str]:
@@ -291,7 +220,7 @@ def add_test_verb(subparsers):
         "plugin_id",
         help="Plugin id of the state to test",
     )
-    plugin_arg.completer = _plugin_id_completer
+    plugin_arg.completer = test_plugin_completer
 
     input_arg = parser.add_argument(
         "--input",
@@ -300,7 +229,7 @@ def add_test_verb(subparsers):
         metavar="KEY=VALUE",
         help="Input value for the selected state, may be given multiple times",
     )
-    input_arg.completer = _input_completer
+    input_arg.completer = input_completer
 
     parser.add_argument(
         "--disable_viewer_pub",
@@ -327,7 +256,7 @@ def add_test_verb(subparsers):
 
 
 def _main_test(args):
-    plugin = _find_plugin(args.plugin_id)
+    plugin = find_plugin(args.plugin_id, include_xml=False)
     if plugin is None:
         print(f"Plugin not found: {args.plugin_id}")
         return 1
@@ -365,7 +294,7 @@ def _main_test(args):
         _print_plugin_input_summary(plugin, provided_inputs)
 
     if args.keep_temp_file:
-        safe_name = args.plugin_id.replace("/", "_").replace(".", "_")
+        safe_name = plugin_id(plugin).replace("/", "_").replace(".", "_")
         temp_path = Path.cwd() / f"yasmin_test_{safe_name}.xml"
         temp_path.write_text(xml_content, encoding="utf-8")
         return run_factory_node(
