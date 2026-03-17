@@ -22,7 +22,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from yasmin_cli.completer import (
-    find_plugin,
+    build_plugin_info,
     input_completer,
     plugin_id,
     test_plugin_completer,
@@ -277,7 +277,7 @@ def add_test_verb(subparsers):
 
 
 def _main_test(args):
-    plugin = find_plugin(args.plugin_id, include_xml=False)
+    plugin = build_plugin_info(args.plugin_id)
     if plugin is None:
         print(f"Plugin not found: {args.plugin_id}")
         return 1

@@ -19,6 +19,7 @@
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
+from yasmin_editor.plugins_manager.plugin_info import PluginInfo
 from yasmin_editor.plugins_manager.plugin_manager import PluginManager
 
 IGNORE_XML_FILES = {"package.xml", "plugins.xml"}
@@ -55,6 +56,22 @@ def find_plugin(plugin_name: str, include_xml: bool = True):
         if plugin_id(plugin) == plugin_name:
             return plugin
     return None
+
+
+def build_plugin_info(plugin_name: str):
+    if "." in plugin_name:
+        last_dot = plugin_name.rfind(".")
+        module = plugin_name[:last_dot]
+        class_name = plugin_name[last_dot + 1 :]
+        try:
+            return PluginInfo(plugin_type="python", class_name=class_name, module=module)
+        except Exception:
+            return None
+    else:
+        try:
+            return PluginInfo(plugin_type="cpp", class_name=plugin_name)
+        except Exception:
+            return None
 
 
 def filter_plugins(plugins, plugin_type: str = "all", search: str | None = None):
@@ -111,7 +128,7 @@ def input_completer(prefix, parsed_args, **kwargs):
     if not selected_plugin_id:
         return []
 
-    plugin = find_plugin(selected_plugin_id, include_xml=False)
+    plugin = find_plugin_fast(selected_plugin_id)
     if plugin is None:
         return []
 
