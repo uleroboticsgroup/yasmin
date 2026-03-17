@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 from ros2cli.command import CommandExtension
 
 from yasmin_cli.verb.info import add_info_verb
@@ -39,7 +40,8 @@ class YasminCommand(CommandExtension):
 
     def main(self, *, parser, args):
         if hasattr(args, "main"):
-            return args.main(args)
+            result = args.main(args)
+            os._exit(result if result is not None else 0)
 
         self._parser.print_help()
-        return 0
+        os._exit(0)

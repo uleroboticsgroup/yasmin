@@ -15,10 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from __future__ import annotations
 
-import xml.etree.ElementTree as ET
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 from yasmin_editor.plugins_manager.plugin_manager import PluginManager
 
@@ -39,7 +38,7 @@ def plugin_id(plugin) -> str:
 
 def load_plugins(include_xml: bool = True):
     manager = PluginManager()
-    manager.load_all_plugins()
+    manager.load_all_plugins(True)
 
     plugins = []
     plugins.extend(manager.cpp_plugins)

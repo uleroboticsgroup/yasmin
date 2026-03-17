@@ -65,7 +65,7 @@ def add_run_verb(subparsers):
     xml_arg.completer = xml_file_completer
 
     parser.add_argument(
-        "--disable_viewer_pub",
+        "--disable-viewer-pub",
         action="store_true",
         help="Disable FSM viewer publisher",
     )

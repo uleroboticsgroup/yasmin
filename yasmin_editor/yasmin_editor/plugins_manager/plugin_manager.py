@@ -35,11 +35,11 @@ class PluginManager:
         self.python_plugins: List[PluginInfo] = []
         self.xml_files: List[PluginInfo] = []
 
-    def load_all_plugins(self) -> None:
+    def load_all_plugins(self, hide_progress: bool = False) -> None:
         set_log_level(LogLevel.WARN)
         packages = list(get_packages_with_prefixes().keys())
 
-        for package in tqdm(packages, desc="Loading plugins"):
+        for package in tqdm(packages, desc="Loading plugins", disable=hide_progress):
             self.load_cpp_plugins_from_package(package)
             self.load_python_plugins_from_package(package)
             self.load_xml_state_machines_from_package(package)
