@@ -224,7 +224,7 @@ class TestStateMetadataExtended(unittest.TestCase):
 
     def test_default_injection_with_complex_type(self):
         state = FooState()
-        state.add_input_key("items", [1, 2, 3])
+        state.add_input_key("items", "A list", [1, 2, 3])
         bb = Blackboard()
         state(bb)
         self.assertEqual(bb["items"], [1, 2, 3])
