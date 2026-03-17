@@ -78,8 +78,8 @@ class TestStateMetadata(unittest.TestCase):
         state = StateWithDefaults()
         bb = Blackboard()
         state(bb)
-        self.assertEqual(bb["counter"], "A counter", 42)
-        self.assertEqual(bb["label"], "A label", "hello")
+        self.assertEqual(bb["counter"], 42)
+        self.assertEqual(bb["label"], "hello")
 
     def test_default_value_not_overwritten_when_present(self):
         state = StateWithDefaults()
