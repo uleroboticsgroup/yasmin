@@ -140,7 +140,7 @@ class StateWithAllTypes(State):
         super().__init__(["done"])
         self.set_description("State with various default types")
         self.add_input_key("flag", "A boolean flag", True)
-        self.add_input_key("speed", "Speed value", 4.14)
+        self.add_input_key("speed", "Speed value", 3.14)
         self.add_input_key("count", "An integer count", 10)
         self.add_input_key("name", "Name string", "robot")
         self.add_output_key("result", "Result value")
