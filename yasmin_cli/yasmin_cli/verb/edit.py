@@ -18,19 +18,32 @@
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 
-from yasmin_cli.completer import xml_file_completer
+from yasmin_cli.completer import is_state_machine_xml, xml_file_completer
 
 
-def run_editor(state_machine_file: str) -> int:
+def run_editor(state_machine_file: str = "") -> int:
+    if state_machine_file:
+        xml_path = Path(state_machine_file)
+
+        if not xml_path.is_file():
+            print(f"File does not exist: {state_machine_file}")
+            return 1
+
+        if not is_state_machine_xml(xml_path):
+            print(f"Not a valid YASMIN state machine XML file: {state_machine_file}")
+            return 1
+
     command = [
         "ros2",
         "run",
         "yasmin_editor",
         "yasmin_editor",
-        "--xml-file",
-        state_machine_file,
     ]
+
+    if state_machine_file:
+        command.extend(["--xml-file", state_machine_file])
 
     try:
         completed = subprocess.run(command, check=False)
@@ -51,6 +64,8 @@ def add_edit_verb(subparsers):
 
     xml_arg = parser.add_argument(
         "state_machine_file",
+        nargs="?",
+        default="",
         help="Path to the XML state machine file",
     )
     xml_arg.completer = xml_file_completer
