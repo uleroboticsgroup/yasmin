@@ -17,6 +17,7 @@
 
 import argparse
 import sys
+import time
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
@@ -35,6 +36,23 @@ def parse_args():
     return args, unknown
 
 
+def wait_for_canvas_ready(
+    editor: YasminEditor, timeout_sec: float = 3.0, min_size: int = 10
+) -> bool:
+    end_time = time.monotonic() + timeout_sec
+
+    while time.monotonic() < end_time:
+        QApplication.processEvents()
+
+        viewport = editor.canvas.viewport()
+        if viewport.width() >= min_size and viewport.height() >= min_size:
+            return True
+
+        time.sleep(0.05)
+
+    return False
+
+
 def main() -> int:
     args, unknown = parse_args()
 
@@ -43,10 +61,13 @@ def main() -> int:
 
     qt_argv = [sys.argv[0]] + unknown
     app = QApplication(qt_argv)
+
     editor = YasminEditor(manager)
+    editor.show()
 
     if args.xml_file:
         try:
+            wait_for_canvas_ready(editor)
             editor.xml_manager.load_from_xml(args.xml_file)
             editor.statusBar().showMessage(f"Opened: {args.xml_file}", 3000)
         except Exception as e:
@@ -55,8 +76,6 @@ def main() -> int:
                 "Error",
                 f"Failed to open startup XML file: {str(e)}",
             )
-
-    editor.show()
 
     return app.exec_()
 
