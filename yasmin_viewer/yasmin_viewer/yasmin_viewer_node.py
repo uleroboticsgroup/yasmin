@@ -19,13 +19,14 @@ import asyncio
 import json
 from pathlib import Path
 from threading import Lock, Thread
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
 import ament_index_python
 import rclpy
+import socketio
 import uvicorn
 from expiringdict import ExpiringDict
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
@@ -33,103 +34,13 @@ from rclpy.node import Node
 from yasmin_msgs.msg import State, StateMachine, Transition
 
 
-class WebSocketManager:
-    """
-    Handles active WebSocket clients and thread-safe broadcasts.
-    """
-
-    def __init__(self, logger) -> None:
-        """
-        Initializes the WebSocket manager.
-
-        :param logger: ROS logger used for connection events.
-        """
-        self._logger = logger
-        self._clients: Set[WebSocket] = set()
-        self._clients_lock = Lock()
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
-
-    def set_loop(self, loop: asyncio.AbstractEventLoop) -> None:
-        """
-        Stores the ASGI event loop for cross-thread scheduling.
-
-        :param loop: Event loop used by the FastAPI server.
-        """
-        self._loop = loop
-
-    async def connect(self, websocket: WebSocket) -> None:
-        """
-        Accepts a WebSocket connection and stores it.
-
-        :param websocket: Connected WebSocket client.
-        """
-        await websocket.accept()
-        with self._clients_lock:
-            self._clients.add(websocket)
-        self._logger.info("Client connected")
-
-    def disconnect(self, websocket: WebSocket) -> None:
-        """
-        Removes a disconnected WebSocket client.
-
-        :param websocket: Disconnected WebSocket client.
-        """
-        with self._clients_lock:
-            self._clients.discard(websocket)
-        self._logger.info("Client disconnected")
-
-    async def broadcast(self, message: str) -> None:
-        """
-        Sends a message to all connected clients.
-
-        :param message: Serialized FSM payload.
-        """
-        with self._clients_lock:
-            clients = list(self._clients)
-
-        stale_clients = []
-        for websocket in clients:
-            try:
-                await websocket.send_text(message)
-            except Exception:
-                stale_clients.append(websocket)
-
-        if stale_clients:
-            with self._clients_lock:
-                for websocket in stale_clients:
-                    self._clients.discard(websocket)
-
-    def _handle_broadcast_result(self, future) -> None:
-        """
-        Handles exceptions from cross-thread broadcast scheduling.
-
-        :param future: Scheduled broadcast future.
-        """
-        try:
-            future.result()
-        except Exception as exc:
-            self._logger.error(f"WebSocket broadcast failed: {exc}")
-
-    def broadcast_from_thread(self, message: str) -> None:
-        """
-        Schedules a broadcast from a non-ASGI thread.
-
-        :param message: Serialized FSM payload.
-        """
-        if self._loop is None:
-            return
-
-        future = asyncio.run_coroutine_threadsafe(self.broadcast(message), self._loop)
-        future.add_done_callback(self._handle_broadcast_result)
-
-
 class YasminViewerNode(Node):
     """
     A ROS 2 node that serves as a viewer for the finite state machines (FSMs)
     using a FastAPI web server.
 
-    This class subscribes to FSM updates and serves them over HTTP and WebSocket.
-    It utilizes a dictionary with expiring entries to manage the FSM data.
+    This class subscribes to FSM updates and serves them over HTTP. It utilizes
+    a dictionary with expiring entries to manage the FSM data.
     """
 
     def __init__(self) -> None:
@@ -145,7 +56,7 @@ class YasminViewerNode(Node):
         self.__fsm_dict: ExpiringDict = ExpiringDict(max_len=300, max_age_seconds=3)
         self.__fsm_lock = Lock()
         self.__last_emitted_payload = ""
-        self.websocket_manager = WebSocketManager(self.get_logger())
+        self.__loop: Optional[asyncio.AbstractEventLoop] = None
 
         # Declare parameters for the Flask server
         self.declare_parameters(
@@ -162,7 +73,9 @@ class YasminViewerNode(Node):
         self._ros_thread = Thread(target=self.start_ros, daemon=True)
         self._ros_thread.start()
 
-    def create_app(self) -> FastAPI:
+        self.socketio: Optional[socketio.AsyncServer] = None
+
+    def create_app(self):
         """
         Creates the FastAPI application.
 
@@ -178,29 +91,14 @@ class YasminViewerNode(Node):
 
         @app.on_event("startup")
         async def startup_event() -> None:
-            self.websocket_manager.set_loop(asyncio.get_running_loop())
+            self.__loop = asyncio.get_running_loop()
 
         @app.get("/api/fsms")
         async def get_fsms() -> JSONResponse:
             return JSONResponse(content=json.loads(self.get_fsm_payload()))
 
-        @app.websocket("/ws")
-        async def websocket_endpoint(websocket: WebSocket) -> None:
-            await self.websocket_manager.connect(websocket)
-            initial_payload = self.get_fsm_payload()
-            if initial_payload != "{}":
-                await websocket.send_text(initial_payload)
-
-            try:
-                while True:
-                    await websocket.receive()
-            except WebSocketDisconnect:
-                pass
-            finally:
-                self.websocket_manager.disconnect(websocket)
-
         @app.get("/{full_path:path}")
-        async def serve_client(full_path: str) -> FileResponse:
+        async def serve_client(full_path: str = "") -> FileResponse:
             if full_path:
                 requested_path = (client_dir / full_path).resolve()
                 if client_dir in requested_path.parents and requested_path.is_file():
@@ -208,7 +106,25 @@ class YasminViewerNode(Node):
 
             return FileResponse(index_file)
 
-        return app
+        # Initialize SocketIO
+        self.socketio = socketio.AsyncServer(
+            async_mode="asgi",
+            cors_allowed_origins="*",
+        )
+
+        @self.socketio.event
+        async def connect(sid, environ):
+            self.get_logger().info("Client connected")
+
+        @self.socketio.event
+        async def disconnect(sid):
+            self.get_logger().info("Client disconnected")
+
+        return socketio.ASGIApp(
+            self.socketio,
+            other_asgi_app=app,
+            socketio_path="socket.io",
+        )
 
     def start_backend_server(self) -> None:
         """
@@ -304,16 +220,33 @@ class YasminViewerNode(Node):
             with self.__fsm_lock:
                 self.__fsm_dict[msg.states[0].name] = self.msg_to_dict(msg)
 
+    def _handle_emit_result(self, future) -> None:
+        """
+        Handles exceptions from cross-thread socket.io emits.
+
+        :param future: Scheduled emit future.
+        """
+        try:
+            future.result()
+        except Exception as exc:
+            self.get_logger().error(f"Socket.IO emit failed: {exc}")
+
     def emit_fsm_data(self) -> None:
         """
-        Emits the current FSM data to connected clients via WebSocket.
+        Emits the current FSM data to connected clients via socket.io.
         """
         payload = self.get_fsm_payload()
         if payload == self.__last_emitted_payload:
             return
 
         self.__last_emitted_payload = payload
-        self.websocket_manager.broadcast_from_thread(payload)
+
+        if self.socketio and self.__loop:
+            future = asyncio.run_coroutine_threadsafe(
+                self.socketio.emit("fsms_update", payload),
+                self.__loop,
+            )
+            future.add_done_callback(self._handle_emit_result)
 
 
 def main() -> None:
