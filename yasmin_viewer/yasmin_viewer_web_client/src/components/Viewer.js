@@ -17,7 +17,6 @@ import React from "react";
 import Grid from "@mui/material/Grid";
 import FSM from "./FSM";
 import TopAppBar from "./TopAppBar";
-import io from "socket.io-client";
 
 class Viewer extends React.Component {
   constructor(props) {
@@ -25,12 +24,16 @@ class Viewer extends React.Component {
 
     this.state = {
       fsm_list: [],
-      fsm_name_list: [],
+      fsm_name_list: ["ALL"],
       current_fsm: "ALL",
       hide_nested_fsm: false,
       show_only_active_fsms: false,
       layout: "dagre",
     };
+
+    this.socket = null;
+    this.reconnectTimer = null;
+    this.shouldReconnect = true;
 
     this.handle_current_fsm = this.handle_current_fsm.bind(this);
     this.handle_hide_nested_fsm = this.handle_hide_nested_fsm.bind(this);
@@ -39,23 +42,41 @@ class Viewer extends React.Component {
     this.handle_change_layout = this.handle_change_layout.bind(this);
   }
 
-  setupSocketListeners() {
-    this.socket.on("connect", () => {
+  getWebSocketUrl() {
+    if (process.env.REACT_APP_WS_URL) {
+      return process.env.REACT_APP_WS_URL;
+    }
+
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    return `${protocol}://${window.location.host}/ws`;
+  }
+
+  connectWebSocket() {
+    this.socket = new WebSocket(this.getWebSocketUrl());
+
+    this.socket.onopen = () => {
       console.log("Connected to Yasmin viewer server");
-    });
+    };
 
-    this.socket.on("disconnect", () => {
+    this.socket.onclose = () => {
       console.log("Disconnected from server");
-    });
+      this.socket = null;
 
-    this.socket.on("fsms_update", (data) => {
+      if (this.shouldReconnect) {
+        this.reconnectTimer = setTimeout(() => {
+          this.connectWebSocket();
+        }, 1000);
+      }
+    };
+
+    this.socket.onmessage = (event) => {
       console.log("Received FSMs update");
-      this.processFSMData(JSON.parse(data));
-    });
+      this.processFSMData(JSON.parse(event.data));
+    };
 
-    this.socket.on("connect_error", (error) => {
+    this.socket.onerror = (error) => {
       console.error("Connection error:", error);
-    });
+    };
   }
 
   processFSMData(data) {
@@ -83,14 +104,20 @@ class Viewer extends React.Component {
   }
 
   componentDidMount() {
-    this.socket = io();
-    this.setupSocketListeners();
+    this.connectWebSocket();
   }
 
   componentWillUnmount() {
+    this.shouldReconnect = false;
+
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
     if (this.socket) {
-      this.socket.disconnect();
-      this.socket.removeAllListeners();
+      this.socket.close();
+      this.socket = null;
     }
   }
 
