@@ -311,9 +311,7 @@ class XmlManager:
         final_outcomes = list(container.final_outcomes.values())
 
         missing_nodes = [
-            node 
-            for node in nodes 
-            if not getattr(node, "_xml_position_loaded", False)
+            node for node in nodes if not getattr(node, "_xml_position_loaded", False)
         ]
         missing_outcomes = [
             node
@@ -505,7 +503,9 @@ class XmlManager:
             return
 
         missing_root_nodes = [
-            node for node in root_nodes if not getattr(node, "_xml_position_loaded", False)
+            node 
+            for node in root_nodes 
+            if not getattr(node, "_xml_position_loaded", False)
         ]
         missing_root_outcomes = [
             node
