@@ -634,6 +634,11 @@ class XmlManager:
                     node = StateNode(
                         state_name, plugin_info, 0, 0, remappings, description, defaults
                     )
+
+                    self.add_node_to_editor_or_container(
+                        node, state_name, parent_container
+                    )
+
                     x = elem.get("x")
                     y = elem.get("y")
                     if x is not None and y is not None:
@@ -644,10 +649,6 @@ class XmlManager:
                             node._xml_position_loaded = False
                     else:
                         node._xml_position_loaded = False
-
-                    self.add_node_to_editor_or_container(
-                        node, state_name, parent_container
-                    )
 
             elif elem.tag == "StateMachine" and not elem.get("file_name"):
                 state_name = elem.get("name")
@@ -669,6 +670,9 @@ class XmlManager:
                     description=description,
                     defaults=defaults,
                 )
+
+                self.add_node_to_editor_or_container(node, state_name, parent_container)
+
                 x = elem.get("x")
                 y = elem.get("y")
                 if x is not None and y is not None:
@@ -680,7 +684,8 @@ class XmlManager:
                 else:
                     node._xml_position_loaded = False
 
-                self.add_node_to_editor_or_container(node, state_name, parent_container)
+                self.load_states_from_xml(elem, node)
+                node.auto_resize_for_children()
 
                 for outcome in outcomes:
                     node.add_final_outcome(
@@ -704,8 +709,6 @@ class XmlManager:
                             outcome_node._xml_position_loaded = True
                         except ValueError:
                             outcome_node._xml_position_loaded = False
-
-                self.load_states_from_xml(elem, node)
 
             elif elem.tag == "Concurrence":
                 state_name = elem.get("name")
@@ -728,6 +731,9 @@ class XmlManager:
                     description=description,
                     defaults=defaults,
                 )
+
+                self.add_node_to_editor_or_container(node, state_name, parent_container)
+
                 x = elem.get("x")
                 y = elem.get("y")
                 if x is not None and y is not None:
@@ -739,7 +745,8 @@ class XmlManager:
                 else:
                     node._xml_position_loaded = False
 
-                self.add_node_to_editor_or_container(node, state_name, parent_container)
+                self.load_states_from_xml(elem, node)
+                node.auto_resize_for_children()
 
                 for outcome in outcomes:
                     node.add_final_outcome(
@@ -763,8 +770,6 @@ class XmlManager:
                             outcome_node._xml_position_loaded = True
                         except ValueError:
                             outcome_node._xml_position_loaded = False
-
-                self.load_states_from_xml(elem, node)
 
     def load_remappings(self, elem: ET.Element) -> dict:
         """Load remappings from XML element."""
