@@ -9,7 +9,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
   <exec_depend>python3-expiringdict</exec_depend>
-  <exec_depend>python3-fastapi</exec_depend>
+  <exec_depend condition="$ROS_DISTRO != 'foxy' and $ROS_DISTRO != 'galactic'">python3-fastapi</exec_depend>
   <exec_depend>python3-socketio</exec_depend>
   <exec_depend>python3-uvicorn</exec_depend>
   <depend>rclpy</depend>
