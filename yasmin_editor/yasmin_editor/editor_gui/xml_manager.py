@@ -43,6 +43,8 @@ class XmlManager:
     ) -> None:
         cont_elem = ET.SubElement(parent_elem, tag)
         cont_elem.set("name", state_node.name)
+        cont_elem.set("x", f"{state_node.pos().x():.2f}")
+        cont_elem.set("y", f"{state_node.pos().y():.2f}")
         if hasattr(state_node, "start_state") and state_node.start_state:
             cont_elem.set("start_state", state_node.start_state)
         if hasattr(state_node, "default_outcome") and state_node.default_outcome:
@@ -63,6 +65,14 @@ class XmlManager:
             self.add_remappings(cont_elem, state_node.remappings)
         if hasattr(state_node, "child_states") and state_node.child_states:
             self.save_states_to_xml(cont_elem, state_node.child_states)
+
+        if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
+            for outcome_node in state_node.final_outcomes.values():
+                outcome_elem = ET.SubElement(cont_elem, "FinalOutcome")
+                outcome_elem.set("name", outcome_node.name)
+                outcome_elem.set("x", f"{outcome_node.pos().x():.2f}")
+                outcome_elem.set("y", f"{outcome_node.pos().y():.2f}")
+
         self.save_transitions(cont_elem, state_node)
         if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
             for outcome_node in state_node.final_outcomes.values():
@@ -98,6 +108,13 @@ class XmlManager:
             if not hasattr(node, "parent_container") or node.parent_container is None
         }
         self.save_states_to_xml(root, root_level_states)
+
+        for outcome_node in self.editor.final_outcomes.values():
+            outcome_elem = ET.SubElement(root, "FinalOutcome")
+            outcome_elem.set("name", outcome_node.name)
+            outcome_elem.set("x", f"{outcome_node.pos().x():.2f}")
+            outcome_elem.set("y", f"{outcome_node.pos().y():.2f}")
+
         tree = ET.ElementTree(root)
         tree.write(
             file_path if file_path.lower().endswith(".xml") else file_path + ".xml",
@@ -121,6 +138,8 @@ class XmlManager:
                 )
                 state_elem = ET.SubElement(parent_elem, tag)
                 state_elem.set("name", state_node.name)
+                state_elem.set("x", f"{state_node.pos().x():.2f}")
+                state_elem.set("y", f"{state_node.pos().y():.2f}")
                 if state_node.plugin_info:
                     ptype = state_node.plugin_info.plugin_type
                     state_elem.set(
@@ -201,6 +220,23 @@ class XmlManager:
                 self.editor.canvas.scene.addItem(node)
                 self.editor.final_outcomes[outcome] = node
 
+        for outcome_elem in root.findall("FinalOutcome"):
+            outcome_name = outcome_elem.get("name", "")
+            outcome_node = self.editor.final_outcomes.get(outcome_name)
+            if outcome_node is None:
+                continue
+
+            x = outcome_elem.get("x")
+            y = outcome_elem.get("y")
+            if x is not None and y is not None:
+                try:
+                    outcome_node.setPos(float(x), float(y))
+                    outcome_node._xml_position_loaded = True
+                except ValueError:
+                    outcome_node._xml_position_loaded = False
+            else:
+                outcome_node._xml_position_loaded = False
+
         self.editor.update_start_state_combo()
 
         if start_state:
@@ -274,23 +310,34 @@ class XmlManager:
         nodes = list(container.child_states.values())
         final_outcomes = list(container.final_outcomes.values())
 
-        if not nodes:
+        missing_nodes = [
+            node for node in nodes if not getattr(node, "_xml_position_loaded", False)
+        ]
+        missing_outcomes = [
+            node
+            for node in final_outcomes
+            if not getattr(node, "_xml_position_loaded", False)
+        ]
+
+        if not missing_nodes and not missing_outcomes:
+            return
+
+        if not missing_nodes:
             rect = container.rect()
             y_start = rect.top() + 140
-            for i, outcome in enumerate(final_outcomes):
+            for i, outcome in enumerate(missing_outcomes):
                 outcome.setPos(rect.left() + 120, y_start + i * 120)
             container.auto_resize_for_children()
             return
 
-        all_nodes = nodes + final_outcomes
+        all_nodes = missing_nodes + missing_outcomes
         graph = {node: [] for node in all_nodes}
 
-        for node in nodes:
+        for node in missing_nodes:
             if hasattr(node, "connections"):
                 for conn in node.connections:
-                    if conn.from_node == node:
-                        if conn.to_node in all_nodes:
-                            graph[node].append(conn.to_node)
+                    if conn.from_node == node and conn.to_node in all_nodes:
+                        graph[node].append(conn.to_node)
 
         rect = container.rect()
         self.force_directed_layout_generic(
@@ -455,28 +502,39 @@ class XmlManager:
         if not root_nodes and not root_final_outcomes:
             return
 
-        all_nodes = root_nodes + root_final_outcomes
+        missing_root_nodes = [
+            node for node in root_nodes if not getattr(node, "_xml_position_loaded", False)
+        ]
+        missing_root_outcomes = [
+            node
+            for node in root_final_outcomes
+            if not getattr(node, "_xml_position_loaded", False)
+        ]
+
+        if not missing_root_nodes and not missing_root_outcomes:
+            return
+
+        all_nodes = missing_root_nodes + missing_root_outcomes
         graph = {node: [] for node in all_nodes}
         reverse_graph = {node: [] for node in all_nodes}
 
-        for node in root_nodes:
+        for node in missing_root_nodes:
             if hasattr(node, "connections"):
                 for conn in node.connections:
-                    if conn.from_node == node:
-                        if conn.to_node in all_nodes:
-                            graph[node].append(conn.to_node)
-                            reverse_graph[conn.to_node].append(node)
+                    if conn.from_node == node and conn.to_node in all_nodes:
+                        graph[node].append(conn.to_node)
+                        reverse_graph[conn.to_node].append(node)
 
         total_edges = sum(len(neighbors) for neighbors in graph.values())
         if total_edges == 0 and len(all_nodes) > 1:
             x_pos = 120
             y_pos = 120
-            for node in root_nodes:
+            for node in missing_root_nodes:
                 node.setPos(x_pos, y_pos)
                 y_pos += 200
-            for outcome in root_final_outcomes:
+            for outcome in missing_root_outcomes:
                 outcome.setPos(
-                    x_pos + 600, 120 + root_final_outcomes.index(outcome) * 150
+                    x_pos + 600, 120 + missing_root_outcomes.index(outcome) * 150
                 )
             return
 
@@ -574,6 +632,17 @@ class XmlManager:
                     node = StateNode(
                         state_name, plugin_info, 0, 0, remappings, description, defaults
                     )
+                    x = elem.get("x")
+                    y = elem.get("y")
+                    if x is not None and y is not None:
+                        try:
+                            node.setPos(float(x), float(y))
+                            node._xml_position_loaded = True
+                        except ValueError:
+                            node._xml_position_loaded = False
+                    else:
+                        node._xml_position_loaded = False
+
                     self.add_node_to_editor_or_container(
                         node, state_name, parent_container
                     )
@@ -598,12 +667,41 @@ class XmlManager:
                     description=description,
                     defaults=defaults,
                 )
+                x = elem.get("x")
+                y = elem.get("y")
+                if x is not None and y is not None:
+                    try:
+                        node.setPos(float(x), float(y))
+                        node._xml_position_loaded = True
+                    except ValueError:
+                        node._xml_position_loaded = False
+                else:
+                    node._xml_position_loaded = False
+
                 self.add_node_to_editor_or_container(node, state_name, parent_container)
 
                 for outcome in outcomes:
                     node.add_final_outcome(
                         FinalOutcomeNode(outcome, 0, 0, inside_container=True)
                     )
+
+                for outcome_node in node.final_outcomes.values():
+                    outcome_node._xml_position_loaded = False
+
+                for outcome_elem in elem.findall("FinalOutcome"):
+                    outcome_name = outcome_elem.get("name", "")
+                    outcome_node = node.final_outcomes.get(outcome_name)
+                    if outcome_node is None:
+                        continue
+
+                    ox = outcome_elem.get("x")
+                    oy = outcome_elem.get("y")
+                    if ox is not None and oy is not None:
+                        try:
+                            outcome_node.setPos(float(ox), float(oy))
+                            outcome_node._xml_position_loaded = True
+                        except ValueError:
+                            outcome_node._xml_position_loaded = False
 
                 self.load_states_from_xml(elem, node)
 
@@ -628,12 +726,41 @@ class XmlManager:
                     description=description,
                     defaults=defaults,
                 )
+                x = elem.get("x")
+                y = elem.get("y")
+                if x is not None and y is not None:
+                    try:
+                        node.setPos(float(x), float(y))
+                        node._xml_position_loaded = True
+                    except ValueError:
+                        node._xml_position_loaded = False
+                else:
+                    node._xml_position_loaded = False
+
                 self.add_node_to_editor_or_container(node, state_name, parent_container)
 
                 for outcome in outcomes:
                     node.add_final_outcome(
                         FinalOutcomeNode(outcome, 0, 0, inside_container=True)
                     )
+
+                for outcome_node in node.final_outcomes.values():
+                    outcome_node._xml_position_loaded = False
+
+                for outcome_elem in elem.findall("FinalOutcome"):
+                    outcome_name = outcome_elem.get("name", "")
+                    outcome_node = node.final_outcomes.get(outcome_name)
+                    if outcome_node is None:
+                        continue
+
+                    ox = outcome_elem.get("x")
+                    oy = outcome_elem.get("y")
+                    if ox is not None and oy is not None:
+                        try:
+                            outcome_node.setPos(float(ox), float(oy))
+                            outcome_node._xml_position_loaded = True
+                        except ValueError:
+                            outcome_node._xml_position_loaded = False
 
                 self.load_states_from_xml(elem, node)
 
