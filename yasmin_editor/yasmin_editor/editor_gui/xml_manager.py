@@ -503,8 +503,8 @@ class XmlManager:
             return
 
         missing_root_nodes = [
-            node 
-            for node in root_nodes 
+            node
+            for node in root_nodes
             if not getattr(node, "_xml_position_loaded", False)
         ]
         missing_root_outcomes = [
