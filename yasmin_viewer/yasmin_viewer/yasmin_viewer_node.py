@@ -99,6 +99,17 @@ class WebSocketManager:
                 for websocket in stale_clients:
                     self._clients.discard(websocket)
 
+    def _handle_broadcast_result(self, future) -> None:
+        """
+        Handles exceptions from cross-thread broadcast scheduling.
+
+        :param future: Scheduled broadcast future.
+        """
+        try:
+            future.result()
+        except Exception as exc:
+            self._logger.error(f"WebSocket broadcast failed: {exc}")
+
     def broadcast_from_thread(self, message: str) -> None:
         """
         Schedules a broadcast from a non-ASGI thread.
@@ -109,7 +120,7 @@ class WebSocketManager:
             return
 
         future = asyncio.run_coroutine_threadsafe(self.broadcast(message), self._loop)
-        future.add_done_callback(lambda fut: fut.exception())
+        future.add_done_callback(self._handle_broadcast_result)
 
 
 class YasminViewerNode(Node):
@@ -182,7 +193,7 @@ class YasminViewerNode(Node):
 
             try:
                 while True:
-                    await websocket.receive_text()
+                    await websocket.receive()
             except WebSocketDisconnect:
                 pass
             finally:
@@ -274,7 +285,14 @@ class YasminViewerNode(Node):
         :return: JSON string containing all active FSMs.
         """
         with self.__fsm_lock:
-            return json.dumps(dict(self.__fsm_dict))
+            snapshot = {}
+            for key in list(self.__fsm_dict.keys()):
+                try:
+                    snapshot[key] = self.__fsm_dict[key]
+                except KeyError:
+                    pass
+
+        return json.dumps(snapshot)
 
     def fsm_viewer_cb(self, msg: StateMachine) -> None:
         """
