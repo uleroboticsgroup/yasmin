@@ -1,9 +1,11 @@
-<StateMachine outcomes="outcome4" name="Demo2">
-    <State name="Foo" type="py" module="yasmin_demos.foo_state" class="FooState">
-        <Transition from="outcome1" to="Bar"/>
-        <Transition from="outcome2" to="outcome4"/>
-    </State>
-    <State name="Bar" type="cpp" class="yasmin_demos/BarState">
-        <Transition from="outcome3" to="Foo"/>
-    </State>
+<?xml version='1.0' encoding='UTF-8'?>
+<StateMachine name="Demo2" outcomes="outcome4" start_state="Foo">
+  <State name="Foo" x="473.60" y="93.62" type="py" module="yasmin_demos.foo_state" class="FooState">
+    <Transition from="outcome1" to="Bar"/>
+    <Transition from="outcome2" to="outcome4"/>
+  </State>
+  <State name="Bar" x="897.20" y="90.20" type="cpp" class="yasmin_demos/BarState">
+    <Transition from="outcome3" to="Foo"/>
+  </State>
+  <FinalOutcome name="outcome4" x="473.80" y="338.80"/>
 </StateMachine>
