@@ -15,18 +15,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-
 const state = {
   fsms: {},
   currentFsm: "ALL",
   hideNested: false,
   showOnlyActive: false,
   lastSuccessMs: 0,
-  renderGeneration: 0,
   lastDataSignature: "",
-  lastViewSignature: "",
 };
+
+const renderedGraphs = new Map();
 
 const fsmSelect = document.getElementById("fsm-select");
 const hideNestedCheckbox = document.getElementById("hide-nested");
@@ -37,24 +35,7 @@ const viewerPanel = document.getElementById("viewer-panel");
 const viewerTitle = document.getElementById("viewer-title");
 const viewerSubtitle = document.getElementById("viewer-subtitle");
 const statusBadge = document.getElementById("status-badge");
-const diagramList = document.getElementById("diagram-list");
-
-mermaid.initialize({
-  startOnLoad: false,
-  theme: "base",
-  securityLevel: "strict",
-  state: {
-    useMaxWidth: false,
-  },
-  themeVariables: {
-    primaryColor: "#eff6ff",
-    primaryBorderColor: "#334155",
-    lineColor: "#475569",
-    primaryTextColor: "#0f172a",
-    fontFamily: "Arial, Helvetica, sans-serif",
-    tertiaryColor: "#f8fafc",
-  },
-});
+const graphList = document.getElementById("graph-list");
 
 function stableStringify(value) {
   if (Array.isArray(value)) {
@@ -75,22 +56,10 @@ function getDataSignature(fsms) {
   return stableStringify(fsms);
 }
 
-function getViewSignature() {
-  return JSON.stringify({
-    currentFsm: state.currentFsm,
-    hideNested: state.hideNested,
-    showOnlyActive: state.showOnlyActive,
-  });
-}
-
-async function renderIfNeeded(force = false) {
-  const viewSignature = getViewSignature();
-  if (!force && viewSignature === state.lastViewSignature) {
-    return;
+function clearElement(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
   }
-
-  state.lastViewSignature = viewSignature;
-  await render();
 }
 
 function setStatus(text, cssClass) {
@@ -98,25 +67,12 @@ function setStatus(text, cssClass) {
   statusBadge.className = `status-badge ${cssClass}`;
 }
 
-function clearElement(element) {
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
-  }
-}
-
-function escapeMermaidLabel(value) {
-  return String(value).replace(/"/g, '\\"');
-}
-
-function sanitizeId(value) {
-  return String(value).replace(/[^a-zA-Z0-9_]/g, "_");
-}
-
 function updateFsmSelector() {
   const names = ["ALL", ...Object.keys(state.fsms).sort()];
   const previousValue = state.currentFsm;
 
   clearElement(fsmSelect);
+
   names.forEach((name) => {
     const option = document.createElement("option");
     option.value = name;
@@ -129,8 +85,8 @@ function updateFsmSelector() {
 }
 
 function getSelectedFsms() {
-  const names = Object.keys(state.fsms).sort();
-  return names
+  return Object.keys(state.fsms)
+    .sort()
     .filter((name) => state.currentFsm === "ALL" || state.currentFsm === name)
     .map((name) => ({
       name,
@@ -139,18 +95,17 @@ function getSelectedFsms() {
     .filter(({ states }) => Array.isArray(states) && states.length > 0);
 }
 
-function cloneNodes(rawStates, fsmName, fsmIndex) {
+function cloneNodes(rawStates, fsmName) {
   const nodesById = new Map();
 
   rawStates.forEach((entry) => {
     nodesById.set(entry.id, {
       ...entry,
-      fsmName,
-      fsmIndex,
-      alias: `fsm_${fsmIndex}_state_${entry.id}`,
+      graphId: `${fsmName}::${entry.id}`,
       active: false,
-      hasActiveDescendant: false,
-      isSyntheticOutcome: false,
+      activeAncestor: false,
+      visible: true,
+      syntheticOutcome: false,
     });
   });
 
@@ -172,319 +127,386 @@ function computeActiveFlags(nodesById) {
     let parentId = node.parent;
     while (nodesById.has(parentId)) {
       const parent = nodesById.get(parentId);
-      parent.hasActiveDescendant = true;
+      parent.activeAncestor = true;
       parentId = parent.parent;
     }
   });
 }
 
-function buildChildrenMap(nodesById) {
-  const childrenByParent = new Map();
-
-  nodesById.forEach((node) => {
-    if (!childrenByParent.has(node.parent)) {
-      childrenByParent.set(node.parent, []);
-    }
-    childrenByParent.get(node.parent).push(node.id);
-  });
-
-  childrenByParent.forEach((ids) => {
-    ids.sort((a, b) => a - b);
-  });
-
-  return childrenByParent;
-}
-
-function shouldKeepNode(node, nodesById) {
-  if (node.parent === -1) {
-    return true;
+function computeVisibility(nodesById) {
+  if (state.showOnlyActive) {
+    nodesById.forEach((node) => {
+      node.visible = node.parent === -1 || node.active || node.activeAncestor;
+    });
+  } else {
+    nodesById.forEach((node) => {
+      node.visible = true;
+    });
   }
 
-  if (!state.showOnlyActive) {
-    return true;
+  if (state.hideNested) {
+    nodesById.forEach((node) => {
+      if (!node.visible) {
+        return;
+      }
+
+      let parentId = node.parent;
+      while (nodesById.has(parentId)) {
+        const parent = nodesById.get(parentId);
+        if (parent.parent !== -1 && parent.is_fsm) {
+          node.visible = false;
+          break;
+        }
+        parentId = parent.parent;
+      }
+    });
   }
-
-  if (node.active || node.hasActiveDescendant) {
-    return true;
-  }
-
-  let parentId = node.parent;
-  while (nodesById.has(parentId)) {
-    const parent = nodesById.get(parentId);
-    if (parent.active || parent.hasActiveDescendant) {
-      return true;
-    }
-    parentId = parent.parent;
-  }
-
-  return false;
-}
-
-function shouldExpandNode(node) {
-  if (!node.is_fsm) {
-    return false;
-  }
-
-  if (node.parent === -1) {
-    return true;
-  }
-
-  return !state.hideNested;
 }
 
 function buildSiblingNameMap(nodesById) {
   const siblingNameMap = new Map();
 
   nodesById.forEach((node) => {
+    if (!node.visible) {
+      return;
+    }
+
     const key = `${node.parent}::${node.name}`;
-    siblingNameMap.set(key, node.id);
+    siblingNameMap.set(key, node);
   });
 
   return siblingNameMap;
 }
 
-function prepareGraph(fsmName, rawStates, fsmIndex) {
-  const nodesById = cloneNodes(rawStates, fsmName, fsmIndex);
+function shouldUseCompoundParent(node, nodesById) {
+  if (node.parent === -1) {
+    return false;
+  }
+
+  if (!nodesById.has(node.parent)) {
+    return false;
+  }
+
+  const parent = nodesById.get(node.parent);
+  return parent.visible && parent.is_fsm && !state.hideNested;
+}
+
+function getNodeClasses(node) {
+  const classes = [];
+
+  if (node.syntheticOutcome) {
+    classes.push("outcome");
+  } else if (node.is_fsm) {
+    classes.push("fsm");
+  } else {
+    classes.push("state");
+  }
+
+  if (node.current_state === -2) {
+    classes.push("concurrence");
+  }
+
+  if (node.active) {
+    classes.push("active");
+  } else if (node.activeAncestor) {
+    classes.push("active-ancestor");
+  }
+
+  return classes.join(" ");
+}
+
+function buildGraphModel(fsmName, rawStates) {
+  const nodesById = cloneNodes(rawStates, fsmName);
   computeActiveFlags(nodesById);
+  computeVisibility(nodesById);
 
-  const visibleNodesById = new Map();
-  nodesById.forEach((node, id) => {
-    if (shouldKeepNode(node, nodesById)) {
-      visibleNodesById.set(id, { ...node });
-    }
-  });
+  const siblingNameMap = buildSiblingNameMap(nodesById);
+  const syntheticOutcomeNodes = new Map();
 
-  const childrenByParent = buildChildrenMap(visibleNodesById);
-  const siblingNameMap = buildSiblingNameMap(visibleNodesById);
-  const syntheticOutcomes = new Map();
-
-  function getOrCreateOutcomeNode(parentId, outcomeName) {
-    const key = `${parentId}::${outcomeName}`;
-    if (syntheticOutcomes.has(key)) {
-      return syntheticOutcomes.get(key);
+  function getOrCreateOutcomeNode(sourceNode, outcomeLabel, targetName) {
+    const outcomeId = `${sourceNode.graphId}::outcome::${outcomeLabel}::${targetName}`;
+    if (syntheticOutcomeNodes.has(outcomeId)) {
+      return syntheticOutcomeNodes.get(outcomeId);
     }
 
     const node = {
-      id: key,
-      parent: parentId,
-      name: outcomeName,
-      alias: `fsm_${fsmIndex}_outcome_${sanitizeId(parentId)}_${sanitizeId(outcomeName)}`,
-      is_fsm: false,
-      current_state: -1,
-      outcomes: [],
-      transitions: [],
-      active: false,
-      hasActiveDescendant: false,
-      isSyntheticOutcome: true,
+      graphId: outcomeId,
+      label: targetName,
+      parent: shouldUseCompoundParent(sourceNode, nodesById)
+        ? nodesById.get(sourceNode.parent).graphId
+        : undefined,
+      classes: "outcome",
+      syntheticOutcome: true,
     };
 
-    syntheticOutcomes.set(key, node);
+    syntheticOutcomeNodes.set(outcomeId, node);
     return node;
   }
 
-  visibleNodesById.forEach((node) => {
-    node.resolvedTransitions = [];
+  const elements = [];
+  const activeNodeIds = [];
 
-    (node.transitions || []).forEach((transition) => {
+  nodesById.forEach((node) => {
+    if (!node.visible) {
+      return;
+    }
+
+    const element = {
+      group: "nodes",
+      data: {
+        id: node.graphId,
+        label: node.name,
+        parent: shouldUseCompoundParent(node, nodesById)
+          ? nodesById.get(node.parent).graphId
+          : undefined,
+        outcomes: Array.isArray(node.outcomes) ? node.outcomes.join(" | ") : "",
+        subtitle:
+          node.current_state === -2
+            ? "Concurrence"
+            : node.is_fsm
+              ? "FSM"
+              : "State",
+      },
+      classes: getNodeClasses(node),
+    };
+
+    elements.push(element);
+
+    if (node.active) {
+      activeNodeIds.push(node.graphId);
+    }
+  });
+
+  const edgeKeys = new Set();
+
+  nodesById.forEach((node) => {
+    if (!node.visible) {
+      return;
+    }
+
+    (node.transitions || []).forEach((transition, index) => {
       const outcomeLabel = transition[0];
       const targetName = transition[1];
-      const targetKey = `${node.parent}::${targetName}`;
+      const siblingKey = `${node.parent}::${targetName}`;
 
-      if (siblingNameMap.has(targetKey)) {
-        const targetId = siblingNameMap.get(targetKey);
-        node.resolvedTransitions.push({
-          outcome: outcomeLabel,
-          targetAlias: visibleNodesById.get(targetId).alias,
-        });
+      let targetId;
+      if (siblingNameMap.has(siblingKey)) {
+        targetId = siblingNameMap.get(siblingKey).graphId;
       } else {
-        const outcomeNode = getOrCreateOutcomeNode(node.parent, targetName);
-        node.resolvedTransitions.push({
-          outcome: outcomeLabel,
-          targetAlias: outcomeNode.alias,
-        });
+        const syntheticNode = getOrCreateOutcomeNode(
+          node,
+          outcomeLabel,
+          targetName,
+        );
+        targetId = syntheticNode.graphId;
       }
-    });
-  });
 
-  function renderScope(parentId, indent) {
-    const lines = [];
-    const childIds = childrenByParent.get(parentId) || [];
-    const children = childIds
-      .map((id) => visibleNodesById.get(id))
-      .filter((node) => node !== undefined);
-
-    const scopeOutcomeNodes = Array.from(syntheticOutcomes.values()).filter(
-      (node) => node.parent === parentId,
-    );
-
-    children.forEach((node) => {
-      const childHasVisibleChildren =
-        (childrenByParent.get(node.id) || []).length > 0 ||
-        scopeOutcomeNodes.some((outcomeNode) => outcomeNode.parent === node.id);
-
-      if (shouldExpandNode(node) && childHasVisibleChildren) {
-        lines.push(
-          `${indent}state "${escapeMermaidLabel(node.name)}" as ${node.alias} {`,
-        );
-        lines.push(...renderScope(node.id, `${indent}  `));
-        lines.push(`${indent}}`);
-      } else {
-        lines.push(
-          `${indent}state "${escapeMermaidLabel(node.name)}" as ${node.alias}`,
-        );
-      }
-    });
-
-    scopeOutcomeNodes.forEach((node) => {
-      lines.push(
-        `${indent}state "${escapeMermaidLabel(node.name)}" as ${node.alias}`,
-      );
-    });
-
-    children.forEach((node) => {
-      node.resolvedTransitions.forEach((transition) => {
-        lines.push(
-          `${indent}${node.alias} --> ${transition.targetAlias} : ${escapeMermaidLabel(transition.outcome)}`,
-        );
-      });
-    });
-
-    return lines;
-  }
-
-  const rootNodes = (childrenByParent.get(-1) || [])
-    .map((id) => visibleNodesById.get(id))
-    .filter((node) => node !== undefined);
-
-  const lines = [];
-  lines.push("stateDiagram-v2");
-  lines.push("  direction LR");
-  lines.push(
-    "  classDef active fill:#dcedc8,stroke:#2e7d32,stroke-width:3px,color:#0f172a,font-weight:bold",
-  );
-  lines.push(
-    "  classDef outcome fill:#fff7ed,stroke:#c2410c,stroke-width:2px,color:#7c2d12",
-  );
-  lines.push(
-    "  classDef normal fill:#eff6ff,stroke:#334155,stroke-width:2px,color:#0f172a",
-  );
-
-  rootNodes.forEach((rootNode) => {
-    const rootChildren = (childrenByParent.get(rootNode.id) || []).length;
-    const rootOutcomeChildren = Array.from(syntheticOutcomes.values()).filter(
-      (node) => node.parent === rootNode.id,
-    ).length;
-
-    if (rootChildren > 0 || rootOutcomeChildren > 0) {
-      lines.push(...renderScope(rootNode.id, "  "));
-    } else {
-      lines.push(
-        `  state "${escapeMermaidLabel(rootNode.name)}" as ${rootNode.alias}`,
-      );
-    }
-  });
-
-  visibleNodesById.forEach((node) => {
-    if (node.isSyntheticOutcome) {
-      return;
-    }
-
-    if (!shouldExpandNode(node) || node.parent === -1) {
-      lines.push(`  class ${node.alias} normal`);
-    }
-
-    if (node.active && !shouldExpandNode(node)) {
-      lines.push(`  class ${node.alias} active`);
-    }
-  });
-
-  syntheticOutcomes.forEach((node) => {
-    lines.push(`  class ${node.alias} outcome`);
-  });
-
-  return {
-    definition: lines.join("\n"),
-    visibleNodeCount: visibleNodesById.size,
-    transitionCount: Array.from(visibleNodesById.values()).reduce(
-      (sum, node) => sum + node.resolvedTransitions.length,
-      0,
-    ),
-  };
-}
-
-function removeInitialStateArtifacts(container) {
-  const svg = container.querySelector("svg");
-  if (!svg) {
-    return;
-  }
-
-  const removedPoints = [];
-  const candidateCircles = Array.from(svg.querySelectorAll("circle")).filter(
-    (circle) => Number(circle.getAttribute("r") || "0") <= 10,
-  );
-
-  candidateCircles.forEach((circle) => {
-    const cx = Number(circle.getAttribute("cx") || "0");
-    const cy = Number(circle.getAttribute("cy") || "0");
-
-    removedPoints.push({ x: cx, y: cy });
-
-    const group = circle.closest("g");
-    if (
-      group &&
-      group.querySelectorAll("circle").length === 1 &&
-      group.querySelectorAll("text").length === 0
-    ) {
-      group.remove();
-    } else {
-      circle.remove();
-    }
-  });
-
-  const hitRadius = 24;
-
-  Array.from(svg.querySelectorAll("path")).forEach((path) => {
-    if (typeof path.getTotalLength !== "function") {
-      return;
-    }
-
-    try {
-      const totalLength = path.getTotalLength();
-      const start = path.getPointAtLength(0);
-      const end = path.getPointAtLength(Math.max(0, totalLength - 0.1));
-
-      const touchesRemovedPoint = removedPoints.some((point) => {
-        const startDistance = Math.hypot(start.x - point.x, start.y - point.y);
-        const endDistance = Math.hypot(end.x - point.x, end.y - point.y);
-        return startDistance < hitRadius || endDistance < hitRadius;
-      });
-
-      if (!touchesRemovedPoint) {
+      const edgeId = `${node.graphId}::${index}::${outcomeLabel}::${targetId}`;
+      if (edgeKeys.has(edgeId)) {
         return;
       }
 
-      const group = path.closest("g");
-      if (
-        group &&
-        group.querySelectorAll("path").length === 1 &&
-        group.querySelectorAll("text").length === 0
-      ) {
-        group.remove();
-      } else {
-        path.remove();
-      }
-    } catch (error) {
-      console.error(error);
-    }
+      edgeKeys.add(edgeId);
+      elements.push({
+        group: "edges",
+        data: {
+          id: edgeId,
+          source: node.graphId,
+          target: targetId,
+          label: outcomeLabel,
+        },
+        classes: node.active ? "active-edge" : "",
+      });
+    });
   });
+
+  syntheticOutcomeNodes.forEach((node) => {
+    elements.push({
+      group: "nodes",
+      data: {
+        id: node.graphId,
+        label: node.label,
+        parent: node.parent,
+        outcomes: "",
+        subtitle: "Outcome",
+      },
+      classes: node.classes,
+    });
+  });
+
+  const structureSignature = stableStringify(
+    elements.map((element) => ({
+      group: element.group,
+      data: element.data,
+      classes: element.classes
+        .split(" ")
+        .filter(
+          (item) =>
+            item !== "active" &&
+            item !== "active-ancestor" &&
+            item !== "active-edge",
+        )
+        .sort()
+        .join(" "),
+    })),
+  );
+
+  const activeSignature = stableStringify({
+    activeNodeIds: elements
+      .filter(
+        (element) =>
+          element.group === "nodes" && element.classes.includes("active"),
+      )
+      .map((element) => element.data.id)
+      .sort(),
+    activeAncestorIds: elements
+      .filter(
+        (element) =>
+          element.group === "nodes" &&
+          element.classes.includes("active-ancestor"),
+      )
+      .map((element) => element.data.id)
+      .sort(),
+    activeEdgeIds: elements
+      .filter(
+        (element) =>
+          element.group === "edges" && element.classes.includes("active-edge"),
+      )
+      .map((element) => element.data.id)
+      .sort(),
+  });
+
+  return {
+    elements,
+    structureSignature,
+    activeSignature,
+    totalVisibleNodes: elements.filter((element) => element.group === "nodes")
+      .length,
+    totalVisibleEdges: elements.filter((element) => element.group === "edges")
+      .length,
+  };
 }
 
-async function renderDiagramCard(fsmName, rawStates, index, renderGeneration) {
+function makeStylesheet() {
+  return [
+    {
+      selector: "node",
+      style: {
+        label: "data(label)",
+        "text-wrap": "wrap",
+        "text-max-width": 180,
+        "text-valign": "center",
+        "text-halign": "center",
+        "font-size": 14,
+        "font-weight": 700,
+        color: "#0f172a",
+        "background-color": "#eff6ff",
+        "border-color": "#334155",
+        "border-width": 2,
+        width: 150,
+        height: 64,
+        shape: "round-rectangle",
+        "overlay-opacity": 0,
+      },
+    },
+    {
+      selector: "node[state]",
+      style: {
+        "background-color": "#ffffff",
+      },
+    },
+    {
+      selector: "node[fsm]",
+      style: {
+        "background-color": "#e3f2fd",
+      },
+    },
+    {
+      selector: "node.outcome",
+      style: {
+        "background-color": "#fff7ed",
+        "border-color": "#c2410c",
+        shape: "round-rectangle",
+        width: 120,
+        height: 52,
+      },
+    },
+    {
+      selector: "node.concurrence",
+      style: {
+        shape: "diamond",
+        width: 120,
+        height: 120,
+        "background-color": "#fff8dc",
+      },
+    },
+    {
+      selector: "node.active",
+      style: {
+        "background-color": "#dcedc8",
+        "border-color": "#2e7d32",
+        "border-width": 4,
+      },
+    },
+    {
+      selector: "node.active-ancestor",
+      style: {
+        "border-color": "#1e88e5",
+        "border-width": 3,
+      },
+    },
+    {
+      selector: "$node > node",
+      style: {
+        "background-opacity": 0.08,
+        "border-style": "dashed",
+        "border-width": 2,
+        "border-color": "#94a3b8",
+        "text-valign": "top",
+        "text-halign": "center",
+        "padding-top": 28,
+        "padding-left": 16,
+        "padding-right": 16,
+        "padding-bottom": 16,
+        "font-size": 15,
+      },
+    },
+    {
+      selector: "edge",
+      style: {
+        width: 2.5,
+        "curve-style": "bezier",
+        "target-arrow-shape": "triangle",
+        "target-arrow-color": "#64748b",
+        "line-color": "#64748b",
+        label: "data(label)",
+        "font-size": 12,
+        color: "#334155",
+        "text-background-color": "#ffffff",
+        "text-background-opacity": 1,
+        "text-background-padding": 2,
+        "text-rotation": "autorotate",
+        "overlay-opacity": 0,
+      },
+    },
+    {
+      selector: "edge.active-edge",
+      style: {
+        width: 3.5,
+        "line-color": "#1e88e5",
+        "target-arrow-color": "#1e88e5",
+      },
+    },
+  ];
+}
+
+function createGraphCard(fsmName) {
   const card = document.createElement("section");
-  card.className = "diagram-card";
+  card.className = "graph-card";
+  card.dataset.fsmName = fsmName;
 
   const header = document.createElement("div");
-  header.className = "diagram-card-header";
+  header.className = "graph-card-header";
 
   const title = document.createElement("h3");
   title.textContent = fsmName;
@@ -496,79 +518,168 @@ async function renderDiagramCard(fsmName, rawStates, index, renderGeneration) {
   card.appendChild(header);
 
   const scroll = document.createElement("div");
-  scroll.className = "diagram-scroll";
+  scroll.className = "graph-scroll";
 
-  const content = document.createElement("div");
-  content.className = "diagram-content";
+  const container = document.createElement("div");
+  container.className = "graph-container";
 
-  scroll.appendChild(content);
+  scroll.appendChild(container);
   card.appendChild(scroll);
 
-  diagramList.appendChild(card);
+  graphList.appendChild(card);
 
-  try {
-    const graph = prepareGraph(fsmName, rawStates, index);
-    subtitle.textContent = `${graph.visibleNodeCount} visible state node(s), ${graph.transitionCount} transition(s)`;
+  return {
+    card,
+    subtitle,
+    container,
+  };
+}
 
-    const renderId = `yasmin_mermaid_${renderGeneration}_${index}`;
-    const { svg, bindFunctions } = await mermaid.render(
-      renderId,
-      graph.definition,
-    );
-
-    if (renderGeneration !== state.renderGeneration) {
+function destroyRemovedGraphs(nextNames) {
+  Array.from(renderedGraphs.keys()).forEach((fsmName) => {
+    if (nextNames.has(fsmName)) {
       return;
     }
 
-    const tempContainer = document.createElement("div");
-    tempContainer.innerHTML = svg;
-
-    if (bindFunctions) {
-      bindFunctions(tempContainer);
+    const entry = renderedGraphs.get(fsmName);
+    if (entry.cy) {
+      entry.cy.destroy();
     }
-
-    removeInitialStateArtifacts(tempContainer);
-
-    fadeReplaceContent(content, tempContainer.innerHTML);
-  } catch (error) {
-    const errorBlock = document.createElement("pre");
-    errorBlock.className = "diagram-error";
-    errorBlock.textContent = String(error);
-    content.replaceChildren(errorBlock);
-    subtitle.textContent = "Failed to render diagram";
-    console.error(error);
-  }
+    if (entry.card && entry.card.parentNode) {
+      entry.card.parentNode.removeChild(entry.card);
+    }
+    renderedGraphs.delete(fsmName);
+  });
 }
 
-async function render() {
-  state.renderGeneration += 1;
-  const renderGeneration = state.renderGeneration;
+function updateGraphOrder(selectedFsms) {
+  selectedFsms.forEach(({ name }) => {
+    const entry = renderedGraphs.get(name);
+    if (entry && entry.card) {
+      graphList.appendChild(entry.card);
+    }
+  });
+}
+
+function rebuildGraph(fsmName, graphModel) {
+  let entry = renderedGraphs.get(fsmName);
+  if (!entry) {
+    entry = createGraphCard(fsmName);
+    renderedGraphs.set(fsmName, entry);
+  }
+
+  if (entry.cy) {
+    entry.cy.destroy();
+  }
+
+  entry.subtitle.textContent = `${graphModel.totalVisibleNodes} visible node(s), ${graphModel.totalVisibleEdges} visible edge(s)`;
+
+  entry.cy = cytoscape({
+    container: entry.container,
+    elements: graphModel.elements,
+    style: makeStylesheet(),
+    layout: {
+      name: "breadthfirst",
+      directed: true,
+      padding: 30,
+      spacingFactor: 1.15,
+      fit: true,
+      avoidOverlap: true,
+      nodeDimensionsIncludeLabels: true,
+    },
+    wheelSensitivity: 0.2,
+    minZoom: 0.2,
+    maxZoom: 3.0,
+  });
+
+  entry.structureSignature = graphModel.structureSignature;
+  entry.activeSignature = graphModel.activeSignature;
+}
+
+function updateActiveClasses(fsmName, graphModel) {
+  const entry = renderedGraphs.get(fsmName);
+  if (!entry || !entry.cy) {
+    return;
+  }
+
+  entry.subtitle.textContent = `${graphModel.totalVisibleNodes} visible node(s), ${graphModel.totalVisibleEdges} visible edge(s)`;
+
+  entry.cy.batch(() => {
+    entry.cy.nodes().removeClass("active");
+    entry.cy.nodes().removeClass("active-ancestor");
+    entry.cy.edges().removeClass("active-edge");
+
+    graphModel.elements.forEach((element) => {
+      if (element.group === "nodes") {
+        const node = entry.cy.getElementById(element.data.id);
+        if (!node || node.empty()) {
+          return;
+        }
+
+        if (element.classes.includes("active")) {
+          node.addClass("active");
+        } else if (element.classes.includes("active-ancestor")) {
+          node.addClass("active-ancestor");
+        }
+      } else if (element.group === "edges") {
+        const edge = entry.cy.getElementById(element.data.id);
+        if (!edge || edge.empty()) {
+          return;
+        }
+
+        if (element.classes.includes("active-edge")) {
+          edge.addClass("active-edge");
+        }
+      }
+    });
+  });
+
+  entry.activeSignature = graphModel.activeSignature;
+}
+
+function render() {
   const selectedFsms = getSelectedFsms();
+  const nextNames = new Set(selectedFsms.map((item) => item.name));
 
   if (selectedFsms.length === 0) {
     emptyState.classList.remove("hidden");
     viewerPanel.classList.add("hidden");
-    clearElement(diagramList);
+    destroyRemovedGraphs(nextNames);
     return;
   }
 
   emptyState.classList.add("hidden");
   viewerPanel.classList.remove("hidden");
-  clearElement(diagramList);
 
   viewerTitle.textContent =
     state.currentFsm === "ALL" ? "All FSMs" : state.currentFsm;
 
-  const totalNodes = selectedFsms.reduce(
+  const totalRawNodes = selectedFsms.reduce(
     (sum, item) => sum + item.states.length,
     0,
   );
-  viewerSubtitle.textContent = `${selectedFsms.length} FSM(s), ${totalNodes} raw state node(s)`;
+  viewerSubtitle.textContent = `${selectedFsms.length} FSM(s), ${totalRawNodes} raw state node(s)`;
 
-  for (let index = 0; index < selectedFsms.length; index += 1) {
-    const item = selectedFsms[index];
-    await renderDiagramCard(item.name, item.states, index, renderGeneration);
-  }
+  destroyRemovedGraphs(nextNames);
+
+  selectedFsms.forEach(({ name, states }) => {
+    const graphModel = buildGraphModel(name, states);
+    const current = renderedGraphs.get(name);
+
+    if (
+      !current ||
+      current.structureSignature !== graphModel.structureSignature
+    ) {
+      rebuildGraph(name, graphModel);
+      return;
+    }
+
+    if (current.activeSignature !== graphModel.activeSignature) {
+      updateActiveClasses(name, graphModel);
+    }
+  });
+
+  updateGraphOrder(selectedFsms);
 }
 
 async function pollFsms() {
@@ -580,20 +691,18 @@ async function pollFsms() {
 
     const nextFsms = await response.json();
     const nextSignature = getDataSignature(nextFsms);
-    const dataChanged = nextSignature !== state.lastDataSignature;
 
     state.lastSuccessMs = Date.now();
     setStatus("Connected", "status-ok");
 
-    if (!dataChanged) {
+    if (nextSignature === state.lastDataSignature) {
       return;
     }
 
     state.fsms = nextFsms;
     state.lastDataSignature = nextSignature;
     updateFsmSelector();
-    state.lastViewSignature = "";
-    await renderIfNeeded(true);
+    render();
   } catch (error) {
     const stale = Date.now() - state.lastSuccessMs > 3000;
     setStatus(
@@ -604,69 +713,27 @@ async function pollFsms() {
   }
 }
 
-function fadeReplaceContent(container, nextHtml) {
-  const current = container.firstElementChild;
-
-  if (!current) {
-    container.innerHTML = nextHtml;
-    const inserted = container.firstElementChild;
-    if (inserted) {
-      inserted.classList.add("diagram-fade-enter");
-      requestAnimationFrame(() => {
-        inserted.classList.add("diagram-fade-enter-active");
-      });
-    }
-    return;
-  }
-
-  const wrapper = document.createElement("div");
-  wrapper.innerHTML = nextHtml;
-  const next = wrapper.firstElementChild;
-
-  if (!next) {
-    return;
-  }
-
-  next.classList.add("diagram-fade-enter");
-  container.appendChild(next);
-
-  requestAnimationFrame(() => {
-    current.classList.add("diagram-fade-exit");
-    next.classList.add("diagram-fade-enter-active");
-  });
-
-  window.setTimeout(() => {
-    if (current.parentNode === container) {
-      container.removeChild(current);
-    }
-    next.classList.remove("diagram-fade-enter");
-    next.classList.remove("diagram-fade-enter-active");
-    next.classList.remove("diagram-fade-exit");
-  }, 180);
-}
-
-fsmSelect.addEventListener("change", async (event) => {
+fsmSelect.addEventListener("change", (event) => {
   state.currentFsm = event.target.value;
-  await renderIfNeeded(true);
+  render();
 });
 
-hideNestedCheckbox.addEventListener("change", async (event) => {
+hideNestedCheckbox.addEventListener("change", (event) => {
   state.hideNested = event.target.checked;
-  await renderIfNeeded(true);
+  render();
 });
 
-showActiveCheckbox.addEventListener("change", async (event) => {
+showActiveCheckbox.addEventListener("change", (event) => {
   state.showOnlyActive = event.target.checked;
-  await renderIfNeeded(true);
+  render();
 });
 
-refreshButton.addEventListener("click", async () => {
-  state.lastViewSignature = "";
-  await renderIfNeeded(true);
+refreshButton.addEventListener("click", () => {
+  render();
 });
 
 setStatus("Connecting", "status-connecting");
-await pollFsms();
+pollFsms();
 window.setInterval(() => {
   pollFsms();
-}, 750);
+}, 500);
