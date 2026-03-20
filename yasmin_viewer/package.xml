@@ -8,12 +8,10 @@
   <license>GPL-3.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
-  <exec_depend>python3-expiringdict</exec_depend>
-  <exec_depend>python3-flask</exec_depend>
-  <exec_depend>python3-flask-socketio</exec_depend>
-  <exec_depend>python3-waitress</exec_depend>
-  <depend>rclpy</depend>
+  <depend>ament_index_cpp</depend>
+  <depend>boost</depend>
   <depend>rclcpp</depend>
+  <depend>rclpy</depend>
   <depend>yasmin</depend>
   <depend>yasmin_ros</depend>
   <depend>yasmin_msgs</depend>
