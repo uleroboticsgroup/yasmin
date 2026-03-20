@@ -15,6 +15,7 @@
 
 import React from "react";
 import Grid from "@mui/material/Grid";
+import io from "socket.io-client";
 import FSM from "./FSM";
 import TopAppBar from "./TopAppBar";
 
@@ -31,52 +32,13 @@ class Viewer extends React.Component {
       layout: "dagre",
     };
 
-    this.socket = null;
-    this.reconnectTimer = null;
-    this.shouldReconnect = true;
+    this.socket = io();
 
     this.handle_current_fsm = this.handle_current_fsm.bind(this);
     this.handle_hide_nested_fsm = this.handle_hide_nested_fsm.bind(this);
     this.handle_show_only_active_fsms =
       this.handle_show_only_active_fsms.bind(this);
     this.handle_change_layout = this.handle_change_layout.bind(this);
-  }
-
-  getWebSocketUrl() {
-    if (process.env.REACT_APP_WS_URL) {
-      return process.env.REACT_APP_WS_URL;
-    }
-
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    return `${protocol}://${window.location.host}/ws`;
-  }
-
-  connectWebSocket() {
-    this.socket = new WebSocket(this.getWebSocketUrl());
-
-    this.socket.onopen = () => {
-      console.log("Connected to Yasmin viewer server");
-    };
-
-    this.socket.onclose = () => {
-      console.log("Disconnected from server");
-      this.socket = null;
-
-      if (this.shouldReconnect) {
-        this.reconnectTimer = setTimeout(() => {
-          this.connectWebSocket();
-        }, 1000);
-      }
-    };
-
-    this.socket.onmessage = (event) => {
-      console.log("Received FSMs update");
-      this.processFSMData(JSON.parse(event.data));
-    };
-
-    this.socket.onerror = (error) => {
-      console.error("Connection error:", error);
-    };
   }
 
   processFSMData(data) {
@@ -93,7 +55,6 @@ class Viewer extends React.Component {
       current_fsm = "ALL";
     }
 
-    // Update state only if there's an actual difference
     if (JSON.stringify(fsm_list) !== JSON.stringify(this.state.fsm_list)) {
       this.setState({
         fsm_list: fsm_list,
@@ -104,21 +65,25 @@ class Viewer extends React.Component {
   }
 
   componentDidMount() {
-    this.connectWebSocket();
+    this.socket.on("connect", () => {
+      console.log("Connected to Yasmin viewer server");
+    });
+
+    this.socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+
+    this.socket.on("fsms_update", (event) => {
+      console.log("Received FSMs update");
+      this.processFSMData(JSON.parse(event));
+    });
   }
 
   componentWillUnmount() {
-    this.shouldReconnect = false;
-
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
-    }
-
-    if (this.socket) {
-      this.socket.close();
-      this.socket = null;
-    }
+    this.socket.off("connect");
+    this.socket.off("disconnect");
+    this.socket.off("fsms_update");
+    this.socket.close();
   }
 
   handle_current_fsm(current_fsm) {

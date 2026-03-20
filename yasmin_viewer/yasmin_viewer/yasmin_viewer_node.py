@@ -26,7 +26,7 @@ import rclpy
 import socketio
 import uvicorn
 from expiringdict import ExpiringDict
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
@@ -93,16 +93,23 @@ class YasminViewerNode(Node):
         async def startup_event() -> None:
             self.__loop = asyncio.get_running_loop()
 
+        @app.get("/")
+        async def index() -> FileResponse:
+            return FileResponse(index_file)
+
         @app.get("/api/fsms")
         async def get_fsms() -> JSONResponse:
             return JSONResponse(content=json.loads(self.get_fsm_payload()))
 
         @app.get("/{full_path:path}")
-        async def serve_client(full_path: str = "") -> FileResponse:
-            if full_path:
-                requested_path = (client_dir / full_path).resolve()
-                if client_dir in requested_path.parents and requested_path.is_file():
-                    return FileResponse(requested_path)
+        async def serve_client(full_path: str) -> FileResponse:
+            requested_path = (client_dir / full_path).resolve()
+
+            if client_dir in requested_path.parents and requested_path.is_file():
+                return FileResponse(requested_path)
+
+            if "." in Path(full_path).name:
+                raise HTTPException(status_code=404, detail="Asset not found")
 
             return FileResponse(index_file)
 
@@ -115,6 +122,10 @@ class YasminViewerNode(Node):
         @self.socketio.event
         async def connect(sid, environ):
             self.get_logger().info("Client connected")
+
+            payload = self.get_fsm_payload()
+            if payload != "{}":
+                await self.socketio.emit("fsms_update", payload, to=sid)
 
         @self.socketio.event
         async def disconnect(sid):
