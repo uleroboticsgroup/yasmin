@@ -24,8 +24,10 @@ const state = {
   showOnlyActive: false,
   lastSuccessMs: 0,
   renderGeneration: 0,
-  lastDataSignature: "",
-  lastViewSignature: "",
+  lastStructureSignature: "",
+  lastActiveSignature: "",
+  diagramCache: new Map(),
+  viewportState: new Map(),
 };
 
 const fsmSelect = document.getElementById("fsm-select");
@@ -71,26 +73,37 @@ function stableStringify(value) {
   return JSON.stringify(value);
 }
 
-function getDataSignature(fsms) {
-  return stableStringify(fsms);
+function stripActivityFromFsms(fsms) {
+  const result = {};
+
+  Object.entries(fsms).forEach(([fsmName, states]) => {
+    result[fsmName] = Array.isArray(states)
+      ? states.map((entry) => ({
+          ...entry,
+          current_state: 0,
+        }))
+      : [];
+  });
+
+  return result;
 }
 
-function getViewSignature() {
-  return JSON.stringify({
+function getStructureSignature(fsms) {
+  return stableStringify({
+    fsms: stripActivityFromFsms(fsms),
     currentFsm: state.currentFsm,
     hideNested: state.hideNested,
     showOnlyActive: state.showOnlyActive,
   });
 }
 
-async function renderIfNeeded(force = false) {
-  const viewSignature = getViewSignature();
-  if (!force && viewSignature === state.lastViewSignature) {
-    return;
-  }
-
-  state.lastViewSignature = viewSignature;
-  await render();
+function getActiveSignature(fsms) {
+  return stableStringify({
+    fsms,
+    currentFsm: state.currentFsm,
+    hideNested: state.hideNested,
+    showOnlyActive: state.showOnlyActive,
+  });
 }
 
 function setStatus(text, cssClass) {
@@ -319,8 +332,7 @@ function prepareGraph(fsmName, rawStates, fsmIndex) {
 
     children.forEach((node) => {
       const childHasVisibleChildren =
-        (childrenByParent.get(node.id) || []).length > 0 ||
-        scopeOutcomeNodes.some((outcomeNode) => outcomeNode.parent === node.id);
+        (childrenByParent.get(node.id) || []).length > 0;
 
       if (shouldExpandNode(node) && childHasVisibleChildren) {
         lines.push(
@@ -360,13 +372,7 @@ function prepareGraph(fsmName, rawStates, fsmIndex) {
   lines.push("stateDiagram-v2");
   lines.push("  direction LR");
   lines.push(
-    "  classDef active fill:#dcedc8,stroke:#2e7d32,stroke-width:3px,color:#0f172a,font-weight:bold",
-  );
-  lines.push(
     "  classDef outcome fill:#fff7ed,stroke:#c2410c,stroke-width:2px,color:#7c2d12",
-  );
-  lines.push(
-    "  classDef normal fill:#eff6ff,stroke:#334155,stroke-width:2px,color:#0f172a",
   );
 
   rootNodes.forEach((rootNode) => {
@@ -384,20 +390,6 @@ function prepareGraph(fsmName, rawStates, fsmIndex) {
     }
   });
 
-  visibleNodesById.forEach((node) => {
-    if (node.isSyntheticOutcome) {
-      return;
-    }
-
-    if (!shouldExpandNode(node) || node.parent === -1) {
-      lines.push(`  class ${node.alias} normal`);
-    }
-
-    if (node.active && !shouldExpandNode(node)) {
-      lines.push(`  class ${node.alias} active`);
-    }
-  });
-
   syntheticOutcomes.forEach((node) => {
     lines.push(`  class ${node.alias} outcome`);
   });
@@ -409,6 +401,9 @@ function prepareGraph(fsmName, rawStates, fsmIndex) {
       (sum, node) => sum + node.resolvedTransitions.length,
       0,
     ),
+    nodesById,
+    visibleNodesById,
+    syntheticOutcomes,
   };
 }
 
@@ -479,7 +474,312 @@ function removeInitialStateArtifacts(container) {
   });
 }
 
-async function renderDiagramCard(fsmName, rawStates, index, renderGeneration) {
+function getCacheKey(fsmName) {
+  return JSON.stringify({
+    fsmName,
+    currentFsm: state.currentFsm,
+    hideNested: state.hideNested,
+    showOnlyActive: state.showOnlyActive,
+  });
+}
+
+function getViewportKey(fsmName) {
+  return `${fsmName}::${state.currentFsm}::${state.hideNested}::${state.showOnlyActive}`;
+}
+
+function getDefaultViewportState() {
+  return {
+    scrollLeft: 0,
+    scrollTop: 0,
+    zoom: 1,
+  };
+}
+
+function getViewportState(viewportKey) {
+  return state.viewportState.get(viewportKey) || getDefaultViewportState();
+}
+
+function saveViewportPosition(viewport, viewportKey, zoomWrapper) {
+  state.viewportState.set(viewportKey, {
+    scrollLeft: viewport.scrollLeft,
+    scrollTop: viewport.scrollTop,
+    zoom: Number(zoomWrapper.dataset.zoom || "1"),
+  });
+}
+
+function restoreViewportPosition(viewport, viewportKey, zoomWrapper) {
+  const saved = getViewportState(viewportKey);
+  setZoom(zoomWrapper, saved.zoom);
+  viewport.scrollLeft = saved.scrollLeft;
+  viewport.scrollTop = saved.scrollTop;
+}
+
+function clampZoom(value) {
+  return Math.min(3.0, Math.max(0.3, value));
+}
+
+function getZoom(zoomWrapper) {
+  return Number(zoomWrapper.dataset.zoom || "1");
+}
+
+function setZoom(zoomWrapper, zoom) {
+  const clampedZoom = clampZoom(zoom);
+  zoomWrapper.dataset.zoom = String(clampedZoom);
+  zoomWrapper.style.transform = `scale(${clampedZoom})`;
+}
+
+function zoomAroundPoint(viewport, zoomWrapper, nextZoom, clientX, clientY) {
+  const previousZoom = getZoom(zoomWrapper);
+  const clampedZoom = clampZoom(nextZoom);
+
+  if (Math.abs(clampedZoom - previousZoom) < 1e-6) {
+    return;
+  }
+
+  const rect = viewport.getBoundingClientRect();
+  const offsetX = clientX - rect.left + viewport.scrollLeft;
+  const offsetY = clientY - rect.top + viewport.scrollTop;
+  const contentX = offsetX / previousZoom;
+  const contentY = offsetY / previousZoom;
+
+  setZoom(zoomWrapper, clampedZoom);
+
+  viewport.scrollLeft = contentX * clampedZoom - (clientX - rect.left);
+  viewport.scrollTop = contentY * clampedZoom - (clientY - rect.top);
+
+  const viewportKey = viewport.dataset.viewportKey;
+  if (viewportKey) {
+    saveViewportPosition(viewport, viewportKey, zoomWrapper);
+  }
+}
+
+function enableViewportInteraction(viewport, viewportKey, zoomWrapper) {
+  let dragging = false;
+  let pointerId = null;
+  let startX = 0;
+  let startY = 0;
+  let startScrollLeft = 0;
+  let startScrollTop = 0;
+  let moved = false;
+
+  viewport.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    dragging = true;
+    pointerId = event.pointerId;
+    startX = event.clientX;
+    startY = event.clientY;
+    startScrollLeft = viewport.scrollLeft;
+    startScrollTop = viewport.scrollTop;
+    moved = false;
+    viewport.classList.add("dragging");
+    viewport.setPointerCapture(pointerId);
+  });
+
+  viewport.addEventListener("pointermove", (event) => {
+    if (!dragging || event.pointerId !== pointerId) {
+      return;
+    }
+
+    const deltaX = event.clientX - startX;
+    const deltaY = event.clientY - startY;
+
+    if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+      moved = true;
+    }
+
+    viewport.scrollLeft = startScrollLeft - deltaX;
+    viewport.scrollTop = startScrollTop - deltaY;
+    saveViewportPosition(viewport, viewportKey, zoomWrapper);
+  });
+
+  function stopDragging(event) {
+    if (!dragging) {
+      return;
+    }
+
+    if (event && event.pointerId !== pointerId) {
+      return;
+    }
+
+    dragging = false;
+    pointerId = null;
+    viewport.classList.remove("dragging");
+    saveViewportPosition(viewport, viewportKey, zoomWrapper);
+  }
+
+  viewport.addEventListener("pointerup", (event) => {
+    stopDragging(event);
+  });
+
+  viewport.addEventListener("pointercancel", (event) => {
+    stopDragging(event);
+  });
+
+  viewport.addEventListener("pointerleave", (event) => {
+    stopDragging(event);
+  });
+
+  viewport.addEventListener("click", (event) => {
+    if (moved) {
+      event.preventDefault();
+      event.stopPropagation();
+      moved = false;
+    }
+  });
+
+  viewport.addEventListener("scroll", () => {
+    saveViewportPosition(viewport, viewportKey, zoomWrapper);
+  });
+
+  viewport.addEventListener(
+    "wheel",
+    (event) => {
+      event.preventDefault();
+
+      const factor = event.deltaY < 0 ? 1.1 : 0.9;
+      zoomAroundPoint(
+        viewport,
+        zoomWrapper,
+        getZoom(zoomWrapper) * factor,
+        event.clientX,
+        event.clientY,
+      );
+    },
+    { passive: false },
+  );
+}
+
+function getMermaidNodeCandidates(svg, alias) {
+  const safeAlias =
+    typeof CSS !== "undefined" && typeof CSS.escape === "function"
+      ? CSS.escape(alias)
+      : alias;
+
+  const selectors = [
+    `g[id="${safeAlias}"]`,
+    `g[id$="${safeAlias}"]`,
+    `g[id*="${safeAlias}"]`,
+    `g[class*="${safeAlias}"]`,
+    `[id="${safeAlias}"]`,
+    `[id$="${safeAlias}"]`,
+    `[id*="${safeAlias}"]`,
+    `[class*="${safeAlias}"]`,
+  ];
+
+  const result = [];
+  selectors.forEach((selector) => {
+    svg.querySelectorAll(selector).forEach((element) => {
+      result.push(element);
+    });
+  });
+
+  return result;
+}
+
+function getRenderableNodeGroup(candidate) {
+  if (!candidate) {
+    return null;
+  }
+
+  const directGroup = candidate.closest(
+    "g.node, g.stateGroup, g.cluster, g.statediagram-state",
+  );
+  if (directGroup) {
+    return directGroup;
+  }
+
+  let current = candidate;
+  while (
+    current &&
+    current.tagName &&
+    current.tagName.toLowerCase() !== "svg"
+  ) {
+    const hasShape =
+      current.querySelector?.("rect, path, polygon, circle, ellipse") !== null;
+    const hasText =
+      current.querySelector?.("text, tspan, foreignObject") !== null;
+
+    if (current.tagName.toLowerCase() === "g" && hasShape && hasText) {
+      return current;
+    }
+
+    current = current.parentElement;
+  }
+
+  return candidate.closest("g");
+}
+
+function indexRenderedNodes(svg, graph) {
+  const aliasToElement = new Map();
+
+  graph.visibleNodesById.forEach((node) => {
+    if (node.isSyntheticOutcome) {
+      return;
+    }
+
+    const candidates = getMermaidNodeCandidates(svg, node.alias);
+    for (const candidate of candidates) {
+      const group = getRenderableNodeGroup(candidate);
+      if (group) {
+        aliasToElement.set(node.alias, group);
+        group.dataset.stateAlias = node.alias;
+        break;
+      }
+    }
+  });
+
+  graph.syntheticOutcomes.forEach((node) => {
+    const candidates = getMermaidNodeCandidates(svg, node.alias);
+    for (const candidate of candidates) {
+      const group = getRenderableNodeGroup(candidate);
+      if (group) {
+        aliasToElement.set(node.alias, group);
+        group.dataset.stateAlias = node.alias;
+        group.classList.add("fsm-outcome-node");
+        break;
+      }
+    }
+  });
+
+  return aliasToElement;
+}
+
+function clearHighlightClasses(root) {
+  root.querySelectorAll(".fsm-active-node").forEach((element) => {
+    element.classList.remove("fsm-active-node");
+  });
+
+  root.querySelectorAll(".fsm-active-ancestor").forEach((element) => {
+    element.classList.remove("fsm-active-ancestor");
+  });
+}
+
+function applyHighlights(cardState) {
+  const { svg, graph, aliasToElement } = cardState;
+  if (!svg) {
+    return;
+  }
+
+  clearHighlightClasses(svg);
+
+  graph.nodesById.forEach((node) => {
+    const element = aliasToElement.get(node.alias);
+    if (!element) {
+      return;
+    }
+
+    if (node.active) {
+      element.classList.add("fsm-active-node");
+    } else if (node.hasActiveDescendant) {
+      element.classList.add("fsm-active-ancestor");
+    }
+  });
+}
+
+function createDiagramCardShell(fsmName) {
   const card = document.createElement("section");
   card.className = "diagram-card";
 
@@ -495,52 +795,92 @@ async function renderDiagramCard(fsmName, rawStates, index, renderGeneration) {
   header.appendChild(subtitle);
   card.appendChild(header);
 
-  const scroll = document.createElement("div");
-  scroll.className = "diagram-scroll";
+  const viewport = document.createElement("div");
+  viewport.className = "diagram-viewport";
+
+  const zoomWrapper = document.createElement("div");
+  zoomWrapper.className = "diagram-zoom-wrapper";
+  zoomWrapper.dataset.zoom = "1";
 
   const content = document.createElement("div");
   content.className = "diagram-content";
 
-  scroll.appendChild(content);
-  card.appendChild(scroll);
+  zoomWrapper.appendChild(content);
+  viewport.appendChild(zoomWrapper);
+  card.appendChild(viewport);
 
-  diagramList.appendChild(card);
-
-  try {
-    const graph = prepareGraph(fsmName, rawStates, index);
-    subtitle.textContent = `${graph.visibleNodeCount} visible state node(s), ${graph.transitionCount} transition(s)`;
-
-    const renderId = `yasmin_mermaid_${renderGeneration}_${index}`;
-    const { svg, bindFunctions } = await mermaid.render(
-      renderId,
-      graph.definition,
-    );
-
-    if (renderGeneration !== state.renderGeneration) {
-      return;
-    }
-
-    const tempContainer = document.createElement("div");
-    tempContainer.innerHTML = svg;
-
-    if (bindFunctions) {
-      bindFunctions(tempContainer);
-    }
-
-    removeInitialStateArtifacts(tempContainer);
-
-    fadeReplaceContent(content, tempContainer.innerHTML);
-  } catch (error) {
-    const errorBlock = document.createElement("pre");
-    errorBlock.className = "diagram-error";
-    errorBlock.textContent = String(error);
-    content.replaceChildren(errorBlock);
-    subtitle.textContent = "Failed to render diagram";
-    console.error(error);
-  }
+  return {
+    card,
+    subtitle,
+    viewport,
+    zoomWrapper,
+    content,
+  };
 }
 
-async function render() {
+async function buildDiagramCard(fsmName, rawStates, index, renderGeneration) {
+  const graph = prepareGraph(fsmName, rawStates, index);
+  const shell = createDiagramCardShell(fsmName);
+
+  shell.subtitle.textContent = `${graph.visibleNodeCount} visible state node(s), ${graph.transitionCount} transition(s)`;
+
+  const renderId = `yasmin_mermaid_${renderGeneration}_${index}`;
+  const { svg, bindFunctions } = await mermaid.render(
+    renderId,
+    graph.definition,
+  );
+
+  if (renderGeneration !== state.renderGeneration) {
+    return null;
+  }
+
+  const tempContainer = document.createElement("div");
+  tempContainer.innerHTML = svg;
+
+  if (bindFunctions) {
+    bindFunctions(tempContainer);
+  }
+
+  removeInitialStateArtifacts(tempContainer);
+
+  const renderedSvg = tempContainer.querySelector("svg");
+  if (!renderedSvg) {
+    throw new Error("Mermaid did not return an SVG");
+  }
+
+  shell.content.replaceChildren(renderedSvg);
+
+  const aliasToElement = indexRenderedNodes(renderedSvg, graph);
+  const viewportKey = getViewportKey(fsmName);
+  shell.viewport.dataset.viewportKey = viewportKey;
+
+  enableViewportInteraction(shell.viewport, viewportKey, shell.zoomWrapper);
+
+  return {
+    fsmName,
+    graph,
+    card: shell.card,
+    subtitle: shell.subtitle,
+    viewport: shell.viewport,
+    zoomWrapper: shell.zoomWrapper,
+    content: shell.content,
+    svg: renderedSvg,
+    aliasToElement,
+    viewportKey,
+  };
+}
+
+function attachDiagramCard(cardState) {
+  diagramList.appendChild(cardState.card);
+  restoreViewportPosition(
+    cardState.viewport,
+    cardState.viewportKey,
+    cardState.zoomWrapper,
+  );
+  applyHighlights(cardState);
+}
+
+async function renderStructure() {
   state.renderGeneration += 1;
   const renderGeneration = state.renderGeneration;
   const selectedFsms = getSelectedFsms();
@@ -549,12 +889,14 @@ async function render() {
     emptyState.classList.remove("hidden");
     viewerPanel.classList.add("hidden");
     clearElement(diagramList);
+    state.diagramCache.clear();
     return;
   }
 
   emptyState.classList.add("hidden");
   viewerPanel.classList.remove("hidden");
   clearElement(diagramList);
+  state.diagramCache.clear();
 
   viewerTitle.textContent =
     state.currentFsm === "ALL" ? "All FSMs" : state.currentFsm;
@@ -567,7 +909,66 @@ async function render() {
 
   for (let index = 0; index < selectedFsms.length; index += 1) {
     const item = selectedFsms[index];
-    await renderDiagramCard(item.name, item.states, index, renderGeneration);
+    const cardState = await buildDiagramCard(
+      item.name,
+      item.states,
+      index,
+      renderGeneration,
+    );
+
+    if (!cardState) {
+      return;
+    }
+
+    state.diagramCache.set(getCacheKey(item.name), cardState);
+    attachDiagramCard(cardState);
+  }
+}
+
+function updateActiveStatesOnly() {
+  const selectedFsms = getSelectedFsms();
+
+  viewerTitle.textContent =
+    state.currentFsm === "ALL" ? "All FSMs" : state.currentFsm;
+
+  const totalNodes = selectedFsms.reduce(
+    (sum, item) => sum + item.states.length,
+    0,
+  );
+  viewerSubtitle.textContent = `${selectedFsms.length} FSM(s), ${totalNodes} raw state node(s)`;
+
+  selectedFsms.forEach((item, index) => {
+    const graph = prepareGraph(item.name, item.states, index);
+    const cacheKey = getCacheKey(item.name);
+    const cardState = state.diagramCache.get(cacheKey);
+
+    if (!cardState) {
+      return;
+    }
+
+    cardState.graph = graph;
+    cardState.subtitle.textContent = `${graph.visibleNodeCount} visible state node(s), ${graph.transitionCount} transition(s)`;
+    applyHighlights(cardState);
+  });
+}
+
+async function updateView(forceStructure = false) {
+  const structureSignature = getStructureSignature(state.fsms);
+  const activeSignature = getActiveSignature(state.fsms);
+
+  const structureChanged =
+    forceStructure || structureSignature !== state.lastStructureSignature;
+
+  if (structureChanged) {
+    state.lastStructureSignature = structureSignature;
+    state.lastActiveSignature = activeSignature;
+    await renderStructure();
+    return;
+  }
+
+  if (activeSignature !== state.lastActiveSignature) {
+    state.lastActiveSignature = activeSignature;
+    updateActiveStatesOnly();
   }
 }
 
@@ -579,21 +980,13 @@ async function pollFsms() {
     }
 
     const nextFsms = await response.json();
-    const nextSignature = getDataSignature(nextFsms);
-    const dataChanged = nextSignature !== state.lastDataSignature;
 
     state.lastSuccessMs = Date.now();
     setStatus("Connected", "status-ok");
 
-    if (!dataChanged) {
-      return;
-    }
-
     state.fsms = nextFsms;
-    state.lastDataSignature = nextSignature;
     updateFsmSelector();
-    state.lastViewSignature = "";
-    await renderIfNeeded(true);
+    await updateView(false);
   } catch (error) {
     const stale = Date.now() - state.lastSuccessMs > 3000;
     setStatus(
@@ -604,65 +997,25 @@ async function pollFsms() {
   }
 }
 
-function fadeReplaceContent(container, nextHtml) {
-  const current = container.firstElementChild;
-
-  if (!current) {
-    container.innerHTML = nextHtml;
-    const inserted = container.firstElementChild;
-    if (inserted) {
-      inserted.classList.add("diagram-fade-enter");
-      requestAnimationFrame(() => {
-        inserted.classList.add("diagram-fade-enter-active");
-      });
-    }
-    return;
-  }
-
-  const wrapper = document.createElement("div");
-  wrapper.innerHTML = nextHtml;
-  const next = wrapper.firstElementChild;
-
-  if (!next) {
-    return;
-  }
-
-  next.classList.add("diagram-fade-enter");
-  container.appendChild(next);
-
-  requestAnimationFrame(() => {
-    current.classList.add("diagram-fade-exit");
-    next.classList.add("diagram-fade-enter-active");
-  });
-
-  window.setTimeout(() => {
-    if (current.parentNode === container) {
-      container.removeChild(current);
-    }
-    next.classList.remove("diagram-fade-enter");
-    next.classList.remove("diagram-fade-enter-active");
-    next.classList.remove("diagram-fade-exit");
-  }, 180);
-}
-
 fsmSelect.addEventListener("change", async (event) => {
   state.currentFsm = event.target.value;
-  await renderIfNeeded(true);
+  await updateView(true);
 });
 
 hideNestedCheckbox.addEventListener("change", async (event) => {
   state.hideNested = event.target.checked;
-  await renderIfNeeded(true);
+  await updateView(true);
 });
 
 showActiveCheckbox.addEventListener("change", async (event) => {
   state.showOnlyActive = event.target.checked;
-  await renderIfNeeded(true);
+  await updateView(true);
 });
 
 refreshButton.addEventListener("click", async () => {
-  state.lastViewSignature = "";
-  await renderIfNeeded(true);
+  state.lastStructureSignature = "";
+  state.lastActiveSignature = "";
+  await updateView(true);
 });
 
 setStatus("Connecting", "status-connecting");

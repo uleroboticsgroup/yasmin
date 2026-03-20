@@ -190,9 +190,14 @@ select {
   font-size: 0.9rem;
 }
 
-.diagram-scroll {
+.diagram-viewport {
   overflow: auto;
+  position: relative;
+  height: min(72vh, 900px);
+  max-height: 72vh;
   padding: 1rem;
+  cursor: grab;
+  touch-action: none;
   background: linear-gradient(
       to right,
       rgba(148, 163, 184, 0.08) 1px,
@@ -202,14 +207,33 @@ select {
   background-size: 28px 28px;
 }
 
+.diagram-viewport.dragging {
+  cursor: grabbing;
+}
+
+.diagram-zoom-wrapper {
+  width: max-content;
+  height: max-content;
+  transform-origin: top left;
+  will-change: transform;
+}
+
 .diagram-content {
   min-width: max-content;
+  min-height: max-content;
+  width: max-content;
+  height: max-content;
+  padding: 0.5rem;
 }
 
 .diagram-content svg {
   display: block;
   max-width: none;
+  width: auto;
   height: auto;
+  overflow: visible;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .diagram-error {
@@ -227,35 +251,48 @@ code {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
+.diagram-content .fsm-active-node rect,
+.diagram-content .fsm-active-node path,
+.diagram-content .fsm-active-node polygon,
+.diagram-content .fsm-active-node ellipse {
+  fill: #dcedc8 !important;
+  stroke: #2e7d32 !important;
+  stroke-width: 4px !important;
+}
+
+.diagram-content .fsm-active-node text,
+.diagram-content .fsm-active-node tspan,
+.diagram-content .fsm-active-node foreignObject {
+  fill: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.diagram-content .fsm-active-ancestor rect,
+.diagram-content .fsm-active-ancestor path,
+.diagram-content .fsm-active-ancestor polygon,
+.diagram-content .fsm-active-ancestor ellipse {
+  fill: #e8f1ff !important;
+  stroke: #1d4ed8 !important;
+  stroke-width: 3px !important;
+}
+
+.diagram-content .fsm-outcome-node rect,
+.diagram-content .fsm-outcome-node path,
+.diagram-content .fsm-outcome-node polygon,
+.diagram-content .fsm-outcome-node ellipse {
+  fill: #fff7ed !important;
+  stroke: #c2410c !important;
+  stroke-width: 2px !important;
+}
+
 @media (max-width: 900px) {
   .toolbar {
     gap: 0.65rem;
   }
 
-  .diagram-scroll {
+  .diagram-viewport {
+    height: 65vh;
+    max-height: 65vh;
     padding: 0.75rem;
   }
-}
-
-.diagram-content {
-  min-width: max-content;
-  position: relative;
-}
-
-.diagram-content > * {
-  transition: opacity 0.18s ease;
-}
-
-.diagram-fade-enter {
-  opacity: 0;
-}
-
-.diagram-fade-enter-active {
-  opacity: 1;
-}
-
-.diagram-fade-exit {
-  opacity: 0;
-  position: absolute;
-  inset: 0 auto auto 0;
 }
