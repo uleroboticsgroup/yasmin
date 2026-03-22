@@ -285,6 +285,30 @@ code {
   stroke-width: 2px !important;
 }
 
+.diagram-content .edgeLabel rect,
+.diagram-content .edgeLabel path,
+.diagram-content .edgeLabel polygon,
+.diagram-content .labelBkg,
+.diagram-content .edgeLabel .labelBkg,
+.diagram-content g.edgeLabel > rect,
+.diagram-content g.edgeLabel > path,
+.diagram-content g.edgeLabel > polygon {
+  fill: transparent !important;
+  stroke: transparent !important;
+  opacity: 0 !important;
+}
+
+.diagram-content .edgeLabel,
+.diagram-content .edgeLabel *,
+.diagram-content .edgeLabel foreignObject,
+.diagram-content .edgeLabel div,
+.diagram-content .edgeLabel span,
+.diagram-content .edgeLabel p {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
 @media (max-width: 900px) {
   .toolbar {
     gap: 0.65rem;

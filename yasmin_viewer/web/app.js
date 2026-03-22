@@ -33,7 +33,9 @@ const state = {
 const fsmSelect = document.getElementById("fsm-select");
 const hideNestedCheckbox = document.getElementById("hide-nested");
 const showActiveCheckbox = document.getElementById("show-active");
-const refreshButton = document.getElementById("refresh-button");
+const fitButton = document.getElementById("fit-button");
+const centerButton = document.getElementById("center-button");
+const resetZoomButton = document.getElementById("reset-zoom-button");
 const emptyState = document.getElementById("empty-state");
 const viewerPanel = document.getElementById("viewer-panel");
 const viewerTitle = document.getElementById("viewer-title");
@@ -45,6 +47,7 @@ mermaid.initialize({
   startOnLoad: false,
   theme: "base",
   securityLevel: "strict",
+  htmlLabels: false,
   state: {
     useMaxWidth: false,
   },
@@ -79,9 +82,9 @@ function stripActivityFromFsms(fsms) {
   Object.entries(fsms).forEach(([fsmName, states]) => {
     result[fsmName] = Array.isArray(states)
       ? states.map((entry) => ({
-          ...entry,
-          current_state: 0,
-        }))
+        ...entry,
+        current_state: 0,
+      }))
       : [];
   });
 
@@ -522,6 +525,68 @@ function getZoom(zoomWrapper) {
   return Number(zoomWrapper.dataset.zoom || "1");
 }
 
+function getViewportContentSize(zoomWrapper) {
+  const content = zoomWrapper.firstElementChild;
+  if (!content) {
+    return { width: 0, height: 0 };
+  }
+
+  return {
+    width: content.scrollWidth,
+    height: content.scrollHeight,
+  };
+}
+
+function centerViewport(viewport, zoomWrapper) {
+  const { width, height } = getViewportContentSize(zoomWrapper);
+  const zoom = getZoom(zoomWrapper);
+  const targetScrollLeft = Math.max(
+    0,
+    (width * zoom - viewport.clientWidth) / 2,
+  );
+  const targetScrollTop = Math.max(
+    0,
+    (height * zoom - viewport.clientHeight) / 2,
+  );
+
+  viewport.scrollLeft = targetScrollLeft;
+  viewport.scrollTop = targetScrollTop;
+
+  const viewportKey = viewport.dataset.viewportKey;
+  if (viewportKey) {
+    saveViewportPosition(viewport, viewportKey, zoomWrapper);
+  }
+}
+
+function resetViewportZoom(viewport, zoomWrapper) {
+  setZoom(zoomWrapper, 1);
+  centerViewport(viewport, zoomWrapper);
+}
+
+function fitViewport(viewport, zoomWrapper) {
+  const { width, height } = getViewportContentSize(zoomWrapper);
+  if (width <= 0 || height <= 0) {
+    return;
+  }
+
+  const fitZoom = clampZoom(
+    Math.min(viewport.clientWidth / width, viewport.clientHeight / height),
+  );
+
+  setZoom(zoomWrapper, fitZoom);
+  centerViewport(viewport, zoomWrapper);
+}
+
+function applyToVisibleCards(callback) {
+  state.diagramCache.forEach((cardState) => {
+    if (!cardState.card.isConnected) {
+      return;
+    }
+
+    callback(cardState);
+  });
+}
+
 function setZoom(zoomWrapper, zoom) {
   const clampedZoom = clampZoom(zoom);
   zoomWrapper.dataset.zoom = String(clampedZoom);
@@ -878,6 +943,10 @@ function attachDiagramCard(cardState) {
     cardState.zoomWrapper,
   );
   applyHighlights(cardState);
+
+  if (!state.viewportState.has(cardState.viewportKey)) {
+    fitViewport(cardState.viewport, cardState.zoomWrapper);
+  }
 }
 
 async function renderStructure() {
@@ -1012,10 +1081,22 @@ showActiveCheckbox.addEventListener("change", async (event) => {
   await updateView(true);
 });
 
-refreshButton.addEventListener("click", async () => {
-  state.lastStructureSignature = "";
-  state.lastActiveSignature = "";
-  await updateView(true);
+fitButton.addEventListener("click", () => {
+  applyToVisibleCards((cardState) => {
+    fitViewport(cardState.viewport, cardState.zoomWrapper);
+  });
+});
+
+centerButton.addEventListener("click", () => {
+  applyToVisibleCards((cardState) => {
+    centerViewport(cardState.viewport, cardState.zoomWrapper);
+  });
+});
+
+resetZoomButton.addEventListener("click", () => {
+  applyToVisibleCards((cardState) => {
+    resetViewportZoom(cardState.viewport, cardState.zoomWrapper);
+  });
 });
 
 setStatus("Connecting", "status-connecting");
