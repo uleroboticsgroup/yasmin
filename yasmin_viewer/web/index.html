@@ -37,6 +37,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <select id="fsm-select"></select>
           </label>
 
+          <label class="toolbar-field">
+            <span>FSMs / Row</span>
+            <select id="cards-per-row">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+
           <label class="toolbar-field checkbox-field">
             <input id="hide-nested" type="checkbox" />
             <span>Hide Nested FSMs</span>
@@ -68,13 +78,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       </section>
 
       <section id="viewer-panel" class="viewer-panel hidden">
-        <div class="viewer-header">
-          <div>
-            <h2 id="viewer-title">FSMs</h2>
-            <div id="viewer-subtitle" class="viewer-subtitle"></div>
-          </div>
-        </div>
-
         <div id="diagram-list" class="diagram-list"></div>
       </section>
     </main>

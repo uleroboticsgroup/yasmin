@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   --brand: #1e88e5;
   --brand-dark: #1565c0;
   --shadow: 0 0.25rem 1rem rgba(15, 23, 42, 0.08);
+  --fsm-columns: 2;
 }
 
 * {
@@ -114,6 +115,10 @@ select {
 }
 
 select {
+  min-width: 8rem;
+}
+
+#fsm-select {
   min-width: 14rem;
 }
 
@@ -137,33 +142,15 @@ select {
 }
 
 .viewer-panel {
-  background: var(--panel);
+  background: transparent;
   border-radius: 0.9rem;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
-.viewer-header {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.viewer-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.viewer-subtitle {
-  margin-top: 0.35rem;
-  color: var(--muted);
-  font-size: 0.92rem;
 }
 
 .diagram-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(var(--fsm-columns), minmax(0, 1fr));
   gap: 1rem;
-  padding: 1rem;
+  align-items: start;
 }
 
 .diagram-card {
@@ -171,23 +158,22 @@ select {
   border-radius: 0.9rem;
   overflow: hidden;
   background: #ffffff;
+  box-shadow: var(--shadow);
+  min-width: 0;
 }
 
 .diagram-card-header {
   padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--line);
   background: #f8fbff;
+  text-align: center;
 }
 
 .diagram-card-header h3 {
   margin: 0;
   font-size: 1.05rem;
-}
-
-.diagram-card-header p {
-  margin: 0.35rem 0 0 0;
-  color: var(--muted);
-  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .diagram-viewport {
@@ -198,6 +184,7 @@ select {
   padding: 1rem;
   cursor: grab;
   touch-action: none;
+  border: 2px solid #000000;
   background: linear-gradient(
       to right,
       rgba(148, 163, 184, 0.08) 1px,
@@ -309,9 +296,19 @@ code {
   box-shadow: none !important;
 }
 
+@media (max-width: 1200px) {
+  .diagram-list {
+    grid-template-columns: repeat(min(var(--fsm-columns), 2), minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 900px) {
   .toolbar {
     gap: 0.65rem;
+  }
+
+  .diagram-list {
+    grid-template-columns: 1fr;
   }
 
   .diagram-viewport {

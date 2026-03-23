@@ -15,13 +15,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-//import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-
 const state = {
   fsms: {},
   currentFsm: "ALL",
   hideNested: false,
   showOnlyActive: false,
+  cardsPerRow: 2,
   lastSuccessMs: 0,
   renderGeneration: 0,
   lastStructureSignature: "",
@@ -31,6 +30,7 @@ const state = {
 };
 
 const fsmSelect = document.getElementById("fsm-select");
+const cardsPerRowSelect = document.getElementById("cards-per-row");
 const hideNestedCheckbox = document.getElementById("hide-nested");
 const showActiveCheckbox = document.getElementById("show-active");
 const fitButton = document.getElementById("fit-button");
@@ -38,8 +38,6 @@ const centerButton = document.getElementById("center-button");
 const resetZoomButton = document.getElementById("reset-zoom-button");
 const emptyState = document.getElementById("empty-state");
 const viewerPanel = document.getElementById("viewer-panel");
-const viewerTitle = document.getElementById("viewer-title");
-const viewerSubtitle = document.getElementById("viewer-subtitle");
 const statusBadge = document.getElementById("status-badge");
 const diagramList = document.getElementById("diagram-list");
 
@@ -82,9 +80,9 @@ function stripActivityFromFsms(fsms) {
   Object.entries(fsms).forEach(([fsmName, states]) => {
     result[fsmName] = Array.isArray(states)
       ? states.map((entry) => ({
-        ...entry,
-        current_state: 0,
-      }))
+          ...entry,
+          current_state: 0,
+        }))
       : [];
   });
 
@@ -97,6 +95,7 @@ function getStructureSignature(fsms) {
     currentFsm: state.currentFsm,
     hideNested: state.hideNested,
     showOnlyActive: state.showOnlyActive,
+    cardsPerRow: state.cardsPerRow,
   });
 }
 
@@ -106,6 +105,7 @@ function getActiveSignature(fsms) {
     currentFsm: state.currentFsm,
     hideNested: state.hideNested,
     showOnlyActive: state.showOnlyActive,
+    cardsPerRow: state.cardsPerRow,
   });
 }
 
@@ -142,6 +142,14 @@ function updateFsmSelector() {
 
   state.currentFsm = names.includes(previousValue) ? previousValue : "ALL";
   fsmSelect.value = state.currentFsm;
+}
+
+function updateCardsPerRowSelector() {
+  cardsPerRowSelect.value = String(state.cardsPerRow);
+}
+
+function updateDiagramGridColumns() {
+  diagramList.style.setProperty("--fsm-columns", String(state.cardsPerRow));
 }
 
 function getSelectedFsms() {
@@ -302,8 +310,12 @@ function prepareGraph(fsmName, rawStates, fsmIndex) {
     node.resolvedTransitions = [];
 
     (node.transitions || []).forEach((transition) => {
-      const outcomeLabel = transition[0];
-      const targetName = transition[1];
+      const outcomeLabel = Array.isArray(transition)
+        ? transition[0]
+        : transition.outcome;
+      const targetName = Array.isArray(transition)
+        ? transition[1]
+        : transition.state;
       const targetKey = `${node.parent}::${targetName}`;
 
       if (siblingNameMap.has(targetKey)) {
@@ -399,11 +411,6 @@ function prepareGraph(fsmName, rawStates, fsmIndex) {
 
   return {
     definition: lines.join("\n"),
-    visibleNodeCount: visibleNodesById.size,
-    transitionCount: Array.from(visibleNodesById.values()).reduce(
-      (sum, node) => sum + node.resolvedTransitions.length,
-      0,
-    ),
     nodesById,
     visibleNodesById,
     syntheticOutcomes,
@@ -483,6 +490,7 @@ function getCacheKey(fsmName) {
     currentFsm: state.currentFsm,
     hideNested: state.hideNested,
     showOnlyActive: state.showOnlyActive,
+    cardsPerRow: state.cardsPerRow,
   });
 }
 
@@ -495,6 +503,7 @@ function getDefaultViewportState() {
     scrollLeft: 0,
     scrollTop: 0,
     zoom: 1,
+    centerContent: false,
   };
 }
 
@@ -507,14 +516,8 @@ function saveViewportPosition(viewport, viewportKey, zoomWrapper) {
     scrollLeft: viewport.scrollLeft,
     scrollTop: viewport.scrollTop,
     zoom: Number(zoomWrapper.dataset.zoom || "1"),
+    centerContent: viewport.dataset.centerContent === "true",
   });
-}
-
-function restoreViewportPosition(viewport, viewportKey, zoomWrapper) {
-  const saved = getViewportState(viewportKey);
-  setZoom(zoomWrapper, saved.zoom);
-  viewport.scrollLeft = saved.scrollLeft;
-  viewport.scrollTop = saved.scrollTop;
 }
 
 function clampZoom(value) {
@@ -525,32 +528,92 @@ function getZoom(zoomWrapper) {
   return Number(zoomWrapper.dataset.zoom || "1");
 }
 
+function setZoom(zoomWrapper, zoom) {
+  const clampedZoom = clampZoom(zoom);
+  zoomWrapper.dataset.zoom = String(clampedZoom);
+  zoomWrapper.style.transform = `scale(${clampedZoom})`;
+}
+
+function getViewportInnerSize(viewport) {
+  const style = window.getComputedStyle(viewport);
+  const paddingLeft = Number.parseFloat(style.paddingLeft || "0");
+  const paddingRight = Number.parseFloat(style.paddingRight || "0");
+  const paddingTop = Number.parseFloat(style.paddingTop || "0");
+  const paddingBottom = Number.parseFloat(style.paddingBottom || "0");
+
+  return {
+    width: Math.max(0, viewport.clientWidth - paddingLeft - paddingRight),
+    height: Math.max(0, viewport.clientHeight - paddingTop - paddingBottom),
+  };
+}
+
 function getViewportContentSize(zoomWrapper) {
   const content = zoomWrapper.firstElementChild;
   if (!content) {
     return { width: 0, height: 0 };
   }
 
+  const svg = content.querySelector("svg");
+  if (svg && typeof svg.getBBox === "function") {
+    try {
+      const bbox = svg.getBBox();
+      return {
+        width: Math.ceil(bbox.width + bbox.x + 16),
+        height: Math.ceil(bbox.height + bbox.y + 16),
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return {
-    width: content.scrollWidth,
-    height: content.scrollHeight,
+    width: Math.ceil(content.scrollWidth),
+    height: Math.ceil(content.scrollHeight),
   };
 }
 
-function centerViewport(viewport, zoomWrapper) {
-  const { width, height } = getViewportContentSize(zoomWrapper);
-  const zoom = getZoom(zoomWrapper);
-  const targetScrollLeft = Math.max(
-    0,
-    (width * zoom - viewport.clientWidth) / 2,
-  );
-  const targetScrollTop = Math.max(
-    0,
-    (height * zoom - viewport.clientHeight) / 2,
-  );
+function getViewportContentOffset(viewport, zoomWrapper) {
+  const centerContent = viewport.dataset.centerContent === "true";
+  if (!centerContent) {
+    return { left: 0, top: 0 };
+  }
 
-  viewport.scrollLeft = targetScrollLeft;
-  viewport.scrollTop = targetScrollTop;
+  const { width, height } = getViewportContentSize(zoomWrapper);
+  const { width: innerWidth, height: innerHeight } = getViewportInnerSize(viewport);
+  const zoom = getZoom(zoomWrapper);
+
+  return {
+    left: Math.max(0, (innerWidth - width * zoom) / 2),
+    top: Math.max(0, (innerHeight - height * zoom) / 2),
+  };
+}
+
+function applyViewportContentOffset(viewport, zoomWrapper) {
+  const offset = getViewportContentOffset(viewport, zoomWrapper);
+  zoomWrapper.style.marginLeft = `${offset.left}px`;
+  zoomWrapper.style.marginTop = `${offset.top}px`;
+}
+
+function centerViewport(viewport, zoomWrapper) {
+  viewport.dataset.centerContent = "true";
+  applyViewportContentOffset(viewport, zoomWrapper);
+
+  const { width, height } = getViewportContentSize(zoomWrapper);
+  const { width: innerWidth, height: innerHeight } = getViewportInnerSize(viewport);
+  const zoom = getZoom(zoomWrapper);
+  const offset = getViewportContentOffset(viewport, zoomWrapper);
+
+  const scaledWidth = width * zoom;
+  const scaledHeight = height * zoom;
+
+  viewport.scrollLeft =
+    scaledWidth + offset.left > innerWidth
+      ? Math.max(0, (scaledWidth - innerWidth) / 2)
+      : 0;
+  viewport.scrollTop =
+    scaledHeight + offset.top > innerHeight
+      ? Math.max(0, (scaledHeight - innerHeight) / 2)
+      : 0;
 
   const viewportKey = viewport.dataset.viewportKey;
   if (viewportKey) {
@@ -565,32 +628,49 @@ function resetViewportZoom(viewport, zoomWrapper) {
 
 function fitViewport(viewport, zoomWrapper) {
   const { width, height } = getViewportContentSize(zoomWrapper);
-  if (width <= 0 || height <= 0) {
+  const { width: innerWidth, height: innerHeight } = getViewportInnerSize(viewport);
+
+  if (width <= 0 || height <= 0 || innerWidth <= 0 || innerHeight <= 0) {
     return;
   }
 
-  const fitZoom = clampZoom(
-    Math.min(viewport.clientWidth / width, viewport.clientHeight / height),
+  const fitMargin = 0.96;
+  let fitZoom = clampZoom(
+    Math.min(innerWidth / width, innerHeight / height) * fitMargin,
   );
 
   setZoom(zoomWrapper, fitZoom);
+  viewport.dataset.centerContent = "true";
+  applyViewportContentOffset(viewport, zoomWrapper);
   centerViewport(viewport, zoomWrapper);
-}
 
-function applyToVisibleCards(callback) {
-  state.diagramCache.forEach((cardState) => {
-    if (!cardState.card.isConnected) {
-      return;
+  for (let iteration = 0; iteration < 6; iteration += 1) {
+    const horizontalOverflow = viewport.scrollWidth - viewport.clientWidth;
+    const verticalOverflow = viewport.scrollHeight - viewport.clientHeight;
+
+    if (horizontalOverflow <= 1 && verticalOverflow <= 1) {
+      break;
     }
 
-    callback(cardState);
-  });
+    fitZoom = clampZoom(fitZoom * 0.98);
+    setZoom(zoomWrapper, fitZoom);
+    applyViewportContentOffset(viewport, zoomWrapper);
+    centerViewport(viewport, zoomWrapper);
+  }
+
+  const viewportKey = viewport.dataset.viewportKey;
+  if (viewportKey) {
+    saveViewportPosition(viewport, viewportKey, zoomWrapper);
+  }
 }
 
-function setZoom(zoomWrapper, zoom) {
-  const clampedZoom = clampZoom(zoom);
-  zoomWrapper.dataset.zoom = String(clampedZoom);
-  zoomWrapper.style.transform = `scale(${clampedZoom})`;
+function restoreViewportPosition(viewport, viewportKey, zoomWrapper) {
+  const saved = getViewportState(viewportKey);
+  setZoom(zoomWrapper, saved.zoom);
+  viewport.dataset.centerContent = saved.centerContent ? "true" : "false";
+  applyViewportContentOffset(viewport, zoomWrapper);
+  viewport.scrollLeft = saved.scrollLeft;
+  viewport.scrollTop = saved.scrollTop;
 }
 
 function zoomAroundPoint(viewport, zoomWrapper, nextZoom, clientX, clientY) {
@@ -602,15 +682,26 @@ function zoomAroundPoint(viewport, zoomWrapper, nextZoom, clientX, clientY) {
   }
 
   const rect = viewport.getBoundingClientRect();
-  const offsetX = clientX - rect.left + viewport.scrollLeft;
-  const offsetY = clientY - rect.top + viewport.scrollTop;
+  const previousOffset = getViewportContentOffset(viewport, zoomWrapper);
+
+  const offsetX =
+    clientX - rect.left + viewport.scrollLeft - previousOffset.left;
+  const offsetY =
+    clientY - rect.top + viewport.scrollTop - previousOffset.top;
+
   const contentX = offsetX / previousZoom;
   const contentY = offsetY / previousZoom;
 
+  viewport.dataset.centerContent = "false";
   setZoom(zoomWrapper, clampedZoom);
+  applyViewportContentOffset(viewport, zoomWrapper);
 
-  viewport.scrollLeft = contentX * clampedZoom - (clientX - rect.left);
-  viewport.scrollTop = contentY * clampedZoom - (clientY - rect.top);
+  const nextOffset = getViewportContentOffset(viewport, zoomWrapper);
+
+  viewport.scrollLeft =
+    contentX * clampedZoom + nextOffset.left - (clientX - rect.left);
+  viewport.scrollTop =
+    contentY * clampedZoom + nextOffset.top - (clientY - rect.top);
 
   const viewportKey = viewport.dataset.viewportKey;
   if (viewportKey) {
@@ -631,6 +722,9 @@ function enableViewportInteraction(viewport, viewportKey, zoomWrapper) {
     if (event.button !== 0) {
       return;
     }
+
+    viewport.dataset.centerContent = "false";
+    applyViewportContentOffset(viewport, zoomWrapper);
 
     dragging = true;
     pointerId = event.pointerId;
@@ -675,17 +769,9 @@ function enableViewportInteraction(viewport, viewportKey, zoomWrapper) {
     saveViewportPosition(viewport, viewportKey, zoomWrapper);
   }
 
-  viewport.addEventListener("pointerup", (event) => {
-    stopDragging(event);
-  });
-
-  viewport.addEventListener("pointercancel", (event) => {
-    stopDragging(event);
-  });
-
-  viewport.addEventListener("pointerleave", (event) => {
-    stopDragging(event);
-  });
+  viewport.addEventListener("pointerup", stopDragging);
+  viewport.addEventListener("pointercancel", stopDragging);
+  viewport.addEventListener("lostpointercapture", stopDragging);
 
   viewport.addEventListener("click", (event) => {
     if (moved) {
@@ -702,6 +788,12 @@ function enableViewportInteraction(viewport, viewportKey, zoomWrapper) {
   viewport.addEventListener(
     "wheel",
     (event) => {
+      const insideViewport =
+        event.target instanceof Node && viewport.contains(event.target);
+      if (!insideViewport) {
+        return;
+      }
+
       event.preventDefault();
 
       const factor = event.deltaY < 0 ? 1.1 : 0.9;
@@ -854,10 +946,7 @@ function createDiagramCardShell(fsmName) {
   const title = document.createElement("h3");
   title.textContent = fsmName;
 
-  const subtitle = document.createElement("p");
-
   header.appendChild(title);
-  header.appendChild(subtitle);
   card.appendChild(header);
 
   const viewport = document.createElement("div");
@@ -866,6 +955,7 @@ function createDiagramCardShell(fsmName) {
   const zoomWrapper = document.createElement("div");
   zoomWrapper.className = "diagram-zoom-wrapper";
   zoomWrapper.dataset.zoom = "1";
+  viewport.dataset.centerContent = "false";
 
   const content = document.createElement("div");
   content.className = "diagram-content";
@@ -876,7 +966,6 @@ function createDiagramCardShell(fsmName) {
 
   return {
     card,
-    subtitle,
     viewport,
     zoomWrapper,
     content,
@@ -886,8 +975,6 @@ function createDiagramCardShell(fsmName) {
 async function buildDiagramCard(fsmName, rawStates, index, renderGeneration) {
   const graph = prepareGraph(fsmName, rawStates, index);
   const shell = createDiagramCardShell(fsmName);
-
-  shell.subtitle.textContent = `${graph.visibleNodeCount} visible state node(s), ${graph.transitionCount} transition(s)`;
 
   const renderId = `yasmin_mermaid_${renderGeneration}_${index}`;
   const { svg, bindFunctions } = await mermaid.render(
@@ -925,7 +1012,6 @@ async function buildDiagramCard(fsmName, rawStates, index, renderGeneration) {
     fsmName,
     graph,
     card: shell.card,
-    subtitle: shell.subtitle,
     viewport: shell.viewport,
     zoomWrapper: shell.zoomWrapper,
     content: shell.content,
@@ -945,7 +1031,9 @@ function attachDiagramCard(cardState) {
   applyHighlights(cardState);
 
   if (!state.viewportState.has(cardState.viewportKey)) {
-    fitViewport(cardState.viewport, cardState.zoomWrapper);
+    requestAnimationFrame(() => {
+      fitViewport(cardState.viewport, cardState.zoomWrapper);
+    });
   }
 }
 
@@ -966,15 +1054,7 @@ async function renderStructure() {
   viewerPanel.classList.remove("hidden");
   clearElement(diagramList);
   state.diagramCache.clear();
-
-  viewerTitle.textContent =
-    state.currentFsm === "ALL" ? "All FSMs" : state.currentFsm;
-
-  const totalNodes = selectedFsms.reduce(
-    (sum, item) => sum + item.states.length,
-    0,
-  );
-  viewerSubtitle.textContent = `${selectedFsms.length} FSM(s), ${totalNodes} raw state node(s)`;
+  updateDiagramGridColumns();
 
   for (let index = 0; index < selectedFsms.length; index += 1) {
     const item = selectedFsms[index];
@@ -997,15 +1077,6 @@ async function renderStructure() {
 function updateActiveStatesOnly() {
   const selectedFsms = getSelectedFsms();
 
-  viewerTitle.textContent =
-    state.currentFsm === "ALL" ? "All FSMs" : state.currentFsm;
-
-  const totalNodes = selectedFsms.reduce(
-    (sum, item) => sum + item.states.length,
-    0,
-  );
-  viewerSubtitle.textContent = `${selectedFsms.length} FSM(s), ${totalNodes} raw state node(s)`;
-
   selectedFsms.forEach((item, index) => {
     const graph = prepareGraph(item.name, item.states, index);
     const cacheKey = getCacheKey(item.name);
@@ -1016,7 +1087,6 @@ function updateActiveStatesOnly() {
     }
 
     cardState.graph = graph;
-    cardState.subtitle.textContent = `${graph.visibleNodeCount} visible state node(s), ${graph.transitionCount} transition(s)`;
     applyHighlights(cardState);
   });
 }
@@ -1055,6 +1125,7 @@ async function pollFsms() {
 
     state.fsms = nextFsms;
     updateFsmSelector();
+    updateCardsPerRowSelector();
     await updateView(false);
   } catch (error) {
     const stale = Date.now() - state.lastSuccessMs > 3000;
@@ -1066,8 +1137,24 @@ async function pollFsms() {
   }
 }
 
+function applyToVisibleCards(callback) {
+  state.diagramCache.forEach((cardState) => {
+    if (!cardState.card.isConnected) {
+      return;
+    }
+
+    callback(cardState);
+  });
+}
+
 fsmSelect.addEventListener("change", async (event) => {
   state.currentFsm = event.target.value;
+  await updateView(true);
+});
+
+cardsPerRowSelect.addEventListener("change", async (event) => {
+  state.cardsPerRow = Number(event.target.value);
+  updateDiagramGridColumns();
   await updateView(true);
 });
 
@@ -1099,6 +1186,8 @@ resetZoomButton.addEventListener("click", () => {
   });
 });
 
+updateCardsPerRowSelector();
+updateDiagramGridColumns();
 setStatus("Connecting", "status-connecting");
 await pollFsms();
 window.setInterval(() => {
