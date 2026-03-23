@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
-find_package(ament_cmake_target_dependencies REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(Boost REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -30,6 +29,7 @@ set(DEPENDENCIES
 )
 
 set(DEPENDENCIES_PACKAGE
+  ament_index_cpp
   rclcpp
   rclpy
   yasmin
@@ -52,12 +52,12 @@ target_include_directories(yasmin_viewer_node PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
 )
-ament_target_dependencies(yasmin_viewer_node
-  ament_index_cpp
-  rclcpp
-  yasmin_msgs
+target_link_libraries(yasmin_viewer_node PUBLIC
+  ament_index_cpp::ament_index_cpp
+  rclcpp::rclcpp
+  ${yasmin_msgs_TARGETS}
+  ${Boost_LIBRARIES}
 )
-target_link_libraries(yasmin_viewer_node PUBLIC ${Boost_LIBRARIES})
 
 ament_python_install_package(${PROJECT_NAME})
 
