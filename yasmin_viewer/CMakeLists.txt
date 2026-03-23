@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
+find_package(ament_cmake_target_dependencies REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(Boost REQUIRED)
 find_package(rclcpp REQUIRED)
