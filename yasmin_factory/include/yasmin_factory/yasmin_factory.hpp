@@ -122,7 +122,8 @@ public:
    * @return A shared pointer to the created StateMachine.
    * @throws std::runtime_error If the XML structure is invalid.
    */
-  yasmin::StateMachine::SharedPtr create_sm(tinyxml2::XMLElement *root);
+  yasmin::StateMachine::SharedPtr create_sm(tinyxml2::XMLElement *root,
+                                          bool is_root = true);
 
   /**
    * @brief Creates a state machine from an XML file.
@@ -214,6 +215,9 @@ private:
   get_optional_attribute(tinyxml2::XMLElement *element,
                          const std::string &attr_name,
                          const std::string &default_value = "") const;
+
+  void add_blackboard_keys(yasmin::State::SharedPtr owner,
+                         tinyxml2::XMLElement *parent) const;
 };
 
 } // namespace yasmin_factory

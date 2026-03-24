@@ -231,14 +231,16 @@ class TestYasminFactory(unittest.TestCase):
         self.assertIsNotNone(sm)
         self.assertEqual(sm.get_description(), "Test SM description")
 
-    def test_sm_defaults_from_xml(self):
-        """Test that a state machine parses Default elements from XML."""
+    def test_sm_keys_from_xml(self):
+        """Test that a state machine parses global Key elements from XML."""
         sm_xml = """
         <StateMachine outcomes="end">
-            <Default key="param_int" value="42" type="int" description="An integer"/>
-            <Default key="param_str" value="hello" type="str" description="A string"/>
-            <Default key="param_float" value="3.14" type="float"/>
-            <Default key="param_bool" value="true" type="bool"/>
+            <Key name="param_int" type="IN" default_value="42" default_type="int" description="An integer"/>
+            <Key name="param_str" type="IN" default_value="hello" default_type="str" description="A string"/>
+            <Key name="param_float" type="IN" default_value="3.14" default_type="float"/>
+            <Key name="param_bool" type="IN" default_value="true" default_type="bool"/>
+            <Key name="result" type="OUT" description="Output value"/>
+            <Key name="shared_key" type="IN/OUT" default_value="5" default_type="int" description="Shared"/>
             <State name="State1" type="py" module="test.test_simple_state" class="TestSimpleState">
                 <Transition from="outcome1" to="State1"/>
                 <Transition from="outcome2" to="end"/>
@@ -250,38 +252,28 @@ class TestYasminFactory(unittest.TestCase):
 
         self.assertIsNotNone(sm)
         input_keys = sm.get_input_keys()
-        self.assertEqual(len(input_keys), 4)
+        output_keys = sm.get_output_keys()
+        self.assertEqual(len(input_keys), 5)
+        self.assertEqual(len(output_keys), 2)
 
-        # Build a dict for easy lookup
-        keys_by_name = {k["name"]: k for k in input_keys}
+        input_by_name = {k["name"]: k for k in input_keys}
+        output_by_name = {k["name"]: k for k in output_keys}
 
-        self.assertIn("param_int", keys_by_name)
-        self.assertTrue(keys_by_name["param_int"]["has_default"])
-        self.assertEqual(keys_by_name["param_int"]["default_value"], 42)
-        self.assertEqual(keys_by_name["param_int"]["description"], "An integer")
+        self.assertEqual(input_by_name["param_int"]["default_value"], 42)
+        self.assertEqual(input_by_name["param_str"]["default_value"], "hello")
+        self.assertAlmostEqual(input_by_name["param_float"]["default_value"], 3.14, places=2)
+        self.assertEqual(input_by_name["param_bool"]["default_value"], True)
+        self.assertEqual(input_by_name["shared_key"]["default_value"], 5)
+        self.assertEqual(output_by_name["result"]["description"], "Output value")
+        self.assertEqual(output_by_name["shared_key"]["description"], "Shared")
 
-        self.assertIn("param_str", keys_by_name)
-        self.assertTrue(keys_by_name["param_str"]["has_default"])
-        self.assertEqual(keys_by_name["param_str"]["default_value"], "hello")
-        self.assertEqual(keys_by_name["param_str"]["description"], "A string")
-
-        self.assertIn("param_float", keys_by_name)
-        self.assertTrue(keys_by_name["param_float"]["has_default"])
-        self.assertAlmostEqual(
-            keys_by_name["param_float"]["default_value"], 3.14, places=2
-        )
-
-        self.assertIn("param_bool", keys_by_name)
-        self.assertTrue(keys_by_name["param_bool"]["has_default"])
-        self.assertEqual(keys_by_name["param_bool"]["default_value"], True)
-
-    def test_nested_sm_description_and_defaults(self):
-        """Test nested SM with description and defaults."""
+    def test_nested_sm_description_and_global_keys(self):
+        """Test nested SM with keys stored only on the root state machine."""
         sm_xml = """
         <StateMachine outcomes="end" description="Root description">
-            <Default key="root_key" value="root_val" type="str"/>
+            <Key name="root_key" type="IN" default_value="root_val" default_type="str" description="Root key"/>
+            <Key name="inner_key" type="IN" default_value="10" default_type="int" description="Inner key"/>
             <StateMachine name="Inner" outcomes="inner_done" description="Inner description">
-                <Default key="inner_key" value="10" type="int"/>
                 <State name="S1" type="py" module="test.test_simple_state" class="TestSimpleState">
                     <Transition from="outcome1" to="S1"/>
                     <Transition from="outcome2" to="inner_done"/>
@@ -296,10 +288,13 @@ class TestYasminFactory(unittest.TestCase):
         self.assertIsNotNone(sm)
         self.assertEqual(sm.get_description(), "Root description")
 
-        root_keys = sm.get_input_keys()
-        self.assertEqual(len(root_keys), 1)
-        self.assertEqual(root_keys[0]["name"], "root_key")
-        self.assertEqual(root_keys[0]["default_value"], "root_val")
+        root_input_keys = sm.get_input_keys()
+        root_output_keys = sm.get_output_keys()
+        self.assertEqual(len(root_input_keys), 2)
+        self.assertEqual(len(root_output_keys), 0)
+        root_key_names = {k["name"] for k in root_input_keys}
+        self.assertIn("root_key", root_key_names)
+        self.assertIn("inner_key", root_key_names)
 
     def test_fsm_metadata_from_file(self):
         """Test loading FSM metadata (description and defaults) from file."""
@@ -311,8 +306,10 @@ class TestYasminFactory(unittest.TestCase):
         self.assertEqual(sm.get_description(), "Root SM description")
         self.assertEqual(sm.get_outcome_description("end"), "Final outcome")
 
-        root_keys = sm.get_input_keys()
-        self.assertEqual(len(root_keys), 2)
+        root_input_keys = sm.get_input_keys()
+        root_output_keys = sm.get_output_keys()
+        self.assertEqual(len(root_input_keys), 4)
+        self.assertEqual(len(root_output_keys), 2)
 
 
 if __name__ == "__main__":

@@ -59,24 +59,7 @@ class YasminFactory:
         else:
             raise ValueError(f"Unknown state type: {state_type}")
 
-        # Parse Default elements for input key default values
-        for def_elem in state_elem.findall("Default"):
-            key = def_elem.attrib["key"]
-            value_str = def_elem.attrib["value"]
-            type_str = def_elem.attrib.get("type", "str")
-            key_description = def_elem.attrib.get("description", "")
-
-            if type_str == "int":
-                value = int(value_str)
-            elif type_str in ("float", "double"):
-                value = float(value_str)
-            elif type_str == "bool":
-                value = value_str.lower() in ("true", "1")
-            else:
-                value = value_str
-
-            state.add_input_key(key, key_description, value)
-
+        self._add_blackboard_keys(state, state_elem)
         return state
 
     def create_concurrence(self, conc_elem: ET.Element) -> Concurrence:
@@ -112,7 +95,7 @@ class YasminFactory:
                 states[child.attrib["name"]] = self.create_concurrence(child)
 
             elif child.tag == "StateMachine":
-                states[child.attrib["name"]] = self.create_sm(child)
+                states[child.attrib["name"]] = self.create_sm(child, is_root=False)
 
         concurrence = Concurrence(
             states=list(states.values()),
@@ -129,7 +112,7 @@ class YasminFactory:
 
         return concurrence
 
-    def create_sm(self, root: ET.Element) -> StateMachine:
+    def create_sm(self, root: ET.Element, is_root: bool = True) -> StateMachine:
         """
         Recursively creates a state machine from an XML element.
         Args:
@@ -183,7 +166,7 @@ class YasminFactory:
                 state = self.create_concurrence(child)
 
             elif child.tag == "StateMachine":
-                state = self.create_sm(child)
+                state = self.create_sm(child, is_root=False)
 
             else:
                 continue
@@ -198,7 +181,6 @@ class YasminFactory:
         if set_start_state:
             sm.set_start_state(set_start_state)
 
-        # Parse description attribute
         description = root.attrib.get("description", "")
         if description:
             sm.set_description(description)
@@ -210,24 +192,8 @@ class YasminFactory:
             if outcome_description:
                 sm.set_outcome_description(outcome_name, outcome_description)
 
-        # Parse Default elements for input key default values
-        for def_elem in root.findall("Default"):
-            key = def_elem.attrib["key"]
-            value_str = def_elem.attrib["value"]
-            type_str = def_elem.attrib.get("type", "str")
-            key_description = def_elem.attrib.get("description", "")
-
-            if type_str == "int":
-                value = int(value_str)
-            elif type_str in ("float", "double"):
-                value = float(value_str)
-            elif type_str == "bool":
-                value = value_str.lower() in ("true", "1")
-            else:
-                value = value_str
-
-            sm.add_input_key(key, key_description, value)
-
+        if is_root:
+            self._add_blackboard_keys(sm, root)
         return sm
 
     def create_sm_from_file(self, xml_file: str) -> StateMachine:
@@ -255,3 +221,40 @@ class YasminFactory:
         sm = self.create_sm(root)
         sm.set_name(fsm_name)
         return sm
+
+    def _parse_key_value(self, value_str: str, type_str: str):
+        """Parse a key default value from XML."""
+        if type_str == "int":
+            return int(value_str)
+        if type_str in ("float", "double"):
+            return float(value_str)
+        if type_str == "bool":
+            return value_str.lower() in ("true", "1")
+        return value_str
+
+    def _add_blackboard_keys(self, owner, parent_elem: ET.Element) -> None:
+        """Parse new Key syntax and legacy Default syntax."""
+        for key_elem in parent_elem.findall("Key"):
+            key_name = key_elem.attrib["name"]
+            key_usage = key_elem.attrib.get("type", "IN").upper()
+            key_description = key_elem.attrib.get("description", "")
+            default_type = key_elem.attrib.get("default_type", "str")
+            default_value = key_elem.attrib.get("default_value")
+
+            if key_usage in ("IN", "IN/OUT"):
+                if default_value is not None:
+                    value = self._parse_key_value(default_value, default_type)
+                    owner.add_input_key(key_name, key_description, value)
+                else:
+                    owner.add_input_key(key_name, key_description)
+
+            if key_usage in ("OUT", "IN/OUT"):
+                owner.add_output_key(key_name, key_description)
+
+        for def_elem in parent_elem.findall("Default"):
+            key_name = def_elem.attrib["key"]
+            value_str = def_elem.attrib["value"]
+            type_str = def_elem.attrib.get("type", "str")
+            key_description = def_elem.attrib.get("description", "")
+            value = self._parse_key_value(value_str, type_str)
+            owner.add_input_key(key_name, key_description, value)

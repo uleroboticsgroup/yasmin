@@ -164,57 +164,98 @@ YasminFactory::get_optional_attribute(tinyxml2::XMLElement *element,
   return attr ? std::string(attr) : default_value;
 }
 
+void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
+                                        tinyxml2::XMLElement *parent) const {
+  for (tinyxml2::XMLElement *key_elem = parent->FirstChildElement("Key");
+       key_elem; key_elem = key_elem->NextSiblingElement("Key")) {
+    const std::string key_name = this->get_required_attribute(key_elem, "name");
+    std::string key_usage =
+        this->get_optional_attribute(key_elem, "type", "IN");
+    const std::string key_description =
+        this->get_optional_attribute(key_elem, "description", "");
+    const std::string default_type =
+        this->get_optional_attribute(key_elem, "default_type", "str");
+
+    std::transform(key_usage.begin(), key_usage.end(), key_usage.begin(),
+                   [](unsigned char c) { return std::toupper(c); });
+
+    const char *default_value_attr = key_elem->Attribute("default_value");
+
+    if (key_usage == "IN" || key_usage == "IN/OUT") {
+      if (default_value_attr) {
+        if (default_type == "int") {
+          owner->add_input_key(yasmin::BlackboardKeyInfo(
+              key_name, key_description, std::stoi(default_value_attr)));
+        } else if (default_type == "float" || default_type == "double") {
+          owner->add_input_key(yasmin::BlackboardKeyInfo(
+              key_name, key_description, std::stod(default_value_attr)));
+        } else if (default_type == "bool") {
+          owner->add_input_key(yasmin::BlackboardKeyInfo(
+              key_name, key_description,
+              std::string(default_value_attr) == "true" ||
+                  std::string(default_value_attr) == "True" ||
+                  std::string(default_value_attr) == "1"));
+        } else {
+          owner->add_input_key(yasmin::BlackboardKeyInfo(
+              key_name, key_description, std::string(default_value_attr)));
+        }
+      } else {
+        owner->add_input_key(
+            yasmin::BlackboardKeyInfo(key_name, key_description));
+      }
+    }
+
+    if (key_usage == "OUT" || key_usage == "IN/OUT") {
+      owner->add_output_key(
+          yasmin::BlackboardKeyInfo(key_name, key_description));
+    }
+  }
+
+  for (tinyxml2::XMLElement *def_elem = parent->FirstChildElement("Default");
+       def_elem; def_elem = def_elem->NextSiblingElement("Default")) {
+    const std::string key_name = this->get_required_attribute(def_elem, "key");
+    const std::string value_str =
+        this->get_required_attribute(def_elem, "value");
+    const std::string type_str =
+        this->get_optional_attribute(def_elem, "type", "str");
+    const std::string key_description =
+        this->get_optional_attribute(def_elem, "description", "");
+
+    if (type_str == "int") {
+      owner->add_input_key(yasmin::BlackboardKeyInfo(key_name, key_description,
+                                                     std::stoi(value_str)));
+    } else if (type_str == "float" || type_str == "double") {
+      owner->add_input_key(yasmin::BlackboardKeyInfo(key_name, key_description,
+                                                     std::stod(value_str)));
+    } else if (type_str == "bool") {
+      owner->add_input_key(yasmin::BlackboardKeyInfo(
+          key_name, key_description,
+          value_str == "true" || value_str == "True" || value_str == "1"));
+    } else {
+      owner->add_input_key(
+          yasmin::BlackboardKeyInfo(key_name, key_description, value_str));
+    }
+  }
+}
+
 yasmin::State::SharedPtr
 YasminFactory::create_state(tinyxml2::XMLElement *state_elem) const {
-  std::string state_type =
-      this->get_optional_attribute(state_elem, "type", "cpp");
+  std::string type = this->get_optional_attribute(state_elem, "type", "py");
   std::string class_name = this->get_required_attribute(state_elem, "class");
 
   yasmin::State::SharedPtr state;
 
-  if (state_type == "cpp") {
-    try {
-      state = state_loader_->createSharedInstance(class_name);
-    } catch (const pluginlib::PluginlibException &ex) {
-      throw std::runtime_error("Failed to load C++ state class '" + class_name +
-                               "': " + ex.what());
-    }
-  } else if (state_type == "py") {
+  if (type == "py") {
     std::string module_name =
         this->get_required_attribute(state_elem, "module");
     state = this->create_python_state(module_name, class_name);
+  } else if (type == "cpp") {
+    state = this->state_loader_->createSharedInstance(class_name);
   } else {
-    throw std::runtime_error("Unknown state type: " + state_type);
+    throw std::runtime_error("Unknown state type: " + type);
   }
 
-  // Parse Default elements for input key default values
-  for (tinyxml2::XMLElement *def_elem =
-           state_elem->FirstChildElement("Default");
-       def_elem; def_elem = def_elem->NextSiblingElement("Default")) {
-    std::string key = this->get_required_attribute(def_elem, "key");
-    std::string value_str = this->get_required_attribute(def_elem, "value");
-    std::string type_str =
-        this->get_optional_attribute(def_elem, "type", "str");
-    std::string key_description =
-        this->get_optional_attribute(def_elem, "description", "");
-
-    yasmin::BlackboardKeyInfo info;
-    if (type_str == "int") {
-      info =
-          yasmin::BlackboardKeyInfo(key, key_description, std::stoi(value_str));
-    } else if (type_str == "float" || type_str == "double") {
-      info =
-          yasmin::BlackboardKeyInfo(key, key_description, std::stod(value_str));
-    } else if (type_str == "bool") {
-      info = yasmin::BlackboardKeyInfo(
-          key, key_description,
-          (value_str == "true" || value_str == "True" || value_str == "1"));
-    } else {
-      info = yasmin::BlackboardKeyInfo(key, key_description, value_str);
-    }
-    state->add_input_key(info);
-  }
-
+  this->add_blackboard_keys(state, state_elem);
   return state;
 }
 
@@ -240,7 +281,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
       states[name] = this->create_concurrence(child);
     } else if (child_name == "StateMachine") {
       std::string name = this->get_required_attribute(child, "name");
-      states[name] = this->create_sm(child);
+      states[name] = this->create_sm(child, false);
     }
   }
 
@@ -289,7 +330,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
 }
 
 yasmin::StateMachine::SharedPtr
-YasminFactory::create_sm(tinyxml2::XMLElement *root) {
+YasminFactory::create_sm(tinyxml2::XMLElement *root, bool is_root) {
 
   std::string file_path = this->get_optional_attribute(root, "file_path", "");
 
@@ -374,7 +415,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
     } else if (child_name == "Concurrence") {
       state = this->create_concurrence(child);
     } else if (child_name == "StateMachine") {
-      state = this->create_sm(child);
+      state = this->create_sm(child, false);
     } else {
       continue;
     }
@@ -410,33 +451,9 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
     }
   }
 
-  // Parse Default elements for input key default values
-  for (tinyxml2::XMLElement *def_elem = root->FirstChildElement("Default");
-       def_elem; def_elem = def_elem->NextSiblingElement("Default")) {
-    std::string key = this->get_required_attribute(def_elem, "key");
-    std::string value_str = this->get_required_attribute(def_elem, "value");
-    std::string type_str =
-        this->get_optional_attribute(def_elem, "type", "str");
-    std::string key_description =
-        this->get_optional_attribute(def_elem, "description", "");
-
-    yasmin::BlackboardKeyInfo info;
-    if (type_str == "int") {
-      info =
-          yasmin::BlackboardKeyInfo(key, key_description, std::stoi(value_str));
-    } else if (type_str == "float" || type_str == "double") {
-      info =
-          yasmin::BlackboardKeyInfo(key, key_description, std::stod(value_str));
-    } else if (type_str == "bool") {
-      info = yasmin::BlackboardKeyInfo(
-          key, key_description,
-          (value_str == "true" || value_str == "True" || value_str == "1"));
-    } else {
-      info = yasmin::BlackboardKeyInfo(key, key_description, value_str);
-    }
-    sm->add_input_key(info);
+  if (is_root) {
+    this->add_blackboard_keys(sm, root);
   }
-
   return sm;
 }
 

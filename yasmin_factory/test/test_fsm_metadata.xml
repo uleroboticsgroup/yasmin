@@ -1,14 +1,16 @@
 <StateMachine outcomes="end" description="Root SM description" name="TestFsmMetadata">
-    <Default key="root_param" value="42" type="int" description="Root integer param"/>
-    <Default key="root_name" value="test" type="str" description="Root string param"/>
+    <Key name="root_param" type="IN" default_value="42" default_type="int" description="Root integer param"/>
+    <Key name="root_name" type="IN" default_value="test" default_type="str" description="Root string param"/>
+    <Key name="root_result" type="OUT" description="Root output"/>
+    <Key name="nested_flag" type="IN" default_value="true" default_type="bool" description="A boolean flag"/>
+    <Key name="nested_rate" type="IN" default_value="3.14" default_type="float" description="A float rate"/>
+    <Key name="nested_result" type="OUT" description="Nested output"/>
     <State name="State1" type="cpp" class="yasmin_factory/TestSimpleState">
         <Transition from="outcome1" to="NestedSM"/>
         <Transition from="outcome2" to="end"/>
     </State>
     <FinalOutcome name="end" description="Final outcome"/>
     <StateMachine name="NestedSM" outcomes="nested_done" description="Nested SM description">
-        <Default key="nested_flag" value="true" type="bool" description="A boolean flag"/>
-        <Default key="nested_rate" value="3.14" type="float" description="A float rate"/>
         <State name="InnerState" type="cpp" class="yasmin_factory/TestSimpleState">
             <Transition from="outcome1" to="InnerState"/>
             <Transition from="outcome2" to="nested_done"/>

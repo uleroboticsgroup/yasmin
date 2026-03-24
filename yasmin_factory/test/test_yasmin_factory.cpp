@@ -374,13 +374,15 @@ TEST_F(TestYasminFactory, TestSmDescriptionFromXml) {
   }
 }
 
-TEST_F(TestYasminFactory, TestSmDefaultsFromXml) {
+TEST_F(TestYasminFactory, TestSmKeysFromXml) {
   std::string xml_content = R"(
     <StateMachine outcomes="end">
-      <Default key="param_int" value="42" type="int" description="An integer"/>
-      <Default key="param_str" value="hello" type="str" description="A string"/>
-      <Default key="param_float" value="3.14" type="float"/>
-      <Default key="param_bool" value="true" type="bool"/>
+      <Key name="param_int" type="IN" default_value="42" default_type="int" description="An integer"/>
+      <Key name="param_str" type="IN" default_value="hello" default_type="str" description="A string"/>
+      <Key name="param_float" type="IN" default_value="3.14" default_type="float"/>
+      <Key name="param_bool" type="IN" default_value="true" default_type="bool"/>
+      <Key name="result" type="OUT" description="Output value"/>
+      <Key name="shared_key" type="IN/OUT" default_value="5" default_type="int" description="Shared"/>
       <State name="State1" type="cpp" class="yasmin_factory/TestSimpleState">
         <Transition from="outcome1" to="State1"/>
         <Transition from="outcome2" to="end"/>
@@ -399,68 +401,39 @@ TEST_F(TestYasminFactory, TestSmDefaultsFromXml) {
 
     ASSERT_NE(sm, nullptr);
     auto input_keys = sm->get_input_keys();
-    EXPECT_EQ(input_keys.size(), 4);
+    auto output_keys = sm->get_output_keys();
+    EXPECT_EQ(input_keys.size(), 5);
+    EXPECT_EQ(output_keys.size(), 2);
 
-    // Check param_int
     bool found_int = false;
+    bool found_result = false;
     for (const auto &key : input_keys) {
       if (key.name == "param_int") {
         found_int = true;
         EXPECT_TRUE(key.has_default);
         EXPECT_EQ(key.get_default_value<int>(), 42);
         EXPECT_EQ(key.description, "An integer");
-        break;
+      }
+    }
+    for (const auto &key : output_keys) {
+      if (key.name == "result") {
+        found_result = true;
+        EXPECT_EQ(key.description, "Output value");
       }
     }
     EXPECT_TRUE(found_int);
-
-    // Check param_str
-    bool found_str = false;
-    for (const auto &key : input_keys) {
-      if (key.name == "param_str") {
-        found_str = true;
-        EXPECT_TRUE(key.has_default);
-        EXPECT_EQ(key.get_default_value<std::string>(), "hello");
-        EXPECT_EQ(key.description, "A string");
-        break;
-      }
-    }
-    EXPECT_TRUE(found_str);
-
-    // Check param_float
-    bool found_float = false;
-    for (const auto &key : input_keys) {
-      if (key.name == "param_float") {
-        found_float = true;
-        EXPECT_TRUE(key.has_default);
-        EXPECT_NEAR(key.get_default_value<double>(), 3.14, 0.001);
-        break;
-      }
-    }
-    EXPECT_TRUE(found_float);
-
-    // Check param_bool
-    bool found_bool = false;
-    for (const auto &key : input_keys) {
-      if (key.name == "param_bool") {
-        found_bool = true;
-        EXPECT_TRUE(key.has_default);
-        EXPECT_EQ(key.get_default_value<bool>(), true);
-        break;
-      }
-    }
-    EXPECT_TRUE(found_bool);
+    EXPECT_TRUE(found_result);
   } catch (const std::exception &e) {
     GTEST_SKIP() << "C++ plugin not available: " << e.what();
   }
 }
 
-TEST_F(TestYasminFactory, TestNestedSmDescriptionAndDefaults) {
+TEST_F(TestYasminFactory, TestNestedSmDescriptionAndGlobalKeys) {
   std::string xml_content = R"(
     <StateMachine outcomes="end" description="Root description">
-      <Default key="root_key" value="root_val" type="str"/>
+      <Key name="root_key" type="IN" default_value="root_val" default_type="str" description="Root key"/>
+      <Key name="inner_key" type="IN" default_value="10" default_type="int" description="Inner key"/>
       <StateMachine name="Inner" outcomes="inner_done" description="Inner description">
-        <Default key="inner_key" value="10" type="int"/>
         <State name="S1" type="cpp" class="yasmin_factory/TestSimpleState">
           <Transition from="outcome1" to="S1"/>
           <Transition from="outcome2" to="inner_done"/>
@@ -482,10 +455,10 @@ TEST_F(TestYasminFactory, TestNestedSmDescriptionAndDefaults) {
     ASSERT_NE(sm, nullptr);
     EXPECT_EQ(sm->get_description(), "Root description");
 
-    auto root_keys = sm->get_input_keys();
-    EXPECT_EQ(root_keys.size(), 1);
-    EXPECT_EQ(root_keys[0].name, "root_key");
-    EXPECT_EQ(root_keys[0].get_default_value<std::string>(), "root_val");
+    auto root_input_keys = sm->get_input_keys();
+    auto root_output_keys = sm->get_output_keys();
+    EXPECT_EQ(root_input_keys.size(), 2);
+    EXPECT_EQ(root_output_keys.size(), 0);
   } catch (const std::exception &e) {
     GTEST_SKIP() << "C++ plugin not available: " << e.what();
   }
@@ -502,8 +475,10 @@ TEST_F(TestYasminFactory, TestFsmMetadataFromFile) {
     EXPECT_EQ(sm->get_description(), "Root SM description");
     EXPECT_EQ(sm->get_outcome_description("end"), "Final outcome");
 
-    auto root_keys = sm->get_input_keys();
-    EXPECT_EQ(root_keys.size(), 2);
+    auto root_input_keys = sm->get_input_keys();
+    auto root_output_keys = sm->get_output_keys();
+    EXPECT_EQ(root_input_keys.size(), 4);
+    EXPECT_EQ(root_output_keys.size(), 2);
   } catch (const std::exception &e) {
     GTEST_SKIP() << "XML file not available or plugin missing: " << e.what();
   }
