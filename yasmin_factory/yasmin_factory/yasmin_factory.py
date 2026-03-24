@@ -125,9 +125,7 @@ class YasminFactory:
             outcome_description = outcome_elem.attrib.get("description", "")
 
             if outcome_description:
-                concurrence.set_outcome_description(
-                    outcome_name, outcome_description
-                )
+                concurrence.set_outcome_description(outcome_name, outcome_description)
 
         return concurrence
 

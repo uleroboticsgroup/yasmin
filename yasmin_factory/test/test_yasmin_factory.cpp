@@ -500,7 +500,7 @@ TEST_F(TestYasminFactory, TestFsmMetadataFromFile) {
     ASSERT_NE(sm, nullptr);
     EXPECT_EQ(sm->get_name(), "TestFsmMetadata");
     EXPECT_EQ(sm->get_description(), "Root SM description");
-    EXPECT_EQ(sm->get_outcome_description("end"),"Final outcome");
+    EXPECT_EQ(sm->get_outcome_description("end"), "Final outcome");
 
     auto root_keys = sm->get_input_keys();
     EXPECT_EQ(root_keys.size(), 2);
