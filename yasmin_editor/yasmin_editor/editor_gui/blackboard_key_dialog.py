@@ -1,4 +1,4 @@
-# Copyright (C) 2026 Miguel Ángel González Santamarta
+# Copyright (C) 2026 Maik Knof
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
