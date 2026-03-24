@@ -41,9 +41,10 @@ class StatePropertiesDialog(QDialog):
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Edit State Properties" if edit_mode else "Add State")
-        self.resize(600, 650)
+        self.resize(600, 700)
         self.edit_mode: bool = edit_mode
         self._base_description: str = description
+        self._fallback_outcomes: List[str] = outcomes or []
 
         layout: QFormLayout = QFormLayout(self)
 
@@ -80,41 +81,18 @@ class StatePropertiesDialog(QDialog):
 
         layout.addRow(self.plugin_label, self.plugin_combo)
 
-        self.plugin_combo.currentIndexChanged.connect(self.update_outcome_list)
+        self.plugin_combo.currentIndexChanged.connect(self.update_description)
         self.type_combo.currentIndexChanged.connect(self.update_plugin_list)
 
         # Disable plugin selection in edit mode (can't change plugin type)
         if edit_mode:
             self.plugin_combo.setEnabled(False)
 
-        # Outcomes field (for new state machines and concurrence)
-        self.outcomes_label: QLabel = QLabel("Outcomes:")
-        if plugin_info and hasattr(plugin_info, "outcomes"):
-            outcomes_str: str = ", ".join(plugin_info.outcomes)
-        elif outcomes:
-            outcomes_str = ", ".join(outcomes)
-        else:
-            outcomes_str = ""
-
-        self.outcomes_display: QLabel = QLabel(outcomes_str)
-        self.outcomes_display.setStyleSheet(
-            "background: #f0f0f0; border: 1px solid #ccc; padding: 4px;"
-        )
-        self.outcomes_display.setWordWrap(True)
-        self.outcomes_display.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        self.outcomes_display.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        # Dynamically set min/max height based on number of outcomes
-        num_outcomes: int = len(outcomes_str.split(",")) if outcomes_str else 0
-        base_height: int = 24
-        extra_height: int = min(3, num_outcomes) * 18  # up to 3 lines
-        self.outcomes_display.setMinimumHeight(base_height + extra_height)
-        self.outcomes_display.setMaximumHeight(base_height + max(3, num_outcomes) * 18)
-        layout.addRow(self.outcomes_label, self.outcomes_display)
-
         # State description (read-only — loaded from plugin metadata)
         desc_label: QLabel = QLabel("<b>Description:</b>")
         self.description_edit: QTextEdit = QTextEdit()
-        self.description_edit.setMaximumHeight(180)
+        self.description_edit.setMinimumHeight(240)
+        self.description_edit.setMaximumHeight(320)
         self.description_edit.setReadOnly(True)
         self.description_edit.setStyleSheet(
             "background: #f0f0f0; border: 1px solid #ccc; color: #333;"
@@ -157,13 +135,11 @@ class StatePropertiesDialog(QDialog):
                         if key_info.get("has_default")
                         else ""
                     ),
-                    "type": (
-                        key_info.get("default_value_type", None)
-                    ),
+                    "type": key_info.get("default_value_type", None),
                 }
-                # skip if type is not supported by editor
                 if row_data["type"] in ("str", "bool", "int", "float"):
                     init_defaults.append(row_data)
+
         for row_data in init_defaults:
             self._add_default_row_with_data(row_data)
 
@@ -175,7 +151,9 @@ class StatePropertiesDialog(QDialog):
 
         self.remappings_table: QTableWidget = QTableWidget(0, 2)
         self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
-        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.remappings_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.Stretch
+        )
         self.remappings_table.setMinimumHeight(80)
         self.remappings_table.setMaximumHeight(150)
         remappings_layout.addWidget(self.remappings_table)
@@ -205,13 +183,16 @@ class StatePropertiesDialog(QDialog):
                     self.plugin_combo.setCurrentIndex(i)
                     break
 
-        self.update_outcome_list()
+        self.update_description()
 
         if not self.plugin_combo.currentData():
-            init_desc = self._base_description
-            if not init_desc and plugin_info:
-                init_desc = getattr(plugin_info, "description", "")
-            self.description_edit.setPlainText(init_desc)
+            self.description_edit.setPlainText(
+                self._build_description_text(
+                    None,
+                    fallback_description=self._base_description,
+                    fallback_outcomes=self._fallback_outcomes,
+                )
+            )
 
         # Buttons
         buttons: QDialogButtonBox = QDialogButtonBox(
@@ -243,39 +224,48 @@ class StatePropertiesDialog(QDialog):
         return line
 
     def _build_description_text(
-        self, plugin_info: Optional[PluginInfo], fallback_description: str = ""
+        self,
+        plugin_info: Optional[PluginInfo],
+        fallback_description: str = "",
+        fallback_outcomes: Optional[List[str]] = None,
     ) -> str:
         if plugin_info:
             base_description = str(getattr(plugin_info, "description", "") or "").strip()
             input_keys = list(getattr(plugin_info, "input_keys", []) or [])
             output_keys = list(getattr(plugin_info, "output_keys", []) or [])
+            outcomes = list(getattr(plugin_info, "outcomes", []) or [])
         else:
             base_description = fallback_description.strip()
             input_keys = []
             output_keys = []
+            outcomes = list(fallback_outcomes or [])
 
         sections: List[str] = []
         if base_description:
             sections.append(base_description)
 
-        key_sections: List[str] = []
+        if outcomes:
+            if sections:
+                sections.append("")
+            sections.append("Outcomes:")
+            sections.extend([f" - {outcome}" for outcome in outcomes])
+
 
         if input_keys:
+            if sections:
+                sections.append("")
             lines = ["Input Keys:"]
             for key_info in input_keys:
                 lines.append(" - " + self._format_key_line(key_info, True))
-            key_sections.append("\n".join(lines))
+            sections.append("\n".join(lines))
 
         if output_keys:
+            if sections:
+                sections.append("")
             lines = ["Output Keys:"]
             for key_info in output_keys:
                 lines.append(" - " + self._format_key_line(key_info, False))
-            key_sections.append("\n".join(lines))
-
-        if key_sections:
-            if sections:
-                sections.append("")
-            sections.extend(key_sections)
+            sections.append("\n".join(lines))
 
         return "\n".join(sections).strip()
 
@@ -320,27 +310,18 @@ class StatePropertiesDialog(QDialog):
         type_combo = QComboBox()
         type_combo.addItems(["str", "int", "float", "bool"])
         type_str = data.get("type", "str")
-        # Normalize type name
         for i in range(type_combo.count()):
             if type_combo.itemText(i) in type_str:
                 type_combo.setCurrentIndex(i)
                 break
         self.defaults_table.setCellWidget(row, 2, type_combo)
 
-    def update_outcome_list(self) -> None:
-        current_type: int = self.type_combo.currentIndex()
-        plugin_info: Optional[PluginInfo] = None
-        if current_type in [0, 1, 2]:
-            plugin_info = self.plugin_combo.currentData()
-
-        if plugin_info and hasattr(plugin_info, "outcomes"):
-            outcomes_str: str = ", ".join(plugin_info.outcomes)
-        else:
-            outcomes_str = ""
-        self.outcomes_display.setText(outcomes_str)
-
+    def update_description(self) -> None:
+        plugin_info: Optional[PluginInfo] = self.plugin_combo.currentData()
         description_text = self._build_description_text(
-            plugin_info, fallback_description=self._base_description
+            plugin_info,
+            fallback_description=self._base_description,
+            fallback_outcomes=self._fallback_outcomes,
         )
         self.description_edit.setPlainText(description_text)
 
@@ -369,6 +350,8 @@ class StatePropertiesDialog(QDialog):
                     )
                     self.plugin_combo.addItem(display_name, plugin)
 
+        self.update_description()
+
     def get_state_data(
         self,
     ) -> Tuple[
@@ -392,8 +375,10 @@ class StatePropertiesDialog(QDialog):
             if old_key and new_key:
                 remappings[old_key] = new_key
 
-        outcomes: str = self.outcomes_display.text().strip()
-        outcomes_list: List[str] = [o.strip() for o in outcomes.split(",") if o.strip()]
+        if plugin and hasattr(plugin, "outcomes"):
+            outcomes_list: List[str] = list(plugin.outcomes)
+        else:
+            outcomes_list = list(self._fallback_outcomes)
 
         description: str = self.description_edit.toPlainText().strip()
 
@@ -402,14 +387,10 @@ class StatePropertiesDialog(QDialog):
             key_item = self.defaults_table.item(row, 0)
             value_item = self.defaults_table.item(row, 1)
             type_widget = self.defaults_table.cellWidget(row, 2)
-            desc_item = self.defaults_table.item(row, 3)
             key = key_item.text().strip() if key_item else ""
             value = value_item.text().strip() if value_item else ""
             type_str = type_widget.currentText() if type_widget else "str"
-            desc = desc_item.text().strip() if desc_item else ""
             if key:
-                defaults.append(
-                    {"key": key, "value": value, "type": type_str, "description": desc}
-                )
+                defaults.append({"key": key, "value": value, "type": type_str})
 
         return name, plugin, outcomes_list, remappings, description, defaults
