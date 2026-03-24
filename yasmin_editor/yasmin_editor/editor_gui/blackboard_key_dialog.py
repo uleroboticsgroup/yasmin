@@ -111,9 +111,7 @@ class BlackboardKeyDialog(QDialog):
             else ""
         )
         default_value = (
-            self.default_value_edit.text()
-            if self.default_value_edit.isEnabled()
-            else ""
+            self.default_value_edit.text() if self.default_value_edit.isEnabled() else ""
         )
 
         return {
