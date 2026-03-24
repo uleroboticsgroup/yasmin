@@ -70,6 +70,16 @@ protected:
   }
 };
 
+class RemappingWriterState : public State {
+public:
+  RemappingWriterState() : State({"done"}) {}
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    blackboard->set<std::string>("nested_key", "nested_value");
+    return "done";
+  }
+};
+
 TEST_F(TestStateMachine, TestStr) {
   std::string sm_str = sm->to_string();
   // Check if "Bar (BarState)" and "Foo (FooState)" are in the string
@@ -357,6 +367,25 @@ TEST_F(TestStateMachine, TestMultipleCallbacks) {
   EXPECT_EQ(start_count, 2);
   EXPECT_EQ(transition_count, 12); // 6 transitions * 2 callbacks
   EXPECT_EQ(end_count, 2);
+}
+
+TEST_F(TestStateMachine, TestNestedRemappingsAreComposed) {
+  auto outer_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  auto inner_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  auto blackboard = yasmin::Blackboard::make_shared();
+
+  inner_sm->add_state(
+      "WRITE", std::make_shared<RemappingWriterState>(),
+      yasmin::Transitions{{"done", "done"}},
+      yasmin::Remappings{{"nested_key", "middle_key"}});
+
+  outer_sm->add_state(
+      "INNER", inner_sm, yasmin::Transitions{{"done", "done"}},
+      yasmin::Remappings{{"middle_key", "outer_key"}});
+
+  EXPECT_EQ((*outer_sm)(blackboard), "done");
+  EXPECT_TRUE(blackboard->contains("outer_key"));
+  EXPECT_EQ(blackboard->get<std::string>("outer_key"), "nested_value");
 }
 
 int main(int argc, char **argv) {
