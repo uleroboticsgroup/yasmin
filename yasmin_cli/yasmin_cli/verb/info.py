@@ -18,6 +18,18 @@
 from yasmin_cli.completer import find_plugin, plugin_completer, plugin_id
 
 
+def _print_outcome_block(
+    title: str, outcomes: list[str], outcome_descriptions: dict[str, str]
+) -> None:
+    print(f"{title}:")
+    for outcome in outcomes:
+        line = f" - {outcome}"
+        desc = outcome_descriptions.get(outcome, "")
+        if desc:
+            line += f": {desc}"
+        print(line)
+
+
 def _print_key_block(title: str, keys: list[dict]) -> None:
     if not keys:
         return
@@ -43,7 +55,7 @@ def _print_plugin_details(plugin) -> None:
     print(f"Plugin:      {plugin_id(plugin)}")
     print(f"Type:        {plugin.plugin_type}")
     print(f"Description: {plugin.description if plugin.description else '-'}")
-    print(f"Outcomes:    {', '.join(plugin.outcomes) if plugin.outcomes else '-'}")
+    _print_outcome_block(f"Outcomes", plugin.outcomes, plugin.outcome_descriptions)
     _print_key_block("Input keys", plugin.input_keys)
     _print_key_block("Output keys", plugin.output_keys)
 
