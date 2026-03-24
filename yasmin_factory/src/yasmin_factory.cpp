@@ -268,7 +268,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
     }
   }
 
-  auto concurrence = 
+  auto concurrence =
       yasmin::Concurrence::make_shared(states, default_outcome, outcome_map);
 
   for (tinyxml2::XMLElement *outcome_elem =
