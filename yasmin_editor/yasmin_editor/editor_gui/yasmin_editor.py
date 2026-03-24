@@ -468,7 +468,7 @@ class YasminEditor(QMainWindow):
         for key_data in self._blackboard_keys:
             if key_data.get("key_type") not in ("IN", "IN/OUT"):
                 continue
-            if not key_data.get("default_value"):
+            if not key_data.get("default_type"):
                 continue
             defaults.append(
                 {

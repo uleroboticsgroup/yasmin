@@ -31,7 +31,7 @@ class BlackboardKeyDialog(QDialog):
     """Dialog for creating and editing blackboard keys."""
 
     TYPE_OPTIONS = ["IN", "OUT", "IN/OUT"]
-    VALUE_TYPE_OPTIONS = ["str", "int", "float", "bool"]
+    VALUE_TYPE_OPTIONS = ["", "str", "int", "float", "bool"]
 
     def __init__(self, key_data: Optional[Dict[str, str]] = None, parent=None) -> None:
         super().__init__(parent)
@@ -60,20 +60,25 @@ class BlackboardKeyDialog(QDialog):
         layout.addRow(QLabel("<b>Description (optional):</b>"), self.description_edit)
 
         self.default_type_combo = QComboBox()
-        self.default_type_combo.addItems(self.VALUE_TYPE_OPTIONS)
-        default_type = key_data.get("default_type", "str")
-        default_type_index = self.default_type_combo.findText(default_type)
+        self.default_type_combo.addItem("No default", "")
+        for option in self.VALUE_TYPE_OPTIONS[1:]:
+            self.default_type_combo.addItem(option, option)
+        default_type = key_data.get("default_type", "")
+        default_type_index = self.default_type_combo.findData(default_type)
         if default_type_index >= 0:
             self.default_type_combo.setCurrentIndex(default_type_index)
         layout.addRow("Default Type:", self.default_type_combo)
 
         self.default_value_edit = QLineEdit(key_data.get("default_value", ""))
         self.default_value_edit.setPlaceholderText(
-            "Optional default value for input keys"
+            "Default value. Leave empty for an empty string when type is str"
         )
         layout.addRow("Default Value:", self.default_value_edit)
 
         self.type_combo.currentTextChanged.connect(self._update_default_fields)
+        self.default_type_combo.currentIndexChanged.connect(
+            lambda _: self._update_default_fields(self.type_combo.currentText())
+        )
         self._update_default_fields(self.type_combo.currentText())
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -84,8 +89,12 @@ class BlackboardKeyDialog(QDialog):
     def _update_default_fields(self, key_type: str) -> None:
         default_allowed = key_type in ("IN", "IN/OUT")
         self.default_type_combo.setEnabled(default_allowed)
-        self.default_value_edit.setEnabled(default_allowed)
+
+        has_default_type = self.default_type_combo.currentData() != ""
+        self.default_value_edit.setEnabled(default_allowed and has_default_type)
+
         if not default_allowed:
+            self.default_type_combo.setCurrentIndex(0)
             self.default_value_edit.clear()
 
     def _accept_with_validation(self) -> None:
@@ -97,12 +106,12 @@ class BlackboardKeyDialog(QDialog):
     def get_key_data(self) -> Dict[str, str]:
         key_type = self.type_combo.currentText()
         default_type = (
-            self.default_type_combo.currentText()
+            self.default_type_combo.currentData()
             if self.default_type_combo.isEnabled()
             else ""
         )
         default_value = (
-            self.default_value_edit.text().strip()
+            self.default_value_edit.text()
             if self.default_value_edit.isEnabled()
             else ""
         )
