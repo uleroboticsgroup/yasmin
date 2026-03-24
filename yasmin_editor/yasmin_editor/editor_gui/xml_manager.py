@@ -592,7 +592,10 @@ class XmlManager:
     ) -> None:
         """Recursively load states and containers from XML."""
         for elem in parent_elem:
-            if elem.tag == "State":
+            is_xml_plugin_state = elem.tag == "StateMachine" and elem.get("file_name")
+            is_regular_state = elem.tag == "State"
+
+            if is_regular_state or is_xml_plugin_state:
                 state_name = elem.get("name")
                 state_type = elem.get("type", "py")
                 remappings = self.load_remappings(elem)
@@ -621,14 +624,29 @@ class XmlManager:
                     )
                 elif state_type == "xml":
                     file_name = elem.get("file_name")
+                    package_name = elem.get("package")
                     plugin_info = next(
                         (
                             p
                             for p in self.editor.plugin_manager.xml_files
                             if p.file_name == file_name
+                            and (
+                                package_name is None
+                                or p.package_name == package_name
+                            )
                         ),
                         None,
                     )
+
+                    if plugin_info is None:
+                        plugin_info = next(
+                            (
+                                p
+                                for p in self.editor.plugin_manager.xml_files
+                                if p.file_name == file_name
+                            ),
+                            None,
+                        )
 
                 if plugin_info:
                     description = elem.get("description", "")
