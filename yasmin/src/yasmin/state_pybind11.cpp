@@ -288,7 +288,7 @@ PYBIND11_MODULE(state, m) {
             }
 
             result["output_keys"] = output_keys;
-            
+
             py::dict outcome_descriptions;
             for (const auto &[outcome, description] :
                  metadata.outcome_descriptions) {
