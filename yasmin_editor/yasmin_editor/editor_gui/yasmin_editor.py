@@ -488,6 +488,20 @@ class YasminEditor(QMainWindow):
         self.highlight_blackboard_btn.setText("Usage: On" if enabled else "Usage: Off")
         self.update_blackboard_usage_highlighting()
 
+    def get_effective_blackboard_key_name(self, state_node, key_name: str) -> str:
+        effective_key_name = key_name
+
+        remap_chain = []
+        current_node = state_node
+        while current_node is not None:
+            remap_chain.append(getattr(current_node, "remappings", {}) or {})
+            current_node = getattr(current_node, "parent_container", None)
+
+        for remappings in remap_chain:
+            effective_key_name = remappings.get(effective_key_name, effective_key_name)
+
+        return effective_key_name
+
     def state_uses_blackboard_key(self, state_node, key_name: str) -> bool:
         plugin_info = getattr(state_node, "plugin_info", None)
         if plugin_info is None:
@@ -500,8 +514,9 @@ class YasminEditor(QMainWindow):
             plugin_key_name = str(key_info.get("name", "")).strip()
             if not plugin_key_name:
                 continue
-            mapped_key_name = state_node.remappings.get(plugin_key_name, plugin_key_name)
-            plugin_keys.append(mapped_key_name)
+            plugin_keys.append(
+                self.get_effective_blackboard_key_name(state_node, plugin_key_name)
+            )
 
         return key_name in plugin_keys
 
