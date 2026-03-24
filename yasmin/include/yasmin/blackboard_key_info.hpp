@@ -20,8 +20,8 @@
 #include <memory>
 #include <string>
 #include <type_traits>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "yasmin/blackboard.hpp"
 

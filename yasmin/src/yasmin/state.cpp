@@ -161,8 +161,8 @@ void State::set_outcome_description(const std::string &outcome,
   this->get_metadata_ref().outcome_descriptions[outcome] = description;
 }
 
-const std::string &State::get_outcome_description(
-    const std::string &outcome) const {
+const std::string &
+State::get_outcome_description(const std::string &outcome) const {
   if (this->outcomes.find(outcome) == this->outcomes.end()) {
     throw std::invalid_argument("Outcome '" + outcome +
                                 "' is not part of state outcomes");
