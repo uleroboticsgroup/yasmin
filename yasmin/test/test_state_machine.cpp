@@ -374,14 +374,12 @@ TEST_F(TestStateMachine, TestNestedRemappingsAreComposed) {
   auto inner_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
   auto blackboard = yasmin::Blackboard::make_shared();
 
-  inner_sm->add_state(
-      "WRITE", std::make_shared<RemappingWriterState>(),
-      yasmin::Transitions{{"done", "done"}},
-      yasmin::Remappings{{"nested_key", "middle_key"}});
+  inner_sm->add_state("WRITE", std::make_shared<RemappingWriterState>(),
+                      yasmin::Transitions{{"done", "done"}},
+                      yasmin::Remappings{{"nested_key", "middle_key"}});
 
-  outer_sm->add_state(
-      "INNER", inner_sm, yasmin::Transitions{{"done", "done"}},
-      yasmin::Remappings{{"middle_key", "outer_key"}});
+  outer_sm->add_state("INNER", inner_sm, yasmin::Transitions{{"done", "done"}},
+                      yasmin::Remappings{{"middle_key", "outer_key"}});
 
   EXPECT_EQ((*outer_sm)(blackboard), "done");
   EXPECT_TRUE(blackboard->contains("outer_key"));
