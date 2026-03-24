@@ -15,25 +15,12 @@
 
 import os
 from typing import Dict, List, Optional, Tuple
-from PyQt5.QtWidgets import (
-    QLabel,
-    QDialog,
-    QFormLayout,
-    QLineEdit,
-    QComboBox,
-    QDialogButtonBox,
-    QTextEdit,
-    QTableWidget,
-    QTableWidgetItem,
-    QHeaderView,
-    QPushButton,
-    QHBoxLayout,
-    QVBoxLayout,
-    QWidget,
-)
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QSizePolicy
 
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFormLayout,
+                             QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+                             QPushButton, QSizePolicy, QTableWidget,
+                             QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget)
 from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
@@ -56,6 +43,7 @@ class StatePropertiesDialog(QDialog):
         self.setWindowTitle("Edit State Properties" if edit_mode else "Add State")
         self.resize(600, 650)
         self.edit_mode: bool = edit_mode
+        self._base_description: str = description
 
         layout: QFormLayout = QFormLayout(self)
 
@@ -92,13 +80,6 @@ class StatePropertiesDialog(QDialog):
 
         layout.addRow(self.plugin_label, self.plugin_combo)
 
-        # Pre-select plugin if provided
-        if plugin_info and self.type_combo.currentIndex() in [0, 1, 2]:
-            for i in range(self.plugin_combo.count()):
-                if self.plugin_combo.itemData(i) == plugin_info:
-                    self.plugin_combo.setCurrentIndex(i)
-                    break
-
         self.plugin_combo.currentIndexChanged.connect(self.update_outcome_list)
         self.type_combo.currentIndexChanged.connect(self.update_plugin_list)
 
@@ -133,16 +114,11 @@ class StatePropertiesDialog(QDialog):
         # State description (read-only — loaded from plugin metadata)
         desc_label: QLabel = QLabel("<b>Description:</b>")
         self.description_edit: QTextEdit = QTextEdit()
-        self.description_edit.setMaximumHeight(60)
+        self.description_edit.setMaximumHeight(180)
         self.description_edit.setReadOnly(True)
         self.description_edit.setStyleSheet(
             "background: #f0f0f0; border: 1px solid #ccc; color: #333;"
         )
-        init_desc = description
-        if not init_desc and plugin_info:
-            init_desc = getattr(plugin_info, "description", "")
-        if init_desc:
-            self.description_edit.setPlainText(init_desc)
         layout.addRow(desc_label, self.description_edit)
 
         # Default values table
@@ -151,10 +127,8 @@ class StatePropertiesDialog(QDialog):
         defaults_layout: QVBoxLayout = QVBoxLayout(defaults_widget)
         defaults_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.defaults_table: QTableWidget = QTableWidget(0, 4)
-        self.defaults_table.setHorizontalHeaderLabels(
-            ["Key", "Value", "Type", "Description"]
-        )
+        self.defaults_table: QTableWidget = QTableWidget(0, 3)
+        self.defaults_table.setHorizontalHeaderLabels(["Key", "Value", "Type"])
         self.defaults_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.defaults_table.setMinimumHeight(100)
         self.defaults_table.setMaximumHeight(200)
@@ -188,7 +162,6 @@ class StatePropertiesDialog(QDialog):
                         if key_info.get("has_default")
                         else "str"
                     ),
-                    "description": key_info.get("description", ""),
                 }
                 init_defaults.append(row_data)
         for row_data in init_defaults:
@@ -202,7 +175,9 @@ class StatePropertiesDialog(QDialog):
 
         self.remappings_table: QTableWidget = QTableWidget(0, 2)
         self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
-        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.remappings_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.Stretch
+        )
         self.remappings_table.setMinimumHeight(80)
         self.remappings_table.setMaximumHeight(150)
         remappings_layout.addWidget(self.remappings_table)
@@ -224,7 +199,21 @@ class StatePropertiesDialog(QDialog):
         layout.addRow(remappings_label, remappings_widget)
 
         self.update_plugin_list()
+
+        # Pre-select plugin if provided
+        if plugin_info and self.type_combo.currentIndex() in [0, 1, 2]:
+            for i in range(self.plugin_combo.count()):
+                if self.plugin_combo.itemData(i) == plugin_info:
+                    self.plugin_combo.setCurrentIndex(i)
+                    break
+
         self.update_outcome_list()
+
+        if not self.plugin_combo.currentData():
+            init_desc = self._base_description
+            if not init_desc and plugin_info:
+                init_desc = getattr(plugin_info, "description", "")
+            self.description_edit.setPlainText(init_desc)
 
         # Buttons
         buttons: QDialogButtonBox = QDialogButtonBox(
@@ -233,6 +222,66 @@ class StatePropertiesDialog(QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+    def _format_key_line(self, key_info: Dict[str, str], is_input: bool) -> str:
+        key_name = str(key_info.get("name", "")).strip()
+        key_desc = str(key_info.get("description", "")).strip()
+        key_type = str(
+            key_info.get("type", key_info.get("default_value_type", "str"))
+        ).strip()
+
+        line = key_name if key_name else "(unnamed)"
+
+        if key_desc:
+            line += f": {key_desc}"
+
+        if is_input and key_info.get("has_default"):
+            default_value = str(key_info.get("default_value", "")).strip()
+            line += f" Default: {default_value}"
+
+        if key_type:
+            line += f" ({key_type})"
+
+        return line
+
+    def _build_description_text(
+        self, plugin_info: Optional[PluginInfo], fallback_description: str = ""
+    ) -> str:
+        if plugin_info:
+            base_description = str(
+                getattr(plugin_info, "description", "") or ""
+            ).strip()
+            input_keys = list(getattr(plugin_info, "input_keys", []) or [])
+            output_keys = list(getattr(plugin_info, "output_keys", []) or [])
+        else:
+            base_description = fallback_description.strip()
+            input_keys = []
+            output_keys = []
+
+        sections: List[str] = []
+        if base_description:
+            sections.append(base_description)
+
+        key_sections: List[str] = []
+
+        if input_keys:
+            lines = ["Input Keys:"]
+            for key_info in input_keys:
+                lines.append(" - " + self._format_key_line(key_info, True))
+            key_sections.append("\n".join(lines))
+
+        if output_keys:
+            lines = ["Output Keys:"]
+            for key_info in output_keys:
+                lines.append(" - " + self._format_key_line(key_info, False))
+            key_sections.append("\n".join(lines))
+
+        if key_sections:
+            if sections:
+                sections.append("")
+            sections.extend(key_sections)
+
+        return "\n".join(sections).strip()
 
     def add_default_row(self) -> None:
         """Add an empty row to the defaults table."""
@@ -281,7 +330,6 @@ class StatePropertiesDialog(QDialog):
                 type_combo.setCurrentIndex(i)
                 break
         self.defaults_table.setCellWidget(row, 2, type_combo)
-        self.defaults_table.setItem(row, 3, QTableWidgetItem(data.get("description", "")))
 
     def update_outcome_list(self) -> None:
         current_type: int = self.type_combo.currentIndex()
@@ -294,6 +342,11 @@ class StatePropertiesDialog(QDialog):
         else:
             outcomes_str = ""
         self.outcomes_display.setText(outcomes_str)
+
+        description_text = self._build_description_text(
+            plugin_info, fallback_description=self._base_description
+        )
+        self.description_edit.setPlainText(description_text)
 
     def update_plugin_list(self) -> None:
         self.plugin_combo.clear()

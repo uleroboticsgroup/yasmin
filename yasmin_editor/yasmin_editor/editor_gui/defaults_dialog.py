@@ -14,18 +14,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from typing import Dict, List, Optional
-from PyQt5.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QHBoxLayout,
-    QTableWidget,
-    QTableWidgetItem,
-    QHeaderView,
-    QPushButton,
-    QDialogButtonBox,
-    QLabel,
-    QComboBox,
-)
+
+from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QHBoxLayout,
+                             QHeaderView, QLabel, QPushButton, QTableWidget,
+                             QTableWidgetItem, QVBoxLayout)
 
 
 class DefaultsDialog(QDialog):
@@ -43,8 +35,8 @@ class DefaultsDialog(QDialog):
         layout: QVBoxLayout = QVBoxLayout(self)
         layout.addWidget(QLabel("<b>Default Values:</b>"))
 
-        self.table: QTableWidget = QTableWidget(0, 4)
-        self.table.setHorizontalHeaderLabels(["Key", "Value", "Type", "Description"])
+        self.table: QTableWidget = QTableWidget(0, 3)
+        self.table.setHorizontalHeaderLabels(["Key", "Value", "Type"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.table)
 
@@ -93,7 +85,6 @@ class DefaultsDialog(QDialog):
                 type_combo.setCurrentIndex(i)
                 break
         self.table.setCellWidget(row, 2, type_combo)
-        self.table.setItem(row, 3, QTableWidgetItem(data.get("description", "")))
 
     def get_defaults(self) -> List[Dict[str, str]]:
         """Return the current list of defaults from the table."""
@@ -106,9 +97,6 @@ class DefaultsDialog(QDialog):
             key = key_item.text().strip() if key_item else ""
             value = value_item.text().strip() if value_item else ""
             type_str = type_widget.currentText() if type_widget else "str"
-            desc = desc_item.text().strip() if desc_item else ""
             if key:
-                defaults.append(
-                    {"key": key, "value": value, "type": type_str, "description": desc}
-                )
+                defaults.append({"key": key, "value": value, "type": type_str})
         return defaults
