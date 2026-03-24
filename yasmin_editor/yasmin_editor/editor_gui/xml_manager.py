@@ -630,10 +630,7 @@ class XmlManager:
                             p
                             for p in self.editor.plugin_manager.xml_files
                             if p.file_name == file_name
-                            and (
-                                package_name is None
-                                or p.package_name == package_name
-                            )
+                            and (package_name is None or p.package_name == package_name)
                         ),
                         None,
                     )
