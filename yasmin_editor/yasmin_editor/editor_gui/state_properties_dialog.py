@@ -158,12 +158,12 @@ class StatePropertiesDialog(QDialog):
                         else ""
                     ),
                     "type": (
-                        key_info.get("default_value_type", "str")
-                        if key_info.get("has_default")
-                        else "str"
+                        key_info.get("default_value_type", None)
                     ),
                 }
-                init_defaults.append(row_data)
+                # skip if type is not supported by editor
+                if row_data["type"] in ("str", "bool", "int", "float"):
+                    init_defaults.append(row_data)
         for row_data in init_defaults:
             self._add_default_row_with_data(row_data)
 
