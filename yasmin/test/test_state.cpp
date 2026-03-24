@@ -162,6 +162,7 @@ class StateWithAllTypes : public State {
 public:
   StateWithAllTypes() : State({"done"}) {
     set_description("State with various default types");
+    set_outcome_description("done", "Main outcome");
     add_input_key<bool>("flag", "A flag", true);
     add_input_key<double>("speed", "Speed", 3.14);
     add_input_key<int>("count", "A counter", 10);
@@ -177,6 +178,11 @@ public:
 TEST_F(TestState, TestDescriptionSetAndGet) {
   StateWithAllTypes s;
   EXPECT_EQ(s.get_description(), "State with various default types");
+}
+
+TEST_F(TestState, TestOutcomeDescription) {
+  StateWithAllTypes s;
+  EXPECT_EQ(s->get_outcome_description("done"), "Main outcome");
 }
 
 TEST_F(TestState, TestMultipleInputKeyTypes) {

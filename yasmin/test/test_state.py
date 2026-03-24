@@ -139,6 +139,7 @@ class StateWithAllTypes(State):
     def __init__(self):
         super().__init__(["done"])
         self.set_description("State with various default types")
+        self.set_outcome_description("done", "Main outcome")
         self.add_input_key("flag", "A boolean flag", True)
         self.add_input_key("speed", "Speed value", 3.14)
         self.add_input_key("count", "An integer count", 10)
@@ -158,6 +159,10 @@ class TestStateMetadataExtended(unittest.TestCase):
     def test_description_default_empty(self):
         state = FooState()
         self.assertEqual(state.get_description(), "")
+
+    def test_outcome_description(self):
+        state = StateWithAllTypes()
+        self.assertEqual(state.get_outcome_description("done"), "Main outcome")
 
     def test_multiple_input_key_types(self):
         state = StateWithAllTypes()

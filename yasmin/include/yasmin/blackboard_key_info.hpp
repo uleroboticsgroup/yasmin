@@ -21,6 +21,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <unordered_map>
 
 #include "yasmin/blackboard.hpp"
 
@@ -122,6 +123,8 @@ struct BlackboardKeyInfo {
 struct StateMetadata {
   /// Description of the state
   std::string description;
+  /// Human-readable descriptions for outcomes, indexed by outcome name
+  std::unordered_map<std::string, std::string> outcome_descriptions;
   /// Information about input keys required by this state
   std::vector<BlackboardKeyInfo> input_keys;
   /// Information about output keys produced by this state

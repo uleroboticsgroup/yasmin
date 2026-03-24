@@ -151,6 +151,40 @@ const std::string &State::get_description() const {
   return this->get_metadata_ref().description;
 }
 
+void State::set_outcome_description(const std::string &outcome,
+                                    const std::string &description) {
+  if (this->outcomes.find(outcome) == this->outcomes.end()) {
+    throw std::invalid_argument("Outcome '" + outcome +
+                                "' is not part of state outcomes");
+  }
+
+  this->get_metadata_ref().outcome_descriptions[outcome] = description;
+}
+
+const std::string &State::get_outcome_description(
+    const std::string &outcome) const {
+  if (this->outcomes.find(outcome) == this->outcomes.end()) {
+    throw std::invalid_argument("Outcome '" + outcome +
+                                "' is not part of state outcomes");
+  }
+
+  const auto &outcome_descriptions =
+      this->get_metadata_ref().outcome_descriptions;
+  const auto it = outcome_descriptions.find(outcome);
+
+  static const std::string empty_description;
+  if (it == outcome_descriptions.end()) {
+    return empty_description;
+  }
+
+  return it->second;
+}
+
+const std::unordered_map<std::string, std::string> &
+State::get_outcome_descriptions() const {
+  return this->get_metadata_ref().outcome_descriptions;
+}
+
 void State::add_input_key(const BlackboardKeyInfo &key_info) {
   this->get_metadata_ref().input_keys.push_back(key_info);
 }

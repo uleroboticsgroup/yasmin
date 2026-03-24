@@ -151,6 +151,13 @@ PYBIND11_MODULE(state, m) {
            "Set the description for this state", py::arg("description"))
       .def("get_description", &yasmin::State::get_description,
            "Get the description of this state")
+      .def("set_outcome_description", &yasmin::State::set_outcome_description,
+           "Set the description for an outcome", py::arg("outcome"),
+           py::arg("description"))
+      .def("get_outcome_description", &yasmin::State::get_outcome_description,
+           "Get the description of an outcome", py::arg("outcome"))
+      .def("get_outcome_descriptions", &yasmin::State::get_outcome_descriptions,
+           "Get all outcome descriptions")
 
       .def(
           "add_input_key",
@@ -281,6 +288,13 @@ PYBIND11_MODULE(state, m) {
             }
 
             result["output_keys"] = output_keys;
+            
+            py::dict outcome_descriptions;
+            for (const auto &[outcome, description] : metadata.outcome_descriptions) {
+              outcome_descriptions[py::str(outcome)] = py::str(description);
+            }
+
+            result["outcome_descriptions"] = outcome_descriptions;
             return result;
           },
           "Get the complete state metadata")
