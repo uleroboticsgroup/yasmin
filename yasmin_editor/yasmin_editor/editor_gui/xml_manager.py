@@ -72,6 +72,8 @@ class XmlManager:
                 outcome_elem.set("name", outcome_node.name)
                 outcome_elem.set("x", f"{outcome_node.pos().x():.2f}")
                 outcome_elem.set("y", f"{outcome_node.pos().y():.2f}")
+                if getattr(outcome_node, "description", ""):
+                    outcome_elem.set("description", outcome_node.description)
 
         self.save_transitions(cont_elem, state_node)
         if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
@@ -114,6 +116,8 @@ class XmlManager:
             outcome_elem.set("name", outcome_node.name)
             outcome_elem.set("x", f"{outcome_node.pos().x():.2f}")
             outcome_elem.set("y", f"{outcome_node.pos().y():.2f}")
+            if getattr(outcome_node, "description", ""):
+                outcome_elem.set("description", outcome_node.description)
 
         tree = ET.ElementTree(root)
         tree.write(
@@ -193,7 +197,6 @@ class XmlManager:
         fsm_description = root.get("description", "")
         self.editor.root_sm_description_edit.setText(fsm_description)
 
-        # Load root defaults
         root_defaults = self.load_defaults(root)
         for default_data in root_defaults:
             self.editor.add_root_default_row_with_data(default_data)
@@ -225,6 +228,9 @@ class XmlManager:
             outcome_node = self.editor.final_outcomes.get(outcome_name)
             if outcome_node is None:
                 continue
+
+            outcome_node.description = outcome_elem.get("description", "")
+            outcome_node.update_tooltip()
 
             x = outcome_elem.get("x")
             y = outcome_elem.get("y")
@@ -582,28 +588,24 @@ class XmlManager:
             self.editor.state_nodes[f"{parent_container.name}.{state_name}"] = node
 
     def load_states_from_xml(
-        self,
-        parent_elem: ET.Element,
-        parent_container: ContainerStateNode = None,
+        self, parent_elem: ET.Element, parent_container: ContainerStateNode = None
     ) -> None:
-        """Recursively load states from XML."""
+        """Recursively load states and containers from XML."""
         for elem in parent_elem:
-            if elem.tag == "State" or (
-                elem.tag == "StateMachine" and elem.get("file_name")
-            ):
+            if elem.tag == "State":
                 state_name = elem.get("name")
-                state_type = elem.get("type")
+                state_type = elem.get("type", "py")
                 remappings = self.load_remappings(elem)
-
                 plugin_info = None
+
                 if state_type == "py":
-                    module = elem.get("module")
+                    module_name = elem.get("module")
                     class_name = elem.get("class")
                     plugin_info = next(
                         (
                             p
                             for p in self.editor.plugin_manager.python_plugins
-                            if p.module == module and p.class_name == class_name
+                            if p.module == module_name and p.class_name == class_name
                         ),
                         None,
                     )
@@ -635,9 +637,7 @@ class XmlManager:
                         state_name, plugin_info, 0, 0, remappings, description, defaults
                     )
 
-                    self.add_node_to_editor_or_container(
-                        node, state_name, parent_container
-                    )
+                    self.add_node_to_editor_or_container(node, state_name, parent_container)
 
                     x = elem.get("x")
                     y = elem.get("y")
@@ -701,6 +701,9 @@ class XmlManager:
                     if outcome_node is None:
                         continue
 
+                    outcome_node.description = outcome_elem.get("description", "")
+                    outcome_node.update_tooltip()
+
                     ox = outcome_elem.get("x")
                     oy = outcome_elem.get("y")
                     if ox is not None and oy is not None:
@@ -761,6 +764,9 @@ class XmlManager:
                     outcome_node = node.final_outcomes.get(outcome_name)
                     if outcome_node is None:
                         continue
+
+                    outcome_node.description = outcome_elem.get("description", "")
+                    outcome_node.update_tooltip()
 
                     ox = outcome_elem.get("x")
                     oy = outcome_elem.get("y")

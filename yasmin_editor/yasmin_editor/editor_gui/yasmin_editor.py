@@ -15,7 +15,7 @@
 
 import os
 import random
-from typing import Dict, List
+from typing import Dict, List, Optional
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -51,6 +51,7 @@ from yasmin_editor.editor_gui.state_machine_dialog import StateMachineDialog
 from yasmin_editor.editor_gui.concurrence_dialog import ConcurrenceDialog
 from yasmin_editor.editor_gui.xml_manager import XmlManager
 from yasmin_editor.editor_gui.defaults_dialog import DefaultsDialog
+from yasmin_editor.editor_gui.outcome_description_dialog import OutcomeDescriptionDialog
 
 
 class YasminEditor(QMainWindow):
@@ -707,6 +708,33 @@ class YasminEditor(QMainWindow):
                     state_node.description = description
                     state_node.defaults = defaults
                     self.statusBar().showMessage(f"Updated state: {name}", 2000)
+
+    def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
+        """Edit the description of a final outcome."""
+        if outcome_node is None:
+            selected_items = self.canvas.scene.selectedItems()
+            for item in selected_items:
+                if isinstance(item, FinalOutcomeNode):
+                    outcome_node = item
+                    break
+
+        if outcome_node is None:
+            QMessageBox.warning(self, "Error", "Please select a final outcome to edit!")
+            return
+
+        dialog = OutcomeDescriptionDialog(
+            outcome_name=outcome_node.name,
+            description=getattr(outcome_node, "description", ""),
+            parent=self,
+        )
+
+        if dialog.exec_():
+            outcome_node.description = dialog.get_description()
+            outcome_node.update_tooltip()
+            self.statusBar().showMessage(
+                f"Updated outcome description: {outcome_node.name}",
+                2000,
+            )
 
     def add_state_to_container(self) -> None:
         """Add a child state to the selected container (SM or Concurrence)."""

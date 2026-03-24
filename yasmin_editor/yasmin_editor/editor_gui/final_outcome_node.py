@@ -15,6 +15,7 @@
 
 import math
 from typing import List, Optional, Any, TYPE_CHECKING
+
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
@@ -30,10 +31,16 @@ class FinalOutcomeNode(QGraphicsRectItem):
     """Graphical representation of a final outcome."""
 
     def __init__(
-        self, name: str, x: float, y: float, inside_container: bool = False
+        self,
+        name: str,
+        x: float,
+        y: float,
+        inside_container: bool = False,
+        description: str = "",
     ) -> None:
         super().__init__(-60, -30, 120, 60)
         self.name: str = name
+        self.description: str = description
         self.connections: List["ConnectionLine"] = []
         self.parent_container: Optional["ContainerStateNode"] = None
         self.inside_container: bool = inside_container
@@ -58,6 +65,22 @@ class FinalOutcomeNode(QGraphicsRectItem):
 
         if inside_container:
             self.connection_port: ConnectionPort = ConnectionPort(self)
+
+        self.update_tooltip()
+
+    def update_tooltip(self) -> None:
+        self.setToolTip(self.description if self.description else self.name)
+
+    def mouseDoubleClickEvent(self, event: Any) -> None:
+        """Handle double-click to edit final outcome metadata."""
+        if self.scene() and self.scene().views():
+            canvas = self.scene().views()[0]
+            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
+                self.setSelected(True)
+                canvas.editor_ref.edit_final_outcome(self)
+                event.accept()
+                return
+        super().mouseDoubleClickEvent(event)
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
