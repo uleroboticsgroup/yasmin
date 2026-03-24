@@ -29,6 +29,8 @@ FooState::FooState() : yasmin::State({"outcome1", "outcome2"}) {
   counter = 0;
   this->set_description("Produces a counter string and stores it in the "
                         "blackboard while the counter is below the threshold.");
+  this->set_outcome_description("outcome1", "Counter is below the threshold");
+  this->set_outcome_description("outcome2", "Counter reached the threshold.");
   this->add_output_key(
       "foo_str",
       "String containing the current counter value produced by FooState.");
