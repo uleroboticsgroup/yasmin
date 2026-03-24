@@ -68,7 +68,9 @@ class BlackboardKeyDialog(QDialog):
         layout.addRow("Default Type:", self.default_type_combo)
 
         self.default_value_edit = QLineEdit(key_data.get("default_value", ""))
-        self.default_value_edit.setPlaceholderText("Optional default value for input keys")
+        self.default_value_edit.setPlaceholderText(
+            "Optional default value for input keys"
+        )
         layout.addRow("Default Value:", self.default_value_edit)
 
         self.type_combo.currentTextChanged.connect(self._update_default_fields)
@@ -94,8 +96,16 @@ class BlackboardKeyDialog(QDialog):
 
     def get_key_data(self) -> Dict[str, str]:
         key_type = self.type_combo.currentText()
-        default_type = self.default_type_combo.currentText() if self.default_type_combo.isEnabled() else ""
-        default_value = self.default_value_edit.text().strip() if self.default_value_edit.isEnabled() else ""
+        default_type = (
+            self.default_type_combo.currentText()
+            if self.default_type_combo.isEnabled()
+            else ""
+        )
+        default_value = (
+            self.default_value_edit.text().strip()
+            if self.default_value_edit.isEnabled()
+            else ""
+        )
 
         return {
             "name": self.name_edit.text().strip(),

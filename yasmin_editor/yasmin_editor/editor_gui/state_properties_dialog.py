@@ -231,8 +231,6 @@ class StatePropertiesDialog(QDialog):
 
         return "\n".join(sections).strip()
 
-
-
     def add_remapping_row(self) -> None:
         """Add an empty row to the remappings table."""
         row = self.remappings_table.rowCount()
@@ -250,7 +248,6 @@ class StatePropertiesDialog(QDialog):
         self.remappings_table.insertRow(row)
         self.remappings_table.setItem(row, 0, QTableWidgetItem(old_key))
         self.remappings_table.setItem(row, 1, QTableWidgetItem(new_key))
-
 
     def update_description(self) -> None:
         plugin_info: Optional[PluginInfo] = self.plugin_combo.currentData()

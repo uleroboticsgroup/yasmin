@@ -340,7 +340,9 @@ class YasminEditor(QMainWindow):
         current_key_name = self.get_selected_blackboard_key_name()
         self.blackboard_list.clear()
 
-        for key_data in sorted(self._blackboard_keys, key=lambda item: item.get("name", "").lower()):
+        for key_data in sorted(
+            self._blackboard_keys, key=lambda item: item.get("name", "").lower()
+        ):
             item = QListWidgetItem(self.format_blackboard_key_label(key_data))
             item.setData(Qt.UserRole, dict(key_data))
             description = key_data.get("description", "")
@@ -371,13 +373,20 @@ class YasminEditor(QMainWindow):
         dlg = BlackboardKeyDialog(parent=self)
         if dlg.exec_():
             key_data = dlg.get_key_data()
-            if any(existing.get("name") == key_data["name"] for existing in self._blackboard_keys):
-                QMessageBox.warning(self, "Error", f"Blackboard key '{key_data['name']}' already exists!")
+            if any(
+                existing.get("name") == key_data["name"]
+                for existing in self._blackboard_keys
+            ):
+                QMessageBox.warning(
+                    self, "Error", f"Blackboard key '{key_data['name']}' already exists!"
+                )
                 return
             self._blackboard_keys.append(key_data)
             self.refresh_blackboard_keys_list()
 
-    def edit_selected_blackboard_key(self, item: Optional[QListWidgetItem] = None) -> None:
+    def edit_selected_blackboard_key(
+            self, item: Optional[QListWidgetItem] = None
+    ) -> None:
         if item is None:
             item = self.blackboard_list.currentItem()
         if item is None:
@@ -389,8 +398,15 @@ class YasminEditor(QMainWindow):
         if dlg.exec_():
             updated_key = dlg.get_key_data()
             for existing in self._blackboard_keys:
-                if existing.get("name") == updated_key["name"] and existing.get("name") != original_name:
-                    QMessageBox.warning(self, "Error", f"Blackboard key '{updated_key['name']}' already exists!")
+                if (
+                    existing.get("name") == updated_key["name"]
+                    and existing.get("name") != original_name
+                ):
+                    QMessageBox.warning(
+                        self,
+                        "Error",
+                        f"Blackboard key '{updated_key['name']}' already exists!",
+                    )
                     return
 
             for index, existing in enumerate(self._blackboard_keys):
@@ -414,7 +430,9 @@ class YasminEditor(QMainWindow):
         if reply != QMessageBox.Yes:
             return
 
-        self._blackboard_keys = [key for key in self._blackboard_keys if key.get("name") != key_name]
+        self._blackboard_keys = [
+            key for key in self._blackboard_keys if key.get("name") != key_name
+        ]
         self.refresh_blackboard_keys_list()
 
     def set_blackboard_keys(self, keys: List[Dict[str, str]]) -> None:
@@ -476,7 +494,9 @@ class YasminEditor(QMainWindow):
             return False
 
         plugin_keys = []
-        for key_info in list(getattr(plugin_info, "input_keys", []) or []) + list(getattr(plugin_info, "output_keys", []) or []):
+        for key_info in list(getattr(plugin_info, "input_keys", []) or []) + list(
+            getattr(plugin_info, "output_keys", []) or []
+        ):
             plugin_key_name = str(key_info.get("name", "")).strip()
             if not plugin_key_name:
                 continue
@@ -495,7 +515,11 @@ class YasminEditor(QMainWindow):
                 item.setBrush(QBrush(QColor(255, 182, 193)))
             else:
                 item.setBrush(QBrush(QColor(255, 165, 0)))
-            item.setPen(QPen(QColor(255, 200, 0), 4) if is_selected else QPen(QColor(0, 0, 180), 3))
+            item.setPen(
+                QPen(QColor(255, 200, 0), 4)
+                if is_selected
+                else QPen(QColor(0, 0, 180), 3)
+            )
         elif isinstance(item, ContainerStateNode):
             if item.is_concurrence:
                 item.setBrush(QBrush(QColor(255, 220, 150, 180)))
@@ -505,7 +529,11 @@ class YasminEditor(QMainWindow):
                 item.setPen(QPen(QColor(0, 0, 180), 3))
         elif isinstance(item, FinalOutcomeNode):
             item.setBrush(QBrush(QColor(255, 0, 0)))
-            item.setPen(QPen(QColor(255, 200, 0), 4) if is_selected else QPen(QColor(0, 0, 0), 3))
+            item.setPen(
+                QPen(QColor(255, 200, 0), 4)
+                if is_selected
+                else QPen(QColor(0, 0, 0), 3)
+            )
 
     def update_blackboard_usage_highlighting(self) -> None:
         selected_key = self.get_selected_blackboard_key_name()

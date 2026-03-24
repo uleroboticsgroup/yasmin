@@ -51,7 +51,10 @@ class XmlManager:
             if key_data.get("description"):
                 key_elem.set("description", key_data["description"])
 
-            if key_data.get("key_type") in ("IN", "IN/OUT") and key_data.get("default_value") != "":
+            if (
+                key_data.get("key_type") in ("IN", "IN/OUT")
+                and key_data.get("default_value") != ""
+            ):
                 key_elem.set("default_type", key_data.get("default_type", "str"))
                 key_elem.set("default_value", key_data.get("default_value", ""))
 
