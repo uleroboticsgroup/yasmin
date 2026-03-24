@@ -225,7 +225,7 @@ class StatePropertiesDialog(QDialog):
         key_name = str(key_info.get("name", "")).strip()
         key_desc = str(key_info.get("description", "")).strip()
         key_type = str(
-            key_info.get("type", key_info.get("default_value_type", "str"))
+            key_info.get("type", key_info.get("default_value_type", ""))
         ).strip()
 
         line = key_name if key_name else "(unnamed)"
