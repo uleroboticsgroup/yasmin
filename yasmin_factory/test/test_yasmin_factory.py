@@ -309,6 +309,7 @@ class TestYasminFactory(unittest.TestCase):
         self.assertIsNotNone(sm)
         self.assertEqual(sm.get_name(), "TestFsmMetadata")
         self.assertEqual(sm.get_description(), "Root SM description")
+        self.assertEqual(sm.get_outcome_description("end"), "Final outcome")
 
         root_keys = sm.get_input_keys()
         self.assertEqual(len(root_keys), 2)

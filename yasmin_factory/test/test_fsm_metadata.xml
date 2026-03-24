@@ -5,6 +5,7 @@
         <Transition from="outcome1" to="NestedSM"/>
         <Transition from="outcome2" to="end"/>
     </State>
+    <FinalOutcome name="end" description="Final outcome"/>
     <StateMachine name="NestedSM" outcomes="nested_done" description="Nested SM description">
         <Default key="nested_flag" value="true" type="bool" description="A boolean flag"/>
         <Default key="nested_rate" value="3.14" type="float" description="A float rate"/>

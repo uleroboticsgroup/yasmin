@@ -268,7 +268,23 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
     }
   }
 
-  return yasmin::Concurrence::make_shared(states, default_outcome, outcome_map);
+  auto concurrence = yasmin::Concurrence::make_shared(states, default_outcome, outcome_map);
+
+  for (tinyxml2::XMLElement *outcome_elem =
+           conc_elem->FirstChildElement("FinalOutcome");
+       outcome_elem;
+       outcome_elem = outcome_elem->NextSiblingElement("FinalOutcome")) {
+    std::string outcome_name =
+        this->get_required_attribute(outcome_elem, "name");
+    std::string outcome_description =
+        this->get_optional_attribute(outcome_elem, "description", "");
+
+    if (!outcome_description.empty()) {
+      concurrence->set_outcome_description(outcome_name, outcome_description);
+    }
+  }
+
+  return concurrence;
 }
 
 yasmin::StateMachine::SharedPtr
@@ -377,6 +393,19 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
   if (!description.empty()) {
     sm->set_description(description);
   }
+
+  // Parse outcome descriptions
+  for (tinyxml2::XMLElement *outcome_elem = root->FirstChildElement("FinalOutcome");
+     outcome_elem; outcome_elem = outcome_elem->NextSiblingElement("FinalOutcome")) {
+  std::string outcome_name =
+      this->get_required_attribute(outcome_elem, "name");
+  std::string outcome_description =
+      this->get_optional_attribute(outcome_elem, "description", "");
+
+  if (!outcome_description.empty()) {
+    sm->set_outcome_description(outcome_name, outcome_description);
+  }
+}
 
   // Parse Default elements for input key default values
   for (tinyxml2::XMLElement *def_elem = root->FirstChildElement("Default");

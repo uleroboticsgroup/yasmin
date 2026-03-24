@@ -120,6 +120,15 @@ class YasminFactory:
             default_outcome=default_outcome,
         )
 
+        for outcome_elem in conc_elem.findall("FinalOutcome"):
+            outcome_name = outcome_elem.attrib["name"]
+            outcome_description = outcome_elem.attrib.get("description", "")
+
+            if outcome_description:
+                concurrence.set_outcome_description(
+                    outcome_name, outcome_description
+                )
+
         return concurrence
 
     def create_sm(self, root: ET.Element) -> StateMachine:
@@ -195,6 +204,13 @@ class YasminFactory:
         description = root.attrib.get("description", "")
         if description:
             sm.set_description(description)
+
+        for outcome_elem in root.findall("FinalOutcome"):
+            outcome_name = outcome_elem.attrib["name"]
+            outcome_description = outcome_elem.attrib.get("description", "")
+
+            if outcome_description:
+                sm.set_outcome_description(outcome_name, outcome_description)
 
         # Parse Default elements for input key default values
         for def_elem in root.findall("Default"):
