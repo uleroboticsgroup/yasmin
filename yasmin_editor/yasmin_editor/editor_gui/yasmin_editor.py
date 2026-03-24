@@ -334,7 +334,14 @@ class YasminEditor(QMainWindow):
             item.setHidden(text.lower() not in item.text().lower())
 
     def format_blackboard_key_label(self, key_data: Dict[str, str]) -> str:
-        return f"{key_data.get('name', '')} ({key_data.get('key_type', 'IN')})"
+        label = f"{key_data.get('name', '')} ({key_data.get('key_type', 'IN')})"
+
+        default_type = str(key_data.get("default_type", "")).strip()
+        if default_type:
+            default_value = str(key_data.get("default_value", ""))
+            label += f" [default: {default_value}, type: {default_type}]"
+
+        return label
 
     def refresh_blackboard_keys_list(self) -> None:
         current_key_name = self.get_selected_blackboard_key_name()
