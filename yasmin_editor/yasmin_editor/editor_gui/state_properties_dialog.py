@@ -232,7 +232,9 @@ class StatePropertiesDialog(QDialog):
             input_keys = list(getattr(plugin_info, "input_keys", []) or [])
             output_keys = list(getattr(plugin_info, "output_keys", []) or [])
             outcomes = list(getattr(plugin_info, "outcomes", []) or [])
-            outcome_descriptions = dict(getattr(plugin_info, "outcome_descriptions", {}) or {})
+            outcome_descriptions = dict(
+                getattr(plugin_info, "outcome_descriptions", {}) or {}
+            )
         else:
             base_description = fallback_description.strip()
             input_keys = []
