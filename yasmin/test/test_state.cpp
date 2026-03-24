@@ -182,7 +182,7 @@ TEST_F(TestState, TestDescriptionSetAndGet) {
 
 TEST_F(TestState, TestOutcomeDescription) {
   StateWithAllTypes s;
-  EXPECT_EQ(s->get_outcome_description("done"), "Main outcome");
+  EXPECT_EQ(s.get_outcome_description("done"), "Main outcome");
 }
 
 TEST_F(TestState, TestMultipleInputKeyTypes) {
