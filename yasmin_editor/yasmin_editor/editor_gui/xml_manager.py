@@ -637,7 +637,9 @@ class XmlManager:
                         state_name, plugin_info, 0, 0, remappings, description, defaults
                     )
 
-                    self.add_node_to_editor_or_container(node, state_name, parent_container)
+                    self.add_node_to_editor_or_container(
+                        node, state_name, parent_container
+                    )
 
                     x = elem.get("x")
                     y = elem.get("y")
