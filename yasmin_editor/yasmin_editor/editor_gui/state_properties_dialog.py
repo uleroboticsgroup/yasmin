@@ -175,9 +175,7 @@ class StatePropertiesDialog(QDialog):
 
         self.remappings_table: QTableWidget = QTableWidget(0, 2)
         self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
-        self.remappings_table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.Stretch
-        )
+        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.remappings_table.setMinimumHeight(80)
         self.remappings_table.setMaximumHeight(150)
         remappings_layout.addWidget(self.remappings_table)
@@ -248,9 +246,7 @@ class StatePropertiesDialog(QDialog):
         self, plugin_info: Optional[PluginInfo], fallback_description: str = ""
     ) -> str:
         if plugin_info:
-            base_description = str(
-                getattr(plugin_info, "description", "") or ""
-            ).strip()
+            base_description = str(getattr(plugin_info, "description", "") or "").strip()
             input_keys = list(getattr(plugin_info, "input_keys", []) or [])
             output_keys = list(getattr(plugin_info, "output_keys", []) or [])
         else:

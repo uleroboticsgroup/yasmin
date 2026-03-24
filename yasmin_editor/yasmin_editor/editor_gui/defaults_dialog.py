@@ -15,9 +15,18 @@
 
 from typing import Dict, List, Optional
 
-from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QHBoxLayout,
-                             QHeaderView, QLabel, QPushButton, QTableWidget,
-                             QTableWidgetItem, QVBoxLayout)
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+)
 
 
 class DefaultsDialog(QDialog):
