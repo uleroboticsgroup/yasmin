@@ -385,7 +385,7 @@ class YasminEditor(QMainWindow):
             self.refresh_blackboard_keys_list()
 
     def edit_selected_blackboard_key(
-            self, item: Optional[QListWidgetItem] = None
+        self, item: Optional[QListWidgetItem] = None
     ) -> None:
         if item is None:
             item = self.blackboard_list.currentItem()
@@ -530,9 +530,7 @@ class YasminEditor(QMainWindow):
         elif isinstance(item, FinalOutcomeNode):
             item.setBrush(QBrush(QColor(255, 0, 0)))
             item.setPen(
-                QPen(QColor(255, 200, 0), 4)
-                if is_selected
-                else QPen(QColor(0, 0, 0), 3)
+                QPen(QColor(255, 200, 0), 4) if is_selected else QPen(QColor(0, 0, 0), 3)
             )
 
     def update_blackboard_usage_highlighting(self) -> None:
