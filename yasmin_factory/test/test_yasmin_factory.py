@@ -261,7 +261,9 @@ class TestYasminFactory(unittest.TestCase):
 
         self.assertEqual(input_by_name["param_int"]["default_value"], 42)
         self.assertEqual(input_by_name["param_str"]["default_value"], "hello")
-        self.assertAlmostEqual(input_by_name["param_float"]["default_value"], 3.14, places=2)
+        self.assertAlmostEqual(
+            input_by_name["param_float"]["default_value"], 3.14, places=2
+        )
         self.assertEqual(input_by_name["param_bool"]["default_value"], True)
         self.assertEqual(input_by_name["shared_key"]["default_value"], 5)
         self.assertEqual(output_by_name["result"]["description"], "Output value")
