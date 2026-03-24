@@ -33,7 +33,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
-from yasmin_editor.editor_gui.defaults_dialog import DefaultsDialog
 
 
 class ConcurrenceDialog(QDialog):
@@ -138,12 +137,6 @@ class ConcurrenceDialog(QDialog):
 
         layout.addRow(remappings_label, remappings_widget)
 
-        # Defaults - stored internally, edited via sub-dialog
-        self._defaults: List[Dict[str, str]] = list(defaults or [])
-        self._defaults_btn: QPushButton = QPushButton("Edit Defaults...")
-        self._defaults_btn.clicked.connect(self._open_defaults_dialog)
-        layout.addRow(QLabel("<b>Defaults (optional):</b>"), self._defaults_btn)
-
         # Buttons
         buttons: QDialogButtonBox = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -183,13 +176,7 @@ class ConcurrenceDialog(QDialog):
 
         description = self.description_edit.toPlainText().strip()
 
-        return name, outcomes, default_outcome, remappings, description, self._defaults
-
-    def _open_defaults_dialog(self) -> None:
-        """Open the DefaultsDialog to edit defaults."""
-        dlg = DefaultsDialog(self._defaults, parent=self)
-        if dlg.exec_():
-            self._defaults = dlg.get_defaults()
+        return name, outcomes, default_outcome, remappings, description, []
 
     def add_remapping_row(self) -> None:
         """Add an empty row to the remappings table."""
