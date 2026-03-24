@@ -7,5 +7,5 @@
   <State name="Bar" x="897.20" y="90.20" type="cpp" class="yasmin_demos/BarState">
     <Transition from="outcome3" to="Foo"/>
   </State>
-  <FinalOutcome name="outcome4" x="473.80" y="338.80"/>
+  <FinalOutcome name="outcome4" x="473.80" y="338.80" description="Final outcome"/>
 </StateMachine>

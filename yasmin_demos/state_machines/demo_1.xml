@@ -8,5 +8,5 @@
   <State name="Bar" x="157.80" y="84.20" type="py" module="yasmin_demos.bar_state" class="BarState">
     <Transition from="outcome3" to="Foo"/>
   </State>
-  <FinalOutcome name="outcome4" x="1204.20" y="82.80"/>
+  <FinalOutcome name="outcome4" x="1204.20" y="81.80" description="Final outcome"/>
 </StateMachine>

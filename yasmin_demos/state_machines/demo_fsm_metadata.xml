@@ -12,8 +12,8 @@
     <State name="Bar" x="-412.18" y="-290.76" type="py" module="yasmin_demos.bar_state" class="BarState">
       <Transition from="outcome3" to="outcome3"/>
     </State>
-    <FinalOutcome name="outcome3" x="292.95" y="-289.14"/>
+    <FinalOutcome name="outcome3" x="292.95" y="-289.14" description="Final nested outcome"/>
     <Transition from="outcome3" to="Foo"/>
   </StateMachine>
-  <FinalOutcome name="outcome4" x="922.79" y="283.07"/>
+  <FinalOutcome name="outcome4" x="922.79" y="283.07" description="Final outcome"/>
 </StateMachine>
