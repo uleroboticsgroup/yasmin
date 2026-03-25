@@ -235,19 +235,19 @@ class YasminFactory:
         """Parse new Key syntax and legacy Default syntax."""
         for key_elem in parent_elem.findall("Key"):
             key_name = key_elem.attrib["name"]
-            key_usage = key_elem.attrib.get("type", "IN").upper()
+            key_usage = key_elem.attrib.get("type", "in").upper()
             key_description = key_elem.attrib.get("description", "")
             default_type = key_elem.attrib.get("default_type", "str")
             default_value = key_elem.attrib.get("default_value")
 
-            if key_usage in ("IN", "IN/OUT"):
+            if key_usage in ("in", "in/out"):
                 if default_value is not None:
                     value = self._parse_key_value(default_value, default_type)
                     owner.add_input_key(key_name, key_description, value)
                 else:
                     owner.add_input_key(key_name, key_description)
 
-            if key_usage in ("OUT", "IN/OUT"):
+            if key_usage in ("out", "in/out"):
                 owner.add_output_key(key_name, key_description)
 
         for def_elem in parent_elem.findall("Default"):

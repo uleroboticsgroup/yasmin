@@ -235,12 +235,12 @@ class TestYasminFactory(unittest.TestCase):
         """Test that a state machine parses global Key elements from XML."""
         sm_xml = """
         <StateMachine outcomes="end">
-            <Key name="param_int" type="IN" default_value="42" default_type="int" description="An integer"/>
-            <Key name="param_str" type="IN" default_value="hello" default_type="str" description="A string"/>
-            <Key name="param_float" type="IN" default_value="3.14" default_type="float"/>
-            <Key name="param_bool" type="IN" default_value="true" default_type="bool"/>
-            <Key name="result" type="OUT" description="Output value"/>
-            <Key name="shared_key" type="IN/OUT" default_value="5" default_type="int" description="Shared"/>
+            <Key name="param_int" type="in" default_value="42" default_type="int" description="An integer"/>
+            <Key name="param_str" type="in" default_value="hello" default_type="str" description="A string"/>
+            <Key name="param_float" type="in" default_value="3.14" default_type="float"/>
+            <Key name="param_bool" type="in" default_value="true" default_type="bool"/>
+            <Key name="result" type="out" description="Output value"/>
+            <Key name="shared_key" type="in/out" default_value="5" default_type="int" description="Shared"/>
             <State name="State1" type="py" module="test.test_simple_state" class="TestSimpleState">
                 <Transition from="outcome1" to="State1"/>
                 <Transition from="outcome2" to="end"/>
@@ -273,9 +273,9 @@ class TestYasminFactory(unittest.TestCase):
         """Test nested SM metadata and keys on both root and nested state machines."""
         sm_xml = """
         <StateMachine outcomes="end" description="Root description">
-            <Key name="root_key" type="IN" default_value="root_val" default_type="str" description="Root key"/>
+            <Key name="root_key" type="in" default_value="root_val" default_type="str" description="Root key"/>
             <StateMachine name="Inner" outcomes="inner_done" description="Inner description">
-                <Key name="inner_key" type="IN" default_value="10" default_type="int" description="Inner key"/>
+                <Key name="inner_key" type="in" default_value="10" default_type="int" description="Inner key"/>
                 <State name="S1" type="py" module="test.test_simple_state" class="TestSimpleState">
                     <Transition from="outcome1" to="S1"/>
                     <Transition from="outcome2" to="inner_done"/>

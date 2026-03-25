@@ -30,7 +30,7 @@ from yasmin_cli.completer import (
     xml_file_completer,
 )
 
-INPUT_KEY_TYPES = {"IN", "IN/OUT"}
+INPUT_KEY_TYPES = {"in", "in/out"}
 
 
 def _parse_input_assignments(values: list[str]) -> dict[str, str]:

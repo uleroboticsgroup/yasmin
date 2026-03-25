@@ -30,7 +30,7 @@ from PyQt5.QtWidgets import (
 class BlackboardKeyDialog(QDialog):
     """Dialog for creating and editing blackboard keys."""
 
-    TYPE_OPTIONS = ["IN", "OUT", "IN/OUT"]
+    TYPE_OPTIONS = ["in", "out", "in/out"]
     VALUE_TYPE_OPTIONS = ["", "str", "int", "float", "bool"]
 
     def __init__(
@@ -55,7 +55,7 @@ class BlackboardKeyDialog(QDialog):
 
         self.type_combo = QComboBox()
         self.type_combo.addItems(self.TYPE_OPTIONS)
-        key_type = key_data.get("key_type", "IN")
+        key_type = key_data.get("key_type", "in")
         type_index = self.type_combo.findText(key_type)
         if type_index >= 0:
             self.type_combo.setCurrentIndex(type_index)
@@ -97,7 +97,7 @@ class BlackboardKeyDialog(QDialog):
         layout.addWidget(buttons)
 
     def _update_default_fields(self, key_type: str) -> None:
-        allow_defaults = key_type in ("IN", "IN/OUT")
+        allow_defaults = key_type in ("in", "in/out")
         if not allow_defaults:
             self.default_type_combo.setCurrentIndex(0)
             self.default_value_edit.clear()
@@ -120,7 +120,7 @@ class BlackboardKeyDialog(QDialog):
     def get_key_data(self) -> Dict[str, str]:
         default_type = ""
         default_value = ""
-        if self.type_combo.currentText() in ("IN", "IN/OUT"):
+        if self.type_combo.currentText() in ("in", "in/out"):
             default_type = str(self.default_type_combo.currentData() or "")
             if default_type:
                 default_value = self.default_value_edit.text().strip()

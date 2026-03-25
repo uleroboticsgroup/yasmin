@@ -329,7 +329,7 @@ class YasminEditor(QMainWindow):
             item.setHidden(text.lower() not in item.text().lower())
 
     def format_blackboard_key_label(self, key_data: Dict[str, str]) -> str:
-        label = f"{key_data.get('name', '')} ({key_data.get('key_type', 'IN')})"
+        label = f"{key_data.get('name', '')} ({key_data.get('key_type', 'in')})"
 
         default_type = str(key_data.get("default_type", "")).strip()
         if default_type:
@@ -400,11 +400,11 @@ class YasminEditor(QMainWindow):
         for key_name, usage in usage_map.items():
             metadata = dict(self._blackboard_key_metadata.get(key_name, {}))
             if usage["input"] and usage["output"]:
-                key_type = "IN/OUT"
+                key_type = "in/out"
             elif usage["output"]:
-                key_type = "OUT"
+                key_type = "out"
             else:
-                key_type = "IN"
+                key_type = "in"
 
             description = str(metadata.get("description", "") or "").strip()
             if not description:
@@ -412,7 +412,7 @@ class YasminEditor(QMainWindow):
 
             default_type = ""
             default_value = ""
-            if key_type in ("IN", "IN/OUT"):
+            if key_type in ("in", "in/out"):
                 default_type = str(metadata.get("default_type", "") or "")
                 if default_type:
                     default_value = str(metadata.get("default_value", "") or "")
@@ -489,7 +489,7 @@ class YasminEditor(QMainWindow):
             **key_data,
             **metadata,
             "name": key_data.get("name", ""),
-            "key_type": key_data.get("key_type", "IN"),
+            "key_type": key_data.get("key_type", "in"),
             "default_type": str(metadata.get("default_type", "") or ""),
             "default_value": str(metadata.get("default_value", "") or ""),
         }
@@ -499,7 +499,7 @@ class YasminEditor(QMainWindow):
             updated_key = dlg.get_key_data()
             self._blackboard_key_metadata[key_name] = {
                 "description": updated_key.get("description", ""),
-                "key_type": key_data.get("key_type", "IN"),
+                "key_type": key_data.get("key_type", "in"),
                 "default_type": updated_key.get("default_type", ""),
                 "default_value": updated_key.get("default_value", ""),
             }
@@ -513,7 +513,7 @@ class YasminEditor(QMainWindow):
                 continue
             self._blackboard_key_metadata[key_name] = {
                 "description": str(key.get("description", "") or "").strip(),
-                "key_type": str(key.get("key_type", "IN") or "IN").strip(),
+                "key_type": str(key.get("key_type", "in") or "in").strip(),
                 "default_type": str(key.get("default_type", "") or "").strip(),
                 "default_value": str(key.get("default_value", "") or "").strip(),
             }
@@ -536,7 +536,7 @@ class YasminEditor(QMainWindow):
             return
         self._blackboard_key_metadata[key_name] = {
             "description": str(data.get("description", "") or "").strip(),
-            "key_type": "IN",
+            "key_type": "in",
             "default_type": str(data.get("type", "") or "").strip(),
             "default_value": str(data.get("value", "") or "").strip(),
         }

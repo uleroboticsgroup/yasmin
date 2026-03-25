@@ -46,12 +46,12 @@ class XmlManager:
 
             key_elem = ET.SubElement(elem, "Key")
             key_elem.set("name", key_name)
-            key_elem.set("type", key_data.get("key_type", "IN"))
+            key_elem.set("type", key_data.get("key_type", "in"))
 
             if key_data.get("description"):
                 key_elem.set("description", key_data["description"])
 
-            if key_data.get("key_type") in ("IN", "IN/OUT") and key_data.get(
+            if key_data.get("key_type") in ("in", "in/out") and key_data.get(
                 "default_type", ""
             ):
                 key_elem.set("default_type", key_data.get("default_type", "str"))
@@ -826,7 +826,7 @@ class XmlManager:
             keys.append(
                 {
                     "name": key_name,
-                    "key_type": key_elem.get("type", "IN"),
+                    "key_type": key_elem.get("type", "in"),
                     "description": key_elem.get("description", ""),
                     "default_type": key_elem.get("default_type", ""),
                     "default_value": key_elem.get("default_value", ""),
@@ -842,7 +842,7 @@ class XmlManager:
             keys.append(
                 {
                     "name": default_data.get("key", ""),
-                    "key_type": "IN",
+                    "key_type": "in",
                     "description": default_data.get("description", ""),
                     "default_type": default_data.get("type", "str"),
                     "default_value": default_data.get("value", ""),

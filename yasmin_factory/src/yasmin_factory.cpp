@@ -170,7 +170,7 @@ void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
        key_elem; key_elem = key_elem->NextSiblingElement("Key")) {
     const std::string key_name = this->get_required_attribute(key_elem, "name");
     std::string key_usage =
-        this->get_optional_attribute(key_elem, "type", "IN");
+        this->get_optional_attribute(key_elem, "type", "in");
     const std::string key_description =
         this->get_optional_attribute(key_elem, "description", "");
     const std::string default_type =
@@ -181,7 +181,7 @@ void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
 
     const char *default_value_attr = key_elem->Attribute("default_value");
 
-    if (key_usage == "IN" || key_usage == "IN/OUT") {
+    if (key_usage == "in" || key_usage == "in/out") {
       if (default_value_attr) {
         if (default_type == "int") {
           owner->add_input_key(yasmin::BlackboardKeyInfo(
@@ -205,7 +205,7 @@ void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
       }
     }
 
-    if (key_usage == "OUT" || key_usage == "IN/OUT") {
+    if (key_usage == "out" || key_usage == "in/out") {
       owner->add_output_key(
           yasmin::BlackboardKeyInfo(key_name, key_description));
     }

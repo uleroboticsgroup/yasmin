@@ -22,7 +22,7 @@ from pathlib import Path
 from yasmin_plugins_manager import PluginInfo, PluginManager
 
 IGNORE_XML_FILES = {"package.xml", "plugins.xml"}
-INPUT_KEY_TYPES = {"IN", "IN/OUT"}
+INPUT_KEY_TYPES = {"in", "in/out"}
 
 
 def plugin_id(plugin) -> str:
