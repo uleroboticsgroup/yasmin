@@ -23,7 +23,18 @@ from pathlib import Path
 from typing import List, Optional
 
 import yasmin
-from ament_index_python import get_package_share_path, get_packages_with_prefixes
+from ament_index_python import (
+    PackageNotFoundError,
+    get_package_prefix,
+    get_package_share_path,
+    get_packages_with_prefixes,
+)
+from ament_index_python.resources import (
+    get_resource,
+    get_resource_types,
+    get_resources,
+    has_resource,
+)
 from lxml import etree as ET
 from tqdm import tqdm
 from yasmin import LogLevel, State, set_log_level
@@ -86,6 +97,7 @@ class PluginManager:
         tracked_files: List[dict] = []
         tracked_dirs: List[dict] = []
         packages = list(get_packages_with_prefixes().keys())
+        cpp_resource_map = self._get_cpp_plugin_resource_map()
 
         for package in tqdm(packages, desc="Loading plugins", disable=hide_progress):
             try:
@@ -96,7 +108,11 @@ class PluginManager:
             except Exception:
                 pass
 
-            self.load_cpp_plugins_from_package(package, tracked_files)
+            self.load_cpp_plugins_from_package(
+                package_name=package,
+                tracked_files=tracked_files,
+                cpp_resource_map=cpp_resource_map,
+            )
             self.load_python_plugins_from_package(package, tracked_files, tracked_dirs)
             self.load_xml_state_machines_from_package(package, tracked_files)
 
@@ -174,64 +190,126 @@ class PluginManager:
         }
         save_cache(data, self.cache_dir)
 
+    def _is_plugin_resource_type(self, resource_type: str) -> bool:
+        """
+        Check whether an ament resource type belongs to pluginlib.
+
+        Parameters
+        ----------
+        resource_type : str
+            Ament resource type name.
+
+        Returns
+        -------
+        bool
+            True if the resource type contains pluginlib plugin exports.
+        """
+        return "__pluginlib__plugin" in resource_type
+
+    def _get_registered_plugin_resource_list(self) -> list[str]:
+        """
+        Return all pluginlib-related resource types from the ament index.
+
+        Returns
+        -------
+        list[str]
+            List of pluginlib resource type names.
+        """
+        return list(filter(self._is_plugin_resource_type, get_resource_types()))
+
+    def _get_cpp_plugin_resource_map(self) -> dict[str, list[str]]:
+        """
+        Build a mapping from package name to exported plugin XML resource paths.
+
+        Only the ament index is queried here. The actual XML parsing happens later
+        when loading plugins from a specific package.
+
+        Returns
+        -------
+        dict[str, list[str]]
+            Mapping from package name to plugin XML paths relative to the package prefix.
+        """
+        resource_map: dict[str, list[str]] = {}
+
+        for plugin_resource in self._get_registered_plugin_resource_list():
+            for package_name in get_resources(plugin_resource).keys():
+                resource_map.setdefault(package_name, [])
+
+                try:
+                    component_registry, _ = get_resource(plugin_resource, package_name)
+                except Exception:
+                    continue
+
+                resource_map[package_name] += [
+                    line.split(";")[0]
+                    for line in component_registry.splitlines()
+                    if line.strip()
+                ]
+
+        return resource_map
+
     def load_cpp_plugins_from_package(
         self,
         package_name: str,
         tracked_files: Optional[List[dict]] = None,
+        cpp_resource_map: Optional[dict[str, list[str]]] = None,
     ) -> None:
-        """Discover C++ plugins from a package share directory."""
-        package_share_path = get_package_share_path(package_name)
+        """
+        Discover YASMIN C++ plugins from pluginlib exports.
 
-        for root, dirs, files in os.walk(package_share_path):
-            for filename in files:
-                if not filename.endswith(".xml"):
+        This uses the ament resource index. Only plugin classes exported with base class
+        ``yasmin::State`` are loaded.
+
+        Parameters
+        ----------
+        package_name : str
+            Package name to inspect.
+        tracked_files : Optional[List[dict]]
+            Optional list that receives signatures of parsed plugin XML files.
+        cpp_resource_map : Optional[dict[str, list[str]]]
+            Optional precomputed map of package names to plugin XML resource paths.
+        """
+        if cpp_resource_map is None:
+            cpp_resource_map = self._get_cpp_plugin_resource_map()
+
+        resource_paths = cpp_resource_map.get(package_name, [])
+        if not resource_paths:
+            return
+
+        try:
+            package_prefix = get_package_prefix(package_name)
+        except PackageNotFoundError:
+            return
+
+        for resource_path in resource_paths:
+            plugin_xml = os.path.join(package_prefix, resource_path)
+
+            if not os.path.isfile(plugin_xml):
+                continue
+
+            if tracked_files is not None:
+                signature = stat_signature(plugin_xml)
+                if signature:
+                    tracked_files.append(signature)
+
+            try:
+                tree = ET.parse(plugin_xml)
+            except ET.ParseError:
+                continue
+
+            for elem in tree.iter():
+                if elem.tag != "class":
                     continue
 
-                xml_file = os.path.join(root, filename)
-                try:
-                    with open(xml_file, "r", encoding="utf-8") as f:
-                        content: str = f.read().strip()
-                except (IOError, UnicodeDecodeError):
+                base_class_type = elem.attrib.get("base_class_type", "")
+                if base_class_type != "yasmin::State":
                     continue
 
-                if "<library" not in content or "yasmin" not in content.lower():
+                plugin_type = elem.attrib.get("name") or elem.attrib.get("type")
+                if not plugin_type:
                     continue
 
-                if tracked_files is not None:
-                    signature = stat_signature(xml_file)
-                    if signature:
-                        tracked_files.append(signature)
-
-                libraries_content: List[str] = []
-                start: int = 0
-
-                while True:
-                    lib_start: int = content.find("<library", start)
-                    if lib_start == -1:
-                        break
-
-                    lib_end: int = content.find("</library>", lib_start)
-                    if lib_end == -1:
-                        break
-
-                    lib_end += len("</library>")
-                    libraries_content.append(content[lib_start:lib_end])
-                    start = lib_end
-
-                for library_content in libraries_content:
-                    try:
-                        library_xml: str = f"<root>{library_content}</root>"
-                        root_elem = ET.fromstring(library_xml)
-                    except Exception:
-                        continue
-
-                    for library in root_elem.findall("library"):
-                        for class_elem in library.findall("class"):
-                            base_class_type = class_elem.get("base_class_type")
-                            if base_class_type == "yasmin::State":
-                                class_name: str = class_elem.get("name")
-                                if class_name:
-                                    self.load_cpp_plugin(class_name)
+                self.load_cpp_plugin(plugin_type)
 
     def load_python_plugins_from_package(
         self,
