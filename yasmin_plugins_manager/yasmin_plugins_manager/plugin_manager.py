@@ -221,9 +221,6 @@ class PluginManager:
         """
         Build a mapping from package name to exported plugin XML resource paths.
 
-        Only the ament index is queried here. The actual XML parsing happens later
-        when loading plugins from a specific package.
-
         Returns
         -------
         dict[str, list[str]]
