@@ -36,22 +36,6 @@ using namespace yasmin;
 namespace {
 StateMachine *sigint_handler_instance = nullptr;
 
-Remappings compose_remappings(const Remappings &parent_remappings,
-                              const Remappings &child_remappings) {
-  Remappings composed_remappings = parent_remappings;
-
-  for (const auto &[child_key, child_target] : child_remappings) {
-    auto parent_it = parent_remappings.find(child_target);
-    if (parent_it != parent_remappings.end()) {
-      composed_remappings[child_key] = parent_it->second;
-    } else {
-      composed_remappings[child_key] = child_target;
-    }
-  }
-
-  return composed_remappings;
-}
-
 void sigint_handler(int signum) {
   if (sigint_handler_instance) {
     sigint_handler_instance->cancel_state();
@@ -343,14 +327,10 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
     std::string current_state = this->get_current_state();
     auto state = this->states.at(current_state);
     transitions = this->transitions.at(current_state);
-    auto old_remappings = blackboard->get_remappings();
-    remappings =
-        compose_remappings(old_remappings, this->remappings.at(current_state));
-
+    remappings = this->remappings.at(current_state);
     blackboard->set_remappings(remappings);
-    outcome = (*state.get())(blackboard);
-    blackboard->set_remappings(old_remappings);
 
+    outcome = (*state.get())(blackboard);
     old_outcome = std::string(outcome);
 
     // Check outcome belongs to state
