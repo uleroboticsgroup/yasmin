@@ -281,7 +281,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
       states[name] = this->create_concurrence(child);
     } else if (child_name == "StateMachine") {
       std::string name = this->get_required_attribute(child, "name");
-      states[name] = this->create_sm(child, false);
+      states[name] = this->create_sm(child);
     }
   }
 
@@ -415,7 +415,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
     } else if (child_name == "Concurrence") {
       state = this->create_concurrence(child);
     } else if (child_name == "StateMachine") {
-      state = this->create_sm(child, false);
+      state = this->create_sm(child);
     } else {
       continue;
     }
