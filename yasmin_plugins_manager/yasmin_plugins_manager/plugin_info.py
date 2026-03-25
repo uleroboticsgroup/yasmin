@@ -23,7 +23,7 @@ from yasmin_pybind_bridge import CppStateFactory
 
 
 class PluginInfo:
-    """Stores all metadata of a discovered plugin."""
+    """Store metadata of a discovered plugin."""
 
     def __init__(
         self,
@@ -34,8 +34,25 @@ class PluginInfo:
         package_name: Optional[str] = None,
         relative_path: Optional[str] = None,
     ) -> None:
-        """Load plugin metadata immediately."""
-        self._cpp_factory: CppStateFactory = CppStateFactory()
+        """
+        Load plugin metadata immediately.
+
+        Parameters
+        ----------
+        plugin_type : str
+            Plugin type identifier. Supported values are ``python``, ``cpp`` and ``xml``.
+        class_name : Optional[str]
+            Class or exported plugin name.
+        module : Optional[str]
+            Python module containing the state class.
+        file_name : Optional[str]
+            XML file name.
+        package_name : Optional[str]
+            Package containing the plugin.
+        relative_path : Optional[str]
+            Relative path of an XML file inside the package share directory.
+        """
+        self._cpp_factory: Optional[CppStateFactory] = CppStateFactory()
 
         self.plugin_type: str = plugin_type
         self.class_name: Optional[str] = class_name
@@ -53,25 +70,11 @@ class PluginInfo:
             loaded_module = importlib.import_module(self.module)
             state_class = getattr(loaded_module, self.class_name)
             instance = state_class()
-            self.outcomes = list(instance.get_outcomes())
-            try:
-                self.description = instance.get_description()
-                self.outcome_descriptions = instance.get_outcome_descriptions()
-                self.input_keys = list(instance.get_input_keys())
-                self.output_keys = list(instance.get_output_keys())
-            except Exception:
-                pass
+            self._load_instance_metadata(instance)
 
         elif self.plugin_type == "cpp":
             instance = self._cpp_factory.create(self.class_name)
-            self.outcomes = list(instance.get_outcomes())
-            try:
-                self.description = instance.get_description()
-                self.outcome_descriptions = instance.get_outcome_descriptions()
-                self.input_keys = list(instance.get_input_keys())
-                self.output_keys = list(instance.get_output_keys())
-            except Exception:
-                pass
+            self._load_instance_metadata(instance)
 
         elif self.plugin_type == "xml":
             package_path = get_package_share_path(self.package_name)
@@ -80,7 +83,7 @@ class PluginInfo:
                 file_path = os.path.join(package_path, self.relative_path)
             else:
                 file_path = ""
-                for root, dirs, files in os.walk(package_path):
+                for root, _, files in os.walk(package_path):
                     if self.file_name in files:
                         file_path = os.path.join(root, self.file_name)
                         self.relative_path = os.path.relpath(file_path, package_path)
@@ -141,6 +144,38 @@ class PluginInfo:
                         }
                     )
 
+    def _load_instance_metadata(self, instance) -> None:
+        """
+        Load metadata from a Python or C++ state instance.
+
+        Each metadata field is queried independently so one failing accessor
+        does not suppress the remaining metadata.
+        """
+        try:
+            self.outcomes = list(instance.get_outcomes())
+        except Exception:
+            self.outcomes = []
+
+        try:
+            self.description = instance.get_description()
+        except Exception:
+            self.description = ""
+
+        try:
+            self.outcome_descriptions = instance.get_outcome_descriptions()
+        except Exception:
+            self.outcome_descriptions = {}
+
+        try:
+            self.input_keys = list(instance.get_input_keys())
+        except Exception:
+            self.input_keys = []
+
+        try:
+            self.output_keys = list(instance.get_output_keys())
+        except Exception:
+            self.output_keys = []
+
     def to_cache_dict(self) -> dict:
         """Serialize the full plugin metadata for caching."""
         return {
@@ -159,9 +194,13 @@ class PluginInfo:
 
     @classmethod
     def from_cache_dict(cls, data: dict) -> "PluginInfo":
-        """Create a plugin info object from cached metadata."""
+        """
+        Create a plugin info object from cached metadata.
+
+        No plugin factory instance is created for cached entries.
+        """
         instance = cls.__new__(cls)
-        instance._cpp_factory = CppStateFactory()
+        instance._cpp_factory = None
         instance.plugin_type = data.get("plugin_type")
         instance.class_name = data.get("class_name")
         instance.module = data.get("module")
@@ -192,3 +231,12 @@ class PluginInfo:
         if self.plugin_type == "cpp":
             return f"cpp:{self.class_name}"
         return f"xml:{self.package_name}:{self.file_name}"
+
+    @property
+    def dedup_key(self) -> str:
+        """Return a stable key used for discovery deduplication."""
+        if self.plugin_type == "python":
+            return f"python:{self.module}:{self.class_name}"
+        if self.plugin_type == "cpp":
+            return f"cpp:{self.class_name}"
+        return f"xml:{self.package_name}:{self.relative_path or self.file_name}"
