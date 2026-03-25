@@ -40,14 +40,23 @@ from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
 class PluginManager:
-    """Discovers and stores all available YASMIN plugins."""
+    """Discover and cache available YASMIN plugins."""
 
     def __init__(
         self,
         cache_dir: Optional[Path] = None,
         max_cache_age_sec: int = 0,
     ) -> None:
-        """Initialize the plugin manager."""
+        """
+        Initialize the plugin manager.
+
+        Parameters
+        ----------
+        cache_dir : Optional[Path]
+            Optional custom cache directory.
+        max_cache_age_sec : int
+            Maximum cache age in seconds. A value of 0 disables age-based invalidation.
+        """
         self.cache_dir = cache_dir
         self.max_cache_age_sec = max_cache_age_sec
         self.cpp_plugins: List[PluginInfo] = []
@@ -59,8 +68,12 @@ class PluginManager:
         hide_progress: bool = False,
         force_refresh: bool = False,
     ) -> None:
-        """Load plugins from cache or perform a full discovery."""
+        """
+        Load all plugins from cache or perform a full discovery run.
 
+        The cache is used when possible. If the cache is missing, outdated or invalid,
+        a full discovery is performed and the result is written back to the cache.
+        """
         set_log_level(LogLevel.WARN)
 
         if not force_refresh and self._load_from_cache():
@@ -90,7 +103,14 @@ class PluginManager:
         self._save_to_cache(tracked_files, tracked_dirs)
 
     def _load_from_cache(self) -> bool:
-        """Load cached plugins if the cache is still valid."""
+        """
+        Load cached plugins if the cache is still valid.
+
+        Returns
+        -------
+        bool
+            True if the cache was successfully loaded, otherwise False.
+        """
         cache = load_cache(self.cache_dir)
         if cache is None:
             return False
@@ -131,7 +151,16 @@ class PluginManager:
         tracked_files: List[dict],
         tracked_dirs: List[dict],
     ) -> None:
-        """Save the discovered plugin metadata to the cache."""
+        """
+        Save the discovered plugin metadata to the cache.
+
+        Parameters
+        ----------
+        tracked_files : List[dict]
+            File signatures used to invalidate the cache when discovery-relevant files change.
+        tracked_dirs : List[dict]
+            Directory signatures used to invalidate the cache when package contents change.
+        """
         environment = build_environment_fingerprint()
         data = {
             "cache_version": CACHE_VERSION,
@@ -210,7 +239,18 @@ class PluginManager:
         tracked_files: Optional[List[dict]] = None,
         tracked_dirs: Optional[List[dict]] = None,
     ) -> None:
-        """Discover Python plugins by scanning a Python package."""
+        """
+        Discover Python plugins by scanning a Python package.
+
+        Parameters
+        ----------
+        package_name : str
+            Package name to inspect.
+        tracked_files : Optional[List[dict]]
+            Optional list that receives signatures of relevant Python files.
+        tracked_dirs : Optional[List[dict]]
+            Optional list that receives the package directory signature.
+        """
         skip_packages: set = {
             "yasmin_ros",
             "rosidl_adapter",
@@ -296,7 +336,16 @@ class PluginManager:
         package_name: str,
         tracked_files: Optional[List[dict]] = None,
     ) -> None:
-        """Discover XML state machines from a package share directory."""
+        """
+        Discover XML state machines from a package share directory.
+
+        Parameters
+        ----------
+        package_name : str
+            Package name to inspect.
+        tracked_files : Optional[List[dict]]
+            Optional list that receives signatures of relevant XML files.
+        """
         package_share_path = get_package_share_path(package_name)
 
         for root, dirs, files in os.walk(package_share_path):
@@ -324,9 +373,19 @@ class PluginManager:
                     continue
 
     def load_cpp_plugin(self, class_name: str) -> None:
-        """Load one C++ plugin."""
+        """
+        Load one C++ plugin.
+
+        Parameters
+        ----------
+        class_name : str
+            Fully qualified exported C++ class name.
+        """
         try:
-            plugin_info: PluginInfo = PluginInfo(plugin_type="cpp", class_name=class_name)
+            plugin_info: PluginInfo = PluginInfo(
+                plugin_type="cpp",
+                class_name=class_name,
+            )
         except Exception as e:
             yasmin.YASMIN_LOG_ERROR(
                 f'Failed to load C++ plugin: {class_name}. Error: "{e}"'
@@ -335,10 +394,21 @@ class PluginManager:
         self.cpp_plugins.append(plugin_info)
 
     def load_python_plugin(self, module: str, class_name: str) -> None:
-        """Load one Python plugin."""
+        """
+        Load one Python plugin.
+
+        Parameters
+        ----------
+        module : str
+            Python module containing the state class.
+        class_name : str
+            Python class name of the state.
+        """
         try:
             plugin_info: PluginInfo = PluginInfo(
-                plugin_type="python", class_name=class_name, module=module
+                plugin_type="python",
+                class_name=class_name,
+                module=module,
             )
         except Exception as e:
             yasmin.YASMIN_LOG_ERROR(
@@ -353,7 +423,18 @@ class PluginManager:
         package_name: Optional[str] = None,
         relative_path: Optional[str] = None,
     ) -> None:
-        """Load one XML state machine."""
+        """
+        Load one XML state machine.
+
+        Parameters
+        ----------
+        xml_file : str
+            File name of the XML state machine.
+        package_name : Optional[str]
+            Package that contains the XML state machine.
+        relative_path : Optional[str]
+            Relative path inside the package share directory.
+        """
         try:
             plugin_info: PluginInfo = PluginInfo(
                 plugin_type="xml",
