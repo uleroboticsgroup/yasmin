@@ -58,10 +58,8 @@ class PluginManager:
         self,
         hide_progress: bool = False,
         force_refresh: bool = False,
-        preload_metadata: bool = False,
     ) -> None:
         """Load plugins from cache or perform a full discovery."""
-        del preload_metadata
 
         set_log_level(LogLevel.WARN)
 
