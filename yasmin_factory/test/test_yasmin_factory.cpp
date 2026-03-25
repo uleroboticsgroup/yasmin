@@ -432,8 +432,8 @@ TEST_F(TestYasminFactory, TestNestedSmDescriptionAndGlobalKeys) {
   std::string xml_content = R"(
     <StateMachine outcomes="end" description="Root description">
       <Key name="root_key" type="IN" default_value="root_val" default_type="str" description="Root key"/>
-      <Key name="inner_key" type="IN" default_value="10" default_type="int" description="Inner key"/>
       <StateMachine name="Inner" outcomes="inner_done" description="Inner description">
+        <Key name="inner_key" type="IN" default_value="10" default_type="int" description="Inner key"/>
         <State name="S1" type="cpp" class="yasmin_factory/TestSimpleState">
           <Transition from="outcome1" to="S1"/>
           <Transition from="outcome2" to="inner_done"/>
@@ -451,14 +451,27 @@ TEST_F(TestYasminFactory, TestNestedSmDescriptionAndGlobalKeys) {
 
   try {
     auto sm = factory->create_sm(root);
+    auto inner_sm = factory->create_sm(root->FirstChildElement("StateMachine"), false);
 
     ASSERT_NE(sm, nullptr);
+    ASSERT_NE(inner_sm, nullptr);
     EXPECT_EQ(sm->get_description(), "Root description");
+    EXPECT_EQ(inner_sm->get_description(), "Inner description");
 
     auto root_input_keys = sm->get_input_keys();
     auto root_output_keys = sm->get_output_keys();
-    EXPECT_EQ(root_input_keys.size(), 2);
+    auto inner_input_keys = inner_sm->get_input_keys();
+    auto inner_output_keys = inner_sm->get_output_keys();
+
+    ASSERT_EQ(root_input_keys.size(), 1);
     EXPECT_EQ(root_output_keys.size(), 0);
+    ASSERT_EQ(inner_input_keys.size(), 1);
+    EXPECT_EQ(inner_output_keys.size(), 0);
+
+    EXPECT_EQ(root_input_keys[0].name, "root_key");
+    EXPECT_EQ(inner_input_keys[0].name, "inner_key");
+    EXPECT_TRUE(inner_input_keys[0].has_default);
+    EXPECT_EQ(inner_input_keys[0].get_default_value<int>(), 10);
   } catch (const std::exception &e) {
     GTEST_SKIP() << "C++ plugin not available: " << e.what();
   }

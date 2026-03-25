@@ -330,7 +330,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
 }
 
 yasmin::StateMachine::SharedPtr
-YasminFactory::create_sm(tinyxml2::XMLElement *root, bool is_root) {
+YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
   std::string file_path = this->get_optional_attribute(root, "file_path", "");
 
@@ -451,9 +451,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root, bool is_root) {
     }
   }
 
-  if (is_root) {
-    this->add_blackboard_keys(sm, root);
-  }
+  this->add_blackboard_keys(sm, root);
   return sm;
 }
 

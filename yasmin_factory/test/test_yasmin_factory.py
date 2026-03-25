@@ -270,12 +270,12 @@ class TestYasminFactory(unittest.TestCase):
         self.assertEqual(output_by_name["shared_key"]["description"], "Shared")
 
     def test_nested_sm_description_and_global_keys(self):
-        """Test nested SM with keys stored only on the root state machine."""
+        """Test nested SM metadata and keys on both root and nested state machines."""
         sm_xml = """
         <StateMachine outcomes="end" description="Root description">
             <Key name="root_key" type="IN" default_value="root_val" default_type="str" description="Root key"/>
-            <Key name="inner_key" type="IN" default_value="10" default_type="int" description="Inner key"/>
             <StateMachine name="Inner" outcomes="inner_done" description="Inner description">
+                <Key name="inner_key" type="IN" default_value="10" default_type="int" description="Inner key"/>
                 <State name="S1" type="py" module="test.test_simple_state" class="TestSimpleState">
                     <Transition from="outcome1" to="S1"/>
                     <Transition from="outcome2" to="inner_done"/>
@@ -286,17 +286,26 @@ class TestYasminFactory(unittest.TestCase):
         """
         root = ET.fromstring(sm_xml)
         sm = self.factory.create_sm(root)
+        inner_sm = self.factory.create_sm(root.find("StateMachine"), is_root=False)
 
         self.assertIsNotNone(sm)
+        self.assertIsNotNone(inner_sm)
         self.assertEqual(sm.get_description(), "Root description")
+        self.assertEqual(inner_sm.get_description(), "Inner description")
 
         root_input_keys = sm.get_input_keys()
         root_output_keys = sm.get_output_keys()
-        self.assertEqual(len(root_input_keys), 2)
+        inner_input_keys = inner_sm.get_input_keys()
+        inner_output_keys = inner_sm.get_output_keys()
+
+        self.assertEqual(len(root_input_keys), 1)
         self.assertEqual(len(root_output_keys), 0)
-        root_key_names = {k["name"] for k in root_input_keys}
-        self.assertIn("root_key", root_key_names)
-        self.assertIn("inner_key", root_key_names)
+        self.assertEqual(len(inner_input_keys), 1)
+        self.assertEqual(len(inner_output_keys), 0)
+
+        self.assertEqual(root_input_keys[0]["name"], "root_key")
+        self.assertEqual(inner_input_keys[0]["name"], "inner_key")
+        self.assertEqual(inner_input_keys[0]["default_value"], 10)
 
     def test_fsm_metadata_from_file(self):
         """Test loading FSM metadata (description and defaults) from file."""

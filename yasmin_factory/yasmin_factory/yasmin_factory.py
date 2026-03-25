@@ -95,7 +95,7 @@ class YasminFactory:
                 states[child.attrib["name"]] = self.create_concurrence(child)
 
             elif child.tag == "StateMachine":
-                states[child.attrib["name"]] = self.create_sm(child, is_root=False)
+                states[child.attrib["name"]] = self.create_sm(child)
 
         concurrence = Concurrence(
             states=list(states.values()),
@@ -112,7 +112,7 @@ class YasminFactory:
 
         return concurrence
 
-    def create_sm(self, root: ET.Element, is_root: bool = True) -> StateMachine:
+    def create_sm(self, root: ET.Element) -> StateMachine:
         """
         Recursively creates a state machine from an XML element.
         Args:
@@ -166,7 +166,7 @@ class YasminFactory:
                 state = self.create_concurrence(child)
 
             elif child.tag == "StateMachine":
-                state = self.create_sm(child, is_root=False)
+                state = self.create_sm(child)
 
             else:
                 continue
@@ -192,8 +192,7 @@ class YasminFactory:
             if outcome_description:
                 sm.set_outcome_description(outcome_name, outcome_description)
 
-        if is_root:
-            self._add_blackboard_keys(sm, root)
+        self._add_blackboard_keys(sm, root)
         return sm
 
     def create_sm_from_file(self, xml_file: str) -> StateMachine:
