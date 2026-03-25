@@ -344,10 +344,10 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
     auto state = this->states.at(current_state);
     transitions = this->transitions.at(current_state);
     auto old_remappings = blackboard->get_remappings();
-    remappings = compose_remappings(old_remappings,
-                                    this->remappings.at(current_state));
+    remappings =
+        compose_remappings(old_remappings, this->remappings.at(current_state));
 
-    blackboard->set_remappings(remappings); 
+    blackboard->set_remappings(remappings);
     outcome = (*state.get())(blackboard);
     blackboard->set_remappings(old_remappings);
 
