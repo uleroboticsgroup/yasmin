@@ -286,7 +286,7 @@ class TestYasminFactory(unittest.TestCase):
         """
         root = ET.fromstring(sm_xml)
         sm = self.factory.create_sm(root)
-        inner_sm = self.factory.create_sm(root.find("StateMachine"), is_root=False)
+        inner_sm = self.factory.create_sm(root.find("StateMachine"))
 
         self.assertIsNotNone(sm)
         self.assertIsNotNone(inner_sm)
