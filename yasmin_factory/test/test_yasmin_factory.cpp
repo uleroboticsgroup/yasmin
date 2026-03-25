@@ -155,7 +155,7 @@ TEST_F(TestYasminFactory, TestCreateStateFromInvalidFile) {
 
   EXPECT_THROW(
       { auto sm = factory->create_sm_from_file(xml_file); },
-    std::runtime_error);
+      std::runtime_error);
 }
 
 TEST_F(TestYasminFactory, TestCreateStateFromInvalidXML) {
