@@ -16,11 +16,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from pathlib import Path
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
-from yasmin_editor.plugins_manager.plugin_info import PluginInfo
-from yasmin_editor.plugins_manager.plugin_manager import PluginManager
+from yasmin_plugins_manager import PluginInfo, PluginManager
 
 IGNORE_XML_FILES = {"package.xml", "plugins.xml"}
 
@@ -64,7 +63,9 @@ def build_plugin_info(plugin_name: str):
         module = plugin_name[:last_dot]
         class_name = plugin_name[last_dot + 1 :]
         try:
-            return PluginInfo(plugin_type="python", class_name=class_name, module=module)
+            return PluginInfo(
+                plugin_type="python", class_name=class_name, module=module
+            )
         except Exception:
             return None
     else:
