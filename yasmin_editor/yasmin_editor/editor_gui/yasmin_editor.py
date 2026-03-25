@@ -418,33 +418,17 @@ class YasminEditor(QMainWindow):
                 "default_value": default_value,
             }
 
-        for key_name, metadata in self._blackboard_key_metadata.items():
-            if key_name in derived_keys:
-                continue
-
-            stored_key_type = str(metadata.get("key_type", "IN") or "IN").strip() or "IN"
-            if stored_key_type not in ("IN", "OUT", "IN/OUT"):
-                stored_key_type = "IN"
-
-            default_type = ""
-            default_value = ""
-            if stored_key_type in ("IN", "IN/OUT"):
-                default_type = str(metadata.get("default_type", "") or "")
-                if default_type:
-                    default_value = str(metadata.get("default_value", "") or "")
-
-            derived_keys[key_name] = {
-                "name": key_name,
-                "key_type": stored_key_type,
-                "description": str(metadata.get("description", "") or "").strip(),
-                "default_type": default_type,
-                "default_value": default_value,
-            }
-
         return dict(sorted(derived_keys.items(), key=lambda item: item[0].lower()))
 
     def sync_blackboard_keys(self) -> None:
-        self._blackboard_keys = list(self._collect_blackboard_key_usage().values())
+        derived_keys = self._collect_blackboard_key_usage()
+        used_key_names = set(derived_keys.keys())
+        self._blackboard_key_metadata = {
+            key_name: metadata
+            for key_name, metadata in self._blackboard_key_metadata.items()
+            if key_name in used_key_names
+        }
+        self._blackboard_keys = list(derived_keys.values())
         self.refresh_blackboard_keys_list()
 
     def refresh_blackboard_keys_list(self) -> None:
@@ -514,7 +498,9 @@ class YasminEditor(QMainWindow):
             }
             self.sync_blackboard_keys()
 
-    def set_blackboard_keys(self, keys: List[Dict[str, str]]) -> None:
+    def set_blackboard_keys(
+        self, keys: List[Dict[str, str]], sync: bool = True
+    ) -> None:
         self._blackboard_key_metadata = {}
         for key in keys:
             key_name = str(key.get("name", "") or "").strip()
@@ -526,7 +512,8 @@ class YasminEditor(QMainWindow):
                 "default_type": str(key.get("default_type", "") or "").strip(),
                 "default_value": str(key.get("default_value", "") or "").strip(),
             }
-        self.sync_blackboard_keys()
+        if sync:
+            self.sync_blackboard_keys()
 
     def get_blackboard_keys(self) -> List[Dict[str, str]]:
         self.sync_blackboard_keys()

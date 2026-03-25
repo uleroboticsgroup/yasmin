@@ -77,9 +77,7 @@ class BlackboardKeyDialog(QDialog):
             self.default_type_combo.setCurrentIndex(default_type_index)
         else:
             self.default_type_combo.setCurrentIndex(0)
-        self.default_type_combo.currentIndexChanged.connect(
-            self._update_default_value_state
-        )
+        self.default_type_combo.currentIndexChanged.connect(self._update_default_value_state)
         layout.addRow("Default Type:", self.default_type_combo)
 
         self.default_value_edit = QLineEdit(str(key_data.get("default_value", "") or ""))
@@ -107,9 +105,7 @@ class BlackboardKeyDialog(QDialog):
 
     def _update_default_value_state(self) -> None:
         has_default_type = bool(self.default_type_combo.currentData())
-        self.default_value_edit.setEnabled(
-            self.default_type_combo.isEnabled() and has_default_type
-        )
+        self.default_value_edit.setEnabled(self.default_type_combo.isEnabled() and has_default_type)
 
     def _accept_with_validation(self) -> None:
         if not self.name_edit.text().strip():

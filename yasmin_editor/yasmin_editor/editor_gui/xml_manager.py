@@ -193,7 +193,7 @@ class XmlManager:
         fsm_description = root.get("description", "")
         self.editor.root_sm_description_edit.setText(fsm_description)
 
-        self.editor.set_blackboard_keys(self.load_blackboard_keys(root))
+        self.editor.set_blackboard_keys(self.load_blackboard_keys(root), sync=False)
 
         start_state = root.get("start_state", "")
 
@@ -254,6 +254,8 @@ class XmlManager:
             if hasattr(state, "connections"):
                 for conn in state.connections:
                     conn.update_position()
+
+        self.editor.sync_blackboard_keys()
 
         for outcome in self.editor.final_outcomes.values():
             if hasattr(outcome, "connections"):
