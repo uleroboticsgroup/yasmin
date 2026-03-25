@@ -451,7 +451,7 @@ TEST_F(TestYasminFactory, TestNestedSmDescriptionAndGlobalKeys) {
 
   try {
     auto sm = factory->create_sm(root);
-    auto inner_sm = factory->create_sm(root->FirstChildElement("StateMachine"), false);
+    auto inner_sm = factory->create_sm(root->FirstChildElement("StateMachine"));
 
     ASSERT_NE(sm, nullptr);
     ASSERT_NE(inner_sm, nullptr);
