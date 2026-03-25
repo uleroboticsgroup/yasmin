@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <StateMachine name="Demo2" outcomes="outcome4" start_state="Foo">
+  <Key name="foo_str" type="IN/OUT" description="String containing the current counter value produced by FooState."/>
   <State name="Foo" x="473.60" y="93.62" type="py" module="yasmin_demos.foo_state" class="FooState">
     <Transition from="outcome1" to="Bar"/>
     <Transition from="outcome2" to="outcome4"/>

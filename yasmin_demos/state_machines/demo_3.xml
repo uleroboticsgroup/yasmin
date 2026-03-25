@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <StateMachine name="Demo3" outcomes="outcome4" start_state="PoseWriter">
+  <Key name="pose_bytes" type="IN/OUT" description="Serialized Pose message stored as bytes in the blackboard."/>
+  <Key name="pose_bytes__type" type="IN/OUT" description="Type information for the serialized Pose message."/>
   <State name="PoseWriter" x="157.80" y="84.20" type="cpp" class="yasmin_demos/PoseWriterState">
     <Transition from="outcome1" to="PoseReader"/>
   </State>
