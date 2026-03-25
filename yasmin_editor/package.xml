@@ -10,6 +10,7 @@
   <buildtool_depend>ament_cmake_python</buildtool_depend>
   <depend>rclpy</depend>
   <depend>yasmin</depend>
+  <depend>yasmin_plugins_manager</depend>
   <depend>yasmin_factory</depend>
   <exec_depend>python3-tqdm</exec_depend>
   <exec_depend>python3-pyqt5</exec_depend>

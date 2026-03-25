@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
     from yasmin_editor.editor_gui.state_node import StateNode
     from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
-    from yasmin_editor.plugins_manager.plugin_info import PluginInfo
+    from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
 class ContainerStateNode(QGraphicsRectItem):

@@ -40,8 +40,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtCore import Qt, QPointF
 
-from yasmin_editor.plugins_manager.plugin_manager import PluginManager
-from yasmin_editor.plugins_manager.plugin_info import PluginInfo
+from yasmin_plugins_manager.plugin_manager import PluginManager, PluginInfo
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.state_node import StateNode
 from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
