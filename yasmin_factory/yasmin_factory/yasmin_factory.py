@@ -235,7 +235,7 @@ class YasminFactory:
         """Parse new Key syntax and legacy Default syntax."""
         for key_elem in parent_elem.findall("Key"):
             key_name = key_elem.attrib["name"]
-            key_usage = key_elem.attrib.get("type", "in").upper()
+            key_usage = key_elem.attrib.get("type", "in").lower()
             key_description = key_elem.attrib.get("description", "")
             default_type = key_elem.attrib.get("default_type", "str")
             default_value = key_elem.attrib.get("default_value")

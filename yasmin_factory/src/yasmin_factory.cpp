@@ -177,7 +177,7 @@ void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
         this->get_optional_attribute(key_elem, "default_type", "str");
 
     std::transform(key_usage.begin(), key_usage.end(), key_usage.begin(),
-                   [](unsigned char c) { return std::toupper(c); });
+                   [](unsigned char c) { return std::tolower(c); });
 
     const char *default_value_attr = key_elem->Attribute("default_value");
 
