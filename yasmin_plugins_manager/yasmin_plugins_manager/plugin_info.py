@@ -32,6 +32,7 @@ class PluginInfo:
         module: Optional[str] = None,
         file_name: Optional[str] = None,
         package_name: Optional[str] = None,
+        relative_path: Optional[str] = None,
     ) -> None:
         """Load plugin metadata immediately."""
         self._cpp_factory: CppStateFactory = CppStateFactory()
@@ -41,6 +42,7 @@ class PluginInfo:
         self.module: Optional[str] = module
         self.file_name: Optional[str] = file_name
         self.package_name: Optional[str] = package_name
+        self.relative_path: Optional[str] = relative_path
         self.outcomes: List[str] = []
         self.description: str = ""
         self.outcome_descriptions: Dict[str, str] = {}
@@ -73,17 +75,24 @@ class PluginInfo:
 
         elif self.plugin_type == "xml":
             package_path = get_package_share_path(self.package_name)
-            file_path = ""
 
-            for root, dirs, files in os.walk(package_path):
-                if self.file_name in files:
-                    file_path = os.path.join(root, self.file_name)
-                    break
+            if self.relative_path:
+                file_path = os.path.join(package_path, self.relative_path)
+            else:
+                file_path = ""
+                for root, dirs, files in os.walk(package_path):
+                    if self.file_name in files:
+                        file_path = os.path.join(root, self.file_name)
+                        self.relative_path = os.path.relpath(file_path, package_path)
+                        break
 
-            if not file_path:
+            if not file_path or not os.path.exists(file_path):
                 raise ValueError(
                     f"Could not find XML file {self.file_name} in package {self.package_name}"
                 )
+
+            if self.file_name is None:
+                self.file_name = os.path.basename(file_path)
 
             tree = ET.parse(file_path)
             root = tree.getroot()
@@ -140,6 +149,7 @@ class PluginInfo:
             "module": self.module,
             "file_name": self.file_name,
             "package_name": self.package_name,
+            "relative_path": self.relative_path,
             "outcomes": self.outcomes,
             "description": self.description,
             "outcome_descriptions": self.outcome_descriptions,
@@ -157,6 +167,7 @@ class PluginInfo:
         instance.module = data.get("module")
         instance.file_name = data.get("file_name")
         instance.package_name = data.get("package_name")
+        instance.relative_path = data.get("relative_path")
         instance.outcomes = list(data.get("outcomes", []))
         instance.description = data.get("description", "")
         instance.outcome_descriptions = dict(data.get("outcome_descriptions", {}))

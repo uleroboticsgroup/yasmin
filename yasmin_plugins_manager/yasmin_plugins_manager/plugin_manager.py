@@ -315,7 +315,13 @@ class PluginManager:
                             signature = stat_signature(xml_file)
                             if signature:
                                 tracked_files.append(signature)
-                        self.load_xml_state_machine(filename, package_name)
+
+                        relative_path = os.path.relpath(xml_file, package_share_path)
+                        self.load_xml_state_machine(
+                            filename,
+                            package_name,
+                            relative_path=relative_path,
+                        )
                 except (ET.ParseError, IOError):
                     continue
 
@@ -344,12 +350,18 @@ class PluginManager:
         self.python_plugins.append(plugin_info)
 
     def load_xml_state_machine(
-        self, xml_file: str, package_name: Optional[str] = None
+        self,
+        xml_file: str,
+        package_name: Optional[str] = None,
+        relative_path: Optional[str] = None,
     ) -> None:
         """Load one XML state machine."""
         try:
             plugin_info: PluginInfo = PluginInfo(
-                plugin_type="xml", file_name=xml_file, package_name=package_name
+                plugin_type="xml",
+                file_name=xml_file,
+                package_name=package_name,
+                relative_path=relative_path,
             )
         except Exception as e:
             yasmin.YASMIN_LOG_ERROR(
