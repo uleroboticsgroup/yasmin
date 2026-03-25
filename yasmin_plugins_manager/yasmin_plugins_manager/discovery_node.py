@@ -63,7 +63,9 @@ def _format_plugin_header(plugin) -> str:
     else:
         source = f"package={plugin.package_name}"
 
-    return f"[{plugin.plugin_type}] {plugin.display_name} | id={plugin.unique_id} | {source}"
+    return (
+        f"[{plugin.plugin_type}] {plugin.display_name} | id={plugin.unique_id} | {source}"
+    )
 
 
 def _format_plugin_details(plugin) -> list[str]:
