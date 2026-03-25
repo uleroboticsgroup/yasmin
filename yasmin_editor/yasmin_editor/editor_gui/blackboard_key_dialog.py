@@ -33,9 +33,15 @@ class BlackboardKeyDialog(QDialog):
     TYPE_OPTIONS = ["IN", "OUT", "IN/OUT"]
     VALUE_TYPE_OPTIONS = ["", "str", "int", "float", "bool"]
 
-    def __init__(self, key_data: Optional[Dict[str, str]] = None, parent=None) -> None:
+    def __init__(
+        self,
+        key_data: Optional[Dict[str, str]] = None,
+        parent=None,
+        edit_mode: bool = False,
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Edit Blackboard Key" if key_data else "Add Blackboard Key")
+        self.edit_mode = edit_mode
         self.resize(480, 320)
 
         key_data = dict(key_data or {})
@@ -44,6 +50,7 @@ class BlackboardKeyDialog(QDialog):
 
         self.name_edit = QLineEdit(key_data.get("name", ""))
         self.name_edit.setPlaceholderText("Enter key name")
+        self.name_edit.setReadOnly(self.edit_mode)
         layout.addRow("Name:*", self.name_edit)
 
         self.type_combo = QComboBox()
@@ -52,6 +59,7 @@ class BlackboardKeyDialog(QDialog):
         type_index = self.type_combo.findText(key_type)
         if type_index >= 0:
             self.type_combo.setCurrentIndex(type_index)
+        self.type_combo.setEnabled(not self.edit_mode)
         layout.addRow("Type:", self.type_combo)
 
         self.description_edit = QTextEdit()
@@ -63,22 +71,22 @@ class BlackboardKeyDialog(QDialog):
         self.default_type_combo.addItem("No default", "")
         for option in self.VALUE_TYPE_OPTIONS[1:]:
             self.default_type_combo.addItem(option, option)
-        default_type = key_data.get("default_type", "")
+        default_type = str(key_data.get("default_type", "") or "")
         default_type_index = self.default_type_combo.findData(default_type)
         if default_type_index >= 0:
             self.default_type_combo.setCurrentIndex(default_type_index)
+        else:
+            self.default_type_combo.setCurrentIndex(0)
+        self.default_type_combo.currentIndexChanged.connect(self._update_default_value_state)
         layout.addRow("Default Type:", self.default_type_combo)
 
-        self.default_value_edit = QLineEdit(key_data.get("default_value", ""))
+        self.default_value_edit = QLineEdit(str(key_data.get("default_value", "") or ""))
         self.default_value_edit.setPlaceholderText(
             "Default value. Leave empty for an empty string when type is str"
         )
         layout.addRow("Default Value:", self.default_value_edit)
 
         self.type_combo.currentTextChanged.connect(self._update_default_fields)
-        self.default_type_combo.currentIndexChanged.connect(
-            lambda _: self._update_default_fields(self.type_combo.currentText())
-        )
         self._update_default_fields(self.type_combo.currentText())
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -87,15 +95,17 @@ class BlackboardKeyDialog(QDialog):
         layout.addWidget(buttons)
 
     def _update_default_fields(self, key_type: str) -> None:
-        default_allowed = key_type in ("IN", "IN/OUT")
-        self.default_type_combo.setEnabled(default_allowed)
-
-        has_default_type = self.default_type_combo.currentData() != ""
-        self.default_value_edit.setEnabled(default_allowed and has_default_type)
-
-        if not default_allowed:
+        allow_defaults = key_type in ("IN", "IN/OUT")
+        if not allow_defaults:
             self.default_type_combo.setCurrentIndex(0)
             self.default_value_edit.clear()
+
+        self.default_type_combo.setEnabled(allow_defaults)
+        self._update_default_value_state()
+
+    def _update_default_value_state(self) -> None:
+        has_default_type = bool(self.default_type_combo.currentData())
+        self.default_value_edit.setEnabled(self.default_type_combo.isEnabled() and has_default_type)
 
     def _accept_with_validation(self) -> None:
         if not self.name_edit.text().strip():
@@ -104,19 +114,16 @@ class BlackboardKeyDialog(QDialog):
         self.accept()
 
     def get_key_data(self) -> Dict[str, str]:
-        key_type = self.type_combo.currentText()
-        default_type = (
-            self.default_type_combo.currentData()
-            if self.default_type_combo.isEnabled()
-            else ""
-        )
-        default_value = (
-            self.default_value_edit.text() if self.default_value_edit.isEnabled() else ""
-        )
+        default_type = ""
+        default_value = ""
+        if self.type_combo.currentText() in ("IN", "IN/OUT"):
+            default_type = str(self.default_type_combo.currentData() or "")
+            if default_type:
+                default_value = self.default_value_edit.text().strip()
 
         return {
             "name": self.name_edit.text().strip(),
-            "key_type": key_type,
+            "key_type": self.type_combo.currentText(),
             "description": self.description_edit.toPlainText().strip(),
             "default_type": default_type,
             "default_value": default_value,

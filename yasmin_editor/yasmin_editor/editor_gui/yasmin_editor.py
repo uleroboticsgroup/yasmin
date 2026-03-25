@@ -15,7 +15,7 @@
 
 import os
 import random
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -80,6 +80,7 @@ class YasminEditor(QMainWindow):
         self.root_sm_name = ""
         self.start_state = None
         self._blackboard_keys: List[Dict[str, str]] = []
+        self._blackboard_key_metadata: Dict[str, Dict[str, str]] = {}
         self._highlight_blackboard_usage = True
 
         self.layout_seed = 42
@@ -187,12 +188,6 @@ class YasminEditor(QMainWindow):
         self.blackboard_list.itemDoubleClicked.connect(self.edit_selected_blackboard_key)
         left_layout.addWidget(self.blackboard_list)
         blackboard_btn_row = QHBoxLayout()
-        self.add_blackboard_btn = QPushButton("Add")
-        self.add_blackboard_btn.clicked.connect(self.add_blackboard_key)
-        blackboard_btn_row.addWidget(self.add_blackboard_btn)
-        self.remove_blackboard_btn = QPushButton("Remove")
-        self.remove_blackboard_btn.clicked.connect(self.remove_selected_blackboard_key)
-        blackboard_btn_row.addWidget(self.remove_blackboard_btn)
         self.highlight_blackboard_btn = QPushButton("Usage: On")
         self.highlight_blackboard_btn.setCheckable(True)
         self.highlight_blackboard_btn.setChecked(True)
@@ -334,14 +329,123 @@ class YasminEditor(QMainWindow):
             item.setHidden(text.lower() not in item.text().lower())
 
     def format_blackboard_key_label(self, key_data: Dict[str, str]) -> str:
-        label = f"{key_data.get('name', '')} ({key_data.get('key_type', 'IN')})"
+        return f"{key_data.get('name', '')} ({key_data.get('key_type', 'IN')})"
 
-        default_type = str(key_data.get("default_type", "")).strip()
-        if default_type:
-            default_value = str(key_data.get("default_value", ""))
-            label += f" [default: {default_value}, type: {default_type}]"
+    def _get_plugin_key_usage(
+        self, state_node: StateNode, key_info: Dict[str, str], is_input: bool
+    ) -> Optional[Dict[str, str]]:
+        key_name = str(key_info.get("name", "")).strip()
+        if not key_name:
+            return None
 
-        return label
+        effective_name = self.get_effective_blackboard_key_name(state_node, key_name)
+        if not effective_name:
+            return None
+
+        description = str(key_info.get("description", "") or "").strip()
+        return {
+            "name": effective_name,
+            "usage": "input" if is_input else "output",
+            "description": description,
+        }
+
+    def _collect_blackboard_key_usage(self) -> Dict[str, Dict[str, str]]:
+        usage_map: Dict[str, Dict[str, object]] = {}
+
+        for state_node in self.state_nodes.values():
+            plugin_info = getattr(state_node, "plugin_info", None)
+            if plugin_info is None:
+                continue
+
+            for key_info in list(getattr(plugin_info, "input_keys", []) or []):
+                usage = self._get_plugin_key_usage(state_node, key_info, True)
+                if usage is None:
+                    continue
+                entry = usage_map.setdefault(
+                    usage["name"],
+                    {
+                        "input": False,
+                        "output": False,
+                        "description": "",
+                    },
+                )
+                entry["input"] = True
+                if not entry["description"] and usage["description"]:
+                    entry["description"] = usage["description"]
+
+            for key_info in list(getattr(plugin_info, "output_keys", []) or []):
+                usage = self._get_plugin_key_usage(state_node, key_info, False)
+                if usage is None:
+                    continue
+                entry = usage_map.setdefault(
+                    usage["name"],
+                    {
+                        "input": False,
+                        "output": False,
+                        "description": "",
+                    },
+                )
+                entry["output"] = True
+                if not entry["description"] and usage["description"]:
+                    entry["description"] = usage["description"]
+
+        derived_keys: Dict[str, Dict[str, str]] = {}
+        for key_name, usage in usage_map.items():
+            metadata = dict(self._blackboard_key_metadata.get(key_name, {}))
+            if usage["input"] and usage["output"]:
+                key_type = "IN/OUT"
+            elif usage["output"]:
+                key_type = "OUT"
+            else:
+                key_type = "IN"
+
+            description = str(metadata.get("description", "") or "").strip()
+            if not description:
+                description = str(usage.get("description", "") or "").strip()
+
+            default_type = ""
+            default_value = ""
+            if key_type in ("IN", "IN/OUT"):
+                default_type = str(metadata.get("default_type", "") or "")
+                if default_type:
+                    default_value = str(metadata.get("default_value", "") or "")
+
+            derived_keys[key_name] = {
+                "name": key_name,
+                "key_type": key_type,
+                "description": description,
+                "default_type": default_type,
+                "default_value": default_value,
+            }
+
+        for key_name, metadata in self._blackboard_key_metadata.items():
+            if key_name in derived_keys:
+                continue
+
+            stored_key_type = str(metadata.get("key_type", "IN") or "IN").strip() or "IN"
+            if stored_key_type not in ("IN", "OUT", "IN/OUT"):
+                stored_key_type = "IN"
+
+            default_type = ""
+            default_value = ""
+            if stored_key_type in ("IN", "IN/OUT"):
+                default_type = str(metadata.get("default_type", "") or "")
+                if default_type:
+                    default_value = str(metadata.get("default_value", "") or "")
+
+            derived_keys[key_name] = {
+                "name": key_name,
+                "key_type": stored_key_type,
+                "description": str(metadata.get("description", "") or "").strip(),
+                "default_type": default_type,
+                "default_value": default_value,
+            }
+
+        return dict(sorted(derived_keys.items(), key=lambda item: item[0].lower()))
+
+    def sync_blackboard_keys(self) -> None:
+        self._blackboard_keys = list(self._collect_blackboard_key_usage().values())
+        self.refresh_blackboard_keys_list()
 
     def refresh_blackboard_keys_list(self) -> None:
         current_key_name = self.get_selected_blackboard_key_name()
@@ -376,21 +480,6 @@ class YasminEditor(QMainWindow):
         key_data = item.data(Qt.UserRole) or {}
         return key_data.get("name")
 
-    def add_blackboard_key(self) -> None:
-        dlg = BlackboardKeyDialog(parent=self)
-        if dlg.exec_():
-            key_data = dlg.get_key_data()
-            if any(
-                existing.get("name") == key_data["name"]
-                for existing in self._blackboard_keys
-            ):
-                QMessageBox.warning(
-                    self, "Error", f"Blackboard key '{key_data['name']}' already exists!"
-                )
-                return
-            self._blackboard_keys.append(key_data)
-            self.refresh_blackboard_keys_list()
-
     def edit_selected_blackboard_key(
         self, item: Optional[QListWidgetItem] = None
     ) -> None:
@@ -400,53 +489,47 @@ class YasminEditor(QMainWindow):
             return
 
         key_data = dict(item.data(Qt.UserRole) or {})
-        original_name = key_data.get("name", "")
-        dlg = BlackboardKeyDialog(key_data, parent=self)
-        if dlg.exec_():
-            updated_key = dlg.get_key_data()
-            for existing in self._blackboard_keys:
-                if (
-                    existing.get("name") == updated_key["name"]
-                    and existing.get("name") != original_name
-                ):
-                    QMessageBox.warning(
-                        self,
-                        "Error",
-                        f"Blackboard key '{updated_key['name']}' already exists!",
-                    )
-                    return
-
-            for index, existing in enumerate(self._blackboard_keys):
-                if existing.get("name") == original_name:
-                    self._blackboard_keys[index] = updated_key
-                    break
-
-            self.refresh_blackboard_keys_list()
-
-    def remove_selected_blackboard_key(self) -> None:
-        key_name = self.get_selected_blackboard_key_name()
+        key_name = key_data.get("name", "")
         if not key_name:
             return
 
-        reply = QMessageBox.question(
-            self,
-            "Remove Blackboard Key",
-            f"Remove blackboard key '{key_name}'?",
-            QMessageBox.Yes | QMessageBox.No,
-        )
-        if reply != QMessageBox.Yes:
-            return
+        metadata = dict(self._blackboard_key_metadata.get(key_name, {}))
+        merged_key_data = {
+            **key_data,
+            **metadata,
+            "name": key_data.get("name", ""),
+            "key_type": key_data.get("key_type", "IN"),
+            "default_type": str(metadata.get("default_type", "") or ""),
+            "default_value": str(metadata.get("default_value", "") or ""),
+        }
 
-        self._blackboard_keys = [
-            key for key in self._blackboard_keys if key.get("name") != key_name
-        ]
-        self.refresh_blackboard_keys_list()
+        dlg = BlackboardKeyDialog(merged_key_data, parent=self, edit_mode=True)
+        if dlg.exec_():
+            updated_key = dlg.get_key_data()
+            self._blackboard_key_metadata[key_name] = {
+                "description": updated_key.get("description", ""),
+                "key_type": key_data.get("key_type", "IN"),
+                "default_type": updated_key.get("default_type", ""),
+                "default_value": updated_key.get("default_value", ""),
+            }
+            self.sync_blackboard_keys()
 
     def set_blackboard_keys(self, keys: List[Dict[str, str]]) -> None:
-        self._blackboard_keys = [dict(key) for key in keys if key.get("name")]
-        self.refresh_blackboard_keys_list()
+        self._blackboard_key_metadata = {}
+        for key in keys:
+            key_name = str(key.get("name", "") or "").strip()
+            if not key_name:
+                continue
+            self._blackboard_key_metadata[key_name] = {
+                "description": str(key.get("description", "") or "").strip(),
+                "key_type": str(key.get("key_type", "IN") or "IN").strip(),
+                "default_type": str(key.get("default_type", "") or "").strip(),
+                "default_value": str(key.get("default_value", "") or "").strip(),
+            }
+        self.sync_blackboard_keys()
 
     def get_blackboard_keys(self) -> List[Dict[str, str]]:
+        self.sync_blackboard_keys()
         return [dict(key) for key in self._blackboard_keys]
 
     def add_root_default_row(self) -> None:
@@ -456,36 +539,19 @@ class YasminEditor(QMainWindow):
         pass
 
     def add_root_default_row_with_data(self, data: dict) -> None:
-        key_name = data.get("key", "")
+        key_name = str(data.get("key", "") or "").strip()
         if not key_name:
             return
-        self._blackboard_keys.append(
-            {
-                "name": key_name,
-                "key_type": "IN",
-                "description": data.get("description", ""),
-                "default_type": data.get("type", "str"),
-                "default_value": data.get("value", ""),
-            }
-        )
-        self.refresh_blackboard_keys_list()
+        self._blackboard_key_metadata[key_name] = {
+            "description": str(data.get("description", "") or "").strip(),
+            "key_type": "IN",
+            "default_type": str(data.get("type", "") or "").strip(),
+            "default_value": str(data.get("value", "") or "").strip(),
+        }
+        self.sync_blackboard_keys()
 
     def get_root_defaults(self) -> list:
-        defaults = []
-        for key_data in self._blackboard_keys:
-            if key_data.get("key_type") not in ("IN", "IN/OUT"):
-                continue
-            if not key_data.get("default_type"):
-                continue
-            defaults.append(
-                {
-                    "key": key_data.get("name", ""),
-                    "value": key_data.get("default_value", ""),
-                    "type": key_data.get("default_type", "str"),
-                    "description": key_data.get("description", ""),
-                }
-            )
-        return defaults
+        return []
 
     def on_blackboard_selection_changed(self) -> None:
         self.update_blackboard_usage_highlighting()
@@ -508,6 +574,14 @@ class YasminEditor(QMainWindow):
             effective_key_name = remappings.get(effective_key_name, effective_key_name)
 
         return effective_key_name
+
+    def _remove_state_node_entries(self, state_node: StateNode, prefix: str = "") -> None:
+        full_name = f"{prefix}.{state_node.name}" if prefix else state_node.name
+        if isinstance(state_node, ContainerStateNode):
+            for child_state in list(state_node.child_states.values()):
+                self._remove_state_node_entries(child_state, full_name)
+        if full_name in self.state_nodes:
+            del self.state_nodes[full_name]
 
     def state_uses_blackboard_key(self, state_node, key_name: str) -> bool:
         plugin_info = getattr(state_node, "plugin_info", None)
@@ -714,6 +788,7 @@ class YasminEditor(QMainWindow):
             if index >= 0:
                 self.start_state_combo.setCurrentIndex(index)
 
+        self.sync_blackboard_keys()
         self.statusBar().showMessage(f"Added state: {name}", 2000)
 
     def add_state(self) -> None:
@@ -842,6 +917,7 @@ class YasminEditor(QMainWindow):
                             state_node.start_state = start_state
                             state_node.update_start_state_label()
 
+                        self.sync_blackboard_keys()
                         self.statusBar().showMessage(
                             f"Updated state machine: {name}", 2000
                         )
@@ -906,6 +982,7 @@ class YasminEditor(QMainWindow):
                             state_node.default_outcome = default_outcome
                             state_node.update_default_outcome_label()
 
+                        self.sync_blackboard_keys()
                         self.statusBar().showMessage(f"Updated concurrence: {name}", 2000)
         else:
             dialog = StatePropertiesDialog(
@@ -954,6 +1031,7 @@ class YasminEditor(QMainWindow):
                     state_node.remappings = remappings
                     state_node.description = description
                     state_node.defaults = defaults
+                    self.sync_blackboard_keys()
                     self.statusBar().showMessage(f"Updated state: {name}", 2000)
 
     def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
@@ -1026,6 +1104,7 @@ class YasminEditor(QMainWindow):
                 full_name = f"{container.name}.{name}"
                 self.state_nodes[full_name] = child_node
 
+                self.sync_blackboard_keys()
                 self.statusBar().showMessage(
                     f"Added state '{name}' to container '{container.name}'", 2000
                 )
@@ -1077,6 +1156,7 @@ class YasminEditor(QMainWindow):
                 full_name = f"{container.name}.{name}"
                 self.state_nodes[full_name] = child_sm
 
+                self.sync_blackboard_keys()
                 self.statusBar().showMessage(
                     f"Added State Machine '{name}' to container '{container.name}'", 2000
                 )
@@ -1130,6 +1210,7 @@ class YasminEditor(QMainWindow):
                 full_name = f"{container.name}.{name}"
                 self.state_nodes[full_name] = child_cc
 
+                self.sync_blackboard_keys()
                 self.statusBar().showMessage(
                     f"Added Concurrence '{name}' to container '{container.name}'", 2000
                 )
@@ -1362,20 +1443,19 @@ class YasminEditor(QMainWindow):
                     if item.name in parent.child_states:
                         del parent.child_states[item.name]
 
-                    full_name = f"{parent.name}.{item.name}"
-                    if full_name in self.state_nodes:
-                        del self.state_nodes[full_name]
+                    self._remove_state_node_entries(item, parent.name)
 
                     parent.auto_resize_for_children()
                     self.canvas.scene.removeItem(item)
+                    self.sync_blackboard_keys()
                     self.statusBar().showMessage(
                         f"Deleted nested state: {item.name}", 2000
                     )
                 else:
                     self.canvas.scene.removeItem(item)
-                    if item.name in self.state_nodes:
-                        del self.state_nodes[item.name]
+                    self._remove_state_node_entries(item)
                     self.update_start_state_combo()
+                    self.sync_blackboard_keys()
                     self.statusBar().showMessage(f"Deleted state: {item.name}", 2000)
 
             elif isinstance(item, FinalOutcomeNode):
@@ -1496,6 +1576,7 @@ class YasminEditor(QMainWindow):
             self.root_sm_name_edit.clear()
             self.root_sm_description_edit.clear()
             self._blackboard_keys = []
+            self._blackboard_key_metadata = {}
             self.refresh_blackboard_keys_list()
             self.update_start_state_combo()
             self.statusBar().showMessage("New state machine created", 2000)

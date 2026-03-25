@@ -260,6 +260,8 @@ class XmlManager:
                 for conn in outcome.connections:
                     conn.update_position()
 
+        self.editor.sync_blackboard_keys()
+
         for _ in range(3):
             self.editor.canvas.scene.update()
             QApplication.processEvents()
