@@ -498,9 +498,7 @@ class YasminEditor(QMainWindow):
             }
             self.sync_blackboard_keys()
 
-    def set_blackboard_keys(
-        self, keys: List[Dict[str, str]], sync: bool = True
-    ) -> None:
+    def set_blackboard_keys(self, keys: List[Dict[str, str]], sync: bool = True) -> None:
         self._blackboard_key_metadata = {}
         for key in keys:
             key_name = str(key.get("name", "") or "").strip()
@@ -545,7 +543,9 @@ class YasminEditor(QMainWindow):
 
     def toggle_blackboard_highlighting(self, enabled: bool) -> None:
         self._highlight_blackboard_usage = enabled
-        self.highlight_blackboard_btn.setText("Highlight: On" if enabled else "Highlight: Off")
+        self.highlight_blackboard_btn.setText(
+            "Highlight: On" if enabled else "Highlight: Off"
+        )
         self.update_blackboard_usage_highlighting()
 
     def get_effective_blackboard_key_name(self, state_node, key_name: str) -> str:
