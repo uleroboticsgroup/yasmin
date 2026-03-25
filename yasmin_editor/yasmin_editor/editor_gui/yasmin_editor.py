@@ -188,7 +188,7 @@ class YasminEditor(QMainWindow):
         self.blackboard_list.itemDoubleClicked.connect(self.edit_selected_blackboard_key)
         left_layout.addWidget(self.blackboard_list)
         blackboard_btn_row = QHBoxLayout()
-        self.highlight_blackboard_btn = QPushButton("Usage: On")
+        self.highlight_blackboard_btn = QPushButton("Highlight: On")
         self.highlight_blackboard_btn.setCheckable(True)
         self.highlight_blackboard_btn.setChecked(True)
         self.highlight_blackboard_btn.toggled.connect(self.toggle_blackboard_highlighting)
@@ -545,7 +545,7 @@ class YasminEditor(QMainWindow):
 
     def toggle_blackboard_highlighting(self, enabled: bool) -> None:
         self._highlight_blackboard_usage = enabled
-        self.highlight_blackboard_btn.setText("Usage: On" if enabled else "Usage: Off")
+        self.highlight_blackboard_btn.setText("Highlight: On" if enabled else "Highlight: Off")
         self.update_blackboard_usage_highlighting()
 
     def get_effective_blackboard_key_name(self, state_node, key_name: str) -> str:
