@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <StateMachine name="Demo1" outcomes="outcome4" start_state="Foo" description="Demo FSM that alternates between Foo and Bar states">
-  <Key name="counter" type="IN/OUT" default_value="0" default_type="int" description="Iteration counter"/>
+  <Key name="foo_str" type="IN/OUT" description="String containing the current counter value produced by FooState."/>
   <State name="Foo" x="789.03" y="84.20" type="cpp" class="yasmin_demos/FooState">
     <Transition from="outcome1" to="Bar"/>
     <Transition from="outcome2" to="outcome4"/>
