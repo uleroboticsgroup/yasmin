@@ -78,17 +78,13 @@ def _convert_value(raw_value: str, type_name: str):
         try:
             return int(raw_value)
         except ValueError as exc:
-            raise ValueError(
-                f"Invalid value '{raw_value}' for type int"
-            ) from exc
+            raise ValueError(f"Invalid value '{raw_value}' for type int") from exc
 
     if normalized_type == "float":
         try:
             return float(raw_value)
         except ValueError as exc:
-            raise ValueError(
-                f"Invalid value '{raw_value}' for type float"
-            ) from exc
+            raise ValueError(f"Invalid value '{raw_value}' for type float") from exc
 
     if normalized_type == "bool":
         lowered = raw_value.strip().lower()
@@ -282,7 +278,8 @@ def _main_run(args):
         )
 
     valid_input_names = {
-        key.get("name", "") for key in get_state_machine_input_keys(args.state_machine_file)
+        key.get("name", "")
+        for key in get_state_machine_input_keys(args.state_machine_file)
     }
     unknown_inputs = sorted(
         name for name in provided_inputs if name not in valid_input_names
