@@ -343,11 +343,14 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
     std::string current_state = this->get_current_state();
     auto state = this->states.at(current_state);
     transitions = this->transitions.at(current_state);
-    remappings = compose_remappings(blackboard->get_remappings(),
+    auto old_remappings = blackboard->get_remappings();
+    remappings = compose_remappings(old_remappings,
                                     this->remappings.at(current_state));
-    blackboard->set_remappings(remappings);
 
+    blackboard->set_remappings(remappings); 
     outcome = (*state.get())(blackboard);
+    blackboard->set_remappings(old_remappings);
+
     old_outcome = std::string(outcome);
 
     // Check outcome belongs to state
