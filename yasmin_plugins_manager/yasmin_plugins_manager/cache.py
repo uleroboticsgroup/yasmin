@@ -116,7 +116,6 @@ def is_stat_signature_valid(signature: Dict[str, Any]) -> bool:
     if current is None:
         return False
 
-    return (
-        current["mtime_ns"] == signature.get("mtime_ns")
-        and current["size"] == signature.get("size")
-    )
+    return current["mtime_ns"] == signature.get("mtime_ns") and current[
+        "size"
+    ] == signature.get("size")
