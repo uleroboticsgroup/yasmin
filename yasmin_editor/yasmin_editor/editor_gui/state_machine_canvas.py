@@ -105,6 +105,10 @@ class StateMachineCanvas(QGraphicsView):
         self.temp_line.setLine(QLineF(port_scene_pos, port_scene_pos))
 
     def mousePressEvent(self, event: QEvent) -> None:
+        if event.button() == Qt.BackButton and self.editor_ref:
+            self.editor_ref.navigate_up_one_level()
+            event.accept()
+            return
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: QEvent) -> None:

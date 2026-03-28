@@ -124,9 +124,13 @@ class EditorModelAdapter:
                 model=state_model,
             )
         else:
+            plugin_info = self.editor.resolve_plugin_info_for_model(state_model)
+            if not state_model.outcomes:
+                for outcome_name in list(getattr(plugin_info, "outcomes", []) or []):
+                    state_model.add_outcome(Outcome(name=outcome_name))
             node = StateNode(
                 state_model.name,
-                self.editor.resolve_plugin_info_for_model(state_model),
+                plugin_info,
                 x,
                 y,
                 description=state_model.description,

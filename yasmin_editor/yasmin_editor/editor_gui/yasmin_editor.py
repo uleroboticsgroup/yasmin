@@ -3005,3 +3005,403 @@ class YasminEditor(QMainWindow):
                 self.statusBar().showMessage(f"Saved: {file_path}", 3000)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save file: {str(e)}")
+
+
+    def create_ui(self) -> None:
+        """Create and setup the user interface."""
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        main_layout = QHBoxLayout(central_widget)
+
+        splitter = QSplitter(Qt.Horizontal)
+        main_layout.addWidget(splitter)
+
+        left_panel = QWidget()
+        left_layout = QVBoxLayout(left_panel)
+
+        toolbar = QToolBar()
+        self.addToolBar(toolbar)
+
+        new_action = QAction("New", self)
+        new_action.setShortcut("Ctrl+N")
+        new_action.triggered.connect(self.new_state_machine)
+        toolbar.addAction(new_action)
+
+        open_action = QAction("Open", self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.triggered.connect(self.open_state_machine)
+        toolbar.addAction(open_action)
+
+        save_action = QAction("Save", self)
+        save_action.setShortcut("Ctrl+S")
+        save_action.triggered.connect(self.save_state_machine)
+        toolbar.addAction(save_action)
+
+        toolbar.addSeparator()
+
+        add_state_action = QAction("Add State", self)
+        add_state_action.triggered.connect(self.add_state)
+        toolbar.addAction(add_state_action)
+
+        add_state_machine_action = QAction("Add State Machine", self)
+        add_state_machine_action.triggered.connect(self.add_state_machine)
+        toolbar.addAction(add_state_machine_action)
+
+        add_concurrence_action = QAction("Add Concurrence", self)
+        add_concurrence_action.triggered.connect(self.add_concurrence)
+        toolbar.addAction(add_concurrence_action)
+
+        add_final_action = QAction("Add Final Outcome", self)
+        add_final_action.triggered.connect(self.add_final_outcome)
+        toolbar.addAction(add_final_action)
+
+        toolbar.addSeparator()
+
+        edit_current_action = QAction("Edit Current Container", self)
+        edit_current_action.triggered.connect(self.edit_current_container)
+        toolbar.addAction(edit_current_action)
+
+        delete_action = QAction("Delete Selected", self)
+        delete_action.triggered.connect(self.delete_selected)
+        toolbar.addAction(delete_action)
+
+        toolbar.addSeparator()
+
+        help_action = QAction("Help", self)
+        help_action.triggered.connect(self.show_help)
+        toolbar.addAction(help_action)
+
+        left_layout.addWidget(QLabel("<b>Blackboard Keys:</b>"))
+        self.blackboard_filter = QLineEdit()
+        self.blackboard_filter.setPlaceholderText("Filter blackboard keys...")
+        self.blackboard_filter.textChanged.connect(self.filter_blackboard_keys)
+        left_layout.addWidget(self.blackboard_filter)
+        self.blackboard_list = QListWidget()
+        self.blackboard_list.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.blackboard_list.itemSelectionChanged.connect(
+            self.on_blackboard_selection_changed
+        )
+        self.blackboard_list.itemDoubleClicked.connect(self.edit_selected_blackboard_key)
+        left_layout.addWidget(self.blackboard_list)
+        blackboard_btn_row = QHBoxLayout()
+        self.highlight_blackboard_btn = QPushButton("Highlight: On")
+        self.highlight_blackboard_btn.setCheckable(True)
+        self.highlight_blackboard_btn.setChecked(True)
+        self.highlight_blackboard_btn.toggled.connect(self.toggle_blackboard_highlighting)
+        blackboard_btn_row.addWidget(self.highlight_blackboard_btn)
+        left_layout.addLayout(blackboard_btn_row)
+
+        left_layout.addWidget(QLabel("<b>Python States:</b>"))
+        self.python_filter = QLineEdit()
+        self.python_filter.setPlaceholderText("Filter Python states...")
+        self.python_filter.textChanged.connect(
+            lambda value: self.filter_list(self.python_list, value)
+        )
+        left_layout.addWidget(self.python_filter)
+        self.python_list = QListWidget()
+        self.python_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
+        left_layout.addWidget(self.python_list)
+
+        left_layout.addWidget(QLabel("<b>C++ States:</b>"))
+        self.cpp_filter = QLineEdit()
+        self.cpp_filter.setPlaceholderText("Filter C++ states...")
+        self.cpp_filter.textChanged.connect(
+            lambda value: self.filter_list(self.cpp_list, value)
+        )
+        left_layout.addWidget(self.cpp_filter)
+        self.cpp_list = QListWidget()
+        self.cpp_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
+        left_layout.addWidget(self.cpp_list)
+
+        left_layout.addWidget(QLabel("<b>XML State Machines:</b>"))
+        self.xml_filter = QLineEdit()
+        self.xml_filter.setPlaceholderText("Filter XML state machines...")
+        self.xml_filter.textChanged.connect(
+            lambda value: self.filter_list(self.xml_list, value)
+        )
+        left_layout.addWidget(self.xml_filter)
+        self.xml_list = QListWidget()
+        self.xml_list.itemDoubleClicked.connect(self.on_xml_double_clicked)
+        left_layout.addWidget(self.xml_list)
+
+        right_panel = QWidget()
+        right_layout = QVBoxLayout(right_panel)
+
+        metadata_widget = QWidget()
+        metadata_layout = QVBoxLayout(metadata_widget)
+        metadata_layout.setContentsMargins(0, 0, 0, 0)
+
+        row1 = QHBoxLayout()
+        self.root_sm_name_label = QLabel("<b>State Machine Name:</b>")
+        row1.addWidget(self.root_sm_name_label)
+        self.root_sm_name_edit = QLineEdit()
+        self.root_sm_name_edit.setPlaceholderText("Enter container name...")
+        self.root_sm_name_edit.textChanged.connect(self.on_root_sm_name_changed)
+        row1.addWidget(self.root_sm_name_edit)
+
+        self.start_state_label = QLabel("<b>Start State:</b>")
+        row1.addWidget(self.start_state_label)
+        self.start_state_combo = QComboBox()
+        self.start_state_combo.addItem("(None)")
+        self.start_state_combo.currentTextChanged.connect(self.on_start_state_changed)
+        row1.addWidget(self.start_state_combo)
+        metadata_layout.addLayout(row1)
+
+        row2 = QHBoxLayout()
+        row2.addWidget(QLabel("<b>Description:</b>"))
+        self.root_sm_description_edit = QLineEdit()
+        self.root_sm_description_edit.setPlaceholderText("Enter container description...")
+        self.root_sm_description_edit.textChanged.connect(self.on_root_sm_description_changed)
+        row2.addWidget(self.root_sm_description_edit)
+        metadata_layout.addLayout(row2)
+
+        right_layout.addWidget(metadata_widget)
+
+        self.canvas_header = QLabel(
+            "<b>State Machine Canvas:</b> "
+            "<i>(Ctrl + double-click a nested container to enter it, drag from blue port to create transitions, scroll to zoom, right-click for options)</i>"
+        )
+        right_layout.addWidget(self.canvas_header)
+
+        breadcrumb_widget = QWidget()
+        self.breadcrumb_layout = QHBoxLayout(breadcrumb_widget)
+        self.breadcrumb_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.addWidget(breadcrumb_widget)
+
+        self.canvas = StateMachineCanvas()
+        self.canvas.editor_ref = self
+        right_layout.addWidget(self.canvas)
+
+        splitter.addWidget(left_panel)
+        splitter.addWidget(right_panel)
+
+        splitter.setSizes([300, 1000])
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+
+        self.statusBar()
+        self.refresh_breadcrumbs()
+        self.update_container_controls()
+
+    def fit_current_view(self) -> None:
+        """Fit the currently rendered container into the canvas view."""
+        if not hasattr(self, "canvas"):
+            return
+        items = self.canvas.scene.items()
+        self.canvas.resetTransform()
+        if not items:
+            self.canvas.scene.setSceneRect(-400, -300, 800, 600)
+            self.canvas.centerOn(0, 0)
+            return
+
+        bounds = self.canvas.scene.itemsBoundingRect()
+        margin = 80.0
+        padded = bounds.adjusted(-margin, -margin, margin, margin)
+        self.canvas.scene.setSceneRect(padded)
+        self.canvas.fitInView(padded, Qt.KeepAspectRatio)
+        self.canvas.centerOn(bounds.center())
+
+    def render_current_container(self, fit_view: bool = False) -> None:
+        self.model_adapter.rebuild_scene(self.current_container_model)
+        self.update_start_state_combo()
+        self.refresh_breadcrumbs()
+        self.refresh_blackboard_keys_list()
+        if fit_view:
+            self.fit_current_view()
+
+    def navigate_up_one_level(self) -> None:
+        if len(self.current_container_path) > 1:
+            self.navigate_to_container_index(len(self.current_container_path) - 2)
+
+    def navigate_to_container_index(self, index: int) -> None:
+        if index < 0 or index >= len(self.current_container_path):
+            return
+        self.sync_current_container_layout()
+        self.current_container_path = self.current_container_path[: index + 1]
+        self.render_current_container(fit_view=True)
+
+    def refresh_breadcrumbs(self) -> None:
+        if not hasattr(self, "breadcrumb_layout"):
+            return
+        while self.breadcrumb_layout.count():
+            item = self.breadcrumb_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+
+        for index, container_model in enumerate(self.current_container_path):
+            label = "root" if index == 0 else container_model.name
+            button = QPushButton(label)
+            button.setFlat(True)
+            button.clicked.connect(
+                lambda _checked=False, idx=index: self.navigate_to_container_index(idx)
+            )
+            self.breadcrumb_layout.addWidget(button)
+            if index < len(self.current_container_path) - 1:
+                self.breadcrumb_layout.addWidget(QLabel(">"))
+
+        self.breadcrumb_layout.addStretch()
+
+        fit_button = QPushButton("Fit")
+        fit_button.clicked.connect(self.fit_current_view)
+        self.breadcrumb_layout.addWidget(fit_button)
+
+    def get_free_position(self) -> QPointF:
+        """Get a free position close to the current viewport center."""
+        if not hasattr(self, "canvas"):
+            return QPointF(100, 100)
+
+        viewport_rect = self.canvas.viewport().rect()
+        visible_rect = self.canvas.mapToScene(viewport_rect).boundingRect()
+        center = visible_rect.center()
+
+        occupied_positions = [item.pos() for item in list(self.state_nodes.values()) + list(self.final_outcomes.values())]
+        spacing_x = 180.0
+        spacing_y = 130.0
+
+        candidates = [QPointF(center.x(), center.y())]
+        for radius in range(1, 6):
+            for dy in range(-radius, radius + 1):
+                for dx in range(-radius, radius + 1):
+                    if max(abs(dx), abs(dy)) != radius:
+                        continue
+                    candidates.append(
+                        QPointF(center.x() + dx * spacing_x, center.y() + dy * spacing_y)
+                    )
+
+        def is_free(candidate: QPointF) -> bool:
+            for occupied in occupied_positions:
+                if abs(candidate.x() - occupied.x()) < spacing_x * 0.8 and abs(candidate.y() - occupied.y()) < spacing_y * 0.8:
+                    return False
+            return True
+
+        for candidate in candidates:
+            if is_free(candidate):
+                return candidate
+
+        fallback_index = len(occupied_positions)
+        return QPointF(
+            center.x() + (fallback_index % 4) * spacing_x,
+            center.y() + (fallback_index // 4) * spacing_y,
+        )
+
+    def load_from_xml(self, file_path: str) -> None:
+        self.model_adapter.load_from_xml(file_path)
+        self.render_current_container(fit_view=True)
+
+    def enter_container(self, container_node: ContainerStateNode) -> None:
+        self.sync_current_container_layout()
+        self.current_container_path.append(container_node.model)
+        self.render_current_container(fit_view=True)
+        self.statusBar().showMessage(f"Entered: {container_node.name}", 2000)
+
+    def edit_current_container(self) -> None:
+        model = self.current_container_model
+        input_keys = []
+        output_keys = []
+        for key in getattr(model, "keys", []) or []:
+            key_data = {
+                "name": str(getattr(key, "name", "") or ""),
+                "description": str(getattr(key, "description", "") or ""),
+                "default_type": str(getattr(key, "default_type", "") or ""),
+                "default_value": "" if getattr(key, "default_value", None) is None else str(getattr(key, "default_value", "")),
+                "has_default": bool(getattr(key, "default_type", "") or ""),
+            }
+            key_type = str(getattr(key, "key_type", "in") or "in")
+            if key_type in ("in", "in/out"):
+                input_keys.append(dict(key_data))
+            if key_type in ("out", "in/out"):
+                output_keys.append(dict(key_data))
+
+        dialog = StatePropertiesDialog(
+            state_name=model.name,
+            plugin_info=None,
+            available_plugins=[],
+            remappings=dict(model.remappings),
+            outcomes=[outcome.name for outcome in model.outcomes],
+            edit_mode=True,
+            parent=self,
+            description=getattr(model, "description", ""),
+            defaults=[],
+            fallback_input_keys=input_keys,
+            fallback_output_keys=output_keys,
+            container_kind="Concurrence" if isinstance(model, Concurrence) else "State Machine",
+        )
+
+        if dialog.exec_():
+            result = dialog.get_state_data()
+            if result and result[0]:
+                name, plugin, outcomes, remappings, description, defaults = result
+                parent_model = self.current_parent_model
+                old_name = model.name
+                if parent_model is None:
+                    model.name = name
+                else:
+                    if name != old_name and name in parent_model.states:
+                        QMessageBox.warning(self, "Error", f"State '{name}' already exists!")
+                        return
+                    if name != old_name:
+                        parent_model.rename_state(old_name, name)
+                model.remappings.clear()
+                model.remappings.update(remappings)
+                self.update_container_controls()
+                self.refresh_breadcrumbs()
+                self.refresh_blackboard_keys_list()
+                self.statusBar().showMessage(
+                    f"Updated {'concurrence' if isinstance(model, Concurrence) else 'state machine'}: {name}",
+                    2000,
+                )
+
+    def state_uses_blackboard_key(self, state_node, key_name: str) -> bool:
+        def apply_remap_chain(raw_name: str, remap_chain: List[Dict[str, str]]) -> str:
+            effective_name = raw_name
+            for remappings in remap_chain:
+                effective_name = remappings.get(effective_name, effective_name)
+            return effective_name
+
+        def model_uses_key(state_model: State, remap_chain: List[Dict[str, str]]) -> bool:
+            current_chain = remap_chain + [dict(getattr(state_model, "remappings", {}) or {})]
+
+            for key in getattr(state_model, "keys", []) or []:
+                raw_name = str(getattr(key, "name", "") or "").strip()
+                if raw_name and apply_remap_chain(raw_name, current_chain) == key_name:
+                    return True
+
+            if isinstance(state_model, (StateMachine, Concurrence)):
+                for child_state in state_model.states.values():
+                    if model_uses_key(child_state, current_chain):
+                        return True
+                return False
+
+            try:
+                plugin_info = self.resolve_plugin_info_for_model(state_model)
+            except Exception:
+                return False
+
+            for key_info in list(getattr(plugin_info, "input_keys", []) or []) + list(
+                getattr(plugin_info, "output_keys", []) or []
+            ):
+                plugin_key_name = str(key_info.get("name", "")).strip()
+                if plugin_key_name and apply_remap_chain(plugin_key_name, current_chain) == key_name:
+                    return True
+            return False
+
+        model = getattr(state_node, "model", None)
+        if model is None:
+            return False
+        return model_uses_key(model, [])
+
+    def update_blackboard_usage_highlighting(self) -> None:
+        selected_key = self.get_selected_blackboard_key_name()
+
+        for state_node in self.state_nodes.values():
+            self.apply_default_visual_state(state_node)
+
+        if not self._highlight_blackboard_usage or not selected_key:
+            return
+
+        for state_node in self.state_nodes.values():
+            if self.state_uses_blackboard_key(state_node, selected_key):
+                self.apply_default_visual_state(state_node)
+                state_node.setPen(QPen(QColor(255, 170, 0), 5))
+                state_node.setBrush(QBrush(QColor(255, 255, 170)))
