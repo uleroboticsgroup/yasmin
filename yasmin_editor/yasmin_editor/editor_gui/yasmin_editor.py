@@ -2064,11 +2064,6 @@ class YasminEditor(QMainWindow):
         metadata_layout = QVBoxLayout(metadata_widget)
         metadata_layout.setContentsMargins(0, 0, 0, 0)
 
-        breadcrumb_widget = QWidget()
-        self.breadcrumb_layout = QHBoxLayout(breadcrumb_widget)
-        self.breadcrumb_layout.setContentsMargins(0, 0, 0, 0)
-        metadata_layout.addWidget(breadcrumb_widget)
-
         row1 = QHBoxLayout()
         self.root_sm_name_label = QLabel("<b>State Machine Name:</b>")
         row1.addWidget(self.root_sm_name_label)
@@ -2100,6 +2095,12 @@ class YasminEditor(QMainWindow):
             "<i>(Ctrl + double-click a nested container to enter it, drag from blue port to create transitions, scroll to zoom, right-click for options)</i>"
         )
         right_layout.addWidget(self.canvas_header)
+
+        breadcrumb_widget = QWidget()
+        self.breadcrumb_layout = QHBoxLayout(breadcrumb_widget)
+        self.breadcrumb_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.addWidget(breadcrumb_widget)
+
         self.canvas = StateMachineCanvas()
         self.canvas.editor_ref = self
         right_layout.addWidget(self.canvas)
@@ -2140,7 +2141,7 @@ class YasminEditor(QMainWindow):
         self.model_adapter.rebuild_scene(self.current_container_model)
         self.update_start_state_combo()
         self.refresh_breadcrumbs()
-        self.update_blackboard_usage_highlighting()
+        self.refresh_blackboard_keys_list()
 
     def navigate_to_container_index(self, index: int) -> None:
         if index < 0 or index >= len(self.current_container_path):
@@ -2673,6 +2674,307 @@ class YasminEditor(QMainWindow):
                 f"Added final outcome: {outcome_name}",
                 2000,
             )
+
+    def _get_container_metadata_map(
+        self,
+        container_model: StateMachine | Concurrence,
+    ) -> Dict[str, Dict[str, str]]:
+        metadata: Dict[str, Dict[str, str]] = {}
+        for key in getattr(container_model, 'keys', []) or []:
+            key_name = str(getattr(key, 'name', '') or '').strip()
+            if not key_name:
+                continue
+            metadata[key_name] = {
+                'description': str(getattr(key, 'description', '') or '').strip(),
+                'key_type': str(getattr(key, 'key_type', 'in') or 'in').strip(),
+                'default_type': str(getattr(key, 'default_type', '') or '').strip(),
+                'default_value': '' if getattr(key, 'default_value', None) is None else str(getattr(key, 'default_value', '')),
+            }
+        return metadata
+
+    def _set_container_metadata_map(
+        self,
+        container_model: StateMachine | Concurrence,
+        metadata: Dict[str, Dict[str, str]],
+    ) -> None:
+        container_model.keys = self.dicts_to_keys(
+            [
+                {
+                    'name': key_name,
+                    'key_type': values.get('key_type', 'in'),
+                    'description': values.get('description', ''),
+                    'default_type': values.get('default_type', ''),
+                    'default_value': values.get('default_value', ''),
+                }
+                for key_name, values in sorted(metadata.items(), key=lambda item: item[0].lower())
+            ]
+        )
+
+    def _collect_blackboard_key_usage_for_model(
+        self,
+        container_model: StateMachine | Concurrence,
+    ) -> Dict[str, Dict[str, str]]:
+        usage_map: Dict[str, Dict[str, object]] = {}
+        metadata_map = self._get_container_metadata_map(container_model)
+
+        def add_usage(key_name: str, usage_kind: str, description: str) -> None:
+            entry = usage_map.setdefault(
+                key_name,
+                {
+                    'input': False,
+                    'output': False,
+                    'description': '',
+                },
+            )
+            entry[usage_kind] = True
+            if not entry['description'] and description:
+                entry['description'] = description
+
+        def visit_state(state_model: State, remap_chain: List[Dict[str, str]]) -> None:
+            if isinstance(state_model, (StateMachine, Concurrence)):
+                child_chain = remap_chain + [dict(state_model.remappings)]
+                for child_state in state_model.states.values():
+                    visit_state(child_state, child_chain)
+                return
+
+            try:
+                plugin_info = self.resolve_plugin_info_for_model(state_model)
+            except Exception:
+                return
+
+            def resolve_local_name(raw_name: str) -> str:
+                effective_name = raw_name
+                for remappings in remap_chain:
+                    effective_name = remappings.get(effective_name, effective_name)
+                return effective_name
+
+            for key_info in list(getattr(plugin_info, 'input_keys', []) or []):
+                raw_name = str(key_info.get('name', '')).strip()
+                if not raw_name:
+                    continue
+                add_usage(
+                    resolve_local_name(raw_name),
+                    'input',
+                    str(key_info.get('description', '') or '').strip(),
+                )
+
+            for key_info in list(getattr(plugin_info, 'output_keys', []) or []):
+                raw_name = str(key_info.get('name', '')).strip()
+                if not raw_name:
+                    continue
+                add_usage(
+                    resolve_local_name(raw_name),
+                    'output',
+                    str(key_info.get('description', '') or '').strip(),
+                )
+
+        for child_state in container_model.states.values():
+            visit_state(child_state, [dict(child_state.remappings)])
+
+        derived_keys: Dict[str, Dict[str, str]] = {}
+        for key_name, usage in usage_map.items():
+            metadata = dict(metadata_map.get(key_name, {}))
+            if usage['input'] and usage['output']:
+                key_type = 'in/out'
+            elif usage['output']:
+                key_type = 'out'
+            else:
+                key_type = 'in'
+
+            description = str(metadata.get('description', '') or '').strip()
+            if not description:
+                description = str(usage.get('description', '') or '').strip()
+
+            default_type = ''
+            default_value = ''
+            if key_type in ('in', 'in/out'):
+                default_type = str(metadata.get('default_type', '') or '')
+                if default_type:
+                    default_value = str(metadata.get('default_value', '') or '')
+
+            derived_keys[key_name] = {
+                'name': key_name,
+                'key_type': key_type,
+                'description': description,
+                'default_type': default_type,
+                'default_value': default_value,
+            }
+
+        return dict(sorted(derived_keys.items(), key=lambda item: item[0].lower()))
+
+    def _rebuild_root_blackboard_keys(self) -> None:
+        root_keys = self._collect_blackboard_key_usage_for_model(self.root_model)
+        root_metadata = self._get_container_metadata_map(self.root_model)
+        merged_root: Dict[str, Dict[str, str]] = {}
+        for key_name, key_data in root_keys.items():
+            metadata = root_metadata.get(key_name, {})
+            merged_root[key_name] = {
+                'name': key_name,
+                'key_type': key_data.get('key_type', 'in'),
+                'description': str(metadata.get('description', '') or key_data.get('description', '') or ''),
+                'default_type': str(metadata.get('default_type', '') or key_data.get('default_type', '') or ''),
+                'default_value': str(metadata.get('default_value', '') or key_data.get('default_value', '') or ''),
+            }
+        self.root_model.keys = self.dicts_to_keys(list(merged_root.values()))
+
+    def sync_blackboard_keys(self) -> None:
+        current_container = self.current_container_model
+        derived_keys = self._collect_blackboard_key_usage_for_model(current_container)
+        metadata_map = self._get_container_metadata_map(current_container)
+        used_key_names = set(derived_keys.keys())
+        filtered_metadata = {
+            key_name: metadata
+            for key_name, metadata in metadata_map.items()
+            if key_name in used_key_names
+        }
+        self._set_container_metadata_map(current_container, filtered_metadata)
+        self._blackboard_keys = list(derived_keys.values())
+        self._blackboard_key_metadata = filtered_metadata
+        self._rebuild_root_blackboard_keys()
+        self.refresh_blackboard_keys_list()
+
+    def refresh_blackboard_keys_list(self) -> None:
+        current_key_name = self.get_selected_blackboard_key_name()
+        self._blackboard_key_metadata = self._get_container_metadata_map(self.current_container_model)
+        self._blackboard_keys = list(
+            self._collect_blackboard_key_usage_for_model(self.current_container_model).values()
+        )
+        self.blackboard_list.clear()
+
+        for key_data in sorted(
+            self._blackboard_keys, key=lambda item: item.get('name', '').lower()
+        ):
+            item = QListWidgetItem(self.format_blackboard_key_label(key_data))
+            item.setData(Qt.UserRole, dict(key_data))
+            description = key_data.get('description', '')
+            if description:
+                item.setToolTip(description)
+            self.blackboard_list.addItem(item)
+
+        self.filter_blackboard_keys(self.blackboard_filter.text())
+
+        if current_key_name:
+            for i in range(self.blackboard_list.count()):
+                item = self.blackboard_list.item(i)
+                key_data = item.data(Qt.UserRole) or {}
+                if key_data.get('name') == current_key_name:
+                    self.blackboard_list.setCurrentItem(item)
+                    break
+
+        self.update_blackboard_usage_highlighting()
+
+    def set_blackboard_keys(self, keys: List[Dict[str, str]], sync: bool = True) -> None:
+        self.root_model.keys = self.dicts_to_keys(keys)
+        self._blackboard_key_metadata = self._get_container_metadata_map(self.current_container_model)
+        self._blackboard_keys = [dict(item) for item in keys]
+        if sync:
+            self.sync_blackboard_keys()
+        else:
+            self.refresh_blackboard_keys_list()
+
+    def get_blackboard_keys(self) -> List[Dict[str, str]]:
+        self.sync_blackboard_keys()
+        return self.keys_to_dicts(self.current_container_model.keys)
+
+    def add_root_default_row_with_data(self, data: dict) -> None:
+        key_name = str(data.get('key', '') or '').strip()
+        if not key_name:
+            return
+        metadata = self._get_container_metadata_map(self.current_container_model)
+        metadata[key_name] = {
+            'description': str(data.get('description', '') or '').strip(),
+            'key_type': 'in',
+            'default_type': str(data.get('type', '') or '').strip(),
+            'default_value': str(data.get('value', '') or '').strip(),
+        }
+        self._set_container_metadata_map(self.current_container_model, metadata)
+        self.sync_blackboard_keys()
+
+    def edit_selected_blackboard_key(
+        self, item: Optional[QListWidgetItem] = None
+    ) -> None:
+        if item is None:
+            item = self.blackboard_list.currentItem()
+        if item is None:
+            return
+
+        key_data = dict(item.data(Qt.UserRole) or {})
+        key_name = key_data.get('name', '')
+        if not key_name:
+            return
+
+        metadata = dict(self._get_container_metadata_map(self.current_container_model).get(key_name, {}))
+        merged_key_data = {
+            **key_data,
+            **metadata,
+            'name': key_data.get('name', ''),
+            'key_type': key_data.get('key_type', 'in'),
+            'default_type': str(metadata.get('default_type', '') or ''),
+            'default_value': str(metadata.get('default_value', '') or ''),
+        }
+
+        dlg = BlackboardKeyDialog(merged_key_data, parent=self, edit_mode=True)
+        if dlg.exec_():
+            updated_key = dlg.get_key_data()
+            metadata_map = self._get_container_metadata_map(self.current_container_model)
+            metadata_map[key_name] = {
+                'description': updated_key.get('description', ''),
+                'key_type': key_data.get('key_type', 'in'),
+                'default_type': updated_key.get('default_type', ''),
+                'default_value': updated_key.get('default_value', ''),
+            }
+            self._set_container_metadata_map(self.current_container_model, metadata_map)
+            self.sync_blackboard_keys()
+
+    def state_uses_blackboard_key(self, state_node, key_name: str) -> bool:
+        def model_uses_key(
+            state_model: State,
+            remap_chain: List[Dict[str, str]],
+        ) -> bool:
+            if isinstance(state_model, (StateMachine, Concurrence)):
+                child_chain = remap_chain + [dict(state_model.remappings)]
+                return any(
+                    model_uses_key(child_state, child_chain)
+                    for child_state in state_model.states.values()
+                )
+
+            try:
+                plugin_info = self.resolve_plugin_info_for_model(state_model)
+            except Exception:
+                return False
+
+            for key_info in list(getattr(plugin_info, 'input_keys', []) or []) + list(
+                getattr(plugin_info, 'output_keys', []) or []
+            ):
+                plugin_key_name = str(key_info.get('name', '')).strip()
+                if not plugin_key_name:
+                    continue
+                effective_key_name = plugin_key_name
+                for remappings in remap_chain:
+                    effective_key_name = remappings.get(effective_key_name, effective_key_name)
+                if effective_key_name == key_name:
+                    return True
+            return False
+
+        model = getattr(state_node, 'model', None)
+        if model is None:
+            return False
+
+        return model_uses_key(model, [dict(getattr(model, 'remappings', {}) or {})])
+
+    def update_blackboard_usage_highlighting(self) -> None:
+        selected_key = self.get_selected_blackboard_key_name()
+
+        for state_node in self.state_nodes.values():
+            self.apply_default_visual_state(state_node)
+
+        if not self._highlight_blackboard_usage or not selected_key:
+            return
+
+        for state_node in self.state_nodes.values():
+            if self.state_uses_blackboard_key(state_node, selected_key):
+                state_node.setPen(QPen(QColor(255, 170, 0), 5))
+                state_node.setBrush(QBrush(QColor(255, 255, 170)))
 
     def save_state_machine(self) -> None:
         self.sync_current_container_layout()

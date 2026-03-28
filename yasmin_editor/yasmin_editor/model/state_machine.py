@@ -49,7 +49,14 @@ class StateMachine(State):
     def add_transition(self, state_name: str, transition: Transition) -> None:
         """Add a transition for a child state."""
 
-        self.transitions.setdefault(state_name, []).append(transition)
+        transition_list = self.transitions.setdefault(state_name, [])
+        for item in transition_list:
+            if (
+                item.source_outcome == transition.source_outcome
+                and item.target == transition.target
+            ):
+                return
+        transition_list.append(transition)
 
     def remove_transition(
         self,

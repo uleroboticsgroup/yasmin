@@ -147,7 +147,7 @@ def _state_to_element(state: State, parent: StateMachine | Concurrence) -> ET.El
 
     _append_remaps(element, state.remappings)
 
-    if isinstance(parent, StateMachine):
+    if isinstance(parent, StateMachine) and not isinstance(state, (StateMachine, Concurrence)):
         for transition in parent.transitions.get(state.name, []):
             element.append(_transition_to_element(transition))
 
@@ -294,8 +294,9 @@ def _parse_state_machine_content(
         if x is not None and y is not None:
             model.layout.set_state_position(state.name, x, y)
 
-        for transition_elem in child.findall("Transition"):
-            model.add_transition(state.name, _parse_transition(transition_elem))
+        if not isinstance(state, (StateMachine, Concurrence)):
+            for transition_elem in child.findall("Transition"):
+                model.add_transition(state.name, _parse_transition(transition_elem))
 
 
 def _parse_concurrence_content(
