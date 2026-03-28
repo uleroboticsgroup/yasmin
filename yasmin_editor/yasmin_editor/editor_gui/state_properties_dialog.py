@@ -34,7 +34,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy
 
-from yasmin_editor.plugins_manager.plugin_info import PluginInfo
+from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
 class StatePropertiesDialog(QDialog):

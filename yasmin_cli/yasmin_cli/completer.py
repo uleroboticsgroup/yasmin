@@ -16,11 +16,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from pathlib import Path
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
-from yasmin_editor.plugins_manager.plugin_info import PluginInfo
-from yasmin_editor.plugins_manager.plugin_manager import PluginManager
+from yasmin_plugins_manager import PluginInfo, PluginManager
 
 IGNORE_XML_FILES = {"package.xml", "plugins.xml"}
 

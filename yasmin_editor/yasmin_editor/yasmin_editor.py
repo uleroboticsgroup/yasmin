@@ -21,7 +21,8 @@ import time
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
-from yasmin_editor.plugins_manager.plugin_manager import PluginManager
+
+from yasmin_plugins_manager.plugin_manager import PluginManager
 
 
 def parse_args():

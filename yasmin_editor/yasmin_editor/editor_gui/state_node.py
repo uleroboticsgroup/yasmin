@@ -18,7 +18,7 @@ from typing import Dict, List, Set, Optional, Any, TYPE_CHECKING
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem, QGraphicsTextItem
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
-from yasmin_editor.plugins_manager.plugin_info import PluginInfo
+from yasmin_plugins_manager.plugin_info import PluginInfo
 
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 

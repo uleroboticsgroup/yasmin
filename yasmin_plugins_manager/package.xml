@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>yasmin_cli</name>
+  <name>yasmin_plugins_manager</name>
   <version>0.0.1</version>
-  <description>CLI tools for inspecting YASMIN states and metadata.</description>
+  <description>Plugin discovery and caching for YASMIN states.</description>
 
   <maintainer email="maik.knof@gmx.de">Maik Knof</maintainer>
   <license>GPL-3.0</license>
 
-  <exec_depend>ros2cli</exec_depend>
+  <depend>yasmin</depend>
+  <depend>yasmin_factory</depend>
+
+  <exec_depend>python3-lxml</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
-
-  <exec_depend>yasmin</exec_depend>
-  <exec_depend>yasmin_factory</exec_depend>
-  <exec_depend>yasmin_plugins_manager</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>
