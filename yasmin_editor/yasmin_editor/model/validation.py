@@ -183,6 +183,9 @@ def _validate_state_machine(
     local_targets = state_names | outcome_names
     nested_parent_targets = local_targets | (parent_targets or set())
 
+    if not outcome_names:
+        result.add_error(path, "State machine requires at least one outcome")
+
     if not state_machine.start_state:
         if len(state_machine.states) > 1:
             result.add_error(path, "State machine requires 'start_state'")
@@ -276,6 +279,9 @@ def _validate_concurrence(
     state_names = set(concurrence.states.keys())
     outcome_names = {outcome.name for outcome in concurrence.outcomes}
     nested_parent_targets = state_names | outcome_names | (parent_targets or set())
+
+    if not outcome_names:
+        result.add_error(path, "Concurrence requires at least one outcome")
 
     if concurrence.default_outcome and concurrence.default_outcome not in outcome_names:
         result.add_error(
