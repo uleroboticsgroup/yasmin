@@ -86,6 +86,26 @@ class StateMachine(State):
             self.start_state = None
         self.layout.remove_state_position(name)
 
+    def rename_transition_owner(self, old_owner: str, new_owner: str) -> None:
+        """Rename one transition owner entry inside this container."""
+
+        if old_owner == new_owner:
+            return
+
+        old_transitions = self.transitions.pop(old_owner, [])
+        if not old_transitions:
+            return
+
+        merged = self.transitions.setdefault(new_owner, [])
+        for transition in old_transitions:
+            if any(
+                item.source_outcome == transition.source_outcome
+                and item.target == transition.target
+                for item in merged
+            ):
+                continue
+            merged.append(transition)
+
     def rename_state(self, old_name: str, new_name: str) -> None:
         """Rename a child state and update all related references."""
 
@@ -96,13 +116,15 @@ class StateMachine(State):
         state.name = new_name
         self.states[new_name] = state
 
-        if old_name in self.transitions:
-            self.transitions[new_name] = self.transitions.pop(old_name)
+        self.rename_transition_owner(old_name, new_name)
 
         for transitions in self.transitions.values():
             for transition in transitions:
                 if transition.target == old_name:
                     transition.target = new_name
+
+        if isinstance(state, StateMachine):
+            state.rename_transition_owner(old_name, new_name)
 
         if self.start_state == old_name:
             self.start_state = new_name

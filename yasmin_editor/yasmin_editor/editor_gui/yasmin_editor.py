@@ -16,43 +16,31 @@
 import os
 import random
 from typing import Dict, List, Optional, Set
-from PyQt5.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QListWidget,
-    QLabel,
-    QInputDialog,
-    QMessageBox,
-    QFileDialog,
-    QSplitter,
-    QListWidgetItem,
-    QLineEdit,
-    QComboBox,
-    QAction,
-    QToolBar,
-    QDialog,
-    QPushButton,
-    QTextBrowser,
-    QAbstractItemView,
-)
-from PyQt5.QtGui import QCloseEvent, QPen, QBrush, QColor
-from PyQt5.QtCore import Qt, QPointF
 
-from yasmin_plugins_manager.plugin_manager import PluginManager, PluginInfo
+from PyQt5.QtCore import QPointF, Qt
+from PyQt5.QtGui import QBrush, QCloseEvent, QColor, QPen
+from PyQt5.QtWidgets import (QAbstractItemView, QAction, QApplication,
+                             QComboBox, QDialog, QFileDialog, QHBoxLayout,
+                             QInputDialog, QLabel, QLineEdit, QListWidget,
+                             QListWidgetItem, QMainWindow, QMessageBox,
+                             QPushButton, QSplitter, QTextBrowser, QToolBar,
+                             QVBoxLayout, QWidget)
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.state_node import StateNode
 from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+from yasmin_editor.editor_gui.dialogs.blackboard_key_dialog import \
+    BlackboardKeyDialog
+from yasmin_editor.editor_gui.dialogs.concurrence_dialog import \
+    ConcurrenceDialog
+from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import \
+    OutcomeDescriptionDialog
+from yasmin_editor.editor_gui.dialogs.state_machine_dialog import \
+    StateMachineDialog
+from yasmin_editor.editor_gui.dialogs.state_properties_dialog import \
+    StatePropertiesDialog
 from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
-from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
-from yasmin_editor.editor_gui.dialogs.state_properties_dialog import StatePropertiesDialog
-from yasmin_editor.editor_gui.dialogs.state_machine_dialog import StateMachineDialog
-from yasmin_editor.editor_gui.dialogs.concurrence_dialog import ConcurrenceDialog
 from yasmin_editor.editor_gui.model_adapter import EditorModelAdapter
-from yasmin_editor.editor_gui.dialogs.blackboard_key_dialog import BlackboardKeyDialog
-from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import OutcomeDescriptionDialog
+from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
+from yasmin_editor.editor_gui.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.outcome import Outcome
@@ -60,6 +48,8 @@ from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.transition import Transition
 from yasmin_editor.model.validation import validate_model
+
+from yasmin_plugins_manager.plugin_manager import PluginInfo, PluginManager
 
 
 class YasminEditor(QMainWindow):
@@ -161,7 +151,9 @@ class YasminEditor(QMainWindow):
     def find_selected_container(self) -> Optional[ContainerStateNode]:
         return self.find_selected_item(ContainerStateNode)
 
-    def get_selected_container_or_warn(self, message: str) -> Optional[ContainerStateNode]:
+    def get_selected_container_or_warn(
+        self, message: str
+    ) -> Optional[ContainerStateNode]:
         container = self.find_selected_container()
         if container is None:
             QMessageBox.warning(self, "Error", message)
@@ -205,7 +197,10 @@ class YasminEditor(QMainWindow):
                 x=0.0 if x is None else x,
                 y=0.0 if y is None else y,
             )
-            if parent_container.is_state_machine and len(parent_container.child_states) == 1:
+            if (
+                parent_container.is_state_machine
+                and len(parent_container.child_states) == 1
+            ):
                 parent_container.start_state = model.name
                 parent_container.update_start_state_label()
 
@@ -374,13 +369,17 @@ class YasminEditor(QMainWindow):
         self.blackboard_list.itemSelectionChanged.connect(
             self.on_blackboard_selection_changed
         )
-        self.blackboard_list.itemDoubleClicked.connect(self.edit_selected_blackboard_key)
+        self.blackboard_list.itemDoubleClicked.connect(
+            self.edit_selected_blackboard_key
+        )
         left_layout.addWidget(self.blackboard_list)
         blackboard_btn_row = QHBoxLayout()
         self.highlight_blackboard_btn = QPushButton("Highlight: On")
         self.highlight_blackboard_btn.setCheckable(True)
         self.highlight_blackboard_btn.setChecked(True)
-        self.highlight_blackboard_btn.toggled.connect(self.toggle_blackboard_highlighting)
+        self.highlight_blackboard_btn.toggled.connect(
+            self.toggle_blackboard_highlighting
+        )
         blackboard_btn_row.addWidget(self.highlight_blackboard_btn)
         left_layout.addLayout(blackboard_btn_row)
 
@@ -444,7 +443,9 @@ class YasminEditor(QMainWindow):
         root_sm_row2.addWidget(QLabel("<b>Description:</b>"))
         self.root_sm_description_edit = QLineEdit()
         self.root_sm_description_edit.setPlaceholderText("Enter FSM description...")
-        self.root_sm_description_edit.textChanged.connect(self.on_root_sm_description_changed)
+        self.root_sm_description_edit.textChanged.connect(
+            self.on_root_sm_description_changed
+        )
         root_sm_row2.addWidget(self.root_sm_description_edit)
 
         root_sm_vlayout.addLayout(root_sm_row2)
@@ -558,7 +559,9 @@ class YasminEditor(QMainWindow):
                     "key_type": key.key_type,
                     "description": key.description,
                     "default_type": key.default_type,
-                    "default_value": "" if key.default_value is None else str(key.default_value),
+                    "default_value": (
+                        "" if key.default_value is None else str(key.default_value)
+                    ),
                 }
             )
         return result
@@ -731,7 +734,9 @@ class YasminEditor(QMainWindow):
             }
             self.sync_blackboard_keys()
 
-    def set_blackboard_keys(self, keys: List[Dict[str, str]], sync: bool = True) -> None:
+    def set_blackboard_keys(
+        self, keys: List[Dict[str, str]], sync: bool = True
+    ) -> None:
         self._blackboard_key_metadata = {}
         for key in keys:
             key_name = str(key.get("name", "") or "").strip()
@@ -799,7 +804,9 @@ class YasminEditor(QMainWindow):
 
         return effective_key_name
 
-    def _remove_state_node_entries(self, state_node: StateNode, prefix: str = "") -> None:
+    def _remove_state_node_entries(
+        self, state_node: StateNode, prefix: str = ""
+    ) -> None:
         full_name = f"{prefix}.{state_node.name}" if prefix else state_node.name
         if isinstance(state_node, ContainerStateNode):
             for child_state in list(state_node.child_states.values()):
@@ -850,7 +857,9 @@ class YasminEditor(QMainWindow):
         elif isinstance(item, FinalOutcomeNode):
             item.setBrush(QBrush(QColor(255, 0, 0)))
             item.setPen(
-                QPen(QColor(255, 200, 0), 4) if is_selected else QPen(QColor(0, 0, 0), 3)
+                QPen(QColor(255, 200, 0), 4)
+                if is_selected
+                else QPen(QColor(0, 0, 0), 3)
             )
 
     def update_blackboard_usage_highlighting(self) -> None:
@@ -892,7 +901,8 @@ class YasminEditor(QMainWindow):
                 (
                     item
                     for item in self.plugin_manager.python_plugins
-                    if item.module == model.module and item.class_name == model.class_name
+                    if item.module == model.module
+                    and item.class_name == model.class_name
                 ),
                 None,
             )
@@ -911,7 +921,10 @@ class YasminEditor(QMainWindow):
                     item
                     for item in self.plugin_manager.xml_files
                     if item.file_name == model.file_name
-                    and (not model.package_name or item.package_name == model.package_name)
+                    and (
+                        not model.package_name
+                        or item.package_name == model.package_name
+                    )
                 ),
                 None,
             )
@@ -926,9 +939,7 @@ class YasminEditor(QMainWindow):
                 )
 
         if plugin is None:
-            raise ValueError(
-                f"Unable to resolve plugin for state '{model.name}'"
-            )
+            raise ValueError(f"Unable to resolve plugin for state '{model.name}'")
         return plugin
 
     def create_leaf_model(
@@ -953,7 +964,9 @@ class YasminEditor(QMainWindow):
             package_name=getattr(plugin_info, "package_name", None),
             file_name=getattr(plugin_info, "file_name", None),
         )
-        for outcome_name in list(outcomes or getattr(plugin_info, "outcomes", []) or []):
+        for outcome_name in list(
+            outcomes or getattr(plugin_info, "outcomes", []) or []
+        ):
             model.add_outcome(Outcome(name=outcome_name))
         return model
 
@@ -1022,7 +1035,9 @@ class YasminEditor(QMainWindow):
             return root_state
         return self.final_outcomes.get(target_name)
 
-    def _create_connection_view(self, from_node, to_node, outcome: str) -> ConnectionLine:
+    def _create_connection_view(
+        self, from_node, to_node, outcome: str
+    ) -> ConnectionLine:
         connection = ConnectionLine(from_node, to_node, outcome)
         self.canvas.scene.addItem(connection)
         self.canvas.scene.addItem(connection.arrow_head)
@@ -1050,7 +1065,11 @@ class YasminEditor(QMainWindow):
             )
             return
 
-        if isinstance(from_node, FinalOutcomeNode) and source_container and source_container.is_concurrence:
+        if (
+            isinstance(from_node, FinalOutcomeNode)
+            and source_container
+            and source_container.is_concurrence
+        ):
             owner_container = source_container.parent_container
             if owner_container is None:
                 owner_model = self.root_model
@@ -1064,10 +1083,14 @@ class YasminEditor(QMainWindow):
             return
 
         if source_container and isinstance(source_container.model, Concurrence):
-            source_container.model.set_outcome_rule(target_name, from_node.name, outcome)
+            source_container.model.set_outcome_rule(
+                target_name, from_node.name, outcome
+            )
             return
 
-        owner_model = self.root_model if source_container is None else source_container.model
+        owner_model = (
+            self.root_model if source_container is None else source_container.model
+        )
         if isinstance(owner_model, StateMachine):
             owner_name = from_node.name
             owner_model.add_transition(
@@ -1095,9 +1118,15 @@ class YasminEditor(QMainWindow):
             )
             return
 
-        if isinstance(from_node, FinalOutcomeNode) and source_container and source_container.is_concurrence:
+        if (
+            isinstance(from_node, FinalOutcomeNode)
+            and source_container
+            and source_container.is_concurrence
+        ):
             owner_container = source_container.parent_container
-            owner_model = self.root_model if owner_container is None else owner_container.model
+            owner_model = (
+                self.root_model if owner_container is None else owner_container.model
+            )
             if isinstance(owner_model, StateMachine):
                 owner_model.remove_transition(
                     source_container.name,
@@ -1110,7 +1139,9 @@ class YasminEditor(QMainWindow):
             source_container.model.remove_outcome_rule(target_name, from_node.name)
             return
 
-        owner_model = self.root_model if source_container is None else source_container.model
+        owner_model = (
+            self.root_model if source_container is None else source_container.model
+        )
         if isinstance(owner_model, StateMachine):
             owner_model.remove_transition(
                 from_node.name,
@@ -1122,7 +1153,7 @@ class YasminEditor(QMainWindow):
         updates = {}
         for key, value in list(self.state_nodes.items()):
             if key == old_prefix or key.startswith(old_prefix + "."):
-                suffix = key[len(old_prefix):]
+                suffix = key[len(old_prefix) :]
                 updates[new_prefix + suffix] = value
                 del self.state_nodes[key]
         self.state_nodes.update(updates)
@@ -1130,14 +1161,18 @@ class YasminEditor(QMainWindow):
     def _rename_state_node(self, state_node, new_name: str) -> None:
         old_name = state_node.name
         parent_container = getattr(state_node, "parent_container", None)
-        parent_model = self.root_model if parent_container is None else parent_container.model
+        parent_model = (
+            self.root_model if parent_container is None else parent_container.model
+        )
         old_prefix = self.get_state_node_key(old_name, parent_container)
         new_prefix = self.get_state_node_key(new_name, parent_container)
 
         parent_model.rename_state(old_name, new_name)
 
         if parent_container is not None:
-            parent_container.child_states[new_name] = parent_container.child_states.pop(old_name)
+            parent_container.child_states[new_name] = parent_container.child_states.pop(
+                old_name
+            )
 
         self._rename_state_node_entries(old_prefix, new_prefix)
         state_node.name = new_name
@@ -1156,7 +1191,9 @@ class YasminEditor(QMainWindow):
                 new_name,
                 getattr(state_node, "parent_container", None),
             ):
-                QMessageBox.warning(self, "Error", f"State '{new_name}' already exists!")
+                QMessageBox.warning(
+                    self, "Error", f"State '{new_name}' already exists!"
+                )
                 return False
             self._rename_state_node(state_node, new_name)
 
@@ -1352,9 +1389,14 @@ class YasminEditor(QMainWindow):
                 if dialog.exec_():
                     result = dialog.get_state_machine_data()
                     if result:
-                        name, outcomes, start_state, remappings, description, defaults = (
-                            result
-                        )
+                        (
+                            name,
+                            outcomes,
+                            start_state,
+                            remappings,
+                            description,
+                            defaults,
+                        ) = result
 
                         if not self.apply_common_state_updates(
                             state_node,
@@ -1420,12 +1462,16 @@ class YasminEditor(QMainWindow):
                         state_node.update_default_outcome_label()
 
                         self.sync_blackboard_keys()
-                        self.statusBar().showMessage(f"Updated concurrence: {name}", 2000)
+                        self.statusBar().showMessage(
+                            f"Updated concurrence: {name}", 2000
+                        )
         else:
             dialog = StatePropertiesDialog(
                 state_name=state_node.name,
                 plugin_info=(
-                    state_node.plugin_info if hasattr(state_node, "plugin_info") else None
+                    state_node.plugin_info
+                    if hasattr(state_node, "plugin_info")
+                    else None
                 ),
                 available_plugins=(
                     [state_node.plugin_info]
@@ -1456,7 +1502,9 @@ class YasminEditor(QMainWindow):
                     self.sync_blackboard_keys()
                     self.statusBar().showMessage(f"Updated state: {name}", 2000)
 
-    def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
+    def edit_final_outcome(
+        self, outcome_node: Optional[FinalOutcomeNode] = None
+    ) -> None:
         """Edit the description of a final outcome."""
         if outcome_node is None:
             outcome_node = self.find_selected_item(FinalOutcomeNode)
@@ -1501,7 +1549,9 @@ class YasminEditor(QMainWindow):
 
                 if name in container.child_states:
                     QMessageBox.warning(
-                        self, "Error", f"State '{name}' already exists in this container!"
+                        self,
+                        "Error",
+                        f"State '{name}' already exists in this container!",
                     )
                     return
 
@@ -1512,7 +1562,9 @@ class YasminEditor(QMainWindow):
                     remappings=remappings,
                     outcomes=outcomes,
                 )
-                self.add_model_state(model, defaults=defaults, parent_container=container)
+                self.add_model_state(
+                    model, defaults=defaults, parent_container=container
+                )
                 self.statusBar().showMessage(
                     f"Added state '{name}' to container '{container.name}'", 2000
                 )
@@ -1534,7 +1586,9 @@ class YasminEditor(QMainWindow):
 
                 if name in container.child_states:
                     QMessageBox.warning(
-                        self, "Error", f"State '{name}' already exists in this container!"
+                        self,
+                        "Error",
+                        f"State '{name}' already exists in this container!",
                     )
                     return
 
@@ -1546,9 +1600,12 @@ class YasminEditor(QMainWindow):
                     start_state=start_state,
                     description=description,
                 )
-                self.add_model_state(model, defaults=defaults, parent_container=container)
+                self.add_model_state(
+                    model, defaults=defaults, parent_container=container
+                )
                 self.statusBar().showMessage(
-                    f"Added State Machine '{name}' to container '{container.name}'", 2000
+                    f"Added State Machine '{name}' to container '{container.name}'",
+                    2000,
                 )
 
     def add_concurrence_to_container(self) -> None:
@@ -1564,11 +1621,15 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             result = dialog.get_concurrence_data()
             if result:
-                name, outcomes, default_outcome, remappings, description, defaults = result
+                name, outcomes, default_outcome, remappings, description, defaults = (
+                    result
+                )
 
                 if name in container.child_states:
                     QMessageBox.warning(
-                        self, "Error", f"State '{name}' already exists in this container!"
+                        self,
+                        "Error",
+                        f"State '{name}' already exists in this container!",
                     )
                     return
 
@@ -1580,7 +1641,9 @@ class YasminEditor(QMainWindow):
                     default_outcome=default_outcome,
                     description=description,
                 )
-                self.add_model_state(model, defaults=defaults, parent_container=container)
+                self.add_model_state(
+                    model, defaults=defaults, parent_container=container
+                )
                 self.statusBar().showMessage(
                     f"Added Concurrence '{name}' to container '{container.name}'", 2000
                 )
@@ -1737,7 +1800,9 @@ class YasminEditor(QMainWindow):
                 y = rect.top() + 70 + len(selected_container.final_outcomes) * 80
 
                 model = Outcome(name=outcome_name)
-                self.model_adapter.create_final_outcome_view(model, selected_container, x=x, y=y)
+                self.model_adapter.create_final_outcome_view(
+                    model, selected_container, x=x, y=y
+                )
 
                 if (
                     selected_container.is_concurrence
@@ -1764,7 +1829,9 @@ class YasminEditor(QMainWindow):
                 self.root_model.add_outcome(model)
                 self.root_model.layout.set_outcome_position(outcome_name, x, y)
                 self.model_adapter.create_final_outcome_view(model, x=x, y=y)
-                self.statusBar().showMessage(f"Added final outcome: {outcome_name}", 2000)
+                self.statusBar().showMessage(
+                    f"Added final outcome: {outcome_name}", 2000
+                )
 
     def delete_selected(self) -> None:
         """Delete the selected items from the canvas."""
@@ -1903,7 +1970,6 @@ class YasminEditor(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save file: {str(e)}")
 
-
     @property
     def current_container_model(self):
         return self.current_container_path[-1]
@@ -2014,13 +2080,17 @@ class YasminEditor(QMainWindow):
         self.blackboard_list.itemSelectionChanged.connect(
             self.on_blackboard_selection_changed
         )
-        self.blackboard_list.itemDoubleClicked.connect(self.edit_selected_blackboard_key)
+        self.blackboard_list.itemDoubleClicked.connect(
+            self.edit_selected_blackboard_key
+        )
         left_layout.addWidget(self.blackboard_list)
         blackboard_btn_row = QHBoxLayout()
         self.highlight_blackboard_btn = QPushButton("Highlight: On")
         self.highlight_blackboard_btn.setCheckable(True)
         self.highlight_blackboard_btn.setChecked(True)
-        self.highlight_blackboard_btn.toggled.connect(self.toggle_blackboard_highlighting)
+        self.highlight_blackboard_btn.toggled.connect(
+            self.toggle_blackboard_highlighting
+        )
         blackboard_btn_row.addWidget(self.highlight_blackboard_btn)
         left_layout.addLayout(blackboard_btn_row)
 
@@ -2083,8 +2153,12 @@ class YasminEditor(QMainWindow):
         row2 = QHBoxLayout()
         row2.addWidget(QLabel("<b>Description:</b>"))
         self.root_sm_description_edit = QLineEdit()
-        self.root_sm_description_edit.setPlaceholderText("Enter container description...")
-        self.root_sm_description_edit.textChanged.connect(self.on_root_sm_description_changed)
+        self.root_sm_description_edit.setPlaceholderText(
+            "Enter container description..."
+        )
+        self.root_sm_description_edit.textChanged.connect(
+            self.on_root_sm_description_changed
+        )
         row2.addWidget(self.root_sm_description_edit)
         metadata_layout.addLayout(row2)
 
@@ -2151,7 +2225,7 @@ class YasminEditor(QMainWindow):
         self.render_current_container()
 
     def refresh_breadcrumbs(self) -> None:
-        if not hasattr(self, 'breadcrumb_layout'):
+        if not hasattr(self, "breadcrumb_layout"):
             return
         while self.breadcrumb_layout.count():
             item = self.breadcrumb_layout.takeAt(0)
@@ -2160,7 +2234,7 @@ class YasminEditor(QMainWindow):
                 widget.deleteLater()
 
         for index, container_model in enumerate(self.current_container_path):
-            label = 'root' if index == 0 else container_model.name
+            label = "root" if index == 0 else container_model.name
             button = QPushButton(label)
             button.setFlat(True)
             button.clicked.connect(
@@ -2168,12 +2242,12 @@ class YasminEditor(QMainWindow):
             )
             self.breadcrumb_layout.addWidget(button)
             if index < len(self.current_container_path) - 1:
-                self.breadcrumb_layout.addWidget(QLabel('>'))
+                self.breadcrumb_layout.addWidget(QLabel(">"))
 
         self.breadcrumb_layout.addStretch()
 
     def update_container_controls(self) -> None:
-        if not hasattr(self, 'root_sm_name_edit'):
+        if not hasattr(self, "root_sm_name_edit"):
             return
         model = self.current_container_model
         self.root_sm_name_edit.blockSignals(True)
@@ -2181,17 +2255,17 @@ class YasminEditor(QMainWindow):
         self.start_state_combo.blockSignals(True)
 
         if isinstance(model, StateMachine):
-            self.root_sm_name_label.setText('<b>State Machine Name:</b>')
-            self.start_state_label.setText('<b>Start State:</b>')
+            self.root_sm_name_label.setText("<b>State Machine Name:</b>")
+            self.start_state_label.setText("<b>Start State:</b>")
         else:
-            self.root_sm_name_label.setText('<b>Concurrence Name:</b>')
-            self.start_state_label.setText('<b>Default Outcome:</b>')
+            self.root_sm_name_label.setText("<b>Concurrence Name:</b>")
+            self.start_state_label.setText("<b>Default Outcome:</b>")
 
         self.root_sm_name_edit.setText(model.name)
         self.root_sm_description_edit.setText(model.description)
 
         self.start_state_combo.clear()
-        self.start_state_combo.addItem('(None)')
+        self.start_state_combo.addItem("(None)")
         if isinstance(model, StateMachine):
             for state_name in sorted(model.states.keys()):
                 self.start_state_combo.addItem(state_name)
@@ -2216,7 +2290,10 @@ class YasminEditor(QMainWindow):
         parent_model = self.current_parent_model
         text = text.strip()
         if parent_model is None:
+            old_name = model.name
             model.name = text
+            if isinstance(model, StateMachine):
+                model.rename_transition_owner(old_name, text)
         else:
             old_name = model.name
             if text != old_name and text in parent_model.states:
@@ -2229,9 +2306,9 @@ class YasminEditor(QMainWindow):
 
     def on_start_state_changed(self, text: str) -> None:
         if isinstance(self.current_container_model, StateMachine):
-            self.start_state = None if text == '(None)' else text
+            self.start_state = None if text == "(None)" else text
         else:
-            self.default_outcome = None if text == '(None)' else text
+            self.default_outcome = None if text == "(None)" else text
 
     def update_start_state_combo(self) -> None:
         self.update_container_controls()
@@ -2257,7 +2334,7 @@ class YasminEditor(QMainWindow):
 
     def get_container_path(self, container: Optional[ContainerStateNode]) -> str:
         if container is None:
-            return ''
+            return ""
         return container.name
 
     def get_state_node_key(
@@ -2326,7 +2403,9 @@ class YasminEditor(QMainWindow):
     def unregister_connection_in_model(self, connection: ConnectionLine) -> None:
         owner_model = self.current_container_model
         if isinstance(owner_model, Concurrence):
-            owner_model.remove_outcome_rule(connection.to_node.name, connection.from_node.name)
+            owner_model.remove_outcome_rule(
+                connection.to_node.name, connection.from_node.name
+            )
             return
         owner_model.remove_transition(
             connection.from_node.name,
@@ -2381,13 +2460,17 @@ class YasminEditor(QMainWindow):
             if dialog.exec_():
                 result = dialog.get_state_machine_data()
                 if result:
-                    name, outcomes, start_state, remappings, description, defaults = result
+                    name, outcomes, start_state, remappings, description, defaults = (
+                        result
+                    )
                     parent_model = self.current_parent_model
                     if parent_model is None:
                         model.name = name
                     else:
                         if name != model.name and name in parent_model.states:
-                            QMessageBox.warning(self, 'Error', f"State '{name}' already exists!")
+                            QMessageBox.warning(
+                                self, "Error", f"State '{name}' already exists!"
+                            )
                             return
                         parent_model.rename_state(model.name, name)
                     model.description = description
@@ -2413,13 +2496,22 @@ class YasminEditor(QMainWindow):
             if dialog.exec_():
                 result = dialog.get_concurrence_data()
                 if result:
-                    name, outcomes, default_outcome, remappings, description, defaults = result
+                    (
+                        name,
+                        outcomes,
+                        default_outcome,
+                        remappings,
+                        description,
+                        defaults,
+                    ) = result
                     parent_model = self.current_parent_model
                     if parent_model is None:
                         model.name = name
                     else:
                         if name != model.name and name in parent_model.states:
-                            QMessageBox.warning(self, 'Error', f"State '{name}' already exists!")
+                            QMessageBox.warning(
+                                self, "Error", f"State '{name}' already exists!"
+                            )
                             return
                         parent_model.rename_state(model.name, name)
                     model.description = description
@@ -2435,24 +2527,28 @@ class YasminEditor(QMainWindow):
         state_node = self.find_selected_state_node()
 
         if not state_node:
-            QMessageBox.warning(self, 'Error', 'Please select a state to edit!')
+            QMessageBox.warning(self, "Error", "Please select a state to edit!")
             return
 
         if isinstance(state_node, ContainerStateNode):
             input_keys = []
             output_keys = []
-            for key in getattr(state_node.model, 'keys', []) or []:
+            for key in getattr(state_node.model, "keys", []) or []:
                 key_data = {
-                    'name': str(getattr(key, 'name', '') or ''),
-                    'description': str(getattr(key, 'description', '') or ''),
-                    'default_type': str(getattr(key, 'default_type', '') or ''),
-                    'default_value': '' if getattr(key, 'default_value', None) is None else str(getattr(key, 'default_value', '')),
-                    'has_default': bool(getattr(key, 'default_type', '') or ''),
+                    "name": str(getattr(key, "name", "") or ""),
+                    "description": str(getattr(key, "description", "") or ""),
+                    "default_type": str(getattr(key, "default_type", "") or ""),
+                    "default_value": (
+                        ""
+                        if getattr(key, "default_value", None) is None
+                        else str(getattr(key, "default_value", ""))
+                    ),
+                    "has_default": bool(getattr(key, "default_type", "") or ""),
                 }
-                key_type = str(getattr(key, 'key_type', 'in') or 'in')
-                if key_type in ('in', 'in/out'):
+                key_type = str(getattr(key, "key_type", "in") or "in")
+                if key_type in ("in", "in/out"):
                     input_keys.append(dict(key_data))
-                if key_type in ('out', 'in/out'):
+                if key_type in ("out", "in/out"):
                     output_keys.append(dict(key_data))
 
             dialog = StatePropertiesDialog(
@@ -2463,11 +2559,13 @@ class YasminEditor(QMainWindow):
                 outcomes=[outcome.name for outcome in state_node.model.outcomes],
                 edit_mode=True,
                 parent=self,
-                description=getattr(state_node, 'description', ''),
-                defaults=getattr(state_node, 'defaults', []),
+                description=getattr(state_node, "description", ""),
+                defaults=getattr(state_node, "defaults", []),
                 fallback_input_keys=input_keys,
                 fallback_output_keys=output_keys,
-                container_kind='Concurrence' if state_node.is_concurrence else 'State Machine',
+                container_kind=(
+                    "Concurrence" if state_node.is_concurrence else "State Machine"
+                ),
             )
 
             if dialog.exec_():
@@ -2478,7 +2576,7 @@ class YasminEditor(QMainWindow):
                         state_node,
                         name,
                         remappings,
-                        getattr(state_node, 'description', ''),
+                        getattr(state_node, "description", ""),
                         defaults,
                     ):
                         return
@@ -2492,19 +2590,19 @@ class YasminEditor(QMainWindow):
         dialog = StatePropertiesDialog(
             state_name=state_node.name,
             plugin_info=(
-                state_node.plugin_info if hasattr(state_node, 'plugin_info') else None
+                state_node.plugin_info if hasattr(state_node, "plugin_info") else None
             ),
             available_plugins=(
                 [state_node.plugin_info]
-                if hasattr(state_node, 'plugin_info') and state_node.plugin_info
+                if hasattr(state_node, "plugin_info") and state_node.plugin_info
                 else []
             ),
             remappings=state_node.remappings,
             outcomes=[outcome.name for outcome in state_node.model.outcomes],
             edit_mode=True,
             parent=self,
-            description=getattr(state_node, 'description', ''),
-            defaults=getattr(state_node, 'defaults', []),
+            description=getattr(state_node, "description", ""),
+            defaults=getattr(state_node, "defaults", []),
         )
 
         if dialog.exec_():
@@ -2539,11 +2637,13 @@ class YasminEditor(QMainWindow):
         current_model = self.current_container_model
 
         if isinstance(current_model, Concurrence):
-            if not isinstance(to_node, FinalOutcomeNode) or isinstance(from_node, FinalOutcomeNode):
+            if not isinstance(to_node, FinalOutcomeNode) or isinstance(
+                from_node, FinalOutcomeNode
+            ):
                 QMessageBox.warning(
                     self,
-                    'Not Allowed',
-                    'States inside a Concurrence can only connect to final outcomes of the current Concurrence.',
+                    "Not Allowed",
+                    "States inside a Concurrence can only connect to final outcomes of the current Concurrence.",
                 )
                 return
             outcomes_list = [outcome.name for outcome in from_node.model.outcomes]
@@ -2551,8 +2651,8 @@ class YasminEditor(QMainWindow):
             if isinstance(from_node, FinalOutcomeNode):
                 QMessageBox.warning(
                     self,
-                    'Not Allowed',
-                    'Final outcomes of the current container cannot start transitions here.',
+                    "Not Allowed",
+                    "Final outcomes of the current container cannot start transitions here.",
                 )
                 return
             outcomes_list = [outcome.name for outcome in from_node.model.outcomes]
@@ -2560,8 +2660,8 @@ class YasminEditor(QMainWindow):
         if not outcomes_list:
             QMessageBox.warning(
                 self,
-                'Error',
-                'Cannot create transitions from states without outcomes!',
+                "Error",
+                "Cannot create transitions from states without outcomes!",
             )
             return
 
@@ -2577,7 +2677,7 @@ class YasminEditor(QMainWindow):
             ]
             if not available_outcomes:
                 QMessageBox.warning(
-                    self, 'Error', 'All outcomes from this state are already used!'
+                    self, "Error", "All outcomes from this state are already used!"
                 )
                 return
         else:
@@ -2589,7 +2689,7 @@ class YasminEditor(QMainWindow):
         else:
             outcome, ok = QInputDialog.getItem(
                 self,
-                'Select Outcome',
+                "Select Outcome",
                 f"Select outcome for transition from '{from_node.name}':",
                 available_outcomes,
                 0,
@@ -2610,7 +2710,7 @@ class YasminEditor(QMainWindow):
             if outcome in used_outcomes:
                 QMessageBox.warning(
                     self,
-                    'Error',
+                    "Error",
                     f"Outcome '{outcome}' is already used for a transition!",
                 )
                 return
@@ -2624,13 +2724,13 @@ class YasminEditor(QMainWindow):
 
     def add_final_outcome(self) -> None:
         outcome_name, ok = QInputDialog.getText(
-            self, 'Final Outcome', 'Enter final outcome name:'
+            self, "Final Outcome", "Enter final outcome name:"
         )
         if ok and outcome_name:
             if outcome_name in self.final_outcomes:
                 QMessageBox.warning(
                     self,
-                    'Error',
+                    "Error",
                     f"Final outcome '{outcome_name}' already exists in this container!",
                 )
                 return
@@ -2643,7 +2743,10 @@ class YasminEditor(QMainWindow):
             self.model_adapter.create_final_outcome_view(model, x=x, y=y)
 
             if isinstance(self.current_container_model, Concurrence):
-                if len(self.current_container_model.outcomes) == 1 and not self.current_container_model.default_outcome:
+                if (
+                    len(self.current_container_model.outcomes) == 1
+                    and not self.current_container_model.default_outcome
+                ):
                     self.current_container_model.default_outcome = outcome_name
 
             self.update_start_state_combo()
@@ -2657,15 +2760,19 @@ class YasminEditor(QMainWindow):
         container_model: StateMachine | Concurrence,
     ) -> Dict[str, Dict[str, str]]:
         metadata: Dict[str, Dict[str, str]] = {}
-        for key in getattr(container_model, 'keys', []) or []:
-            key_name = str(getattr(key, 'name', '') or '').strip()
+        for key in getattr(container_model, "keys", []) or []:
+            key_name = str(getattr(key, "name", "") or "").strip()
             if not key_name:
                 continue
             metadata[key_name] = {
-                'description': str(getattr(key, 'description', '') or '').strip(),
-                'key_type': str(getattr(key, 'key_type', 'in') or 'in').strip(),
-                'default_type': str(getattr(key, 'default_type', '') or '').strip(),
-                'default_value': '' if getattr(key, 'default_value', None) is None else str(getattr(key, 'default_value', '')),
+                "description": str(getattr(key, "description", "") or "").strip(),
+                "key_type": str(getattr(key, "key_type", "in") or "in").strip(),
+                "default_type": str(getattr(key, "default_type", "") or "").strip(),
+                "default_value": (
+                    ""
+                    if getattr(key, "default_value", None) is None
+                    else str(getattr(key, "default_value", ""))
+                ),
             }
         return metadata
 
@@ -2677,13 +2784,15 @@ class YasminEditor(QMainWindow):
         container_model.keys = self.dicts_to_keys(
             [
                 {
-                    'name': key_name,
-                    'key_type': values.get('key_type', 'in'),
-                    'description': values.get('description', ''),
-                    'default_type': values.get('default_type', ''),
-                    'default_value': values.get('default_value', ''),
+                    "name": key_name,
+                    "key_type": values.get("key_type", "in"),
+                    "description": values.get("description", ""),
+                    "default_type": values.get("default_type", ""),
+                    "default_value": values.get("default_value", ""),
                 }
-                for key_name, values in sorted(metadata.items(), key=lambda item: item[0].lower())
+                for key_name, values in sorted(
+                    metadata.items(), key=lambda item: item[0].lower()
+                )
             ]
         )
 
@@ -2698,14 +2807,14 @@ class YasminEditor(QMainWindow):
             entry = usage_map.setdefault(
                 key_name,
                 {
-                    'input': False,
-                    'output': False,
-                    'description': '',
+                    "input": False,
+                    "output": False,
+                    "description": "",
                 },
             )
             entry[usage_kind] = True
-            if not entry['description'] and description:
-                entry['description'] = description
+            if not entry["description"] and description:
+                entry["description"] = description
 
         def visit_state(state_model: State, remap_chain: List[Dict[str, str]]) -> None:
             if isinstance(state_model, (StateMachine, Concurrence)):
@@ -2725,24 +2834,24 @@ class YasminEditor(QMainWindow):
                     effective_name = remappings.get(effective_name, effective_name)
                 return effective_name
 
-            for key_info in list(getattr(plugin_info, 'input_keys', []) or []):
-                raw_name = str(key_info.get('name', '')).strip()
+            for key_info in list(getattr(plugin_info, "input_keys", []) or []):
+                raw_name = str(key_info.get("name", "")).strip()
                 if not raw_name:
                     continue
                 add_usage(
                     resolve_local_name(raw_name),
-                    'input',
-                    str(key_info.get('description', '') or '').strip(),
+                    "input",
+                    str(key_info.get("description", "") or "").strip(),
                 )
 
-            for key_info in list(getattr(plugin_info, 'output_keys', []) or []):
-                raw_name = str(key_info.get('name', '')).strip()
+            for key_info in list(getattr(plugin_info, "output_keys", []) or []):
+                raw_name = str(key_info.get("name", "")).strip()
                 if not raw_name:
                     continue
                 add_usage(
                     resolve_local_name(raw_name),
-                    'output',
-                    str(key_info.get('description', '') or '').strip(),
+                    "output",
+                    str(key_info.get("description", "") or "").strip(),
                 )
 
         for child_state in container_model.states.values():
@@ -2751,30 +2860,30 @@ class YasminEditor(QMainWindow):
         derived_keys: Dict[str, Dict[str, str]] = {}
         for key_name, usage in usage_map.items():
             metadata = dict(metadata_map.get(key_name, {}))
-            if usage['input'] and usage['output']:
-                key_type = 'in/out'
-            elif usage['output']:
-                key_type = 'out'
+            if usage["input"] and usage["output"]:
+                key_type = "in/out"
+            elif usage["output"]:
+                key_type = "out"
             else:
-                key_type = 'in'
+                key_type = "in"
 
-            description = str(metadata.get('description', '') or '').strip()
+            description = str(metadata.get("description", "") or "").strip()
             if not description:
-                description = str(usage.get('description', '') or '').strip()
+                description = str(usage.get("description", "") or "").strip()
 
-            default_type = ''
-            default_value = ''
-            if key_type in ('in', 'in/out'):
-                default_type = str(metadata.get('default_type', '') or '')
+            default_type = ""
+            default_value = ""
+            if key_type in ("in", "in/out"):
+                default_type = str(metadata.get("default_type", "") or "")
                 if default_type:
-                    default_value = str(metadata.get('default_value', '') or '')
+                    default_value = str(metadata.get("default_value", "") or "")
 
             derived_keys[key_name] = {
-                'name': key_name,
-                'key_type': key_type,
-                'description': description,
-                'default_type': default_type,
-                'default_value': default_value,
+                "name": key_name,
+                "key_type": key_type,
+                "description": description,
+                "default_type": default_type,
+                "default_value": default_value,
             }
 
         return dict(sorted(derived_keys.items(), key=lambda item: item[0].lower()))
@@ -2787,16 +2896,32 @@ class YasminEditor(QMainWindow):
         metadata_map = self._get_container_metadata_map(container_model)
         merged: Dict[str, Dict[str, str]] = {}
 
-        for key_name in sorted(set(derived_keys.keys()) | set(metadata_map.keys()), key=str.lower):
+        for key_name in sorted(
+            set(derived_keys.keys()) | set(metadata_map.keys()), key=str.lower
+        ):
             derived = dict(derived_keys.get(key_name, {}))
             metadata = dict(metadata_map.get(key_name, {}))
-            key_type = str(derived.get('key_type', metadata.get('key_type', 'in')) or 'in')
+            key_type = str(
+                derived.get("key_type", metadata.get("key_type", "in")) or "in"
+            )
             merged[key_name] = {
-                'name': key_name,
-                'key_type': key_type,
-                'description': str(metadata.get('description', '') or derived.get('description', '') or ''),
-                'default_type': str(metadata.get('default_type', '') or derived.get('default_type', '') or ''),
-                'default_value': str(metadata.get('default_value', '') or derived.get('default_value', '') or ''),
+                "name": key_name,
+                "key_type": key_type,
+                "description": str(
+                    metadata.get("description", "")
+                    or derived.get("description", "")
+                    or ""
+                ),
+                "default_type": str(
+                    metadata.get("default_type", "")
+                    or derived.get("default_type", "")
+                    or ""
+                ),
+                "default_value": str(
+                    metadata.get("default_value", "")
+                    or derived.get("default_value", "")
+                    or ""
+                ),
             }
         return merged
 
@@ -2810,11 +2935,11 @@ class YasminEditor(QMainWindow):
         self._set_container_metadata_map(current_container, merged)
         self._blackboard_keys = list(merged.values())
         self._blackboard_key_metadata = {
-            item['name']: {
-                'description': item.get('description', ''),
-                'key_type': item.get('key_type', 'in'),
-                'default_type': item.get('default_type', ''),
-                'default_value': item.get('default_value', ''),
+            item["name"]: {
+                "description": item.get("description", ""),
+                "key_type": item.get("key_type", "in"),
+                "default_type": item.get("default_type", ""),
+                "default_value": item.get("default_value", ""),
             }
             for item in self._blackboard_keys
         }
@@ -2826,10 +2951,10 @@ class YasminEditor(QMainWindow):
         merged = self._merge_container_keys(self.current_container_model)
         self._blackboard_key_metadata = {
             key_name: {
-                'description': values.get('description', ''),
-                'key_type': values.get('key_type', 'in'),
-                'default_type': values.get('default_type', ''),
-                'default_value': values.get('default_value', ''),
+                "description": values.get("description", ""),
+                "key_type": values.get("key_type", "in"),
+                "default_type": values.get("default_type", ""),
+                "default_value": values.get("default_value", ""),
             }
             for key_name, values in merged.items()
         }
@@ -2837,11 +2962,11 @@ class YasminEditor(QMainWindow):
         self.blackboard_list.clear()
 
         for key_data in sorted(
-            self._blackboard_keys, key=lambda item: item.get('name', '').lower()
+            self._blackboard_keys, key=lambda item: item.get("name", "").lower()
         ):
             item = QListWidgetItem(self.format_blackboard_key_label(key_data))
             item.setData(Qt.UserRole, dict(key_data))
-            description = key_data.get('description', '')
+            description = key_data.get("description", "")
             if description:
                 item.setToolTip(description)
             self.blackboard_list.addItem(item)
@@ -2852,16 +2977,20 @@ class YasminEditor(QMainWindow):
             for i in range(self.blackboard_list.count()):
                 item = self.blackboard_list.item(i)
                 key_data = item.data(Qt.UserRole) or {}
-                if key_data.get('name') == current_key_name:
+                if key_data.get("name") == current_key_name:
                     self.blackboard_list.setCurrentItem(item)
                     break
 
         self.update_blackboard_usage_highlighting()
 
-    def set_blackboard_keys(self, keys: List[Dict[str, str]], sync: bool = True) -> None:
+    def set_blackboard_keys(
+        self, keys: List[Dict[str, str]], sync: bool = True
+    ) -> None:
 
         self.root_model.keys = self.dicts_to_keys(keys)
-        self._blackboard_key_metadata = self._get_container_metadata_map(self.current_container_model)
+        self._blackboard_key_metadata = self._get_container_metadata_map(
+            self.current_container_model
+        )
         self._blackboard_keys = [dict(item) for item in keys]
         if sync:
             self.sync_blackboard_keys()
@@ -2873,15 +3002,15 @@ class YasminEditor(QMainWindow):
         return self.keys_to_dicts(self.current_container_model.keys)
 
     def add_root_default_row_with_data(self, data: dict) -> None:
-        key_name = str(data.get('key', '') or '').strip()
+        key_name = str(data.get("key", "") or "").strip()
         if not key_name:
             return
         metadata = self._get_container_metadata_map(self.current_container_model)
         metadata[key_name] = {
-            'description': str(data.get('description', '') or '').strip(),
-            'key_type': 'in',
-            'default_type': str(data.get('type', '') or '').strip(),
-            'default_value': str(data.get('value', '') or '').strip(),
+            "description": str(data.get("description", "") or "").strip(),
+            "key_type": "in",
+            "default_type": str(data.get("type", "") or "").strip(),
+            "default_value": str(data.get("value", "") or "").strip(),
         }
         self._set_container_metadata_map(self.current_container_model, metadata)
         self.sync_blackboard_keys()
@@ -2895,29 +3024,35 @@ class YasminEditor(QMainWindow):
             return
 
         key_data = dict(item.data(Qt.UserRole) or {})
-        key_name = key_data.get('name', '')
+        key_name = key_data.get("name", "")
         if not key_name:
             return
 
-        metadata = dict(self._get_container_metadata_map(self.current_container_model).get(key_name, {}))
+        metadata = dict(
+            self._get_container_metadata_map(self.current_container_model).get(
+                key_name, {}
+            )
+        )
         merged_key_data = {
             **key_data,
             **metadata,
-            'name': key_data.get('name', ''),
-            'key_type': key_data.get('key_type', 'in'),
-            'default_type': str(metadata.get('default_type', '') or ''),
-            'default_value': str(metadata.get('default_value', '') or ''),
+            "name": key_data.get("name", ""),
+            "key_type": key_data.get("key_type", "in"),
+            "default_type": str(metadata.get("default_type", "") or ""),
+            "default_value": str(metadata.get("default_value", "") or ""),
         }
 
         dlg = BlackboardKeyDialog(merged_key_data, parent=self, edit_mode=True)
         if dlg.exec_():
             updated_key = dlg.get_key_data()
-            metadata_map = self._get_container_metadata_map(self.current_container_model)
+            metadata_map = self._get_container_metadata_map(
+                self.current_container_model
+            )
             metadata_map[key_name] = {
-                'description': updated_key.get('description', ''),
-                'key_type': key_data.get('key_type', 'in'),
-                'default_type': updated_key.get('default_type', ''),
-                'default_value': updated_key.get('default_value', ''),
+                "description": updated_key.get("description", ""),
+                "key_type": key_data.get("key_type", "in"),
+                "default_type": updated_key.get("default_type", ""),
+                "default_value": updated_key.get("default_value", ""),
             }
             self._set_container_metadata_map(self.current_container_model, metadata_map)
             self.sync_blackboard_keys()
@@ -2939,24 +3074,26 @@ class YasminEditor(QMainWindow):
             except Exception:
                 return False
 
-            for key_info in list(getattr(plugin_info, 'input_keys', []) or []) + list(
-                getattr(plugin_info, 'output_keys', []) or []
+            for key_info in list(getattr(plugin_info, "input_keys", []) or []) + list(
+                getattr(plugin_info, "output_keys", []) or []
             ):
-                plugin_key_name = str(key_info.get('name', '')).strip()
+                plugin_key_name = str(key_info.get("name", "")).strip()
                 if not plugin_key_name:
                     continue
                 effective_key_name = plugin_key_name
                 for remappings in remap_chain:
-                    effective_key_name = remappings.get(effective_key_name, effective_key_name)
+                    effective_key_name = remappings.get(
+                        effective_key_name, effective_key_name
+                    )
                 if effective_key_name == key_name:
                     return True
             return False
 
-        model = getattr(state_node, 'model', None)
+        model = getattr(state_node, "model", None)
         if model is None:
             return False
 
-        return model_uses_key(model, [dict(getattr(model, 'remappings', {}) or {})])
+        return model_uses_key(model, [dict(getattr(model, "remappings", {}) or {})])
 
     def update_blackboard_usage_highlighting(self) -> None:
         selected_key = self.get_selected_blackboard_key_name()
@@ -3005,7 +3142,6 @@ class YasminEditor(QMainWindow):
                 self.statusBar().showMessage(f"Saved: {file_path}", 3000)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save file: {str(e)}")
-
 
     def create_ui(self) -> None:
         """Create and setup the user interface."""
@@ -3081,13 +3217,17 @@ class YasminEditor(QMainWindow):
         self.blackboard_list.itemSelectionChanged.connect(
             self.on_blackboard_selection_changed
         )
-        self.blackboard_list.itemDoubleClicked.connect(self.edit_selected_blackboard_key)
+        self.blackboard_list.itemDoubleClicked.connect(
+            self.edit_selected_blackboard_key
+        )
         left_layout.addWidget(self.blackboard_list)
         blackboard_btn_row = QHBoxLayout()
         self.highlight_blackboard_btn = QPushButton("Highlight: On")
         self.highlight_blackboard_btn.setCheckable(True)
         self.highlight_blackboard_btn.setChecked(True)
-        self.highlight_blackboard_btn.toggled.connect(self.toggle_blackboard_highlighting)
+        self.highlight_blackboard_btn.toggled.connect(
+            self.toggle_blackboard_highlighting
+        )
         blackboard_btn_row.addWidget(self.highlight_blackboard_btn)
         left_layout.addLayout(blackboard_btn_row)
 
@@ -3150,8 +3290,12 @@ class YasminEditor(QMainWindow):
         row2 = QHBoxLayout()
         row2.addWidget(QLabel("<b>Description:</b>"))
         self.root_sm_description_edit = QLineEdit()
-        self.root_sm_description_edit.setPlaceholderText("Enter container description...")
-        self.root_sm_description_edit.textChanged.connect(self.on_root_sm_description_changed)
+        self.root_sm_description_edit.setPlaceholderText(
+            "Enter container description..."
+        )
+        self.root_sm_description_edit.textChanged.connect(
+            self.on_root_sm_description_changed
+        )
         row2.addWidget(self.root_sm_description_edit)
         metadata_layout.addLayout(row2)
 
@@ -3195,7 +3339,7 @@ class YasminEditor(QMainWindow):
             return
 
         bounds = self.canvas.scene.itemsBoundingRect()
-        margin = 80.0
+        margin = 10.0
         padded = bounds.adjusted(-margin, -margin, margin, margin)
         self.canvas.scene.setSceneRect(padded)
         self.canvas.fitInView(padded, Qt.KeepAspectRatio)
@@ -3255,7 +3399,11 @@ class YasminEditor(QMainWindow):
         visible_rect = self.canvas.mapToScene(viewport_rect).boundingRect()
         center = visible_rect.center()
 
-        occupied_positions = [item.pos() for item in list(self.state_nodes.values()) + list(self.final_outcomes.values())]
+        occupied_positions = [
+            item.pos()
+            for item in list(self.state_nodes.values())
+            + list(self.final_outcomes.values())
+        ]
         spacing_x = 180.0
         spacing_y = 130.0
 
@@ -3266,12 +3414,17 @@ class YasminEditor(QMainWindow):
                     if max(abs(dx), abs(dy)) != radius:
                         continue
                     candidates.append(
-                        QPointF(center.x() + dx * spacing_x, center.y() + dy * spacing_y)
+                        QPointF(
+                            center.x() + dx * spacing_x, center.y() + dy * spacing_y
+                        )
                     )
 
         def is_free(candidate: QPointF) -> bool:
             for occupied in occupied_positions:
-                if abs(candidate.x() - occupied.x()) < spacing_x * 0.8 and abs(candidate.y() - occupied.y()) < spacing_y * 0.8:
+                if (
+                    abs(candidate.x() - occupied.x()) < spacing_x * 0.8
+                    and abs(candidate.y() - occupied.y()) < spacing_y * 0.8
+                ):
                     return False
             return True
 
@@ -3304,7 +3457,11 @@ class YasminEditor(QMainWindow):
                 "name": str(getattr(key, "name", "") or ""),
                 "description": str(getattr(key, "description", "") or ""),
                 "default_type": str(getattr(key, "default_type", "") or ""),
-                "default_value": "" if getattr(key, "default_value", None) is None else str(getattr(key, "default_value", "")),
+                "default_value": (
+                    ""
+                    if getattr(key, "default_value", None) is None
+                    else str(getattr(key, "default_value", ""))
+                ),
                 "has_default": bool(getattr(key, "default_type", "") or ""),
             }
             key_type = str(getattr(key, "key_type", "in") or "in")
@@ -3325,7 +3482,9 @@ class YasminEditor(QMainWindow):
             defaults=[],
             fallback_input_keys=input_keys,
             fallback_output_keys=output_keys,
-            container_kind="Concurrence" if isinstance(model, Concurrence) else "State Machine",
+            container_kind=(
+                "Concurrence" if isinstance(model, Concurrence) else "State Machine"
+            ),
         )
 
         if dialog.exec_():
@@ -3336,9 +3495,13 @@ class YasminEditor(QMainWindow):
                 old_name = model.name
                 if parent_model is None:
                     model.name = name
+                    if isinstance(model, StateMachine):
+                        model.rename_transition_owner(old_name, name)
                 else:
                     if name != old_name and name in parent_model.states:
-                        QMessageBox.warning(self, "Error", f"State '{name}' already exists!")
+                        QMessageBox.warning(
+                            self, "Error", f"State '{name}' already exists!"
+                        )
                         return
                     if name != old_name:
                         parent_model.rename_state(old_name, name)
@@ -3359,8 +3522,12 @@ class YasminEditor(QMainWindow):
                 effective_name = remappings.get(effective_name, effective_name)
             return effective_name
 
-        def model_uses_key(state_model: State, remap_chain: List[Dict[str, str]]) -> bool:
-            current_chain = remap_chain + [dict(getattr(state_model, "remappings", {}) or {})]
+        def model_uses_key(
+            state_model: State, remap_chain: List[Dict[str, str]]
+        ) -> bool:
+            current_chain = remap_chain + [
+                dict(getattr(state_model, "remappings", {}) or {})
+            ]
 
             for key in getattr(state_model, "keys", []) or []:
                 raw_name = str(getattr(key, "name", "") or "").strip()
@@ -3382,7 +3549,10 @@ class YasminEditor(QMainWindow):
                 getattr(plugin_info, "output_keys", []) or []
             ):
                 plugin_key_name = str(key_info.get("name", "")).strip()
-                if plugin_key_name and apply_remap_chain(plugin_key_name, current_chain) == key_name:
+                if (
+                    plugin_key_name
+                    and apply_remap_chain(plugin_key_name, current_chain) == key_name
+                ):
                     return True
             return False
 
