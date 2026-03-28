@@ -50,9 +50,13 @@ from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
 from yasmin_editor.editor_gui.state_properties_dialog import StatePropertiesDialog
 from yasmin_editor.editor_gui.state_machine_dialog import StateMachineDialog
 from yasmin_editor.editor_gui.concurrence_dialog import ConcurrenceDialog
-from yasmin_editor.editor_gui.xml_manager import XmlManager
 from yasmin_editor.editor_gui.blackboard_key_dialog import BlackboardKeyDialog
 from yasmin_editor.editor_gui.outcome_description_dialog import OutcomeDescriptionDialog
+from yasmin_editor.editor_gui.xml_manager import XmlManager
+from yasmin_editor.editor_gui.model_adapter import (
+    create_empty_model,
+    sync_model_from_editor,
+)
 
 
 class YasminEditor(QMainWindow):
@@ -82,11 +86,13 @@ class YasminEditor(QMainWindow):
         self._blackboard_keys: List[Dict[str, str]] = []
         self._blackboard_key_metadata: Dict[str, Dict[str, str]] = {}
         self._highlight_blackboard_usage = True
+        self._suspend_model_sync = False
+        self.model = create_empty_model()
+        self.xml_manager = XmlManager(self)
 
         self.layout_seed = 42
         self.layout_rng = random.Random(self.layout_seed)
 
-        self.xml_manager = XmlManager(self)
         self.create_ui()
 
         self.statusBar().showMessage("Loading plugins...")
@@ -255,6 +261,9 @@ class YasminEditor(QMainWindow):
         root_sm_row2.addWidget(QLabel("<b>Description:</b>"))
         self.root_sm_description_edit = QLineEdit()
         self.root_sm_description_edit.setPlaceholderText("Enter FSM description...")
+        self.root_sm_description_edit.textChanged.connect(
+            self.on_root_sm_description_changed
+        )
         root_sm_row2.addWidget(self.root_sm_description_edit)
 
         root_sm_vlayout.addLayout(root_sm_row2)
@@ -310,6 +319,7 @@ class YasminEditor(QMainWindow):
             text: The new state machine name.
         """
         self.root_sm_name = text
+        self.sync_model_from_gui()
 
     def on_start_state_changed(self, text: str) -> None:
         """Handle initial state selection change.
@@ -321,6 +331,21 @@ class YasminEditor(QMainWindow):
             self.start_state = None
         else:
             self.start_state = text
+        self.sync_model_from_gui()
+
+    def on_root_sm_description_changed(self, text: str) -> None:
+        """Handle root state machine description change."""
+        self.sync_model_from_gui()
+
+    def sync_model_from_gui(self) -> None:
+        """Synchronize the editor backend model from the current GUI state."""
+        if self._suspend_model_sync:
+            return
+        self.model = sync_model_from_editor(self)
+
+    def on_graphics_item_position_changed(self) -> None:
+        """Update the backend model after a graphics item moved."""
+        self.sync_model_from_gui()
 
     def filter_blackboard_keys(self, text: str) -> None:
         """Filter blackboard keys based on search text."""
@@ -437,6 +462,7 @@ class YasminEditor(QMainWindow):
         }
         self._blackboard_keys = list(derived_keys.values())
         self.refresh_blackboard_keys_list()
+        self.sync_model_from_gui()
 
     def refresh_blackboard_keys_list(self) -> None:
         current_key_name = self.get_selected_blackboard_key_name()
@@ -783,6 +809,7 @@ class YasminEditor(QMainWindow):
                 self.start_state_combo.setCurrentIndex(index)
 
         self.sync_blackboard_keys()
+        self.sync_model_from_gui()
         self.statusBar().showMessage(f"Added state: {name}", 2000)
 
     def add_state(self) -> None:
@@ -912,6 +939,7 @@ class YasminEditor(QMainWindow):
                             state_node.update_start_state_label()
 
                         self.sync_blackboard_keys()
+                        self.sync_model_from_gui()
                         self.statusBar().showMessage(
                             f"Updated state machine: {name}", 2000
                         )
@@ -977,6 +1005,7 @@ class YasminEditor(QMainWindow):
                             state_node.update_default_outcome_label()
 
                         self.sync_blackboard_keys()
+                        self.sync_model_from_gui()
                         self.statusBar().showMessage(f"Updated concurrence: {name}", 2000)
         else:
             dialog = StatePropertiesDialog(
@@ -1026,6 +1055,7 @@ class YasminEditor(QMainWindow):
                     state_node.description = description
                     state_node.defaults = defaults
                     self.sync_blackboard_keys()
+                    self.sync_model_from_gui()
                     self.statusBar().showMessage(f"Updated state: {name}", 2000)
 
     def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
@@ -1050,6 +1080,7 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             outcome_node.description = dialog.get_description()
             outcome_node.update_tooltip()
+            self.sync_model_from_gui()
             self.statusBar().showMessage(
                 f"Updated outcome description: {outcome_node.name}",
                 2000,
@@ -1099,6 +1130,7 @@ class YasminEditor(QMainWindow):
                 self.state_nodes[full_name] = child_node
 
                 self.sync_blackboard_keys()
+                self.sync_model_from_gui()
                 self.statusBar().showMessage(
                     f"Added state '{name}' to container '{container.name}'", 2000
                 )
@@ -1151,6 +1183,7 @@ class YasminEditor(QMainWindow):
                 self.state_nodes[full_name] = child_sm
 
                 self.sync_blackboard_keys()
+                self.sync_model_from_gui()
                 self.statusBar().showMessage(
                     f"Added State Machine '{name}' to container '{container.name}'", 2000
                 )
@@ -1205,6 +1238,7 @@ class YasminEditor(QMainWindow):
                 self.state_nodes[full_name] = child_cc
 
                 self.sync_blackboard_keys()
+                self.sync_model_from_gui()
                 self.statusBar().showMessage(
                     f"Added Concurrence '{name}' to container '{container.name}'", 2000
                 )
@@ -1348,6 +1382,7 @@ class YasminEditor(QMainWindow):
             ):
                 conn.update_position()
 
+        self.sync_model_from_gui()
         self.statusBar().showMessage(
             f"Added transition: {from_node.name} --[{outcome}]--> {to_node.name}",
             2000,
@@ -1394,6 +1429,7 @@ class YasminEditor(QMainWindow):
                         selected_container.default_outcome = outcome_name
                         selected_container.update_default_outcome_label()
 
+                self.sync_model_from_gui()
                 self.statusBar().showMessage(
                     f"Added final outcome '{outcome_name}' to container '{selected_container.name}'",
                     2000,
@@ -1410,11 +1446,13 @@ class YasminEditor(QMainWindow):
                 node = FinalOutcomeNode(outcome_name, x, y)
                 self.canvas.scene.addItem(node)
                 self.final_outcomes[outcome_name] = node
+                self.sync_model_from_gui()
                 self.statusBar().showMessage(f"Added final outcome: {outcome_name}", 2000)
 
     def delete_selected(self) -> None:
         """Delete the selected items from the canvas."""
         selected_items = self.canvas.scene.selectedItems()
+        changed = False
 
         for item in selected_items:
             if isinstance(item, (StateNode, ContainerStateNode)):
@@ -1442,6 +1480,7 @@ class YasminEditor(QMainWindow):
                     parent.auto_resize_for_children()
                     self.canvas.scene.removeItem(item)
                     self.sync_blackboard_keys()
+                    changed = True
                     self.statusBar().showMessage(
                         f"Deleted nested state: {item.name}", 2000
                     )
@@ -1450,6 +1489,7 @@ class YasminEditor(QMainWindow):
                     self._remove_state_node_entries(item)
                     self.update_start_state_combo()
                     self.sync_blackboard_keys()
+                    changed = True
                     self.statusBar().showMessage(f"Deleted state: {item.name}", 2000)
 
             elif isinstance(item, FinalOutcomeNode):
@@ -1476,6 +1516,7 @@ class YasminEditor(QMainWindow):
                     if item.name in self.final_outcomes:
                         del self.final_outcomes[item.name]
 
+                changed = True
                 self.statusBar().showMessage(f"Deleted final outcome: {item.name}", 2000)
 
             elif isinstance(item, ConnectionLine):
@@ -1487,7 +1528,11 @@ class YasminEditor(QMainWindow):
                 self.canvas.scene.removeItem(item.label)
                 if item in self.connections:
                     self.connections.remove(item)
+                changed = True
                 self.statusBar().showMessage("Deleted transition", 2000)
+
+        if changed:
+            self.sync_model_from_gui()
 
     def show_help(self) -> None:
         """Display help dialog with usage instructions."""
@@ -1573,6 +1618,7 @@ class YasminEditor(QMainWindow):
             self._blackboard_key_metadata = {}
             self.refresh_blackboard_keys_list()
             self.update_start_state_combo()
+            self.model = create_empty_model()
             self.statusBar().showMessage("New state machine created", 2000)
             return True
 

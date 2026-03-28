@@ -104,6 +104,10 @@ class FinalOutcomeNode(QGraphicsRectItem):
         elif change == QGraphicsItem.ItemPositionHasChanged:
             if self.parent_container:
                 self.parent_container.auto_resize_for_children()
+            if self.scene() and self.scene().views():
+                canvas = self.scene().views()[0]
+                if hasattr(canvas, "editor_ref") and canvas.editor_ref:
+                    canvas.editor_ref.on_graphics_item_position_changed()
 
         elif change == QGraphicsItem.ItemSelectedChange:
             if value:
