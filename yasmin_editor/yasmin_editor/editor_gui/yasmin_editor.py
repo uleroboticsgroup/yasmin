@@ -91,6 +91,7 @@ class YasminEditor(QMainWindow):
 
         self.layout_seed = 42
         self.layout_rng = random.Random(self.layout_seed)
+        self.current_container_path = [self.root_model]
 
         self.model_adapter = EditorModelAdapter(self)
         self.create_ui()
@@ -1869,7 +1870,812 @@ class YasminEditor(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Failed to open file: {str(e)}")
 
     def save_state_machine(self) -> None:
-        self.model_adapter.sync_root_model_from_ui()
+        self.sync_current_container_layout()
+        validation = validate_model(self.root_model)
+        errors = [f"- {item.message}" for item in validation.errors]
+
+        if errors:
+            error_msg = (
+                "Cannot save state machine. Please fix the following issues:\n\n"
+                + "\n".join(errors)
+            )
+            reply = QMessageBox.critical(
+                self,
+                "Validation Errors",
+                error_msg + "\n\nDo you want to save anyway?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
+            if reply == QMessageBox.No:
+                return
+
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Save State Machine", "", "XML Files (*.xml)"
+        )
+
+        if file_path:
+            if not file_path.lower().endswith(".xml"):
+                file_path += ".xml"
+
+            try:
+                self.save_to_xml(file_path)
+                self.statusBar().showMessage(f"Saved: {file_path}", 3000)
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to save file: {str(e)}")
+
+
+    @property
+    def current_container_model(self):
+        return self.current_container_path[-1]
+
+    @property
+    def current_parent_model(self):
+        if len(self.current_container_path) < 2:
+            return None
+        return self.current_container_path[-2]
+
+    @property
+    def start_state(self) -> Optional[str]:
+        model = self.current_container_model
+        return model.start_state if isinstance(model, StateMachine) else None
+
+    @start_state.setter
+    def start_state(self, value: Optional[str]) -> None:
+        model = self.current_container_model
+        if isinstance(model, StateMachine):
+            model.start_state = value
+
+    @property
+    def default_outcome(self) -> Optional[str]:
+        model = self.current_container_model
+        return model.default_outcome if isinstance(model, Concurrence) else None
+
+    @default_outcome.setter
+    def default_outcome(self, value: Optional[str]) -> None:
+        model = self.current_container_model
+        if isinstance(model, Concurrence):
+            model.default_outcome = value
+
+    def create_ui(self) -> None:
+        """Create and setup the user interface.
+
+        Sets up the main window layout including toolbars, panels,
+        and the state machine canvas.
+        """
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        main_layout = QHBoxLayout(central_widget)
+
+        splitter = QSplitter(Qt.Horizontal)
+        main_layout.addWidget(splitter)
+
+        left_panel = QWidget()
+        left_layout = QVBoxLayout(left_panel)
+
+        toolbar = QToolBar()
+        self.addToolBar(toolbar)
+
+        new_action = QAction("New", self)
+        new_action.setShortcut("Ctrl+N")
+        new_action.triggered.connect(self.new_state_machine)
+        toolbar.addAction(new_action)
+
+        open_action = QAction("Open", self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.triggered.connect(self.open_state_machine)
+        toolbar.addAction(open_action)
+
+        save_action = QAction("Save", self)
+        save_action.setShortcut("Ctrl+S")
+        save_action.triggered.connect(self.save_state_machine)
+        toolbar.addAction(save_action)
+
+        toolbar.addSeparator()
+
+        add_state_action = QAction("Add State", self)
+        add_state_action.triggered.connect(self.add_state)
+        toolbar.addAction(add_state_action)
+
+        add_state_machine_action = QAction("Add State Machine", self)
+        add_state_machine_action.triggered.connect(self.add_state_machine)
+        toolbar.addAction(add_state_machine_action)
+
+        add_concurrence_action = QAction("Add Concurrence", self)
+        add_concurrence_action.triggered.connect(self.add_concurrence)
+        toolbar.addAction(add_concurrence_action)
+
+        add_final_action = QAction("Add Final Outcome", self)
+        add_final_action.triggered.connect(self.add_final_outcome)
+        toolbar.addAction(add_final_action)
+
+        toolbar.addSeparator()
+
+        edit_current_action = QAction("Edit Current Container", self)
+        edit_current_action.triggered.connect(self.edit_current_container)
+        toolbar.addAction(edit_current_action)
+
+        delete_action = QAction("Delete Selected", self)
+        delete_action.triggered.connect(self.delete_selected)
+        toolbar.addAction(delete_action)
+
+        toolbar.addSeparator()
+
+        help_action = QAction("Help", self)
+        help_action.triggered.connect(self.show_help)
+        toolbar.addAction(help_action)
+
+        left_layout.addWidget(QLabel("<b>Blackboard Keys:</b>"))
+        self.blackboard_filter = QLineEdit()
+        self.blackboard_filter.setPlaceholderText("Filter blackboard keys...")
+        self.blackboard_filter.textChanged.connect(self.filter_blackboard_keys)
+        left_layout.addWidget(self.blackboard_filter)
+        self.blackboard_list = QListWidget()
+        self.blackboard_list.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.blackboard_list.itemSelectionChanged.connect(
+            self.on_blackboard_selection_changed
+        )
+        self.blackboard_list.itemDoubleClicked.connect(self.edit_selected_blackboard_key)
+        left_layout.addWidget(self.blackboard_list)
+        blackboard_btn_row = QHBoxLayout()
+        self.highlight_blackboard_btn = QPushButton("Highlight: On")
+        self.highlight_blackboard_btn.setCheckable(True)
+        self.highlight_blackboard_btn.setChecked(True)
+        self.highlight_blackboard_btn.toggled.connect(self.toggle_blackboard_highlighting)
+        blackboard_btn_row.addWidget(self.highlight_blackboard_btn)
+        left_layout.addLayout(blackboard_btn_row)
+
+        left_layout.addWidget(QLabel("<b>Python States:</b>"))
+        self.python_filter = QLineEdit()
+        self.python_filter.setPlaceholderText("Filter Python states...")
+        self.python_filter.textChanged.connect(
+            lambda value: self.filter_list(self.python_list, value)
+        )
+        left_layout.addWidget(self.python_filter)
+        self.python_list = QListWidget()
+        self.python_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
+        left_layout.addWidget(self.python_list)
+
+        left_layout.addWidget(QLabel("<b>C++ States:</b>"))
+        self.cpp_filter = QLineEdit()
+        self.cpp_filter.setPlaceholderText("Filter C++ states...")
+        self.cpp_filter.textChanged.connect(
+            lambda value: self.filter_list(self.cpp_list, value)
+        )
+        left_layout.addWidget(self.cpp_filter)
+        self.cpp_list = QListWidget()
+        self.cpp_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
+        left_layout.addWidget(self.cpp_list)
+
+        left_layout.addWidget(QLabel("<b>XML State Machines:</b>"))
+        self.xml_filter = QLineEdit()
+        self.xml_filter.setPlaceholderText("Filter XML state machines...")
+        self.xml_filter.textChanged.connect(
+            lambda value: self.filter_list(self.xml_list, value)
+        )
+        left_layout.addWidget(self.xml_filter)
+        self.xml_list = QListWidget()
+        self.xml_list.itemDoubleClicked.connect(self.on_xml_double_clicked)
+        left_layout.addWidget(self.xml_list)
+
+        right_panel = QWidget()
+        right_layout = QVBoxLayout(right_panel)
+
+        metadata_widget = QWidget()
+        metadata_layout = QVBoxLayout(metadata_widget)
+        metadata_layout.setContentsMargins(0, 0, 0, 0)
+
+        breadcrumb_widget = QWidget()
+        self.breadcrumb_layout = QHBoxLayout(breadcrumb_widget)
+        self.breadcrumb_layout.setContentsMargins(0, 0, 0, 0)
+        metadata_layout.addWidget(breadcrumb_widget)
+
+        row1 = QHBoxLayout()
+        self.root_sm_name_label = QLabel("<b>State Machine Name:</b>")
+        row1.addWidget(self.root_sm_name_label)
+        self.root_sm_name_edit = QLineEdit()
+        self.root_sm_name_edit.setPlaceholderText("Enter container name...")
+        self.root_sm_name_edit.textChanged.connect(self.on_root_sm_name_changed)
+        row1.addWidget(self.root_sm_name_edit)
+
+        self.start_state_label = QLabel("<b>Start State:</b>")
+        row1.addWidget(self.start_state_label)
+        self.start_state_combo = QComboBox()
+        self.start_state_combo.addItem("(None)")
+        self.start_state_combo.currentTextChanged.connect(self.on_start_state_changed)
+        row1.addWidget(self.start_state_combo)
+        metadata_layout.addLayout(row1)
+
+        row2 = QHBoxLayout()
+        row2.addWidget(QLabel("<b>Description:</b>"))
+        self.root_sm_description_edit = QLineEdit()
+        self.root_sm_description_edit.setPlaceholderText("Enter container description...")
+        self.root_sm_description_edit.textChanged.connect(self.on_root_sm_description_changed)
+        row2.addWidget(self.root_sm_description_edit)
+        metadata_layout.addLayout(row2)
+
+        right_layout.addWidget(metadata_widget)
+
+        self.canvas_header = QLabel(
+            "<b>State Machine Canvas:</b> "
+            "<i>(Ctrl + double-click a nested container to enter it, drag from blue port to create transitions, scroll to zoom, right-click for options)</i>"
+        )
+        right_layout.addWidget(self.canvas_header)
+        self.canvas = StateMachineCanvas()
+        self.canvas.editor_ref = self
+        right_layout.addWidget(self.canvas)
+
+        splitter.addWidget(left_panel)
+        splitter.addWidget(right_panel)
+
+        splitter.setSizes([300, 1000])
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+
+        self.statusBar()
+        self.refresh_breadcrumbs()
+        self.update_container_controls()
+
+    def clear_current_scene(self) -> None:
+        self.canvas.scene.clear()
+        self.state_nodes.clear()
+        self.final_outcomes.clear()
+        self.connections.clear()
+
+    def sync_current_container_layout(self) -> None:
+        container_model = self.current_container_model
+        for state_name, state_view in self.state_nodes.items():
+            container_model.layout.set_state_position(
+                state_name,
+                float(state_view.pos().x()),
+                float(state_view.pos().y()),
+            )
+        for outcome_name, outcome_view in self.final_outcomes.items():
+            container_model.layout.set_outcome_position(
+                outcome_name,
+                float(outcome_view.pos().x()),
+                float(outcome_view.pos().y()),
+            )
+
+    def render_current_container(self) -> None:
+        self.model_adapter.rebuild_scene(self.current_container_model)
+        self.update_start_state_combo()
+        self.refresh_breadcrumbs()
+        self.update_blackboard_usage_highlighting()
+
+    def navigate_to_container_index(self, index: int) -> None:
+        if index < 0 or index >= len(self.current_container_path):
+            return
+        self.sync_current_container_layout()
+        self.current_container_path = self.current_container_path[: index + 1]
+        self.render_current_container()
+
+    def refresh_breadcrumbs(self) -> None:
+        if not hasattr(self, 'breadcrumb_layout'):
+            return
+        while self.breadcrumb_layout.count():
+            item = self.breadcrumb_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+
+        for index, container_model in enumerate(self.current_container_path):
+            label = 'root' if index == 0 else container_model.name
+            button = QPushButton(label)
+            button.setFlat(True)
+            button.clicked.connect(
+                lambda _checked=False, idx=index: self.navigate_to_container_index(idx)
+            )
+            self.breadcrumb_layout.addWidget(button)
+            if index < len(self.current_container_path) - 1:
+                self.breadcrumb_layout.addWidget(QLabel('>'))
+
+        self.breadcrumb_layout.addStretch()
+
+    def update_container_controls(self) -> None:
+        if not hasattr(self, 'root_sm_name_edit'):
+            return
+        model = self.current_container_model
+        self.root_sm_name_edit.blockSignals(True)
+        self.root_sm_description_edit.blockSignals(True)
+        self.start_state_combo.blockSignals(True)
+
+        if isinstance(model, StateMachine):
+            self.root_sm_name_label.setText('<b>State Machine Name:</b>')
+            self.start_state_label.setText('<b>Start State:</b>')
+        else:
+            self.root_sm_name_label.setText('<b>Concurrence Name:</b>')
+            self.start_state_label.setText('<b>Default Outcome:</b>')
+
+        self.root_sm_name_edit.setText(model.name)
+        self.root_sm_description_edit.setText(model.description)
+
+        self.start_state_combo.clear()
+        self.start_state_combo.addItem('(None)')
+        if isinstance(model, StateMachine):
+            for state_name in sorted(model.states.keys()):
+                self.start_state_combo.addItem(state_name)
+            current_value = model.start_state
+        else:
+            for outcome in model.outcomes:
+                self.start_state_combo.addItem(outcome.name)
+            current_value = model.default_outcome
+
+        if current_value:
+            index = self.start_state_combo.findText(current_value)
+            self.start_state_combo.setCurrentIndex(index if index >= 0 else 0)
+        else:
+            self.start_state_combo.setCurrentIndex(0)
+
+        self.root_sm_name_edit.blockSignals(False)
+        self.root_sm_description_edit.blockSignals(False)
+        self.start_state_combo.blockSignals(False)
+
+    def on_root_sm_name_changed(self, text: str) -> None:
+        model = self.current_container_model
+        parent_model = self.current_parent_model
+        text = text.strip()
+        if parent_model is None:
+            model.name = text
+        else:
+            old_name = model.name
+            if text != old_name and text in parent_model.states:
+                return
+            parent_model.rename_state(old_name, text)
+        self.refresh_breadcrumbs()
+
+    def on_root_sm_description_changed(self, text: str) -> None:
+        self.current_container_model.description = text
+
+    def on_start_state_changed(self, text: str) -> None:
+        if isinstance(self.current_container_model, StateMachine):
+            self.start_state = None if text == '(None)' else text
+        else:
+            self.default_outcome = None if text == '(None)' else text
+
+    def update_start_state_combo(self) -> None:
+        self.update_container_controls()
+
+    def reset_editor_state(self, model: Optional[StateMachine] = None) -> None:
+        self.clear_current_scene()
+        self._blackboard_keys = []
+        self._blackboard_key_metadata = {}
+        self.root_model = model or self.model_adapter.create_empty_root_model()
+        self.current_container_path = [self.root_model]
+        self.refresh_blackboard_keys_list()
+        self.update_container_controls()
+        self.refresh_breadcrumbs()
+
+    def load_from_xml(self, file_path: str) -> None:
+        self.model_adapter.load_from_xml(file_path)
+
+    def save_to_xml(self, file_path: str) -> None:
+        self.model_adapter.save_to_xml(file_path)
+
+    def get_root_state_nodes(self) -> Dict[str, StateNode | ContainerStateNode]:
+        return self.state_nodes
+
+    def get_container_path(self, container: Optional[ContainerStateNode]) -> str:
+        if container is None:
+            return ''
+        return container.name
+
+    def get_state_node_key(
+        self,
+        name: str,
+        parent_container: Optional[ContainerStateNode] = None,
+    ) -> str:
+        return name
+
+    def register_state_node(
+        self,
+        state_node: StateNode | ContainerStateNode,
+        parent_container: Optional[ContainerStateNode] = None,
+    ) -> str:
+        self.state_nodes[state_node.name] = state_node
+        return state_node.name
+
+    def find_target_view(self, target_name: str, source_container=None):
+        target = self.state_nodes.get(target_name)
+        if target is not None:
+            return target
+        return self.final_outcomes.get(target_name)
+
+    def has_state_name_conflict(
+        self,
+        state_name: str,
+        parent_container: Optional[ContainerStateNode] = None,
+    ) -> bool:
+        return state_name in self.current_container_model.states
+
+    def add_model_state(
+        self,
+        model: State,
+        defaults: Optional[List[Dict[str, str]]] = None,
+        parent_container: Optional[ContainerStateNode] = None,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+    ) -> StateNode | ContainerStateNode:
+        position = self.get_free_position()
+        x = position.x() if x is None else x
+        y = position.y() if y is None else y
+
+        container_model = self.current_container_model
+        container_model.add_state(model)
+        container_model.layout.set_state_position(model.name, x, y)
+        node = self.model_adapter.create_state_view(model, x=x, y=y)
+        node.defaults = defaults or []
+
+        if isinstance(container_model, StateMachine):
+            if len(container_model.states) == 1 and not container_model.start_state:
+                container_model.start_state = model.name
+        self.update_start_state_combo()
+        self.sync_blackboard_keys()
+        return node
+
+    def register_connection_in_model(self, from_node, to_node, outcome: str) -> None:
+        owner_model = self.current_container_model
+        if isinstance(owner_model, Concurrence):
+            owner_model.set_outcome_rule(to_node.name, from_node.name, outcome)
+            return
+        owner_model.add_transition(
+            from_node.name,
+            Transition(source_outcome=outcome, target=to_node.name),
+        )
+
+    def unregister_connection_in_model(self, connection: ConnectionLine) -> None:
+        owner_model = self.current_container_model
+        if isinstance(owner_model, Concurrence):
+            owner_model.remove_outcome_rule(connection.to_node.name, connection.from_node.name)
+            return
+        owner_model.remove_transition(
+            connection.from_node.name,
+            connection.outcome,
+            connection.to_node.name,
+        )
+
+    def delete_state_item(self, state_node: StateNode | ContainerStateNode) -> None:
+        for connection in list(state_node.connections):
+            self.delete_connection_item(connection)
+
+        self.state_nodes.pop(state_node.name, None)
+        self.current_container_model.remove_state(state_node.name)
+        self.canvas.scene.removeItem(state_node)
+        self.update_start_state_combo()
+        self.sync_blackboard_keys()
+        self.statusBar().showMessage(f"Deleted state: {state_node.name}", 2000)
+
+    def delete_final_outcome_item(self, outcome_node: FinalOutcomeNode) -> None:
+        for connection in list(outcome_node.connections):
+            self.delete_connection_item(connection)
+
+        self.final_outcomes.pop(outcome_node.name, None)
+        self.current_container_model.remove_outcome(outcome_node.name)
+        self.canvas.scene.removeItem(outcome_node)
+        self.update_start_state_combo()
+        self.statusBar().showMessage(
+            f"Deleted final outcome: {outcome_node.name}",
+            2000,
+        )
+
+    def enter_container(self, container_node: ContainerStateNode) -> None:
+        self.sync_current_container_layout()
+        self.current_container_path.append(container_node.model)
+        self.render_current_container()
+        self.statusBar().showMessage(f"Entered: {container_node.name}", 2000)
+
+    def edit_current_container(self) -> None:
+        model = self.current_container_model
+        if isinstance(model, StateMachine):
+            dialog = StateMachineDialog(
+                name=model.name,
+                outcomes=[outcome.name for outcome in model.outcomes],
+                start_state=model.start_state,
+                remappings=model.remappings,
+                child_states=list(model.states.keys()),
+                edit_mode=True,
+                parent=self,
+                description=model.description,
+                defaults=[],
+            )
+            if dialog.exec_():
+                result = dialog.get_state_machine_data()
+                if result:
+                    name, outcomes, start_state, remappings, description, defaults = result
+                    parent_model = self.current_parent_model
+                    if parent_model is None:
+                        model.name = name
+                    else:
+                        if name != model.name and name in parent_model.states:
+                            QMessageBox.warning(self, 'Error', f"State '{name}' already exists!")
+                            return
+                        parent_model.rename_state(model.name, name)
+                    model.description = description
+                    model.remappings.clear()
+                    model.remappings.update(remappings)
+                    model.outcomes = [Outcome(name=item) for item in outcomes]
+                    model.start_state = start_state
+                    self.update_container_controls()
+                    self.refresh_breadcrumbs()
+                    self.render_current_container()
+        else:
+            dialog = ConcurrenceDialog(
+                name=model.name,
+                outcomes=[outcome.name for outcome in model.outcomes],
+                default_outcome=model.default_outcome,
+                remappings=model.remappings,
+                final_outcomes=[outcome.name for outcome in model.outcomes],
+                edit_mode=True,
+                parent=self,
+                description=model.description,
+                defaults=[],
+            )
+            if dialog.exec_():
+                result = dialog.get_concurrence_data()
+                if result:
+                    name, outcomes, default_outcome, remappings, description, defaults = result
+                    parent_model = self.current_parent_model
+                    if parent_model is None:
+                        model.name = name
+                    else:
+                        if name != model.name and name in parent_model.states:
+                            QMessageBox.warning(self, 'Error', f"State '{name}' already exists!")
+                            return
+                        parent_model.rename_state(model.name, name)
+                    model.description = description
+                    model.remappings.clear()
+                    model.remappings.update(remappings)
+                    model.outcomes = [Outcome(name=item) for item in outcomes]
+                    model.default_outcome = default_outcome
+                    self.update_container_controls()
+                    self.refresh_breadcrumbs()
+                    self.render_current_container()
+
+    def edit_state(self) -> None:
+        state_node = self.find_selected_state_node()
+
+        if not state_node:
+            QMessageBox.warning(self, 'Error', 'Please select a state to edit!')
+            return
+
+        if isinstance(state_node, ContainerStateNode):
+            if state_node.is_state_machine:
+                dialog = StateMachineDialog(
+                    name=state_node.name,
+                    outcomes=[outcome.name for outcome in state_node.model.outcomes],
+                    start_state=state_node.start_state,
+                    remappings=state_node.remappings,
+                    child_states=list(state_node.model.states.keys()),
+                    edit_mode=True,
+                    parent=self,
+                    description=getattr(state_node, 'description', ''),
+                    defaults=getattr(state_node, 'defaults', []),
+                )
+
+                if dialog.exec_():
+                    result = dialog.get_state_machine_data()
+                    if result:
+                        name, outcomes, start_state, remappings, description, defaults = result
+                        if not self.apply_common_state_updates(
+                            state_node,
+                            name,
+                            remappings,
+                            description,
+                            defaults,
+                        ):
+                            return
+
+                        state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
+                        state_node.start_state = start_state
+                        state_node.update_start_state_label()
+                        self.sync_blackboard_keys()
+                        self.statusBar().showMessage(
+                            f"Updated state machine: {name}", 2000
+                        )
+            else:
+                dialog = ConcurrenceDialog(
+                    name=state_node.name,
+                    outcomes=[outcome.name for outcome in state_node.model.outcomes],
+                    default_outcome=state_node.default_outcome,
+                    remappings=state_node.remappings,
+                    final_outcomes=[outcome.name for outcome in state_node.model.outcomes],
+                    edit_mode=True,
+                    parent=self,
+                    description=getattr(state_node, 'description', ''),
+                    defaults=getattr(state_node, 'defaults', []),
+                )
+
+                if dialog.exec_():
+                    result = dialog.get_concurrence_data()
+                    if result:
+                        (
+                            name,
+                            outcomes,
+                            default_outcome,
+                            remappings,
+                            description,
+                            defaults,
+                        ) = result
+
+                        if not self.apply_common_state_updates(
+                            state_node,
+                            name,
+                            remappings,
+                            description,
+                            defaults,
+                        ):
+                            return
+
+                        state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
+                        state_node.default_outcome = default_outcome
+                        state_node.update_default_outcome_label()
+                        self.sync_blackboard_keys()
+                        self.statusBar().showMessage(f"Updated concurrence: {name}", 2000)
+        else:
+            dialog = StatePropertiesDialog(
+                state_name=state_node.name,
+                plugin_info=(
+                    state_node.plugin_info if hasattr(state_node, 'plugin_info') else None
+                ),
+                available_plugins=(
+                    [state_node.plugin_info]
+                    if hasattr(state_node, 'plugin_info') and state_node.plugin_info
+                    else []
+                ),
+                remappings=state_node.remappings,
+                outcomes=[outcome.name for outcome in state_node.model.outcomes],
+                edit_mode=True,
+                parent=self,
+                description=getattr(state_node, 'description', ''),
+                defaults=getattr(state_node, 'defaults', []),
+            )
+
+            if dialog.exec_():
+                result = dialog.get_state_data()
+                if result[0]:
+                    name, plugin, outcomes, remappings, description, defaults = result
+
+                    if not self.apply_common_state_updates(
+                        state_node,
+                        name,
+                        remappings,
+                        description,
+                        defaults,
+                    ):
+                        return
+                    state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
+                    self.sync_blackboard_keys()
+                    self.statusBar().showMessage(f"Updated state: {name}", 2000)
+
+    def add_state_to_container(self) -> None:
+        self.add_state()
+
+    def add_state_machine_to_container(self) -> None:
+        self.add_state_machine()
+
+    def add_concurrence_to_container(self) -> None:
+        self.add_concurrence()
+
+    def create_connection_from_drag(
+        self, from_node: StateNode, to_node: StateNode
+    ) -> None:
+        current_model = self.current_container_model
+
+        if isinstance(current_model, Concurrence):
+            if not isinstance(to_node, FinalOutcomeNode) or isinstance(from_node, FinalOutcomeNode):
+                QMessageBox.warning(
+                    self,
+                    'Not Allowed',
+                    'States inside a Concurrence can only connect to final outcomes of the current Concurrence.',
+                )
+                return
+            outcomes_list = [outcome.name for outcome in from_node.model.outcomes]
+        else:
+            if isinstance(from_node, FinalOutcomeNode):
+                QMessageBox.warning(
+                    self,
+                    'Not Allowed',
+                    'Final outcomes of the current container cannot start transitions here.',
+                )
+                return
+            outcomes_list = [outcome.name for outcome in from_node.model.outcomes]
+
+        if not outcomes_list:
+            QMessageBox.warning(
+                self,
+                'Error',
+                'Cannot create transitions from states without outcomes!',
+            )
+            return
+
+        if isinstance(current_model, StateMachine):
+            used_outcomes = {
+                transition.source_outcome
+                for transition in current_model.transitions.get(from_node.name, [])
+            }
+            available_outcomes = [
+                outcome_name
+                for outcome_name in outcomes_list
+                if outcome_name not in used_outcomes
+            ]
+            if not available_outcomes:
+                QMessageBox.warning(
+                    self, 'Error', 'All outcomes from this state are already used!'
+                )
+                return
+        else:
+            available_outcomes = outcomes_list
+
+        if len(available_outcomes) == 1:
+            outcome = available_outcomes[0]
+            self.create_connection(from_node, to_node, outcome)
+        else:
+            outcome, ok = QInputDialog.getItem(
+                self,
+                'Select Outcome',
+                f"Select outcome for transition from '{from_node.name}':",
+                available_outcomes,
+                0,
+                False,
+            )
+            if ok:
+                self.create_connection(from_node, to_node, outcome)
+
+    def create_connection(
+        self, from_node: StateNode, to_node: StateNode, outcome: str
+    ) -> None:
+        current_model = self.current_container_model
+        if isinstance(current_model, StateMachine):
+            used_outcomes = {
+                transition.source_outcome
+                for transition in current_model.transitions.get(from_node.name, [])
+            }
+            if outcome in used_outcomes:
+                QMessageBox.warning(
+                    self,
+                    'Error',
+                    f"Outcome '{outcome}' is already used for a transition!",
+                )
+                return
+
+        self._create_connection_view(from_node, to_node, outcome)
+        self.register_connection_in_model(from_node, to_node, outcome)
+        self.statusBar().showMessage(
+            f"Added transition: {from_node.name} --[{outcome}]--> {to_node.name}",
+            2000,
+        )
+
+    def add_final_outcome(self) -> None:
+        outcome_name, ok = QInputDialog.getText(
+            self, 'Final Outcome', 'Enter final outcome name:'
+        )
+        if ok and outcome_name:
+            if outcome_name in self.final_outcomes:
+                QMessageBox.warning(
+                    self,
+                    'Error',
+                    f"Final outcome '{outcome_name}' already exists in this container!",
+                )
+                return
+
+            x = 700
+            y = len(self.final_outcomes) * 170
+            model = Outcome(name=outcome_name)
+            self.current_container_model.add_outcome(model)
+            self.current_container_model.layout.set_outcome_position(outcome_name, x, y)
+            self.model_adapter.create_final_outcome_view(model, x=x, y=y)
+
+            if isinstance(self.current_container_model, Concurrence):
+                if len(self.current_container_model.outcomes) == 1 and not self.current_container_model.default_outcome:
+                    self.current_container_model.default_outcome = outcome_name
+
+            self.update_start_state_combo()
+            self.statusBar().showMessage(
+                f"Added final outcome: {outcome_name}",
+                2000,
+            )
+
+    def save_state_machine(self) -> None:
+        self.sync_current_container_layout()
         validation = validate_model(self.root_model)
         errors = [f"- {item.message}" for item in validation.errors]
 

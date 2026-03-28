@@ -14,6 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from typing import Optional, Union, TYPE_CHECKING
+
 from PyQt5.QtWidgets import (
     QGraphicsView,
     QGraphicsScene,
@@ -27,6 +28,7 @@ from PyQt5.QtGui import QPen, QBrush, QColor, QPainter
 from yasmin_editor.editor_gui.state_node import StateNode
 from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.model.concurrence import Concurrence
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
@@ -55,50 +57,25 @@ class StateMachineCanvas(QGraphicsView):
         source_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
         target_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
     ) -> bool:
-        """Validate if a connection between two nodes is allowed."""
-        if source_node == target_node:
-            # Allow self-loops for regular StateNodes (not containers or final outcomes)
-            if isinstance(source_node, StateNode) and not isinstance(
-                source_node, ContainerStateNode
-            ):
-                return True
+        if self.editor_ref is None:
             return False
 
-        source_container: Optional["ContainerStateNode"] = getattr(
-            source_node, "parent_container", None
-        )
-        target_container: Optional["ContainerStateNode"] = getattr(
-            target_node, "parent_container", None
-        )
+        current_model = self.editor_ref.current_container_model
+
+        if isinstance(current_model, Concurrence):
+            return not isinstance(source_node, FinalOutcomeNode) and isinstance(
+                target_node, FinalOutcomeNode
+            )
 
         if isinstance(source_node, FinalOutcomeNode):
-            if isinstance(target_node, ContainerStateNode):
-                if source_container == target_node:
-                    return True
-                return True
+            return False
 
-            if isinstance(target_node, FinalOutcomeNode):
-                if (
-                    source_container
-                    and target_container == source_container.parent_container
-                ):
-                    return True
-                if source_container == target_container:
-                    return True
+        if source_node == target_node:
+            return True
 
-            return source_container != target_container and target_container is None
-
-        if isinstance(source_node, (StateNode, ContainerStateNode)):
-            if isinstance(target_node, FinalOutcomeNode):
-                return source_container == target_container
-
-            if isinstance(target_node, (StateNode, ContainerStateNode)):
-                return source_container == target_container
-
-        return False
+        return True
 
     def keyPressEvent(self, event: QEvent) -> None:
-        """Handle keyboard shortcuts."""
         if event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
             if self.editor_ref:
                 self.editor_ref.delete_selected()
@@ -115,7 +92,6 @@ class StateMachineCanvas(QGraphicsView):
         from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
         event: QEvent,
     ) -> None:
-        """Start dragging a connection from a node's port."""
         self.drag_start_node = from_node
         self.is_dragging_connection = True
         self.setDragMode(QGraphicsView.NoDrag)
@@ -192,9 +168,7 @@ class StateMachineCanvas(QGraphicsView):
                 ):
                     scene_item.setOpacity(1.0)
 
-            source_node: Optional[
-                Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
-            ] = self.drag_start_node
+            source_node = self.drag_start_node
             self.drag_start_node = None
             self.is_dragging_connection = False
             self.setDragMode(QGraphicsView.ScrollHandDrag)
@@ -218,7 +192,6 @@ class StateMachineCanvas(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def contextMenuEvent(self, event: QEvent) -> None:
-        """Handle right-click context menu on canvas background."""
         item = self.itemAt(event.pos())
         if item is None:
             if self.editor_ref:
@@ -229,6 +202,8 @@ class StateMachineCanvas(QGraphicsView):
                 add_cc_action = menu.addAction("Add Concurrence")
                 menu.addSeparator()
                 add_outcome_action = menu.addAction("Add Final Outcome")
+                menu.addSeparator()
+                edit_container_action = menu.addAction("Edit Current Container")
 
                 action = menu.exec_(event.globalPos())
 
@@ -240,6 +215,8 @@ class StateMachineCanvas(QGraphicsView):
                     self.editor_ref.add_concurrence()
                 elif action == add_outcome_action:
                     self.editor_ref.add_final_outcome()
+                elif action == edit_container_action:
+                    self.editor_ref.edit_current_container()
 
                 event.accept()
                 return

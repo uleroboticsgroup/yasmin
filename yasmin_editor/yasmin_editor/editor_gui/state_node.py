@@ -173,8 +173,9 @@ class StateNode(QGraphicsEllipseItem):
     def get_used_outcomes(self) -> Set[str]:
         """Get set of outcomes that already have connections."""
         return {
-            connection.from_node.name + connection.outcome
+            connection.outcome
             for connection in self.connections
+            if connection.from_node == self
         }
 
     def get_connection_point(self) -> QPointF:
