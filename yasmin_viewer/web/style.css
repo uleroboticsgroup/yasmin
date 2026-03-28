@@ -1,0 +1,319 @@
+/*
+Copyright (C) 2026 Maik Knof
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  --bg: #f4f7fb;
+  --panel: #ffffff;
+  --line: #dbe3ee;
+  --text: #0f172a;
+  --muted: #64748b;
+  --brand: #1e88e5;
+  --brand-dark: #1565c0;
+  --shadow: 0 0.25rem 1rem rgba(15, 23, 42, 0.08);
+  --fsm-columns: 2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.hidden {
+  display: none;
+}
+
+.topbar {
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #ffffff;
+  box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.16);
+}
+
+.topbar-row {
+  padding: 1rem 1.25rem;
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.title-group h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.status-badge {
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.status-ok {
+  background: #2e7d32;
+}
+
+.status-stale {
+  background: #ef6c00;
+}
+
+.status-connecting {
+  background: #546e7a;
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.toolbar-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-field {
+  background: rgba(255, 255, 255, 0.14);
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.55rem;
+}
+
+.toolbar-button,
+select {
+  min-height: 2.5rem;
+  border: none;
+  border-radius: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+select {
+  min-width: 8rem;
+}
+
+#fsm-select {
+  min-width: 14rem;
+}
+
+.toolbar-button {
+  cursor: pointer;
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.main-content {
+  padding: 1.25rem;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  background: var(--panel);
+  border-radius: 0.9rem;
+  box-shadow: var(--shadow);
+}
+
+.viewer-panel {
+  background: transparent;
+  border-radius: 0.9rem;
+}
+
+.diagram-list {
+  display: grid;
+  grid-template-columns: repeat(var(--fsm-columns), minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.diagram-card {
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+
+.diagram-card-header {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: #f8fbff;
+  text-align: center;
+}
+
+.diagram-card-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.diagram-viewport {
+  overflow: auto;
+  position: relative;
+  height: min(72vh, 900px);
+  max-height: 72vh;
+  padding: 1rem;
+  cursor: grab;
+  touch-action: none;
+  border: 2px solid #000000;
+  background: linear-gradient(
+      to right,
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.diagram-viewport.dragging {
+  cursor: grabbing;
+}
+
+.diagram-zoom-wrapper {
+  width: max-content;
+  height: max-content;
+  transform-origin: top left;
+  will-change: transform;
+}
+
+.diagram-content {
+  min-width: max-content;
+  min-height: max-content;
+  width: max-content;
+  height: max-content;
+  padding: 0.5rem;
+}
+
+.diagram-content svg {
+  display: block;
+  max-width: none;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.diagram-error {
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #7f1d1d;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.6rem;
+  padding: 1rem;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.diagram-content .fsm-active-node rect,
+.diagram-content .fsm-active-node path,
+.diagram-content .fsm-active-node polygon,
+.diagram-content .fsm-active-node ellipse {
+  fill: #dcedc8 !important;
+  stroke: #2e7d32 !important;
+  stroke-width: 4px !important;
+}
+
+.diagram-content .fsm-active-node text,
+.diagram-content .fsm-active-node tspan,
+.diagram-content .fsm-active-node foreignObject {
+  fill: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.diagram-content .fsm-active-ancestor rect,
+.diagram-content .fsm-active-ancestor path,
+.diagram-content .fsm-active-ancestor polygon,
+.diagram-content .fsm-active-ancestor ellipse {
+  fill: #e8f1ff !important;
+  stroke: #1d4ed8 !important;
+  stroke-width: 3px !important;
+}
+
+.diagram-content .fsm-outcome-node rect,
+.diagram-content .fsm-outcome-node path,
+.diagram-content .fsm-outcome-node polygon,
+.diagram-content .fsm-outcome-node ellipse {
+  fill: #fff7ed !important;
+  stroke: #c2410c !important;
+  stroke-width: 2px !important;
+}
+
+.diagram-content .edgeLabel rect,
+.diagram-content .edgeLabel path,
+.diagram-content .edgeLabel polygon,
+.diagram-content .labelBkg,
+.diagram-content .edgeLabel .labelBkg,
+.diagram-content g.edgeLabel > rect,
+.diagram-content g.edgeLabel > path,
+.diagram-content g.edgeLabel > polygon {
+  fill: transparent !important;
+  stroke: transparent !important;
+  opacity: 0 !important;
+}
+
+.diagram-content .edgeLabel,
+.diagram-content .edgeLabel *,
+.diagram-content .edgeLabel foreignObject,
+.diagram-content .edgeLabel div,
+.diagram-content .edgeLabel span,
+.diagram-content .edgeLabel p {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 1200px) {
+  .diagram-list {
+    grid-template-columns: repeat(min(var(--fsm-columns), 2), minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .toolbar {
+    gap: 0.65rem;
+  }
+
+  .diagram-list {
+    grid-template-columns: 1fr;
+  }
+
+  .diagram-viewport {
+    height: 65vh;
+    max-height: 65vh;
+    padding: 0.75rem;
+  }
+}

@@ -1,0 +1,88 @@
+<!--
+Copyright (C) 2026 Maik Knof
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YASMIN Viewer</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="topbar-row">
+        <div class="title-group">
+          <h1>YASMIN Viewer</h1>
+          <span id="status-badge" class="status-badge status-connecting">Connecting</span>
+        </div>
+
+        <div class="toolbar">
+          <label class="toolbar-field">
+            <span>FSM</span>
+            <select id="fsm-select"></select>
+          </label>
+
+          <label class="toolbar-field">
+            <span>FSMs / Row</span>
+            <select id="cards-per-row">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+
+          <label class="toolbar-field checkbox-field">
+            <input id="hide-nested" type="checkbox" />
+            <span>Hide Nested FSMs</span>
+          </label>
+
+          <label class="toolbar-field checkbox-field">
+            <input id="show-active" type="checkbox" />
+            <span>Show Only Active FSMs</span>
+          </label>
+
+          <button id="fit-button" type="button" class="toolbar-button">
+            Fit
+          </button>
+
+          <button id="center-button" type="button" class="toolbar-button">
+            Center
+          </button>
+
+          <button id="reset-zoom-button" type="button" class="toolbar-button">
+            Reset Zoom
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section id="empty-state" class="empty-state">
+        Waiting for state machines on <code>/fsm_viewer</code>
+      </section>
+
+      <section id="viewer-panel" class="viewer-panel hidden">
+        <div id="diagram-list" class="diagram-list"></div>
+      </section>
+    </main>
+
+    <script src="/mermaid.min.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
