@@ -17,10 +17,22 @@ import os
 from typing import Dict, List, Optional, Tuple
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFormLayout,
-                             QHBoxLayout, QHeaderView, QLabel, QLineEdit,
-                             QPushButton, QSizePolicy, QTableWidget,
-                             QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
