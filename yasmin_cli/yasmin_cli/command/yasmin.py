@@ -22,6 +22,7 @@ from ros2cli.command import CommandExtension
 from yasmin_cli.verb.edit import add_edit_verb
 from yasmin_cli.verb.info import add_info_verb
 from yasmin_cli.verb.list import add_list_verb
+from yasmin_cli.verb.print import add_print_verb
 from yasmin_cli.verb.run import add_run_verb
 from yasmin_cli.verb.test import add_test_verb
 from yasmin_cli.verb.viewer import add_viewer_verb
@@ -37,6 +38,7 @@ class YasminCommand(CommandExtension):
         add_edit_verb(subparsers)
         add_info_verb(subparsers)
         add_list_verb(subparsers)
+        add_print_verb(subparsers)
         add_run_verb(subparsers)
         add_test_verb(subparsers)
         add_viewer_verb(subparsers)
