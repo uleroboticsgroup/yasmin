@@ -47,12 +47,12 @@ from yasmin_editor.editor_gui.state_node import StateNode
 from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
-from yasmin_editor.editor_gui.state_properties_dialog import StatePropertiesDialog
-from yasmin_editor.editor_gui.state_machine_dialog import StateMachineDialog
-from yasmin_editor.editor_gui.concurrence_dialog import ConcurrenceDialog
+from yasmin_editor.editor_gui.dialogs.state_properties_dialog import StatePropertiesDialog
+from yasmin_editor.editor_gui.dialogs.state_machine_dialog import StateMachineDialog
+from yasmin_editor.editor_gui.dialogs.concurrence_dialog import ConcurrenceDialog
 from yasmin_editor.editor_gui.model_adapter import EditorModelAdapter
-from yasmin_editor.editor_gui.blackboard_key_dialog import BlackboardKeyDialog
-from yasmin_editor.editor_gui.outcome_description_dialog import OutcomeDescriptionDialog
+from yasmin_editor.editor_gui.dialogs.blackboard_key_dialog import BlackboardKeyDialog
+from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import OutcomeDescriptionDialog
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.outcome import Outcome
@@ -2439,113 +2439,90 @@ class YasminEditor(QMainWindow):
             return
 
         if isinstance(state_node, ContainerStateNode):
-            if state_node.is_state_machine:
-                dialog = StateMachineDialog(
-                    name=state_node.name,
-                    outcomes=[outcome.name for outcome in state_node.model.outcomes],
-                    start_state=state_node.start_state,
-                    remappings=state_node.remappings,
-                    child_states=list(state_node.model.states.keys()),
-                    edit_mode=True,
-                    parent=self,
-                    description=getattr(state_node, 'description', ''),
-                    defaults=getattr(state_node, 'defaults', []),
-                )
+            input_keys = []
+            output_keys = []
+            for key in getattr(state_node.model, 'keys', []) or []:
+                key_data = {
+                    'name': str(getattr(key, 'name', '') or ''),
+                    'description': str(getattr(key, 'description', '') or ''),
+                    'default_type': str(getattr(key, 'default_type', '') or ''),
+                    'default_value': '' if getattr(key, 'default_value', None) is None else str(getattr(key, 'default_value', '')),
+                    'has_default': bool(getattr(key, 'default_type', '') or ''),
+                }
+                key_type = str(getattr(key, 'key_type', 'in') or 'in')
+                if key_type in ('in', 'in/out'):
+                    input_keys.append(dict(key_data))
+                if key_type in ('out', 'in/out'):
+                    output_keys.append(dict(key_data))
 
-                if dialog.exec_():
-                    result = dialog.get_state_machine_data()
-                    if result:
-                        name, outcomes, start_state, remappings, description, defaults = result
-                        if not self.apply_common_state_updates(
-                            state_node,
-                            name,
-                            remappings,
-                            description,
-                            defaults,
-                        ):
-                            return
-
-                        state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
-                        state_node.start_state = start_state
-                        state_node.update_start_state_label()
-                        self.sync_blackboard_keys()
-                        self.statusBar().showMessage(
-                            f"Updated state machine: {name}", 2000
-                        )
-            else:
-                dialog = ConcurrenceDialog(
-                    name=state_node.name,
-                    outcomes=[outcome.name for outcome in state_node.model.outcomes],
-                    default_outcome=state_node.default_outcome,
-                    remappings=state_node.remappings,
-                    final_outcomes=[outcome.name for outcome in state_node.model.outcomes],
-                    edit_mode=True,
-                    parent=self,
-                    description=getattr(state_node, 'description', ''),
-                    defaults=getattr(state_node, 'defaults', []),
-                )
-
-                if dialog.exec_():
-                    result = dialog.get_concurrence_data()
-                    if result:
-                        (
-                            name,
-                            outcomes,
-                            default_outcome,
-                            remappings,
-                            description,
-                            defaults,
-                        ) = result
-
-                        if not self.apply_common_state_updates(
-                            state_node,
-                            name,
-                            remappings,
-                            description,
-                            defaults,
-                        ):
-                            return
-
-                        state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
-                        state_node.default_outcome = default_outcome
-                        state_node.update_default_outcome_label()
-                        self.sync_blackboard_keys()
-                        self.statusBar().showMessage(f"Updated concurrence: {name}", 2000)
-        else:
             dialog = StatePropertiesDialog(
                 state_name=state_node.name,
-                plugin_info=(
-                    state_node.plugin_info if hasattr(state_node, 'plugin_info') else None
-                ),
-                available_plugins=(
-                    [state_node.plugin_info]
-                    if hasattr(state_node, 'plugin_info') and state_node.plugin_info
-                    else []
-                ),
+                plugin_info=None,
+                available_plugins=[],
                 remappings=state_node.remappings,
                 outcomes=[outcome.name for outcome in state_node.model.outcomes],
                 edit_mode=True,
                 parent=self,
                 description=getattr(state_node, 'description', ''),
                 defaults=getattr(state_node, 'defaults', []),
+                fallback_input_keys=input_keys,
+                fallback_output_keys=output_keys,
+                container_kind='Concurrence' if state_node.is_concurrence else 'State Machine',
             )
 
             if dialog.exec_():
                 result = dialog.get_state_data()
-                if result[0]:
+                if result and result[0]:
                     name, plugin, outcomes, remappings, description, defaults = result
-
                     if not self.apply_common_state_updates(
                         state_node,
                         name,
                         remappings,
-                        description,
+                        getattr(state_node, 'description', ''),
                         defaults,
                     ):
                         return
-                    state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
                     self.sync_blackboard_keys()
-                    self.statusBar().showMessage(f"Updated state: {name}", 2000)
+                    self.statusBar().showMessage(
+                        f"Updated {'concurrence' if state_node.is_concurrence else 'state machine'}: {name}",
+                        2000,
+                    )
+            return
+
+        dialog = StatePropertiesDialog(
+            state_name=state_node.name,
+            plugin_info=(
+                state_node.plugin_info if hasattr(state_node, 'plugin_info') else None
+            ),
+            available_plugins=(
+                [state_node.plugin_info]
+                if hasattr(state_node, 'plugin_info') and state_node.plugin_info
+                else []
+            ),
+            remappings=state_node.remappings,
+            outcomes=[outcome.name for outcome in state_node.model.outcomes],
+            edit_mode=True,
+            parent=self,
+            description=getattr(state_node, 'description', ''),
+            defaults=getattr(state_node, 'defaults', []),
+        )
+
+        if dialog.exec_():
+            result = dialog.get_state_data()
+            if result[0]:
+                name, plugin, outcomes, remappings, description, defaults = result
+
+                if not self.apply_common_state_updates(
+                    state_node,
+                    name,
+                    remappings,
+                    description,
+                    defaults,
+                ):
+                    return
+                state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
+                self.sync_blackboard_keys()
+                self.statusBar().showMessage(f"Updated state: {name}", 2000)
 
     def add_state_to_container(self) -> None:
         self.add_state()
@@ -2802,43 +2779,61 @@ class YasminEditor(QMainWindow):
 
         return dict(sorted(derived_keys.items(), key=lambda item: item[0].lower()))
 
-    def _rebuild_root_blackboard_keys(self) -> None:
-        root_keys = self._collect_blackboard_key_usage_for_model(self.root_model)
-        root_metadata = self._get_container_metadata_map(self.root_model)
-        merged_root: Dict[str, Dict[str, str]] = {}
-        for key_name, key_data in root_keys.items():
-            metadata = root_metadata.get(key_name, {})
-            merged_root[key_name] = {
+    def _merge_container_keys(
+        self,
+        container_model: StateMachine | Concurrence,
+    ) -> Dict[str, Dict[str, str]]:
+        derived_keys = self._collect_blackboard_key_usage_for_model(container_model)
+        metadata_map = self._get_container_metadata_map(container_model)
+        merged: Dict[str, Dict[str, str]] = {}
+
+        for key_name in sorted(set(derived_keys.keys()) | set(metadata_map.keys()), key=str.lower):
+            derived = dict(derived_keys.get(key_name, {}))
+            metadata = dict(metadata_map.get(key_name, {}))
+            key_type = str(derived.get('key_type', metadata.get('key_type', 'in')) or 'in')
+            merged[key_name] = {
                 'name': key_name,
-                'key_type': key_data.get('key_type', 'in'),
-                'description': str(metadata.get('description', '') or key_data.get('description', '') or ''),
-                'default_type': str(metadata.get('default_type', '') or key_data.get('default_type', '') or ''),
-                'default_value': str(metadata.get('default_value', '') or key_data.get('default_value', '') or ''),
+                'key_type': key_type,
+                'description': str(metadata.get('description', '') or derived.get('description', '') or ''),
+                'default_type': str(metadata.get('default_type', '') or derived.get('default_type', '') or ''),
+                'default_value': str(metadata.get('default_value', '') or derived.get('default_value', '') or ''),
             }
+        return merged
+
+    def _rebuild_root_blackboard_keys(self) -> None:
+        merged_root = self._merge_container_keys(self.root_model)
         self.root_model.keys = self.dicts_to_keys(list(merged_root.values()))
 
     def sync_blackboard_keys(self) -> None:
         current_container = self.current_container_model
-        derived_keys = self._collect_blackboard_key_usage_for_model(current_container)
-        metadata_map = self._get_container_metadata_map(current_container)
-        used_key_names = set(derived_keys.keys())
-        filtered_metadata = {
-            key_name: metadata
-            for key_name, metadata in metadata_map.items()
-            if key_name in used_key_names
+        merged = self._merge_container_keys(current_container)
+        self._set_container_metadata_map(current_container, merged)
+        self._blackboard_keys = list(merged.values())
+        self._blackboard_key_metadata = {
+            item['name']: {
+                'description': item.get('description', ''),
+                'key_type': item.get('key_type', 'in'),
+                'default_type': item.get('default_type', ''),
+                'default_value': item.get('default_value', ''),
+            }
+            for item in self._blackboard_keys
         }
-        self._set_container_metadata_map(current_container, filtered_metadata)
-        self._blackboard_keys = list(derived_keys.values())
-        self._blackboard_key_metadata = filtered_metadata
         self._rebuild_root_blackboard_keys()
         self.refresh_blackboard_keys_list()
 
     def refresh_blackboard_keys_list(self) -> None:
         current_key_name = self.get_selected_blackboard_key_name()
-        self._blackboard_key_metadata = self._get_container_metadata_map(self.current_container_model)
-        self._blackboard_keys = list(
-            self._collect_blackboard_key_usage_for_model(self.current_container_model).values()
-        )
+        merged = self._merge_container_keys(self.current_container_model)
+        self._blackboard_key_metadata = {
+            key_name: {
+                'description': values.get('description', ''),
+                'key_type': values.get('key_type', 'in'),
+                'default_type': values.get('default_type', ''),
+                'default_value': values.get('default_value', ''),
+            }
+            for key_name, values in merged.items()
+        }
+        self._blackboard_keys = list(merged.values())
         self.blackboard_list.clear()
 
         for key_data in sorted(
@@ -2864,6 +2859,7 @@ class YasminEditor(QMainWindow):
         self.update_blackboard_usage_highlighting()
 
     def set_blackboard_keys(self, keys: List[Dict[str, str]], sync: bool = True) -> None:
+
         self.root_model.keys = self.dicts_to_keys(keys)
         self._blackboard_key_metadata = self._get_container_metadata_map(self.current_container_model)
         self._blackboard_keys = [dict(item) for item in keys]

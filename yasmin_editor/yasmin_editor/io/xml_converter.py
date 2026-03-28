@@ -33,7 +33,7 @@ from yasmin_editor.model.transition import Transition
 def model_to_xml(model: StateMachine, file_path: str | Path | None = None) -> str:
     """Serialize a state machine model to XML."""
 
-    root = _state_machine_to_element(model, is_root=True)
+    root = _state_machine_to_element(model, parent=None)
     _indent(root)
     xml_text = ET.tostring(root, encoding="utf-8", xml_declaration=True).decode("utf-8")
 
@@ -65,7 +65,7 @@ def model_from_xml(xml_input: str | Path) -> StateMachine:
 
 def _state_machine_to_element(
     model: StateMachine,
-    is_root: bool = False,
+    parent: StateMachine | Concurrence | None,
 ) -> ET.Element:
     element = ET.Element("StateMachine")
     element.set("name", model.name)
@@ -77,9 +77,14 @@ def _state_machine_to_element(
     if model.description:
         element.set("description", model.description)
 
-    if is_root:
-        for key in model.keys:
-            element.append(_key_to_element(key))
+    if parent is not None:
+        position = parent.layout.get_state_position(model.name)
+        if position is not None:
+            element.set("x", f"{position.x:.2f}")
+            element.set("y", f"{position.y:.2f}")
+
+    for key in model.keys:
+        element.append(_key_to_element(key))
 
     _append_remaps(element, model.remappings)
 
@@ -89,11 +94,18 @@ def _state_machine_to_element(
     for outcome in model.outcomes:
         element.append(_final_outcome_to_element(outcome, model))
 
-    _append_container_level_transitions(element, model)
+    if parent is None:
+        _append_container_level_transitions(element, model)
+    else:
+        _append_owner_transitions(element, parent, model.name)
+
     return element
 
 
-def _concurrence_to_element(model: Concurrence) -> ET.Element:
+def _concurrence_to_element(
+    model: Concurrence,
+    parent: StateMachine | Concurrence | None,
+) -> ET.Element:
     element = ET.Element("Concurrence")
     element.set("name", model.name)
 
@@ -104,6 +116,15 @@ def _concurrence_to_element(model: Concurrence) -> ET.Element:
     if model.description:
         element.set("description", model.description)
 
+    if parent is not None:
+        position = parent.layout.get_state_position(model.name)
+        if position is not None:
+            element.set("x", f"{position.x:.2f}")
+            element.set("y", f"{position.y:.2f}")
+
+    for key in model.keys:
+        element.append(_key_to_element(key))
+
     _append_remaps(element, model.remappings)
 
     for state in model.states.values():
@@ -113,32 +134,36 @@ def _concurrence_to_element(model: Concurrence) -> ET.Element:
         element.append(_final_outcome_to_element(outcome, model))
 
     _append_concurrence_outcome_map(element, model)
+
+    if parent is not None and isinstance(parent, StateMachine):
+        _append_owner_transitions(element, parent, model.name)
+
     return element
 
 
 def _state_to_element(state: State, parent: StateMachine | Concurrence) -> ET.Element:
     if isinstance(state, StateMachine):
-        element = _state_machine_to_element(state)
-    elif isinstance(state, Concurrence):
-        element = _concurrence_to_element(state)
-    else:
-        tag = "State" if state.state_type != "xml" else "StateMachine"
-        element = ET.Element(tag)
-        element.set("name", state.name)
+        return _state_machine_to_element(state, parent=parent)
+    if isinstance(state, Concurrence):
+        return _concurrence_to_element(state, parent=parent)
 
-        if state.state_type:
-            element.set("type", state.state_type)
-        if state.state_type == "py" and state.module:
-            element.set("module", state.module)
-        if state.class_name:
-            element.set("class", state.class_name)
-        if state.state_type == "xml":
-            if state.file_name:
-                element.set("file_name", state.file_name)
-            if state.package_name:
-                element.set("package", state.package_name)
-        if state.description:
-            element.set("description", state.description)
+    tag = "State" if state.state_type != "xml" else "StateMachine"
+    element = ET.Element(tag)
+    element.set("name", state.name)
+
+    if state.state_type:
+        element.set("type", state.state_type)
+    if state.state_type == "py" and state.module:
+        element.set("module", state.module)
+    if state.class_name:
+        element.set("class", state.class_name)
+    if state.state_type == "xml":
+        if state.file_name:
+            element.set("file_name", state.file_name)
+        if state.package_name:
+            element.set("package", state.package_name)
+    if state.description:
+        element.set("description", state.description)
 
     position = parent.layout.get_state_position(state.name)
     if position is not None:
@@ -146,11 +171,7 @@ def _state_to_element(state: State, parent: StateMachine | Concurrence) -> ET.El
         element.set("y", f"{position.y:.2f}")
 
     _append_remaps(element, state.remappings)
-
-    if isinstance(parent, StateMachine) and not isinstance(state, (StateMachine, Concurrence)):
-        for transition in parent.transitions.get(state.name, []):
-            element.append(_transition_to_element(transition))
-
+    _append_owner_transitions(element, parent, state.name)
     return element
 
 
@@ -209,6 +230,17 @@ def _append_remaps(element: ET.Element, remappings: dict[str, str]) -> None:
         remap.set("new", new)
 
 
+def _append_owner_transitions(
+    element: ET.Element,
+    parent: StateMachine | Concurrence,
+    owner_name: str,
+) -> None:
+    if isinstance(parent, Concurrence):
+        return
+    for transition in parent.transitions.get(owner_name, []):
+        element.append(_transition_to_element(transition))
+
+
 def _append_container_level_transitions(
     element: ET.Element,
     model: StateMachine,
@@ -257,6 +289,7 @@ def _parse_concurrence_container(element: ET.Element) -> Concurrence:
         default_outcome=element.get("default_outcome"),
     )
 
+    model.keys.extend(_parse_keys(element.findall("Key")))
     model.remappings.update(_parse_remaps(element))
     _parse_concurrence_content(model, element)
     return model
@@ -287,16 +320,14 @@ def _parse_state_machine_content(
 
         state = _parse_state_like(child)
         model.add_state(state)
-        state.remappings.update(_parse_remaps(child))
 
         x = _parse_float(child.get("x"))
         y = _parse_float(child.get("y"))
         if x is not None and y is not None:
             model.layout.set_state_position(state.name, x, y)
 
-        if not isinstance(state, (StateMachine, Concurrence)):
-            for transition_elem in child.findall("Transition"):
-                model.add_transition(state.name, _parse_transition(transition_elem))
+        for transition_elem in child.findall("Transition"):
+            model.add_transition(state.name, _parse_transition(transition_elem))
 
 
 def _parse_concurrence_content(
@@ -308,7 +339,7 @@ def _parse_concurrence_content(
         model.add_outcome(Outcome(name=outcome_name))
 
     for child in element:
-        if child.tag in {"Key", "Remap", "Transition"}:
+        if child.tag in {"Key", "Remap"}:
             continue
 
         if child.tag == "FinalOutcome":
@@ -319,9 +350,11 @@ def _parse_concurrence_content(
             _parse_outcome_map(model, child)
             continue
 
+        if child.tag == "Transition":
+            continue
+
         state = _parse_state_like(child)
         model.add_state(state)
-        state.remappings.update(_parse_remaps(child))
 
         x = _parse_float(child.get("x"))
         y = _parse_float(child.get("y"))
@@ -373,7 +406,7 @@ def _parse_state_like(element: ET.Element) -> State:
     if element.tag == "StateMachine" and not element.get("file_name"):
         return _parse_state_machine_container(element)
 
-    return State(
+    state = State(
         name=element.get("name", ""),
         description=element.get("description", ""),
         state_type=element.get("type"),
@@ -382,6 +415,9 @@ def _parse_state_like(element: ET.Element) -> State:
         package_name=element.get("package"),
         file_name=element.get("file_name"),
     )
+    state.remappings.update(_parse_remaps(element))
+    state.keys.extend(_parse_keys(element.findall("Key")))
+    return state
 
 
 def _parse_transition(element: ET.Element) -> Transition:

@@ -47,7 +47,7 @@ class ContainerStateNode(QGraphicsRectItem):
         defaults: Optional[List[Dict[str, str]]] = None,
         model: Optional[Union[StateMachine, Concurrence]] = None,
     ) -> None:
-        super().__init__(-90, -55, 180, 110)
+        super().__init__(-65, -40, 130, 80)
         self.model: Union[StateMachine, Concurrence] = model or (
             Concurrence(
                 name=name,
@@ -83,7 +83,7 @@ class ContainerStateNode(QGraphicsRectItem):
         self._apply_default_style()
 
         self.title = QGraphicsTextItem(self.name, self)
-        self.title.setDefaultTextColor(Qt.white)
+        self.title.setDefaultTextColor(Qt.black)
         title_font = QFont()
         title_font.setPointSize(10)
         title_font.setBold(True)
@@ -95,12 +95,6 @@ class ContainerStateNode(QGraphicsRectItem):
         type_font.setPointSize(8)
         type_font.setBold(True)
         self.type_label.setFont(type_font)
-
-        self.meta_label = QGraphicsTextItem(self)
-        self.meta_label.setDefaultTextColor(QColor(40, 40, 40))
-        meta_font = QFont()
-        meta_font.setPointSize(8)
-        self.meta_label.setFont(meta_font)
 
         self.connection_port = ConnectionPort(self)
         self.update_label()
@@ -172,29 +166,25 @@ class ContainerStateNode(QGraphicsRectItem):
         self.type_label.setPlainText(
             "CONCURRENCE" if self.is_concurrence else "STATE MACHINE"
         )
+        tooltip_lines = [self.name]
+        if self.description:
+            tooltip_lines.append(self.description)
         if self.is_concurrence:
-            meta = (
-                f"Default: {self.default_outcome}"
-                if self.default_outcome
-                else "Default: (none)"
+            tooltip_lines.append(
+                f"Default: {self.default_outcome}" if self.default_outcome else "Default: (none)"
             )
         else:
-            meta = (
-                f"Start: {self.start_state}"
-                if self.start_state
-                else "Start: (none)"
+            tooltip_lines.append(
+                f"Start: {self.start_state}" if self.start_state else "Start: (none)"
             )
-        self.meta_label.setPlainText(meta)
-        self.setToolTip(self.description if self.description else self.name)
+        self.setToolTip("\n".join(tooltip_lines))
         self.update_visual_elements()
 
     def update_visual_elements(self) -> None:
         title_rect = self.title.boundingRect()
-        self.title.setPos(-title_rect.width() / 2, -40)
+        self.title.setPos(-title_rect.width() / 2, -22)
         type_rect = self.type_label.boundingRect()
-        self.type_label.setPos(-type_rect.width() / 2, -6)
-        meta_rect = self.meta_label.boundingRect()
-        self.meta_label.setPos(-meta_rect.width() / 2, 16)
+        self.type_label.setPos(-type_rect.width() / 2, 6)
         self.connection_port.update_position_for_container()
 
     def mouseDoubleClickEvent(self, event: Any) -> None:

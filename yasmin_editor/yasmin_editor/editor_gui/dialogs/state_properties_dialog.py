@@ -16,7 +16,6 @@
 import os
 from typing import Dict, List, Optional, Tuple
 
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QComboBox,
     QDialog,
@@ -50,6 +49,9 @@ class StatePropertiesDialog(QDialog):
         parent: Optional[QDialog] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
+        fallback_input_keys: Optional[List[Dict[str, str]]] = None,
+        fallback_output_keys: Optional[List[Dict[str, str]]] = None,
+        container_kind: Optional[str] = None,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Edit State Properties" if edit_mode else "Add State")
@@ -57,22 +59,26 @@ class StatePropertiesDialog(QDialog):
         self.edit_mode: bool = edit_mode
         self._base_description: str = description
         self._fallback_outcomes: List[str] = outcomes or []
+        self._fallback_input_keys: List[Dict[str, str]] = fallback_input_keys or []
+        self._fallback_output_keys: List[Dict[str, str]] = fallback_output_keys or []
+        self._container_kind: Optional[str] = container_kind
 
         layout: QFormLayout = QFormLayout(self)
 
-        # State name
         self.name_edit: QLineEdit = QLineEdit(state_name)
         self.name_edit.setPlaceholderText("Enter state name (required)")
         layout.addRow("Name:*", self.name_edit)
 
-        # State type
         self.type_combo: QComboBox = QComboBox()
         self.type_combo.addItem("Python State")
         self.type_combo.addItem("C++ State")
         self.type_combo.addItem("XML File")
 
-        # Set initial type based on parameters
-        if plugin_info:
+        if self._container_kind:
+            self.type_combo.clear()
+            self.type_combo.addItem(self._container_kind)
+            self.type_combo.setEnabled(False)
+        elif plugin_info:
             if plugin_info.plugin_type == "python":
                 self.type_combo.setCurrentIndex(0)
             elif plugin_info.plugin_type == "cpp":
@@ -80,27 +86,26 @@ class StatePropertiesDialog(QDialog):
             elif plugin_info.plugin_type == "xml":
                 self.type_combo.setCurrentIndex(2)
 
-        # Disable type change in edit mode
         if edit_mode:
             self.type_combo.setEnabled(False)
 
         layout.addRow("Type:", self.type_combo)
 
-        # Plugin selection (for Python/C++/XML)
         self.plugin_label: QLabel = QLabel("Plugin:*")
         self.plugin_combo: QComboBox = QComboBox()
         self.available_plugins: List[PluginInfo] = available_plugins or []
-
         layout.addRow(self.plugin_label, self.plugin_combo)
 
         self.plugin_combo.currentIndexChanged.connect(self.update_description)
         self.type_combo.currentIndexChanged.connect(self.update_plugin_list)
 
-        # Disable plugin selection in edit mode (can't change plugin type)
         if edit_mode:
             self.plugin_combo.setEnabled(False)
 
-        # State description (read-only — loaded from plugin metadata)
+        if self._container_kind:
+            self.plugin_label.hide()
+            self.plugin_combo.hide()
+
         desc_label: QLabel = QLabel("<b>Description:</b>")
         self.description_edit: QTextEdit = QTextEdit()
         self.description_edit.setMinimumHeight(240)
@@ -111,7 +116,6 @@ class StatePropertiesDialog(QDialog):
         )
         layout.addRow(desc_label, self.description_edit)
 
-        # Remappings
         remappings_label: QLabel = QLabel("<b>Remappings (optional):</b>")
         remappings_widget: QWidget = QWidget()
         remappings_layout: QVBoxLayout = QVBoxLayout(remappings_widget)
@@ -142,8 +146,7 @@ class StatePropertiesDialog(QDialog):
 
         self.update_plugin_list()
 
-        # Pre-select plugin if provided
-        if plugin_info and self.type_combo.currentIndex() in [0, 1, 2]:
+        if plugin_info and not self._container_kind:
             for i in range(self.plugin_combo.count()):
                 if self.plugin_combo.itemData(i) == plugin_info:
                     self.plugin_combo.setCurrentIndex(i)
@@ -151,16 +154,17 @@ class StatePropertiesDialog(QDialog):
 
         self.update_description()
 
-        if not self.plugin_combo.currentData():
+        if self._container_kind or not self.plugin_combo.currentData():
             self.description_edit.setPlainText(
                 self._build_description_text(
                     None,
                     fallback_description=self._base_description,
                     fallback_outcomes=self._fallback_outcomes,
+                    fallback_input_keys=self._fallback_input_keys,
+                    fallback_output_keys=self._fallback_output_keys,
                 )
             )
 
-        # Buttons
         buttons: QDialogButtonBox = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         )
@@ -172,7 +176,7 @@ class StatePropertiesDialog(QDialog):
         key_name = str(key_info.get("name", "")).strip()
         key_desc = str(key_info.get("description", "")).strip()
         key_type = str(
-            key_info.get("type", key_info.get("default_value_type", ""))
+            key_info.get("type", key_info.get("default_value_type", key_info.get("default_type", "")))
         ).strip()
 
         line = key_name if key_name else "(unnamed)"
@@ -181,6 +185,9 @@ class StatePropertiesDialog(QDialog):
             line += f": {key_desc}"
 
         if is_input and key_info.get("has_default"):
+            default_value = str(key_info.get("default_value", "")).strip()
+            line += f" Default: {default_value}"
+        elif is_input and key_info.get("default_value") not in (None, ""):
             default_value = str(key_info.get("default_value", "")).strip()
             line += f" Default: {default_value}"
 
@@ -194,6 +201,8 @@ class StatePropertiesDialog(QDialog):
         plugin_info: Optional[PluginInfo],
         fallback_description: str = "",
         fallback_outcomes: Optional[List[str]] = None,
+        fallback_input_keys: Optional[List[Dict[str, str]]] = None,
+        fallback_output_keys: Optional[List[Dict[str, str]]] = None,
     ) -> str:
         if plugin_info:
             base_description = str(getattr(plugin_info, "description", "") or "").strip()
@@ -205,8 +214,8 @@ class StatePropertiesDialog(QDialog):
             )
         else:
             base_description = fallback_description.strip()
-            input_keys = []
-            output_keys = []
+            input_keys = list(fallback_input_keys or [])
+            output_keys = list(fallback_output_keys or [])
             outcomes = list(fallback_outcomes or [])
             outcome_descriptions = {}
 
@@ -244,47 +253,49 @@ class StatePropertiesDialog(QDialog):
         return "\n".join(sections).strip()
 
     def add_remapping_row(self) -> None:
-        """Add an empty row to the remappings table."""
         row = self.remappings_table.rowCount()
         self.remappings_table.insertRow(row)
 
     def remove_remapping_row(self) -> None:
-        """Remove the selected row from the remappings table."""
         row = self.remappings_table.currentRow()
         if row >= 0:
             self.remappings_table.removeRow(row)
 
     def _add_remapping_row_with_data(self, old_key: str, new_key: str) -> None:
-        """Add a row to the remappings table pre-filled with data."""
         row = self.remappings_table.rowCount()
         self.remappings_table.insertRow(row)
         self.remappings_table.setItem(row, 0, QTableWidgetItem(old_key))
         self.remappings_table.setItem(row, 1, QTableWidgetItem(new_key))
 
     def update_description(self) -> None:
-        plugin_info: Optional[PluginInfo] = self.plugin_combo.currentData()
+        plugin_info: Optional[PluginInfo] = None if self._container_kind else self.plugin_combo.currentData()
         description_text = self._build_description_text(
             plugin_info,
             fallback_description=self._base_description,
             fallback_outcomes=self._fallback_outcomes,
+            fallback_input_keys=self._fallback_input_keys,
+            fallback_output_keys=self._fallback_output_keys,
         )
         self.description_edit.setPlainText(description_text)
 
     def update_plugin_list(self) -> None:
         self.plugin_combo.clear()
+        if self._container_kind:
+            self.update_description()
+            return
 
         current_type: int = self.type_combo.currentIndex()
-        if current_type == 0:  # Python
+        if current_type == 0:
             for plugin in self.available_plugins:
                 if plugin.plugin_type == "python":
                     self.plugin_combo.addItem(
                         f"{plugin.module}.{plugin.class_name}", plugin
                     )
-        elif current_type == 1:  # C++
+        elif current_type == 1:
             for plugin in self.available_plugins:
                 if plugin.plugin_type == "cpp":
                     self.plugin_combo.addItem(plugin.class_name, plugin)
-        elif current_type == 2:  # State Machine (XML)
+        elif current_type == 2:
             for plugin in self.available_plugins:
                 if plugin.plugin_type == "xml":
                     filename: str = os.path.basename(plugin.file_name)
@@ -307,9 +318,8 @@ class StatePropertiesDialog(QDialog):
         str,
         List[Dict[str, str]],
     ]:
-        """Returns: (name, plugin_info, outcomes, remappings, description, defaults)"""
         name: str = self.name_edit.text().strip()
-        plugin: Optional[PluginInfo] = self.plugin_combo.currentData()
+        plugin: Optional[PluginInfo] = None if self._container_kind else self.plugin_combo.currentData()
 
         remappings: Dict[str, str] = {}
         for row in range(self.remappings_table.rowCount()):
@@ -326,5 +336,4 @@ class StatePropertiesDialog(QDialog):
             outcomes_list = list(self._fallback_outcomes)
 
         description: str = self.description_edit.toPlainText().strip()
-
         return name, plugin, outcomes_list, remappings, description, []
