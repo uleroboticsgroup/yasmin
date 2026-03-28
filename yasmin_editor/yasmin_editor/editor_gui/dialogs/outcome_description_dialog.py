@@ -32,9 +32,11 @@ class OutcomeDescriptionDialog(QDialog):
         outcome_name: str,
         description: str = "",
         parent: Optional[QDialog] = None,
+        readonly: bool = False,
     ) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Edit Outcome Description")
+        self.readonly = readonly
+        self.setWindowTitle("Edit Outcome Description" + (" (Readonly)" if self.readonly else ""))
         self.resize(500, 260)
 
         layout = QFormLayout(self)
@@ -44,11 +46,15 @@ class OutcomeDescriptionDialog(QDialog):
 
         self.description_edit = QTextEdit()
         self.description_edit.setPlainText(description)
+        self.description_edit.setReadOnly(self.readonly)
         layout.addRow("Description:", self.description_edit)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
+        buttons = QDialogButtonBox(QDialogButtonBox.Close if self.readonly else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel))
+        if self.readonly:
+            buttons.rejected.connect(self.reject)
+        else:
+            buttons.accepted.connect(self.accept)
+            buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
     def get_description(self) -> str:

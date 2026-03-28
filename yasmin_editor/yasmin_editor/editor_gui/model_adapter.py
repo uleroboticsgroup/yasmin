@@ -51,6 +51,9 @@ class EditorModelAdapter:
         self.sync_root_model_from_ui()
         return model_to_xml(self.editor.root_model, Path(file_path))
 
+    def load_external_xml_model(self, file_path: str) -> StateMachine:
+        return model_from_xml(Path(file_path))
+
     def sync_root_model_from_ui(self) -> None:
         self.editor.sync_current_container_layout()
 
@@ -128,15 +131,29 @@ class EditorModelAdapter:
             if not state_model.outcomes:
                 for outcome_name in list(getattr(plugin_info, "outcomes", []) or []):
                     state_model.add_outcome(Outcome(name=outcome_name))
-            node = StateNode(
-                state_model.name,
-                plugin_info,
-                x,
-                y,
-                description=state_model.description,
-                defaults=[],
-                model=state_model,
-            )
+            if state_model.state_type == "xml":
+                node = ContainerStateNode(
+                    state_model.name,
+                    x,
+                    y,
+                    False,
+                    description=state_model.description,
+                    defaults=[],
+                    model=state_model,
+                    state_kind_label="XML",
+                    is_xml_reference=True,
+                )
+                node.plugin_info = plugin_info
+            else:
+                node = StateNode(
+                    state_model.name,
+                    plugin_info,
+                    x,
+                    y,
+                    description=state_model.description,
+                    defaults=[],
+                    model=state_model,
+                )
 
         self.editor.canvas.scene.addItem(node)
         self.editor.register_state_node(node)

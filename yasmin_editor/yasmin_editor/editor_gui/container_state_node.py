@@ -23,6 +23,7 @@ from PyQt5.QtGui import QPen, QBrush, QColor, QFont
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
+from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 
 if TYPE_CHECKING:
@@ -45,10 +46,12 @@ class ContainerStateNode(QGraphicsRectItem):
         default_outcome: Optional[str] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
-        model: Optional[Union[StateMachine, Concurrence]] = None,
+        model: Optional[Union[StateMachine, Concurrence, State]] = None,
+        state_kind_label: Optional[str] = None,
+        is_xml_reference: bool = False,
     ) -> None:
         super().__init__(-65, -40, 130, 80)
-        self.model: Union[StateMachine, Concurrence] = model or (
+        self.model: Union[StateMachine, Concurrence, State] = model or (
             Concurrence(
                 name=name,
                 description=description,
@@ -68,6 +71,8 @@ class ContainerStateNode(QGraphicsRectItem):
         self.plugin_info: Optional["PluginInfo"] = None
         self.is_state_machine = isinstance(self.model, StateMachine)
         self.is_concurrence = isinstance(self.model, Concurrence)
+        self.is_xml_reference = bool(is_xml_reference)
+        self.state_kind_label = state_kind_label or ("XML" if self.is_xml_reference else None)
         self.connections: List["ConnectionLine"] = []
         self.parent_container = None
         self.child_states = {}
@@ -148,7 +153,10 @@ class ContainerStateNode(QGraphicsRectItem):
             self.update_label()
 
     def _apply_default_style(self) -> None:
-        if self.is_concurrence:
+        if self.is_xml_reference:
+            self.setBrush(QBrush(QColor(255, 165, 0)))
+            self.setPen(QPen(QColor(0, 0, 0), 3))
+        elif self.is_concurrence:
             self.setBrush(QBrush(QColor(255, 235, 205)))
             self.setPen(QPen(QColor(255, 140, 0), 3))
         else:
@@ -164,12 +172,17 @@ class ContainerStateNode(QGraphicsRectItem):
     def update_label(self) -> None:
         self.title.setPlainText(self.name)
         self.type_label.setPlainText(
-            "CONCURRENCE" if self.is_concurrence else "STATE MACHINE"
+            self.state_kind_label
+            if self.state_kind_label
+            else ("CONCURRENCE" if self.is_concurrence else "STATE MACHINE")
         )
         tooltip_lines = [self.name]
         if self.description:
             tooltip_lines.append(self.description)
-        if self.is_concurrence:
+        if self.is_xml_reference:
+            if getattr(self.model, "file_name", None):
+                tooltip_lines.append(f"XML: {self.model.file_name}")
+        elif self.is_concurrence:
             tooltip_lines.append(
                 f"Default: {self.default_outcome}" if self.default_outcome else "Default: (none)"
             )

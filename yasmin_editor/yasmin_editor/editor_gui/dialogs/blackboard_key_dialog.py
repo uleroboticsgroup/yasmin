@@ -38,9 +38,14 @@ class BlackboardKeyDialog(QDialog):
         key_data: Optional[Dict[str, str]] = None,
         parent=None,
         edit_mode: bool = False,
+        readonly: bool = False,
     ) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Edit Blackboard Key" if key_data else "Add Blackboard Key")
+        self.readonly = readonly
+        title = "Edit Blackboard Key" if key_data else "Add Blackboard Key"
+        if self.readonly:
+            title += " (Readonly)"
+        self.setWindowTitle(title)
         self.edit_mode = edit_mode
         self.resize(480, 320)
 
@@ -50,7 +55,7 @@ class BlackboardKeyDialog(QDialog):
 
         self.name_edit = QLineEdit(key_data.get("name", ""))
         self.name_edit.setPlaceholderText("Enter key name")
-        self.name_edit.setReadOnly(self.edit_mode)
+        self.name_edit.setReadOnly(self.edit_mode or self.readonly)
         layout.addRow("Name:*", self.name_edit)
 
         self.type_combo = QComboBox()
@@ -59,12 +64,13 @@ class BlackboardKeyDialog(QDialog):
         type_index = self.type_combo.findText(key_type)
         if type_index >= 0:
             self.type_combo.setCurrentIndex(type_index)
-        self.type_combo.setEnabled(not self.edit_mode)
+        self.type_combo.setEnabled(not self.edit_mode and not self.readonly)
         layout.addRow("Type:", self.type_combo)
 
         self.description_edit = QTextEdit()
         self.description_edit.setMaximumHeight(80)
         self.description_edit.setPlainText(key_data.get("description", ""))
+        self.description_edit.setReadOnly(self.readonly)
         layout.addRow(QLabel("<b>Description (optional):</b>"), self.description_edit)
 
         self.default_type_combo = QComboBox()
@@ -80,9 +86,11 @@ class BlackboardKeyDialog(QDialog):
         self.default_type_combo.currentIndexChanged.connect(
             self._update_default_value_state
         )
+        self.default_type_combo.setEnabled(not self.readonly and self.default_type_combo.isEnabled())
         layout.addRow("Default Type:", self.default_type_combo)
 
         self.default_value_edit = QLineEdit(str(key_data.get("default_value", "") or ""))
+        self.default_value_edit.setReadOnly(self.readonly)
         self.default_value_edit.setPlaceholderText(
             "Default value. Leave empty for an empty string when type is str"
         )
@@ -91,9 +99,12 @@ class BlackboardKeyDialog(QDialog):
         self.type_combo.currentTextChanged.connect(self._update_default_fields)
         self._update_default_fields(self.type_combo.currentText())
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        buttons.accepted.connect(self._accept_with_validation)
-        buttons.rejected.connect(self.reject)
+        buttons = QDialogButtonBox(QDialogButtonBox.Close if self.readonly else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel))
+        if self.readonly:
+            buttons.rejected.connect(self.reject)
+        else:
+            buttons.accepted.connect(self._accept_with_validation)
+            buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
     def _update_default_fields(self, key_type: str) -> None:
@@ -102,7 +113,7 @@ class BlackboardKeyDialog(QDialog):
             self.default_type_combo.setCurrentIndex(0)
             self.default_value_edit.clear()
 
-        self.default_type_combo.setEnabled(allow_defaults)
+        self.default_type_combo.setEnabled(allow_defaults and not self.readonly)
         self._update_default_value_state()
 
     def _update_default_value_state(self) -> None:

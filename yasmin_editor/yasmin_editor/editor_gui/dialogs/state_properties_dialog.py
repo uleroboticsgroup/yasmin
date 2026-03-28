@@ -52,9 +52,14 @@ class StatePropertiesDialog(QDialog):
         fallback_input_keys: Optional[List[Dict[str, str]]] = None,
         fallback_output_keys: Optional[List[Dict[str, str]]] = None,
         container_kind: Optional[str] = None,
+        readonly: bool = False,
     ) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Edit State Properties" if edit_mode else "Add State")
+        self.readonly: bool = readonly
+        title = "Edit State Properties" if edit_mode else "Add State"
+        if self.readonly:
+            title += " (Readonly)"
+        self.setWindowTitle(title)
         self.resize(600, 700)
         self.edit_mode: bool = edit_mode
         self._base_description: str = description
@@ -67,6 +72,7 @@ class StatePropertiesDialog(QDialog):
 
         self.name_edit: QLineEdit = QLineEdit(state_name)
         self.name_edit.setPlaceholderText("Enter state name (required)")
+        self.name_edit.setReadOnly(self.readonly)
         layout.addRow("Name:*", self.name_edit)
 
         self.type_combo: QComboBox = QComboBox()
@@ -86,7 +92,7 @@ class StatePropertiesDialog(QDialog):
             elif plugin_info.plugin_type == "xml":
                 self.type_combo.setCurrentIndex(2)
 
-        if edit_mode:
+        if edit_mode or self.readonly:
             self.type_combo.setEnabled(False)
 
         layout.addRow("Type:", self.type_combo)
@@ -99,7 +105,7 @@ class StatePropertiesDialog(QDialog):
         self.plugin_combo.currentIndexChanged.connect(self.update_description)
         self.type_combo.currentIndexChanged.connect(self.update_plugin_list)
 
-        if edit_mode:
+        if edit_mode or self.readonly:
             self.plugin_combo.setEnabled(False)
 
         if self._container_kind:
@@ -126,13 +132,16 @@ class StatePropertiesDialog(QDialog):
         self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.remappings_table.setMinimumHeight(80)
         self.remappings_table.setMaximumHeight(150)
+        self.remappings_table.setEnabled(not self.readonly)
         remappings_layout.addWidget(self.remappings_table)
 
         remap_btn_layout: QHBoxLayout = QHBoxLayout()
         add_remap_btn: QPushButton = QPushButton("Add Row")
+        add_remap_btn.setEnabled(not self.readonly)
         add_remap_btn.clicked.connect(self.add_remapping_row)
         remap_btn_layout.addWidget(add_remap_btn)
         remove_remap_btn: QPushButton = QPushButton("Remove Row")
+        remove_remap_btn.setEnabled(not self.readonly)
         remove_remap_btn.clicked.connect(self.remove_remapping_row)
         remap_btn_layout.addWidget(remove_remap_btn)
         remap_btn_layout.addStretch()
@@ -166,10 +175,13 @@ class StatePropertiesDialog(QDialog):
             )
 
         buttons: QDialogButtonBox = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+            QDialogButtonBox.Close if self.readonly else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
+        if self.readonly:
+            buttons.rejected.connect(self.reject)
+        else:
+            buttons.accepted.connect(self.accept)
+            buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
     def _format_key_line(self, key_info: Dict[str, str], is_input: bool) -> str:

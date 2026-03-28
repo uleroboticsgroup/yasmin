@@ -92,6 +92,9 @@ class StateMachineCanvas(QGraphicsView):
         from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
         event: QEvent,
     ) -> None:
+        if self.editor_ref and self.editor_ref.is_read_only_mode():
+            event.ignore()
+            return
         self.drag_start_node = from_node
         self.is_dragging_connection = True
         self.setDragMode(QGraphicsView.NoDrag)
@@ -197,32 +200,41 @@ class StateMachineCanvas(QGraphicsView):
 
     def contextMenuEvent(self, event: QEvent) -> None:
         item = self.itemAt(event.pos())
-        if item is None:
-            if self.editor_ref:
-                menu: QMenu = QMenu()
-
-                add_state_action = menu.addAction("Add State")
-                add_sm_action = menu.addAction("Add State Machine")
-                add_cc_action = menu.addAction("Add Concurrence")
-                menu.addSeparator()
-                add_outcome_action = menu.addAction("Add Final Outcome")
-                menu.addSeparator()
-                edit_container_action = menu.addAction("Edit Current Container")
-
+        if item is None and self.editor_ref:
+            menu: QMenu = QMenu()
+            if self.editor_ref.is_read_only_mode():
+                view_container_action = menu.addAction("View Current Container")
+                fit_action = menu.addAction("Fit")
                 action = menu.exec_(event.globalPos())
-
-                if action == add_state_action:
-                    self.editor_ref.add_state()
-                elif action == add_sm_action:
-                    self.editor_ref.add_state_machine()
-                elif action == add_cc_action:
-                    self.editor_ref.add_concurrence()
-                elif action == add_outcome_action:
-                    self.editor_ref.add_final_outcome()
-                elif action == edit_container_action:
+                if action == view_container_action:
                     self.editor_ref.edit_current_container()
-
+                elif action == fit_action:
+                    self.editor_ref.fit_current_view()
                 event.accept()
                 return
+
+            add_state_action = menu.addAction("Add State")
+            add_sm_action = menu.addAction("Add State Machine")
+            add_cc_action = menu.addAction("Add Concurrence")
+            menu.addSeparator()
+            add_outcome_action = menu.addAction("Add Final Outcome")
+            menu.addSeparator()
+            edit_container_action = menu.addAction("Edit Current Container")
+
+            action = menu.exec_(event.globalPos())
+
+            if action == add_state_action:
+                self.editor_ref.add_state()
+            elif action == add_sm_action:
+                self.editor_ref.add_state_machine()
+            elif action == add_cc_action:
+                self.editor_ref.add_concurrence()
+            elif action == add_outcome_action:
+                self.editor_ref.add_final_outcome()
+            elif action == edit_container_action:
+                self.editor_ref.edit_current_container()
+
+            event.accept()
+            return
 
         super().contextMenuEvent(event)

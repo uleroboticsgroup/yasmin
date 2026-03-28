@@ -848,12 +848,27 @@ class YasminEditor(QMainWindow):
                 else QPen(QColor(0, 0, 180), 3)
             )
         elif isinstance(item, ContainerStateNode):
-            if item.is_concurrence:
+            if getattr(item, "is_xml_reference", False):
+                item.setBrush(QBrush(QColor(255, 165, 0)))
+                item.setPen(
+                    QPen(QColor(255, 200, 0), 4)
+                    if is_selected
+                    else QPen(QColor(0, 0, 0), 3)
+                )
+            elif item.is_concurrence:
                 item.setBrush(QBrush(QColor(255, 220, 150, 180)))
-                item.setPen(QPen(QColor(255, 140, 0), 3))
+                item.setPen(
+                    QPen(QColor(255, 200, 0), 4)
+                    if is_selected
+                    else QPen(QColor(255, 140, 0), 3)
+                )
             else:
                 item.setBrush(QBrush(QColor(173, 216, 230, 180)))
-                item.setPen(QPen(QColor(0, 0, 180), 3))
+                item.setPen(
+                    QPen(QColor(255, 200, 0), 4)
+                    if is_selected
+                    else QPen(QColor(0, 0, 180), 3)
+                )
         elif isinstance(item, FinalOutcomeNode):
             item.setBrush(QBrush(QColor(255, 0, 0)))
             item.setPen(
@@ -3575,3 +3590,638 @@ class YasminEditor(QMainWindow):
                 self.apply_default_visual_state(state_node)
                 state_node.setPen(QPen(QColor(255, 170, 0), 5))
                 state_node.setBrush(QBrush(QColor(255, 255, 170)))
+
+
+    def _ensure_external_xml_state(self) -> None:
+        if not hasattr(self, "extern_xml"):
+            self.extern_xml = None
+        if not hasattr(self, "extern_xml_source_state"):
+            self.extern_xml_source_state = None
+        if not hasattr(self, "extern_xml_path_start_index"):
+            self.extern_xml_path_start_index = None
+
+    def is_read_only_mode(self) -> bool:
+        self._ensure_external_xml_state()
+        return (
+            self.extern_xml is not None
+            and self.extern_xml_path_start_index is not None
+            and len(self.current_container_path) > self.extern_xml_path_start_index
+        )
+
+    def _show_read_only_message(self) -> None:
+        self.statusBar().showMessage("External XML view is read-only", 3000)
+
+    def _clear_external_xml_view(self) -> None:
+        self._ensure_external_xml_state()
+        self.extern_xml = None
+        self.extern_xml_source_state = None
+        self.extern_xml_path_start_index = None
+
+    def _resolve_xml_state_file_path(self, state_node: ContainerStateNode) -> Optional[str]:
+        state_model = getattr(state_node, "model", None)
+        plugin_info = getattr(state_node, "plugin_info", None)
+        if plugin_info is None and state_model is not None:
+            try:
+                plugin_info = self.resolve_plugin_info_for_model(state_model)
+            except Exception:
+                plugin_info = None
+
+        candidates: List[str] = []
+        for source in [plugin_info, state_model]:
+            if source is None:
+                continue
+            for attr in [
+                "file_path",
+                "xml_file",
+                "path",
+                "full_path",
+                "abs_path",
+                "filepath",
+                "file_name",
+            ]:
+                value = getattr(source, attr, None)
+                if value:
+                    candidates.append(str(value))
+
+        for candidate in candidates:
+            if os.path.isfile(candidate):
+                return candidate
+
+        package_name = None
+        file_name = None
+        for source in [plugin_info, state_model]:
+            if source is None:
+                continue
+            if not package_name:
+                package_name = getattr(source, "package_name", None)
+            if not file_name:
+                file_name = getattr(source, "file_name", None)
+
+        if file_name and package_name:
+            try:
+                from ament_index_python.packages import get_package_share_directory
+
+                share_dir = get_package_share_directory(str(package_name))
+                direct_candidate = os.path.join(share_dir, str(file_name))
+                if os.path.isfile(direct_candidate):
+                    return direct_candidate
+                for root_dir, _dirs, files in os.walk(share_dir):
+                    if os.path.basename(str(file_name)) in files:
+                        return os.path.join(root_dir, os.path.basename(str(file_name)))
+            except Exception:
+                pass
+
+        return None
+
+    def _set_scene_read_only_state(self) -> None:
+        readonly = self.is_read_only_mode()
+        for item in list(self.state_nodes.values()) + list(self.final_outcomes.values()):
+            item.setFlag(item.ItemIsMovable, not readonly)
+            if hasattr(item, "connection_port"):
+                item.connection_port.setVisible(not readonly)
+        if hasattr(self, "root_sm_name_edit"):
+            self.root_sm_name_edit.setEnabled(not readonly)
+        if hasattr(self, "root_sm_description_edit"):
+            self.root_sm_description_edit.setEnabled(not readonly)
+        if hasattr(self, "start_state_combo"):
+            self.start_state_combo.setEnabled(not readonly)
+        for widget_name in [
+            "python_list",
+            "cpp_list",
+            "xml_list",
+            "python_filter",
+            "cpp_filter",
+            "xml_filter",
+        ]:
+            widget = getattr(self, widget_name, None)
+            if widget is not None:
+                widget.setEnabled(not readonly)
+
+    def render_current_container(self, fit_view: bool = False) -> None:
+        self.model_adapter.rebuild_scene(self.current_container_model)
+        self.update_container_controls()
+        self.update_start_state_combo()
+        self.refresh_breadcrumbs()
+        self.refresh_blackboard_keys_list()
+        self._set_scene_read_only_state()
+        if fit_view:
+            self.fit_current_view()
+
+    def navigate_to_container_index(self, index: int) -> None:
+        self._ensure_external_xml_state()
+        if index < 0 or index >= len(self.current_container_path):
+            return
+        if not self.is_read_only_mode():
+            self.sync_current_container_layout()
+        if self.extern_xml_path_start_index is not None and index < self.extern_xml_path_start_index:
+            self.current_container_path = self.current_container_path[: index + 1]
+            self._clear_external_xml_view()
+        else:
+            self.current_container_path = self.current_container_path[: index + 1]
+        self.render_current_container(fit_view=True)
+
+    def navigate_up_one_level(self) -> None:
+        if len(self.current_container_path) > 1:
+            self.navigate_to_container_index(len(self.current_container_path) - 2)
+
+    def enter_container(self, container_node: ContainerStateNode) -> None:
+        self._ensure_external_xml_state()
+        if getattr(container_node, "is_xml_reference", False):
+            if self.is_read_only_mode():
+                self.edit_state()
+                return
+            xml_file_path = self._resolve_xml_state_file_path(container_node)
+            if not xml_file_path:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    f"Unable to locate XML file for state '{container_node.name}'.",
+                )
+                return
+            try:
+                external_model = self.model_adapter.load_external_xml_model(xml_file_path)
+            except Exception as exc:
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    f"Failed to load external XML state machine:\n{exc}",
+                )
+                return
+            self.sync_current_container_layout()
+            self.extern_xml = external_model
+            self.extern_xml_source_state = container_node.model
+            self.extern_xml_path_start_index = len(self.current_container_path)
+            self.current_container_path.append(external_model)
+            self.render_current_container(fit_view=True)
+            self.statusBar().showMessage(f"Entered external XML: {container_node.name}", 2000)
+            return
+
+        self.sync_current_container_layout()
+        self.current_container_path.append(container_node.model)
+        self.render_current_container(fit_view=True)
+        self.statusBar().showMessage(f"Entered: {container_node.name}", 2000)
+
+    def on_plugin_double_clicked(self, item: QListWidgetItem) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        plugin_info = item.data(Qt.UserRole)
+        state_name, ok = QInputDialog.getText(self, "State Name", "Enter state name:")
+        if ok:
+            self.create_state_node(state_name, plugin_info, False, False)
+
+    def on_xml_double_clicked(self, item: QListWidgetItem) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        xml_plugin = item.data(Qt.UserRole)
+        state_name, ok = QInputDialog.getText(
+            self, "State Machine Name", "Enter state machine name:"
+        )
+        if ok:
+            self.create_state_node(state_name, xml_plugin, False, False)
+
+    def add_state(self) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        all_plugins = (
+            self.plugin_manager.python_plugins
+            + self.plugin_manager.cpp_plugins
+            + self.plugin_manager.xml_files
+        )
+        dialog = StatePropertiesDialog(available_plugins=all_plugins, parent=self)
+        if dialog.exec_():
+            result = dialog.get_state_data()
+            if result[0]:
+                name, plugin, outcomes, remappings, description, defaults = result
+                self.create_state_node(
+                    name,
+                    plugin,
+                    outcomes=outcomes,
+                    remappings=remappings,
+                    description=description,
+                    defaults=defaults,
+                )
+
+    def add_state_machine(self) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        dialog = StateMachineDialog(parent=self)
+        if dialog.exec_():
+            result = dialog.get_state_machine_data()
+            if result:
+                name, outcomes, start_state, remappings, description, defaults = result
+                self.create_state_node(
+                    name=name,
+                    plugin_info=None,
+                    is_state_machine=True,
+                    is_concurrence=False,
+                    outcomes=outcomes,
+                    remappings=remappings,
+                    start_state=start_state,
+                    default_outcome=None,
+                    description=description,
+                    defaults=defaults,
+                )
+
+    def add_concurrence(self) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        dialog = ConcurrenceDialog(parent=self)
+        if dialog.exec_():
+            result = dialog.get_concurrence_data()
+            if result:
+                name, outcomes, default_outcome, remappings, description, defaults = result
+                self.create_state_node(
+                    name=name,
+                    plugin_info=None,
+                    is_state_machine=False,
+                    is_concurrence=True,
+                    outcomes=outcomes,
+                    remappings=remappings,
+                    start_state=None,
+                    default_outcome=default_outcome,
+                    description=description,
+                    defaults=defaults,
+                )
+
+    def add_final_outcome(self) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        current_model = self.current_container_model
+        outcome_name, ok = QInputDialog.getText(
+            self, "Final Outcome", "Enter final outcome name:"
+        )
+        if ok and outcome_name:
+            if outcome_name in self.final_outcomes:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    f"Final outcome '{outcome_name}' already exists in this container!",
+                )
+                return
+
+            x = 700
+            y = len(self.final_outcomes) * 170
+            model = Outcome(name=outcome_name)
+            current_model.add_outcome(model)
+            current_model.layout.set_outcome_position(outcome_name, x, y)
+            self.model_adapter.create_final_outcome_view(model, x=x, y=y)
+
+            if isinstance(current_model, Concurrence):
+                if len(current_model.outcomes) == 1 and not current_model.default_outcome:
+                    current_model.default_outcome = outcome_name
+
+            self.update_start_state_combo()
+            self.statusBar().showMessage(
+                f"Added final outcome: {outcome_name}",
+                2000,
+            )
+
+    def create_connection_from_drag(self, from_node: StateNode, to_node: StateNode) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        current_model = self.current_container_model
+
+        if isinstance(current_model, Concurrence):
+            if not isinstance(to_node, FinalOutcomeNode) or isinstance(from_node, FinalOutcomeNode):
+                QMessageBox.warning(
+                    self,
+                    "Not Allowed",
+                    "States inside a Concurrence can only connect to final outcomes of the current Concurrence.",
+                )
+                return
+            outcomes_list = [outcome.name for outcome in from_node.model.outcomes]
+        else:
+            if isinstance(from_node, FinalOutcomeNode):
+                QMessageBox.warning(
+                    self,
+                    "Not Allowed",
+                    "Final outcomes of the current container cannot start transitions here.",
+                )
+                return
+            outcomes_list = [outcome.name for outcome in from_node.model.outcomes]
+
+        if not outcomes_list:
+            QMessageBox.warning(
+                self,
+                "Error",
+                "Cannot create transitions from states without outcomes!",
+            )
+            return
+
+        if isinstance(current_model, StateMachine):
+            used_outcomes = {
+                transition.source_outcome
+                for transition in current_model.transitions.get(from_node.name, [])
+            }
+            available_outcomes = [
+                outcome_name
+                for outcome_name in outcomes_list
+                if outcome_name not in used_outcomes
+            ]
+            if not available_outcomes:
+                QMessageBox.warning(
+                    self, "Error", "All outcomes from this state are already used!"
+                )
+                return
+        else:
+            available_outcomes = outcomes_list
+
+        if len(available_outcomes) == 1:
+            outcome = available_outcomes[0]
+            self.create_connection(from_node, to_node, outcome)
+        else:
+            outcome, ok = QInputDialog.getItem(
+                self,
+                "Select Outcome",
+                f"Select outcome for transition from '{from_node.name}':",
+                available_outcomes,
+                0,
+                False,
+            )
+            if ok:
+                self.create_connection(from_node, to_node, outcome)
+
+    def create_connection(self, from_node: StateNode, to_node: StateNode, outcome: str) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        current_model = self.current_container_model
+        if isinstance(current_model, StateMachine):
+            used_outcomes = {
+                transition.source_outcome
+                for transition in current_model.transitions.get(from_node.name, [])
+            }
+            if outcome in used_outcomes:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    f"Outcome '{outcome}' is already used for a transition!",
+                )
+                return
+
+        self._create_connection_view(from_node, to_node, outcome)
+        self.register_connection_in_model(from_node, to_node, outcome)
+        self.statusBar().showMessage(
+            f"Added transition: {from_node.name} --[{outcome}]--> {to_node.name}",
+            2000,
+        )
+
+    def delete_selected(self) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        for item in self.canvas.scene.selectedItems():
+            if isinstance(item, ConnectionLine):
+                self.delete_connection_item(item)
+                return
+            if isinstance(item, FinalOutcomeNode):
+                self.delete_final_outcome_item(item)
+                return
+            if isinstance(item, (StateNode, ContainerStateNode)):
+                self.delete_state_item(item)
+                return
+
+    def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
+        if outcome_node is None:
+            outcome_node = self.find_selected_item(FinalOutcomeNode)
+
+        if outcome_node is None:
+            QMessageBox.warning(self, "Error", "Please select a final outcome to edit!")
+            return
+
+        dialog = OutcomeDescriptionDialog(
+            outcome_name=outcome_node.name,
+            description=getattr(outcome_node, "description", ""),
+            parent=self,
+            readonly=self.is_read_only_mode(),
+        )
+
+        if self.is_read_only_mode():
+            dialog.exec_()
+            return
+
+        if dialog.exec_():
+            outcome_node.description = dialog.get_description()
+            outcome_node.update_tooltip()
+            self.statusBar().showMessage(
+                f"Updated outcome description: {outcome_node.name}",
+                2000,
+            )
+
+    def edit_selected_blackboard_key(self, item: Optional[QListWidgetItem] = None) -> None:
+        if item is None:
+            item = self.blackboard_list.currentItem()
+        if item is None:
+            return
+
+        key_data = dict(item.data(Qt.UserRole) or {})
+        key_name = key_data.get("name", "")
+        if not key_name:
+            return
+
+        metadata = dict(
+            self._get_container_metadata_map(self.current_container_model).get(
+                key_name, {}
+            )
+        )
+        merged_key_data = {
+            **key_data,
+            **metadata,
+            "name": key_data.get("name", ""),
+            "key_type": key_data.get("key_type", "in"),
+            "default_type": str(metadata.get("default_type", "") or ""),
+            "default_value": str(metadata.get("default_value", "") or ""),
+        }
+
+        dlg = BlackboardKeyDialog(
+            merged_key_data,
+            parent=self,
+            edit_mode=True,
+            readonly=self.is_read_only_mode(),
+        )
+        if self.is_read_only_mode():
+            dlg.exec_()
+            return
+        if dlg.exec_():
+            updated_key = dlg.get_key_data()
+            metadata_map = self._get_container_metadata_map(
+                self.current_container_model
+            )
+            metadata_map[key_name] = {
+                "description": updated_key.get("description", ""),
+                "key_type": key_data.get("key_type", "in"),
+                "default_type": updated_key.get("default_type", ""),
+                "default_value": updated_key.get("default_value", ""),
+            }
+            self._set_container_metadata_map(self.current_container_model, metadata_map)
+            self.sync_blackboard_keys()
+
+    def _collect_container_key_lists(self, model: State) -> tuple[List[Dict[str, str]], List[Dict[str, str]]]:
+        input_keys: List[Dict[str, str]] = []
+        output_keys: List[Dict[str, str]] = []
+        for key in getattr(model, "keys", []) or []:
+            key_data = {
+                "name": str(getattr(key, "name", "") or ""),
+                "description": str(getattr(key, "description", "") or ""),
+                "default_type": str(getattr(key, "default_type", "") or ""),
+                "default_value": (
+                    ""
+                    if getattr(key, "default_value", None) is None
+                    else str(getattr(key, "default_value", ""))
+                ),
+                "has_default": bool(getattr(key, "default_type", "") or ""),
+            }
+            key_type = str(getattr(key, "key_type", "in") or "in")
+            if key_type in ("in", "in/out"):
+                input_keys.append(dict(key_data))
+            if key_type in ("out", "in/out"):
+                output_keys.append(dict(key_data))
+        return input_keys, output_keys
+
+    def edit_current_container(self) -> None:
+        model = self.current_container_model
+        input_keys, output_keys = self._collect_container_key_lists(model)
+        dialog = StatePropertiesDialog(
+            state_name=model.name,
+            plugin_info=None,
+            available_plugins=[],
+            remappings=dict(model.remappings),
+            outcomes=[outcome.name for outcome in model.outcomes],
+            edit_mode=True,
+            parent=self,
+            description=getattr(model, "description", ""),
+            defaults=[],
+            fallback_input_keys=input_keys,
+            fallback_output_keys=output_keys,
+            container_kind=(
+                "Concurrence" if isinstance(model, Concurrence) else "State Machine"
+            ),
+            readonly=self.is_read_only_mode(),
+        )
+        if self.is_read_only_mode():
+            dialog.exec_()
+            return
+
+        if dialog.exec_():
+            result = dialog.get_state_data()
+            if result and result[0]:
+                name, plugin, outcomes, remappings, description, defaults = result
+                parent_model = self.current_parent_model
+                old_name = model.name
+                if parent_model is None:
+                    model.name = name
+                    if isinstance(model, StateMachine):
+                        model.rename_transition_owner(old_name, name)
+                else:
+                    if name != old_name and name in parent_model.states:
+                        QMessageBox.warning(
+                            self, "Error", f"State '{name}' already exists!"
+                        )
+                        return
+                    if name != old_name:
+                        parent_model.rename_state(old_name, name)
+                model.remappings.clear()
+                model.remappings.update(remappings)
+                self.update_container_controls()
+                self.refresh_breadcrumbs()
+                self.refresh_blackboard_keys_list()
+                self.statusBar().showMessage(
+                    f"Updated {'concurrence' if isinstance(model, Concurrence) else 'state machine'}: {name}",
+                    2000,
+                )
+
+    def edit_state(self) -> None:
+        state_node = self.find_selected_state_node()
+        if not state_node:
+            QMessageBox.warning(self, "Error", "Please select a state to edit!")
+            return
+
+        readonly = self.is_read_only_mode()
+        is_container = isinstance(state_node, ContainerStateNode) and not getattr(state_node, "is_xml_reference", False)
+
+        if is_container:
+            input_keys, output_keys = self._collect_container_key_lists(state_node.model)
+            dialog = StatePropertiesDialog(
+                state_name=state_node.name,
+                plugin_info=None,
+                available_plugins=[],
+                remappings=state_node.remappings,
+                outcomes=[outcome.name for outcome in state_node.model.outcomes],
+                edit_mode=True,
+                parent=self,
+                description=getattr(state_node, "description", ""),
+                defaults=getattr(state_node, "defaults", []),
+                fallback_input_keys=input_keys,
+                fallback_output_keys=output_keys,
+                container_kind=(
+                    "Concurrence" if state_node.is_concurrence else "State Machine"
+                ),
+                readonly=readonly,
+            )
+            if readonly:
+                dialog.exec_()
+                return
+            if dialog.exec_():
+                result = dialog.get_state_data()
+                if result and result[0]:
+                    name, plugin, outcomes, remappings, description, defaults = result
+                    if not self.apply_common_state_updates(
+                        state_node,
+                        name,
+                        remappings,
+                        getattr(state_node, "description", ""),
+                        defaults,
+                    ):
+                        return
+                    self.sync_blackboard_keys()
+                    self.statusBar().showMessage(
+                        f"Updated {'concurrence' if state_node.is_concurrence else 'state machine'}: {name}",
+                        2000,
+                    )
+            return
+
+        plugin_info = getattr(state_node, "plugin_info", None)
+        if plugin_info is None and getattr(state_node, "model", None) is not None:
+            try:
+                plugin_info = self.resolve_plugin_info_for_model(state_node.model)
+            except Exception:
+                plugin_info = None
+
+        dialog = StatePropertiesDialog(
+            state_name=state_node.name,
+            plugin_info=plugin_info,
+            available_plugins=[plugin_info] if plugin_info else [],
+            remappings=state_node.remappings,
+            outcomes=[outcome.name for outcome in state_node.model.outcomes],
+            edit_mode=True,
+            parent=self,
+            description=getattr(state_node, "description", ""),
+            defaults=getattr(state_node, "defaults", []),
+            readonly=readonly,
+        )
+        if readonly:
+            dialog.exec_()
+            return
+
+        if dialog.exec_():
+            result = dialog.get_state_data()
+            if result[0]:
+                name, plugin, outcomes, remappings, description, defaults = result
+                if not self.apply_common_state_updates(
+                    state_node,
+                    name,
+                    remappings,
+                    description,
+                    defaults,
+                ):
+                    return
+                state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
+                self.sync_blackboard_keys()
+                self.statusBar().showMessage(f"Updated state: {name}", 2000)
