@@ -20,6 +20,9 @@ from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
 
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
+from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.outcome import Outcome
+from yasmin_editor.model.state_machine import StateMachine
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -47,6 +50,7 @@ class ContainerStateNode(QGraphicsRectItem):
         default_outcome: Optional[str] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
+        model: Optional[Union[StateMachine, Concurrence]] = None,
     ) -> None:
         """Initialize a container state node.
 
@@ -61,18 +65,30 @@ class ContainerStateNode(QGraphicsRectItem):
             default_outcome: Default outcome for Concurrence states.
         """
         super().__init__(-500, -400, 1000, 800)
-        self.name = name
+        self.model: Union[StateMachine, Concurrence] = model or (
+            Concurrence(
+                name=name,
+                description=description,
+                default_outcome=default_outcome,
+                remappings=dict(remappings or {}),
+                outcomes=[Outcome(name=item) for item in outcomes or []],
+            )
+            if is_concurrence
+            else StateMachine(
+                name=name,
+                description=description,
+                start_state=start_state,
+                remappings=dict(remappings or {}),
+                outcomes=[Outcome(name=item) for item in outcomes or []],
+            )
+        )
         self.plugin_info: Optional["PluginInfo"] = None
-        self.is_state_machine = not is_concurrence
-        self.is_concurrence = is_concurrence
+        self.is_state_machine = isinstance(self.model, StateMachine)
+        self.is_concurrence = isinstance(self.model, Concurrence)
         self.connections: List["ConnectionLine"] = []
-        self.remappings = remappings or {}
         self.final_outcomes: Dict[str, "FinalOutcomeNode"] = {}
-        self.start_state = start_state
-        self.default_outcome = default_outcome
         self.child_states: Dict[str, Union["StateNode", "ContainerStateNode"]] = {}
         self.parent_container: Optional["ContainerStateNode"] = None
-        self.description: str = description
         self.defaults: List[Dict[str, str]] = defaults or []
         self.min_width = 1000
         self.min_height = 800
@@ -124,11 +140,69 @@ class ContainerStateNode(QGraphicsRectItem):
 
         self.connection_port = ConnectionPort(self)
 
+    @property
+    def name(self) -> str:
+        return self.model.name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self.model.name = value
+        if hasattr(self, "title"):
+            prefix = "CONCURRENCE" if self.is_concurrence else "STATE MACHINE"
+            self.title.setPlainText(f"{prefix}: {value}")
+            title_rect = self.title.boundingRect()
+            self.title.setPos(-title_rect.width() / 2, -385)
+
+    @property
+    def description(self) -> str:
+        return self.model.description
+
+    @description.setter
+    def description(self, value: str) -> None:
+        self.model.description = value
+
+    @property
+    def remappings(self) -> Dict[str, str]:
+        return self.model.remappings
+
+    @remappings.setter
+    def remappings(self, value: Dict[str, str]) -> None:
+        self.model.remappings.clear()
+        self.model.remappings.update(value or {})
+
+    @property
+    def start_state(self) -> Optional[str]:
+        return self.model.start_state if isinstance(self.model, StateMachine) else None
+
+    @start_state.setter
+    def start_state(self, value: Optional[str]) -> None:
+        if isinstance(self.model, StateMachine):
+            self.model.start_state = value
+            if hasattr(self, "start_state_label"):
+                self.update_label()
+
+    @property
+    def default_outcome(self) -> Optional[str]:
+        return self.model.default_outcome if isinstance(self.model, Concurrence) else None
+
+    @default_outcome.setter
+    def default_outcome(self, value: Optional[str]) -> None:
+        if isinstance(self.model, Concurrence):
+            self.model.default_outcome = value
+            if hasattr(self, "default_outcome_label"):
+                self.update_label()
+
     def _set_label_font(self, label: QGraphicsTextItem) -> None:
         font = QFont()
         font.setPointSize(8)
         font.setBold(True)
         label.setFont(font)
+
+    def update_start_state_label(self) -> None:
+        self.update_label()
+
+    def update_default_outcome_label(self) -> None:
+        self.update_label()
 
     def update_label(self) -> None:
         if hasattr(self, "start_state_label"):
@@ -173,6 +247,8 @@ class ContainerStateNode(QGraphicsRectItem):
     ) -> None:
         if state_node.name not in self.child_states:
             self.child_states[state_node.name] = state_node
+            if self.model.get_state(state_node.name) is None:
+                self.model.add_state(state_node.model)
             state_node.parent_container = self
             state_node.setParentItem(self)
             self._update_layout()
@@ -183,6 +259,7 @@ class ContainerStateNode(QGraphicsRectItem):
             state.parent_container = None
             state.setParentItem(None)
             del self.child_states[state_name]
+            self.model.remove_state(state_name)
             self._update_layout()
 
     def _update_layout(self) -> None:
@@ -236,6 +313,8 @@ class ContainerStateNode(QGraphicsRectItem):
         """
         if outcome_node.name not in self.final_outcomes:
             self.final_outcomes[outcome_node.name] = outcome_node
+            if not any(outcome.name == outcome_node.name for outcome in self.model.outcomes):
+                self.model.add_outcome(outcome_node.model)
             outcome_node.parent_container = self
             outcome_node.setParentItem(self)
 
@@ -429,10 +508,6 @@ class ContainerStateNode(QGraphicsRectItem):
         elif change == QGraphicsItem.ItemPositionHasChanged:
             if self.parent_container:
                 self.parent_container.auto_resize_for_children()
-            if self.scene() and self.scene().views():
-                canvas = self.scene().views()[0]
-                if hasattr(canvas, "editor_ref") and canvas.editor_ref:
-                    canvas.editor_ref.on_graphics_item_position_changed()
 
         elif change == QGraphicsItem.ItemSelectedChange:
             if value:

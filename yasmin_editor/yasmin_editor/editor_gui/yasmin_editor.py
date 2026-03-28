@@ -50,14 +50,16 @@ from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
 from yasmin_editor.editor_gui.state_properties_dialog import StatePropertiesDialog
 from yasmin_editor.editor_gui.state_machine_dialog import StateMachineDialog
 from yasmin_editor.editor_gui.concurrence_dialog import ConcurrenceDialog
+from yasmin_editor.editor_gui.model_adapter import EditorModelAdapter
 from yasmin_editor.editor_gui.blackboard_key_dialog import BlackboardKeyDialog
 from yasmin_editor.editor_gui.outcome_description_dialog import OutcomeDescriptionDialog
-from yasmin_editor.editor_gui.model_adapter import (
-    load_model_into_editor,
-    sync_model_from_editor,
-)
-from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
+from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.key import Key
+from yasmin_editor.model.outcome import Outcome
+from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
+from yasmin_editor.model.transition import Transition
+from yasmin_editor.model.validation import validate_model
 
 
 class YasminEditor(QMainWindow):
@@ -79,26 +81,206 @@ class YasminEditor(QMainWindow):
         self.showMaximized()
 
         self.plugin_manager = manager
-        self.state_nodes: Dict[str, StateNode] = {}
+        self.root_model = StateMachine(name="")
+        self.state_nodes: Dict[str, StateNode | ContainerStateNode] = {}
         self.final_outcomes: Dict[str, FinalOutcomeNode] = {}
         self.connections: List[ConnectionLine] = []
-        self.root_sm_name = ""
-        self.start_state = None
         self._blackboard_keys: List[Dict[str, str]] = []
         self._blackboard_key_metadata: Dict[str, Dict[str, str]] = {}
         self._highlight_blackboard_usage = True
-        self._suspend_model_sync = False
-        self.model = StateMachine(name="")
 
         self.layout_seed = 42
         self.layout_rng = random.Random(self.layout_seed)
 
+        self.model_adapter = EditorModelAdapter(self)
         self.create_ui()
 
         self.statusBar().showMessage("Loading plugins...")
         QApplication.processEvents()
         self.populate_plugin_lists()
         self.statusBar().showMessage("Ready", 3000)
+
+    @property
+    def root_sm_name(self) -> str:
+        return self.root_model.name
+
+    @root_sm_name.setter
+    def root_sm_name(self, value: str) -> None:
+        self.root_model.name = value
+
+    @property
+    def start_state(self) -> Optional[str]:
+        return self.root_model.start_state
+
+    @start_state.setter
+    def start_state(self, value: Optional[str]) -> None:
+        self.root_model.start_state = value
+
+    def get_root_state_nodes(self) -> Dict[str, StateNode | ContainerStateNode]:
+        return {
+            name: node
+            for name, node in self.state_nodes.items()
+            if getattr(node, "parent_container", None) is None
+        }
+
+    def get_container_path(self, container: Optional[ContainerStateNode]) -> str:
+        names: List[str] = []
+        current = container
+        while current is not None:
+            names.append(current.name)
+            current = current.parent_container
+        return ".".join(reversed(names))
+
+    def get_state_node_key(
+        self,
+        name: str,
+        parent_container: Optional[ContainerStateNode] = None,
+    ) -> str:
+        container_path = self.get_container_path(parent_container)
+        return f"{container_path}.{name}" if container_path else name
+
+    def register_state_node(
+        self,
+        state_node: StateNode | ContainerStateNode,
+        parent_container: Optional[ContainerStateNode] = None,
+    ) -> str:
+        key = self.get_state_node_key(state_node.name, parent_container)
+        self.state_nodes[key] = state_node
+        return key
+
+    def find_selected_item(self, item_type):
+        for item in self.canvas.scene.selectedItems():
+            if isinstance(item, item_type):
+                return item
+        return None
+
+    def find_selected_state_node(self) -> Optional[StateNode | ContainerStateNode]:
+        return self.find_selected_item((StateNode, ContainerStateNode))
+
+    def find_selected_container(self) -> Optional[ContainerStateNode]:
+        return self.find_selected_item(ContainerStateNode)
+
+    def get_selected_container_or_warn(self, message: str) -> Optional[ContainerStateNode]:
+        container = self.find_selected_container()
+        if container is None:
+            QMessageBox.warning(self, "Error", message)
+        return container
+
+    def has_state_name_conflict(
+        self,
+        state_name: str,
+        parent_container: Optional[ContainerStateNode] = None,
+    ) -> bool:
+        if parent_container is None:
+            return state_name in self.get_root_state_nodes()
+        return state_name in parent_container.child_states
+
+    def add_model_state(
+        self,
+        model: State,
+        defaults: Optional[List[Dict[str, str]]] = None,
+        parent_container: Optional[ContainerStateNode] = None,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+    ) -> StateNode | ContainerStateNode:
+        if parent_container is None:
+            position = self.get_free_position()
+            x = position.x() if x is None else x
+            y = position.y() if y is None else y
+            self.root_model.add_state(model)
+            self.root_model.layout.set_state_position(model.name, x, y)
+            node = self.model_adapter.create_state_view(model, x=x, y=y)
+            self.update_start_state_combo()
+
+            if len(self.get_root_state_nodes()) == 1 and not self.start_state:
+                self.start_state = model.name
+                index = self.start_state_combo.findText(model.name)
+                if index >= 0:
+                    self.start_state_combo.setCurrentIndex(index)
+        else:
+            node = self.model_adapter.create_state_view(
+                model,
+                parent_container=parent_container,
+                x=0.0 if x is None else x,
+                y=0.0 if y is None else y,
+            )
+            if parent_container.is_state_machine and len(parent_container.child_states) == 1:
+                parent_container.start_state = model.name
+                parent_container.update_start_state_label()
+
+        node.defaults = defaults or []
+        self.sync_blackboard_keys()
+        return node
+
+    def delete_connection_item(self, connection: ConnectionLine) -> None:
+        self.unregister_connection_in_model(connection)
+        connection.from_node.remove_connection(connection)
+        connection.to_node.remove_connection(connection)
+        self.canvas.scene.removeItem(connection)
+        self.canvas.scene.removeItem(connection.arrow_head)
+        self.canvas.scene.removeItem(connection.label_bg)
+        self.canvas.scene.removeItem(connection.label)
+        if connection in self.connections:
+            self.connections.remove(connection)
+
+    def iter_state_subtree_items(self, state_node: StateNode | ContainerStateNode):
+        yield state_node
+        if isinstance(state_node, ContainerStateNode):
+            for child_state in state_node.child_states.values():
+                yield from self.iter_state_subtree_items(child_state)
+            for final_outcome in state_node.final_outcomes.values():
+                yield final_outcome
+
+    def delete_state_item(self, state_node: StateNode | ContainerStateNode) -> None:
+        connections_to_remove: List[ConnectionLine] = []
+        for item in self.iter_state_subtree_items(state_node):
+            for connection in getattr(item, "connections", []):
+                if connection not in connections_to_remove:
+                    connections_to_remove.append(connection)
+
+        for connection in connections_to_remove:
+            self.delete_connection_item(connection)
+
+        parent_container = getattr(state_node, "parent_container", None)
+        if parent_container is not None:
+            parent_path = self.get_container_path(parent_container)
+            self._remove_state_node_entries(state_node, parent_path)
+            parent_container.remove_child_state(state_node.name)
+            parent_container.auto_resize_for_children()
+            self.canvas.scene.removeItem(state_node)
+            self.sync_blackboard_keys()
+            self.statusBar().showMessage(
+                f"Deleted nested state: {state_node.name}",
+                2000,
+            )
+            return
+
+        self._remove_state_node_entries(state_node)
+        self.root_model.remove_state(state_node.name)
+        self.canvas.scene.removeItem(state_node)
+        self.update_start_state_combo()
+        self.sync_blackboard_keys()
+        self.statusBar().showMessage(f"Deleted state: {state_node.name}", 2000)
+
+    def delete_final_outcome_item(self, outcome_node: FinalOutcomeNode) -> None:
+        for connection in outcome_node.connections[:]:
+            self.delete_connection_item(connection)
+
+        parent_container = outcome_node.parent_container
+        if parent_container is not None:
+            parent_container.final_outcomes.pop(outcome_node.name, None)
+            parent_container.model.remove_outcome(outcome_node.name)
+            parent_container.auto_resize_for_children()
+            self.canvas.scene.removeItem(outcome_node)
+        else:
+            self.final_outcomes.pop(outcome_node.name, None)
+            self.root_model.remove_outcome(outcome_node.name)
+            self.canvas.scene.removeItem(outcome_node)
+
+        self.statusBar().showMessage(
+            f"Deleted final outcome: {outcome_node.name}",
+            2000,
+        )
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """Handle window close event to ensure proper cleanup."""
@@ -261,9 +443,7 @@ class YasminEditor(QMainWindow):
         root_sm_row2.addWidget(QLabel("<b>Description:</b>"))
         self.root_sm_description_edit = QLineEdit()
         self.root_sm_description_edit.setPlaceholderText("Enter FSM description...")
-        self.root_sm_description_edit.textChanged.connect(
-            self.on_root_sm_description_changed
-        )
+        self.root_sm_description_edit.textChanged.connect(self.on_root_sm_description_changed)
         root_sm_row2.addWidget(self.root_sm_description_edit)
 
         root_sm_vlayout.addLayout(root_sm_row2)
@@ -319,7 +499,10 @@ class YasminEditor(QMainWindow):
             text: The new state machine name.
         """
         self.root_sm_name = text
-        self.sync_model_from_gui()
+
+    def on_root_sm_description_changed(self, text: str) -> None:
+        """Handle root state machine description change."""
+        self.root_model.description = text
 
     def on_start_state_changed(self, text: str) -> None:
         """Handle initial state selection change.
@@ -331,55 +514,6 @@ class YasminEditor(QMainWindow):
             self.start_state = None
         else:
             self.start_state = text
-        self.sync_model_from_gui()
-
-    def on_root_sm_description_changed(self, text: str) -> None:
-        """Handle root state machine description change."""
-        self.sync_model_from_gui()
-
-    def sync_model_from_gui(self) -> None:
-        """Synchronize the editor backend model from the current GUI state."""
-        if self._suspend_model_sync:
-            return
-        self.model = sync_model_from_editor(self)
-
-    def reset_editor_state(self) -> None:
-        """Reset the current editor state to an empty root state machine."""
-        self.canvas.scene.clear()
-        self.state_nodes.clear()
-        self.final_outcomes.clear()
-        self.connections.clear()
-        self.root_sm_name = ""
-        self.start_state = None
-        self.root_sm_name_edit.clear()
-        self.root_sm_description_edit.clear()
-        self._blackboard_keys = []
-        self._blackboard_key_metadata = {}
-        self.refresh_blackboard_keys_list()
-        self.update_start_state_combo()
-        self.model = StateMachine(name="")
-
-    def load_from_xml(self, file_path: str) -> None:
-        """Load an XML state machine into the editor."""
-        self.reset_editor_state()
-
-        self._suspend_model_sync = True
-        try:
-            self.model = model_from_xml(file_path)
-            load_model_into_editor(self, self.model)
-        finally:
-            self._suspend_model_sync = False
-
-        self.sync_model_from_gui()
-
-    def save_to_xml(self, file_path: str) -> None:
-        """Save the current editor content as XML."""
-        self.sync_model_from_gui()
-        model_to_xml(self.model, file_path)
-
-    def on_graphics_item_position_changed(self) -> None:
-        """Update the backend model after a graphics item moved."""
-        self.sync_model_from_gui()
 
     def filter_blackboard_keys(self, text: str) -> None:
         """Filter blackboard keys based on search text."""
@@ -396,6 +530,37 @@ class YasminEditor(QMainWindow):
             label += f" [default: {default_value}, type: {default_type}]"
 
         return label
+
+    def dicts_to_keys(self, keys: List[Dict[str, str]]) -> List[Key]:
+        result: List[Key] = []
+        for key_data in keys:
+            key_name = str(key_data.get("name", "") or "").strip()
+            if not key_name:
+                continue
+            result.append(
+                Key(
+                    name=key_name,
+                    key_type=str(key_data.get("key_type", "in") or "in").strip(),
+                    description=str(key_data.get("description", "") or "").strip(),
+                    default_type=str(key_data.get("default_type", "") or "").strip(),
+                    default_value=str(key_data.get("default_value", "") or ""),
+                )
+            )
+        return result
+
+    def keys_to_dicts(self, keys: List[Key]) -> List[Dict[str, str]]:
+        result: List[Dict[str, str]] = []
+        for key in keys:
+            result.append(
+                {
+                    "name": key.name,
+                    "key_type": key.key_type,
+                    "description": key.description,
+                    "default_type": key.default_type,
+                    "default_value": "" if key.default_value is None else str(key.default_value),
+                }
+            )
+        return result
 
     def _get_plugin_key_usage(
         self, state_node: StateNode, key_info: Dict[str, str], is_input: bool
@@ -495,8 +660,8 @@ class YasminEditor(QMainWindow):
             if key_name in used_key_names
         }
         self._blackboard_keys = list(derived_keys.values())
+        self.root_model.keys = self.dicts_to_keys(self._blackboard_keys)
         self.refresh_blackboard_keys_list()
-        self.sync_model_from_gui()
 
     def refresh_blackboard_keys_list(self) -> None:
         current_key_name = self.get_selected_blackboard_key_name()
@@ -577,12 +742,16 @@ class YasminEditor(QMainWindow):
                 "default_type": str(key.get("default_type", "") or "").strip(),
                 "default_value": str(key.get("default_value", "") or "").strip(),
             }
+        self.root_model.keys = self.dicts_to_keys(keys)
+        self._blackboard_keys = [dict(item) for item in keys]
         if sync:
             self.sync_blackboard_keys()
+        else:
+            self.refresh_blackboard_keys_list()
 
     def get_blackboard_keys(self) -> List[Dict[str, str]]:
         self.sync_blackboard_keys()
-        return [dict(key) for key in self._blackboard_keys]
+        return self.keys_to_dicts(self.root_model.keys)
 
     def add_root_default_row(self) -> None:
         pass
@@ -703,7 +872,7 @@ class YasminEditor(QMainWindow):
         self.start_state_combo.clear()
         self.start_state_combo.addItem("(None)")
 
-        for state_name in self.state_nodes.keys():
+        for state_name in sorted(self.get_root_state_nodes().keys()):
             self.start_state_combo.addItem(state_name)
 
         if current:
@@ -715,6 +884,285 @@ class YasminEditor(QMainWindow):
                 self.start_state_combo.setCurrentIndex(0)
         else:
             self.start_state_combo.setCurrentIndex(0)
+
+    def resolve_plugin_info_for_model(self, model: State) -> PluginInfo:
+        if model.state_type == "py":
+            plugin = next(
+                (
+                    item
+                    for item in self.plugin_manager.python_plugins
+                    if item.module == model.module and item.class_name == model.class_name
+                ),
+                None,
+            )
+        elif model.state_type == "cpp":
+            plugin = next(
+                (
+                    item
+                    for item in self.plugin_manager.cpp_plugins
+                    if item.class_name == model.class_name
+                ),
+                None,
+            )
+        else:
+            plugin = next(
+                (
+                    item
+                    for item in self.plugin_manager.xml_files
+                    if item.file_name == model.file_name
+                    and (not model.package_name or item.package_name == model.package_name)
+                ),
+                None,
+            )
+            if plugin is None and model.file_name:
+                plugin = next(
+                    (
+                        item
+                        for item in self.plugin_manager.xml_files
+                        if item.file_name == model.file_name
+                    ),
+                    None,
+                )
+
+        if plugin is None:
+            raise ValueError(
+                f"Unable to resolve plugin for state '{model.name}'"
+            )
+        return plugin
+
+    def create_leaf_model(
+        self,
+        name: str,
+        plugin_info: PluginInfo,
+        description: str = "",
+        remappings: Optional[Dict[str, str]] = None,
+        outcomes: Optional[List[str]] = None,
+    ) -> State:
+        state_type = {"python": "py", "cpp": "cpp", "xml": "xml"}.get(
+            plugin_info.plugin_type,
+            plugin_info.plugin_type,
+        )
+        model = State(
+            name=name,
+            description=description or "",
+            remappings=dict(remappings or {}),
+            state_type=state_type,
+            module=getattr(plugin_info, "module", None),
+            class_name=getattr(plugin_info, "class_name", None),
+            package_name=getattr(plugin_info, "package_name", None),
+            file_name=getattr(plugin_info, "file_name", None),
+        )
+        for outcome_name in list(outcomes or getattr(plugin_info, "outcomes", []) or []):
+            model.add_outcome(Outcome(name=outcome_name))
+        return model
+
+    def create_container_model(
+        self,
+        name: str,
+        is_concurrence: bool,
+        outcomes: Optional[List[str]] = None,
+        remappings: Optional[Dict[str, str]] = None,
+        start_state: Optional[str] = None,
+        default_outcome: Optional[str] = None,
+        description: str = "",
+    ) -> StateMachine | Concurrence:
+        if is_concurrence:
+            model: StateMachine | Concurrence = Concurrence(
+                name=name,
+                description=description or "",
+                default_outcome=default_outcome,
+                remappings=dict(remappings or {}),
+            )
+        else:
+            model = StateMachine(
+                name=name,
+                description=description or "",
+                start_state=start_state,
+                remappings=dict(remappings or {}),
+            )
+        for outcome_name in outcomes or []:
+            model.add_outcome(Outcome(name=outcome_name))
+        return model
+
+    def reset_editor_state(self, model: Optional[StateMachine] = None) -> None:
+        self.canvas.scene.clear()
+        self.state_nodes.clear()
+        self.final_outcomes.clear()
+        self.connections.clear()
+        self._blackboard_keys = []
+        self._blackboard_key_metadata = {}
+        self.root_sm_name_edit.blockSignals(True)
+        self.root_sm_description_edit.blockSignals(True)
+        self.root_sm_name_edit.clear()
+        self.root_sm_description_edit.clear()
+        self.root_sm_name_edit.blockSignals(False)
+        self.root_sm_description_edit.blockSignals(False)
+        self.root_model = model or self.model_adapter.create_empty_root_model()
+        self.refresh_blackboard_keys_list()
+        self.update_start_state_combo()
+
+    def load_from_xml(self, file_path: str) -> None:
+        self.model_adapter.load_from_xml(file_path)
+
+    def save_to_xml(self, file_path: str) -> None:
+        self.model_adapter.save_to_xml(file_path)
+
+    def find_target_view(self, target_name: str, source_container=None):
+        container = source_container
+        while container is not None:
+            if target_name in container.child_states:
+                return container.child_states[target_name]
+            if target_name in container.final_outcomes:
+                return container.final_outcomes[target_name]
+            container = container.parent_container
+
+        root_state = self.get_root_state_nodes().get(target_name)
+        if root_state is not None:
+            return root_state
+        return self.final_outcomes.get(target_name)
+
+    def _create_connection_view(self, from_node, to_node, outcome: str) -> ConnectionLine:
+        connection = ConnectionLine(from_node, to_node, outcome)
+        self.canvas.scene.addItem(connection)
+        self.canvas.scene.addItem(connection.arrow_head)
+        self.canvas.scene.addItem(connection.label_bg)
+        self.canvas.scene.addItem(connection.label)
+        self.connections.append(connection)
+        return connection
+
+    def register_connection_in_model(self, from_node, to_node, outcome: str) -> None:
+        source_container = getattr(from_node, "parent_container", None)
+        target_name = to_node.name
+
+        if (
+            isinstance(from_node, FinalOutcomeNode)
+            and source_container
+            and source_container.parent_container
+            and source_container.parent_container.is_concurrence
+            and isinstance(to_node, FinalOutcomeNode)
+            and to_node.parent_container == source_container.parent_container
+        ):
+            source_container.parent_container.model.set_outcome_rule(
+                target_name,
+                source_container.name,
+                outcome,
+            )
+            return
+
+        if isinstance(from_node, FinalOutcomeNode) and source_container and source_container.is_concurrence:
+            owner_container = source_container.parent_container
+            if owner_container is None:
+                owner_model = self.root_model
+            else:
+                owner_model = owner_container.model
+            if isinstance(owner_model, StateMachine):
+                owner_model.add_transition(
+                    source_container.name,
+                    Transition(source_outcome=outcome, target=target_name),
+                )
+            return
+
+        if source_container and isinstance(source_container.model, Concurrence):
+            source_container.model.set_outcome_rule(target_name, from_node.name, outcome)
+            return
+
+        owner_model = self.root_model if source_container is None else source_container.model
+        if isinstance(owner_model, StateMachine):
+            owner_name = from_node.name
+            owner_model.add_transition(
+                owner_name,
+                Transition(source_outcome=outcome, target=target_name),
+            )
+
+    def unregister_connection_in_model(self, connection: ConnectionLine) -> None:
+        from_node = connection.from_node
+        to_node = connection.to_node
+        source_container = getattr(from_node, "parent_container", None)
+        target_name = to_node.name
+
+        if (
+            isinstance(from_node, FinalOutcomeNode)
+            and source_container
+            and source_container.parent_container
+            and source_container.parent_container.is_concurrence
+            and isinstance(to_node, FinalOutcomeNode)
+            and to_node.parent_container == source_container.parent_container
+        ):
+            source_container.parent_container.model.remove_outcome_rule(
+                target_name,
+                source_container.name,
+            )
+            return
+
+        if isinstance(from_node, FinalOutcomeNode) and source_container and source_container.is_concurrence:
+            owner_container = source_container.parent_container
+            owner_model = self.root_model if owner_container is None else owner_container.model
+            if isinstance(owner_model, StateMachine):
+                owner_model.remove_transition(
+                    source_container.name,
+                    connection.outcome,
+                    target_name,
+                )
+            return
+
+        if source_container and isinstance(source_container.model, Concurrence):
+            source_container.model.remove_outcome_rule(target_name, from_node.name)
+            return
+
+        owner_model = self.root_model if source_container is None else source_container.model
+        if isinstance(owner_model, StateMachine):
+            owner_model.remove_transition(
+                from_node.name,
+                connection.outcome,
+                target_name,
+            )
+
+    def _rename_state_node_entries(self, old_prefix: str, new_prefix: str) -> None:
+        updates = {}
+        for key, value in list(self.state_nodes.items()):
+            if key == old_prefix or key.startswith(old_prefix + "."):
+                suffix = key[len(old_prefix):]
+                updates[new_prefix + suffix] = value
+                del self.state_nodes[key]
+        self.state_nodes.update(updates)
+
+    def _rename_state_node(self, state_node, new_name: str) -> None:
+        old_name = state_node.name
+        parent_container = getattr(state_node, "parent_container", None)
+        parent_model = self.root_model if parent_container is None else parent_container.model
+        old_prefix = self.get_state_node_key(old_name, parent_container)
+        new_prefix = self.get_state_node_key(new_name, parent_container)
+
+        parent_model.rename_state(old_name, new_name)
+
+        if parent_container is not None:
+            parent_container.child_states[new_name] = parent_container.child_states.pop(old_name)
+
+        self._rename_state_node_entries(old_prefix, new_prefix)
+        state_node.name = new_name
+        self.update_start_state_combo()
+
+    def apply_common_state_updates(
+        self,
+        state_node: StateNode | ContainerStateNode,
+        new_name: str,
+        remappings: Dict[str, str],
+        description: str,
+        defaults: List[Dict[str, str]],
+    ) -> bool:
+        if new_name != state_node.name:
+            if self.has_state_name_conflict(
+                new_name,
+                getattr(state_node, "parent_container", None),
+            ):
+                QMessageBox.warning(self, "Error", f"State '{new_name}' already exists!")
+                return False
+            self._rename_state_node(state_node, new_name)
+
+        state_node.remappings = remappings
+        state_node.description = description
+        state_node.defaults = defaults
+        return True
 
     def on_plugin_double_clicked(self, item: QListWidgetItem) -> None:
         """Handle double-click on a plugin item to add it as a state.
@@ -756,11 +1204,7 @@ class YasminEditor(QMainWindow):
         NODE_HEIGHT = 350
         NODES_PER_ROW = 3
 
-        root_nodes = [
-            node
-            for node in self.state_nodes.values()
-            if not hasattr(node, "parent_container") or node.parent_container is None
-        ]
+        root_nodes = list(self.get_root_state_nodes().values())
 
         all_items = list(root_nodes) + list(self.final_outcomes.values())
 
@@ -786,64 +1230,35 @@ class YasminEditor(QMainWindow):
         description: str = "",
         defaults: List[Dict[str, str]] = None,
     ) -> None:
-        """Create a new state node in the canvas.
-
-        Args:
-            name: Name of the state.
-            plugin_info: Plugin information for the state.
-            is_state_machine: Whether this is a state machine container.
-            is_concurrence: Whether this is a concurrence container.
-            outcomes: List of outcome names.
-            remappings: Dictionary of key remappings.
-            start_state: Initial state for state machines.
-            default_outcome: Default outcome for concurrences.
-        """
+        """Create a new state node in the canvas."""
         if not name:
             QMessageBox.warning(self, "Validation Error", "Name is required!")
             return
 
-        if name in self.state_nodes:
+        if self.has_state_name_conflict(name):
             QMessageBox.warning(self, "Error", f"State '{name}' already exists!")
             return
 
-        pos = self.get_free_position()
-
         if is_state_machine or is_concurrence:
-            node = ContainerStateNode(
-                name,
-                pos.x(),
-                pos.y(),
-                is_concurrence,
-                remappings,
-                outcomes,
-                start_state,
-                default_outcome,
-                description or "",
-                defaults,
+            model = self.create_container_model(
+                name=name,
+                is_concurrence=is_concurrence,
+                outcomes=outcomes,
+                remappings=remappings,
+                start_state=start_state,
+                default_outcome=default_outcome,
+                description=description,
             )
         else:
-            node = StateNode(
-                name,
-                plugin_info,
-                pos.x(),
-                pos.y(),
-                remappings,
-                description or "",
-                defaults,
+            model = self.create_leaf_model(
+                name=name,
+                plugin_info=plugin_info,
+                description=description,
+                remappings=remappings,
+                outcomes=outcomes,
             )
 
-        self.canvas.scene.addItem(node)
-        self.state_nodes[name] = node
-        self.update_start_state_combo()
-
-        if len(self.state_nodes) == 1 and not self.start_state:
-            self.start_state = name
-            index = self.start_state_combo.findText(name)
-            if index >= 0:
-                self.start_state_combo.setCurrentIndex(index)
-
-        self.sync_blackboard_keys()
-        self.sync_model_from_gui()
+        self.add_model_state(model, defaults=defaults)
         self.statusBar().showMessage(f"Added state: {name}", 2000)
 
     def add_state(self) -> None:
@@ -905,13 +1320,7 @@ class YasminEditor(QMainWindow):
 
     def edit_state(self) -> None:
         """Edit properties of the selected state."""
-        selected_items = self.canvas.scene.selectedItems()
-        state_node = None
-
-        for item in selected_items:
-            if isinstance(item, (StateNode, ContainerStateNode)):
-                state_node = item
-                break
+        state_node = self.find_selected_state_node()
 
         if not state_node:
             QMessageBox.warning(self, "Error", "Please select a state to edit!")
@@ -946,34 +1355,19 @@ class YasminEditor(QMainWindow):
                             result
                         )
 
-                        if name != old_name:
-                            if name in self.state_nodes:
-                                QMessageBox.warning(
-                                    self, "Error", f"State '{name}' already exists!"
-                                )
-                                return
+                        if not self.apply_common_state_updates(
+                            state_node,
+                            name,
+                            remappings,
+                            description,
+                            defaults,
+                        ):
+                            return
 
-                            if self.start_state == old_name:
-                                self.start_state = name
-
-                            del self.state_nodes[old_name]
-                            self.state_nodes[name] = state_node
-                            state_node.name = name
-                            state_node.title.setPlainText(f"STATE MACHINE: {name}")
-                            title_rect = state_node.title.boundingRect()
-                            state_node.title.setPos(-title_rect.width() / 2, -75)
-                            self.update_start_state_combo()
-
-                        state_node.remappings = remappings
-                        state_node.description = description
-                        state_node.defaults = defaults
-
-                        if start_state:
-                            state_node.start_state = start_state
-                            state_node.update_start_state_label()
+                        state_node.start_state = start_state
+                        state_node.update_start_state_label()
 
                         self.sync_blackboard_keys()
-                        self.sync_model_from_gui()
                         self.statusBar().showMessage(
                             f"Updated state machine: {name}", 2000
                         )
@@ -1012,34 +1406,19 @@ class YasminEditor(QMainWindow):
                             defaults,
                         ) = result
 
-                        if name != old_name:
-                            if name in self.state_nodes:
-                                QMessageBox.warning(
-                                    self, "Error", f"State '{name}' already exists!"
-                                )
-                                return
+                        if not self.apply_common_state_updates(
+                            state_node,
+                            name,
+                            remappings,
+                            description,
+                            defaults,
+                        ):
+                            return
 
-                            if self.start_state == old_name:
-                                self.start_state = name
-
-                            del self.state_nodes[old_name]
-                            self.state_nodes[name] = state_node
-                            state_node.name = name
-                            state_node.title.setPlainText(f"CONCURRENCE: {name}")
-                            title_rect = state_node.title.boundingRect()
-                            state_node.title.setPos(-title_rect.width() / 2, -75)
-                            self.update_start_state_combo()
-
-                        state_node.remappings = remappings
-                        state_node.description = description
-                        state_node.defaults = defaults
-
-                        if default_outcome:
-                            state_node.default_outcome = default_outcome
-                            state_node.update_default_outcome_label()
+                        state_node.default_outcome = default_outcome
+                        state_node.update_default_outcome_label()
 
                         self.sync_blackboard_keys()
-                        self.sync_model_from_gui()
                         self.statusBar().showMessage(f"Updated concurrence: {name}", 2000)
         else:
             dialog = StatePropertiesDialog(
@@ -1065,41 +1444,21 @@ class YasminEditor(QMainWindow):
                 if result[0]:
                     name, plugin, outcomes, remappings, description, defaults = result
 
-                    if name != old_name:
-                        if name in self.state_nodes:
-                            QMessageBox.warning(
-                                self, "Error", f"State '{name}' already exists!"
-                            )
-                            return
-
-                        if self.start_state == old_name:
-                            self.start_state = name
-
-                        del self.state_nodes[old_name]
-                        self.state_nodes[name] = state_node
-                        state_node.name = name
-                        state_node.text.setPlainText(name)
-                        text_rect = state_node.text.boundingRect()
-                        state_node.text.setPos(
-                            -text_rect.width() / 2, -text_rect.height() / 2
-                        )
-                        self.update_start_state_combo()
-
-                    state_node.remappings = remappings
-                    state_node.description = description
-                    state_node.defaults = defaults
+                    if not self.apply_common_state_updates(
+                        state_node,
+                        name,
+                        remappings,
+                        description,
+                        defaults,
+                    ):
+                        return
                     self.sync_blackboard_keys()
-                    self.sync_model_from_gui()
                     self.statusBar().showMessage(f"Updated state: {name}", 2000)
 
     def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
         """Edit the description of a final outcome."""
         if outcome_node is None:
-            selected_items = self.canvas.scene.selectedItems()
-            for item in selected_items:
-                if isinstance(item, FinalOutcomeNode):
-                    outcome_node = item
-                    break
+            outcome_node = self.find_selected_item(FinalOutcomeNode)
 
         if outcome_node is None:
             QMessageBox.warning(self, "Error", "Please select a final outcome to edit!")
@@ -1114,7 +1473,6 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             outcome_node.description = dialog.get_description()
             outcome_node.update_tooltip()
-            self.sync_model_from_gui()
             self.statusBar().showMessage(
                 f"Updated outcome description: {outcome_node.name}",
                 2000,
@@ -1122,20 +1480,10 @@ class YasminEditor(QMainWindow):
 
     def add_state_to_container(self) -> None:
         """Add a child state to the selected container (SM or Concurrence)."""
-        selected_items = self.canvas.scene.selectedItems()
-        container = None
-
-        for item in selected_items:
-            if isinstance(item, ContainerStateNode):
-                container = item
-                break
-
-        if not container:
-            QMessageBox.warning(
-                self,
-                "Error",
-                "Please select a user-created Container State Machine or Concurrence!",
-            )
+        container = self.get_selected_container_or_warn(
+            "Please select a user-created Container State Machine or Concurrence!"
+        )
+        if container is None:
             return
 
         all_plugins = (
@@ -1156,35 +1504,24 @@ class YasminEditor(QMainWindow):
                     )
                     return
 
-                child_node = StateNode(
-                    name, plugin, 0, 0, remappings, description, defaults
+                model = self.create_leaf_model(
+                    name=name,
+                    plugin_info=plugin,
+                    description=description,
+                    remappings=remappings,
+                    outcomes=outcomes,
                 )
-                container.add_child_state(child_node)
-                full_name = f"{container.name}.{name}"
-                self.state_nodes[full_name] = child_node
-
-                self.sync_blackboard_keys()
-                self.sync_model_from_gui()
+                self.add_model_state(model, defaults=defaults, parent_container=container)
                 self.statusBar().showMessage(
                     f"Added state '{name}' to container '{container.name}'", 2000
                 )
 
-                if container.is_state_machine and len(container.child_states) == 1:
-                    container.start_state = name
-                    container.update_start_state_label()
-
     def add_state_machine_to_container(self) -> None:
         """Add a State Machine to the selected container."""
-        selected_items = self.canvas.scene.selectedItems()
-        container = None
-
-        for item in selected_items:
-            if isinstance(item, ContainerStateNode):
-                container = item
-                break
-
-        if not container:
-            QMessageBox.warning(self, "Error", "Please select a user-created Container!")
+        container = self.get_selected_container_or_warn(
+            "Please select a user-created Container!"
+        )
+        if container is None:
             return
 
         dialog = StateMachineDialog(parent=self)
@@ -1200,44 +1537,25 @@ class YasminEditor(QMainWindow):
                     )
                     return
 
-                child_sm = ContainerStateNode(
-                    name,
-                    0,
-                    0,
-                    False,
-                    remappings,
-                    outcomes,
-                    start_state,
-                    None,
+                model = self.create_container_model(
+                    name=name,
+                    is_concurrence=False,
+                    outcomes=outcomes,
+                    remappings=remappings,
+                    start_state=start_state,
                     description=description,
-                    defaults=defaults,
                 )
-                container.add_child_state(child_sm)
-                full_name = f"{container.name}.{name}"
-                self.state_nodes[full_name] = child_sm
-
-                self.sync_blackboard_keys()
-                self.sync_model_from_gui()
+                self.add_model_state(model, defaults=defaults, parent_container=container)
                 self.statusBar().showMessage(
                     f"Added State Machine '{name}' to container '{container.name}'", 2000
                 )
 
-                if container.is_state_machine and len(container.child_states) == 1:
-                    container.start_state = name
-                    container.update_start_state_label()
-
     def add_concurrence_to_container(self) -> None:
         """Add a Concurrence to the selected container."""
-        selected_items = self.canvas.scene.selectedItems()
-        container = None
-
-        for item in selected_items:
-            if isinstance(item, ContainerStateNode):
-                container = item
-                break
-
-        if not container:
-            QMessageBox.warning(self, "Error", "Please select a user-created Container!")
+        container = self.get_selected_container_or_warn(
+            "Please select a user-created Container!"
+        )
+        if container is None:
             return
 
         dialog = ConcurrenceDialog(parent=self)
@@ -1245,9 +1563,7 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             result = dialog.get_concurrence_data()
             if result:
-                name, outcomes, default_outcome, remappings, description, defaults = (
-                    result
-                )
+                name, outcomes, default_outcome, remappings, description, defaults = result
 
                 if name in container.child_states:
                     QMessageBox.warning(
@@ -1255,31 +1571,18 @@ class YasminEditor(QMainWindow):
                     )
                     return
 
-                child_cc = ContainerStateNode(
-                    name,
-                    0,
-                    0,
-                    True,
-                    remappings,
-                    outcomes,
-                    None,
-                    default_outcome,
+                model = self.create_container_model(
+                    name=name,
+                    is_concurrence=True,
+                    outcomes=outcomes,
+                    remappings=remappings,
+                    default_outcome=default_outcome,
                     description=description,
-                    defaults=defaults,
                 )
-                container.add_child_state(child_cc)
-                full_name = f"{container.name}.{name}"
-                self.state_nodes[full_name] = child_cc
-
-                self.sync_blackboard_keys()
-                self.sync_model_from_gui()
+                self.add_model_state(model, defaults=defaults, parent_container=container)
                 self.statusBar().showMessage(
                     f"Added Concurrence '{name}' to container '{container.name}'", 2000
                 )
-
-                if container.is_state_machine and len(container.child_states) == 1:
-                    container.start_state = name
-                    container.update_start_state_label()
 
     def create_connection_from_drag(
         self, from_node: StateNode, to_node: StateNode
@@ -1380,13 +1683,7 @@ class YasminEditor(QMainWindow):
     def create_connection(
         self, from_node: StateNode, to_node: StateNode, outcome: str
     ) -> None:
-        """Create and add a connection to the scene.
-
-        Args:
-            from_node: The source node.
-            to_node: The target node.
-            outcome: The outcome name for this transition.
-        """
+        """Create and add a connection to the scene."""
         is_in_concurrence = False
         if hasattr(from_node, "parent_container") and from_node.parent_container:
             if isinstance(from_node.parent_container, ContainerStateNode):
@@ -1403,12 +1700,8 @@ class YasminEditor(QMainWindow):
                     )
                     return
 
-        connection = ConnectionLine(from_node, to_node, outcome)
-        self.canvas.scene.addItem(connection)
-        self.canvas.scene.addItem(connection.arrow_head)
-        self.canvas.scene.addItem(connection.label_bg)
-        self.canvas.scene.addItem(connection.label)
-        self.connections.append(connection)
+        self._create_connection_view(from_node, to_node, outcome)
+        self.register_connection_in_model(from_node, to_node, outcome)
 
         for conn in self.connections:
             if (conn.from_node == from_node and conn.to_node == to_node) or (
@@ -1416,7 +1709,6 @@ class YasminEditor(QMainWindow):
             ):
                 conn.update_position()
 
-        self.sync_model_from_gui()
         self.statusBar().showMessage(
             f"Added transition: {from_node.name} --[{outcome}]--> {to_node.name}",
             2000,
@@ -1428,13 +1720,7 @@ class YasminEditor(QMainWindow):
             self, "Final Outcome", "Enter final outcome name:"
         )
         if ok and outcome_name:
-            selected_items = self.canvas.scene.selectedItems()
-            selected_container = None
-
-            for item in selected_items:
-                if isinstance(item, ContainerStateNode):
-                    selected_container = item
-                    break
+            selected_container = self.find_selected_container()
 
             if selected_container:
                 if outcome_name in selected_container.final_outcomes:
@@ -1449,21 +1735,17 @@ class YasminEditor(QMainWindow):
                 x = rect.right() - 100
                 y = rect.top() + 70 + len(selected_container.final_outcomes) * 80
 
-                node = FinalOutcomeNode(outcome_name, x, y, inside_container=True)
-                node.parent_container = selected_container
-                node.setParentItem(selected_container)
-                selected_container.final_outcomes[outcome_name] = node
-                selected_container.auto_resize_for_children()
+                model = Outcome(name=outcome_name)
+                self.model_adapter.create_final_outcome_view(model, selected_container, x=x, y=y)
 
                 if (
                     selected_container.is_concurrence
                     and len(selected_container.final_outcomes) == 1
+                    and not selected_container.default_outcome
                 ):
-                    if not selected_container.default_outcome:
-                        selected_container.default_outcome = outcome_name
-                        selected_container.update_default_outcome_label()
+                    selected_container.default_outcome = outcome_name
+                    selected_container.update_default_outcome_label()
 
-                self.sync_model_from_gui()
                 self.statusBar().showMessage(
                     f"Added final outcome '{outcome_name}' to container '{selected_container.name}'",
                     2000,
@@ -1477,96 +1759,24 @@ class YasminEditor(QMainWindow):
 
                 x = 600
                 y = len(self.final_outcomes) * 150
-                node = FinalOutcomeNode(outcome_name, x, y)
-                self.canvas.scene.addItem(node)
-                self.final_outcomes[outcome_name] = node
-                self.sync_model_from_gui()
+                model = Outcome(name=outcome_name)
+                self.root_model.add_outcome(model)
+                self.root_model.layout.set_outcome_position(outcome_name, x, y)
+                self.model_adapter.create_final_outcome_view(model, x=x, y=y)
                 self.statusBar().showMessage(f"Added final outcome: {outcome_name}", 2000)
 
     def delete_selected(self) -> None:
         """Delete the selected items from the canvas."""
         selected_items = self.canvas.scene.selectedItems()
-        changed = False
 
         for item in selected_items:
             if isinstance(item, (StateNode, ContainerStateNode)):
-                for connection in item.connections[:]:
-                    if connection.from_node == item:
-                        connection.to_node.remove_connection(connection)
-                    else:
-                        connection.from_node.remove_connection(connection)
-
-                    self.canvas.scene.removeItem(connection)
-                    self.canvas.scene.removeItem(connection.arrow_head)
-                    self.canvas.scene.removeItem(connection.label_bg)
-                    self.canvas.scene.removeItem(connection.label)
-                    if connection in self.connections:
-                        self.connections.remove(connection)
-
-                if hasattr(item, "parent_container") and item.parent_container:
-                    parent = item.parent_container
-
-                    if item.name in parent.child_states:
-                        del parent.child_states[item.name]
-
-                    self._remove_state_node_entries(item, parent.name)
-
-                    parent.auto_resize_for_children()
-                    self.canvas.scene.removeItem(item)
-                    self.sync_blackboard_keys()
-                    changed = True
-                    self.statusBar().showMessage(
-                        f"Deleted nested state: {item.name}", 2000
-                    )
-                else:
-                    self.canvas.scene.removeItem(item)
-                    self._remove_state_node_entries(item)
-                    self.update_start_state_combo()
-                    self.sync_blackboard_keys()
-                    changed = True
-                    self.statusBar().showMessage(f"Deleted state: {item.name}", 2000)
-
+                self.delete_state_item(item)
             elif isinstance(item, FinalOutcomeNode):
-                for connection in item.connections[:]:
-                    if connection.from_node == item:
-                        connection.to_node.remove_connection(connection)
-                    else:
-                        connection.from_node.remove_connection(connection)
-
-                    self.canvas.scene.removeItem(connection)
-                    self.canvas.scene.removeItem(connection.arrow_head)
-                    self.canvas.scene.removeItem(connection.label_bg)
-                    self.canvas.scene.removeItem(connection.label)
-                    if connection in self.connections:
-                        self.connections.remove(connection)
-
-                if item.parent_container:
-                    if item.name in item.parent_container.final_outcomes:
-                        del item.parent_container.final_outcomes[item.name]
-                    item.parent_container.auto_resize_for_children()
-                    self.canvas.scene.removeItem(item)
-                else:
-                    self.canvas.scene.removeItem(item)
-                    if item.name in self.final_outcomes:
-                        del self.final_outcomes[item.name]
-
-                changed = True
-                self.statusBar().showMessage(f"Deleted final outcome: {item.name}", 2000)
-
+                self.delete_final_outcome_item(item)
             elif isinstance(item, ConnectionLine):
-                item.from_node.remove_connection(item)
-                item.to_node.remove_connection(item)
-                self.canvas.scene.removeItem(item)
-                self.canvas.scene.removeItem(item.arrow_head)
-                self.canvas.scene.removeItem(item.label_bg)
-                self.canvas.scene.removeItem(item.label)
-                if item in self.connections:
-                    self.connections.remove(item)
-                changed = True
+                self.delete_connection_item(item)
                 self.statusBar().showMessage("Deleted transition", 2000)
-
-        if changed:
-            self.sync_model_from_gui()
 
     def show_help(self) -> None:
         """Display help dialog with usage instructions."""
@@ -1627,31 +1837,20 @@ class YasminEditor(QMainWindow):
         dialog.exec_()
 
     def new_state_machine(self) -> bool:
-        """Create a new state machine, clearing the current one.
-
-        Returns:
-            bool: True if a new state machine was created, False if cancelled.
-        """
-        if not self.confirm_reset_editor_state(
-            "New State Machine",
-            "Are you sure you want to create a new state machine? All unsaved changes will be lost.",
-        ):
-            return False
-
-        self.reset_editor_state()
-        self.statusBar().showMessage("New state machine created", 2000)
-        return True
-
-    def confirm_reset_editor_state(self, title: str, message: str) -> bool:
-        """Ask whether the current editor content may be discarded."""
+        """Create a new state machine, clearing the current one."""
         reply = QMessageBox.question(
             self,
-            title,
-            message,
+            "New State Machine",
+            "Are you sure you want to create a new state machine? All unsaved changes will be lost.",
             QMessageBox.Yes | QMessageBox.No,
         )
 
-        return reply == QMessageBox.Yes
+        if reply == QMessageBox.Yes:
+            self.reset_editor_state()
+            self.statusBar().showMessage("New state machine created", 2000)
+            return True
+
+        return False
 
     def open_state_machine(self) -> None:
         """Open a state machine from an XML file."""
@@ -1661,10 +1860,7 @@ class YasminEditor(QMainWindow):
 
         if file_path:
             try:
-                if not self.confirm_reset_editor_state(
-                    "Open State Machine",
-                    "Are you sure you want to open a state machine? All unsaved changes will be lost.",
-                ):
+                if not self.new_state_machine():
                     return
 
                 self.load_from_xml(file_path)
@@ -1673,27 +1869,9 @@ class YasminEditor(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Failed to open file: {str(e)}")
 
     def save_state_machine(self) -> None:
-        # Validation checks
-        errors = []
-
-        if not self.final_outcomes:
-            errors.append("- No final outcomes defined")
-
-        if not self.root_sm_name or not self.root_sm_name.strip():
-            errors.append("- Root state machine name is empty")
-
-        if not self.state_nodes:
-            errors.append("- No states defined")
-
-        if not self.start_state:
-            errors.append("- Initial state is not set")
-        elif self.start_state not in self.state_nodes:
-            errors.append(f"- Initial state '{self.start_state}' does not exist")
-
-        for name in self.state_nodes.keys():
-            if not name or not name.strip():
-                errors.append("- Found state with empty name")
-                break
+        self.model_adapter.sync_root_model_from_ui()
+        validation = validate_model(self.root_model)
+        errors = [f"- {item.message}" for item in validation.errors]
 
         if errors:
             error_msg = (

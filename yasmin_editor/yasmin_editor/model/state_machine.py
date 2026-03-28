@@ -32,7 +32,6 @@ class StateMachine(State):
     start_state: str | None = None
     states: dict[str, State] = field(default_factory=dict)
     transitions: dict[str, list[Transition]] = field(default_factory=dict)
-    remappings: dict[str, dict[str, str]] = field(default_factory=dict)
     layout: Layout = field(default_factory=Layout)
 
     @property
@@ -46,17 +45,71 @@ class StateMachine(State):
 
         self.states[state.name] = state
         self.transitions.setdefault(state.name, [])
-        self.remappings.setdefault(state.name, {})
 
     def add_transition(self, state_name: str, transition: Transition) -> None:
         """Add a transition for a child state."""
 
         self.transitions.setdefault(state_name, []).append(transition)
 
-    def set_remapping(self, state_name: str, source: str, target: str) -> None:
-        """Set a remapping for a child state inside this state machine."""
+    def remove_transition(
+        self,
+        state_name: str,
+        source_outcome: str,
+        target: str,
+    ) -> None:
+        """Remove a transition for a child state."""
 
-        self.remappings.setdefault(state_name, {})[source] = target
+        transitions = self.transitions.get(state_name, [])
+        self.transitions[state_name] = [
+            item
+            for item in transitions
+            if not (item.source_outcome == source_outcome and item.target == target)
+        ]
+        if not self.transitions.get(state_name):
+            self.transitions.pop(state_name, None)
+
+    def remove_state(self, name: str) -> None:
+        """Remove a child state and all related transitions."""
+
+        self.states.pop(name, None)
+        self.transitions.pop(name, None)
+        for transitions in self.transitions.values():
+            transitions[:] = [item for item in transitions if item.target != name]
+        if self.start_state == name:
+            self.start_state = None
+        self.layout.remove_state_position(name)
+
+    def rename_state(self, old_name: str, new_name: str) -> None:
+        """Rename a child state and update all related references."""
+
+        if old_name == new_name:
+            return
+
+        state = self.states.pop(old_name)
+        state.name = new_name
+        self.states[new_name] = state
+
+        if old_name in self.transitions:
+            self.transitions[new_name] = self.transitions.pop(old_name)
+
+        for transitions in self.transitions.values():
+            for transition in transitions:
+                if transition.target == old_name:
+                    transition.target = new_name
+
+        if self.start_state == old_name:
+            self.start_state = new_name
+
+        self.layout.rename_state_position(old_name, new_name)
+
+    def remove_outcome(self, name: str) -> None:
+        """Remove a final outcome and all related transitions."""
+
+        self.outcomes = [outcome for outcome in self.outcomes if outcome.name != name]
+        self.transitions.pop(name, None)
+        for transitions in self.transitions.values():
+            transitions[:] = [item for item in transitions if item.target != name]
+        self.layout.remove_outcome_position(name)
 
     def get_state(self, name: str) -> State | None:
         """Return a child state by name."""
@@ -99,13 +152,12 @@ class StateMachine(State):
                         f"{prefix}      {transition.source_outcome} -> {transition.target}"
                     )
 
-                state_remappings = self.remappings.get(state_name, {})
-                if state_remappings:
+                if state.remappings:
                     lines.append(
                         f"{prefix}      remap: "
                         + ", ".join(
                             f"{source}->{target}"
-                            for source, target in state_remappings.items()
+                            for source, target in state.remappings.items()
                         )
                     )
 

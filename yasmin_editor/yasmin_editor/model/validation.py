@@ -216,8 +216,7 @@ def _validate_state_machine(
                     f"Transition target '{transition.target}' does not exist",
                 )
 
-        remappings = state_machine.remappings.get(state_name, {})
-        for source_key, target_key in remappings.items():
+        for source_key, target_key in child_state.remappings.items():
             if not source_key:
                 result.add_error(child_path, "Remapping source key must not be empty")
             if not target_key:
@@ -254,15 +253,6 @@ def _validate_state_machine(
             path,
             f"Transitions defined for unknown owner '{owner_name}'",
         )
-
-    for owner_name in state_machine.remappings:
-        if owner_name == state_machine.name:
-            continue
-        if owner_name not in state_names:
-            result.add_error(
-                path,
-                f"Remappings defined for unknown state '{owner_name}'",
-            )
 
 
 def _validate_concurrence(

@@ -32,6 +32,7 @@ class State:
     description: str = ""
     keys: list[Key] = field(default_factory=list)
     outcomes: list[Outcome] = field(default_factory=list)
+    remappings: dict[str, str] = field(default_factory=dict)
     state_type: str | None = None
     module: str | None = None
     class_name: str | None = None
@@ -103,6 +104,14 @@ class State:
 
         if self.keys:
             lines.append(f"{prefix}  keys: {', '.join(key.name for key in self.keys)}")
+
+        if self.remappings:
+            lines.append(
+                f"{prefix}  remap: "
+                + ", ".join(
+                    f"{source}->{target}" for source, target in self.remappings.items()
+                )
+            )
 
         if self.description:
             lines.append(f"{prefix}  description: {self.description}")

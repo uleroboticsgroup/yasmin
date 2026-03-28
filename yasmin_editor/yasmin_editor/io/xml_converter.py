@@ -81,7 +81,7 @@ def _state_machine_to_element(
         for key in model.keys:
             element.append(_key_to_element(key))
 
-    _append_remaps(element, model.remappings.get(model.name, {}))
+    _append_remaps(element, model.remappings)
 
     for state in model.states.values():
         element.append(_state_to_element(state, model))
@@ -103,6 +103,8 @@ def _concurrence_to_element(model: Concurrence) -> ET.Element:
         element.set("default_outcome", model.default_outcome)
     if model.description:
         element.set("description", model.description)
+
+    _append_remaps(element, model.remappings)
 
     for state in model.states.values():
         element.append(_state_to_element(state, model))
@@ -143,8 +145,9 @@ def _state_to_element(state: State, parent: StateMachine | Concurrence) -> ET.El
         element.set("x", f"{position.x:.2f}")
         element.set("y", f"{position.y:.2f}")
 
+    _append_remaps(element, state.remappings)
+
     if isinstance(parent, StateMachine):
-        _append_remaps(element, parent.remappings.get(state.name, {}))
         for transition in parent.transitions.get(state.name, []):
             element.append(_transition_to_element(transition))
 
@@ -242,7 +245,7 @@ def _parse_state_machine_container(element: ET.Element) -> StateMachine:
     )
 
     model.keys.extend(_parse_keys(element.findall("Key")))
-    model.remappings[model.name] = _parse_remaps(element)
+    model.remappings.update(_parse_remaps(element))
     _parse_state_machine_content(model, element)
     return model
 
@@ -254,6 +257,7 @@ def _parse_concurrence_container(element: ET.Element) -> Concurrence:
         default_outcome=element.get("default_outcome"),
     )
 
+    model.remappings.update(_parse_remaps(element))
     _parse_concurrence_content(model, element)
     return model
 
@@ -283,7 +287,7 @@ def _parse_state_machine_content(
 
         state = _parse_state_like(child)
         model.add_state(state)
-        model.remappings[state.name] = _parse_remaps(child)
+        state.remappings.update(_parse_remaps(child))
 
         x = _parse_float(child.get("x"))
         y = _parse_float(child.get("y"))
@@ -316,6 +320,7 @@ def _parse_concurrence_content(
 
         state = _parse_state_like(child)
         model.add_state(state)
+        state.remappings.update(_parse_remaps(child))
 
         x = _parse_float(child.get("x"))
         y = _parse_float(child.get("y"))

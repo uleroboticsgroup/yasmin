@@ -21,6 +21,7 @@ from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont
 
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
+from yasmin_editor.model.outcome import Outcome
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -37,10 +38,10 @@ class FinalOutcomeNode(QGraphicsRectItem):
         y: float,
         inside_container: bool = False,
         description: str = "",
+        model: Optional[Outcome] = None,
     ) -> None:
         super().__init__(-60, -30, 120, 60)
-        self.name: str = name
-        self.description: str = description
+        self.model: Outcome = model or Outcome(name=name, description=description)
         self.connections: List["ConnectionLine"] = []
         self.parent_container: Optional["ContainerStateNode"] = None
         self.inside_container: bool = inside_container
@@ -66,6 +67,28 @@ class FinalOutcomeNode(QGraphicsRectItem):
         if inside_container:
             self.connection_port: ConnectionPort = ConnectionPort(self)
 
+        self.update_tooltip()
+
+    @property
+    def name(self) -> str:
+        return self.model.name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self.model.name = value
+        if hasattr(self, "text"):
+            self.text.setPlainText(value)
+            text_rect = self.text.boundingRect()
+            self.text.setPos(-text_rect.width() / 2, -text_rect.height() / 2)
+        self.update_tooltip()
+
+    @property
+    def description(self) -> str:
+        return self.model.description
+
+    @description.setter
+    def description(self, value: str) -> None:
+        self.model.description = value
         self.update_tooltip()
 
     def update_tooltip(self) -> None:
@@ -104,10 +127,6 @@ class FinalOutcomeNode(QGraphicsRectItem):
         elif change == QGraphicsItem.ItemPositionHasChanged:
             if self.parent_container:
                 self.parent_container.auto_resize_for_children()
-            if self.scene() and self.scene().views():
-                canvas = self.scene().views()[0]
-                if hasattr(canvas, "editor_ref") and canvas.editor_ref:
-                    canvas.editor_ref.on_graphics_item_position_changed()
 
         elif change == QGraphicsItem.ItemSelectedChange:
             if value:

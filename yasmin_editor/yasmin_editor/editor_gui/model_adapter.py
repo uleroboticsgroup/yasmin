@@ -15,435 +15,301 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.state_node import StateNode
+from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
 from yasmin_editor.model.concurrence import Concurrence
-from yasmin_editor.model.key import Key
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.transition import Transition
 
 if TYPE_CHECKING:
+    from yasmin_plugins_manager.plugin_info import PluginInfo
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
-def sync_model_from_editor(editor: "YasminEditor") -> StateMachine:
-    model = StateMachine(
-        name=editor.root_sm_name,
-        description=editor.root_sm_description_edit.text().strip(),
-        start_state=editor.start_state,
-    )
+class EditorModelAdapter:
+    """Bridge between the editor scene and the pure data model."""
 
-    for key_data in list(getattr(editor, "_blackboard_keys", [])):
-        model.add_key(
-            Key(
-                name=str(key_data.get("name", "") or "").strip(),
-                key_type=str(key_data.get("key_type", "in") or "in").strip(),
-                description=str(key_data.get("description", "") or "").strip(),
-                default_type=str(key_data.get("default_type", "") or "").strip(),
-                default_value=key_data.get("default_value"),
-            )
-        )
+    def __init__(self, editor: "YasminEditor") -> None:
+        self.editor = editor
 
-    root_state_nodes = [
-        node
-        for node in editor.state_nodes.values()
-        if getattr(node, "parent_container", None) is None
-    ]
-    for node in sorted(root_state_nodes, key=lambda item: item.name.lower()):
-        state = _build_state_from_node(node)
-        model.add_state(state)
-        model.layout.set_state_position(node.name, node.pos().x(), node.pos().y())
-        model.remappings[state.name] = dict(getattr(node, "remappings", {}) or {})
-        _append_state_machine_connections(model, node)
+    def create_empty_root_model(self) -> StateMachine:
+        return StateMachine(name="")
 
-    _append_gui_outcomes_to_container(model, editor.final_outcomes.values())
-
-    return model
-
-
-def load_model_into_editor(editor: "YasminEditor", model: StateMachine) -> None:
-    editor.root_sm_name = model.name
-    editor.start_state = model.start_state
-    editor.root_sm_name_edit.setText(model.name)
-    editor.root_sm_description_edit.setText(model.description)
-    editor.set_blackboard_keys(
-        [
-            {
-                "name": key.name,
-                "key_type": key.key_type,
-                "description": key.description,
-                "default_type": key.default_type,
-                "default_value": "" if key.default_value is None else str(key.default_value),
-            }
-            for key in model.keys
-        ],
-        sync=False,
-    )
-
-    for state in model.states.values():
-        _create_gui_state(editor, state, None, model)
-
-    for outcome in model.outcomes:
-        position = model.layout.get_outcome_position(outcome.name)
-        x = position.x if position is not None else 600.0
-        y = position.y if position is not None else float(len(editor.final_outcomes) * 150)
-        node = FinalOutcomeNode(outcome.name, x, y, description=outcome.description)
-        editor.canvas.scene.addItem(node)
-        editor.final_outcomes[outcome.name] = node
-
-    _create_state_machine_connections(editor, model, None)
-
-    editor.update_start_state_combo()
-    if model.start_state:
-        index = editor.start_state_combo.findText(model.start_state)
-        if index >= 0:
-            editor.start_state_combo.setCurrentIndex(index)
-
-    editor.sync_blackboard_keys()
-
-
-def _build_state_from_node(node: StateNode | ContainerStateNode) -> State:
-    if isinstance(node, ContainerStateNode):
-        if node.is_concurrence:
-            model = Concurrence(
-                name=node.name,
-                description=getattr(node, "description", "") or "",
-                default_outcome=getattr(node, "default_outcome", None),
-            )
-
-            for child in sorted(node.child_states.values(), key=lambda item: item.name.lower()):
-                child_state = _build_state_from_node(child)
-                model.add_state(child_state)
-                model.layout.set_state_position(child.name, child.pos().x(), child.pos().y())
-
-            _append_gui_outcomes_to_container(model, node.final_outcomes.values())
-
-            for child in node.child_states.values():
-                for connection in getattr(child, "connections", []):
-                    if connection.from_node != child:
-                        continue
-                    target = connection.to_node
-                    if isinstance(target, FinalOutcomeNode) and target.parent_container == node:
-                        model.set_outcome_rule(target.name, child.name, connection.outcome)
-
-            return model
-
-        model = StateMachine(
-            name=node.name,
-            description=getattr(node, "description", "") or "",
-            start_state=getattr(node, "start_state", None),
-        )
-
-        for child in sorted(node.child_states.values(), key=lambda item: item.name.lower()):
-            child_state = _build_state_from_node(child)
-            model.add_state(child_state)
-            model.layout.set_state_position(child.name, child.pos().x(), child.pos().y())
-            model.remappings[child.name] = dict(getattr(child, "remappings", {}) or {})
-            _append_state_machine_connections(model, child)
-
-        for outcome_node in sorted(node.final_outcomes.values(), key=lambda item: item.name.lower()):
-            model.add_outcome(Outcome(name=outcome_node.name, description=outcome_node.description))
-            model.layout.set_outcome_position(
-                outcome_node.name, outcome_node.pos().x(), outcome_node.pos().y()
-            )
-            for connection in getattr(outcome_node, "connections", []):
-                if connection.from_node != outcome_node:
-                    continue
-                model.add_transition(
-                    outcome_node.name,
-                    Transition(
-                        source_outcome=connection.outcome,
-                        target=_get_target_name(connection.to_node),
-                    ),
-                )
-
+    def load_from_xml(self, file_path: str) -> StateMachine:
+        model = model_from_xml(Path(file_path))
+        self.rebuild_scene(model)
         return model
 
-    plugin_info = node.plugin_info
-    state_type = None
-    module = None
-    class_name = None
-    package_name = None
-    file_name = None
+    def save_to_xml(self, file_path: str) -> str:
+        self.sync_root_model_from_ui()
+        self.sync_all_layouts()
+        return model_to_xml(self.editor.root_model, Path(file_path))
 
-    if plugin_info is not None:
-        plugin_type = getattr(plugin_info, "plugin_type", None)
-        state_type = {"python": "py", "cpp": "cpp", "xml": "xml"}.get(
-            plugin_type, plugin_type
-        )
-        module = getattr(plugin_info, "module", None)
-        class_name = getattr(plugin_info, "class_name", None)
-        package_name = getattr(plugin_info, "package_name", None)
-        file_name = getattr(plugin_info, "file_name", None)
-
-    state = State(
-        name=node.name,
-        description=getattr(node, "description", "") or "",
-        state_type=state_type,
-        module=module,
-        class_name=class_name,
-        package_name=package_name,
-        file_name=file_name,
-    )
-
-    for outcome_name in list(getattr(plugin_info, "outcomes", []) or []):
-        state.add_outcome(Outcome(name=outcome_name))
-
-    return state
-
-
-def _append_gui_outcomes_to_container(
-    container: StateMachine | Concurrence,
-    outcome_nodes,
-) -> None:
-    for outcome_node in sorted(outcome_nodes, key=lambda item: item.name.lower()):
-        container.add_outcome(
-            Outcome(name=outcome_node.name, description=outcome_node.description)
-        )
-        container.layout.set_outcome_position(
-            outcome_node.name,
-            outcome_node.pos().x(),
-            outcome_node.pos().y(),
+    def sync_root_model_from_ui(self) -> None:
+        self.editor.root_model.name = self.editor.root_sm_name_edit.text().strip()
+        self.editor.root_model.description = (
+            self.editor.root_sm_description_edit.text().strip()
         )
 
+    def sync_all_layouts(self) -> None:
+        self._sync_container_layout(self.editor.root_model, None)
 
-def _append_state_machine_connections(
-    model: StateMachine,
-    node: StateNode | ContainerStateNode,
-) -> None:
-    for connection in getattr(node, "connections", []):
-        if connection.from_node != node:
-            continue
-        model.add_transition(
-            node.name,
-            Transition(
-                source_outcome=connection.outcome,
-                target=_get_target_name(connection.to_node),
-            ),
-        )
+    def _sync_container_layout(
+        self,
+        container_model: StateMachine | Concurrence,
+        container_view: Optional[ContainerStateNode],
+    ) -> None:
+        if container_view is None:
+            state_views = self.editor.get_root_state_nodes()
+            outcome_views = self.editor.final_outcomes
+        else:
+            state_views = container_view.child_states
+            outcome_views = container_view.final_outcomes
 
-
-def _get_target_name(node: StateNode | ContainerStateNode | FinalOutcomeNode) -> str:
-    return node.name
-
-
-def _create_gui_state(
-    editor: "YasminEditor",
-    state: State,
-    parent_container: Optional[ContainerStateNode],
-    parent_model: StateMachine | Concurrence,
-) -> StateNode | ContainerStateNode:
-    position = parent_model.layout.get_state_position(state.name)
-    x = position.x if position is not None else 0.0
-    y = position.y if position is not None else 0.0
-    remappings = _get_state_remappings(parent_model, state.name)
-
-    if isinstance(state, StateMachine):
-        node = ContainerStateNode(
-            state.name,
-            x,
-            y,
-            False,
-            remappings,
-            [outcome.name for outcome in state.outcomes],
-            state.start_state,
-            None,
-            description=state.description,
-        )
-    elif isinstance(state, Concurrence):
-        node = ContainerStateNode(
-            state.name,
-            x,
-            y,
-            True,
-            remappings,
-            [outcome.name for outcome in state.outcomes],
-            None,
-            state.default_outcome,
-            description=state.description,
-        )
-    else:
-        plugin_info = _find_plugin_info(editor, state)
-        if plugin_info is None:
-            raise ValueError(f"Could not resolve plugin for state '{state.name}'")
-        node = StateNode(
-            state.name,
-            plugin_info,
-            x,
-            y,
-            remappings,
-            state.description,
-        )
-
-    if parent_container is None:
-        editor.canvas.scene.addItem(node)
-        editor.state_nodes[state.name] = node
-    else:
-        parent_container.add_child_state(node)
-        editor.state_nodes[f"{parent_container.name}.{state.name}"] = node
-
-    if isinstance(state, StateMachine):
-        for child in state.states.values():
-            _create_gui_state(editor, child, node, state)
-
-        _add_container_outcomes_to_node(node, state)
-
-        _create_state_machine_connections(editor, state, node)
-        node.auto_resize_for_children()
-    elif isinstance(state, Concurrence):
-        for child in state.states.values():
-            _create_gui_state(editor, child, node, state)
-
-        _add_container_outcomes_to_node(node, state)
-
-        _create_concurrence_connections(editor, state, node)
-        node.auto_resize_for_children()
-
-    return node
-
-
-def _create_state_machine_connections(
-    editor: "YasminEditor",
-    model: StateMachine,
-    container_node: Optional[ContainerStateNode],
-) -> None:
-    for owner_name, transitions in model.transitions.items():
-        for transition in transitions:
-            from_node = _resolve_state_machine_owner(editor, container_node, owner_name)
-            to_node = _resolve_target_node(editor, container_node, transition.target)
-            if from_node is None or to_node is None:
-                continue
-            _add_connection(editor, from_node, to_node, transition.source_outcome)
-
-
-def _create_concurrence_connections(
-    editor: "YasminEditor",
-    model: Concurrence,
-    container_node: ContainerStateNode,
-) -> None:
-    for outcome_name, requirements in model.outcome_map.items():
-        outcome_node = container_node.final_outcomes.get(outcome_name)
-        if outcome_node is None:
-            continue
-        for state_name, state_outcome in requirements.items():
-            from_node = container_node.child_states.get(state_name)
-            if from_node is None:
-                continue
-            _add_connection(editor, from_node, outcome_node, state_outcome)
-
-
-def _resolve_state_machine_owner(
-    editor: "YasminEditor",
-    container_node: Optional[ContainerStateNode],
-    owner_name: str,
-):
-    if container_node is None:
-        return editor.state_nodes.get(owner_name) or editor.final_outcomes.get(owner_name)
-    return container_node.child_states.get(owner_name) or container_node.final_outcomes.get(owner_name)
-
-
-def _resolve_target_node(
-    editor: "YasminEditor",
-    container_node: Optional[ContainerStateNode],
-    target_name: str,
-):
-    if container_node is None:
-        return editor.state_nodes.get(target_name) or editor.final_outcomes.get(target_name)
-
-    current_container = container_node
-    while current_container is not None:
-        local_target = current_container.child_states.get(target_name)
-        if local_target is not None:
-            return local_target
-
-        local_outcome = current_container.final_outcomes.get(target_name)
-        if local_outcome is not None:
-            return local_outcome
-
-        current_container = current_container.parent_container
-
-    return editor.state_nodes.get(target_name) or editor.final_outcomes.get(target_name)
-
-
-def _add_connection(editor: "YasminEditor", from_node, to_node, outcome: str) -> None:
-    connection = ConnectionLine(from_node, to_node, outcome)
-    editor.canvas.scene.addItem(connection)
-    editor.canvas.scene.addItem(connection.arrow_head)
-    editor.canvas.scene.addItem(connection.label_bg)
-    editor.canvas.scene.addItem(connection.label)
-    editor.connections.append(connection)
-
-
-def _get_state_remappings(
-    parent_model: StateMachine | Concurrence,
-    state_name: str,
-) -> dict[str, str]:
-    if isinstance(parent_model, StateMachine):
-        return dict(parent_model.remappings.get(state_name, {}))
-    return {}
-
-
-def _add_container_outcomes_to_node(
-    node: ContainerStateNode,
-    container: StateMachine | Concurrence,
-) -> None:
-    for outcome in container.outcomes:
-        outcome_position = container.layout.get_outcome_position(outcome.name)
-        ox = outcome_position.x if outcome_position is not None else 0.0
-        oy = outcome_position.y if outcome_position is not None else 0.0
-        node.add_final_outcome(
-            FinalOutcomeNode(
-                outcome.name,
-                ox,
-                oy,
-                inside_container=True,
-                description=outcome.description,
+        for state_name, state_view in state_views.items():
+            container_model.layout.set_state_position(
+                state_name,
+                float(state_view.pos().x()),
+                float(state_view.pos().y()),
             )
+            if isinstance(state_view, ContainerStateNode):
+                self._sync_container_layout(state_view.model, state_view)
+
+        for outcome_name, outcome_view in outcome_views.items():
+            container_model.layout.set_outcome_position(
+                outcome_name,
+                float(outcome_view.pos().x()),
+                float(outcome_view.pos().y()),
+            )
+
+    def rebuild_scene(self, model: StateMachine) -> None:
+        self.editor.reset_editor_state(model)
+        self.editor.root_sm_name_edit.setText(model.name)
+        self.editor.root_sm_description_edit.setText(model.description)
+        self.editor.set_blackboard_keys(self.editor.keys_to_dicts(model.keys), sync=False)
+
+        for state in model.states.values():
+            self.create_state_view(state)
+
+        for outcome in model.outcomes:
+            self.create_final_outcome_view(outcome)
+
+        for state in model.states.values():
+            if isinstance(state, (StateMachine, Concurrence)):
+                self._build_child_views_for_container(self.editor.get_root_state_nodes()[state.name])
+
+        self._build_state_machine_connections(self.editor.root_model, None)
+
+        for state in model.states.values():
+            if isinstance(state, (StateMachine, Concurrence)):
+                self._build_nested_connections(self.editor.get_root_state_nodes()[state.name])
+
+        self.editor.update_start_state_combo()
+        if model.start_state:
+            index = self.editor.start_state_combo.findText(model.start_state)
+            if index >= 0:
+                self.editor.start_state_combo.setCurrentIndex(index)
+        self.editor.update_blackboard_usage_highlighting()
+
+    def create_state_view(
+        self,
+        state_model: State,
+        parent_container: Optional[ContainerStateNode] = None,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+    ) -> StateNode | ContainerStateNode:
+        container_model = self.editor.root_model if parent_container is None else parent_container.model
+
+        pos = container_model.layout.get_state_position(state_model.name)
+        if x is None:
+            x = pos.x if pos is not None else (self.editor.get_free_position().x() if parent_container is None else 0.0)
+        if y is None:
+            y = pos.y if pos is not None else (self.editor.get_free_position().y() if parent_container is None else 0.0)
+
+        if isinstance(state_model, StateMachine):
+            node = ContainerStateNode(
+                state_model.name,
+                x,
+                y,
+                False,
+                description=state_model.description,
+                defaults=[],
+                model=state_model,
+            )
+        elif isinstance(state_model, Concurrence):
+            node = ContainerStateNode(
+                state_model.name,
+                x,
+                y,
+                True,
+                description=state_model.description,
+                defaults=[],
+                model=state_model,
+            )
+        else:
+            node = StateNode(
+                state_model.name,
+                self.editor.resolve_plugin_info_for_model(state_model),
+                x,
+                y,
+                description=state_model.description,
+                defaults=[],
+                model=state_model,
+            )
+
+        if parent_container is None:
+            self.editor.canvas.scene.addItem(node)
+        else:
+            parent_container.add_child_state(node)
+            node.setPos(x, y)
+
+        self.editor.register_state_node(node, parent_container)
+        return node
+
+    def create_final_outcome_view(
+        self,
+        outcome_model: Outcome,
+        parent_container: Optional[ContainerStateNode] = None,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+    ) -> FinalOutcomeNode:
+        container_model = self.editor.root_model if parent_container is None else parent_container.model
+        pos = container_model.layout.get_outcome_position(outcome_model.name)
+        if x is None:
+            x = pos.x if pos is not None else (600.0 if parent_container is None else 0.0)
+        if y is None:
+            y = pos.y if pos is not None else (len(self.editor.final_outcomes) * 150.0 if parent_container is None else 0.0)
+
+        node = FinalOutcomeNode(
+            outcome_model.name,
+            x,
+            y,
+            inside_container=parent_container is not None,
+            description=outcome_model.description,
+            model=outcome_model,
         )
 
+        if parent_container is None:
+            self.editor.canvas.scene.addItem(node)
+            self.editor.final_outcomes[node.name] = node
+        else:
+            parent_container.add_final_outcome(node)
+            node.setPos(x, y)
 
-def _find_plugin_info(editor: "YasminEditor", state: State):
-    if state.state_type == "py":
-        return next(
-            (
-                plugin
-                for plugin in editor.plugin_manager.python_plugins
-                if plugin.module == state.module and plugin.class_name == state.class_name
-            ),
-            None,
-        )
+        return node
 
-    if state.state_type == "cpp":
-        return next(
-            (
-                plugin
-                for plugin in editor.plugin_manager.cpp_plugins
-                if plugin.class_name == state.class_name
-            ),
-            None,
-        )
+    def _build_child_views_for_container(self, container_view: ContainerStateNode) -> None:
+        for state in container_view.model.states.values():
+            child_view = self.create_state_view(state, container_view)
+            if isinstance(child_view, ContainerStateNode):
+                self._build_child_views_for_container(child_view)
 
-    if state.state_type == "xml":
-        plugin = next(
-            (
-                item
-                for item in editor.plugin_manager.xml_files
-                if item.file_name == state.file_name
-                and (state.package_name is None or item.package_name == state.package_name)
-            ),
-            None,
-        )
-        if plugin is not None:
-            return plugin
-        return next(
-            (item for item in editor.plugin_manager.xml_files if item.file_name == state.file_name),
-            None,
-        )
+        for outcome in container_view.model.outcomes:
+            self.create_final_outcome_view(outcome, container_view)
 
-    return None
+        self._apply_container_layout(container_view)
+
+    def _apply_container_layout(self, container_view: ContainerStateNode) -> None:
+        for state_name, child_view in container_view.child_states.items():
+            pos = container_view.model.layout.get_state_position(state_name)
+            if pos is not None:
+                child_view.setPos(pos.x, pos.y)
+        for outcome_name, outcome_view in container_view.final_outcomes.items():
+            pos = container_view.model.layout.get_outcome_position(outcome_name)
+            if pos is not None:
+                outcome_view.setPos(pos.x, pos.y)
+        container_view.auto_resize_for_children()
+
+    def _build_nested_connections(self, container_view: ContainerStateNode) -> None:
+        if isinstance(container_view.model, StateMachine):
+            self._build_state_machine_connections(container_view.model, container_view)
+        else:
+            self._build_concurrence_connections(container_view.model, container_view)
+
+        for child_view in container_view.child_states.values():
+            if isinstance(child_view, ContainerStateNode):
+                self._build_nested_connections(child_view)
+
+    def _build_state_machine_connections(
+        self,
+        model: StateMachine,
+        container_view: Optional[ContainerStateNode],
+    ) -> None:
+        for owner_name, transitions in model.transitions.items():
+            for transition in transitions:
+                from_view = self._resolve_state_machine_source_view(
+                    model,
+                    container_view,
+                    owner_name,
+                    transition,
+                )
+                if from_view is None:
+                    continue
+                target_view = self.editor.find_target_view(
+                    transition.target,
+                    getattr(from_view, "parent_container", None),
+                )
+                if target_view is None:
+                    continue
+                self.editor._create_connection_view(
+                    from_view,
+                    target_view,
+                    transition.source_outcome,
+                )
+
+    def _build_concurrence_connections(
+        self,
+        model: Concurrence,
+        container_view: ContainerStateNode,
+    ) -> None:
+        for outcome_name, mapping in model.outcome_map.items():
+            to_view = container_view.final_outcomes.get(outcome_name)
+            if to_view is None:
+                continue
+            for state_name, source_outcome in mapping.items():
+                from_view = container_view.child_states.get(state_name)
+                if isinstance(from_view, ContainerStateNode):
+                    from_view = from_view.final_outcomes.get(source_outcome, from_view)
+                if from_view is None:
+                    continue
+                self.editor._create_connection_view(from_view, to_view, source_outcome)
+
+    def _resolve_state_machine_source_view(
+        self,
+        model: StateMachine,
+        container_view: Optional[ContainerStateNode],
+        owner_name: str,
+        transition: Transition,
+    ):
+        if container_view is None:
+            local_states = self.editor.get_root_state_nodes()
+            local_outcomes = self.editor.final_outcomes
+        else:
+            local_states = container_view.child_states
+            local_outcomes = container_view.final_outcomes
+
+        from_view = local_states.get(owner_name)
+        if isinstance(from_view, ContainerStateNode):
+            proxied = from_view.final_outcomes.get(transition.source_outcome)
+            if proxied is not None:
+                return proxied
+            return from_view
+
+        if from_view is not None:
+            return from_view
+
+        if owner_name in local_outcomes:
+            return local_outcomes[owner_name]
+
+        if owner_name == model.name:
+            return local_outcomes.get(transition.source_outcome)
+
+        return None

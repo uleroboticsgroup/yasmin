@@ -54,6 +54,50 @@ class Concurrence(State):
 
         self.outcome_map.setdefault(outcome, {})[state_name] = state_outcome
 
+    def remove_outcome_rule(self, outcome: str, state_name: str) -> None:
+        """Remove one outcome rule entry from the concurrence."""
+
+        mapping = self.outcome_map.get(outcome, {})
+        mapping.pop(state_name, None)
+        if not mapping:
+            self.outcome_map.pop(outcome, None)
+
+    def remove_state(self, name: str) -> None:
+        """Remove a child state and all related outcome rules."""
+
+        self.states.pop(name, None)
+        for mapping in self.outcome_map.values():
+            mapping.pop(name, None)
+        empty_outcomes = [outcome for outcome, mapping in self.outcome_map.items() if not mapping]
+        for outcome in empty_outcomes:
+            self.outcome_map.pop(outcome, None)
+        self.layout.remove_state_position(name)
+
+    def rename_state(self, old_name: str, new_name: str) -> None:
+        """Rename a child state and update all related outcome rules."""
+
+        if old_name == new_name:
+            return
+
+        state = self.states.pop(old_name)
+        state.name = new_name
+        self.states[new_name] = state
+
+        for mapping in self.outcome_map.values():
+            if old_name in mapping:
+                mapping[new_name] = mapping.pop(old_name)
+
+        self.layout.rename_state_position(old_name, new_name)
+
+    def remove_outcome(self, name: str) -> None:
+        """Remove a final outcome and its outcome-map rule."""
+
+        self.outcomes = [outcome for outcome in self.outcomes if outcome.name != name]
+        self.outcome_map.pop(name, None)
+        if self.default_outcome == name:
+            self.default_outcome = None
+        self.layout.remove_outcome_position(name)
+
     def get_state(self, name: str) -> State | None:
         """Return a child state by name."""
 

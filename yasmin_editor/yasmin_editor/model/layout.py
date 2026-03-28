@@ -46,6 +46,18 @@ class Layout:
 
         return self.state_positions.get(name)
 
+    def remove_state_position(self, name: str) -> None:
+        """Remove the stored position of a child state."""
+
+        self.state_positions.pop(name, None)
+
+    def rename_state_position(self, old_name: str, new_name: str) -> None:
+        """Rename the stored position of a child state."""
+
+        position = self.state_positions.pop(old_name, None)
+        if position is not None:
+            self.state_positions[new_name] = position
+
     def set_outcome_position(self, name: str, x: float, y: float) -> None:
         """Set the position of a final outcome."""
 
@@ -55,3 +67,15 @@ class Layout:
         """Return the position of a final outcome if present."""
 
         return self.outcome_positions.get(name)
+
+    def remove_outcome_position(self, name: str) -> None:
+        """Remove the stored position of a final outcome."""
+
+        self.outcome_positions.pop(name, None)
+
+    def rename_outcome_position(self, old_name: str, new_name: str) -> None:
+        """Rename the stored position of a final outcome."""
+
+        position = self.outcome_positions.pop(old_name, None)
+        if position is not None:
+            self.outcome_positions[new_name] = position

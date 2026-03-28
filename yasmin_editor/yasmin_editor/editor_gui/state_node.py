@@ -21,6 +21,7 @@ from PyQt5.QtGui import QPen, QBrush, QColor, QFont
 from yasmin_plugins_manager.plugin_info import PluginInfo
 
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
+from yasmin_editor.model.state import State
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -39,16 +40,19 @@ class StateNode(QGraphicsEllipseItem):
         remappings: Optional[Dict[str, str]] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
+        model: Optional[State] = None,
     ) -> None:
         super().__init__(-60, -40, 120, 80)
-        self.name: str = name
+        self.model: State = model or State(
+            name=name,
+            description=description,
+            remappings=dict(remappings or {}),
+        )
         self.plugin_info: PluginInfo = plugin_info
         self.is_state_machine: bool = False
         self.is_concurrence: bool = False
         self.connections: List["ConnectionLine"] = []
-        self.remappings: Dict[str, str] = remappings or {}
         self.parent_container: Optional["ContainerStateNode"] = None
-        self.description: str = description
         self.defaults: List[Dict[str, str]] = defaults or []
 
         self.setPos(x, y)
@@ -87,6 +91,35 @@ class StateNode(QGraphicsEllipseItem):
 
         self.connection_port: ConnectionPort = ConnectionPort(self)
 
+    @property
+    def name(self) -> str:
+        return self.model.name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self.model.name = value
+        if hasattr(self, "text"):
+            self.text.setPlainText(value)
+            text_rect = self.text.boundingRect()
+            self.text.setPos(-text_rect.width() / 2, -text_rect.height() / 2)
+
+    @property
+    def description(self) -> str:
+        return self.model.description
+
+    @description.setter
+    def description(self, value: str) -> None:
+        self.model.description = value
+
+    @property
+    def remappings(self) -> Dict[str, str]:
+        return self.model.remappings
+
+    @remappings.setter
+    def remappings(self, value: Dict[str, str]) -> None:
+        self.model.remappings.clear()
+        self.model.remappings.update(value or {})
+
     def mouseDoubleClickEvent(self, event: Any) -> None:
         """Handle double-click to edit state."""
         if self.scene() and self.scene().views():
@@ -120,10 +153,6 @@ class StateNode(QGraphicsEllipseItem):
         elif change == QGraphicsItem.ItemPositionHasChanged:
             if self.parent_container:
                 self.parent_container.auto_resize_for_children()
-            if self.scene() and self.scene().views():
-                canvas = self.scene().views()[0]
-                if hasattr(canvas, "editor_ref") and canvas.editor_ref:
-                    canvas.editor_ref.on_graphics_item_position_changed()
 
         elif change == QGraphicsItem.ItemSelectedChange:
             if value:
