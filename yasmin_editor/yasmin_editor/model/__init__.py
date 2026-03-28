@@ -7,6 +7,7 @@ from .outcome import Outcome
 from .state import State
 from .state_machine import StateMachine
 from .transition import Transition
+from .validation import ValidationMessage, ValidationResult, validate_model
 
 __all__ = [
     "Concurrence",
@@ -17,4 +18,7 @@ __all__ = [
     "State",
     "StateMachine",
     "Transition",
+    "ValidationMessage",
+    "ValidationResult",
+    "validate_model",
 ]

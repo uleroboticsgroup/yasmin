@@ -21,6 +21,7 @@ from pathlib import Path
 from xml.etree import ElementTree as ET
 
 from yasmin_editor.io import model_from_xml
+from yasmin_editor.model import validate_model
 
 from yasmin_cli.completer import is_state_machine_xml, xml_file_completer
 
@@ -37,6 +38,12 @@ def add_print_verb(subparsers):
         help="Path to the XML state machine file",
     )
     xml_arg.completer = xml_file_completer
+
+    parser.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="Only print the validation result",
+    )
 
     parser.set_defaults(main=_main_print)
 
@@ -60,5 +67,17 @@ def _main_print(args):
         print(str(exc))
         return 1
 
+    validation_result = validate_model(model)
+
+    if not validation_result.is_valid:
+        print(validation_result)
+        if not args.validate_only:
+            print()
+
+    if args.validate_only:
+        if validation_result.is_valid:
+            print(validation_result)
+        return 0 if validation_result.is_valid else 1
+
     print(model)
-    return 0
+    return 0 if validation_result.is_valid else 1
