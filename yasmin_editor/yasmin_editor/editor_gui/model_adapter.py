@@ -32,10 +32,6 @@ if TYPE_CHECKING:
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
-def create_empty_model() -> StateMachine:
-    return StateMachine(name="")
-
-
 def sync_model_from_editor(editor: "YasminEditor") -> StateMachine:
     model = StateMachine(
         name=editor.root_sm_name,
@@ -64,13 +60,9 @@ def sync_model_from_editor(editor: "YasminEditor") -> StateMachine:
         model.add_state(state)
         model.layout.set_state_position(node.name, node.pos().x(), node.pos().y())
         model.remappings[state.name] = dict(getattr(node, "remappings", {}) or {})
-        _append_state_machine_connections(model, node, None)
+        _append_state_machine_connections(model, node)
 
-    for outcome_node in sorted(editor.final_outcomes.values(), key=lambda item: item.name.lower()):
-        model.add_outcome(Outcome(name=outcome_node.name, description=outcome_node.description))
-        model.layout.set_outcome_position(
-            outcome_node.name, outcome_node.pos().x(), outcome_node.pos().y()
-        )
+    _append_gui_outcomes_to_container(model, editor.final_outcomes.values())
 
     return model
 
@@ -130,13 +122,7 @@ def _build_state_from_node(node: StateNode | ContainerStateNode) -> State:
                 model.add_state(child_state)
                 model.layout.set_state_position(child.name, child.pos().x(), child.pos().y())
 
-            for outcome_node in sorted(node.final_outcomes.values(), key=lambda item: item.name.lower()):
-                model.add_outcome(
-                    Outcome(name=outcome_node.name, description=outcome_node.description)
-                )
-                model.layout.set_outcome_position(
-                    outcome_node.name, outcome_node.pos().x(), outcome_node.pos().y()
-                )
+            _append_gui_outcomes_to_container(model, node.final_outcomes.values())
 
             for child in node.child_states.values():
                 for connection in getattr(child, "connections", []):
@@ -159,7 +145,7 @@ def _build_state_from_node(node: StateNode | ContainerStateNode) -> State:
             model.add_state(child_state)
             model.layout.set_state_position(child.name, child.pos().x(), child.pos().y())
             model.remappings[child.name] = dict(getattr(child, "remappings", {}) or {})
-            _append_state_machine_connections(model, child, node)
+            _append_state_machine_connections(model, child)
 
         for outcome_node in sorted(node.final_outcomes.values(), key=lambda item: item.name.lower()):
             model.add_outcome(Outcome(name=outcome_node.name, description=outcome_node.description))
@@ -212,10 +198,24 @@ def _build_state_from_node(node: StateNode | ContainerStateNode) -> State:
     return state
 
 
+def _append_gui_outcomes_to_container(
+    container: StateMachine | Concurrence,
+    outcome_nodes,
+) -> None:
+    for outcome_node in sorted(outcome_nodes, key=lambda item: item.name.lower()):
+        container.add_outcome(
+            Outcome(name=outcome_node.name, description=outcome_node.description)
+        )
+        container.layout.set_outcome_position(
+            outcome_node.name,
+            outcome_node.pos().x(),
+            outcome_node.pos().y(),
+        )
+
+
 def _append_state_machine_connections(
     model: StateMachine,
     node: StateNode | ContainerStateNode,
-    parent_container: Optional[ContainerStateNode],
 ) -> None:
     for connection in getattr(node, "connections", []):
         if connection.from_node != node:
@@ -242,6 +242,7 @@ def _create_gui_state(
     position = parent_model.layout.get_state_position(state.name)
     x = position.x if position is not None else 0.0
     y = position.y if position is not None else 0.0
+    remappings = _get_state_remappings(parent_model, state.name)
 
     if isinstance(state, StateMachine):
         node = ContainerStateNode(
@@ -249,9 +250,7 @@ def _create_gui_state(
             x,
             y,
             False,
-            dict(parent_model.remappings.get(state.name, {}))
-            if isinstance(parent_model, StateMachine)
-            else {},
+            remappings,
             [outcome.name for outcome in state.outcomes],
             state.start_state,
             None,
@@ -263,9 +262,7 @@ def _create_gui_state(
             x,
             y,
             True,
-            dict(parent_model.remappings.get(state.name, {}))
-            if isinstance(parent_model, StateMachine)
-            else {},
+            remappings,
             [outcome.name for outcome in state.outcomes],
             None,
             state.default_outcome,
@@ -280,38 +277,22 @@ def _create_gui_state(
             plugin_info,
             x,
             y,
-            dict(parent_model.remappings.get(state.name, {}))
-            if isinstance(parent_model, StateMachine)
-            else {},
+            remappings,
             state.description,
         )
 
     if parent_container is None:
         editor.canvas.scene.addItem(node)
         editor.state_nodes[state.name] = node
-        full_prefix = state.name
     else:
         parent_container.add_child_state(node)
         editor.state_nodes[f"{parent_container.name}.{state.name}"] = node
-        full_prefix = f"{parent_container.name}.{state.name}"
 
     if isinstance(state, StateMachine):
         for child in state.states.values():
             _create_gui_state(editor, child, node, state)
 
-        for outcome in state.outcomes:
-            outcome_position = state.layout.get_outcome_position(outcome.name)
-            ox = outcome_position.x if outcome_position is not None else 0.0
-            oy = outcome_position.y if outcome_position is not None else 0.0
-            node.add_final_outcome(
-                FinalOutcomeNode(
-                    outcome.name,
-                    ox,
-                    oy,
-                    inside_container=True,
-                    description=outcome.description,
-                )
-            )
+        _add_container_outcomes_to_node(node, state)
 
         _create_state_machine_connections(editor, state, node)
         node.auto_resize_for_children()
@@ -319,19 +300,7 @@ def _create_gui_state(
         for child in state.states.values():
             _create_gui_state(editor, child, node, state)
 
-        for outcome in state.outcomes:
-            outcome_position = state.layout.get_outcome_position(outcome.name)
-            ox = outcome_position.x if outcome_position is not None else 0.0
-            oy = outcome_position.y if outcome_position is not None else 0.0
-            node.add_final_outcome(
-                FinalOutcomeNode(
-                    outcome.name,
-                    ox,
-                    oy,
-                    inside_container=True,
-                    description=outcome.description,
-                )
-            )
+        _add_container_outcomes_to_node(node, state)
 
         _create_concurrence_connections(editor, state, node)
         node.auto_resize_for_children()
@@ -346,7 +315,7 @@ def _create_state_machine_connections(
 ) -> None:
     for owner_name, transitions in model.transitions.items():
         for transition in transitions:
-            from_node = _resolve_state_machine_owner(editor, model, container_node, owner_name)
+            from_node = _resolve_state_machine_owner(editor, container_node, owner_name)
             to_node = _resolve_target_node(editor, container_node, transition.target)
             if from_node is None or to_node is None:
                 continue
@@ -371,7 +340,6 @@ def _create_concurrence_connections(
 
 def _resolve_state_machine_owner(
     editor: "YasminEditor",
-    model: StateMachine,
     container_node: Optional[ContainerStateNode],
     owner_name: str,
 ):
@@ -410,6 +378,34 @@ def _add_connection(editor: "YasminEditor", from_node, to_node, outcome: str) ->
     editor.canvas.scene.addItem(connection.label_bg)
     editor.canvas.scene.addItem(connection.label)
     editor.connections.append(connection)
+
+
+def _get_state_remappings(
+    parent_model: StateMachine | Concurrence,
+    state_name: str,
+) -> dict[str, str]:
+    if isinstance(parent_model, StateMachine):
+        return dict(parent_model.remappings.get(state_name, {}))
+    return {}
+
+
+def _add_container_outcomes_to_node(
+    node: ContainerStateNode,
+    container: StateMachine | Concurrence,
+) -> None:
+    for outcome in container.outcomes:
+        outcome_position = container.layout.get_outcome_position(outcome.name)
+        ox = outcome_position.x if outcome_position is not None else 0.0
+        oy = outcome_position.y if outcome_position is not None else 0.0
+        node.add_final_outcome(
+            FinalOutcomeNode(
+                outcome.name,
+                ox,
+                oy,
+                inside_container=True,
+                description=outcome.description,
+            )
+        )
 
 
 def _find_plugin_info(editor: "YasminEditor", state: State):

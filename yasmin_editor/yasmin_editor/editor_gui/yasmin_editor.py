@@ -52,11 +52,12 @@ from yasmin_editor.editor_gui.state_machine_dialog import StateMachineDialog
 from yasmin_editor.editor_gui.concurrence_dialog import ConcurrenceDialog
 from yasmin_editor.editor_gui.blackboard_key_dialog import BlackboardKeyDialog
 from yasmin_editor.editor_gui.outcome_description_dialog import OutcomeDescriptionDialog
-from yasmin_editor.editor_gui.xml_manager import XmlManager
 from yasmin_editor.editor_gui.model_adapter import (
-    create_empty_model,
+    load_model_into_editor,
     sync_model_from_editor,
 )
+from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
+from yasmin_editor.model.state_machine import StateMachine
 
 
 class YasminEditor(QMainWindow):
@@ -87,8 +88,7 @@ class YasminEditor(QMainWindow):
         self._blackboard_key_metadata: Dict[str, Dict[str, str]] = {}
         self._highlight_blackboard_usage = True
         self._suspend_model_sync = False
-        self.model = create_empty_model()
-        self.xml_manager = XmlManager(self)
+        self.model = StateMachine(name="")
 
         self.layout_seed = 42
         self.layout_rng = random.Random(self.layout_seed)
@@ -342,6 +342,40 @@ class YasminEditor(QMainWindow):
         if self._suspend_model_sync:
             return
         self.model = sync_model_from_editor(self)
+
+    def reset_editor_state(self) -> None:
+        """Reset the current editor state to an empty root state machine."""
+        self.canvas.scene.clear()
+        self.state_nodes.clear()
+        self.final_outcomes.clear()
+        self.connections.clear()
+        self.root_sm_name = ""
+        self.start_state = None
+        self.root_sm_name_edit.clear()
+        self.root_sm_description_edit.clear()
+        self._blackboard_keys = []
+        self._blackboard_key_metadata = {}
+        self.refresh_blackboard_keys_list()
+        self.update_start_state_combo()
+        self.model = StateMachine(name="")
+
+    def load_from_xml(self, file_path: str) -> None:
+        """Load an XML state machine into the editor."""
+        self.reset_editor_state()
+
+        self._suspend_model_sync = True
+        try:
+            self.model = model_from_xml(file_path)
+            load_model_into_editor(self, self.model)
+        finally:
+            self._suspend_model_sync = False
+
+        self.sync_model_from_gui()
+
+    def save_to_xml(self, file_path: str) -> None:
+        """Save the current editor content as XML."""
+        self.sync_model_from_gui()
+        model_to_xml(self.model, file_path)
 
     def on_graphics_item_position_changed(self) -> None:
         """Update the backend model after a graphics item moved."""
@@ -1598,31 +1632,26 @@ class YasminEditor(QMainWindow):
         Returns:
             bool: True if a new state machine was created, False if cancelled.
         """
-        reply = QMessageBox.question(
-            self,
+        if not self.confirm_reset_editor_state(
             "New State Machine",
             "Are you sure you want to create a new state machine? All unsaved changes will be lost.",
+        ):
+            return False
+
+        self.reset_editor_state()
+        self.statusBar().showMessage("New state machine created", 2000)
+        return True
+
+    def confirm_reset_editor_state(self, title: str, message: str) -> bool:
+        """Ask whether the current editor content may be discarded."""
+        reply = QMessageBox.question(
+            self,
+            title,
+            message,
             QMessageBox.Yes | QMessageBox.No,
         )
 
-        if reply == QMessageBox.Yes:
-            self.canvas.scene.clear()
-            self.state_nodes.clear()
-            self.final_outcomes.clear()
-            self.connections.clear()
-            self.root_sm_name = ""
-            self.start_state = None
-            self.root_sm_name_edit.clear()
-            self.root_sm_description_edit.clear()
-            self._blackboard_keys = []
-            self._blackboard_key_metadata = {}
-            self.refresh_blackboard_keys_list()
-            self.update_start_state_combo()
-            self.model = create_empty_model()
-            self.statusBar().showMessage("New state machine created", 2000)
-            return True
-
-        return False
+        return reply == QMessageBox.Yes
 
     def open_state_machine(self) -> None:
         """Open a state machine from an XML file."""
@@ -1632,10 +1661,13 @@ class YasminEditor(QMainWindow):
 
         if file_path:
             try:
-                if not self.new_state_machine():
+                if not self.confirm_reset_editor_state(
+                    "Open State Machine",
+                    "Are you sure you want to open a state machine? All unsaved changes will be lost.",
+                ):
                     return
 
-                self.xml_manager.load_from_xml(file_path)
+                self.load_from_xml(file_path)
                 self.statusBar().showMessage(f"Opened: {file_path}", 3000)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to open file: {str(e)}")
@@ -1687,7 +1719,7 @@ class YasminEditor(QMainWindow):
                 file_path += ".xml"
 
             try:
-                self.xml_manager.save_to_xml(file_path)
+                self.save_to_xml(file_path)
                 self.statusBar().showMessage(f"Saved: {file_path}", 3000)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save file: {str(e)}")

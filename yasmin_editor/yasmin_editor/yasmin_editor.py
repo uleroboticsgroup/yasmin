@@ -69,7 +69,7 @@ def main() -> int:
     if args.xml_file:
         try:
             wait_for_canvas_ready(editor)
-            editor.xml_manager.load_from_xml(args.xml_file)
+            editor.load_from_xml(args.xml_file)
             editor.statusBar().showMessage(f"Opened: {args.xml_file}", 3000)
         except Exception as e:
             QMessageBox.critical(
