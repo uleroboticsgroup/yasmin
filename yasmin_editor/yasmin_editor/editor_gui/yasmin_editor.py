@@ -15,16 +15,19 @@
 
 import os
 import random
+import tempfile
 from typing import Dict, List, Optional, Set
 
 from PyQt5.QtCore import QPointF, Qt
 from PyQt5.QtGui import QBrush, QCloseEvent, QColor, QPen
 from PyQt5.QtWidgets import (QAbstractItemView, QAction, QApplication,
-                             QComboBox, QDialog, QFileDialog, QHBoxLayout,
-                             QInputDialog, QLabel, QLineEdit, QListWidget,
-                             QListWidgetItem, QMainWindow, QMessageBox,
-                             QPushButton, QSplitter, QTextBrowser, QToolBar,
-                             QVBoxLayout, QWidget)
+                             QComboBox, QDialog, QFileDialog, QFrame,
+                             QHBoxLayout, QInputDialog, QLabel, QLineEdit,
+                             QListWidget, QListWidgetItem, QMainWindow,
+                             QMessageBox, QPushButton, QSplitter, QTextBrowser,
+                             QToolBar, QVBoxLayout, QWidget)
+from yasmin_editor.editor_gui.colors import (PALETTE, build_qt_palette,
+                                             build_stylesheet)
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.dialogs.blackboard_key_dialog import \
@@ -38,8 +41,6 @@ from yasmin_editor.editor_gui.dialogs.state_machine_dialog import \
 from yasmin_editor.editor_gui.dialogs.state_properties_dialog import \
     StatePropertiesDialog
 from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
-from yasmin_editor.editor_gui.colors import (PALETTE, build_qt_palette,
-                                             build_stylesheet)
 from yasmin_editor.editor_gui.model_adapter import EditorModelAdapter
 from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
 from yasmin_editor.editor_gui.state_node import StateNode
@@ -50,6 +51,7 @@ from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.transition import Transition
 from yasmin_editor.model.validation import validate_model
+from yasmin_editor.runtime import Runtime
 
 from yasmin_plugins_manager.plugin_manager import PluginInfo, PluginManager
 
@@ -85,6 +87,25 @@ class YasminEditor(QMainWindow):
         self.layout_seed = 42
         self.layout_rng = random.Random(self.layout_seed)
         self.current_container_path = [self.root_model]
+        self.current_file_path: Optional[str] = None
+        self.runtime_snapshot_file_path: Optional[str] = None
+        self.runtime_mode_enabled = False
+        self.runtime_active_path: tuple[str, ...] = tuple()
+        self.runtime_last_transition: Optional[
+            tuple[tuple[str, ...], tuple[str, ...], str]
+        ] = None
+
+        self.runtime = Runtime()
+        self.runtime.ready_changed.connect(self.update_runtime_actions)
+        self.runtime.running_changed.connect(self.update_runtime_actions)
+        self.runtime.blocked_changed.connect(self.update_runtime_actions)
+        self.runtime.active_state_changed.connect(self.on_runtime_active_state_changed)
+        self.runtime.active_transition_changed.connect(
+            self.on_runtime_transition_changed
+        )
+        self.runtime.outcome_changed.connect(self.on_runtime_outcome_changed)
+        self.runtime.status_changed.connect(self.on_runtime_status_changed)
+        self.runtime.error_occurred.connect(self.on_runtime_error)
 
         self.model_adapter = EditorModelAdapter(self)
         self.create_ui()
@@ -161,6 +182,8 @@ class YasminEditor(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """Handle window close event to ensure proper cleanup."""
+        self.runtime.shutdown()
+
         # Clear all references
         self.canvas.scene.clear()
         self.state_nodes.clear()
@@ -388,47 +411,96 @@ class YasminEditor(QMainWindow):
         if full_name in self.state_nodes:
             del self.state_nodes[full_name]
 
-    def apply_default_visual_state(self, item) -> None:
-        is_selected = item.isSelected() if hasattr(item, "isSelected") else False
+    def _is_deleted_graphics_item(self, item) -> bool:
+        if item is None:
+            return True
+        try:
+            item.scene()
+        except RuntimeError:
+            return True
+        return False
 
-        if isinstance(item, StateNode):
-            item.setBrush(
-                QBrush(PALETTE.state_fill(item.plugin_info.plugin_type if item.plugin_info else None))
-            )
-            item.setPen(
-                QPen(PALETTE.selection_pen, 4)
-                if is_selected
-                else QPen(PALETTE.state_pen, 3)
-            )
-        elif isinstance(item, ContainerStateNode):
-            if getattr(item, "is_xml_reference", False):
-                item.setBrush(QBrush(PALETTE.container_xml_fill))
+    def _is_deleted_connection_item(self, connection: Optional[ConnectionLine]) -> bool:
+        if connection is None:
+            return True
+        try:
+            connection.scene()
+            connection.arrow_head.scene()
+            connection.label_bg.scene()
+            connection.label.scene()
+        except RuntimeError:
+            return True
+        return False
+
+    def apply_default_connection_visual_state(self, connection: ConnectionLine) -> None:
+        if self._is_deleted_connection_item(connection):
+            return
+
+        try:
+            is_selected = connection.isSelected()
+        except RuntimeError:
+            return
+
+        try:
+            connection.label_bg.setBrush(QBrush(PALETTE.connection_label_bg))
+            connection._update_label_style(is_selected)
+        except RuntimeError:
+            return
+
+    def apply_default_visual_state(self, item) -> None:
+        if self._is_deleted_graphics_item(item):
+            return
+
+        try:
+            is_selected = item.isSelected() if hasattr(item, "isSelected") else False
+        except RuntimeError:
+            return
+
+        try:
+            if isinstance(item, StateNode):
+                item.setBrush(
+                    QBrush(
+                        PALETTE.state_fill(
+                            item.plugin_info.plugin_type if item.plugin_info else None
+                        )
+                    )
+                )
                 item.setPen(
                     QPen(PALETTE.selection_pen, 4)
                     if is_selected
-                    else QPen(PALETTE.container_xml_pen, 3)
+                    else QPen(PALETTE.state_pen, 3)
                 )
-            elif item.is_concurrence:
-                item.setBrush(QBrush(PALETTE.container_concurrence_fill))
+            elif isinstance(item, ContainerStateNode):
+                if getattr(item, "is_xml_reference", False):
+                    item.setBrush(QBrush(PALETTE.container_xml_fill))
+                    item.setPen(
+                        QPen(PALETTE.selection_pen, 4)
+                        if is_selected
+                        else QPen(PALETTE.container_xml_pen, 3)
+                    )
+                elif item.is_concurrence:
+                    item.setBrush(QBrush(PALETTE.container_concurrence_fill))
+                    item.setPen(
+                        QPen(PALETTE.selection_pen, 4)
+                        if is_selected
+                        else QPen(PALETTE.container_concurrence_pen, 3)
+                    )
+                else:
+                    item.setBrush(QBrush(PALETTE.container_state_machine_fill))
+                    item.setPen(
+                        QPen(PALETTE.selection_pen, 4)
+                        if is_selected
+                        else QPen(PALETTE.container_state_machine_pen, 3)
+                    )
+            elif isinstance(item, FinalOutcomeNode):
+                item.setBrush(QBrush(PALETTE.final_outcome_fill))
                 item.setPen(
                     QPen(PALETTE.selection_pen, 4)
                     if is_selected
-                    else QPen(PALETTE.container_concurrence_pen, 3)
+                    else QPen(PALETTE.final_outcome_pen, 3)
                 )
-            else:
-                item.setBrush(QBrush(PALETTE.container_state_machine_fill))
-                item.setPen(
-                    QPen(PALETTE.selection_pen, 4)
-                    if is_selected
-                    else QPen(PALETTE.container_state_machine_pen, 3)
-                )
-        elif isinstance(item, FinalOutcomeNode):
-            item.setBrush(QBrush(PALETTE.final_outcome_fill))
-            item.setPen(
-                QPen(PALETTE.selection_pen, 4)
-                if is_selected
-                else QPen(PALETTE.final_outcome_pen, 3)
-            )
+        except RuntimeError:
+            return
 
     def resolve_plugin_info_for_model(self, model: State) -> PluginInfo:
         if model.state_type == "py":
@@ -731,6 +803,10 @@ class YasminEditor(QMainWindow):
 
     def new_state_machine(self) -> bool:
         """Create a new state machine, clearing the current one."""
+        if self.runtime_mode_enabled:
+            self._show_read_only_message()
+            return False
+
         reply = QMessageBox.question(
             self,
             "New State Machine",
@@ -747,6 +823,10 @@ class YasminEditor(QMainWindow):
 
     def open_state_machine(self) -> None:
         """Open a state machine from an XML file."""
+        if self.runtime_mode_enabled:
+            self._show_read_only_message()
+            return
+
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Open State Machine", "", "XML Files (*.xml)"
         )
@@ -887,6 +967,10 @@ class YasminEditor(QMainWindow):
         self._blackboard_key_metadata = {}
         self.root_model = model or self.model_adapter.create_empty_root_model()
         self.current_container_path = [self.root_model]
+        self.current_file_path = None
+        self.runtime_active_path = tuple()
+        self.runtime_last_transition = None
+        self.runtime_snapshot_file_path = None
         self.refresh_blackboard_keys_list()
         self.update_container_controls()
         self.refresh_breadcrumbs()
@@ -1338,6 +1422,7 @@ class YasminEditor(QMainWindow):
 
             try:
                 self.save_to_xml(file_path)
+                self.current_file_path = file_path
                 self.statusBar().showMessage(f"Saved: {file_path}", 3000)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save file: {str(e)}")
@@ -1357,54 +1442,64 @@ class YasminEditor(QMainWindow):
         toolbar = QToolBar()
         self.addToolBar(toolbar)
 
-        new_action = QAction("New", self)
-        new_action.setShortcut("Ctrl+N")
-        new_action.triggered.connect(self.new_state_machine)
-        toolbar.addAction(new_action)
+        self.new_action = QAction("New", self)
+        self.new_action.setShortcut("Ctrl+N")
+        self.new_action.triggered.connect(self.new_state_machine)
+        toolbar.addAction(self.new_action)
 
-        open_action = QAction("Open", self)
-        open_action.setShortcut("Ctrl+O")
-        open_action.triggered.connect(self.open_state_machine)
-        toolbar.addAction(open_action)
+        self.open_action = QAction("Open", self)
+        self.open_action.setShortcut("Ctrl+O")
+        self.open_action.triggered.connect(self.open_state_machine)
+        toolbar.addAction(self.open_action)
 
-        save_action = QAction("Save", self)
-        save_action.setShortcut("Ctrl+S")
-        save_action.triggered.connect(self.save_state_machine)
-        toolbar.addAction(save_action)
-
-        toolbar.addSeparator()
-
-        add_state_action = QAction("Add State", self)
-        add_state_action.triggered.connect(self.add_state)
-        toolbar.addAction(add_state_action)
-
-        add_state_machine_action = QAction("Add State Machine", self)
-        add_state_machine_action.triggered.connect(self.add_state_machine)
-        toolbar.addAction(add_state_machine_action)
-
-        add_concurrence_action = QAction("Add Concurrence", self)
-        add_concurrence_action.triggered.connect(self.add_concurrence)
-        toolbar.addAction(add_concurrence_action)
-
-        add_final_action = QAction("Add Final Outcome", self)
-        add_final_action.triggered.connect(self.add_final_outcome)
-        toolbar.addAction(add_final_action)
+        self.save_action = QAction("Save", self)
+        self.save_action.setShortcut("Ctrl+S")
+        self.save_action.triggered.connect(self.save_state_machine)
+        toolbar.addAction(self.save_action)
 
         toolbar.addSeparator()
 
-        edit_current_action = QAction("Edit Current Container", self)
-        edit_current_action.triggered.connect(self.edit_current_container)
-        toolbar.addAction(edit_current_action)
+        self.add_state_action = QAction("Add State", self)
+        self.add_state_action.triggered.connect(self.add_state)
+        toolbar.addAction(self.add_state_action)
 
-        delete_action = QAction("Delete Selected", self)
-        delete_action.triggered.connect(self.delete_selected)
-        toolbar.addAction(delete_action)
+        self.add_state_machine_action = QAction("Add State Machine", self)
+        self.add_state_machine_action.triggered.connect(self.add_state_machine)
+        toolbar.addAction(self.add_state_machine_action)
+
+        self.add_concurrence_action = QAction("Add Concurrence", self)
+        self.add_concurrence_action.triggered.connect(self.add_concurrence)
+        toolbar.addAction(self.add_concurrence_action)
+
+        self.add_final_action = QAction("Add Final Outcome", self)
+        self.add_final_action.triggered.connect(self.add_final_outcome)
+        toolbar.addAction(self.add_final_action)
+
+        toolbar.addSeparator()
+
+        self.edit_current_action = QAction("Edit Current Container", self)
+        self.edit_current_action.triggered.connect(self.edit_current_container)
+        toolbar.addAction(self.edit_current_action)
+
+        self.delete_action = QAction("Delete Selected", self)
+        self.delete_action.triggered.connect(self.delete_selected)
+        toolbar.addAction(self.delete_action)
 
         toolbar.addSeparator()
 
         help_action = QAction("Help", self)
         help_action.triggered.connect(self.show_help)
         toolbar.addAction(help_action)
+
+        toolbar.addSeparator()
+
+        self.runtime_mode_button = QPushButton("Runtime Mode")
+        self.runtime_mode_button.setCheckable(True)
+        self.runtime_mode_button.setToolTip(
+            "Enter or leave runtime mode using the current state machine XML snapshot."
+        )
+        self.runtime_mode_button.clicked.connect(self.toggle_runtime_mode)
+        toolbar.addWidget(self.runtime_mode_button)
 
         left_layout.addWidget(QLabel("<b>Blackboard Keys:</b>"))
         self.blackboard_filter = QLineEdit()
@@ -1514,9 +1609,64 @@ class YasminEditor(QMainWindow):
         self.breadcrumb_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.addWidget(breadcrumb_widget)
 
+        self.runtime_controls_widget = QWidget()
+        self.runtime_controls_layout = QHBoxLayout(self.runtime_controls_widget)
+        self.runtime_controls_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.runtime_play_button = QPushButton("Play")
+        self.runtime_play_button.setToolTip(
+            "Start the runtime or resume execution after a pause."
+        )
+        self.runtime_play_button.clicked.connect(self.runtime.play)
+        self.runtime_controls_layout.addWidget(self.runtime_play_button)
+
+        self.runtime_pause_button = QPushButton("Pause")
+        self.runtime_pause_button.setToolTip(
+            "Pause execution on the next transition callback."
+        )
+        self.runtime_pause_button.clicked.connect(self.runtime.pause)
+        self.runtime_controls_layout.addWidget(self.runtime_pause_button)
+
+        self.runtime_step_button = QPushButton("Play Once")
+        self.runtime_step_button.setToolTip(
+            "Execute exactly one state transition and pause again."
+        )
+        self.runtime_step_button.clicked.connect(self.runtime.play_once)
+        self.runtime_controls_layout.addWidget(self.runtime_step_button)
+
+        self.runtime_cancel_state_button = QPushButton("Cancel State")
+        self.runtime_cancel_state_button.setToolTip(
+            "Request cancellation of the currently active state."
+        )
+        self.runtime_cancel_state_button.clicked.connect(self.runtime.cancel_state)
+        self.runtime_controls_layout.addWidget(self.runtime_cancel_state_button)
+
+        self.runtime_cancel_sm_button = QPushButton("Cancel State Machine")
+        self.runtime_cancel_sm_button.setToolTip(
+            "Request cancellation of the complete runtime state machine."
+        )
+        self.runtime_cancel_sm_button.clicked.connect(self.runtime.cancel)
+        self.runtime_controls_layout.addWidget(self.runtime_cancel_sm_button)
+
+        self.runtime_kill_button = QPushButton("Kill")
+        self.runtime_kill_button.setToolTip(
+            "Force-stop the runtime by destroying the active runtime object."
+        )
+        self.runtime_kill_button.clicked.connect(self.runtime.kill)
+        self.runtime_controls_layout.addWidget(self.runtime_kill_button)
+
+        self.runtime_controls_layout.addStretch()
+        right_layout.addWidget(self.runtime_controls_widget)
+
+        self.canvas_frame = QFrame()
+        self.canvas_frame_layout = QVBoxLayout(self.canvas_frame)
+        self.canvas_frame_layout.setContentsMargins(0, 0, 0, 0)
+
         self.canvas = StateMachineCanvas()
         self.canvas.editor_ref = self
-        right_layout.addWidget(self.canvas)
+        self.canvas.scene.selectionChanged.connect(self.refresh_visual_highlighting)
+        self.canvas_frame_layout.addWidget(self.canvas)
+        right_layout.addWidget(self.canvas_frame)
 
         splitter.addWidget(left_panel)
         splitter.addWidget(right_panel)
@@ -1528,6 +1678,7 @@ class YasminEditor(QMainWindow):
         self.statusBar()
         self.refresh_breadcrumbs()
         self.update_container_controls()
+        self.update_runtime_actions()
 
     def fit_current_view(self) -> None:
         """Fit the currently rendered container into the canvas view."""
@@ -1546,6 +1697,157 @@ class YasminEditor(QMainWindow):
         self.canvas.scene.setSceneRect(padded)
         self.canvas.fitInView(padded, Qt.KeepAspectRatio)
         self.canvas.centerOn(bounds.center())
+
+    def create_runtime_xml_snapshot(self) -> str:
+        self.sync_current_container_layout()
+
+        if self.current_file_path:
+            self.save_to_xml(self.current_file_path)
+            return self.current_file_path
+
+        if not self.runtime_snapshot_file_path:
+            fd, temp_path = tempfile.mkstemp(
+                prefix="yasmin_editor_runtime_",
+                suffix=".xml",
+            )
+            os.close(fd)
+            self.runtime_snapshot_file_path = temp_path
+
+        self.save_to_xml(self.runtime_snapshot_file_path)
+        return self.runtime_snapshot_file_path
+
+    def toggle_runtime_mode(self, checked: bool) -> None:
+        if checked:
+            try:
+                runtime_path = self.create_runtime_xml_snapshot()
+            except Exception as exc:
+                self.runtime_mode_enabled = False
+                self.runtime_mode_button.blockSignals(True)
+                self.runtime_mode_button.setChecked(False)
+                self.runtime_mode_button.blockSignals(False)
+                QMessageBox.critical(
+                    self,
+                    "Runtime Error",
+                    f"Failed to enter runtime mode:\n{exc}",
+                )
+                self.update_runtime_actions()
+                return
+
+            if not self.runtime.create_sm_from_file(runtime_path):
+                self.runtime_mode_enabled = False
+                self.runtime_mode_button.blockSignals(True)
+                self.runtime_mode_button.setChecked(False)
+                self.runtime_mode_button.blockSignals(False)
+                self.update_runtime_actions()
+                return
+
+            self.runtime_mode_enabled = True
+            self.runtime_active_path = self.runtime.get_active_path()
+            self.runtime_last_transition = self.runtime.get_last_transition()
+            self.render_current_container()
+            self.set_canvas_runtime_visual_state()
+            self.statusBar().showMessage("Runtime mode enabled", 3000)
+            return
+
+        self.runtime_mode_enabled = False
+        self.runtime_active_path = tuple()
+        self.runtime_last_transition = None
+        self.runtime.shutdown()
+        self.render_current_container()
+        self.set_canvas_runtime_visual_state()
+        self.statusBar().showMessage("Runtime mode disabled", 3000)
+
+    def set_canvas_runtime_visual_state(self) -> None:
+        if hasattr(self, "runtime_controls_widget"):
+            self.runtime_controls_widget.setVisible(self.runtime_mode_enabled)
+
+        if hasattr(self, "canvas_frame"):
+            border_width = 3 if self.runtime_mode_enabled else 1
+            border_color = (
+                PALETTE.runtime_canvas_border
+                if self.runtime_mode_enabled
+                else PALETTE.ui_border
+            )
+            self.canvas_frame.setStyleSheet(
+                f"QFrame {{ border: {border_width}px solid {border_color.name()}; }}"
+            )
+
+        if hasattr(self, "runtime_mode_button"):
+            self.runtime_mode_button.setText(
+                "Runtime Mode Active" if self.runtime_mode_enabled else "Runtime Mode"
+            )
+            if self.runtime_mode_enabled:
+                self.runtime_mode_button.setStyleSheet(
+                    "QPushButton {"
+                    f"background-color: {PALETTE.runtime_mode_button_bg.name()}; "
+                    f"color: {PALETTE.runtime_mode_button_text.name()}; "
+                    f"border: 1px solid {PALETTE.runtime_canvas_border.name()};"
+                    "}"
+                )
+            else:
+                self.runtime_mode_button.setStyleSheet("")
+
+    def on_runtime_active_state_changed(self, state_path: tuple[str, ...]) -> None:
+        self.runtime_active_path = tuple(state_path or tuple())
+        self.refresh_visual_highlighting()
+        self.update_runtime_actions()
+
+    def on_runtime_transition_changed(
+        self,
+        transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]],
+    ) -> None:
+        self.runtime_last_transition = transition
+        self.refresh_visual_highlighting()
+
+    def on_runtime_outcome_changed(self, outcome: Optional[str]) -> None:
+        del outcome
+        self.runtime_active_path = tuple()
+        self.runtime_last_transition = None
+        self.refresh_visual_highlighting()
+        self.update_runtime_actions()
+
+    def on_runtime_status_changed(self, message: str) -> None:
+        self.statusBar().showMessage(message, 3000)
+        self.update_runtime_actions()
+
+    def on_runtime_error(self, message: str) -> None:
+        self.statusBar().showMessage("Runtime error", 3000)
+        QMessageBox.critical(self, "Runtime Error", message)
+        self.update_runtime_actions()
+
+    def update_runtime_actions(self) -> None:
+        runtime_ready = self.runtime_mode_enabled and self.runtime.is_ready()
+        runtime_running = runtime_ready and self.runtime.is_running()
+        runtime_blocked = runtime_running and self.runtime.is_blocked()
+        runtime_playing = runtime_running and not runtime_blocked
+
+        if hasattr(self, "runtime_mode_button"):
+            self.runtime_mode_button.blockSignals(True)
+            self.runtime_mode_button.setChecked(self.runtime_mode_enabled)
+            self.runtime_mode_button.blockSignals(False)
+
+        self.set_canvas_runtime_visual_state()
+
+        runtime_button_states = {
+            "runtime_play_button": runtime_ready and not runtime_playing,
+            "runtime_pause_button": runtime_playing,
+            "runtime_step_button": runtime_ready and not runtime_playing,
+            "runtime_cancel_state_button": runtime_ready,
+            "runtime_cancel_sm_button": runtime_ready,
+            "runtime_kill_button": runtime_ready,
+        }
+        for button_name, enabled in runtime_button_states.items():
+            button = getattr(self, button_name, None)
+            if button is not None:
+                button.setEnabled(enabled)
+
+        for action_name in [
+            "new_action",
+            "open_action",
+        ]:
+            action = getattr(self, action_name, None)
+            if action is not None:
+                action.setEnabled(not self.runtime_mode_enabled)
 
     def refresh_breadcrumbs(self) -> None:
         if not hasattr(self, "breadcrumb_layout"):
@@ -1623,6 +1925,7 @@ class YasminEditor(QMainWindow):
 
     def load_from_xml(self, file_path: str) -> None:
         self.model_adapter.load_from_xml(file_path)
+        self.current_file_path = file_path
         self.render_current_container(fit_view=True)
 
     def state_uses_blackboard_key(self, state_node, key_name: str) -> bool:
@@ -1672,19 +1975,139 @@ class YasminEditor(QMainWindow):
         return model_uses_key(model, [])
 
     def update_blackboard_usage_highlighting(self) -> None:
-        selected_key = self.get_selected_blackboard_key_name()
+        self.refresh_visual_highlighting()
 
-        for state_node in self.state_nodes.values():
-            self.apply_default_visual_state(state_node)
+    def _get_current_runtime_container_path(self) -> tuple[str, ...]:
+        return tuple(
+            str(container.name) for container in self.current_container_path[1:]
+        )
 
-        if not self._highlight_blackboard_usage or not selected_key:
+    def _get_runtime_state_name_for_current_container(self) -> Optional[str]:
+        if not self.runtime_mode_enabled or not self.runtime_active_path:
+            return None
+
+        current_path = self._get_current_runtime_container_path()
+        shared_depth = min(len(current_path), len(self.runtime_active_path))
+        if self.runtime_active_path[:shared_depth] != current_path[:shared_depth]:
+            return None
+
+        if len(current_path) > len(self.runtime_active_path):
+            return None
+
+        if len(self.runtime_active_path) > len(current_path):
+            return self.runtime_active_path[len(current_path)]
+
+        start_state = getattr(self.current_container_model, "start_state", None)
+        if start_state and str(start_state) in self.state_nodes:
+            return str(start_state)
+
+        return None
+
+    def _find_runtime_connection_for_current_container(
+        self,
+    ) -> Optional[ConnectionLine]:
+        if not self.runtime_mode_enabled or not self.runtime_last_transition:
+            return None
+
+        from_path, to_path, outcome = self.runtime_last_transition
+        current_path = self._get_current_runtime_container_path()
+        expected_depth = len(current_path) + 1
+
+        if len(from_path) != expected_depth or len(to_path) != expected_depth:
+            return None
+
+        if from_path[: len(current_path)] != current_path:
+            return None
+
+        if to_path[: len(current_path)] != current_path:
+            return None
+
+        from_name = from_path[len(current_path)]
+        to_name = to_path[len(current_path)]
+
+        for connection in list(self.connections):
+            if self._is_deleted_connection_item(connection):
+                continue
+            if (
+                getattr(connection.from_node, "name", None) == from_name
+                and getattr(connection.to_node, "name", None) == to_name
+                and connection.outcome == outcome
+            ):
+                return connection
+
+        return None
+
+    def apply_runtime_highlighting(self) -> None:
+        active_name = self._get_runtime_state_name_for_current_container()
+        if not active_name:
             return
 
-        for state_node in self.state_nodes.values():
-            if self.state_uses_blackboard_key(state_node, selected_key):
-                self.apply_default_visual_state(state_node)
-                state_node.setPen(QPen(PALETTE.blackboard_highlight_pen, 5))
-                state_node.setBrush(QBrush(PALETTE.blackboard_highlight_fill))
+        active_item = self.state_nodes.get(active_name)
+        if active_item is None or self._is_deleted_graphics_item(active_item):
+            return
+
+        try:
+            active_item.setPen(QPen(PALETTE.runtime_highlight_pen, 5))
+            active_item.setBrush(QBrush(PALETTE.runtime_highlight_fill))
+        except RuntimeError:
+            return
+
+    def apply_runtime_transition_highlighting(self) -> None:
+        connection = self._find_runtime_connection_for_current_container()
+        if connection is None or self._is_deleted_connection_item(connection):
+            return
+
+        try:
+            pen = QPen(PALETTE.runtime_transition_pen, 5)
+            pen.setCapStyle(Qt.RoundCap)
+            pen.setJoinStyle(Qt.RoundJoin)
+            connection.setPen(pen)
+            connection.arrow_head.setBrush(QBrush(PALETTE.runtime_transition_pen))
+            connection.arrow_head.setPen(QPen(PALETTE.runtime_transition_pen))
+            connection.label_bg.setBrush(QBrush(PALETTE.runtime_transition_label_bg))
+            connection.label_bg.setPen(QPen(PALETTE.runtime_transition_pen, 2))
+        except RuntimeError:
+            return
+
+    def refresh_visual_highlighting(self) -> None:
+        selected_key = self.get_selected_blackboard_key_name()
+
+        stale_state_names = [
+            state_name
+            for state_name, state_node in self.state_nodes.items()
+            if self._is_deleted_graphics_item(state_node)
+        ]
+        for state_name in stale_state_names:
+            del self.state_nodes[state_name]
+
+        stale_connections = [
+            connection
+            for connection in self.connections
+            if self._is_deleted_connection_item(connection)
+        ]
+        for connection in stale_connections:
+            self.connections.remove(connection)
+
+        for connection in list(self.connections):
+            self.apply_default_connection_visual_state(connection)
+
+        for state_node in list(self.state_nodes.values()):
+            self.apply_default_visual_state(state_node)
+
+        if self._highlight_blackboard_usage and selected_key:
+            for state_node in list(self.state_nodes.values()):
+                if self._is_deleted_graphics_item(state_node):
+                    continue
+                if self.state_uses_blackboard_key(state_node, selected_key):
+                    self.apply_default_visual_state(state_node)
+                    try:
+                        state_node.setPen(QPen(PALETTE.blackboard_highlight_pen, 5))
+                        state_node.setBrush(QBrush(PALETTE.blackboard_highlight_fill))
+                    except RuntimeError:
+                        continue
+
+        self.apply_runtime_highlighting()
+        self.apply_runtime_transition_highlighting()
 
     def _ensure_external_xml_state(self) -> None:
         if not hasattr(self, "extern_xml"):
@@ -1696,14 +2119,18 @@ class YasminEditor(QMainWindow):
 
     def is_read_only_mode(self) -> bool:
         self._ensure_external_xml_state()
-        return (
+        external_xml_read_only = (
             self.extern_xml is not None
             and self.extern_xml_path_start_index is not None
             and len(self.current_container_path) > self.extern_xml_path_start_index
         )
+        return self.runtime_mode_enabled or external_xml_read_only
 
     def _show_read_only_message(self) -> None:
-        self.statusBar().showMessage("External XML view is read-only", 3000)
+        if self.runtime_mode_enabled:
+            self.statusBar().showMessage("Runtime mode is read-only", 3000)
+        else:
+            self.statusBar().showMessage("External XML view is read-only", 3000)
 
     def _clear_external_xml_view(self) -> None:
         self._ensure_external_xml_state()
@@ -1836,6 +2263,8 @@ class YasminEditor(QMainWindow):
         self.refresh_connection_port_visibility()
         self.refresh_blackboard_keys_list()
         self._set_scene_read_only_state()
+        self.refresh_visual_highlighting()
+        self.update_runtime_actions()
         if fit_view:
             self.fit_current_view()
 
@@ -1862,7 +2291,12 @@ class YasminEditor(QMainWindow):
     def enter_container(self, container_node: ContainerStateNode) -> None:
         self._ensure_external_xml_state()
         if getattr(container_node, "is_xml_reference", False):
-            if self.is_read_only_mode():
+            external_xml_active = (
+                self.extern_xml is not None
+                and self.extern_xml_path_start_index is not None
+                and len(self.current_container_path) > self.extern_xml_path_start_index
+            )
+            if external_xml_active:
                 self.edit_state()
                 return
             xml_file_path = self._resolve_xml_state_file_path(container_node)

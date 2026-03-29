@@ -18,10 +18,10 @@ from typing import TYPE_CHECKING, Any, List, Union
 
 from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer
 from PyQt5.QtGui import QBrush, QFont, QPainterPath, QPen, QPolygonF
-from yasmin_editor.editor_gui.colors import PALETTE
 from PyQt5.QtWidgets import (QGraphicsItem, QGraphicsPathItem,
                              QGraphicsPolygonItem, QGraphicsRectItem,
                              QGraphicsTextItem)
+from yasmin_editor.editor_gui.colors import PALETTE
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.container_state_node import \

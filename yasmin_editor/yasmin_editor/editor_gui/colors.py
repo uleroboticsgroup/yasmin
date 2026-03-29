@@ -52,6 +52,13 @@ class EditorPalette:
     selection_pen: QColor
     blackboard_highlight_pen: QColor
     blackboard_highlight_fill: QColor
+    runtime_highlight_pen: QColor
+    runtime_highlight_fill: QColor
+    runtime_transition_pen: QColor
+    runtime_transition_label_bg: QColor
+    runtime_canvas_border: QColor
+    runtime_mode_button_bg: QColor
+    runtime_mode_button_text: QColor
     connection_line: QColor
     connection_selected: QColor
     connection_label_bg: QColor
@@ -420,6 +427,13 @@ PALETTES = {
         selection_pen=QColor(255, 200, 0),
         blackboard_highlight_pen=QColor(255, 170, 0),
         blackboard_highlight_fill=QColor(255, 255, 170),
+        runtime_highlight_pen=QColor(46, 150, 76),
+        runtime_highlight_fill=QColor(198, 244, 210),
+        runtime_transition_pen=QColor(34, 122, 194),
+        runtime_transition_label_bg=QColor(220, 239, 255),
+        runtime_canvas_border=QColor(46, 150, 76),
+        runtime_mode_button_bg=QColor(46, 150, 76),
+        runtime_mode_button_text=QColor(255, 255, 255),
         connection_line=QColor(60, 60, 180),
         connection_selected=QColor(255, 100, 0),
         connection_label_bg=QColor(255, 255, 255),
@@ -460,6 +474,13 @@ PALETTES = {
         selection_pen=QColor(255, 210, 90),
         blackboard_highlight_pen=QColor(255, 196, 64),
         blackboard_highlight_fill=QColor(125, 110, 42),
+        runtime_highlight_pen=QColor(116, 214, 146),
+        runtime_highlight_fill=QColor(44, 88, 56),
+        runtime_transition_pen=QColor(128, 192, 255),
+        runtime_transition_label_bg=QColor(42, 67, 92),
+        runtime_canvas_border=QColor(116, 214, 146),
+        runtime_mode_button_bg=QColor(68, 124, 84),
+        runtime_mode_button_text=QColor(245, 247, 250),
         connection_line=QColor(130, 170, 255),
         connection_selected=QColor(255, 165, 90),
         connection_label_bg=QColor(49, 55, 63),
