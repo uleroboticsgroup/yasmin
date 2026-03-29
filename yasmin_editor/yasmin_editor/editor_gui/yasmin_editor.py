@@ -402,14 +402,14 @@ class YasminEditor(QMainWindow):
                     else QPen(QColor(0, 0, 0), 3)
                 )
             elif item.is_concurrence:
-                item.setBrush(QBrush(QColor(255, 220, 150, 180)))
+                item.setBrush(QBrush(QColor(255, 220, 150)))
                 item.setPen(
                     QPen(QColor(255, 200, 0), 4)
                     if is_selected
                     else QPen(QColor(255, 140, 0), 3)
                 )
             else:
-                item.setBrush(QBrush(QColor(173, 216, 230, 180)))
+                item.setBrush(QBrush(QColor(173, 216, 230)))
                 item.setPen(
                     QPen(QColor(255, 200, 0), 4)
                     if is_selected
