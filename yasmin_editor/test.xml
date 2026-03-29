@@ -40,14 +40,14 @@
   <StateMachine name="test" type="xml" file_name="demo_1.xml" package="yasmin_demos" x="-1101.54" y="-625.93">
     <Transition from="outcome4" to="test" />
   </StateMachine>
-  <State name="a" type="cpp" class="yasmin_demos/FooState" x="-1305.59" y="-581.32">
+  <State name="a" type="cpp" class="yasmin_demos/FooState" x="-1338.33" y="-559.49">
     <Transition from="outcome1" to="a" />
     <Transition from="outcome2" to="a" />
   </State>
   <State name="b" type="py" module="yasmin_demos.foo_state" class="FooState" x="-367.91" y="-610.75">
     <Transition from="outcome1" to="b" />
   </State>
-  <State name="lot_transitions" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-1073.98" y="-314.82">
+  <State name="lot_transitions" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-1093.62" y="-297.36">
     <Transition from="timeout" to="more_transitions" />
     <Transition from="outcome2" to="more_transitions" />
     <Transition from="outcome1" to="more_transitions" />

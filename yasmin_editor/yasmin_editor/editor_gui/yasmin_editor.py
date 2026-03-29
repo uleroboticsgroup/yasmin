@@ -137,6 +137,8 @@ class YasminEditor(QMainWindow):
         self.canvas.scene.removeItem(connection.label)
         if connection in self.connections:
             self.connections.remove(connection)
+        for existing_connection in self.connections:
+            existing_connection.update_position()
         self.refresh_connection_port_visibility()
 
     def iter_state_subtree_items(self, state_node: StateNode | ContainerStateNode):
@@ -533,6 +535,8 @@ class YasminEditor(QMainWindow):
         self.canvas.scene.addItem(connection.label_bg)
         self.canvas.scene.addItem(connection.label)
         self.connections.append(connection)
+        for existing_connection in self.connections:
+            existing_connection.update_position()
         return connection
 
     def _rename_state_node_entries(self, old_prefix: str, new_prefix: str) -> None:
