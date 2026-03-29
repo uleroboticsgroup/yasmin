@@ -1149,6 +1149,15 @@ class YasminEditor(QMainWindow):
             hidden_key_names,
         )
 
+    def _has_persistent_blackboard_metadata(
+        self,
+        metadata: Dict[str, str],
+    ) -> bool:
+        return any(
+            str(metadata.get(field, "") or "").strip()
+            for field in ["default_type", "default_value"]
+        )
+
     def _merge_container_keys(
         self,
         container_model: StateMachine | Concurrence,
@@ -1162,11 +1171,14 @@ class YasminEditor(QMainWindow):
         for key_name in sorted(
             set(derived_keys.keys()) | set(metadata_map.keys()), key=str.lower
         ):
-            if key_name not in derived_keys and key_name in hidden_key_names:
-                continue
+            metadata = dict(metadata_map.get(key_name, {}))
+            if key_name not in derived_keys:
+                if key_name in hidden_key_names:
+                    continue
+                if not self._has_persistent_blackboard_metadata(metadata):
+                    continue
 
             derived = dict(derived_keys.get(key_name, {}))
-            metadata = dict(metadata_map.get(key_name, {}))
             key_type = str(
                 derived.get("key_type", metadata.get("key_type", "in")) or "in"
             )
