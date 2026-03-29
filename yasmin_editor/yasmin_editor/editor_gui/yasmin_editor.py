@@ -107,10 +107,6 @@ class YasminEditor(QMainWindow):
     def start_state(self, value: Optional[str]) -> None:
         self.root_model.start_state = value
 
-
-
-
-
     def find_selected_item(self, item_type):
         for item in self.canvas.scene.selectedItems():
             if isinstance(item, item_type):
@@ -131,8 +127,6 @@ class YasminEditor(QMainWindow):
             QMessageBox.warning(self, "Error", message)
         return container
 
-
-
     def delete_connection_item(self, connection: ConnectionLine) -> None:
         self.unregister_connection_in_model(connection)
         connection.from_node.remove_connection(connection)
@@ -152,8 +146,6 @@ class YasminEditor(QMainWindow):
             for final_outcome in state_node.final_outcomes.values():
                 yield final_outcome
 
-
-
     def closeEvent(self, event: QCloseEvent) -> None:
         """Handle window close event to ensure proper cleanup."""
         # Clear all references
@@ -170,7 +162,6 @@ class YasminEditor(QMainWindow):
 
         # Force process termination
         os._exit(0)
-
 
     def populate_plugin_lists(self) -> None:
         """Populate the plugin lists with available Python, C++, and XML states."""
@@ -195,9 +186,6 @@ class YasminEditor(QMainWindow):
         for i in range(list_widget.count()):
             item = list_widget.item(i)
             item.setHidden(text.lower() not in item.text().lower())
-
-
-
 
     def filter_blackboard_keys(self, text: str) -> None:
         """Filter blackboard keys based on search text."""
@@ -337,8 +325,6 @@ class YasminEditor(QMainWindow):
 
         return dict(sorted(derived_keys.items(), key=lambda item: item[0].lower()))
 
-
-
     def get_selected_blackboard_key_name(self) -> Optional[str]:
         item = self.blackboard_list.currentItem()
         if item is None:
@@ -346,15 +332,11 @@ class YasminEditor(QMainWindow):
         key_data = item.data(Qt.UserRole) or {}
         return key_data.get("name")
 
-
-
-
     def add_root_default_row(self) -> None:
         pass
 
     def remove_root_default_row(self) -> None:
         pass
-
 
     def get_root_defaults(self) -> list:
         return []
@@ -392,7 +374,6 @@ class YasminEditor(QMainWindow):
                 self._remove_state_node_entries(child_state, full_name)
         if full_name in self.state_nodes:
             del self.state_nodes[full_name]
-
 
     def apply_default_visual_state(self, item) -> None:
         is_selected = item.isSelected() if hasattr(item, "isSelected") else False
@@ -438,8 +419,6 @@ class YasminEditor(QMainWindow):
                 if is_selected
                 else QPen(QColor(0, 0, 0), 3)
             )
-
-
 
     def resolve_plugin_info_for_model(self, model: State) -> PluginInfo:
         if model.state_type == "py":
@@ -544,10 +523,6 @@ class YasminEditor(QMainWindow):
             model.add_outcome(Outcome(name=outcome_name))
         return model
 
-
-
-
-
     def _create_connection_view(
         self, from_node, to_node, outcome: str
     ) -> ConnectionLine:
@@ -558,8 +533,6 @@ class YasminEditor(QMainWindow):
         self.canvas.scene.addItem(connection.label)
         self.connections.append(connection)
         return connection
-
-
 
     def _rename_state_node_entries(self, old_prefix: str, new_prefix: str) -> None:
         updates = {}
@@ -614,9 +587,6 @@ class YasminEditor(QMainWindow):
         state_node.defaults = defaults
         return True
 
-
-
-
     def create_state_node(
         self,
         name: str,
@@ -661,7 +631,6 @@ class YasminEditor(QMainWindow):
         self.add_model_state(model, defaults=defaults)
         self.statusBar().showMessage(f"Added state: {name}", 2000)
 
-
     def add_container(self, is_concurrence: bool = False) -> None:
         """Add a new container (State Machine or Concurrence)."""
         dialog = (
@@ -689,17 +658,6 @@ class YasminEditor(QMainWindow):
                     description=description,
                     defaults=defaults,
                 )
-
-
-
-
-
-
-
-
-
-
-
 
     def show_help(self) -> None:
         """Display help dialog with usage instructions."""
@@ -791,7 +749,6 @@ class YasminEditor(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to open file: {str(e)}")
 
-
     @property
     def current_container_model(self):
         return self.current_container_path[-1]
@@ -824,7 +781,6 @@ class YasminEditor(QMainWindow):
         if isinstance(model, Concurrence):
             model.default_outcome = value
 
-
     def clear_current_scene(self) -> None:
         self.canvas.scene.clear()
         self.state_nodes.clear()
@@ -845,9 +801,6 @@ class YasminEditor(QMainWindow):
                 float(outcome_view.pos().x()),
                 float(outcome_view.pos().y()),
             )
-
-
-
 
     def update_container_controls(self) -> None:
         if not hasattr(self, "root_sm_name_edit"):
@@ -925,7 +878,6 @@ class YasminEditor(QMainWindow):
         self.refresh_blackboard_keys_list()
         self.update_container_controls()
         self.refresh_breadcrumbs()
-
 
     def save_to_xml(self, file_path: str) -> None:
         self.model_adapter.save_to_xml(file_path)
@@ -1038,9 +990,6 @@ class YasminEditor(QMainWindow):
             2000,
         )
 
-
-
-
     def add_state_to_container(self) -> None:
         self.add_state()
 
@@ -1049,9 +998,6 @@ class YasminEditor(QMainWindow):
 
     def add_concurrence_to_container(self) -> None:
         self.add_concurrence()
-
-
-
 
     def _get_container_metadata_map(
         self,
@@ -1313,9 +1259,6 @@ class YasminEditor(QMainWindow):
         self._set_container_metadata_map(self.current_container_model, metadata)
         self.sync_blackboard_keys()
 
-
-
-
     def save_state_machine(self) -> None:
         self.sync_current_container_layout()
         validation = validate_model(self.root_model)
@@ -1552,9 +1495,6 @@ class YasminEditor(QMainWindow):
         self.canvas.fitInView(padded, Qt.KeepAspectRatio)
         self.canvas.centerOn(bounds.center())
 
-
-
-
     def refresh_breadcrumbs(self) -> None:
         if not hasattr(self, "breadcrumb_layout"):
             return
@@ -1633,8 +1573,6 @@ class YasminEditor(QMainWindow):
         self.model_adapter.load_from_xml(file_path)
         self.render_current_container(fit_view=True)
 
-
-
     def state_uses_blackboard_key(self, state_node, key_name: str) -> bool:
         def apply_remap_chain(raw_name: str, remap_chain: List[Dict[str, str]]) -> str:
             effective_name = raw_name
@@ -1696,7 +1634,6 @@ class YasminEditor(QMainWindow):
                 state_node.setPen(QPen(QColor(255, 170, 0), 5))
                 state_node.setBrush(QBrush(QColor(255, 255, 170)))
 
-
     def _ensure_external_xml_state(self) -> None:
         if not hasattr(self, "extern_xml"):
             self.extern_xml = None
@@ -1722,7 +1659,9 @@ class YasminEditor(QMainWindow):
         self.extern_xml_source_state = None
         self.extern_xml_path_start_index = None
 
-    def _resolve_xml_state_file_path(self, state_node: ContainerStateNode) -> Optional[str]:
+    def _resolve_xml_state_file_path(
+        self, state_node: ContainerStateNode
+    ) -> Optional[str]:
         state_model = getattr(state_node, "model", None)
         plugin_info = getattr(state_node, "plugin_info", None)
         if plugin_info is None and state_model is not None:
@@ -1764,7 +1703,8 @@ class YasminEditor(QMainWindow):
 
         if file_name and package_name:
             try:
-                from ament_index_python.packages import get_package_share_directory
+                from ament_index_python.packages import \
+                    get_package_share_directory
 
                 share_dir = get_package_share_directory(str(package_name))
                 direct_candidate = os.path.join(share_dir, str(file_name))
@@ -1780,7 +1720,9 @@ class YasminEditor(QMainWindow):
 
     def _set_scene_read_only_state(self) -> None:
         readonly = self.is_read_only_mode()
-        for item in list(self.state_nodes.values()) + list(self.final_outcomes.values()):
+        for item in list(self.state_nodes.values()) + list(
+            self.final_outcomes.values()
+        ):
             item.setFlag(item.ItemIsMovable, not readonly)
             if hasattr(item, "connection_port"):
                 item.connection_port.setVisible(not readonly)
@@ -1818,7 +1760,10 @@ class YasminEditor(QMainWindow):
             return
         if not self.is_read_only_mode():
             self.sync_current_container_layout()
-        if self.extern_xml_path_start_index is not None and index < self.extern_xml_path_start_index:
+        if (
+            self.extern_xml_path_start_index is not None
+            and index < self.extern_xml_path_start_index
+        ):
             self.current_container_path = self.current_container_path[: index + 1]
             self._clear_external_xml_view()
         else:
@@ -1844,7 +1789,9 @@ class YasminEditor(QMainWindow):
                 )
                 return
             try:
-                external_model = self.model_adapter.load_external_xml_model(xml_file_path)
+                external_model = self.model_adapter.load_external_xml_model(
+                    xml_file_path
+                )
             except Exception as exc:
                 QMessageBox.critical(
                     self,
@@ -1858,7 +1805,9 @@ class YasminEditor(QMainWindow):
             self.extern_xml_path_start_index = len(self.current_container_path)
             self.current_container_path.append(external_model)
             self.render_current_container(fit_view=True)
-            self.statusBar().showMessage(f"Entered external XML: {container_node.name}", 2000)
+            self.statusBar().showMessage(
+                f"Entered external XML: {container_node.name}", 2000
+            )
             return
 
         self.sync_current_container_layout()
@@ -1939,7 +1888,9 @@ class YasminEditor(QMainWindow):
         if dialog.exec_():
             result = dialog.get_concurrence_data()
             if result:
-                name, outcomes, default_outcome, remappings, description, defaults = result
+                name, outcomes, default_outcome, remappings, description, defaults = (
+                    result
+                )
                 self.create_state_node(
                     name=name,
                     plugin_info=None,
@@ -1978,7 +1929,10 @@ class YasminEditor(QMainWindow):
             self.model_adapter.create_final_outcome_view(model, x=x, y=y)
 
             if isinstance(current_model, Concurrence):
-                if len(current_model.outcomes) == 1 and not current_model.default_outcome:
+                if (
+                    len(current_model.outcomes) == 1
+                    and not current_model.default_outcome
+                ):
                     current_model.default_outcome = outcome_name
 
             self.update_start_state_combo()
@@ -1987,14 +1941,18 @@ class YasminEditor(QMainWindow):
                 2000,
             )
 
-    def create_connection_from_drag(self, from_node: StateNode, to_node: StateNode) -> None:
+    def create_connection_from_drag(
+        self, from_node: StateNode, to_node: StateNode
+    ) -> None:
         if self.is_read_only_mode():
             self._show_read_only_message()
             return
         current_model = self.current_container_model
 
         if isinstance(current_model, Concurrence):
-            if not isinstance(to_node, FinalOutcomeNode) or isinstance(from_node, FinalOutcomeNode):
+            if not isinstance(to_node, FinalOutcomeNode) or isinstance(
+                from_node, FinalOutcomeNode
+            ):
                 QMessageBox.warning(
                     self,
                     "Not Allowed",
@@ -2053,7 +2011,9 @@ class YasminEditor(QMainWindow):
             if ok:
                 self.create_connection(from_node, to_node, outcome)
 
-    def create_connection(self, from_node: StateNode, to_node: StateNode, outcome: str) -> None:
+    def create_connection(
+        self, from_node: StateNode, to_node: StateNode, outcome: str
+    ) -> None:
         if self.is_read_only_mode():
             self._show_read_only_message()
             return
@@ -2093,7 +2053,9 @@ class YasminEditor(QMainWindow):
                 self.delete_state_item(item)
                 return
 
-    def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
+    def edit_final_outcome(
+        self, outcome_node: Optional[FinalOutcomeNode] = None
+    ) -> None:
         if outcome_node is None:
             outcome_node = self.find_selected_item(FinalOutcomeNode)
 
@@ -2120,7 +2082,9 @@ class YasminEditor(QMainWindow):
                 2000,
             )
 
-    def edit_selected_blackboard_key(self, item: Optional[QListWidgetItem] = None) -> None:
+    def edit_selected_blackboard_key(
+        self, item: Optional[QListWidgetItem] = None
+    ) -> None:
         if item is None:
             item = self.blackboard_list.currentItem()
         if item is None:
@@ -2168,7 +2132,9 @@ class YasminEditor(QMainWindow):
             self._set_container_metadata_map(self.current_container_model, metadata_map)
             self.sync_blackboard_keys()
 
-    def _collect_container_key_lists(self, model: State) -> tuple[List[Dict[str, str]], List[Dict[str, str]]]:
+    def _collect_container_key_lists(
+        self, model: State
+    ) -> tuple[List[Dict[str, str]], List[Dict[str, str]]]:
         input_keys: List[Dict[str, str]] = []
         output_keys: List[Dict[str, str]] = []
         for key in getattr(model, "keys", []) or []:
@@ -2249,10 +2215,14 @@ class YasminEditor(QMainWindow):
             return
 
         readonly = self.is_read_only_mode()
-        is_container = isinstance(state_node, ContainerStateNode) and not getattr(state_node, "is_xml_reference", False)
+        is_container = isinstance(state_node, ContainerStateNode) and not getattr(
+            state_node, "is_xml_reference", False
+        )
 
         if is_container:
-            input_keys, output_keys = self._collect_container_key_lists(state_node.model)
+            input_keys, output_keys = self._collect_container_key_lists(
+                state_node.model
+            )
             dialog = StatePropertiesDialog(
                 state_name=state_node.name,
                 plugin_info=None,
