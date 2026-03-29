@@ -17,14 +17,30 @@
 
 from __future__ import annotations
 
+import importlib
+import logging
 import threading
 import time
-from typing import Any, Iterable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
 from yasmin import Blackboard, StateMachine
 from yasmin_factory import YasminFactory
+
+
+class _RuntimeLogHandler(logging.Handler):
+    def __init__(self, runtime: "Runtime") -> None:
+        super().__init__()
+        self.runtime = runtime
+        self.setFormatter(logging.Formatter("%(message)s"))
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            message = self.format(record)
+        except Exception:
+            message = record.getMessage()
+        self.runtime._append_log(message)
 
 
 class Runtime(QObject):
@@ -36,6 +52,8 @@ class Runtime(QObject):
     outcome_changed = pyqtSignal(object)
     status_changed = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
+    log_cleared = pyqtSignal()
+    log_appended = pyqtSignal(str)
 
     def __init__(self) -> None:
         super().__init__()
@@ -44,6 +62,8 @@ class Runtime(QObject):
         self.bb: Optional[Blackboard] = None
         self._running = False
         self._blocked = False
+        self._finished = False
+        self._final_outcome: Optional[str] = None
         self._active_path: tuple[str, ...] = tuple()
         self._last_transition: Optional[
             tuple[tuple[str, ...], tuple[str, ...], str]
@@ -55,6 +75,16 @@ class Runtime(QObject):
         self._shutting_down = False
         self._worker_state_lock = threading.Lock()
 
+        self._log_entries: list[str] = []
+        self._last_log_message = ""
+        self._last_log_timestamp = 0.0
+
+        self._yasmin_module: Any = None
+        self._yasmin_logs_module: Any = None
+        self._python_log_handler: Optional[_RuntimeLogHandler] = None
+
+        self._install_yasmin_loggers()
+
     def is_ready(self) -> bool:
         return isinstance(self.sm, StateMachine)
 
@@ -63,6 +93,23 @@ class Runtime(QObject):
 
     def is_blocked(self) -> bool:
         return self._blocked
+
+    def is_finished(self) -> bool:
+        return self._finished
+
+    def get_final_outcome(self) -> Optional[str]:
+        return self._final_outcome
+
+    def get_status_label(self) -> str:
+        if self._finished and self._final_outcome:
+            return self._final_outcome
+        if self.is_running() and self.is_blocked():
+            return "Paused"
+        if self.is_running():
+            return "Running"
+        if self.is_ready():
+            return "Ready"
+        return "Inactive"
 
     def get_current_state(self) -> Optional[str]:
         if self._active_path:
@@ -82,11 +129,17 @@ class Runtime(QObject):
     ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
         return self._last_transition
 
+    def get_logs(self) -> list[str]:
+        return list(self._log_entries)
+
     def create_sm_from_file(self, path: str) -> bool:
         self.shutdown()
+        self._clear_logs()
+        self._install_yasmin_loggers()
 
         try:
             self.sm = self.factory.create_sm_from_file(path)
+            self._install_yasmin_loggers()
             self._register_callbacks()
         except Exception as exc:
             self.sm = None
@@ -94,6 +147,8 @@ class Runtime(QObject):
             self.error_occurred.emit(f"Failed to create runtime state machine:\n{exc}")
             return False
 
+        self._finished = False
+        self._final_outcome = None
         self._set_last_transition(None)
         self._set_active_path(self._resolve_initial_active_path())
         self.ready_changed.emit(self.is_ready())
@@ -101,7 +156,7 @@ class Runtime(QObject):
         return self.is_ready()
 
     def play(self) -> None:
-        if not self.is_ready():
+        if not self.is_ready() or self.is_finished():
             return
 
         self._resume(step_once=False)
@@ -128,16 +183,18 @@ class Runtime(QObject):
         self.status_changed.emit("Runtime started")
 
     def pause(self) -> None:
-        if not self.is_ready() or not self._running:
+        if not self.is_ready() or not self._running or self.is_finished():
             return
         with self._pause_condition:
             self._pause_requested = True
-        self.status_changed.emit("Runtime will pause on the next transition")
+        self.status_changed.emit("Pause requested")
 
     def play_once(self) -> None:
-        if not self.is_ready():
+        if not self.is_ready() or self.is_finished():
             return
+
         self._resume(step_once=True)
+
         if not self._running:
             if self._execution_thread is not None and self._execution_thread.is_alive():
                 return
@@ -156,10 +213,11 @@ class Runtime(QObject):
             self._execution_thread.start()
             self.status_changed.emit("Runtime started")
             return
+
         self.status_changed.emit("Runtime will execute one state")
 
     def cancel_state(self) -> None:
-        if not self.is_ready():
+        if not self.is_ready() or self.is_finished():
             return
         try:
             self.sm.cancel_state()
@@ -168,7 +226,7 @@ class Runtime(QObject):
             self.error_occurred.emit(f"Failed to cancel current state:\n{exc}")
 
     def cancel(self) -> None:
-        if not self.is_ready():
+        if not self.is_ready() or self.is_finished():
             return
 
         self._resume(step_once=False)
@@ -201,6 +259,8 @@ class Runtime(QObject):
         sm = self.sm
         self.sm = None
         self.bb = None
+        self._finished = False
+        self._final_outcome = None
 
         if sm is not None:
             try:
@@ -213,7 +273,7 @@ class Runtime(QObject):
         self._set_active_path(tuple())
         self._set_last_transition(None)
         self.ready_changed.emit(False)
-        self.status_changed.emit("Runtime force-stop requested")
+        self.status_changed.emit("Runtime stopped")
 
     def shutdown(self) -> None:
         self.kill()
@@ -259,6 +319,233 @@ class Runtime(QObject):
             return
         self._last_transition = transition
         self.active_transition_changed.emit(transition)
+
+    def _clear_logs(self) -> None:
+        self._log_entries.clear()
+        self._last_log_message = ""
+        self._last_log_timestamp = 0.0
+        self.log_cleared.emit()
+
+    def _append_log(self, message: str) -> None:
+        clean_message = str(message).rstrip()
+        if not clean_message:
+            return
+
+        now = time.monotonic()
+        if (
+            clean_message == self._last_log_message
+            and now - self._last_log_timestamp < 0.02
+        ):
+            return
+
+        self._last_log_message = clean_message
+        self._last_log_timestamp = now
+        self._log_entries.append(clean_message)
+        self.log_appended.emit(clean_message)
+
+    def _install_python_logging_bridge(self) -> None:
+        root_logger = logging.getLogger()
+
+        if self._python_log_handler is None:
+            self._python_log_handler = _RuntimeLogHandler(self)
+            self._python_log_handler.setLevel(logging.NOTSET)
+
+        if self._python_log_handler not in root_logger.handlers:
+            root_logger.addHandler(self._python_log_handler)
+
+        if root_logger.level > logging.NOTSET:
+            root_logger.setLevel(logging.NOTSET)
+
+    def _install_yasmin_loggers(self) -> None:
+        self._install_python_logging_bridge()
+
+        try:
+            self._yasmin_module = importlib.import_module("yasmin")
+        except Exception:
+            self._yasmin_module = None
+
+        try:
+            self._yasmin_logs_module = importlib.import_module("yasmin.logs")
+        except Exception:
+            self._yasmin_logs_module = None
+
+        self._patch_yasmin_log_functions()
+        self._patch_yasmin_setters()
+        self._activate_yasmin_logger()
+
+    def _patch_yasmin_log_functions(self) -> None:
+        for func_name, level_name in (
+            ("log_error", "ERROR"),
+            ("log_warn", "WARN"),
+            ("log_info", "INFO"),
+            ("log_debug", "DEBUG"),
+        ):
+            original = None
+
+            if self._yasmin_logs_module is not None:
+                original = getattr(self._yasmin_logs_module, func_name, None)
+
+            if original is None and self._yasmin_module is not None:
+                original = getattr(self._yasmin_module, func_name, None)
+
+            if not callable(original):
+                continue
+
+            if getattr(original, "__yasmin_editor_runtime_wrapper__", False):
+                continue
+
+            wrapped = self._build_log_function_wrapper(
+                func_name=func_name,
+                level_name=level_name,
+                original=original,
+            )
+
+            if self._yasmin_logs_module is not None:
+                setattr(self._yasmin_logs_module, func_name, wrapped)
+
+            if self._yasmin_module is not None:
+                setattr(self._yasmin_module, func_name, wrapped)
+
+    def _build_log_function_wrapper(
+        self,
+        func_name: str,
+        level_name: str,
+        original: Callable[..., Any],
+    ) -> Callable[..., Any]:
+        def wrapped(file: str, function: str, line: int, text: str) -> Any:
+            self._append_log(f"[{level_name}] [{file}:{function}:{line}] {text}")
+            return original(file, function, line, text)
+
+        wrapped.__name__ = func_name
+        wrapped.__yasmin_editor_runtime_wrapper__ = True
+        return wrapped
+
+    def _patch_yasmin_setters(self) -> None:
+        original_set_loggers = None
+
+        if self._yasmin_logs_module is not None:
+            original_set_loggers = getattr(
+                self._yasmin_logs_module, "set_loggers", None
+            )
+
+        if original_set_loggers is None and self._yasmin_module is not None:
+            original_set_loggers = getattr(self._yasmin_module, "set_loggers", None)
+
+        if callable(original_set_loggers) and not getattr(
+            original_set_loggers, "__yasmin_editor_runtime_wrapper__", False
+        ):
+
+            def wrapped_set_loggers(user_logger: Callable[..., Any]) -> Any:
+                if user_logger is self._yasmin_log_message:
+                    return original_set_loggers(self._yasmin_log_message)
+
+                def combined_logger(
+                    level: Any,
+                    file: str,
+                    function: str,
+                    line: int,
+                    text: str,
+                ) -> None:
+                    self._yasmin_log_message(level, file, function, line, text)
+                    user_logger(level, file, function, line, text)
+
+                return original_set_loggers(combined_logger)
+
+            wrapped_set_loggers.__yasmin_editor_runtime_wrapper__ = True
+
+            if self._yasmin_logs_module is not None:
+                setattr(self._yasmin_logs_module, "set_loggers", wrapped_set_loggers)
+
+            if self._yasmin_module is not None:
+                setattr(self._yasmin_module, "set_loggers", wrapped_set_loggers)
+
+        self._wrap_reset_logger_function("set_default_loggers")
+        self._wrap_reset_logger_function("set_py_loggers")
+
+    def _wrap_reset_logger_function(self, func_name: str) -> None:
+        original = None
+
+        if self._yasmin_logs_module is not None:
+            original = getattr(self._yasmin_logs_module, func_name, None)
+
+        if original is None and self._yasmin_module is not None:
+            original = getattr(self._yasmin_module, func_name, None)
+
+        if not callable(original):
+            return
+
+        if getattr(original, "__yasmin_editor_runtime_wrapper__", False):
+            return
+
+        def wrapped(*args: Any, **kwargs: Any) -> Any:
+            result = original(*args, **kwargs)
+            self._activate_yasmin_logger()
+            return result
+
+        wrapped.__name__ = func_name
+        wrapped.__yasmin_editor_runtime_wrapper__ = True
+
+        if self._yasmin_logs_module is not None and hasattr(
+            self._yasmin_logs_module, func_name
+        ):
+            setattr(self._yasmin_logs_module, func_name, wrapped)
+
+        if self._yasmin_module is not None and hasattr(self._yasmin_module, func_name):
+            setattr(self._yasmin_module, func_name, wrapped)
+
+    def _activate_yasmin_logger(self) -> None:
+        set_loggers = None
+
+        if self._yasmin_logs_module is not None:
+            set_loggers = getattr(self._yasmin_logs_module, "set_loggers", None)
+
+        if not callable(set_loggers) and self._yasmin_module is not None:
+            set_loggers = getattr(self._yasmin_module, "set_loggers", None)
+
+        if callable(set_loggers):
+            try:
+                set_loggers(self._yasmin_log_message)
+            except Exception:
+                pass
+
+    def _yasmin_log_message(
+        self,
+        level: Any,
+        file: str,
+        function: str,
+        line: int,
+        text: str,
+    ) -> None:
+        level_name = self._log_level_to_name(level)
+        self._append_log(f"[{level_name}] [{file}:{function}:{line}] {text}")
+
+    def _log_level_to_name(self, level: Any) -> str:
+        if self._yasmin_logs_module is not None:
+            log_level_to_name = getattr(
+                self._yasmin_logs_module, "log_level_to_name", None
+            )
+            if callable(log_level_to_name):
+                try:
+                    return str(log_level_to_name(level))
+                except Exception:
+                    pass
+
+        if hasattr(level, "name"):
+            return str(level.name)
+
+        if isinstance(level, str):
+            return level.upper()
+
+        try:
+            value = int(level)
+        except Exception:
+            value = None
+
+        if value is not None:
+            mapping = {0: "ERROR", 1: "WARN", 2: "INFO", 3: "DEBUG"}
+            return mapping.get(value, str(value))
+
+        return str(level)
 
     def _resolve_initial_active_path(self) -> tuple[str, ...]:
         container = self.sm
@@ -315,6 +602,7 @@ class Runtime(QObject):
             return
 
         try:
+            self._install_yasmin_loggers()
             sm()
         except Exception as exc:
             self._set_running(False)
@@ -325,7 +613,6 @@ class Runtime(QObject):
                 if threading.current_thread() is self._execution_thread:
                     self._execution_thread = None
                 if not self._running:
-                    self._set_active_path(tuple())
                     self.ready_changed.emit(self.is_ready())
 
     def _register_callbacks(self) -> None:
@@ -384,6 +671,41 @@ class Runtime(QObject):
 
         walk(self.sm, tuple())
 
+    def _resolve_container(self, prefix: tuple[str, ...]) -> Optional[Any]:
+        container: Any = self.sm
+        for state_name in prefix:
+            if container is None:
+                return None
+            get_states = getattr(container, "get_states", None)
+            if not callable(get_states):
+                return None
+            try:
+                states = get_states()
+            except Exception:
+                return None
+            if not hasattr(states, "get"):
+                return None
+            container = states.get(state_name)
+        return container
+
+    def _container_has_state(self, prefix: tuple[str, ...], state_name: str) -> bool:
+        container = self._resolve_container(prefix)
+        if container is None:
+            return False
+
+        get_states = getattr(container, "get_states", None)
+        if callable(get_states):
+            try:
+                states = get_states()
+            except Exception:
+                states = None
+            if states is not None and hasattr(states, "__contains__"):
+                try:
+                    return state_name in states
+                except Exception:
+                    return False
+        return False
+
     def start_cb(
         self,
         bb: Blackboard,
@@ -403,7 +725,6 @@ class Runtime(QObject):
         self.bb = bb
 
         if prefix:
-            self._set_active_path(prefix)
             return
 
         with self._pause_condition:
@@ -411,11 +732,12 @@ class Runtime(QObject):
             self._step_once_requested = False
             self._pause_condition.notify_all()
 
+        self._finished = True
+        self._final_outcome = str(outcome)
         self._set_running(False)
         self._set_blocked(False)
-        self._set_active_path(tuple())
         self._set_last_transition(None)
-        self.outcome_changed.emit(outcome)
+        self.outcome_changed.emit(self._final_outcome)
         self.status_changed.emit(f"Runtime finished with outcome: {outcome}")
 
     def transition_cb(
@@ -427,14 +749,21 @@ class Runtime(QObject):
         prefix: tuple[str, ...] = tuple(),
     ) -> None:
         self.bb = bb
+        from_name = str(from_state)
+        to_name = str(to_state)
+
         self._set_last_transition(
             (
-                prefix + (str(from_state),),
-                prefix + (str(to_state),),
+                prefix + (from_name,),
+                prefix + (to_name,),
                 str(outcome),
             )
         )
-        self._set_active_path(prefix + (str(to_state),))
+
+        if self._container_has_state(prefix, to_name):
+            self._set_active_path(prefix + (to_name,))
+        else:
+            self._set_active_path(prefix + (from_name,))
 
         with self._pause_condition:
             if self._step_once_requested:
