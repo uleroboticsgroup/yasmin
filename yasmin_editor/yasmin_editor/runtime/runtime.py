@@ -22,14 +22,14 @@ import time
 from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
-
-from yasmin import Blackboard, StateMachine
-from yasmin_factory import YasminFactory
 from yasmin_editor.runtime.logging import RuntimeLoggingBridge
 from yasmin_editor.runtime.traversal import (child_state, container_states,
                                              expand_to_deepest_known_path,
                                              is_container_object,
                                              resolve_container)
+
+from yasmin import Blackboard, StateMachine
+from yasmin_factory import YasminFactory
 
 
 class Runtime(QObject):
@@ -167,7 +167,12 @@ class Runtime(QObject):
         self.status_changed.emit("Runtime started")
 
     def pause(self) -> None:
-        if not self.is_ready() or not self._running or self.is_finished() or self._disposed:
+        if (
+            not self.is_ready()
+            or not self._running
+            or self.is_finished()
+            or self._disposed
+        ):
             return
         with self._pause_condition:
             self._pause_requested = True
@@ -355,7 +360,10 @@ class Runtime(QObject):
             return
 
         now = time.monotonic()
-        if clean_message == self._last_log_message and now - self._last_log_timestamp < 0.02:
+        if (
+            clean_message == self._last_log_message
+            and now - self._last_log_timestamp < 0.02
+        ):
             return
 
         self._last_log_message = clean_message
@@ -366,13 +374,17 @@ class Runtime(QObject):
     def _resolve_container(self, path: tuple[str, ...]) -> Optional[Any]:
         return resolve_container(self.sm, path)
 
-    def _expand_to_deepest_known_path(self, base_path: tuple[str, ...]) -> tuple[str, ...]:
+    def _expand_to_deepest_known_path(
+        self, base_path: tuple[str, ...]
+    ) -> tuple[str, ...]:
         return expand_to_deepest_known_path(self.sm, base_path)
 
     def _resolve_initial_active_path(self) -> tuple[str, ...]:
         return self._expand_to_deepest_known_path(tuple())
 
-    def _resolve_current_execution_path(self, fallback: tuple[str, ...]) -> tuple[str, ...]:
+    def _resolve_current_execution_path(
+        self, fallback: tuple[str, ...]
+    ) -> tuple[str, ...]:
         live_path = self._expand_to_deepest_known_path(tuple())
         return live_path if live_path else fallback
 
@@ -497,7 +509,6 @@ class Runtime(QObject):
         if self._disposed:
             return
 
-        self.bb = bb
         self._set_running(True)
         active_path = self._expand_to_deepest_known_path(prefix + (str(start_state),))
         self._set_active_path(active_path)
@@ -511,8 +522,6 @@ class Runtime(QObject):
     ) -> None:
         if self._disposed:
             return
-
-        self.bb = bb
 
         if prefix:
             self._set_active_path(prefix)
@@ -550,11 +559,24 @@ class Runtime(QObject):
         if self._disposed:
             return
 
-        self.bb = bb
-        from_path = prefix + (str(from_state),)
-        to_path = prefix + (str(to_state),)
+        # store blackboard remappings
+        remappings = dict(bb.get_remappings())
 
-        self._set_last_transition((from_path, to_path, str(outcome)))
-        self._complete_step_for_finished_leaf(from_path)
-        self._set_active_path(self._expand_to_deepest_known_path(to_path))
-        self._pause_if_requested()
+        try:
+            # remove remappings and store bb as class member
+            bb.set_remappings({})
+            self.bb = bb
+
+            from_path = prefix + (str(from_state),)
+            to_path = prefix + (str(to_state),)
+
+            self._set_last_transition((from_path, to_path, str(outcome)))
+            self._complete_step_for_finished_leaf(from_path)
+            self._set_active_path(self._expand_to_deepest_known_path(to_path))
+            self._pause_if_requested()
+        finally:
+            # reinstert stored remappings
+            try:
+                bb.set_remappings(remappings)
+            finally:
+                self.bb = None
