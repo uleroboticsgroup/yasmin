@@ -25,8 +25,8 @@ from PyQt5.QtWidgets import (QAbstractItemView, QAction, QApplication,
                              QComboBox, QDialog, QFileDialog, QFrame,
                              QHBoxLayout, QInputDialog, QLabel, QLineEdit,
                              QListWidget, QListWidgetItem, QMainWindow,
-                             QMessageBox, QPushButton, QSplitter,
-                             QTextBrowser, QToolBar, QVBoxLayout, QWidget)
+                             QMessageBox, QPushButton, QSplitter, QTextBrowser,
+                             QToolBar, QVBoxLayout, QWidget)
 from yasmin_editor.editor_gui.colors import (PALETTE, build_qt_palette,
                                              build_stylesheet)
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -1662,6 +1662,7 @@ class YasminEditor(QMainWindow):
         self.runtime_log_view.setOpenExternalLinks(False)
         self.runtime_log_view.setOpenLinks(False)
         self.runtime_log_view.setLineWrapMode(QTextBrowser.NoWrap)
+        self.runtime_log_view.setProperty("viewerText", True)
         self.runtime_log_view.document().setDocumentMargin(8)
         runtime_sidebar_layout.addWidget(self.runtime_log_view)
         self.runtime_sidebar_widget.setVisible(False)
@@ -1753,7 +1754,9 @@ class YasminEditor(QMainWindow):
         self.runtime_cancel_state_button.setToolTip(
             "Request cancellation of the currently active state."
         )
-        self.runtime_cancel_state_button.clicked.connect(self.on_runtime_cancel_state_clicked)
+        self.runtime_cancel_state_button.clicked.connect(
+            self.on_runtime_cancel_state_clicked
+        )
         self.runtime_controls_layout.addWidget(self.runtime_cancel_state_button)
 
         self.runtime_cancel_sm_button = QPushButton("Cancel State Machine")
@@ -1999,33 +2002,67 @@ class YasminEditor(QMainWindow):
             self._runtime_status_badge_style(label_text)
         )
 
+    def _runtime_log_uses_dark_background(self) -> bool:
+        """Return whether the runtime log view uses a dark background."""
+        return PALETTE.ui_input_bg.lightness() < 128
+
+    def _runtime_log_view_style(self) -> str:
+        """Return the stylesheet used by the runtime log view."""
+        return (
+            "QTextBrowser {"
+            f"background-color: {PALETTE.ui_input_bg.name()}; "
+            f"color: {PALETTE.text_primary.name()}; "
+            f"border: 1px solid {PALETTE.ui_border.name()}; "
+            f"selection-background-color: {PALETTE.ui_selection_bg.name()}; "
+            f"selection-color: {PALETTE.ui_selection_text.name()}; "
+            "border-radius: 6px;"
+            "}"
+        )
+
     def _runtime_log_line_color(self, message: str) -> str:
         """Return the HTML color used for a runtime log line."""
         normalized = str(message).lstrip()
+        if self._runtime_log_uses_dark_background():
+            if normalized.startswith("[WARN]"):
+                return "#ffd24d"
+            if normalized.startswith("[ERROR]"):
+                return "#ff7a7a"
+            if normalized.startswith("[STATUS]"):
+                return "#d3d7dc"
+            if normalized.startswith("[INFO]"):
+                return "#ffffff"
+            if normalized.startswith("[DEBUG]"):
+                return "#9aa3ad"
+            if normalized.startswith("[ACTIVE]"):
+                return "#8dd8ff"
+            if normalized.startswith("[TRANSITION]"):
+                return "#78f0c8"
+            return "#e8eaed"
+
         if normalized.startswith("[WARN]"):
-            return "#ffd24d"
+            return "#8a6700"
         if normalized.startswith("[ERROR]"):
-            return "#ff7a7a"
+            return "#b53333"
         if normalized.startswith("[STATUS]"):
-            return "#d3d7dc"
+            return PALETTE.text_secondary.name()
         if normalized.startswith("[INFO]"):
-            return "#ffffff"
+            return PALETTE.text_primary.name()
         if normalized.startswith("[DEBUG]"):
-            return "#9aa3ad"
+            return "#6b7280"
         if normalized.startswith("[ACTIVE]"):
-            return "#8dd8ff"
+            return "#1565c0"
         if normalized.startswith("[TRANSITION]"):
-            return "#78f0c8"
-        return "#e8eaed"
+            return "#0f8a6b"
+        return PALETTE.text_primary.name()
 
     def _format_runtime_log_entry(self, message: str) -> str:
         """Convert a runtime log message into a styled HTML block."""
         color = self._runtime_log_line_color(message)
         return (
             '<div style="'
-            f'color: {color}; '
+            f"color: {color}; "
             "font-family: 'DejaVu Sans Mono', 'Courier New', monospace; "
-            'white-space: pre; '
+            "white-space: pre; "
             'margin: 0;">'
             f"{escape(str(message))}"
             "</div>"
@@ -2079,7 +2116,9 @@ class YasminEditor(QMainWindow):
 
     def update_runtime_actions(self) -> None:
         runtime = self.runtime
-        runtime_ready = self.runtime_mode_enabled and runtime is not None and runtime.is_ready()
+        runtime_ready = (
+            self.runtime_mode_enabled and runtime is not None and runtime.is_ready()
+        )
         runtime_running = runtime_ready and runtime.is_running()
         runtime_blocked = runtime_running and runtime.is_blocked()
         runtime_playing = runtime_running and not runtime_blocked
@@ -2094,18 +2133,16 @@ class YasminEditor(QMainWindow):
             )
 
         if hasattr(self, "runtime_log_view"):
-            self.runtime_log_view.setStyleSheet(
-                "QTextBrowser {"
-                "background-color: #1f2329; "
-                "border: 1px solid #40464f; "
-                "border-radius: 6px;"
-                "}"
-            )
+            self.runtime_log_view.setStyleSheet(self._runtime_log_view_style())
 
         runtime_button_visibility = {
-            "runtime_play_button": runtime_ready and not runtime_playing and not runtime_finished,
+            "runtime_play_button": runtime_ready
+            and not runtime_playing
+            and not runtime_finished,
             "runtime_pause_button": runtime_playing,
-            "runtime_step_button": runtime_ready and not runtime_playing and not runtime_finished,
+            "runtime_step_button": runtime_ready
+            and not runtime_playing
+            and not runtime_finished,
             "runtime_cancel_state_button": runtime_running and not runtime_finished,
             "runtime_cancel_sm_button": runtime_running and not runtime_finished,
             "runtime_restart_button": runtime_ready,
@@ -2255,7 +2292,9 @@ class YasminEditor(QMainWindow):
     def _get_current_runtime_container_path(self) -> tuple[str, ...]:
         if self.current_runtime_container_path:
             return tuple(self.current_runtime_container_path)
-        return tuple(str(container.name) for container in self.current_container_path[1:])
+        return tuple(
+            str(container.name) for container in self.current_container_path[1:]
+        )
 
     def _get_runtime_state_name_for_current_container(self) -> Optional[str]:
         if not self.runtime_mode_enabled:
@@ -2551,11 +2590,15 @@ class YasminEditor(QMainWindow):
             and index < self.extern_xml_path_start_index
         ):
             self.current_container_path = self.current_container_path[: index + 1]
-            self.current_runtime_container_path = self.current_runtime_container_path[:index]
+            self.current_runtime_container_path = self.current_runtime_container_path[
+                :index
+            ]
             self._clear_external_xml_view()
         else:
             self.current_container_path = self.current_container_path[: index + 1]
-            self.current_runtime_container_path = self.current_runtime_container_path[:index]
+            self.current_runtime_container_path = self.current_runtime_container_path[
+                :index
+            ]
         self.render_current_container(fit_view=True)
 
     def navigate_up_one_level(self) -> None:
