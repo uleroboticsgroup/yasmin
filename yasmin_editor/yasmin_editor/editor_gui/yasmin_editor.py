@@ -18,7 +18,7 @@ import random
 import tempfile
 from typing import Dict, List, Optional, Set
 
-from PyQt5.QtCore import QPointF, Qt
+from PyQt5.QtCore import QPointF, Qt, QTimer
 from PyQt5.QtGui import QBrush, QCloseEvent, QColor, QPen
 from PyQt5.QtWidgets import (QAbstractItemView, QAction, QApplication,
                              QComboBox, QDialog, QFileDialog, QFrame,
@@ -88,6 +88,7 @@ class YasminEditor(QMainWindow):
         self.layout_seed = 42
         self.layout_rng = random.Random(self.layout_seed)
         self.current_container_path = [self.root_model]
+        self.current_runtime_container_path: List[str] = []
         self.current_file_path: Optional[str] = None
         self.runtime_snapshot_file_path: Optional[str] = None
         self.runtime_mode_enabled = False
@@ -96,19 +97,8 @@ class YasminEditor(QMainWindow):
             tuple[tuple[str, ...], tuple[str, ...], str]
         ] = None
 
-        self.runtime = Runtime()
-        self.runtime.ready_changed.connect(self.update_runtime_actions)
-        self.runtime.running_changed.connect(self.update_runtime_actions)
-        self.runtime.blocked_changed.connect(self.update_runtime_actions)
-        self.runtime.active_state_changed.connect(self.on_runtime_active_state_changed)
-        self.runtime.active_transition_changed.connect(
-            self.on_runtime_transition_changed
-        )
-        self.runtime.outcome_changed.connect(self.on_runtime_outcome_changed)
-        self.runtime.status_changed.connect(self.on_runtime_status_changed)
-        self.runtime.error_occurred.connect(self.on_runtime_error)
-        self.runtime.log_cleared.connect(self.clear_runtime_log_view)
-        self.runtime.log_appended.connect(self.append_runtime_log)
+        self.runtime = None
+        self._create_runtime()
 
         self.model_adapter = EditorModelAdapter(self)
         self.create_ui()
@@ -124,6 +114,96 @@ class YasminEditor(QMainWindow):
             return
         app.setPalette(build_qt_palette(PALETTE))
         app.setStyleSheet(build_stylesheet(PALETTE))
+
+    def _connect_runtime_signals(self) -> None:
+        if self.runtime is None:
+            return
+        self.runtime.ready_changed.connect(self.update_runtime_actions)
+        self.runtime.running_changed.connect(self.update_runtime_actions)
+        self.runtime.blocked_changed.connect(self.update_runtime_actions)
+        self.runtime.active_state_changed.connect(self.on_runtime_active_state_changed)
+        self.runtime.active_transition_changed.connect(
+            self.on_runtime_transition_changed
+        )
+        self.runtime.outcome_changed.connect(self.on_runtime_outcome_changed)
+        self.runtime.status_changed.connect(self.on_runtime_status_changed)
+        self.runtime.error_occurred.connect(self.on_runtime_error)
+        self.runtime.log_cleared.connect(self.clear_runtime_log_view)
+        self.runtime.log_appended.connect(self.append_runtime_log)
+
+    def _create_runtime(self) -> None:
+        self.runtime = Runtime()
+        self._connect_runtime_signals()
+
+    def _destroy_runtime(self) -> None:
+        runtime = self.runtime
+        self.runtime = None
+        if runtime is None:
+            return
+        try:
+            runtime.disconnect()
+        except Exception:
+            pass
+        try:
+            runtime.shutdown()
+        except Exception:
+            pass
+        try:
+            runtime.deleteLater()
+        except Exception:
+            pass
+        del runtime
+
+    def _recreate_runtime(self) -> None:
+        self._destroy_runtime()
+        self._create_runtime()
+
+    def _delete_runtime_snapshot(self) -> None:
+        if self.runtime_snapshot_file_path and os.path.isfile(
+            self.runtime_snapshot_file_path
+        ):
+            try:
+                os.remove(self.runtime_snapshot_file_path)
+            except OSError:
+                pass
+        self.runtime_snapshot_file_path = None
+
+    def _runtime_ready(self) -> bool:
+        return self.runtime is not None
+
+    def _get_live_runtime_active_path(self) -> tuple[str, ...]:
+        if self.runtime is None or not self.runtime_mode_enabled:
+            return tuple()
+        try:
+            active_path = tuple(self.runtime.get_active_path() or tuple())
+        except Exception:
+            active_path = tuple()
+        self.runtime_active_path = active_path
+        return active_path
+
+    def _get_live_runtime_transition(
+        self,
+    ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
+        if self.runtime is None or not self.runtime_mode_enabled:
+            return None
+        try:
+            transition = self.runtime.get_last_transition()
+        except Exception:
+            transition = None
+        self.runtime_last_transition = transition
+        return transition
+
+    def _schedule_runtime_highlight_refresh(self) -> None:
+        if not self.runtime_mode_enabled:
+            return
+        QTimer.singleShot(0, self._refresh_runtime_highlighting_from_runtime)
+
+    def _refresh_runtime_highlighting_from_runtime(self) -> None:
+        if not self.runtime_mode_enabled:
+            return
+        self._get_live_runtime_active_path()
+        self._get_live_runtime_transition()
+        self.refresh_visual_highlighting()
 
     @property
     def root_sm_name(self) -> str:
@@ -185,15 +265,8 @@ class YasminEditor(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """Handle window close event to ensure proper cleanup."""
-        self.runtime.shutdown()
-
-        if self.runtime_snapshot_file_path and os.path.isfile(
-            self.runtime_snapshot_file_path
-        ):
-            try:
-                os.remove(self.runtime_snapshot_file_path)
-            except OSError:
-                pass
+        self._destroy_runtime()
+        self._delete_runtime_snapshot()
 
         # Clear all references
         self.canvas.scene.clear()
@@ -979,16 +1052,10 @@ class YasminEditor(QMainWindow):
         self.root_model = model or self.model_adapter.create_empty_root_model()
         self.current_container_path = [self.root_model]
         self.current_file_path = None
+        self.current_runtime_container_path = []
         self.runtime_active_path = tuple()
         self.runtime_last_transition = None
-        if self.runtime_snapshot_file_path and os.path.isfile(
-            self.runtime_snapshot_file_path
-        ):
-            try:
-                os.remove(self.runtime_snapshot_file_path)
-            except OSError:
-                pass
-        self.runtime_snapshot_file_path = None
+        self._delete_runtime_snapshot()
         self.clear_runtime_log_view()
         self.refresh_blackboard_keys_list()
         self.update_container_controls()
@@ -1659,35 +1726,35 @@ class YasminEditor(QMainWindow):
         self.runtime_play_button.setToolTip(
             "Start the runtime or resume execution after a pause."
         )
-        self.runtime_play_button.clicked.connect(self.runtime.play)
+        self.runtime_play_button.clicked.connect(self.on_runtime_play_clicked)
         self.runtime_controls_layout.addWidget(self.runtime_play_button)
 
         self.runtime_pause_button = QPushButton("Pause")
         self.runtime_pause_button.setToolTip(
-            "Pause execution on the next transition callback."
+            "Pause execution at the next state boundary."
         )
-        self.runtime_pause_button.clicked.connect(self.runtime.pause)
+        self.runtime_pause_button.clicked.connect(self.on_runtime_pause_clicked)
         self.runtime_controls_layout.addWidget(self.runtime_pause_button)
 
         self.runtime_step_button = QPushButton("Play Once")
         self.runtime_step_button.setToolTip(
-            "Execute exactly one state transition and pause again."
+            "Execute exactly one state and pause before the following state starts."
         )
-        self.runtime_step_button.clicked.connect(self.runtime.play_once)
+        self.runtime_step_button.clicked.connect(self.on_runtime_step_clicked)
         self.runtime_controls_layout.addWidget(self.runtime_step_button)
 
         self.runtime_cancel_state_button = QPushButton("Cancel State")
         self.runtime_cancel_state_button.setToolTip(
             "Request cancellation of the currently active state."
         )
-        self.runtime_cancel_state_button.clicked.connect(self.runtime.cancel_state)
+        self.runtime_cancel_state_button.clicked.connect(self.on_runtime_cancel_state_clicked)
         self.runtime_controls_layout.addWidget(self.runtime_cancel_state_button)
 
         self.runtime_cancel_sm_button = QPushButton("Cancel State Machine")
         self.runtime_cancel_sm_button.setToolTip(
             "Request cancellation of the complete runtime state machine."
         )
-        self.runtime_cancel_sm_button.clicked.connect(self.runtime.cancel)
+        self.runtime_cancel_sm_button.clicked.connect(self.on_runtime_cancel_sm_clicked)
         self.runtime_controls_layout.addWidget(self.runtime_cancel_sm_button)
 
         self.runtime_restart_button = QPushButton("Restart")
@@ -1742,14 +1809,14 @@ class YasminEditor(QMainWindow):
 
     def create_runtime_xml_snapshot(self) -> str:
         self.sync_current_container_layout()
+        self._delete_runtime_snapshot()
 
-        if not self.runtime_snapshot_file_path:
-            fd, temp_path = tempfile.mkstemp(
-                prefix="yasmin_editor_runtime_",
-                suffix=".xml",
-            )
-            os.close(fd)
-            self.runtime_snapshot_file_path = temp_path
+        fd, temp_path = tempfile.mkstemp(
+            prefix="yasmin_editor_runtime_",
+            suffix=".xml",
+        )
+        os.close(fd)
+        self.runtime_snapshot_file_path = temp_path
 
         self.save_to_xml(self.runtime_snapshot_file_path)
         return self.runtime_snapshot_file_path
@@ -1762,6 +1829,8 @@ class YasminEditor(QMainWindow):
         self.runtime_mode_button.blockSignals(False)
 
     def _enter_runtime_mode(self) -> bool:
+        self._recreate_runtime()
+
         try:
             runtime_path = self.create_runtime_xml_snapshot()
         except Exception as exc:
@@ -1775,19 +1844,39 @@ class YasminEditor(QMainWindow):
             self.update_runtime_actions()
             return False
 
-        if not self.runtime.create_sm_from_file(runtime_path):
+        if self.runtime is None or not self.runtime.create_sm_from_file(runtime_path):
             self.runtime_mode_enabled = False
             self._set_runtime_mode_button_checked(False)
             self.update_runtime_actions()
             return False
 
         self.runtime_mode_enabled = True
-        self.runtime_active_path = self.runtime.get_active_path()
-        self.runtime_last_transition = self.runtime.get_last_transition()
+        self._get_live_runtime_active_path()
+        self._get_live_runtime_transition()
         self.render_current_container()
         self.set_canvas_runtime_visual_state()
         self.statusBar().showMessage("Runtime mode enabled", 3000)
         return True
+
+    def on_runtime_play_clicked(self) -> None:
+        if self.runtime is not None:
+            self.runtime.play()
+
+    def on_runtime_pause_clicked(self) -> None:
+        if self.runtime is not None:
+            self.runtime.pause()
+
+    def on_runtime_step_clicked(self) -> None:
+        if self.runtime is not None:
+            self.runtime.play_once()
+
+    def on_runtime_cancel_state_clicked(self) -> None:
+        if self.runtime is not None:
+            self.runtime.cancel_state()
+
+    def on_runtime_cancel_sm_clicked(self) -> None:
+        if self.runtime is not None:
+            self.runtime.cancel()
 
     def restart_runtime_mode(self) -> None:
         if not self.runtime_mode_enabled:
@@ -1795,7 +1884,8 @@ class YasminEditor(QMainWindow):
 
         self.runtime_active_path = tuple()
         self.runtime_last_transition = None
-        self.runtime.shutdown()
+        self._delete_runtime_snapshot()
+        self._recreate_runtime()
         self.clear_runtime_log_view()
         self._enter_runtime_mode()
 
@@ -1807,7 +1897,9 @@ class YasminEditor(QMainWindow):
         self.runtime_mode_enabled = False
         self.runtime_active_path = tuple()
         self.runtime_last_transition = None
-        self.runtime.shutdown()
+        self._delete_runtime_snapshot()
+        self._recreate_runtime()
+        self.clear_runtime_log_view()
         self.render_current_container()
         self.set_canvas_runtime_visual_state()
         self.statusBar().showMessage("Runtime mode disabled", 3000)
@@ -1861,7 +1953,7 @@ class YasminEditor(QMainWindow):
 
     def on_runtime_active_state_changed(self, state_path: tuple[str, ...]) -> None:
         self.runtime_active_path = tuple(state_path or tuple())
-        self.refresh_visual_highlighting()
+        self._schedule_runtime_highlight_refresh()
         self.update_runtime_actions()
 
     def on_runtime_transition_changed(
@@ -1869,13 +1961,13 @@ class YasminEditor(QMainWindow):
         transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]],
     ) -> None:
         self.runtime_last_transition = transition
-        self.refresh_visual_highlighting()
+        self._schedule_runtime_highlight_refresh()
 
     def on_runtime_outcome_changed(self, outcome: Optional[str]) -> None:
         del outcome
-        self.runtime_active_path = self.runtime.get_active_path()
+        self._get_live_runtime_active_path()
         self.runtime_last_transition = None
-        self.refresh_visual_highlighting()
+        self._schedule_runtime_highlight_refresh()
         self.update_runtime_actions()
 
     def on_runtime_status_changed(self, message: str) -> None:
@@ -1890,17 +1982,20 @@ class YasminEditor(QMainWindow):
         self.update_runtime_actions()
 
     def update_runtime_actions(self) -> None:
-        runtime_ready = self.runtime_mode_enabled and self.runtime.is_ready()
-        runtime_running = runtime_ready and self.runtime.is_running()
-        runtime_blocked = runtime_running and self.runtime.is_blocked()
+        runtime = self.runtime
+        runtime_ready = self.runtime_mode_enabled and runtime is not None and runtime.is_ready()
+        runtime_running = runtime_ready and runtime.is_running()
+        runtime_blocked = runtime_running and runtime.is_blocked()
         runtime_playing = runtime_running and not runtime_blocked
-        runtime_finished = runtime_ready and self.runtime.is_finished()
+        runtime_finished = runtime_ready and runtime.is_finished()
 
         self._set_runtime_mode_button_checked(self.runtime_mode_enabled)
         self.set_canvas_runtime_visual_state()
 
         if hasattr(self, "runtime_status_label"):
-            self.runtime_status_label.setText(self.runtime.get_status_label())
+            self.runtime_status_label.setText(
+                runtime.get_status_label() if runtime is not None else "Inactive"
+            )
 
         runtime_button_visibility = {
             "runtime_play_button": runtime_ready and not runtime_playing and not runtime_finished,
@@ -2053,30 +2148,35 @@ class YasminEditor(QMainWindow):
         self.refresh_visual_highlighting()
 
     def _get_current_runtime_container_path(self) -> tuple[str, ...]:
-        return tuple(
-            str(container.name) for container in self.current_container_path[1:]
-        )
+        if self.current_runtime_container_path:
+            return tuple(self.current_runtime_container_path)
+        return tuple(str(container.name) for container in self.current_container_path[1:])
 
     def _get_runtime_state_name_for_current_container(self) -> Optional[str]:
-        if not self.runtime_mode_enabled or not self.runtime_active_path:
+        if not self.runtime_mode_enabled:
+            return None
+
+        active_path = self._get_live_runtime_active_path()
+        if not active_path:
             return None
 
         current_path = self._get_current_runtime_container_path()
-        if len(current_path) >= len(self.runtime_active_path):
+        if len(current_path) >= len(active_path):
             return None
 
-        if self.runtime_active_path[: len(current_path)] != current_path:
+        if active_path[: len(current_path)] != current_path:
             return None
 
-        return self.runtime_active_path[len(current_path)]
+        return active_path[len(current_path)]
 
     def _find_runtime_connection_for_current_container(
         self,
     ) -> Optional[ConnectionLine]:
-        if not self.runtime_mode_enabled or not self.runtime_last_transition:
+        transition = self._get_live_runtime_transition()
+        if not self.runtime_mode_enabled or not transition:
             return None
 
-        from_path, to_path, outcome = self.runtime_last_transition
+        from_path, to_path, outcome = transition
         current_path = self._get_current_runtime_container_path()
         expected_depth = len(current_path) + 1
 
@@ -2346,9 +2446,11 @@ class YasminEditor(QMainWindow):
             and index < self.extern_xml_path_start_index
         ):
             self.current_container_path = self.current_container_path[: index + 1]
+            self.current_runtime_container_path = self.current_runtime_container_path[:index]
             self._clear_external_xml_view()
         else:
             self.current_container_path = self.current_container_path[: index + 1]
+            self.current_runtime_container_path = self.current_runtime_container_path[:index]
         self.render_current_container(fit_view=True)
 
     def navigate_up_one_level(self) -> None:
@@ -2390,7 +2492,11 @@ class YasminEditor(QMainWindow):
             self.extern_xml_source_state = container_node.model
             self.extern_xml_path_start_index = len(self.current_container_path)
             self.current_container_path.append(external_model)
+            self.current_runtime_container_path.append(container_node.name)
+            self._get_live_runtime_active_path()
+            self._get_live_runtime_transition()
             self.render_current_container(fit_view=True)
+            self._schedule_runtime_highlight_refresh()
             self.statusBar().showMessage(
                 f"Entered external XML: {container_node.name}", 2000
             )
@@ -2398,7 +2504,11 @@ class YasminEditor(QMainWindow):
 
         self.sync_current_container_layout()
         self.current_container_path.append(container_node.model)
+        self.current_runtime_container_path.append(container_node.name)
+        self._get_live_runtime_active_path()
+        self._get_live_runtime_transition()
         self.render_current_container(fit_view=True)
+        self._schedule_runtime_highlight_refresh()
         self.statusBar().showMessage(f"Entered: {container_node.name}", 2000)
 
     def on_plugin_double_clicked(self, item: QListWidgetItem) -> None:

@@ -17,30 +17,19 @@
 
 from __future__ import annotations
 
-import importlib
-import logging
 import threading
 import time
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
 from yasmin import Blackboard, StateMachine
 from yasmin_factory import YasminFactory
-
-
-class _RuntimeLogHandler(logging.Handler):
-    def __init__(self, runtime: "Runtime") -> None:
-        super().__init__()
-        self.runtime = runtime
-        self.setFormatter(logging.Formatter("%(message)s"))
-
-    def emit(self, record: logging.LogRecord) -> None:
-        try:
-            message = self.format(record)
-        except Exception:
-            message = record.getMessage()
-        self.runtime._append_log(message)
+from yasmin_editor.runtime.logging import RuntimeLoggingBridge
+from yasmin_editor.runtime.traversal import (child_state, container_states,
+                                             expand_to_deepest_known_path,
+                                             is_container_object,
+                                             resolve_container)
 
 
 class Runtime(QObject):
@@ -60,30 +49,34 @@ class Runtime(QObject):
         self.factory = YasminFactory()
         self.sm: Optional[StateMachine] = None
         self.bb: Optional[Blackboard] = None
+
         self._running = False
         self._blocked = False
         self._finished = False
         self._final_outcome: Optional[str] = None
+        self._disposed = False
+        self._shutting_down = False
+
         self._active_path: tuple[str, ...] = tuple()
         self._last_transition: Optional[
             tuple[tuple[str, ...], tuple[str, ...], str]
         ] = None
+
         self._execution_thread: Optional[threading.Thread] = None
+        self._worker_state_lock = threading.Lock()
         self._pause_condition = threading.Condition()
         self._pause_requested = False
-        self._step_once_requested = False
-        self._shutting_down = False
-        self._worker_state_lock = threading.Lock()
+
+        self._step_mode = False
+        self._step_target_leaf_path: Optional[tuple[str, ...]] = None
+        self._step_target_started = False
 
         self._log_entries: list[str] = []
         self._last_log_message = ""
         self._last_log_timestamp = 0.0
 
-        self._yasmin_module: Any = None
-        self._yasmin_logs_module: Any = None
-        self._python_log_handler: Optional[_RuntimeLogHandler] = None
-
-        self._install_yasmin_loggers()
+        RuntimeLoggingBridge.set_current_runtime(self)
+        RuntimeLoggingBridge.install()
 
     def is_ready(self) -> bool:
         return isinstance(self.sm, StateMachine)
@@ -103,26 +96,22 @@ class Runtime(QObject):
     def get_status_label(self) -> str:
         if self._finished and self._final_outcome:
             return self._final_outcome
-        if self.is_running() and self.is_blocked():
+        if self._running and self._blocked:
             return "Paused"
-        if self.is_running():
+        if self._running:
             return "Running"
         if self.is_ready():
             return "Ready"
         return "Inactive"
 
     def get_current_state(self) -> Optional[str]:
-        if self._active_path:
-            return self._active_path[-1]
-        if not self.is_ready():
-            return None
-        try:
-            return self.sm.get_current_state()
-        except Exception:
-            return None
+        return self._active_path[-1] if self._active_path else None
 
     def get_active_path(self) -> tuple[str, ...]:
         return self._active_path
+
+    def get_live_active_path(self) -> tuple[str, ...]:
+        return self._resolve_current_execution_path(tuple())
 
     def get_last_transition(
         self,
@@ -133,13 +122,16 @@ class Runtime(QObject):
         return list(self._log_entries)
 
     def create_sm_from_file(self, path: str) -> bool:
-        self.shutdown()
+        self.shutdown(reset_disposed=False)
+        self._disposed = False
         self._clear_logs()
-        self._install_yasmin_loggers()
+        RuntimeLoggingBridge.set_current_runtime(self)
+        RuntimeLoggingBridge.install()
 
         try:
             self.sm = self.factory.create_sm_from_file(path)
-            self._install_yasmin_loggers()
+            RuntimeLoggingBridge.set_current_runtime(self)
+            RuntimeLoggingBridge.activate_yasmin_logger()
             self._register_callbacks()
         except Exception as exc:
             self.sm = None
@@ -147,8 +139,15 @@ class Runtime(QObject):
             self.error_occurred.emit(f"Failed to create runtime state machine:\n{exc}")
             return False
 
+        self._running = False
+        self._blocked = False
         self._finished = False
         self._final_outcome = None
+        self._pause_requested = False
+        self._shutting_down = False
+        self._step_mode = False
+        self._step_target_leaf_path = None
+        self._step_target_started = False
         self._set_last_transition(None)
         self._set_active_path(self._resolve_initial_active_path())
         self.ready_changed.emit(self.is_ready())
@@ -156,68 +155,38 @@ class Runtime(QObject):
         return self.is_ready()
 
     def play(self) -> None:
-        if not self.is_ready() or self.is_finished():
+        if not self.is_ready() or self.is_finished() or self._disposed:
             return
 
         self._resume(step_once=False)
-
         if self._running:
             self.status_changed.emit("Runtime resumed")
             return
 
-        if self._execution_thread is not None and self._execution_thread.is_alive():
-            return
-
-        initial_active_path = self._resolve_initial_active_path()
-        if initial_active_path:
-            self._set_running(True)
-            self._set_active_path(initial_active_path)
-
-        self._shutting_down = False
-        self._execution_thread = threading.Thread(
-            target=self._execute_worker,
-            name="yasmin-runtime",
-            daemon=True,
-        )
-        self._execution_thread.start()
+        self._start_execution_thread()
         self.status_changed.emit("Runtime started")
 
     def pause(self) -> None:
-        if not self.is_ready() or not self._running or self.is_finished():
+        if not self.is_ready() or not self._running or self.is_finished() or self._disposed:
             return
         with self._pause_condition:
             self._pause_requested = True
         self.status_changed.emit("Pause requested")
 
     def play_once(self) -> None:
-        if not self.is_ready() or self.is_finished():
+        if not self.is_ready() or self.is_finished() or self._disposed:
             return
 
         self._resume(step_once=True)
-
-        if not self._running:
-            if self._execution_thread is not None and self._execution_thread.is_alive():
-                return
-
-            initial_active_path = self._resolve_initial_active_path()
-            if initial_active_path:
-                self._set_running(True)
-                self._set_active_path(initial_active_path)
-
-            self._shutting_down = False
-            self._execution_thread = threading.Thread(
-                target=self._execute_worker,
-                name="yasmin-runtime",
-                daemon=True,
-            )
-            self._execution_thread.start()
-            self.status_changed.emit("Runtime started")
+        if self._running:
+            self.status_changed.emit("Runtime will execute one state")
             return
 
-        self.status_changed.emit("Runtime will execute one state")
+        self._start_execution_thread()
+        self.status_changed.emit("Runtime started")
 
     def cancel_state(self) -> None:
-        if not self.is_ready() or self.is_finished():
+        if not self.is_ready() or self.is_finished() or self._disposed:
             return
         try:
             self.sm.cancel_state()
@@ -226,13 +195,18 @@ class Runtime(QObject):
             self.error_occurred.emit(f"Failed to cancel current state:\n{exc}")
 
     def cancel(self) -> None:
-        if not self.is_ready() or self.is_finished():
+        if not self.is_ready() or self.is_finished() or self._disposed:
             return
 
         self._resume(step_once=False)
 
         def _cancel_worker() -> None:
-            while self.is_ready() and self._running and not self._shutting_down:
+            while (
+                self.is_ready()
+                and self._running
+                and not self._shutting_down
+                and not self._disposed
+            ):
                 try:
                     self.sm.cancel_state()
                 except Exception as exc:
@@ -250,7 +224,7 @@ class Runtime(QObject):
         self.status_changed.emit("Canceling runtime state machine")
 
     def kill(self) -> None:
-        if not self.is_ready() and self._execution_thread is None:
+        if (not self.is_ready() and self._execution_thread is None) or self._disposed:
             return
 
         self._shutting_down = True
@@ -261,6 +235,9 @@ class Runtime(QObject):
         self.bb = None
         self._finished = False
         self._final_outcome = None
+        self._step_mode = False
+        self._step_target_leaf_path = None
+        self._step_target_started = False
 
         if sm is not None:
             try:
@@ -275,19 +252,55 @@ class Runtime(QObject):
         self.ready_changed.emit(False)
         self.status_changed.emit("Runtime stopped")
 
-    def shutdown(self) -> None:
+    def shutdown(self, reset_disposed: bool = True) -> None:
+        if self._disposed and reset_disposed:
+            return
+
         self.kill()
         if self._execution_thread is not None and self._execution_thread.is_alive():
-            self._execution_thread.join(timeout=0.2)
+            self._execution_thread.join(timeout=1.0)
         self._execution_thread = None
         self._pause_requested = False
-        self._step_once_requested = False
         self._shutting_down = False
+        self._step_mode = False
+        self._step_target_leaf_path = None
+        self._step_target_started = False
+
+        if RuntimeLoggingBridge.get_current_runtime() is self:
+            RuntimeLoggingBridge.set_current_runtime(None)
+
+        if reset_disposed:
+            self._disposed = True
+
+    def _start_execution_thread(self) -> None:
+        if self._execution_thread is not None and self._execution_thread.is_alive():
+            return
+
+        initial_path = self._active_path or self._resolve_initial_active_path()
+        if initial_path:
+            self._set_running(True)
+            self._set_active_path(initial_path)
+
+        self._shutting_down = False
+        RuntimeLoggingBridge.set_current_runtime(self)
+        RuntimeLoggingBridge.activate_yasmin_logger()
+        self._execution_thread = threading.Thread(
+            target=self._execute_worker,
+            name="yasmin-runtime",
+            daemon=True,
+        )
+        self._execution_thread.start()
 
     def _resume(self, step_once: bool) -> None:
         with self._pause_condition:
-            self._step_once_requested = step_once
+            self._step_mode = step_once
             self._pause_requested = False
+            if step_once and self._is_leaf_state_path(self._active_path):
+                self._step_target_leaf_path = tuple(self._active_path)
+                self._step_target_started = True
+            else:
+                self._step_target_leaf_path = None
+                self._step_target_started = False
             self._pause_condition.notify_all()
         if self._blocked:
             self._set_blocked(False)
@@ -309,6 +322,8 @@ class Runtime(QObject):
         if self._active_path == next_path:
             return
         self._active_path = next_path
+        if next_path:
+            self._append_log(f"[ACTIVE] {' / '.join(next_path)}")
         self.active_state_changed.emit(next_path)
 
     def _set_last_transition(
@@ -318,6 +333,11 @@ class Runtime(QObject):
         if self._last_transition == transition:
             return
         self._last_transition = transition
+        if transition is not None:
+            from_path, to_path, outcome = transition
+            self._append_log(
+                f"[TRANSITION] {' / '.join(from_path)} --[{outcome}]--> {' / '.join(to_path)}"
+            )
         self.active_transition_changed.emit(transition)
 
     def _clear_logs(self) -> None:
@@ -327,15 +347,15 @@ class Runtime(QObject):
         self.log_cleared.emit()
 
     def _append_log(self, message: str) -> None:
+        if self._disposed:
+            return
+
         clean_message = str(message).rstrip()
         if not clean_message:
             return
 
         now = time.monotonic()
-        if (
-            clean_message == self._last_log_message
-            and now - self._last_log_timestamp < 0.02
-        ):
+        if clean_message == self._last_log_message and now - self._last_log_timestamp < 0.02:
             return
 
         self._last_log_message = clean_message
@@ -343,276 +363,77 @@ class Runtime(QObject):
         self._log_entries.append(clean_message)
         self.log_appended.emit(clean_message)
 
-    def _install_python_logging_bridge(self) -> None:
-        root_logger = logging.getLogger()
+    def _resolve_container(self, path: tuple[str, ...]) -> Optional[Any]:
+        return resolve_container(self.sm, path)
 
-        if self._python_log_handler is None:
-            self._python_log_handler = _RuntimeLogHandler(self)
-            self._python_log_handler.setLevel(logging.NOTSET)
-
-        if self._python_log_handler not in root_logger.handlers:
-            root_logger.addHandler(self._python_log_handler)
-
-        if root_logger.level > logging.NOTSET:
-            root_logger.setLevel(logging.NOTSET)
-
-    def _install_yasmin_loggers(self) -> None:
-        self._install_python_logging_bridge()
-
-        try:
-            self._yasmin_module = importlib.import_module("yasmin")
-        except Exception:
-            self._yasmin_module = None
-
-        try:
-            self._yasmin_logs_module = importlib.import_module("yasmin.logs")
-        except Exception:
-            self._yasmin_logs_module = None
-
-        self._patch_yasmin_log_functions()
-        self._patch_yasmin_setters()
-        self._activate_yasmin_logger()
-
-    def _patch_yasmin_log_functions(self) -> None:
-        for func_name, level_name in (
-            ("log_error", "ERROR"),
-            ("log_warn", "WARN"),
-            ("log_info", "INFO"),
-            ("log_debug", "DEBUG"),
-        ):
-            original = None
-
-            if self._yasmin_logs_module is not None:
-                original = getattr(self._yasmin_logs_module, func_name, None)
-
-            if original is None and self._yasmin_module is not None:
-                original = getattr(self._yasmin_module, func_name, None)
-
-            if not callable(original):
-                continue
-
-            if getattr(original, "__yasmin_editor_runtime_wrapper__", False):
-                continue
-
-            wrapped = self._build_log_function_wrapper(
-                func_name=func_name,
-                level_name=level_name,
-                original=original,
-            )
-
-            if self._yasmin_logs_module is not None:
-                setattr(self._yasmin_logs_module, func_name, wrapped)
-
-            if self._yasmin_module is not None:
-                setattr(self._yasmin_module, func_name, wrapped)
-
-    def _build_log_function_wrapper(
-        self,
-        func_name: str,
-        level_name: str,
-        original: Callable[..., Any],
-    ) -> Callable[..., Any]:
-        def wrapped(file: str, function: str, line: int, text: str) -> Any:
-            self._append_log(f"[{level_name}] [{file}:{function}:{line}] {text}")
-            return original(file, function, line, text)
-
-        wrapped.__name__ = func_name
-        wrapped.__yasmin_editor_runtime_wrapper__ = True
-        return wrapped
-
-    def _patch_yasmin_setters(self) -> None:
-        original_set_loggers = None
-
-        if self._yasmin_logs_module is not None:
-            original_set_loggers = getattr(
-                self._yasmin_logs_module, "set_loggers", None
-            )
-
-        if original_set_loggers is None and self._yasmin_module is not None:
-            original_set_loggers = getattr(self._yasmin_module, "set_loggers", None)
-
-        if callable(original_set_loggers) and not getattr(
-            original_set_loggers, "__yasmin_editor_runtime_wrapper__", False
-        ):
-
-            def wrapped_set_loggers(user_logger: Callable[..., Any]) -> Any:
-                if user_logger is self._yasmin_log_message:
-                    return original_set_loggers(self._yasmin_log_message)
-
-                def combined_logger(
-                    level: Any,
-                    file: str,
-                    function: str,
-                    line: int,
-                    text: str,
-                ) -> None:
-                    self._yasmin_log_message(level, file, function, line, text)
-                    user_logger(level, file, function, line, text)
-
-                return original_set_loggers(combined_logger)
-
-            wrapped_set_loggers.__yasmin_editor_runtime_wrapper__ = True
-
-            if self._yasmin_logs_module is not None:
-                setattr(self._yasmin_logs_module, "set_loggers", wrapped_set_loggers)
-
-            if self._yasmin_module is not None:
-                setattr(self._yasmin_module, "set_loggers", wrapped_set_loggers)
-
-        self._wrap_reset_logger_function("set_default_loggers")
-        self._wrap_reset_logger_function("set_py_loggers")
-
-    def _wrap_reset_logger_function(self, func_name: str) -> None:
-        original = None
-
-        if self._yasmin_logs_module is not None:
-            original = getattr(self._yasmin_logs_module, func_name, None)
-
-        if original is None and self._yasmin_module is not None:
-            original = getattr(self._yasmin_module, func_name, None)
-
-        if not callable(original):
-            return
-
-        if getattr(original, "__yasmin_editor_runtime_wrapper__", False):
-            return
-
-        def wrapped(*args: Any, **kwargs: Any) -> Any:
-            result = original(*args, **kwargs)
-            self._activate_yasmin_logger()
-            return result
-
-        wrapped.__name__ = func_name
-        wrapped.__yasmin_editor_runtime_wrapper__ = True
-
-        if self._yasmin_logs_module is not None and hasattr(
-            self._yasmin_logs_module, func_name
-        ):
-            setattr(self._yasmin_logs_module, func_name, wrapped)
-
-        if self._yasmin_module is not None and hasattr(self._yasmin_module, func_name):
-            setattr(self._yasmin_module, func_name, wrapped)
-
-    def _activate_yasmin_logger(self) -> None:
-        set_loggers = None
-
-        if self._yasmin_logs_module is not None:
-            set_loggers = getattr(self._yasmin_logs_module, "set_loggers", None)
-
-        if not callable(set_loggers) and self._yasmin_module is not None:
-            set_loggers = getattr(self._yasmin_module, "set_loggers", None)
-
-        if callable(set_loggers):
-            try:
-                set_loggers(self._yasmin_log_message)
-            except Exception:
-                pass
-
-    def _yasmin_log_message(
-        self,
-        level: Any,
-        file: str,
-        function: str,
-        line: int,
-        text: str,
-    ) -> None:
-        level_name = self._log_level_to_name(level)
-        self._append_log(f"[{level_name}] [{file}:{function}:{line}] {text}")
-
-    def _log_level_to_name(self, level: Any) -> str:
-        if self._yasmin_logs_module is not None:
-            log_level_to_name = getattr(
-                self._yasmin_logs_module, "log_level_to_name", None
-            )
-            if callable(log_level_to_name):
-                try:
-                    return str(log_level_to_name(level))
-                except Exception:
-                    pass
-
-        if hasattr(level, "name"):
-            return str(level.name)
-
-        if isinstance(level, str):
-            return level.upper()
-
-        try:
-            value = int(level)
-        except Exception:
-            value = None
-
-        if value is not None:
-            mapping = {0: "ERROR", 1: "WARN", 2: "INFO", 3: "DEBUG"}
-            return mapping.get(value, str(value))
-
-        return str(level)
+    def _expand_to_deepest_known_path(self, base_path: tuple[str, ...]) -> tuple[str, ...]:
+        return expand_to_deepest_known_path(self.sm, base_path)
 
     def _resolve_initial_active_path(self) -> tuple[str, ...]:
-        container = self.sm
-        path: list[str] = []
-        visited: set[int] = set()
+        return self._expand_to_deepest_known_path(tuple())
 
-        while container is not None and id(container) not in visited:
-            visited.add(id(container))
+    def _resolve_current_execution_path(self, fallback: tuple[str, ...]) -> tuple[str, ...]:
+        live_path = self._expand_to_deepest_known_path(tuple())
+        return live_path if live_path else fallback
 
-            start_state = None
-            get_start_state = getattr(container, "get_start_state", None)
-            if callable(get_start_state):
-                try:
-                    start_state = get_start_state()
-                except Exception:
-                    start_state = None
+    def _is_leaf_state_path(self, path: tuple[str, ...]) -> bool:
+        return bool(path) and not is_container_object(self._resolve_container(path))
 
-            if not start_state:
-                start_state = getattr(container, "start_state", None)
+    def _set_step_target_from_active_path(self, active_path: tuple[str, ...]) -> None:
+        if not self._step_mode or not self._is_leaf_state_path(active_path):
+            return
+        if self._step_target_leaf_path is None:
+            self._step_target_leaf_path = active_path
+        if active_path == self._step_target_leaf_path:
+            self._step_target_started = True
 
-            if not start_state:
-                break
+    def _complete_step_for_finished_leaf(self, leaf_path: tuple[str, ...]) -> bool:
+        with self._pause_condition:
+            if not self._step_mode:
+                return False
+            if self._step_target_leaf_path != leaf_path:
+                return False
+            if not self._step_target_started:
+                return False
 
-            state_name = str(start_state)
-            path.append(state_name)
+            self._step_mode = False
+            self._step_target_leaf_path = None
+            self._step_target_started = False
+            self._pause_requested = True
+            return True
 
-            get_states = getattr(container, "get_states", None)
-            if not callable(get_states):
-                break
+    def _pause_if_requested(self) -> None:
+        with self._pause_condition:
+            if not self._pause_requested or self._shutting_down:
+                return
 
-            try:
-                states = get_states()
-            except Exception:
-                break
+            self._set_blocked(True)
+            self.status_changed.emit("Runtime paused")
 
-            if not hasattr(states, "get"):
-                break
+            while self._pause_requested and not self._shutting_down:
+                self._pause_condition.wait()
 
-            next_container = states.get(state_name)
-            if next_container is None:
-                break
-
-            child_get_states = getattr(next_container, "get_states", None)
-            if not callable(child_get_states):
-                break
-
-            container = next_container
-
-        return tuple(path)
+        self._set_blocked(False)
 
     def _execute_worker(self) -> None:
         sm = self.sm
-        if sm is None:
+        if sm is None or self._disposed:
             return
 
         try:
-            self._install_yasmin_loggers()
+            RuntimeLoggingBridge.set_current_runtime(self)
+            RuntimeLoggingBridge.activate_yasmin_logger()
             sm()
         except Exception as exc:
-            self._set_running(False)
-            self._set_blocked(False)
-            self.error_occurred.emit(f"Runtime execution failed:\n{exc}")
+            if not self._disposed:
+                self._set_running(False)
+                self._set_blocked(False)
+                self.error_occurred.emit(f"Runtime execution failed:\n{exc}")
         finally:
             with self._worker_state_lock:
                 if threading.current_thread() is self._execution_thread:
                     self._execution_thread = None
-                if not self._running:
+                if not self._running and not self._disposed:
                     self.ready_changed.emit(self.is_ready())
 
     def _register_callbacks(self) -> None:
@@ -622,6 +443,9 @@ class Runtime(QObject):
         visited: set[int] = set()
 
         def walk(container: Any, prefix: tuple[str, ...]) -> None:
+            if container is None:
+                return
+
             object_id = id(container)
             if object_id in visited:
                 return
@@ -634,7 +458,9 @@ class Runtime(QObject):
             if callable(add_start_cb):
                 add_start_cb(
                     lambda bb, start_state, current_prefix=prefix: self.start_cb(
-                        bb, start_state, current_prefix
+                        bb,
+                        start_state,
+                        current_prefix,
                     )
                 )
             if callable(add_transition_cb):
@@ -656,55 +482,11 @@ class Runtime(QObject):
                     )
                 )
 
-            get_states = getattr(container, "get_states", None)
-            if not callable(get_states):
-                return
-
-            try:
-                states = get_states()
-            except Exception:
-                return
-
-            state_items = states.items() if hasattr(states, "items") else []
-            for state_name, child_state in state_items:
-                walk(child_state, prefix + (str(state_name),))
+            for state_name, nested_state in container_states(container).items():
+                if is_container_object(nested_state):
+                    walk(nested_state, prefix + (str(state_name),))
 
         walk(self.sm, tuple())
-
-    def _resolve_container(self, prefix: tuple[str, ...]) -> Optional[Any]:
-        container: Any = self.sm
-        for state_name in prefix:
-            if container is None:
-                return None
-            get_states = getattr(container, "get_states", None)
-            if not callable(get_states):
-                return None
-            try:
-                states = get_states()
-            except Exception:
-                return None
-            if not hasattr(states, "get"):
-                return None
-            container = states.get(state_name)
-        return container
-
-    def _container_has_state(self, prefix: tuple[str, ...], state_name: str) -> bool:
-        container = self._resolve_container(prefix)
-        if container is None:
-            return False
-
-        get_states = getattr(container, "get_states", None)
-        if callable(get_states):
-            try:
-                states = get_states()
-            except Exception:
-                states = None
-            if states is not None and hasattr(states, "__contains__"):
-                try:
-                    return state_name in states
-                except Exception:
-                    return False
-        return False
 
     def start_cb(
         self,
@@ -712,9 +494,14 @@ class Runtime(QObject):
         start_state: str,
         prefix: tuple[str, ...] = tuple(),
     ) -> None:
+        if self._disposed:
+            return
+
         self.bb = bb
         self._set_running(True)
-        self._set_active_path(prefix + (str(start_state),))
+        active_path = self._expand_to_deepest_known_path(prefix + (str(start_state),))
+        self._set_active_path(active_path)
+        self._set_step_target_from_active_path(active_path)
 
     def end_cb(
         self,
@@ -722,14 +509,26 @@ class Runtime(QObject):
         outcome: str,
         prefix: tuple[str, ...] = tuple(),
     ) -> None:
+        if self._disposed:
+            return
+
         self.bb = bb
 
         if prefix:
+            self._set_active_path(prefix)
+            if (
+                self._step_target_leaf_path is not None
+                and self._step_target_leaf_path[: len(prefix)] == prefix
+            ):
+                self._complete_step_for_finished_leaf(self._step_target_leaf_path)
+            self._pause_if_requested()
             return
 
         with self._pause_condition:
             self._pause_requested = False
-            self._step_once_requested = False
+            self._step_mode = False
+            self._step_target_leaf_path = None
+            self._step_target_started = False
             self._pause_condition.notify_all()
 
         self._finished = True
@@ -748,35 +547,14 @@ class Runtime(QObject):
         outcome: str,
         prefix: tuple[str, ...] = tuple(),
     ) -> None:
+        if self._disposed:
+            return
+
         self.bb = bb
-        from_name = str(from_state)
-        to_name = str(to_state)
+        from_path = prefix + (str(from_state),)
+        to_path = prefix + (str(to_state),)
 
-        self._set_last_transition(
-            (
-                prefix + (from_name,),
-                prefix + (to_name,),
-                str(outcome),
-            )
-        )
-
-        if self._container_has_state(prefix, to_name):
-            self._set_active_path(prefix + (to_name,))
-        else:
-            self._set_active_path(prefix + (from_name,))
-
-        with self._pause_condition:
-            if self._step_once_requested:
-                self._pause_requested = True
-                self._step_once_requested = False
-
-            if not self._pause_requested or self._shutting_down:
-                return
-
-            self._set_blocked(True)
-            self.status_changed.emit("Runtime paused")
-
-            while self._pause_requested and not self._shutting_down:
-                self._pause_condition.wait()
-
-        self._set_blocked(False)
+        self._set_last_transition((from_path, to_path, str(outcome)))
+        self._complete_step_for_finished_leaf(from_path)
+        self._set_active_path(self._expand_to_deepest_known_path(to_path))
+        self._pause_if_requested()
