@@ -16,6 +16,7 @@
 import os
 import random
 import tempfile
+from html import escape
 from typing import Dict, List, Optional, Set
 
 from PyQt5.QtCore import QPointF, Qt, QTimer
@@ -24,9 +25,8 @@ from PyQt5.QtWidgets import (QAbstractItemView, QAction, QApplication,
                              QComboBox, QDialog, QFileDialog, QFrame,
                              QHBoxLayout, QInputDialog, QLabel, QLineEdit,
                              QListWidget, QListWidgetItem, QMainWindow,
-                             QMessageBox, QPlainTextEdit, QPushButton,
-                             QSplitter, QTextBrowser, QToolBar, QVBoxLayout,
-                             QWidget)
+                             QMessageBox, QPushButton, QSplitter,
+                             QTextBrowser, QToolBar, QVBoxLayout, QWidget)
 from yasmin_editor.editor_gui.colors import (PALETTE, build_qt_palette,
                                              build_stylesheet)
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -1657,9 +1657,12 @@ class YasminEditor(QMainWindow):
         runtime_sidebar_layout = QVBoxLayout(self.runtime_sidebar_widget)
         runtime_sidebar_layout.setContentsMargins(0, 0, 0, 0)
         runtime_sidebar_layout.addWidget(QLabel("<b>Logs:</b>"))
-        self.runtime_log_view = QPlainTextEdit()
+        self.runtime_log_view = QTextBrowser()
         self.runtime_log_view.setReadOnly(True)
-        self.runtime_log_view.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.runtime_log_view.setOpenExternalLinks(False)
+        self.runtime_log_view.setOpenLinks(False)
+        self.runtime_log_view.setLineWrapMode(QTextBrowser.NoWrap)
+        self.runtime_log_view.document().setDocumentMargin(8)
         runtime_sidebar_layout.addWidget(self.runtime_log_view)
         self.runtime_sidebar_widget.setVisible(False)
         left_layout.addWidget(self.runtime_sidebar_widget)
@@ -1720,6 +1723,9 @@ class YasminEditor(QMainWindow):
         self.runtime_controls_layout.setContentsMargins(0, 0, 0, 0)
 
         self.runtime_status_label = QLabel("Ready")
+        self.runtime_status_label.setAlignment(Qt.AlignCenter)
+        self.runtime_status_label.setMinimumWidth(120)
+        self.runtime_status_label.setTextFormat(Qt.PlainText)
         self.runtime_controls_layout.addWidget(self.runtime_status_label)
 
         self.runtime_play_button = QPushButton("Play")
@@ -1939,6 +1945,92 @@ class YasminEditor(QMainWindow):
             else:
                 self.runtime_mode_button.setStyleSheet("")
 
+    def _runtime_status_badge_style(self, status: str) -> str:
+        """Return the stylesheet for the runtime status badge."""
+        normalized = str(status).strip().lower()
+
+        background = QColor(205, 210, 214)
+        foreground = QColor(28, 31, 36)
+        border = QColor(148, 154, 160)
+
+        if normalized == "running":
+            background = QColor(46, 150, 76)
+            foreground = QColor(255, 255, 255)
+            border = QColor(33, 108, 54)
+        elif normalized == "paused":
+            background = QColor(214, 170, 52)
+            foreground = QColor(24, 24, 24)
+            border = QColor(150, 118, 34)
+        elif normalized == "inactive":
+            background = QColor(145, 149, 156)
+            foreground = QColor(255, 255, 255)
+            border = QColor(103, 108, 115)
+        elif normalized == "ready":
+            background = QColor(224, 228, 232)
+            foreground = QColor(30, 34, 40)
+            border = QColor(172, 178, 184)
+        elif normalized in {"succeeded", "success"}:
+            background = QColor(46, 150, 76)
+            foreground = QColor(255, 255, 255)
+            border = QColor(33, 108, 54)
+        elif normalized in {"aborted", "failed", "failure", "error"}:
+            background = QColor(176, 60, 60)
+            foreground = QColor(255, 255, 255)
+            border = QColor(120, 40, 40)
+
+        return (
+            "QLabel {"
+            f"background-color: {background.name()}; "
+            f"color: {foreground.name()}; "
+            f"border: 1px solid {border.name()}; "
+            "border-radius: 10px; "
+            "padding: 4px 12px; "
+            "font-weight: 600;"
+            "}"
+        )
+
+    def _update_runtime_status_badge(self, status: str) -> None:
+        """Apply runtime status text and styling to the badge widget."""
+        if not hasattr(self, "runtime_status_label"):
+            return
+        label_text = str(status).strip() or "Inactive"
+        self.runtime_status_label.setText(label_text)
+        self.runtime_status_label.setStyleSheet(
+            self._runtime_status_badge_style(label_text)
+        )
+
+    def _runtime_log_line_color(self, message: str) -> str:
+        """Return the HTML color used for a runtime log line."""
+        normalized = str(message).lstrip()
+        if normalized.startswith("[WARN]"):
+            return "#ffd24d"
+        if normalized.startswith("[ERROR]"):
+            return "#ff7a7a"
+        if normalized.startswith("[STATUS]"):
+            return "#d3d7dc"
+        if normalized.startswith("[INFO]"):
+            return "#ffffff"
+        if normalized.startswith("[DEBUG]"):
+            return "#9aa3ad"
+        if normalized.startswith("[ACTIVE]"):
+            return "#8dd8ff"
+        if normalized.startswith("[TRANSITION]"):
+            return "#78f0c8"
+        return "#e8eaed"
+
+    def _format_runtime_log_entry(self, message: str) -> str:
+        """Convert a runtime log message into a styled HTML block."""
+        color = self._runtime_log_line_color(message)
+        return (
+            '<div style="'
+            f'color: {color}; '
+            "font-family: 'DejaVu Sans Mono', 'Courier New', monospace; "
+            'white-space: pre; '
+            'margin: 0;">'
+            f"{escape(str(message))}"
+            "</div>"
+        )
+
     def clear_runtime_log_view(self) -> None:
         if hasattr(self, "runtime_log_view"):
             self.runtime_log_view.clear()
@@ -1946,7 +2038,7 @@ class YasminEditor(QMainWindow):
     def append_runtime_log(self, message: str) -> None:
         if not hasattr(self, "runtime_log_view"):
             return
-        self.runtime_log_view.appendPlainText(str(message))
+        self.runtime_log_view.append(self._format_runtime_log_entry(str(message)))
         scrollbar = self.runtime_log_view.verticalScrollBar()
         if scrollbar is not None:
             scrollbar.setValue(scrollbar.maximum())
@@ -1973,11 +2065,15 @@ class YasminEditor(QMainWindow):
     def on_runtime_status_changed(self, message: str) -> None:
         self.statusBar().showMessage(message, 3000)
         self.append_runtime_log(f"[STATUS] {message}")
+        runtime = self.runtime
+        if runtime is not None:
+            self._update_runtime_status_badge(runtime.get_status_label())
         self.update_runtime_actions()
 
     def on_runtime_error(self, message: str) -> None:
         self.statusBar().showMessage("Runtime error", 3000)
         self.append_runtime_log(f"[ERROR] {message}")
+        self._update_runtime_status_badge("Error")
         QMessageBox.critical(self, "Runtime Error", message)
         self.update_runtime_actions()
 
@@ -1993,8 +2089,17 @@ class YasminEditor(QMainWindow):
         self.set_canvas_runtime_visual_state()
 
         if hasattr(self, "runtime_status_label"):
-            self.runtime_status_label.setText(
+            self._update_runtime_status_badge(
                 runtime.get_status_label() if runtime is not None else "Inactive"
+            )
+
+        if hasattr(self, "runtime_log_view"):
+            self.runtime_log_view.setStyleSheet(
+                "QTextBrowser {"
+                "background-color: #1f2329; "
+                "border: 1px solid #40464f; "
+                "border-radius: 6px;"
+                "}"
             )
 
         runtime_button_visibility = {

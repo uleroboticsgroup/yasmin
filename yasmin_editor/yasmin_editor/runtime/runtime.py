@@ -15,6 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Runtime execution backend for the YASMIN editor.
+
+The runtime keeps a live state machine instance, mirrors its execution state into
+Qt signals, and provides a small control surface for play, pause, step, cancel,
+and shutdown.
+"""
+
 from __future__ import annotations
 
 import threading
@@ -23,16 +30,25 @@ from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from yasmin_editor.runtime.logging import RuntimeLoggingBridge
-from yasmin_editor.runtime.traversal import (child_state, container_states,
-                                             expand_to_deepest_known_path,
-                                             is_container_object,
-                                             resolve_container)
+from yasmin_editor.runtime.traversal import (
+    child_state,
+    container_states,
+    expand_to_deepest_known_path,
+    is_container_object,
+    resolve_container,
+)
 
 from yasmin import Blackboard, StateMachine
 from yasmin_factory import YasminFactory
 
 
 class Runtime(QObject):
+    """Execute and observe a YASMIN state machine instance.
+
+    The class exposes Qt signals so the editor can react to state changes,
+    transitions, status updates, and log output without polling.
+    """
+
     ready_changed = pyqtSignal(bool)
     running_changed = pyqtSignal(bool)
     blocked_changed = pyqtSignal(bool)
@@ -45,6 +61,7 @@ class Runtime(QObject):
     log_appended = pyqtSignal(str)
 
     def __init__(self) -> None:
+        """Initialize the runtime controller and install logging hooks."""
         super().__init__()
         self.factory = YasminFactory()
         self.sm: Optional[StateMachine] = None
@@ -79,21 +96,27 @@ class Runtime(QObject):
         RuntimeLoggingBridge.install()
 
     def is_ready(self) -> bool:
+        """Return whether a state machine is currently loaded."""
         return isinstance(self.sm, StateMachine)
 
     def is_running(self) -> bool:
+        """Return whether the runtime worker is actively executing."""
         return self._running
 
     def is_blocked(self) -> bool:
+        """Return whether execution is currently paused."""
         return self._blocked
 
     def is_finished(self) -> bool:
+        """Return whether the loaded state machine finished execution."""
         return self._finished
 
     def get_final_outcome(self) -> Optional[str]:
+        """Return the final outcome once execution completed."""
         return self._final_outcome
 
     def get_status_label(self) -> str:
+        """Return the human-readable runtime status shown in the UI."""
         if self._finished and self._final_outcome:
             return self._final_outcome
         if self._running and self._blocked:
@@ -105,23 +128,29 @@ class Runtime(QObject):
         return "Inactive"
 
     def get_current_state(self) -> Optional[str]:
+        """Return the currently active leaf state name if available."""
         return self._active_path[-1] if self._active_path else None
 
     def get_active_path(self) -> tuple[str, ...]:
+        """Return the last known active path inside the loaded machine."""
         return self._active_path
 
     def get_live_active_path(self) -> tuple[str, ...]:
+        """Resolve the current execution path directly from the live machine."""
         return self._resolve_current_execution_path(tuple())
 
     def get_last_transition(
         self,
     ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
+        """Return the most recently observed transition."""
         return self._last_transition
 
     def get_logs(self) -> list[str]:
+        """Return a copy of the collected runtime log lines."""
         return list(self._log_entries)
 
     def create_sm_from_file(self, path: str) -> bool:
+        """Load a runtime state machine from an XML file."""
         self.shutdown(reset_disposed=False)
         self._disposed = False
         self._clear_logs()
@@ -155,6 +184,7 @@ class Runtime(QObject):
         return self.is_ready()
 
     def play(self) -> None:
+        """Start execution or resume a paused runtime."""
         if not self.is_ready() or self.is_finished() or self._disposed:
             return
 
@@ -167,6 +197,7 @@ class Runtime(QObject):
         self.status_changed.emit("Runtime started")
 
     def pause(self) -> None:
+        """Request a pause at the next state boundary."""
         if (
             not self.is_ready()
             or not self._running
@@ -179,6 +210,7 @@ class Runtime(QObject):
         self.status_changed.emit("Pause requested")
 
     def play_once(self) -> None:
+        """Execute a single state and pause before the following state starts."""
         if not self.is_ready() or self.is_finished() or self._disposed:
             return
 
@@ -191,6 +223,7 @@ class Runtime(QObject):
         self.status_changed.emit("Runtime started")
 
     def cancel_state(self) -> None:
+        """Request cancellation of the currently active state."""
         if not self.is_ready() or self.is_finished() or self._disposed:
             return
         try:
@@ -200,6 +233,7 @@ class Runtime(QObject):
             self.error_occurred.emit(f"Failed to cancel current state:\n{exc}")
 
     def cancel(self) -> None:
+        """Continuously request cancellation until the machine stops."""
         if not self.is_ready() or self.is_finished() or self._disposed:
             return
 
@@ -229,6 +263,7 @@ class Runtime(QObject):
         self.status_changed.emit("Canceling runtime state machine")
 
     def kill(self) -> None:
+        """Stop the runtime immediately and clear the loaded machine."""
         if (not self.is_ready() and self._execution_thread is None) or self._disposed:
             return
 
@@ -258,6 +293,7 @@ class Runtime(QObject):
         self.status_changed.emit("Runtime stopped")
 
     def shutdown(self, reset_disposed: bool = True) -> None:
+        """Tear down the runtime and optionally mark it as disposed."""
         if self._disposed and reset_disposed:
             return
 
@@ -278,6 +314,7 @@ class Runtime(QObject):
             self._disposed = True
 
     def _start_execution_thread(self) -> None:
+        """Create the worker thread when execution starts for the first time."""
         if self._execution_thread is not None and self._execution_thread.is_alive():
             return
 
@@ -297,10 +334,13 @@ class Runtime(QObject):
         self._execution_thread.start()
 
     def _resume(self, step_once: bool) -> None:
+        """Resume execution and configure optional single-step behavior."""
         with self._pause_condition:
             self._step_mode = step_once
             self._pause_requested = False
             if step_once and self._is_leaf_state_path(self._active_path):
+                # When stepping from a paused leaf state, continue until this exact
+                # leaf finishes and the next state is about to start.
                 self._step_target_leaf_path = tuple(self._active_path)
                 self._step_target_started = True
             else:
@@ -311,18 +351,21 @@ class Runtime(QObject):
             self._set_blocked(False)
 
     def _set_running(self, value: bool) -> None:
+        """Update the running flag and emit the corresponding signal."""
         if self._running == value:
             return
         self._running = value
         self.running_changed.emit(value)
 
     def _set_blocked(self, value: bool) -> None:
+        """Update the paused flag and emit the corresponding signal."""
         if self._blocked == value:
             return
         self._blocked = value
         self.blocked_changed.emit(value)
 
     def _set_active_path(self, state_path: Iterable[str]) -> None:
+        """Store the active state path and notify the UI if it changed."""
         next_path = tuple(state_path)
         if self._active_path == next_path:
             return
@@ -335,6 +378,7 @@ class Runtime(QObject):
         self,
         transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]],
     ) -> None:
+        """Store the most recent transition and append a readable log line."""
         if self._last_transition == transition:
             return
         self._last_transition = transition
@@ -346,12 +390,14 @@ class Runtime(QObject):
         self.active_transition_changed.emit(transition)
 
     def _clear_logs(self) -> None:
+        """Reset the in-memory runtime log buffer."""
         self._log_entries.clear()
         self._last_log_message = ""
         self._last_log_timestamp = 0.0
         self.log_cleared.emit()
 
     def _append_log(self, message: str) -> None:
+        """Append a log line while filtering accidental duplicate bursts."""
         if self._disposed:
             return
 
@@ -372,26 +418,32 @@ class Runtime(QObject):
         self.log_appended.emit(clean_message)
 
     def _resolve_container(self, path: tuple[str, ...]) -> Optional[Any]:
+        """Resolve a container object for the given path inside the live machine."""
         return resolve_container(self.sm, path)
 
     def _expand_to_deepest_known_path(
         self, base_path: tuple[str, ...]
     ) -> tuple[str, ...]:
+        """Expand a container path down to the deepest active child path."""
         return expand_to_deepest_known_path(self.sm, base_path)
 
     def _resolve_initial_active_path(self) -> tuple[str, ...]:
+        """Return the initial path that should be highlighted before execution."""
         return self._expand_to_deepest_known_path(tuple())
 
     def _resolve_current_execution_path(
         self, fallback: tuple[str, ...]
     ) -> tuple[str, ...]:
+        """Resolve the best available live execution path for the UI."""
         live_path = self._expand_to_deepest_known_path(tuple())
         return live_path if live_path else fallback
 
     def _is_leaf_state_path(self, path: tuple[str, ...]) -> bool:
+        """Return whether a path points to a non-container state."""
         return bool(path) and not is_container_object(self._resolve_container(path))
 
     def _set_step_target_from_active_path(self, active_path: tuple[str, ...]) -> None:
+        """Initialize single-step tracking once a leaf state becomes active."""
         if not self._step_mode or not self._is_leaf_state_path(active_path):
             return
         if self._step_target_leaf_path is None:
@@ -400,6 +452,7 @@ class Runtime(QObject):
             self._step_target_started = True
 
     def _complete_step_for_finished_leaf(self, leaf_path: tuple[str, ...]) -> bool:
+        """Finalize a single-step cycle when the tracked leaf state finished."""
         with self._pause_condition:
             if not self._step_mode:
                 return False
@@ -415,6 +468,7 @@ class Runtime(QObject):
             return True
 
     def _pause_if_requested(self) -> None:
+        """Block the worker thread while a pause request is active."""
         with self._pause_condition:
             if not self._pause_requested or self._shutting_down:
                 return
@@ -428,6 +482,7 @@ class Runtime(QObject):
         self._set_blocked(False)
 
     def _execute_worker(self) -> None:
+        """Run the loaded state machine inside the worker thread."""
         sm = self.sm
         if sm is None or self._disposed:
             return
@@ -449,6 +504,7 @@ class Runtime(QObject):
                     self.ready_changed.emit(self.is_ready())
 
     def _register_callbacks(self) -> None:
+        """Attach runtime callbacks to all containers in the loaded machine."""
         if self.sm is None:
             return
 
@@ -506,6 +562,7 @@ class Runtime(QObject):
         start_state: str,
         prefix: tuple[str, ...] = tuple(),
     ) -> None:
+        """Handle a state start callback from the live runtime."""
         if self._disposed:
             return
 
@@ -520,6 +577,7 @@ class Runtime(QObject):
         outcome: str,
         prefix: tuple[str, ...] = tuple(),
     ) -> None:
+        """Handle the completion of a container or the root machine."""
         if self._disposed:
             return
 
@@ -556,14 +614,15 @@ class Runtime(QObject):
         outcome: str,
         prefix: tuple[str, ...] = tuple(),
     ) -> None:
+        """Handle transitions and expose the current blackboard safely."""
         if self._disposed:
             return
 
-        # store blackboard remappings
+        # Store blackboard remappings temporarily so the editor can inspect the
+        # raw key space without mutating the runtime-visible mapping.
         remappings = dict(bb.get_remappings())
 
         try:
-            # remove remappings and store bb as class member
             bb.set_remappings({})
             self.bb = bb
 
@@ -575,7 +634,6 @@ class Runtime(QObject):
             self._set_active_path(self._expand_to_deepest_known_path(to_path))
             self._pause_if_requested()
         finally:
-            # reinstert stored remappings
             try:
                 bb.set_remappings(remappings)
             finally:
