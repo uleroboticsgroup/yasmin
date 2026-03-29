@@ -137,6 +137,7 @@ class YasminEditor(QMainWindow):
         self.canvas.scene.removeItem(connection.label)
         if connection in self.connections:
             self.connections.remove(connection)
+        self.refresh_connection_port_visibility()
 
     def iter_state_subtree_items(self, state_node: StateNode | ContainerStateNode):
         yield state_node
@@ -941,6 +942,7 @@ class YasminEditor(QMainWindow):
                 container_model.start_state = model.name
         self.update_start_state_combo()
         self.sync_blackboard_keys()
+        self.refresh_connection_port_visibility()
         return node
 
     def register_connection_in_model(self, from_node, to_node, outcome: str) -> None:
@@ -975,6 +977,7 @@ class YasminEditor(QMainWindow):
         self.canvas.scene.removeItem(state_node)
         self.update_start_state_combo()
         self.sync_blackboard_keys()
+        self.refresh_connection_port_visibility()
         self.statusBar().showMessage(f"Deleted state: {state_node.name}", 2000)
 
     def delete_final_outcome_item(self, outcome_node: FinalOutcomeNode) -> None:
@@ -985,6 +988,7 @@ class YasminEditor(QMainWindow):
         self.current_container_model.remove_outcome(outcome_node.name)
         self.canvas.scene.removeItem(outcome_node)
         self.update_start_state_combo()
+        self.refresh_connection_port_visibility()
         self.statusBar().showMessage(
             f"Deleted final outcome: {outcome_node.name}",
             2000,
@@ -1752,14 +1756,46 @@ class YasminEditor(QMainWindow):
 
         return None
 
+    def _state_has_available_outcomes(
+        self,
+        state_node: StateNode | ContainerStateNode,
+    ) -> bool:
+        if not hasattr(state_node, "model"):
+            return False
+
+        outcomes = list(getattr(state_node.model, "outcomes", []) or [])
+        if not outcomes:
+            return False
+
+        if isinstance(self.current_container_model, Concurrence):
+            return True
+
+        used_outcomes = {
+            transition.source_outcome
+            for transition in self.current_container_model.transitions.get(
+                state_node.name, []
+            )
+        }
+        return any(outcome.name not in used_outcomes for outcome in outcomes)
+
+    def refresh_connection_port_visibility(self) -> None:
+        readonly = self.is_read_only_mode()
+        for item in self.state_nodes.values():
+            if hasattr(item, "connection_port"):
+                item.connection_port.setVisible(
+                    (not readonly) and self._state_has_available_outcomes(item)
+                )
+
     def _set_scene_read_only_state(self) -> None:
         readonly = self.is_read_only_mode()
         for item in list(self.state_nodes.values()) + list(
             self.final_outcomes.values()
         ):
             item.setFlag(item.ItemIsMovable, not readonly)
-            if hasattr(item, "connection_port"):
-                item.connection_port.setVisible(not readonly)
+            if hasattr(item, "connection_port") and readonly:
+                item.connection_port.setVisible(False)
+        if not readonly:
+            self.refresh_connection_port_visibility()
         if hasattr(self, "root_sm_name_edit"):
             self.root_sm_name_edit.setEnabled(not readonly)
         if hasattr(self, "root_sm_description_edit"):
@@ -1783,6 +1819,7 @@ class YasminEditor(QMainWindow):
         self.update_container_controls()
         self.update_start_state_combo()
         self.refresh_breadcrumbs()
+        self.refresh_connection_port_visibility()
         self.refresh_blackboard_keys_list()
         self._set_scene_read_only_state()
         if fit_view:
@@ -1970,6 +2007,7 @@ class YasminEditor(QMainWindow):
                     current_model.default_outcome = outcome_name
 
             self.update_start_state_combo()
+            self.refresh_connection_port_visibility()
             self.statusBar().showMessage(
                 f"Added final outcome: {outcome_name}",
                 2000,
@@ -2067,6 +2105,7 @@ class YasminEditor(QMainWindow):
 
         self._create_connection_view(from_node, to_node, outcome)
         self.register_connection_in_model(from_node, to_node, outcome)
+        self.refresh_connection_port_visibility()
         self.statusBar().showMessage(
             f"Added transition: {from_node.name} --[{outcome}]--> {to_node.name}",
             2000,
@@ -2333,4 +2372,5 @@ class YasminEditor(QMainWindow):
                     return
                 state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
                 self.sync_blackboard_keys()
+                self.refresh_connection_port_visibility()
                 self.statusBar().showMessage(f"Updated state: {name}", 2000)

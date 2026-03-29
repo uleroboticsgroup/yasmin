@@ -252,7 +252,10 @@ class ConnectionLine(QGraphicsPathItem):
         Multiple self-loops on the same node are offset to avoid overlap.
         """
         node = self.from_node
-        center: QPointF = node.get_connection_point()
+        bounds = node.sceneBoundingRect()
+        center_x: float = bounds.center().x()
+        node_top: float = bounds.top()
+        node_width: float = bounds.width()
 
         # Calculate offset for multiple self-loops on the same node
         self_loops = [
@@ -268,26 +271,20 @@ class ConnectionLine(QGraphicsPathItem):
             loop_index = 0
 
         num_loops: int = len(self_loops)
-
-        # Base loop parameters
-        loop_height: float = 80  # How far the loop extends above the node
-        loop_width: float = 60  # Width of the loop
+        loop_height: float = max(80.0, bounds.height() + 20.0)
+        loop_width: float = max(60.0, node_width * 0.45)
+        anchor_half_width: float = max(18.0, min(26.0, node_width * 0.18))
 
         # Offset multiple loops horizontally
-        horizontal_spacing: float = 50
+        horizontal_spacing: float = max(50.0, node_width * 0.4)
         if num_loops > 1:
             center_offset = (num_loops - 1) / 2
             horizontal_offset = (loop_index - center_offset) * horizontal_spacing
         else:
-            horizontal_offset = 0
+            horizontal_offset = 0.0
 
-        # Calculate start and end points on the top edge of the node
-        # Start point is slightly to the left, end point slightly to the right
-        start_x = center.x() + horizontal_offset - 20
-        end_x = center.x() + horizontal_offset + 20
-
-        # Get the top of the node (approximate)
-        node_top = center.y() - 40  # Approximate top of node
+        start_x = center_x + horizontal_offset - anchor_half_width
+        end_x = center_x + horizontal_offset + anchor_half_width
 
         start_pos = QPointF(start_x, node_top)
         end_pos = QPointF(end_x, node_top)
@@ -320,7 +317,7 @@ class ConnectionLine(QGraphicsPathItem):
         self.arrow_head.setPolygon(arrow_polygon)
 
         # Position label at the top of the loop
-        mid_point = QPointF(center.x() + horizontal_offset, node_top - loop_height + 10)
+        mid_point = QPointF(center_x + horizontal_offset, node_top - loop_height + 10)
         label_rect = self.label.boundingRect()
         padding: float = 4
 
