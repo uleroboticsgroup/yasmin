@@ -1043,9 +1043,10 @@ class YasminEditor(QMainWindow):
     def _collect_blackboard_key_usage_for_model(
         self,
         container_model: StateMachine | Concurrence,
-    ) -> Dict[str, Dict[str, str]]:
+    ) -> tuple[Dict[str, Dict[str, str]], set[str]]:
         usage_map: Dict[str, Dict[str, object]] = {}
         metadata_map = self._get_container_metadata_map(container_model)
+        hidden_key_names: set[str] = set()
 
         def add_usage(key_name: str, usage_kind: str, description: str) -> None:
             entry = usage_map.setdefault(
@@ -1060,11 +1061,30 @@ class YasminEditor(QMainWindow):
             if not entry["description"] and description:
                 entry["description"] = description
 
-        def visit_state(state_model: State, remap_chain: List[Dict[str, str]]) -> None:
+        def resolve_local_name(
+            raw_name: str,
+            remap_chain: List[Dict[str, str]],
+        ) -> str:
+            effective_name = raw_name
+            intermediate_names: list[str] = []
+
+            for remappings in remap_chain:
+                intermediate_names.append(effective_name)
+                effective_name = remappings.get(effective_name, effective_name)
+
+            hidden_key_names.update(
+                name for name in intermediate_names if name and name != effective_name
+            )
+            return effective_name
+
+        def visit_state(
+            state_model: State, ancestor_remaps: List[Dict[str, str]]
+        ) -> None:
+            state_remaps = [dict(state_model.remappings)] + ancestor_remaps
+
             if isinstance(state_model, (StateMachine, Concurrence)):
-                child_chain = remap_chain + [dict(state_model.remappings)]
                 for child_state in state_model.states.values():
-                    visit_state(child_state, child_chain)
+                    visit_state(child_state, state_remaps)
                 return
 
             try:
@@ -1072,18 +1092,12 @@ class YasminEditor(QMainWindow):
             except Exception:
                 return
 
-            def resolve_local_name(raw_name: str) -> str:
-                effective_name = raw_name
-                for remappings in remap_chain:
-                    effective_name = remappings.get(effective_name, effective_name)
-                return effective_name
-
             for key_info in list(getattr(plugin_info, "input_keys", []) or []):
                 raw_name = str(key_info.get("name", "")).strip()
                 if not raw_name:
                     continue
                 add_usage(
-                    resolve_local_name(raw_name),
+                    resolve_local_name(raw_name, state_remaps),
                     "input",
                     str(key_info.get("description", "") or "").strip(),
                 )
@@ -1093,13 +1107,13 @@ class YasminEditor(QMainWindow):
                 if not raw_name:
                     continue
                 add_usage(
-                    resolve_local_name(raw_name),
+                    resolve_local_name(raw_name, state_remaps),
                     "output",
                     str(key_info.get("description", "") or "").strip(),
                 )
 
         for child_state in container_model.states.values():
-            visit_state(child_state, [dict(child_state.remappings)])
+            visit_state(child_state, [])
 
         derived_keys: Dict[str, Dict[str, str]] = {}
         for key_name, usage in usage_map.items():
@@ -1130,19 +1144,27 @@ class YasminEditor(QMainWindow):
                 "default_value": default_value,
             }
 
-        return dict(sorted(derived_keys.items(), key=lambda item: item[0].lower()))
+        return (
+            dict(sorted(derived_keys.items(), key=lambda item: item[0].lower())),
+            hidden_key_names,
+        )
 
     def _merge_container_keys(
         self,
         container_model: StateMachine | Concurrence,
     ) -> Dict[str, Dict[str, str]]:
-        derived_keys = self._collect_blackboard_key_usage_for_model(container_model)
+        derived_keys, hidden_key_names = self._collect_blackboard_key_usage_for_model(
+            container_model
+        )
         metadata_map = self._get_container_metadata_map(container_model)
         merged: Dict[str, Dict[str, str]] = {}
 
         for key_name in sorted(
             set(derived_keys.keys()) | set(metadata_map.keys()), key=str.lower
         ):
+            if key_name not in derived_keys and key_name in hidden_key_names:
+                continue
+
             derived = dict(derived_keys.get(key_name, {}))
             metadata = dict(metadata_map.get(key_name, {}))
             key_type = str(
