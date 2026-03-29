@@ -14,21 +14,19 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-from typing import Union, List, Any, TYPE_CHECKING
-from PyQt5.QtWidgets import (
-    QGraphicsItem,
-    QGraphicsTextItem,
-    QGraphicsRectItem,
-    QGraphicsPolygonItem,
-    QGraphicsPathItem,
-)
-from PyQt5.QtCore import Qt, QPointF, QRectF, QTimer
-from PyQt5.QtGui import QPen, QBrush, QColor, QFont, QPolygonF, QPainterPath
+from typing import TYPE_CHECKING, Any, List, Union
+
+from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer
+from PyQt5.QtGui import QBrush, QColor, QFont, QPainterPath, QPen, QPolygonF
+from PyQt5.QtWidgets import (QGraphicsItem, QGraphicsPathItem,
+                             QGraphicsPolygonItem, QGraphicsRectItem,
+                             QGraphicsTextItem)
 
 if TYPE_CHECKING:
-    from yasmin_editor.editor_gui.state_node import StateNode
-    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+    from yasmin_editor.editor_gui.container_state_node import \
+        ContainerStateNode
     from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+    from yasmin_editor.editor_gui.state_node import StateNode
 
 
 class _ConnectionLabelRectItem(QGraphicsRectItem):
@@ -102,13 +100,17 @@ class ConnectionLine(QGraphicsPathItem):
         self.selected_pen: QPen = QPen(QColor(255, 100, 0), 4, Qt.SolidLine)
         self.selected_pen.setCapStyle(Qt.RoundCap)
 
+        self.setZValue(-2)
+
         self.arrow_head: QGraphicsPolygonItem = QGraphicsPolygonItem()
         self.arrow_head.setBrush(QBrush(QColor(60, 60, 180)))
         self.arrow_head.setPen(QPen(QColor(60, 60, 180)))
+        self.arrow_head.setZValue(-2)
 
         self.label_bg: QGraphicsRectItem = _ConnectionLabelRectItem(self)
         self.label_bg.setBrush(QBrush(QColor(255, 255, 255, 230)))
         self.label_bg.setPen(QPen(QColor(60, 60, 180), 1))
+        self.label_bg.setZValue(1)
 
         self.label: QGraphicsTextItem = _ConnectionLabelTextItem(self, outcome)
         self.label.setDefaultTextColor(QColor(0, 0, 100))
@@ -116,6 +118,7 @@ class ConnectionLine(QGraphicsPathItem):
         font.setPointSize(9)
         font.setBold(True)
         self.label.setFont(font)
+        self.label.setZValue(2)
 
         from_node.add_connection(self)
         to_node.add_connection(self)
@@ -124,7 +127,9 @@ class ConnectionLine(QGraphicsPathItem):
     def _get_direction_group(self) -> List["ConnectionLine"]:
         """Get all connections with the same source and target nodes."""
         group: List["ConnectionLine"] = []
-        for connection in list(self.from_node.connections) + list(self.to_node.connections):
+        for connection in list(self.from_node.connections) + list(
+            self.to_node.connections
+        ):
             if (
                 connection.from_node == self.from_node
                 and connection.to_node == self.to_node
@@ -137,7 +142,9 @@ class ConnectionLine(QGraphicsPathItem):
     def _get_opposite_direction_group(self) -> List["ConnectionLine"]:
         """Get all connections with the reverse source and target nodes."""
         group: List["ConnectionLine"] = []
-        for connection in list(self.from_node.connections) + list(self.to_node.connections):
+        for connection in list(self.from_node.connections) + list(
+            self.to_node.connections
+        ):
             if (
                 connection.from_node == self.to_node
                 and connection.to_node == self.from_node
@@ -169,7 +176,9 @@ class ConnectionLine(QGraphicsPathItem):
         Returns:
             The offset amount in pixels (positive or negative).
         """
-        opposite_direction: List["ConnectionLine"] = self._get_opposite_direction_group()
+        opposite_direction: List["ConnectionLine"] = (
+            self._get_opposite_direction_group()
+        )
         if not opposite_direction:
             return 0.0
         return 35.0
@@ -254,7 +263,9 @@ class ConnectionLine(QGraphicsPathItem):
         if self.scene() and self.scene().views():
             canvas = self.scene().views()[0]
             if hasattr(canvas, "start_rewire_drag"):
-                QTimer.singleShot(0, lambda connection=self: canvas.start_rewire_drag(connection))
+                QTimer.singleShot(
+                    0, lambda connection=self: canvas.start_rewire_drag(connection)
+                )
                 return
         event.ignore()
 
@@ -292,7 +303,9 @@ class ConnectionLine(QGraphicsPathItem):
         from_pos: QPointF = self.from_node.get_edge_point(to_center)
         to_pos: QPointF = self.to_node.get_edge_point(from_center)
 
-        opposite_direction: List["ConnectionLine"] = self._get_opposite_direction_group()
+        opposite_direction: List["ConnectionLine"] = (
+            self._get_opposite_direction_group()
+        )
         offset_amount: float = self._calculate_offset()
         if opposite_direction:
             opposite_representative = opposite_direction[0]
