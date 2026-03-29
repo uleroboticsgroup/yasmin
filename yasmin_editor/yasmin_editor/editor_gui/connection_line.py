@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import (
     QGraphicsPolygonItem,
     QGraphicsPathItem,
 )
-from PyQt5.QtCore import Qt, QPointF, QRectF
+from PyQt5.QtCore import Qt, QPointF, QRectF, QTimer
 from PyQt5.QtGui import QPen, QBrush, QColor, QFont, QPolygonF, QPainterPath
 
 if TYPE_CHECKING:
@@ -43,6 +43,9 @@ class _ConnectionLabelRectItem(QGraphicsRectItem):
     def mousePressEvent(self, event: Any) -> None:
         self.owner.select_from_label(event)
 
+    def mouseDoubleClickEvent(self, event: Any) -> None:
+        self.owner.start_rewire_from_label(event)
+
 
 class _ConnectionLabelTextItem(QGraphicsTextItem):
     """Clickable label text that selects the owning connection."""
@@ -55,6 +58,9 @@ class _ConnectionLabelTextItem(QGraphicsTextItem):
 
     def mousePressEvent(self, event: Any) -> None:
         self.owner.select_from_label(event)
+
+    def mouseDoubleClickEvent(self, event: Any) -> None:
+        self.owner.start_rewire_from_label(event)
 
 
 class ConnectionLine(QGraphicsPathItem):
@@ -241,6 +247,16 @@ class ConnectionLine(QGraphicsPathItem):
             scene.clearSelection()
         self.setSelected(True)
         event.accept()
+
+    def start_rewire_from_label(self, event: Any) -> None:
+        """Start rewiring mode when the transition label is double-clicked."""
+        self.select_from_label(event)
+        if self.scene() and self.scene().views():
+            canvas = self.scene().views()[0]
+            if hasattr(canvas, "start_rewire_drag"):
+                QTimer.singleShot(0, lambda connection=self: canvas.start_rewire_drag(connection))
+                return
+        event.ignore()
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         """Handle item changes like selection state.

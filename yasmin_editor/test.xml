@@ -26,7 +26,7 @@
         <Transition from="outcome1" to="done" />
       </State>
       <FinalOutcome name="done" x="152.45" y="-70.01" />
-      <Transition from="done" to="done" />
+      <Transition from="done" to="loop" />
     </StateMachine>
     <FinalOutcome name="done" x="-7.66" y="-200.52" />
     <FinalOutcome name="loop" x="143.94" y="-212.86" />

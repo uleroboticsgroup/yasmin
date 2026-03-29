@@ -2087,6 +2087,49 @@ class YasminEditor(QMainWindow):
             if ok:
                 self.create_connection(from_node, to_node, outcome)
 
+    def rewire_connection(
+        self,
+        connection: ConnectionLine,
+        to_node: StateNode | ContainerStateNode | FinalOutcomeNode,
+    ) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+
+        if connection not in self.connections:
+            return
+
+        from_node = connection.from_node
+        old_to_node = connection.to_node
+        outcome = connection.outcome
+
+        if old_to_node == to_node:
+            self.statusBar().showMessage(
+                f"Transition unchanged: {from_node.name} --[{outcome}]--> {to_node.name}",
+                2000,
+            )
+            connection.setSelected(True)
+            return
+
+        self.unregister_connection_in_model(connection)
+        connection.from_node.remove_connection(connection)
+        connection.to_node.remove_connection(connection)
+        self.canvas.scene.removeItem(connection)
+        self.canvas.scene.removeItem(connection.arrow_head)
+        self.canvas.scene.removeItem(connection.label_bg)
+        self.canvas.scene.removeItem(connection.label)
+        if connection in self.connections:
+            self.connections.remove(connection)
+
+        new_connection = self._create_connection_view(from_node, to_node, outcome)
+        self.register_connection_in_model(from_node, to_node, outcome)
+        self.refresh_connection_port_visibility()
+        new_connection.setSelected(True)
+        self.statusBar().showMessage(
+            f"Rewired transition: {from_node.name} --[{outcome}]--> {to_node.name}",
+            2000,
+        )
+
     def create_connection(
         self, from_node: StateNode, to_node: StateNode, outcome: str
     ) -> None:

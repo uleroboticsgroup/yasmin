@@ -31,6 +31,7 @@ from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.model.concurrence import Concurrence
 
 if TYPE_CHECKING:
+    from yasmin_editor.editor_gui.connection_line import ConnectionLine
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
@@ -50,6 +51,7 @@ class StateMachineCanvas(QGraphicsView):
             Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
         ] = None
         self.temp_line: Optional[QGraphicsLineItem] = None
+        self.drag_rewire_connection: Optional["ConnectionLine"] = None
         self.editor_ref: Optional["YasminEditor"] = None
 
     def is_valid_connection(
@@ -87,14 +89,10 @@ class StateMachineCanvas(QGraphicsView):
         factor: float = 1.2 if event.angleDelta().y() > 0 else 1.0 / 1.2
         self.scale(factor, factor)
 
-    def start_connection_drag(
+    def _begin_connection_drag(
         self,
         from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
-        event: QEvent,
     ) -> None:
-        if self.editor_ref and self.editor_ref.is_read_only_mode():
-            event.ignore()
-            return
         self.drag_start_node = from_node
         self.is_dragging_connection = True
         self.setDragMode(QGraphicsView.NoDrag)
@@ -106,6 +104,27 @@ class StateMachineCanvas(QGraphicsView):
 
         port_scene_pos: QPointF = from_node.connection_port.scenePos()
         self.temp_line.setLine(QLineF(port_scene_pos, port_scene_pos))
+
+    def start_connection_drag(
+        self,
+        from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
+        event: QEvent,
+    ) -> None:
+        if self.editor_ref and self.editor_ref.is_read_only_mode():
+            event.ignore()
+            return
+        self.drag_rewire_connection = None
+        self._begin_connection_drag(from_node)
+
+    def start_rewire_drag(self, connection: "ConnectionLine") -> None:
+        if self.editor_ref and self.editor_ref.is_read_only_mode():
+            return
+        self.drag_rewire_connection = connection
+        self._begin_connection_drag(connection.from_node)
+        if self.editor_ref:
+            self.editor_ref.statusBar().showMessage(
+                f"Rewiring transition '{connection.outcome}' from {connection.from_node.name}. Click a new target state."
+            )
 
     def mousePressEvent(self, event: QEvent) -> None:
         if event.button() == Qt.BackButton and self.editor_ref:
@@ -176,7 +195,9 @@ class StateMachineCanvas(QGraphicsView):
                     scene_item.setOpacity(1.0)
 
             source_node = self.drag_start_node
+            rewire_connection = self.drag_rewire_connection
             self.drag_start_node = None
+            self.drag_rewire_connection = None
             self.is_dragging_connection = False
             self.setDragMode(QGraphicsView.ScrollHandDrag)
 
@@ -186,12 +207,25 @@ class StateMachineCanvas(QGraphicsView):
                 and self.is_valid_connection(source_node, target_node)
             ):
                 if self.editor_ref:
-                    QTimer.singleShot(
-                        0,
-                        lambda src=source_node, tgt=target_node: self.editor_ref.create_connection_from_drag(
-                            src, tgt
-                        ),
-                    )
+                    if rewire_connection is not None:
+                        QTimer.singleShot(
+                            0,
+                            lambda connection=rewire_connection, tgt=target_node: self.editor_ref.rewire_connection(
+                                connection, tgt
+                            ),
+                        )
+                    else:
+                        QTimer.singleShot(
+                            0,
+                            lambda src=source_node, tgt=target_node: self.editor_ref.create_connection_from_drag(
+                                src, tgt
+                            ),
+                        )
+            elif rewire_connection is not None and self.editor_ref:
+                self.editor_ref.statusBar().showMessage(
+                    "Rewiring canceled",
+                    2000,
+                )
 
             event.accept()
             return
