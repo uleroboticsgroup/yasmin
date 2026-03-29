@@ -38,6 +38,8 @@ from yasmin_editor.editor_gui.dialogs.state_machine_dialog import \
 from yasmin_editor.editor_gui.dialogs.state_properties_dialog import \
     StatePropertiesDialog
 from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.colors import (PALETTE, build_qt_palette,
+                                             build_stylesheet)
 from yasmin_editor.editor_gui.model_adapter import EditorModelAdapter
 from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
 from yasmin_editor.editor_gui.state_node import StateNode
@@ -66,6 +68,7 @@ class YasminEditor(QMainWindow):
             manager: The PluginManager instance for handling plugins.
         """
         super().__init__()
+        self._apply_theme()
         self.setWindowTitle("YASMIN Editor")
 
         self.showMaximized()
@@ -90,6 +93,13 @@ class YasminEditor(QMainWindow):
         QApplication.processEvents()
         self.populate_plugin_lists()
         self.statusBar().showMessage("Ready", 3000)
+
+    def _apply_theme(self) -> None:
+        app = QApplication.instance()
+        if app is None:
+            return
+        app.setPalette(build_qt_palette(PALETTE))
+        app.setStyleSheet(build_stylesheet(PALETTE))
 
     @property
     def root_sm_name(self) -> str:
@@ -382,45 +392,42 @@ class YasminEditor(QMainWindow):
         is_selected = item.isSelected() if hasattr(item, "isSelected") else False
 
         if isinstance(item, StateNode):
-            if item.plugin_info and item.plugin_info.plugin_type == "python":
-                item.setBrush(QBrush(QColor(144, 238, 144)))
-            elif item.plugin_info and item.plugin_info.plugin_type == "cpp":
-                item.setBrush(QBrush(QColor(255, 182, 193)))
-            else:
-                item.setBrush(QBrush(QColor(255, 165, 0)))
+            item.setBrush(
+                QBrush(PALETTE.state_fill(item.plugin_info.plugin_type if item.plugin_info else None))
+            )
             item.setPen(
-                QPen(QColor(255, 200, 0), 4)
+                QPen(PALETTE.selection_pen, 4)
                 if is_selected
-                else QPen(QColor(0, 0, 180), 3)
+                else QPen(PALETTE.state_pen, 3)
             )
         elif isinstance(item, ContainerStateNode):
             if getattr(item, "is_xml_reference", False):
-                item.setBrush(QBrush(QColor(255, 165, 0)))
+                item.setBrush(QBrush(PALETTE.container_xml_fill))
                 item.setPen(
-                    QPen(QColor(255, 200, 0), 4)
+                    QPen(PALETTE.selection_pen, 4)
                     if is_selected
-                    else QPen(QColor(0, 0, 0), 3)
+                    else QPen(PALETTE.container_xml_pen, 3)
                 )
             elif item.is_concurrence:
-                item.setBrush(QBrush(QColor(255, 220, 150)))
+                item.setBrush(QBrush(PALETTE.container_concurrence_fill))
                 item.setPen(
-                    QPen(QColor(255, 200, 0), 4)
+                    QPen(PALETTE.selection_pen, 4)
                     if is_selected
-                    else QPen(QColor(255, 140, 0), 3)
+                    else QPen(PALETTE.container_concurrence_pen, 3)
                 )
             else:
-                item.setBrush(QBrush(QColor(173, 216, 230)))
+                item.setBrush(QBrush(PALETTE.container_state_machine_fill))
                 item.setPen(
-                    QPen(QColor(255, 200, 0), 4)
+                    QPen(PALETTE.selection_pen, 4)
                     if is_selected
-                    else QPen(QColor(0, 0, 180), 3)
+                    else QPen(PALETTE.container_state_machine_pen, 3)
                 )
         elif isinstance(item, FinalOutcomeNode):
-            item.setBrush(QBrush(QColor(255, 0, 0)))
+            item.setBrush(QBrush(PALETTE.final_outcome_fill))
             item.setPen(
-                QPen(QColor(255, 200, 0), 4)
+                QPen(PALETTE.selection_pen, 4)
                 if is_selected
-                else QPen(QColor(0, 0, 0), 3)
+                else QPen(PALETTE.final_outcome_pen, 3)
             )
 
     def resolve_plugin_info_for_model(self, model: State) -> PluginInfo:
@@ -1467,6 +1474,7 @@ class YasminEditor(QMainWindow):
         self.root_sm_name_label = QLabel("<b>State Machine Name:</b>")
         row1.addWidget(self.root_sm_name_label)
         self.root_sm_name_edit = QLineEdit()
+        self.root_sm_name_edit.setProperty("flatInput", True)
         self.root_sm_name_edit.setPlaceholderText("Enter container name...")
         self.root_sm_name_edit.textChanged.connect(self.on_root_sm_name_changed)
         row1.addWidget(self.root_sm_name_edit)
@@ -1474,6 +1482,7 @@ class YasminEditor(QMainWindow):
         self.start_state_label = QLabel("<b>Start State:</b>")
         row1.addWidget(self.start_state_label)
         self.start_state_combo = QComboBox()
+        self.start_state_combo.setProperty("flatInput", True)
         self.start_state_combo.addItem("(None)")
         self.start_state_combo.currentTextChanged.connect(self.on_start_state_changed)
         row1.addWidget(self.start_state_combo)
@@ -1482,6 +1491,7 @@ class YasminEditor(QMainWindow):
         row2 = QHBoxLayout()
         row2.addWidget(QLabel("<b>Description:</b>"))
         self.root_sm_description_edit = QLineEdit()
+        self.root_sm_description_edit.setProperty("flatInput", True)
         self.root_sm_description_edit.setPlaceholderText(
             "Enter container description..."
         )
@@ -1673,8 +1683,8 @@ class YasminEditor(QMainWindow):
         for state_node in self.state_nodes.values():
             if self.state_uses_blackboard_key(state_node, selected_key):
                 self.apply_default_visual_state(state_node)
-                state_node.setPen(QPen(QColor(255, 170, 0), 5))
-                state_node.setBrush(QBrush(QColor(255, 255, 170)))
+                state_node.setPen(QPen(PALETTE.blackboard_highlight_pen, 5))
+                state_node.setBrush(QBrush(PALETTE.blackboard_highlight_fill))
 
     def _ensure_external_xml_state(self) -> None:
         if not hasattr(self, "extern_xml"):

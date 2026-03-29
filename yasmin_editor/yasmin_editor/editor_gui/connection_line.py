@@ -17,7 +17,8 @@ import math
 from typing import TYPE_CHECKING, Any, List, Union
 
 from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer
-from PyQt5.QtGui import QBrush, QColor, QFont, QPainterPath, QPen, QPolygonF
+from PyQt5.QtGui import QBrush, QFont, QPainterPath, QPen, QPolygonF
+from yasmin_editor.editor_gui.colors import PALETTE
 from PyQt5.QtWidgets import (QGraphicsItem, QGraphicsPathItem,
                              QGraphicsPolygonItem, QGraphicsRectItem,
                              QGraphicsTextItem)
@@ -90,30 +91,30 @@ class ConnectionLine(QGraphicsPathItem):
         )
         self.outcome: str = outcome
 
-        pen: QPen = QPen(QColor(60, 60, 180), 3, Qt.SolidLine)
+        pen: QPen = QPen(PALETTE.connection_line, 3, Qt.SolidLine)
         pen.setCapStyle(Qt.RoundCap)
         pen.setJoinStyle(Qt.RoundJoin)
         self.setPen(pen)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
 
         self.normal_pen: QPen = pen
-        self.selected_pen: QPen = QPen(QColor(255, 100, 0), 4, Qt.SolidLine)
+        self.selected_pen: QPen = QPen(PALETTE.connection_selected, 4, Qt.SolidLine)
         self.selected_pen.setCapStyle(Qt.RoundCap)
 
         self.setZValue(-2)
 
         self.arrow_head: QGraphicsPolygonItem = QGraphicsPolygonItem()
-        self.arrow_head.setBrush(QBrush(QColor(60, 60, 180)))
-        self.arrow_head.setPen(QPen(QColor(60, 60, 180)))
+        self.arrow_head.setBrush(QBrush(PALETTE.connection_line))
+        self.arrow_head.setPen(QPen(PALETTE.connection_line))
         self.arrow_head.setZValue(-2)
 
         self.label_bg: QGraphicsRectItem = _ConnectionLabelRectItem(self)
-        self.label_bg.setBrush(QBrush(QColor(255, 255, 255, 230)))
-        self.label_bg.setPen(QPen(QColor(60, 60, 180), 1))
+        self.label_bg.setBrush(QBrush(PALETTE.connection_label_bg))
+        self.label_bg.setPen(QPen(PALETTE.connection_label_pen, 1))
         self.label_bg.setZValue(1)
 
         self.label: QGraphicsTextItem = _ConnectionLabelTextItem(self, outcome)
-        self.label.setDefaultTextColor(QColor(0, 0, 100))
+        self.label.setDefaultTextColor(PALETTE.connection_label_text)
         font: QFont = QFont()
         font.setPointSize(9)
         font.setBold(True)
@@ -207,14 +208,14 @@ class ConnectionLine(QGraphicsPathItem):
             selected = self.isSelected()
         if selected:
             self.setPen(self.selected_pen)
-            self.arrow_head.setBrush(QBrush(QColor(255, 100, 0)))
-            self.arrow_head.setPen(QPen(QColor(255, 100, 0)))
-            self.label_bg.setPen(QPen(QColor(255, 100, 0), 2))
+            self.arrow_head.setBrush(QBrush(PALETTE.connection_selected))
+            self.arrow_head.setPen(QPen(PALETTE.connection_selected))
+            self.label_bg.setPen(QPen(PALETTE.connection_selected, 2))
         else:
             self.setPen(self.normal_pen)
-            self.arrow_head.setBrush(QBrush(QColor(60, 60, 180)))
-            self.arrow_head.setPen(QPen(QColor(60, 60, 180)))
-            self.label_bg.setPen(QPen(QColor(60, 60, 180), 1))
+            self.arrow_head.setBrush(QBrush(PALETTE.connection_line))
+            self.arrow_head.setPen(QPen(PALETTE.connection_line))
+            self.label_bg.setPen(QPen(PALETTE.connection_label_pen, 1))
 
     def _layout_stacked_labels(
         self,

@@ -88,9 +88,7 @@ class ConcurrenceDialog(QDialog):
 
         self.outcomes_display: QLabel = QLabel(outcomes_str)
         self.outcomes_display.setWordWrap(True)
-        self.outcomes_display.setStyleSheet(
-            "background: #f0f0f0; border: 1px solid #ccc; padding: 4px;"
-        )
+        self.outcomes_display.setProperty("infoBox", True)
         self.outcomes_display.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.outcomes_display.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         num_outcomes: int = len(outcomes_str.split(",")) if outcomes_str else 0

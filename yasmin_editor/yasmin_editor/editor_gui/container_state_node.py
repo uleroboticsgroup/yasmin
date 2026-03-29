@@ -18,7 +18,8 @@ from typing import Dict, List, Optional, Union, Any, Set, TYPE_CHECKING
 
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem, QMenu
 from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtGui import QPen, QBrush, QColor, QFont
+from PyQt5.QtGui import QPen, QBrush, QFont
+from yasmin_editor.editor_gui.colors import PALETTE
 
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.model.concurrence import Concurrence
@@ -88,14 +89,14 @@ class ContainerStateNode(QGraphicsRectItem):
         self._apply_default_style()
 
         self.title = QGraphicsTextItem(self.name, self)
-        self.title.setDefaultTextColor(Qt.black)
+        self.title.setDefaultTextColor(PALETTE.text_primary)
         title_font = QFont()
         title_font.setPointSize(10)
         title_font.setBold(True)
         self.title.setFont(title_font)
 
         self.type_label = QGraphicsTextItem(self)
-        self.type_label.setDefaultTextColor(QColor(60, 60, 60))
+        self.type_label.setDefaultTextColor(PALETTE.text_secondary)
         type_font = QFont()
         type_font.setPointSize(8)
         type_font.setBold(True)
@@ -154,14 +155,14 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def _apply_default_style(self) -> None:
         if self.is_xml_reference:
-            self.setBrush(QBrush(QColor(255, 165, 0)))
-            self.setPen(QPen(QColor(0, 0, 0), 3))
+            self.setBrush(QBrush(PALETTE.container_xml_fill))
+            self.setPen(QPen(PALETTE.container_xml_pen, 3))
         elif self.is_concurrence:
-            self.setBrush(QBrush(QColor(255, 235, 205)))
-            self.setPen(QPen(QColor(255, 140, 0), 3))
+            self.setBrush(QBrush(PALETTE.container_concurrence_fill))
+            self.setPen(QPen(PALETTE.container_concurrence_pen, 3))
         else:
-            self.setBrush(QBrush(QColor(220, 235, 255)))
-            self.setPen(QPen(QColor(0, 90, 180), 3))
+            self.setBrush(QBrush(PALETTE.container_state_machine_fill))
+            self.setPen(QPen(PALETTE.container_state_machine_pen, 3))
 
     def update_start_state_label(self) -> None:
         self.update_label()
@@ -246,7 +247,7 @@ class ContainerStateNode(QGraphicsRectItem):
                 connection.update_position()
         elif change == QGraphicsItem.ItemSelectedChange:
             if value:
-                self.setPen(QPen(QColor(255, 200, 0), 4))
+                self.setPen(QPen(PALETTE.selection_pen, 4))
             else:
                 self._apply_default_style()
         return super().itemChange(change, value)

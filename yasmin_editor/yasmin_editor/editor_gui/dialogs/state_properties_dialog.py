@@ -117,9 +117,7 @@ class StatePropertiesDialog(QDialog):
         self.description_edit.setMinimumHeight(240)
         self.description_edit.setMaximumHeight(320)
         self.description_edit.setReadOnly(True)
-        self.description_edit.setStyleSheet(
-            "background: #f0f0f0; border: 1px solid #ccc; color: #333;"
-        )
+        self.description_edit.setProperty("viewerText", True)
         layout.addRow(desc_label, self.description_edit)
 
         remappings_label: QLabel = QLabel("<b>Remappings (optional):</b>")

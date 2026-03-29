@@ -23,7 +23,8 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 from PyQt5.QtCore import Qt, QLineF, QTimer, QPointF, QEvent
-from PyQt5.QtGui import QPen, QBrush, QColor, QPainter
+from PyQt5.QtGui import QPen, QBrush, QPainter
+from yasmin_editor.editor_gui.colors import PALETTE
 
 from yasmin_editor.editor_gui.state_node import StateNode
 from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
@@ -44,7 +45,7 @@ class StateMachineCanvas(QGraphicsView):
         self.setScene(self.scene)
         self.setRenderHint(QPainter.Antialiasing)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
-        self.setBackgroundBrush(QBrush(QColor(255, 255, 255)))
+        self.setBackgroundBrush(QBrush(PALETTE.background))
 
         self.is_dragging_connection: bool = False
         self.drag_start_node: Optional[
@@ -98,7 +99,7 @@ class StateMachineCanvas(QGraphicsView):
         self.setDragMode(QGraphicsView.NoDrag)
 
         self.temp_line = QGraphicsLineItem()
-        pen: QPen = QPen(QColor(100, 100, 255), 3, Qt.DashLine)
+        pen: QPen = QPen(PALETTE.temp_connection, 3, Qt.DashLine)
         self.temp_line.setPen(pen)
         self.scene.addItem(self.temp_line)
 

@@ -16,7 +16,8 @@
 from typing import Union, TYPE_CHECKING
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
 from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtGui import QPen, QBrush, QColor
+from PyQt5.QtGui import QPen, QBrush
+from yasmin_editor.editor_gui.colors import PALETTE
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.state_node import StateNode
@@ -34,8 +35,8 @@ class ConnectionPort(QGraphicsEllipseItem):
         self.parent_state: Union[
             "StateNode", "ContainerStateNode", "FinalOutcomeNode"
         ] = parent_state
-        self.setBrush(QBrush(QColor(100, 100, 255)))
-        self.setPen(QPen(QColor(0, 0, 100), 1))
+        self.setBrush(QBrush(PALETTE.connection_port_fill))
+        self.setPen(QPen(PALETTE.connection_port_pen, 1))
 
         from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 

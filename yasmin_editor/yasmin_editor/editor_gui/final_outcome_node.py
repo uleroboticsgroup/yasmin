@@ -18,7 +18,8 @@ from typing import List, Optional, Any, TYPE_CHECKING
 
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
 from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtGui import QPen, QBrush, QColor, QFont
+from PyQt5.QtGui import QPen, QBrush, QFont
+from yasmin_editor.editor_gui.colors import PALETTE
 
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.model.outcome import Outcome
@@ -51,11 +52,11 @@ class FinalOutcomeNode(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
-        self.setBrush(QBrush(QColor(255, 0, 0)))
-        self.setPen(QPen(QColor(0, 0, 0), 3))
+        self.setBrush(QBrush(PALETTE.final_outcome_fill))
+        self.setPen(QPen(PALETTE.final_outcome_pen, 3))
 
         self.text: QGraphicsTextItem = QGraphicsTextItem(self.name, self)
-        self.text.setDefaultTextColor(Qt.black)
+        self.text.setDefaultTextColor(PALETTE.text_primary)
         font: QFont = QFont()
         font.setPointSize(10)
         font.setBold(True)
@@ -127,9 +128,9 @@ class FinalOutcomeNode(QGraphicsRectItem):
 
         elif change == QGraphicsItem.ItemSelectedChange:
             if value:
-                self.setPen(QPen(QColor(255, 200, 0), 4))
+                self.setPen(QPen(PALETTE.selection_pen, 4))
             else:
-                self.setPen(QPen(QColor(0, 0, 0), 3))
+                self.setPen(QPen(PALETTE.final_outcome_pen, 3))
 
         return super().itemChange(change, value)
 

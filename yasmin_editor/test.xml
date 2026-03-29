@@ -59,5 +59,11 @@
     <Transition from="outcome1" to="lot_transitions" />
     <Transition from="canceled" to="lot_transitions" />
   </State>
+  <State name="l" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-908.62" y="-229.37">
+    <Transition from="outcome2" to="bar" />
+    <Transition from="outcome1" to="bar" />
+    <Transition from="canceled" to="l" />
+    <Transition from="timeout" to="l" />
+  </State>
   <FinalOutcome name="done" x="-400.74" y="-421.63" />
 </StateMachine>

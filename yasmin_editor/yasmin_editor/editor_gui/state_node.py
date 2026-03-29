@@ -17,7 +17,8 @@ import math
 from typing import Dict, List, Set, Optional, Any, TYPE_CHECKING
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem, QGraphicsTextItem
 from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtGui import QPen, QBrush, QColor, QFont
+from PyQt5.QtGui import QPen, QBrush, QFont
+from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_plugins_manager.plugin_info import PluginInfo
 
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
@@ -60,17 +61,11 @@ class StateNode(QGraphicsEllipseItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
 
-        if plugin_info and plugin_info.plugin_type == "python":
-            self.setBrush(QBrush(QColor(144, 238, 144)))
-        elif plugin_info and plugin_info.plugin_type == "cpp":
-            self.setBrush(QBrush(QColor(255, 182, 193)))
-        else:
-            self.setBrush(QBrush(QColor(255, 165, 0)))
-
-        self.setPen(QPen(QColor(0, 0, 0), 2))
+        self.setBrush(QBrush(PALETTE.state_fill(plugin_info.plugin_type if plugin_info else None)))
+        self.setPen(QPen(PALETTE.state_pen, 3))
 
         self.text: QGraphicsTextItem = QGraphicsTextItem(self.name, self)
-        self.text.setDefaultTextColor(Qt.black)
+        self.text.setDefaultTextColor(PALETTE.text_primary)
         font: QFont = QFont()
         font.setPointSize(10)
         font.setBold(True)
@@ -82,7 +77,7 @@ class StateNode(QGraphicsEllipseItem):
         if plugin_info:
             type_text: str = plugin_info.plugin_type.upper()
             self.type_label: QGraphicsTextItem = QGraphicsTextItem(type_text, self)
-            self.type_label.setDefaultTextColor(Qt.darkGray)
+            self.type_label.setDefaultTextColor(PALETTE.text_secondary)
             type_font: QFont = QFont()
             type_font.setPointSize(8)
             self.type_label.setFont(type_font)
@@ -156,9 +151,9 @@ class StateNode(QGraphicsEllipseItem):
 
         elif change == QGraphicsItem.ItemSelectedChange:
             if value:
-                self.setPen(QPen(QColor(255, 200, 0), 4))
+                self.setPen(QPen(PALETTE.selection_pen, 4))
             else:
-                self.setPen(QPen(QColor(0, 0, 180), 3))
+                self.setPen(QPen(PALETTE.state_pen, 3))
 
         return super().itemChange(change, value)
 
