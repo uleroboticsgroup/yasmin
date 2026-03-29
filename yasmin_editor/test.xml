@@ -2,9 +2,10 @@
 <StateMachine name="test" outcomes="done" start_state="foo" description="this is a test">
   <Key name="foo_str" type="in/out" description="String containing the current counter value produced by FooState." />
   <Key name="nodom" type="in" description="Odometry message received from the monitored ROS topic." />
+  <Key name="odom" type="in" description="Odometry message received from the monitored ROS topic." />
   <Key name="pose_bytes" type="in/out" description="Serialized Pose message stored as bytes in the blackboard." />
   <Key name="pose_bytes__type" type="in/out" description="Type information for the serialized Pose message." />
-  <State name="foo" type="py" module="yasmin_demos.foo_state" class="FooState" x="-938.28" y="-467.82">
+  <State name="foo" type="py" module="yasmin_demos.foo_state" class="FooState" x="-944.48" y="-458.52">
     <Transition from="outcome2" to="bar" />
     <Transition from="outcome1" to="bar" />
   </State>
@@ -16,9 +17,9 @@
   </StateMachine>
   <StateMachine name="nested" outcomes="done loop" start_state="deeperNested" x="-631.14" y="-629.58">
     <Remap old="odom" new="nodom" />
-    <StateMachine name="deeperNested" outcomes="done" start_state="print_odom" x="0.00" y="0.50">
+    <StateMachine name="deeperNested" outcomes="done" start_state="print_odom" x="0.38" y="0.50">
       <Key name="odom" type="in" description="Odometry message received from the monitored ROS topic." />
-      <State name="print_odom" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-234.70" y="-115.08">
+      <State name="print_odom" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-219.88" y="-138.66">
         <Transition from="timeout" to="done" />
         <Transition from="canceled" to="done" />
         <Transition from="outcome2" to="done" />
@@ -45,6 +46,18 @@
   </State>
   <State name="b" type="py" module="yasmin_demos.foo_state" class="FooState" x="-367.91" y="-610.75">
     <Transition from="outcome1" to="b" />
+  </State>
+  <State name="lot_transitions" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-1073.98" y="-314.82">
+    <Transition from="timeout" to="more_transitions" />
+    <Transition from="outcome2" to="more_transitions" />
+    <Transition from="outcome1" to="more_transitions" />
+    <Transition from="canceled" to="more_transitions" />
+  </State>
+  <State name="more_transitions" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-1398.87" y="-317.03">
+    <Transition from="timeout" to="lot_transitions" />
+    <Transition from="outcome2" to="lot_transitions" />
+    <Transition from="outcome1" to="lot_transitions" />
+    <Transition from="canceled" to="lot_transitions" />
   </State>
   <FinalOutcome name="done" x="-400.74" y="-421.63" />
 </StateMachine>
