@@ -29,6 +29,7 @@ import time
 from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
+from yasmin_editor.runtime.logging import RuntimeLogger
 from yasmin_editor.runtime.traversal import (container_states,
                                              expand_to_deepest_known_path,
                                              is_container_object,
@@ -37,13 +38,6 @@ from yasmin_editor.runtime.traversal import (container_states,
 import yasmin
 from yasmin import Blackboard, StateMachine
 from yasmin_factory import YasminFactory
-
-LOG_LEVEL_BY_NAME = {
-    "ERROR": yasmin.LogLevel.ERROR,
-    "WARN": yasmin.LogLevel.WARN,
-    "INFO": yasmin.LogLevel.INFO,
-    "DEBUG": yasmin.LogLevel.DEBUG,
-}
 
 
 class Runtime(QObject):
@@ -91,15 +85,11 @@ class Runtime(QObject):
 
         self._step_mode = False
 
-        self._log_entries: list[str] = []
-        self._log_buffer_lock = threading.Lock()
-        self._last_log_message = ""
-        self._last_log_timestamp = 0.0
-        self._log_level = yasmin.LogLevel.INFO
-        self._log_depth = 0
-        self._log_depth_lock = threading.Lock()
-
-        self._configure_logging()
+        self.logger = RuntimeLogger(
+            append_callback=self.log_appended.emit,
+            clear_callback=self.log_cleared.emit,
+            is_disposed=lambda: self._disposed,
+        )
 
     def is_ready(self) -> bool:
         """Return whether a state machine is currently loaded."""
@@ -157,12 +147,11 @@ class Runtime(QObject):
 
     def get_logs(self) -> list[str]:
         """Return a copy of the collected runtime log lines."""
-        with self._log_buffer_lock:
-            return list(self._log_entries)
+        return self.logger.get_logs()
 
     def get_log_level_name(self) -> str:
         """Return the active YASMIN log level as an uppercase string."""
-        return str(yasmin.log_level_to_name(self._log_level)).upper()
+        return self.logger.get_log_level_name()
 
     def set_log_level(
         self,
@@ -175,44 +164,16 @@ class Runtime(QObject):
             level: Target log level as a ``yasmin.LogLevel`` or its name.
             emit_status: Whether the change should be mirrored into the log view.
         """
-        if isinstance(level, str):
-            normalized_level = LOG_LEVEL_BY_NAME.get(level.strip().upper())
-            if normalized_level is None:
-                raise ValueError(f"Unsupported log level: {level}")
-            level = normalized_level
-
-        self._log_level = level
-        self._configure_logging()
-        if emit_status:
-            self._append_log(f"[STATUS] Log level set to {self.get_log_level_name()}")
-
-    def _configure_logging(self) -> None:
-        """Install the runtime logger callback and apply the selected level."""
-        yasmin.set_loggers(self._handle_yasmin_log)
-        yasmin.set_log_level(self._log_level)
-
-    def _handle_yasmin_log(
-        self,
-        level: Any,
-        file: str,
-        function: str,
-        line: int,
-        text: str,
-    ) -> None:
-        """Forward YASMIN logs to the terminal and the runtime log view."""
-        message = (
-            f"[{yasmin.log_level_to_name(level)}] " f"[{file}:{function}:{line}] {text}"
-        )
-        self._append_log(message)
+        self.logger.set_log_level(level, emit_status=emit_status)
 
     def create_sm_from_file(self, path: str) -> bool:
         """Load a runtime state machine from an XML file."""
         self.shutdown(reset_disposed=False)
         self._disposed = False
-        self._clear_logs()
+        self.logger.clear()
 
         try:
-            self._configure_logging()
+            self.logger.configure()
             self.sm = self.factory.create_sm_from_file(path)
             self._register_callbacks()
         except Exception as exc:
@@ -228,7 +189,7 @@ class Runtime(QObject):
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
-        self._reset_log_depth()
+        self.logger.reset_depth()
         self._set_last_transition(None)
         self._set_active_path(self._resolve_initial_active_path())
         self.ready_changed.emit(self.is_ready())
@@ -328,7 +289,7 @@ class Runtime(QObject):
         self._finished = False
         self._final_outcome = None
         self._step_mode = False
-        self._reset_log_depth()
+        self.logger.reset_depth()
 
         if sm is not None:
             try:
@@ -355,7 +316,7 @@ class Runtime(QObject):
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
-        self._reset_log_depth()
+        self.logger.reset_depth()
 
         if reset_disposed:
             self._disposed = True
@@ -419,76 +380,6 @@ class Runtime(QObject):
         self._last_transition = transition
         self.active_transition_changed.emit(transition)
 
-    def _clear_logs(self) -> None:
-        """Reset the in-memory runtime log buffer."""
-        with self._log_buffer_lock:
-            self._log_entries.clear()
-            self._last_log_message = ""
-            self._last_log_timestamp = 0.0
-        self.log_cleared.emit()
-
-    def _reset_log_depth(self) -> None:
-        """Reset the visual log depth to the top level."""
-        with self._log_depth_lock:
-            self._log_depth = 0
-
-    def _increment_log_depth(self) -> None:
-        """Increase the visual log depth after entering a container."""
-        with self._log_depth_lock:
-            self._log_depth += 1
-
-    def _decrement_log_depth(self) -> None:
-        """Decrease the visual log depth after leaving a container."""
-        with self._log_depth_lock:
-            self._log_depth = max(0, self._log_depth - 1)
-
-    def _get_log_depth(self) -> int:
-        """Return the current visual log depth."""
-        with self._log_depth_lock:
-            return self._log_depth
-
-    def _append_log(
-        self,
-        message: str,
-        depth: Optional[int] = None,
-        is_end: bool = False,
-    ) -> None:
-        """Append a log line while filtering accidental duplicate bursts."""
-        if self._disposed:
-            return
-
-        clean_message = str(message).rstrip()
-        if not clean_message:
-            return
-
-        current_depth = self._get_log_depth() if depth is None else max(0, depth)
-        if current_depth > 0:
-            clean_message = (
-                f"{self._format_log_tree_prefix(current_depth, is_end=is_end)}"
-                f"{clean_message}"
-            )
-
-        with self._log_buffer_lock:
-            now = time.monotonic()
-            if (
-                clean_message == self._last_log_message
-                and now - self._last_log_timestamp < 0.02
-            ):
-                return
-
-            self._last_log_message = clean_message
-            self._last_log_timestamp = now
-            self._log_entries.append(clean_message)
-
-        self.log_appended.emit(clean_message)
-
-    def _format_log_tree_prefix(self, depth: int, is_end: bool = False) -> str:
-        """Return a tree-style prefix for nested runtime log lines."""
-        if depth <= 0:
-            return ""
-        branch = "└─ " if is_end else "├─ "
-        return ("│  " * (depth - 1)) + branch
-
     def _resolve_container(self, path: tuple[str, ...]) -> Optional[Any]:
         """Resolve a container object for the given path inside the live machine."""
         return resolve_container(self.sm, path)
@@ -531,7 +422,7 @@ class Runtime(QObject):
             return
 
         try:
-            self._configure_logging()
+            self.logger.configure()
             sm()
         except Exception as exc:
             if not self._disposed:
@@ -608,11 +499,11 @@ class Runtime(QObject):
         if self._disposed:
             return
 
-        self._append_log(
+        self.logger.append(
             f"[START] {' / '.join(prefix) if prefix else '<root>'} "
             f"with start_state: {start_state}"
         )
-        self._increment_log_depth()
+        self.logger.increment_depth()
 
         self._set_running(True)
         active_path = self._expand_to_deepest_known_path(prefix + (str(start_state),))
@@ -628,11 +519,11 @@ class Runtime(QObject):
         if self._disposed:
             return
 
-        self._append_log(
+        self.logger.append(
             f"[END] {' / '.join(prefix) if prefix else '<root>'} with outcome: {outcome}",
             is_end=True,
         )
-        self._decrement_log_depth()
+        self.logger.decrement_depth()
 
         if prefix:
             self._set_active_path(prefix)
@@ -675,7 +566,7 @@ class Runtime(QObject):
             from_path = prefix + (str(from_state),)
             to_path = prefix + (str(to_state),)
 
-            self._append_log(
+            self.logger.append(
                 f"[TRANSITION] {' / '.join(from_path)} "
                 f"--[{outcome}]--> {' / '.join(to_path)}"
             )
