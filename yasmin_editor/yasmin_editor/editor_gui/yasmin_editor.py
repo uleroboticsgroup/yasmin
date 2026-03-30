@@ -82,6 +82,7 @@ class YasminEditor(
         self.current_file_path: Optional[str] = None
         self.runtime_snapshot_file_path: Optional[str] = None
         self.runtime_mode_enabled = False
+        self.runtime_auto_follow_enabled = False
         self.runtime_active_path: tuple[str, ...] = tuple()
         self.runtime_last_transition: Optional[
             tuple[tuple[str, ...], tuple[str, ...], str]

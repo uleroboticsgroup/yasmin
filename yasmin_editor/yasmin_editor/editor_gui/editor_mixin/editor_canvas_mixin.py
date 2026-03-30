@@ -444,7 +444,11 @@ class EditorCanvasMixin:
         if len(self.current_container_path) > 1:
             self.navigate_to_container_index(len(self.current_container_path) - 2)
 
-    def enter_container(self, container_node: ContainerStateNode) -> None:
+    def enter_container(
+        self,
+        container_node: ContainerStateNode,
+        show_status_message: bool = True,
+    ) -> None:
         self._ensure_external_xml_state()
         if getattr(container_node, "is_xml_reference", False):
             external_xml_active = (
@@ -484,9 +488,10 @@ class EditorCanvasMixin:
             self._get_live_runtime_transition()
             self.render_current_container(fit_view=True)
             self._schedule_runtime_highlight_refresh()
-            self.statusBar().showMessage(
-                f"Entered external XML: {container_node.name}", 2000
-            )
+            if show_status_message:
+                self.statusBar().showMessage(
+                    f"Entered external XML: {container_node.name}", 2000
+                )
             return
 
         self.sync_current_container_layout()
@@ -496,4 +501,5 @@ class EditorCanvasMixin:
         self._get_live_runtime_transition()
         self.render_current_container(fit_view=True)
         self._schedule_runtime_highlight_refresh()
-        self.statusBar().showMessage(f"Entered: {container_node.name}", 2000)
+        if show_status_message:
+            self.statusBar().showMessage(f"Entered: {container_node.name}", 2000)

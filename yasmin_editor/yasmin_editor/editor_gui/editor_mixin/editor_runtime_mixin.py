@@ -21,8 +21,11 @@ from typing import Optional
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QBrush, QColor, QPen
 from PyQt5.QtWidgets import QMessageBox
+
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
+from yasmin_editor.editor_gui.nodes.container_state_node import \
+    ContainerStateNode
 from yasmin_editor.runtime import Runtime
 
 
@@ -152,6 +155,38 @@ class EditorRuntimeMixin:
         self.runtime_mode_button.setChecked(checked)
         self.runtime_mode_button.blockSignals(False)
 
+    def _set_runtime_auto_follow_button_checked(self, checked: bool) -> None:
+        if not hasattr(self, "runtime_auto_follow_button"):
+            return
+
+        button = self.runtime_auto_follow_button
+        button.blockSignals(True)
+        button.setChecked(checked)
+        button.setText("Auto Follow: ON" if checked else "Auto Follow: OFF")
+
+        if checked:
+            button.setStyleSheet(
+                "QPushButton {"
+                f"background-color: {PALETTE.runtime_mode_button_bg.name()}; "
+                f"color: {PALETTE.runtime_mode_button_text.name()}; "
+                f"border: 2px solid {PALETTE.runtime_canvas_border.name()}; "
+                "font-weight: 700;"
+                "padding: 4px 10px;"
+                "}"
+            )
+        else:
+            button.setStyleSheet(
+                "QPushButton {"
+                f"background-color: {PALETTE.ui_button_bg.name()}; "
+                f"color: {PALETTE.text_primary.name()}; "
+                f"border: 2px solid {PALETTE.ui_border.name()}; "
+                "font-weight: 700;"
+                "padding: 4px 10px;"
+                "}"
+            )
+
+        button.blockSignals(False)
+
     def _enter_runtime_mode(self) -> bool:
         self._recreate_runtime()
 
@@ -178,6 +213,7 @@ class EditorRuntimeMixin:
         self._get_live_runtime_active_path()
         self._get_live_runtime_transition()
         self.render_current_container()
+        self._follow_runtime_active_state()
         self.set_canvas_runtime_visual_state()
         self.statusBar().showMessage("Runtime mode enabled", 3000)
         return True
@@ -212,6 +248,13 @@ class EditorRuntimeMixin:
         self._recreate_runtime()
         self.clear_runtime_log_view()
         self._enter_runtime_mode()
+
+    def on_runtime_auto_follow_toggled(self, checked: bool) -> None:
+        self.runtime_auto_follow_enabled = bool(checked)
+        self._set_runtime_auto_follow_button_checked(self.runtime_auto_follow_enabled)
+        if self.runtime_auto_follow_enabled:
+            self._follow_runtime_active_state()
+        self.update_runtime_actions()
 
     def toggle_runtime_mode(self, checked: bool) -> None:
         if checked:
@@ -425,6 +468,7 @@ class EditorRuntimeMixin:
 
     def on_runtime_active_state_changed(self, state_path: tuple[str, ...]) -> None:
         self.runtime_active_path = tuple(state_path or tuple())
+        self._follow_runtime_active_state()
         self._schedule_runtime_highlight_refresh()
         self.update_runtime_actions()
 
@@ -499,6 +543,14 @@ class EditorRuntimeMixin:
                 button.setVisible(visible)
                 button.setEnabled(visible)
 
+        auto_follow_button = getattr(self, "runtime_auto_follow_button", None)
+        if auto_follow_button is not None:
+            auto_follow_button.setVisible(self.runtime_mode_enabled)
+            auto_follow_button.setEnabled(runtime_ready)
+            self._set_runtime_auto_follow_button_checked(
+                self.runtime_auto_follow_enabled
+            )
+
         for action_name in [
             "new_action",
             "open_action",
@@ -506,6 +558,30 @@ class EditorRuntimeMixin:
             action = getattr(self, action_name, None)
             if action is not None:
                 action.setEnabled(not self.runtime_mode_enabled)
+
+    def _follow_runtime_active_state(self) -> None:
+        if not self.runtime_mode_enabled or not self.runtime_auto_follow_enabled:
+            return
+
+        active_path = tuple(self.runtime_active_path or tuple())
+        target_path = active_path[:-1] if active_path else tuple()
+        self._navigate_to_runtime_container_path(target_path)
+
+    def _navigate_to_runtime_container_path(self, target_path: tuple[str, ...]) -> None:
+        if not self.runtime_mode_enabled:
+            return
+
+        normalized_target_path = tuple(str(item) for item in target_path)
+        if self._get_current_runtime_container_path() == normalized_target_path:
+            return
+
+        self.navigate_to_container_index(0)
+
+        for state_name in normalized_target_path:
+            container_node = self.state_nodes.get(state_name)
+            if not isinstance(container_node, ContainerStateNode):
+                return
+            self.enter_container(container_node, show_status_message=False)
 
     def _get_current_runtime_container_path(self) -> tuple[str, ...]:
         if self.current_runtime_container_path:

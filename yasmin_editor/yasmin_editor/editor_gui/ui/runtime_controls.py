@@ -17,7 +17,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
 
-
 def build_runtime_controls_widget(editor) -> QWidget:
     """Create the runtime control bar."""
     widget = QWidget()
@@ -73,6 +72,17 @@ def build_runtime_controls_widget(editor) -> QWidget:
     )
     editor.runtime_restart_button.clicked.connect(editor.restart_runtime_mode)
     editor.runtime_controls_layout.addWidget(editor.runtime_restart_button)
+
+    editor.runtime_auto_follow_button = QPushButton("Auto Follow: ON")
+    editor.runtime_auto_follow_button.setCheckable(True)
+    editor.runtime_auto_follow_button.setChecked(True)
+    editor.runtime_auto_follow_button.setToolTip(
+        "Automatically navigate into nested state machines so the active state remains visible."
+    )
+    editor.runtime_auto_follow_button.clicked.connect(
+        editor.on_runtime_auto_follow_toggled
+    )
+    editor.runtime_controls_layout.addWidget(editor.runtime_auto_follow_button)
 
     editor.runtime_controls_layout.addStretch()
     return widget
