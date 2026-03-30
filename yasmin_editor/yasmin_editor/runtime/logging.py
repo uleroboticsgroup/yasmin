@@ -81,9 +81,6 @@ class RuntimeLoggingBridge:
     - tracking the active runtime instance
     - attaching a Python logging handler to the root logger
     - patching YASMIN logging helpers so their messages are mirrored into the UI
-
-    The public API is intentionally small so that runtime startup and shutdown
-    can install and uninstall the bridge deterministically.
     """
 
     _current_runtime_ref: Optional[weakref.ReferenceType] = None
