@@ -115,12 +115,41 @@ class EditorRuntimeMixin:
     ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
         if self.runtime is None or not self.runtime_mode_enabled:
             return None
+
         try:
             transition = self.runtime.get_last_transition()
         except Exception:
             transition = None
+
+        if transition is None and self.runtime.is_finished():
+            return self.runtime_last_transition
+
         self.runtime_last_transition = transition
         return transition
+
+    def _build_root_final_transition(
+        self,
+        outcome: Optional[str],
+    ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
+        if not outcome:
+            return None
+
+        active_path = tuple(self.runtime_active_path or tuple())
+        if not active_path:
+            return None
+
+        root_state_name = str(active_path[0])
+        transitions = self.root_model.transitions.get(root_state_name, [])
+
+        for transition in transitions:
+            if str(transition.target) == str(outcome):
+                return (
+                    (root_state_name,),
+                    (str(outcome),),
+                    str(transition.source_outcome),
+                )
+
+        return None
 
     def _schedule_runtime_highlight_refresh(self) -> None:
         if not self.runtime_mode_enabled:
@@ -480,10 +509,13 @@ class EditorRuntimeMixin:
         self._schedule_runtime_highlight_refresh()
 
     def on_runtime_outcome_changed(self, outcome: Optional[str]) -> None:
-        del outcome
         self._get_live_runtime_active_path()
-        self.runtime_last_transition = None
-        self._schedule_runtime_highlight_refresh()
+        self.runtime_last_transition = self._build_root_final_transition(outcome)
+
+        if self.runtime_mode_enabled:
+            self.navigate_to_container_index(0)
+
+        self.refresh_visual_highlighting()
         self.update_runtime_actions()
 
     def on_runtime_status_changed(self, message: str) -> None:
