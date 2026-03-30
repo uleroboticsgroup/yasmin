@@ -19,6 +19,8 @@ from typing import Dict, List, Optional
 
 from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from yasmin_plugins_manager.plugin_manager import PluginManager
+
 from yasmin_editor.editor_gui.colors import (PALETTE, build_qt_palette,
                                              build_stylesheet)
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -37,8 +39,6 @@ from yasmin_editor.editor_gui.nodes.container_state_node import \
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.state_machine import StateMachine
-
-from yasmin_plugins_manager.plugin_manager import PluginManager
 
 
 class YasminEditor(

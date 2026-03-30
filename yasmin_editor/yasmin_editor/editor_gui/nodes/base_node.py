@@ -13,9 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Any, Callable, List, Optional, Set, TYPE_CHECKING
-
 import math
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Set
 
 from PyQt5.QtCore import QPointF
 from PyQt5.QtGui import QPen
@@ -25,7 +24,8 @@ from yasmin_editor.editor_gui.colors import PALETTE
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
-    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+    from yasmin_editor.editor_gui.nodes.container_state_node import \
+        ContainerStateNode
 
 
 class BaseNodeMixin:

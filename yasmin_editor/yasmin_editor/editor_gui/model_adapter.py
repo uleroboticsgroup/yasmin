@@ -18,9 +18,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
-from yasmin_editor.editor_gui.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.container_state_node import \
+    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
@@ -43,7 +44,9 @@ class EditorModelAdapter:
     def load_from_xml(self, file_path: str) -> StateMachine:
         model = model_from_xml(Path(file_path))
         self.editor.reset_editor_state(model)
-        self.editor.set_blackboard_keys(self.editor.keys_to_dicts(model.keys), sync=False)
+        self.editor.set_blackboard_keys(
+            self.editor.keys_to_dicts(model.keys), sync=False
+        )
         self.editor.render_current_container()
         return model
 
@@ -91,7 +94,9 @@ class EditorModelAdapter:
                     from_view = self.editor.state_nodes.get(state_name)
                     if from_view is None:
                         continue
-                    self.editor._create_connection_view(from_view, to_view, source_outcome)
+                    self.editor._create_connection_view(
+                        from_view, to_view, source_outcome
+                    )
 
     def create_state_view(
         self,

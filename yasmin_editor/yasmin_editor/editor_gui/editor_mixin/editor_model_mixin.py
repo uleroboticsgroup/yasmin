@@ -17,22 +17,23 @@ from typing import Dict, List, Optional
 
 from PyQt5.QtCore import QPointF
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from yasmin_plugins_manager.plugin_manager import PluginInfo
+
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.dialogs.concurrence_dialog import \
     ConcurrenceDialog
 from yasmin_editor.editor_gui.dialogs.state_machine_dialog import \
     StateMachineDialog
-from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
-from yasmin_editor.editor_gui.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.container_state_node import \
+    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.transition import Transition
 from yasmin_editor.model.validation import validate_model
-
-from yasmin_plugins_manager.plugin_manager import PluginInfo
 
 
 class EditorModelMixin:

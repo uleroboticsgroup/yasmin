@@ -13,22 +13,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
 
-from PyQt5.QtWidgets import (
-    QGraphicsView,
-    QGraphicsScene,
-    QGraphicsLineItem,
-    QMenu,
-    QWidget,
-)
-from PyQt5.QtCore import Qt, QLineF, QTimer, QPointF, QEvent
-from PyQt5.QtGui import QPen, QBrush, QPainter, QCursor
+from PyQt5.QtCore import QEvent, QLineF, QPointF, Qt, QTimer
+from PyQt5.QtGui import QBrush, QCursor, QPainter, QPen
+from PyQt5.QtWidgets import (QGraphicsLineItem, QGraphicsScene, QGraphicsView,
+                             QMenu, QWidget)
+
 from yasmin_editor.editor_gui.colors import PALETTE
-
-from yasmin_editor.editor_gui.state_node import StateNode
-from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.nodes.container_state_node import \
+    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
 
 if TYPE_CHECKING:
@@ -234,7 +230,9 @@ class StateMachineCanvas(QGraphicsView):
                 target = item
             elif hasattr(item, "parentItem"):
                 parent = item.parentItem()
-                if isinstance(parent, (StateNode, FinalOutcomeNode, ContainerStateNode)):
+                if isinstance(
+                    parent, (StateNode, FinalOutcomeNode, ContainerStateNode)
+                ):
                     target = parent
 
             if target and self.is_valid_connection(self.drag_start_node, target):

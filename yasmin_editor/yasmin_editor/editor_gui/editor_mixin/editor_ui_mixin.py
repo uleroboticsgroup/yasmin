@@ -21,8 +21,9 @@ from PyQt5.QtWidgets import (QAbstractItemView, QAction, QComboBox, QDialog,
                              QLabel, QLineEdit, QListWidget, QListWidgetItem,
                              QMessageBox, QPushButton, QSplitter, QTextBrowser,
                              QToolBar, QVBoxLayout, QWidget)
+from yasmin_plugins_manager.plugin_manager import PluginInfo
+
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.dialogs.concurrence_dialog import \
     ConcurrenceDialog
 from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import \
@@ -31,14 +32,14 @@ from yasmin_editor.editor_gui.dialogs.state_machine_dialog import \
     StateMachineDialog
 from yasmin_editor.editor_gui.dialogs.state_properties_dialog import \
     StatePropertiesDialog
-from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.nodes.container_state_node import \
+    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
-from yasmin_editor.editor_gui.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state_machine import StateMachine
-
-from yasmin_plugins_manager.plugin_manager import PluginInfo
 
 
 class EditorUiMixin:

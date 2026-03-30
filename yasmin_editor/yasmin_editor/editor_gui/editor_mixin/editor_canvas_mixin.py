@@ -19,11 +19,13 @@ from typing import List, Optional
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QBrush, QPen
 from PyQt5.QtWidgets import QLabel, QMessageBox, QPushButton
+
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
-from yasmin_editor.editor_gui.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.container_state_node import \
+    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
 
 

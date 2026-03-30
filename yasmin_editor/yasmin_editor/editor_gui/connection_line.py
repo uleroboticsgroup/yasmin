@@ -21,13 +21,15 @@ from PyQt5.QtGui import QBrush, QFont, QPainterPath, QPen, QPolygonF
 from PyQt5.QtWidgets import (QGraphicsItem, QGraphicsPathItem,
                              QGraphicsPolygonItem, QGraphicsRectItem,
                              QGraphicsTextItem)
+
 from yasmin_editor.editor_gui.colors import PALETTE
 
 if TYPE_CHECKING:
-    from yasmin_editor.editor_gui.container_state_node import \
+    from yasmin_editor.editor_gui.nodes.container_state_node import \
         ContainerStateNode
-    from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
-    from yasmin_editor.editor_gui.state_node import StateNode
+    from yasmin_editor.editor_gui.nodes.final_outcome_node import \
+        FinalOutcomeNode
+    from yasmin_editor.editor_gui.nodes.state_node import StateNode
 
 
 class _ConnectionLabelRectItem(QGraphicsRectItem):

@@ -17,9 +17,10 @@ from typing import Dict, List, Optional
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QListWidgetItem
+
 from yasmin_editor.editor_gui.dialogs.blackboard_key_dialog import \
     BlackboardKeyDialog
-from yasmin_editor.editor_gui.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.state import State
