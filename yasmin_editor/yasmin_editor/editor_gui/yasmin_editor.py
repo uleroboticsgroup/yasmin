@@ -23,12 +23,15 @@ from yasmin_editor.editor_gui.colors import (PALETTE, build_qt_palette,
                                              build_stylesheet)
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-from yasmin_editor.editor_gui.editor_blackboard_mixin import \
+from yasmin_editor.editor_gui.editor_mixin.editor_blackboard_mixin import \
     EditorBlackboardMixin
-from yasmin_editor.editor_gui.editor_canvas_mixin import EditorCanvasMixin
-from yasmin_editor.editor_gui.editor_model_mixin import EditorModelMixin
-from yasmin_editor.editor_gui.editor_runtime_mixin import EditorRuntimeMixin
-from yasmin_editor.editor_gui.editor_ui_mixin import EditorUiMixin
+from yasmin_editor.editor_gui.editor_mixin.editor_canvas_mixin import \
+    EditorCanvasMixin
+from yasmin_editor.editor_gui.editor_mixin.editor_model_mixin import \
+    EditorModelMixin
+from yasmin_editor.editor_gui.editor_mixin.editor_runtime_mixin import \
+    EditorRuntimeMixin
+from yasmin_editor.editor_gui.editor_mixin.editor_ui_mixin import EditorUiMixin
 from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.model_adapter import EditorModelAdapter
 from yasmin_editor.editor_gui.state_node import StateNode
