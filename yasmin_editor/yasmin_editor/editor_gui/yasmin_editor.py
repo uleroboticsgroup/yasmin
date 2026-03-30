@@ -89,6 +89,7 @@ class YasminEditor(
         ] = None
 
         self.runtime = None
+        self.runtime_shell = None
         self._create_runtime()
 
         self.model_adapter = EditorModelAdapter(self)
@@ -119,6 +120,7 @@ class YasminEditor(
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """Handle window close event to ensure proper cleanup."""
+        self._shutdown_runtime_shell()
         self._destroy_runtime()
         self._delete_runtime_snapshot()
 

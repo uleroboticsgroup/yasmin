@@ -27,6 +27,7 @@ from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.nodes.container_state_node import \
     ContainerStateNode
 from yasmin_editor.runtime import Runtime
+from yasmin_editor.runtime.interactive_shell import InteractiveShellManager
 
 
 class EditorRuntimeMixin:
@@ -52,6 +53,7 @@ class EditorRuntimeMixin:
         """Create a fresh runtime instance and re-apply UI settings."""
         self.runtime = Runtime()
         self._connect_runtime_signals()
+        self._refresh_runtime_shell_context()
 
         if hasattr(self, "runtime_log_level_combo"):
             try:
@@ -65,6 +67,7 @@ class EditorRuntimeMixin:
         self._sync_runtime_log_level_combo()
 
     def _destroy_runtime(self) -> None:
+        self._close_runtime_shell()
         runtime = self.runtime
         self.runtime = None
         if runtime is None:
@@ -216,7 +219,56 @@ class EditorRuntimeMixin:
 
         button.blockSignals(False)
 
+    def _ensure_runtime_shell(self) -> Optional[InteractiveShellManager]:
+        shell = getattr(self, "runtime_shell", None)
+        if shell is not None:
+            return shell
+
+        if not InteractiveShellManager.is_supported():
+            return None
+
+        self.runtime_shell = InteractiveShellManager(self)
+        self.runtime_shell.visibility_changed.connect(
+            self.on_runtime_shell_visibility_changed
+        )
+        return self.runtime_shell
+
+    def _refresh_runtime_shell_context(self) -> None:
+        shell = getattr(self, "runtime_shell", None)
+        runtime = self.runtime
+        if shell is None or runtime is None or not shell.is_open():
+            return
+
+        bb = getattr(runtime, "bb", None)
+        sm = getattr(runtime, "sm", None)
+        if bb is None or sm is None:
+            return
+
+        shell.open_shell(bb=bb, sm=sm)
+
+    def _close_runtime_shell(self) -> None:
+        shell = getattr(self, "runtime_shell", None)
+        if shell is not None:
+            shell.close_shell()
+
+    def _shutdown_runtime_shell(self) -> None:
+        shell = getattr(self, "runtime_shell", None)
+        if shell is not None:
+            shell.shutdown()
+        self.runtime_shell = None
+
+    def _is_runtime_shell_open(self) -> bool:
+        shell = getattr(self, "runtime_shell", None)
+        return bool(shell is not None and shell.is_open())
+
+    def _runtime_shell_resume_blocked(self) -> bool:
+        runtime = self.runtime
+        if runtime is None:
+            return False
+        return self._is_runtime_shell_open() and runtime.is_blocked()
+
     def _enter_runtime_mode(self) -> bool:
+        self._close_runtime_shell()
         self._recreate_runtime()
 
         try:
@@ -248,6 +300,12 @@ class EditorRuntimeMixin:
         return True
 
     def on_runtime_play_clicked(self) -> None:
+        if self._runtime_shell_resume_blocked():
+            self.statusBar().showMessage(
+                "Close the interactive shell before resuming execution.",
+                3000,
+            )
+            return
         if self.runtime is not None:
             self.runtime.play()
 
@@ -256,6 +314,12 @@ class EditorRuntimeMixin:
             self.runtime.pause()
 
     def on_runtime_step_clicked(self) -> None:
+        if self._runtime_shell_resume_blocked():
+            self.statusBar().showMessage(
+                "Close the interactive shell before resuming execution.",
+                3000,
+            )
+            return
         if self.runtime is not None:
             self.runtime.play_once()
 
@@ -264,6 +328,12 @@ class EditorRuntimeMixin:
             self.runtime.cancel_state()
 
     def on_runtime_cancel_sm_clicked(self) -> None:
+        if self._runtime_shell_resume_blocked():
+            self.statusBar().showMessage(
+                "Close the interactive shell before resuming execution.",
+                3000,
+            )
+            return
         if self.runtime is not None:
             self.runtime.cancel()
 
@@ -285,11 +355,43 @@ class EditorRuntimeMixin:
             self._follow_runtime_active_state()
         self.update_runtime_actions()
 
+    def on_runtime_shell_clicked(self) -> None:
+        runtime = self.runtime
+        if runtime is None or not runtime.is_blocked() or runtime.bb is None:
+            self.statusBar().showMessage(
+                "The interactive shell is only available while a transition is paused.",
+                3000,
+            )
+            return
+
+        shell = self._ensure_runtime_shell()
+        if shell is None:
+            QMessageBox.critical(
+                self,
+                "Interactive Shell Unavailable",
+                "The interactive shell requires qtconsole.\n\n"
+                "Install it with:\n"
+                "python3 -m pip install qtconsole\n\n"
+                f"Import error: {InteractiveShellManager.unavailable_reason()}",
+            )
+            return
+
+        shell.open_shell(bb=runtime.bb, sm=runtime.sm)
+        self.update_runtime_actions()
+
+    def on_runtime_shell_visibility_changed(self, visible: bool) -> None:
+        if visible:
+            self.statusBar().showMessage("Interactive shell opened", 3000)
+        else:
+            self.statusBar().showMessage("Interactive shell closed", 3000)
+        self.update_runtime_actions()
+
     def toggle_runtime_mode(self, checked: bool) -> None:
         if checked:
             self._enter_runtime_mode()
             return
 
+        self._close_runtime_shell()
         self.runtime_mode_enabled = False
         self.runtime_active_path = tuple()
         self.runtime_last_transition = None
@@ -543,6 +645,7 @@ class EditorRuntimeMixin:
         runtime_playing = runtime_running and not runtime_blocked
         runtime_step_mode = runtime_running and runtime.is_step_mode()
         runtime_finished = runtime_ready and runtime.is_finished()
+        runtime_shell_open = self._runtime_shell_resume_blocked()
 
         self._set_runtime_mode_button_checked(self.runtime_mode_enabled)
         self.set_canvas_runtime_visual_state()
@@ -572,8 +675,15 @@ class EditorRuntimeMixin:
         for button_name, visible in runtime_button_visibility.items():
             button = getattr(self, button_name, None)
             if button is not None:
+                enabled = visible
+                if button_name in {
+                    "runtime_play_button",
+                    "runtime_step_button",
+                    "runtime_cancel_sm_button",
+                }:
+                    enabled = visible and not runtime_shell_open
                 button.setVisible(visible)
-                button.setEnabled(visible)
+                button.setEnabled(enabled)
 
         auto_follow_button = getattr(self, "runtime_auto_follow_button", None)
         if auto_follow_button is not None:
@@ -582,6 +692,17 @@ class EditorRuntimeMixin:
             self._set_runtime_auto_follow_button_checked(
                 self.runtime_auto_follow_enabled
             )
+
+        shell_button = getattr(self, "runtime_shell_button", None)
+        if shell_button is not None:
+            shell_visible = (
+                self.runtime_mode_enabled
+                and runtime_blocked
+                and runtime is not None
+                and getattr(runtime, "bb", None) is not None
+            )
+            shell_button.setVisible(shell_visible)
+            shell_button.setEnabled(shell_visible)
 
         for action_name in [
             "new_action",

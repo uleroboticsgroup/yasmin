@@ -84,5 +84,14 @@ def build_runtime_controls_widget(editor) -> QWidget:
     )
     editor.runtime_controls_layout.addWidget(editor.runtime_auto_follow_button)
 
+    editor.runtime_shell_button = QPushButton("Interactive Shell")
+    editor.runtime_shell_button.setToolTip(
+        "Open an interactive shell with access to bb and sm while execution is paused."
+    )
+    editor.runtime_shell_button.clicked.connect(editor.on_runtime_shell_clicked)
+    editor.runtime_shell_button.setVisible(False)
+    editor.runtime_shell_button.setEnabled(False)
+    editor.runtime_controls_layout.addWidget(editor.runtime_shell_button)
+
     editor.runtime_controls_layout.addStretch()
     return widget
