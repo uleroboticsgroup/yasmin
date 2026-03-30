@@ -132,8 +132,20 @@ class YasminEditor(QMainWindow):
         self.runtime.log_appended.connect(self.append_runtime_log)
 
     def _create_runtime(self) -> None:
+        """Create a fresh runtime instance and re-apply UI settings."""
         self.runtime = Runtime()
         self._connect_runtime_signals()
+
+        if hasattr(self, "runtime_log_level_combo"):
+            try:
+                self.runtime.set_log_level(
+                    self.runtime_log_level_combo.currentText(),
+                    emit_status=False,
+                )
+            except Exception:
+                pass
+
+        self._sync_runtime_log_level_combo()
 
     def _destroy_runtime(self) -> None:
         runtime = self.runtime
@@ -1656,7 +1668,20 @@ class YasminEditor(QMainWindow):
         self.runtime_sidebar_widget = QWidget()
         runtime_sidebar_layout = QVBoxLayout(self.runtime_sidebar_widget)
         runtime_sidebar_layout.setContentsMargins(0, 0, 0, 0)
-        runtime_sidebar_layout.addWidget(QLabel("<b>Logs:</b>"))
+
+        runtime_log_header_layout = QHBoxLayout()
+        runtime_log_header_layout.addWidget(QLabel("<b>Logs:</b>"))
+        runtime_log_header_layout.addStretch()
+        self.runtime_log_level_combo = QComboBox()
+        self.runtime_log_level_combo.setProperty("flatInput", True)
+        self.runtime_log_level_combo.addItems(["ERROR", "WARN", "INFO", "DEBUG"])
+        self.runtime_log_level_combo.setCurrentText("INFO")
+        self.runtime_log_level_combo.currentTextChanged.connect(
+            self.on_runtime_log_level_changed
+        )
+        runtime_log_header_layout.addWidget(self.runtime_log_level_combo)
+        runtime_sidebar_layout.addLayout(runtime_log_header_layout)
+
         self.runtime_log_view = QTextBrowser()
         self.runtime_log_view.setReadOnly(True)
         self.runtime_log_view.setOpenExternalLinks(False)
@@ -2002,10 +2027,6 @@ class YasminEditor(QMainWindow):
             self._runtime_status_badge_style(label_text)
         )
 
-    def _runtime_log_uses_dark_background(self) -> bool:
-        """Return whether the runtime log view uses a dark background."""
-        return PALETTE.ui_input_bg.lightness() < 128
-
     def _runtime_log_view_style(self) -> str:
         """Return the stylesheet used by the runtime log view."""
         return (
@@ -2022,38 +2043,19 @@ class YasminEditor(QMainWindow):
     def _runtime_log_line_color(self, message: str) -> str:
         """Return the HTML color used for a runtime log line."""
         normalized = str(message).lstrip()
-        if self._runtime_log_uses_dark_background():
-            if normalized.startswith("[WARN]"):
-                return "#ffd24d"
-            if normalized.startswith("[ERROR]"):
-                return "#ff7a7a"
-            if normalized.startswith("[STATUS]"):
-                return "#d3d7dc"
-            if normalized.startswith("[INFO]"):
-                return "#ffffff"
-            if normalized.startswith("[DEBUG]"):
-                return "#9aa3ad"
-            if normalized.startswith("[ACTIVE]"):
-                return "#8dd8ff"
-            if normalized.startswith("[TRANSITION]"):
-                return "#78f0c8"
-            return "#e8eaed"
-
         if normalized.startswith("[WARN]"):
-            return "#8a6700"
+            return PALETTE.runtime_log_warn.name()
         if normalized.startswith("[ERROR]"):
-            return "#b53333"
+            return PALETTE.runtime_log_error.name()
         if normalized.startswith("[STATUS]"):
-            return PALETTE.text_secondary.name()
+            return PALETTE.runtime_log_status.name()
         if normalized.startswith("[INFO]"):
-            return PALETTE.text_primary.name()
+            return PALETTE.runtime_log_info.name()
         if normalized.startswith("[DEBUG]"):
-            return "#6b7280"
-        if normalized.startswith("[ACTIVE]"):
-            return "#1565c0"
+            return PALETTE.runtime_log_debug.name()
         if normalized.startswith("[TRANSITION]"):
-            return "#0f8a6b"
-        return PALETTE.text_primary.name()
+            return PALETTE.runtime_log_transition.name()
+        return PALETTE.runtime_log_default.name()
 
     def _format_runtime_log_entry(self, message: str) -> str:
         """Convert a runtime log message into a styled HTML block."""
@@ -2068,11 +2070,48 @@ class YasminEditor(QMainWindow):
             "</div>"
         )
 
+    def _sync_runtime_log_level_combo(self) -> None:
+        """Keep the runtime log-level selector aligned with the backend state."""
+        if not hasattr(self, "runtime_log_level_combo"):
+            return
+
+        combo = self.runtime_log_level_combo
+        runtime = self.runtime
+        target_level = "INFO"
+        if runtime is not None:
+            try:
+                target_level = runtime.get_log_level_name()
+            except Exception:
+                target_level = combo.currentText() or "INFO"
+
+        combo.blockSignals(True)
+        combo.setCurrentText(target_level)
+        combo.blockSignals(False)
+
+    def on_runtime_log_level_changed(self, level_name: str) -> None:
+        """Apply the selected runtime log level to the active runtime backend."""
+        runtime = self.runtime
+        if runtime is None:
+            return
+
+        try:
+            runtime.set_log_level(level_name)
+        except Exception as exc:
+            self.statusBar().showMessage("Failed to update log level", 3000)
+            QMessageBox.critical(
+                self,
+                "Runtime Error",
+                f"Failed to update runtime log level:\n{exc}",
+            )
+            self._sync_runtime_log_level_combo()
+
     def clear_runtime_log_view(self) -> None:
+        """Clear the runtime log widget shown in the sidebar."""
         if hasattr(self, "runtime_log_view"):
             self.runtime_log_view.clear()
 
     def append_runtime_log(self, message: str) -> None:
+        """Append a formatted runtime log message to the sidebar view."""
         if not hasattr(self, "runtime_log_view"):
             return
         self.runtime_log_view.append(self._format_runtime_log_entry(str(message)))
@@ -2135,6 +2174,8 @@ class YasminEditor(QMainWindow):
 
         if hasattr(self, "runtime_log_view"):
             self.runtime_log_view.setStyleSheet(self._runtime_log_view_style())
+
+        self._sync_runtime_log_level_combo()
 
         runtime_button_visibility = {
             "runtime_play_button": runtime_ready

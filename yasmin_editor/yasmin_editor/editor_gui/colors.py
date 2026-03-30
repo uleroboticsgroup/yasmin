@@ -59,6 +59,13 @@ class EditorPalette:
     runtime_canvas_border: QColor
     runtime_mode_button_bg: QColor
     runtime_mode_button_text: QColor
+    runtime_log_default: QColor
+    runtime_log_status: QColor
+    runtime_log_info: QColor
+    runtime_log_debug: QColor
+    runtime_log_warn: QColor
+    runtime_log_error: QColor
+    runtime_log_transition: QColor
     connection_line: QColor
     connection_selected: QColor
     connection_label_bg: QColor
@@ -434,6 +441,13 @@ PALETTES = {
         runtime_canvas_border=QColor(46, 150, 76),
         runtime_mode_button_bg=QColor(46, 150, 76),
         runtime_mode_button_text=QColor(255, 255, 255),
+        runtime_log_default=QColor(18, 18, 18),
+        runtime_log_status=QColor(80, 80, 80),
+        runtime_log_info=QColor(18, 18, 18),
+        runtime_log_debug=QColor(0, 128, 0),
+        runtime_log_warn=QColor(138, 103, 0),
+        runtime_log_error=QColor(181, 51, 51),
+        runtime_log_transition=QColor(21, 101, 192),
         connection_line=QColor(60, 60, 180),
         connection_selected=QColor(255, 100, 0),
         connection_label_bg=QColor(255, 255, 255),
@@ -481,6 +495,13 @@ PALETTES = {
         runtime_canvas_border=QColor(116, 214, 146),
         runtime_mode_button_bg=QColor(68, 124, 84),
         runtime_mode_button_text=QColor(245, 247, 250),
+        runtime_log_default=QColor(232, 234, 237),
+        runtime_log_status=QColor(211, 215, 220),
+        runtime_log_info=QColor(255, 255, 255),
+        runtime_log_debug=QColor(85, 255, 85),
+        runtime_log_warn=QColor(255, 210, 77),
+        runtime_log_error=QColor(255, 122, 122),
+        runtime_log_transition=QColor(102, 179, 255),
         connection_line=QColor(130, 170, 255),
         connection_selected=QColor(255, 165, 90),
         connection_label_bg=QColor(49, 55, 63),

@@ -29,14 +29,24 @@ import time
 from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
-from yasmin_editor.runtime.logging import RuntimeLoggingBridge
-from yasmin_editor.runtime.traversal import (child_state, container_states,
-                                             expand_to_deepest_known_path,
-                                             is_container_object,
-                                             resolve_container)
+from yasmin_editor.runtime.traversal import (
+    container_states,
+    expand_to_deepest_known_path,
+    is_container_object,
+    resolve_container,
+)
 
+import yasmin
 from yasmin import Blackboard, StateMachine
 from yasmin_factory import YasminFactory
+
+
+LOG_LEVEL_BY_NAME = {
+    "ERROR": yasmin.LogLevel.ERROR,
+    "WARN": yasmin.LogLevel.WARN,
+    "INFO": yasmin.LogLevel.INFO,
+    "DEBUG": yasmin.LogLevel.DEBUG,
+}
 
 
 class Runtime(QObject):
@@ -58,8 +68,9 @@ class Runtime(QObject):
     log_appended = pyqtSignal(str)
 
     def __init__(self) -> None:
-        """Initialize the runtime controller and install logging hooks."""
+        """Initialize the runtime controller and its logger bridge."""
         super().__init__()
+
         self.factory = YasminFactory()
         self.sm: Optional[StateMachine] = None
         self.bb: Optional[Blackboard] = None
@@ -84,11 +95,12 @@ class Runtime(QObject):
         self._step_mode = False
 
         self._log_entries: list[str] = []
+        self._log_buffer_lock = threading.Lock()
         self._last_log_message = ""
         self._last_log_timestamp = 0.0
+        self._log_level = yasmin.LogLevel.INFO
 
-        RuntimeLoggingBridge.set_current_runtime(self)
-        RuntimeLoggingBridge.install()
+        self._configure_logging()
 
     def is_ready(self) -> bool:
         """Return whether a state machine is currently loaded."""
@@ -102,13 +114,13 @@ class Runtime(QObject):
         """Return whether execution is currently paused."""
         return self._blocked
 
-    def is_step_mode(self) -> bool:
-        """Return whether single-step execution is armed."""
-        return self._step_mode
-
     def is_finished(self) -> bool:
         """Return whether the loaded state machine finished execution."""
         return self._finished
+
+    def is_step_mode(self) -> bool:
+        """Return whether execution is currently armed for a single step."""
+        return self._step_mode
 
     def get_final_outcome(self) -> Optional[str]:
         """Return the final outcome once execution completed."""
@@ -146,20 +158,65 @@ class Runtime(QObject):
 
     def get_logs(self) -> list[str]:
         """Return a copy of the collected runtime log lines."""
-        return list(self._log_entries)
+        with self._log_buffer_lock:
+            return list(self._log_entries)
+
+    def get_log_level_name(self) -> str:
+        """Return the active YASMIN log level as an uppercase string."""
+        return str(yasmin.log_level_to_name(self._log_level)).upper()
+
+    def set_log_level(
+        self,
+        level: yasmin.LogLevel | str,
+        emit_status: bool = True,
+    ) -> None:
+        """Update the runtime log level and re-apply the logger callback.
+
+        Args:
+            level: Target log level as a ``yasmin.LogLevel`` or its name.
+            emit_status: Whether the change should be mirrored into the log view.
+        """
+        if isinstance(level, str):
+            normalized_level = LOG_LEVEL_BY_NAME.get(level.strip().upper())
+            if normalized_level is None:
+                raise ValueError(f"Unsupported log level: {level}")
+            level = normalized_level
+
+        self._log_level = level
+        self._configure_logging()
+        if emit_status:
+            self._append_log(f"[STATUS] Log level set to {self.get_log_level_name()}")
+
+    def _configure_logging(self) -> None:
+        """Install the runtime logger callback and apply the selected level."""
+        yasmin.set_loggers(self._handle_yasmin_log)
+        yasmin.set_log_level(self._log_level)
+
+    def _handle_yasmin_log(
+        self,
+        level: Any,
+        file: str,
+        function: str,
+        line: int,
+        text: str,
+    ) -> None:
+        """Forward YASMIN logs to the terminal and the runtime log view."""
+        message = (
+            f"[{yasmin.log_level_to_name(level)}] "
+            f"[{file}:{function}:{line}] {text}"
+        )
+        print(message, flush=True)
+        self._append_log(message)
 
     def create_sm_from_file(self, path: str) -> bool:
         """Load a runtime state machine from an XML file."""
         self.shutdown(reset_disposed=False)
         self._disposed = False
         self._clear_logs()
-        RuntimeLoggingBridge.set_current_runtime(self)
-        RuntimeLoggingBridge.install()
 
         try:
+            self._configure_logging()
             self.sm = self.factory.create_sm_from_file(path)
-            RuntimeLoggingBridge.set_current_runtime(self)
-            RuntimeLoggingBridge.activate_yasmin_logger()
             self._register_callbacks()
         except Exception as exc:
             self.sm = None
@@ -207,7 +264,7 @@ class Runtime(QObject):
         self.status_changed.emit("Pause requested")
 
     def play_once(self) -> None:
-        """Execute a single state and pause before the following state starts."""
+        """Execute exactly one transition callback and then pause."""
         if not self.is_ready() or self.is_finished() or self._disposed:
             return
 
@@ -217,7 +274,7 @@ class Runtime(QObject):
             return
 
         self._start_execution_thread()
-        self.status_changed.emit("Runtime will execute one state")
+        self.status_changed.emit("Runtime started")
 
     def cancel_state(self) -> None:
         """Request cancellation of the currently active state."""
@@ -299,12 +356,6 @@ class Runtime(QObject):
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
-        self._step_target_leaf_path = None
-        self._step_target_started = False
-
-        if RuntimeLoggingBridge.get_current_runtime() is self:
-            RuntimeLoggingBridge.set_current_runtime(None)
-            RuntimeLoggingBridge.uninstall()
 
         if reset_disposed:
             self._disposed = True
@@ -320,8 +371,6 @@ class Runtime(QObject):
             self._set_active_path(initial_path)
 
         self._shutting_down = False
-        RuntimeLoggingBridge.set_current_runtime(self)
-        RuntimeLoggingBridge.activate_yasmin_logger()
         self._execution_thread = threading.Thread(
             target=self._execute_worker,
             name="yasmin-runtime",
@@ -358,8 +407,6 @@ class Runtime(QObject):
         if self._active_path == next_path:
             return
         self._active_path = next_path
-        if next_path:
-            self._append_log(f"[ACTIVE] {' / '.join(next_path)}")
         self.active_state_changed.emit(next_path)
 
     def _set_last_transition(
@@ -379,9 +426,10 @@ class Runtime(QObject):
 
     def _clear_logs(self) -> None:
         """Reset the in-memory runtime log buffer."""
-        self._log_entries.clear()
-        self._last_log_message = ""
-        self._last_log_timestamp = 0.0
+        with self._log_buffer_lock:
+            self._log_entries.clear()
+            self._last_log_message = ""
+            self._last_log_timestamp = 0.0
         self.log_cleared.emit()
 
     def _append_log(self, message: str) -> None:
@@ -393,16 +441,18 @@ class Runtime(QObject):
         if not clean_message:
             return
 
-        now = time.monotonic()
-        if (
-            clean_message == self._last_log_message
-            and now - self._last_log_timestamp < 0.02
-        ):
-            return
+        with self._log_buffer_lock:
+            now = time.monotonic()
+            if (
+                clean_message == self._last_log_message
+                and now - self._last_log_timestamp < 0.02
+            ):
+                return
 
-        self._last_log_message = clean_message
-        self._last_log_timestamp = now
-        self._log_entries.append(clean_message)
+            self._last_log_message = clean_message
+            self._last_log_timestamp = now
+            self._log_entries.append(clean_message)
+
         self.log_appended.emit(clean_message)
 
     def _resolve_container(self, path: tuple[str, ...]) -> Optional[Any]:
@@ -447,8 +497,7 @@ class Runtime(QObject):
             return
 
         try:
-            RuntimeLoggingBridge.set_current_runtime(self)
-            RuntimeLoggingBridge.activate_yasmin_logger()
+            self._configure_logging()
             sm()
         except Exception as exc:
             if not self._disposed:
@@ -581,13 +630,13 @@ class Runtime(QObject):
             to_path = prefix + (str(to_state),)
 
             self._set_last_transition((from_path, to_path, str(outcome)))
-            self._set_active_path(self._expand_to_deepest_known_path(to_path))
 
             with self._pause_condition:
                 if self._step_mode:
                     self._step_mode = False
                     self._pause_requested = True
 
+            self._set_active_path(self._expand_to_deepest_known_path(to_path))
             self._pause_if_requested()
         finally:
             try:
