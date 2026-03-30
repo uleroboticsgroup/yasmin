@@ -523,10 +523,30 @@ class EditorUiMixin:
             return
 
         if dialog.exec_():
+            new_name = dialog.get_outcome_name()
+            if not new_name:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    "Final outcome name must not be empty!",
+                )
+                return
+
+            if new_name != outcome_node.name and new_name in self.final_outcomes:
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    f"Final outcome '{new_name}' already exists in this container!",
+                )
+                return
+
+            if new_name != outcome_node.name:
+                self.rename_final_outcome(outcome_node, new_name)
+
             outcome_node.description = dialog.get_description()
             outcome_node.update_tooltip()
             self.statusBar().showMessage(
-                f"Updated outcome description: {outcome_node.name}",
+                f"Updated final outcome: {outcome_node.name}",
                 2000,
             )
 

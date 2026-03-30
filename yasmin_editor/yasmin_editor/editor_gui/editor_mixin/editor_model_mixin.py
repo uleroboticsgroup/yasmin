@@ -550,6 +550,44 @@ class EditorModelMixin:
         self.refresh_connection_port_visibility()
         self.statusBar().showMessage(message, 2000)
 
+    def rename_final_outcome(
+        self,
+        outcome_node: FinalOutcomeNode,
+        new_name: str,
+    ) -> None:
+        """Rename a final outcome and update all dependent model references."""
+
+        old_name = outcome_node.name
+        if old_name == new_name:
+            return
+
+        container_model = self.current_container_model
+        container_model.rename_outcome(old_name, new_name)
+
+        if old_name in self.final_outcomes:
+            self.final_outcomes[new_name] = self.final_outcomes.pop(old_name)
+
+        outcome_node.name = new_name
+        outcome_node.update_attached_connections()
+
+        parent_model = self.current_parent_model
+        if parent_model is not None:
+            if isinstance(parent_model, StateMachine):
+                parent_model.rename_child_state_outcome(
+                    container_model.name,
+                    old_name,
+                    new_name,
+                )
+            elif isinstance(parent_model, Concurrence):
+                parent_model.rename_child_state_outcome(
+                    container_model.name,
+                    old_name,
+                    new_name,
+                )
+
+        self.update_start_state_combo()
+        self.refresh_connection_port_visibility()
+
     def register_connection_in_model(self, from_node, to_node, outcome: str) -> None:
         owner_model = self.current_container_model
         if isinstance(owner_model, Concurrence):
