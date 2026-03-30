@@ -2715,25 +2715,47 @@ class YasminEditor(QMainWindow):
         self._schedule_runtime_highlight_refresh()
         self.statusBar().showMessage(f"Entered: {container_node.name}", 2000)
 
-    def on_plugin_double_clicked(self, item: QListWidgetItem) -> None:
+    def _open_add_state_dialog_for_plugin(self, plugin_info: PluginInfo) -> None:
         if self.is_read_only_mode():
             self._show_read_only_message()
             return
+
+        all_plugins = (
+            self.plugin_manager.python_plugins
+            + self.plugin_manager.cpp_plugins
+            + self.plugin_manager.xml_files
+        )
+
+        dialog = StatePropertiesDialog(
+            plugin_info=plugin_info,
+            available_plugins=all_plugins,
+            parent=self,
+        )
+
+        if dialog.exec_():
+            result = dialog.get_state_data()
+            if result[0]:
+                name, plugin, outcomes, remappings, description, defaults = result
+                self.create_state_node(
+                    name,
+                    plugin,
+                    outcomes=outcomes,
+                    remappings=remappings,
+                    description=description,
+                    defaults=defaults,
+                )
+
+    def on_plugin_double_clicked(self, item: QListWidgetItem) -> None:
         plugin_info = item.data(Qt.UserRole)
-        state_name, ok = QInputDialog.getText(self, "State Name", "Enter state name:")
-        if ok:
-            self.create_state_node(state_name, plugin_info, False, False)
+        if plugin_info is None:
+            return
+        self._open_add_state_dialog_for_plugin(plugin_info)
 
     def on_xml_double_clicked(self, item: QListWidgetItem) -> None:
-        if self.is_read_only_mode():
-            self._show_read_only_message()
-            return
         xml_plugin = item.data(Qt.UserRole)
-        state_name, ok = QInputDialog.getText(
-            self, "State Machine Name", "Enter state machine name:"
-        )
-        if ok:
-            self.create_state_node(state_name, xml_plugin, False, False)
+        if xml_plugin is None:
+            return
+        self._open_add_state_dialog_for_plugin(xml_plugin)
 
     def add_state(self) -> None:
         if self.is_read_only_mode():
