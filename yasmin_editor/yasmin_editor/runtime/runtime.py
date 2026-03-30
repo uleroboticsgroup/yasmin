@@ -29,17 +29,14 @@ import time
 from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
-from yasmin_editor.runtime.traversal import (
-    container_states,
-    expand_to_deepest_known_path,
-    is_container_object,
-    resolve_container,
-)
+from yasmin_editor.runtime.traversal import (container_states,
+                                             expand_to_deepest_known_path,
+                                             is_container_object,
+                                             resolve_container)
 
 import yasmin
 from yasmin import Blackboard, StateMachine
 from yasmin_factory import YasminFactory
-
 
 LOG_LEVEL_BY_NAME = {
     "ERROR": yasmin.LogLevel.ERROR,
@@ -202,10 +199,8 @@ class Runtime(QObject):
     ) -> None:
         """Forward YASMIN logs to the terminal and the runtime log view."""
         message = (
-            f"[{yasmin.log_level_to_name(level)}] "
-            f"[{file}:{function}:{line}] {text}"
+            f"[{yasmin.log_level_to_name(level)}] " f"[{file}:{function}:{line}] {text}"
         )
-        print(message, flush=True)
         self._append_log(message)
 
     def create_sm_from_file(self, path: str) -> bool:
