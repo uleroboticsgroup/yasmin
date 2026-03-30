@@ -17,11 +17,20 @@
     <Key name="foo_str" type="in/out" description="Formatted counter string written by FooState." />
     <State name="Foo" type="py" module="yasmin_demos.yasmin_demo" class="FooState" x="-252.00" y="-11.50">
       <Transition from="outcome1" to="Bar" />
-      <Transition from="outcome2" to="done" />
+      <Transition from="outcome2" to="NestedNestedSM" />
     </State>
     <State name="Bar" type="py" module="yasmin_demos.yasmin_demo" class="BarState" x="154.05" y="-13.13">
       <Transition from="outcome3" to="Foo" />
     </State>
+    <StateMachine name="NestedNestedSM" outcomes="done" start_state="Foo" x="-225.57" y="-223.34">
+      <Key name="foo_str" type="out" description="String containing the current counter value produced by FooState." />
+      <State name="Foo" type="cpp" class="yasmin_demos/FooState" x="-349.96" y="-292.96">
+        <Transition from="outcome2" to="done" />
+        <Transition from="outcome1" to="done" />
+      </State>
+      <FinalOutcome name="done" x="-81.91" y="-182.57" />
+      <Transition from="done" to="done" />
+    </StateMachine>
     <FinalOutcome name="done" description="NestedFSM done" x="-40.72" y="-186.12" />
     <Transition from="done" to="done" />
   </StateMachine>

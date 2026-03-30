@@ -2042,7 +2042,8 @@ class YasminEditor(QMainWindow):
 
     def _runtime_log_line_color(self, message: str) -> str:
         """Return the HTML color used for a runtime log line."""
-        normalized = str(message).lstrip()
+        # split removes the tree stucture from the log
+        normalized = "[" + str(message).split("[", 1)[-1].lstrip()
         if normalized.startswith("[WARN]"):
             return PALETTE.runtime_log_warn.name()
         if normalized.startswith("[ERROR]"):
@@ -2063,14 +2064,23 @@ class YasminEditor(QMainWindow):
 
     def _format_runtime_log_entry(self, message: str) -> str:
         """Convert a runtime log message into a styled HTML block."""
-        color = self._runtime_log_line_color(message)
+        raw_message = str(message)
+        color = self._runtime_log_line_color(raw_message)
+
+        prefix = ""
+        content = raw_message
+        first_bracket_index = raw_message.find("[")
+        if first_bracket_index > 0:
+            prefix = raw_message[:first_bracket_index]
+            content = raw_message[first_bracket_index:]
+
         return (
             '<div style="'
-            f"color: {color}; "
             "font-family: 'DejaVu Sans Mono', 'Courier New', monospace; "
             "white-space: pre; "
             'margin: 0;">'
-            f"{escape(str(message))}"
+            f'<span style="color: {PALETTE.text_primary.name()};">{escape(prefix)}</span>'
+            f'<span style="color: {color};">{escape(content)}</span>'
             "</div>"
         )
 

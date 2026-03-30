@@ -96,6 +96,8 @@ class Runtime(QObject):
         self._last_log_message = ""
         self._last_log_timestamp = 0.0
         self._log_level = yasmin.LogLevel.INFO
+        self._log_depth = 0
+        self._log_depth_lock = threading.Lock()
 
         self._configure_logging()
 
@@ -226,6 +228,7 @@ class Runtime(QObject):
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
+        self._reset_log_depth()
         self._set_last_transition(None)
         self._set_active_path(self._resolve_initial_active_path())
         self.ready_changed.emit(self.is_ready())
@@ -325,6 +328,7 @@ class Runtime(QObject):
         self._finished = False
         self._final_outcome = None
         self._step_mode = False
+        self._reset_log_depth()
 
         if sm is not None:
             try:
@@ -351,6 +355,7 @@ class Runtime(QObject):
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
+        self._reset_log_depth()
 
         if reset_disposed:
             self._disposed = True
@@ -422,7 +427,32 @@ class Runtime(QObject):
             self._last_log_timestamp = 0.0
         self.log_cleared.emit()
 
-    def _append_log(self, message: str) -> None:
+    def _reset_log_depth(self) -> None:
+        """Reset the visual log depth to the top level."""
+        with self._log_depth_lock:
+            self._log_depth = 0
+
+    def _increment_log_depth(self) -> None:
+        """Increase the visual log depth after entering a container."""
+        with self._log_depth_lock:
+            self._log_depth += 1
+
+    def _decrement_log_depth(self) -> None:
+        """Decrease the visual log depth after leaving a container."""
+        with self._log_depth_lock:
+            self._log_depth = max(0, self._log_depth - 1)
+
+    def _get_log_depth(self) -> int:
+        """Return the current visual log depth."""
+        with self._log_depth_lock:
+            return self._log_depth
+
+    def _append_log(
+        self,
+        message: str,
+        depth: Optional[int] = None,
+        is_end: bool = False,
+    ) -> None:
         """Append a log line while filtering accidental duplicate bursts."""
         if self._disposed:
             return
@@ -430,6 +460,13 @@ class Runtime(QObject):
         clean_message = str(message).rstrip()
         if not clean_message:
             return
+
+        current_depth = self._get_log_depth() if depth is None else max(0, depth)
+        if current_depth > 0:
+            clean_message = (
+                f"{self._format_log_tree_prefix(current_depth, is_end=is_end)}"
+                f"{clean_message}"
+            )
 
         with self._log_buffer_lock:
             now = time.monotonic()
@@ -444,6 +481,13 @@ class Runtime(QObject):
             self._log_entries.append(clean_message)
 
         self.log_appended.emit(clean_message)
+
+    def _format_log_tree_prefix(self, depth: int, is_end: bool = False) -> str:
+        """Return a tree-style prefix for nested runtime log lines."""
+        if depth <= 0:
+            return ""
+        branch = "└─ " if is_end else "├─ "
+        return ("│  " * (depth - 1)) + branch
 
     def _resolve_container(self, path: tuple[str, ...]) -> Optional[Any]:
         """Resolve a container object for the given path inside the live machine."""
@@ -563,9 +607,12 @@ class Runtime(QObject):
         """Handle a state start callback from the live runtime."""
         if self._disposed:
             return
+
         self._append_log(
-            f"[START] {' / '.join(prefix)} with start_state: {start_state}"
+            f"[START] {' / '.join(prefix) if prefix else '<root>'} "
+            f"with start_state: {start_state}"
         )
+        self._increment_log_depth()
 
         self._set_running(True)
         active_path = self._expand_to_deepest_known_path(prefix + (str(start_state),))
@@ -580,7 +627,12 @@ class Runtime(QObject):
         """Handle the completion of a container or the root machine."""
         if self._disposed:
             return
-        self._append_log(f"[END] {' / '.join(prefix)} with {outcome}")
+
+        self._append_log(
+            f"[END] {' / '.join(prefix) if prefix else '<root>'} with outcome: {outcome}",
+            is_end=True,
+        )
+        self._decrement_log_depth()
 
         if prefix:
             self._set_active_path(prefix)
@@ -624,7 +676,8 @@ class Runtime(QObject):
             to_path = prefix + (str(to_state),)
 
             self._append_log(
-                f"[TRANSITION] {' / '.join(from_path)} --[{outcome}]--> {' / '.join(to_path)}"
+                f"[TRANSITION] {' / '.join(from_path)} "
+                f"--[{outcome}]--> {' / '.join(to_path)}"
             )
             self._set_last_transition((from_path, to_path, str(outcome)))
 
