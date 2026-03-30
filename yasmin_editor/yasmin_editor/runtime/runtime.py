@@ -412,11 +412,6 @@ class Runtime(QObject):
         if self._last_transition == transition:
             return
         self._last_transition = transition
-        if transition is not None:
-            from_path, to_path, outcome = transition
-            self._append_log(
-                f"[TRANSITION] {' / '.join(from_path)} --[{outcome}]--> {' / '.join(to_path)}"
-            )
         self.active_transition_changed.emit(transition)
 
     def _clear_logs(self) -> None:
@@ -568,6 +563,9 @@ class Runtime(QObject):
         """Handle a state start callback from the live runtime."""
         if self._disposed:
             return
+        self._append_log(
+            f"[START] {' / '.join(prefix)} with start_state: {start_state}"
+        )
 
         self._set_running(True)
         active_path = self._expand_to_deepest_known_path(prefix + (str(start_state),))
@@ -582,6 +580,7 @@ class Runtime(QObject):
         """Handle the completion of a container or the root machine."""
         if self._disposed:
             return
+        self._append_log(f"[END] {' / '.join(prefix)} with {outcome}")
 
         if prefix:
             self._set_active_path(prefix)
@@ -624,6 +623,9 @@ class Runtime(QObject):
             from_path = prefix + (str(from_state),)
             to_path = prefix + (str(to_state),)
 
+            self._append_log(
+                f"[TRANSITION] {' / '.join(from_path)} --[{outcome}]--> {' / '.join(to_path)}"
+            )
             self._set_last_transition((from_path, to_path, str(outcome)))
 
             with self._pause_condition:

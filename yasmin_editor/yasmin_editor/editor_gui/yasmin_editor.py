@@ -2054,7 +2054,11 @@ class YasminEditor(QMainWindow):
         if normalized.startswith("[DEBUG]"):
             return PALETTE.runtime_log_debug.name()
         if normalized.startswith("[TRANSITION]"):
-            return PALETTE.runtime_log_transition.name()
+            return PALETTE.runtime_log_system.name()
+        if normalized.startswith("[START]"):
+            return PALETTE.runtime_log_system.name()
+        if normalized.startswith("[END]"):
+            return PALETTE.runtime_log_system.name()
         return PALETTE.runtime_log_default.name()
 
     def _format_runtime_log_entry(self, message: str) -> str:

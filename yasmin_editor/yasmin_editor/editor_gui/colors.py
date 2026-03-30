@@ -65,7 +65,7 @@ class EditorPalette:
     runtime_log_debug: QColor
     runtime_log_warn: QColor
     runtime_log_error: QColor
-    runtime_log_transition: QColor
+    runtime_log_system: QColor
     connection_line: QColor
     connection_selected: QColor
     connection_label_bg: QColor
@@ -447,7 +447,7 @@ PALETTES = {
         runtime_log_debug=QColor(0, 128, 0),
         runtime_log_warn=QColor(138, 103, 0),
         runtime_log_error=QColor(181, 51, 51),
-        runtime_log_transition=QColor(21, 101, 192),
+        runtime_log_system=QColor(21, 101, 192),
         connection_line=QColor(60, 60, 180),
         connection_selected=QColor(255, 100, 0),
         connection_label_bg=QColor(255, 255, 255),
@@ -501,7 +501,7 @@ PALETTES = {
         runtime_log_debug=QColor(85, 255, 85),
         runtime_log_warn=QColor(255, 210, 77),
         runtime_log_error=QColor(255, 122, 122),
-        runtime_log_transition=QColor(102, 179, 255),
+        runtime_log_system=QColor(102, 179, 255),
         connection_line=QColor(130, 170, 255),
         connection_selected=QColor(255, 165, 90),
         connection_label_bg=QColor(49, 55, 63),
