@@ -171,14 +171,29 @@ class EditorUiMixin:
         """Create and setup the user interface."""
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        main_layout = QHBoxLayout(central_widget)
 
+        main_layout = QHBoxLayout(central_widget)
         splitter = QSplitter(Qt.Horizontal)
         main_layout.addWidget(splitter)
 
-        left_panel = QWidget()
-        left_layout = QVBoxLayout(left_panel)
+        self._create_toolbar()
 
+        left_panel = self._create_left_panel()
+        right_panel = self._create_right_panel()
+
+        splitter.addWidget(left_panel)
+        splitter.addWidget(right_panel)
+        splitter.setSizes([300, 1000])
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+
+        self.statusBar()
+        self.refresh_breadcrumbs()
+        self.update_container_controls()
+        self.update_runtime_actions()
+
+    def _create_toolbar(self) -> None:
+        """Create the main toolbar."""
         toolbar = QToolBar()
         self.addToolBar(toolbar)
 
@@ -241,14 +256,35 @@ class EditorUiMixin:
         self.runtime_mode_button.clicked.connect(self.toggle_runtime_mode)
         toolbar.addWidget(self.runtime_mode_button)
 
-        self.blackboard_widget = QWidget()
-        blackboard_layout = QVBoxLayout(self.blackboard_widget)
-        blackboard_layout.setContentsMargins(0, 0, 0, 0)
-        blackboard_layout.addWidget(QLabel("<b>Blackboard Keys:</b>"))
+    def _create_left_panel(self) -> QWidget:
+        """Create the complete left panel."""
+        left_panel = QWidget()
+        left_layout = QVBoxLayout(left_panel)
+
+        self.blackboard_widget = self._create_blackboard_widget()
+        left_layout.addWidget(self.blackboard_widget)
+
+        self.editor_sidebar_widget = self._create_editor_sidebar_widget()
+        left_layout.addWidget(self.editor_sidebar_widget)
+
+        self.runtime_sidebar_widget = self._create_runtime_sidebar_widget()
+        left_layout.addWidget(self.runtime_sidebar_widget)
+
+        return left_panel
+
+    def _create_blackboard_widget(self) -> QWidget:
+        """Create the blackboard panel."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        layout.addWidget(QLabel("<b>Blackboard Keys:</b>"))
+
         self.blackboard_filter = QLineEdit()
         self.blackboard_filter.setPlaceholderText("Filter blackboard keys...")
         self.blackboard_filter.textChanged.connect(self.filter_blackboard_keys)
-        blackboard_layout.addWidget(self.blackboard_filter)
+        layout.addWidget(self.blackboard_filter)
+
         self.blackboard_list = QListWidget()
         self.blackboard_list.setSelectionMode(QAbstractItemView.SingleSelection)
         self.blackboard_list.itemSelectionChanged.connect(
@@ -257,63 +293,84 @@ class EditorUiMixin:
         self.blackboard_list.itemDoubleClicked.connect(
             self.edit_selected_blackboard_key
         )
-        blackboard_layout.addWidget(self.blackboard_list)
-        blackboard_btn_row = QHBoxLayout()
+        layout.addWidget(self.blackboard_list)
+
+        button_row = QHBoxLayout()
         self.highlight_blackboard_btn = QPushButton("Highlight: On")
         self.highlight_blackboard_btn.setCheckable(True)
         self.highlight_blackboard_btn.setChecked(True)
         self.highlight_blackboard_btn.toggled.connect(
             self.toggle_blackboard_highlighting
         )
-        blackboard_btn_row.addWidget(self.highlight_blackboard_btn)
-        blackboard_layout.addLayout(blackboard_btn_row)
-        left_layout.addWidget(self.blackboard_widget)
+        button_row.addWidget(self.highlight_blackboard_btn)
+        layout.addLayout(button_row)
 
-        self.editor_sidebar_widget = QWidget()
-        editor_sidebar_layout = QVBoxLayout(self.editor_sidebar_widget)
-        editor_sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        return widget
 
-        editor_sidebar_layout.addWidget(QLabel("<b>Python States:</b>"))
-        self.python_filter = QLineEdit()
-        self.python_filter.setPlaceholderText("Filter Python states...")
-        self.python_filter.textChanged.connect(
-            lambda value: self.filter_list(self.python_list, value)
+    def _create_editor_sidebar_widget(self) -> QWidget:
+        """Create the editor sidebar with available plugins."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.python_filter, self.python_list = self._create_filterable_list_section(
+            layout,
+            "<b>Python States:</b>",
+            "Filter Python states...",
+            lambda value: self.filter_list(self.python_list, value),
+            self.on_plugin_double_clicked,
         )
-        editor_sidebar_layout.addWidget(self.python_filter)
-        self.python_list = QListWidget()
-        self.python_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
-        editor_sidebar_layout.addWidget(self.python_list)
 
-        editor_sidebar_layout.addWidget(QLabel("<b>C++ States:</b>"))
-        self.cpp_filter = QLineEdit()
-        self.cpp_filter.setPlaceholderText("Filter C++ states...")
-        self.cpp_filter.textChanged.connect(
-            lambda value: self.filter_list(self.cpp_list, value)
+        self.cpp_filter, self.cpp_list = self._create_filterable_list_section(
+            layout,
+            "<b>C++ States:</b>",
+            "Filter C++ states...",
+            lambda value: self.filter_list(self.cpp_list, value),
+            self.on_plugin_double_clicked,
         )
-        editor_sidebar_layout.addWidget(self.cpp_filter)
-        self.cpp_list = QListWidget()
-        self.cpp_list.itemDoubleClicked.connect(self.on_plugin_double_clicked)
-        editor_sidebar_layout.addWidget(self.cpp_list)
 
-        editor_sidebar_layout.addWidget(QLabel("<b>XML State Machines:</b>"))
-        self.xml_filter = QLineEdit()
-        self.xml_filter.setPlaceholderText("Filter XML state machines...")
-        self.xml_filter.textChanged.connect(
-            lambda value: self.filter_list(self.xml_list, value)
+        self.xml_filter, self.xml_list = self._create_filterable_list_section(
+            layout,
+            "<b>XML State Machines:</b>",
+            "Filter XML state machines...",
+            lambda value: self.filter_list(self.xml_list, value),
+            self.on_xml_double_clicked,
         )
-        editor_sidebar_layout.addWidget(self.xml_filter)
-        self.xml_list = QListWidget()
-        self.xml_list.itemDoubleClicked.connect(self.on_xml_double_clicked)
-        editor_sidebar_layout.addWidget(self.xml_list)
-        left_layout.addWidget(self.editor_sidebar_widget)
 
-        self.runtime_sidebar_widget = QWidget()
-        runtime_sidebar_layout = QVBoxLayout(self.runtime_sidebar_widget)
-        runtime_sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        return widget
 
-        runtime_log_header_layout = QHBoxLayout()
-        runtime_log_header_layout.addWidget(QLabel("<b>Logs:</b>"))
-        runtime_log_header_layout.addStretch()
+    def _create_filterable_list_section(
+        self,
+        layout: QVBoxLayout,
+        title: str,
+        placeholder: str,
+        filter_handler,
+        double_click_handler,
+    ) -> tuple[QLineEdit, QListWidget]:
+        """Create a titled filter + list section."""
+        layout.addWidget(QLabel(title))
+
+        filter_edit = QLineEdit()
+        filter_edit.setPlaceholderText(placeholder)
+        filter_edit.textChanged.connect(filter_handler)
+        layout.addWidget(filter_edit)
+
+        list_widget = QListWidget()
+        list_widget.itemDoubleClicked.connect(double_click_handler)
+        layout.addWidget(list_widget)
+
+        return filter_edit, list_widget
+
+    def _create_runtime_sidebar_widget(self) -> QWidget:
+        """Create the runtime log sidebar."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        header_layout = QHBoxLayout()
+        header_layout.addWidget(QLabel("<b>Logs:</b>"))
+        header_layout.addStretch()
+
         self.runtime_log_level_combo = QComboBox()
         self.runtime_log_level_combo.setProperty("flatInput", True)
         self.runtime_log_level_combo.addItems(["ERROR", "WARN", "INFO", "DEBUG"])
@@ -321,8 +378,8 @@ class EditorUiMixin:
         self.runtime_log_level_combo.currentTextChanged.connect(
             self.on_runtime_log_level_changed
         )
-        runtime_log_header_layout.addWidget(self.runtime_log_level_combo)
-        runtime_sidebar_layout.addLayout(runtime_log_header_layout)
+        header_layout.addWidget(self.runtime_log_level_combo)
+        layout.addLayout(header_layout)
 
         self.runtime_log_view = QTextBrowser()
         self.runtime_log_view.setReadOnly(True)
@@ -331,48 +388,17 @@ class EditorUiMixin:
         self.runtime_log_view.setLineWrapMode(QTextBrowser.NoWrap)
         self.runtime_log_view.setProperty("viewerText", True)
         self.runtime_log_view.document().setDocumentMargin(8)
-        runtime_sidebar_layout.addWidget(self.runtime_log_view)
-        self.runtime_sidebar_widget.setVisible(False)
-        left_layout.addWidget(self.runtime_sidebar_widget)
+        layout.addWidget(self.runtime_log_view)
 
+        widget.setVisible(False)
+        return widget
+
+    def _create_right_panel(self) -> QWidget:
+        """Create the complete right panel."""
         right_panel = QWidget()
         right_layout = QVBoxLayout(right_panel)
 
-        metadata_widget = QWidget()
-        metadata_layout = QVBoxLayout(metadata_widget)
-        metadata_layout.setContentsMargins(0, 0, 0, 0)
-
-        row1 = QHBoxLayout()
-        self.root_sm_name_label = QLabel("<b>State Machine Name:</b>")
-        row1.addWidget(self.root_sm_name_label)
-        self.root_sm_name_edit = QLineEdit()
-        self.root_sm_name_edit.setProperty("flatInput", True)
-        self.root_sm_name_edit.setPlaceholderText("Enter container name...")
-        self.root_sm_name_edit.textChanged.connect(self.on_root_sm_name_changed)
-        row1.addWidget(self.root_sm_name_edit)
-
-        self.start_state_label = QLabel("<b>Start State:</b>")
-        row1.addWidget(self.start_state_label)
-        self.start_state_combo = QComboBox()
-        self.start_state_combo.setProperty("flatInput", True)
-        self.start_state_combo.addItem("(None)")
-        self.start_state_combo.currentTextChanged.connect(self.on_start_state_changed)
-        row1.addWidget(self.start_state_combo)
-        metadata_layout.addLayout(row1)
-
-        row2 = QHBoxLayout()
-        row2.addWidget(QLabel("<b>Description:</b>"))
-        self.root_sm_description_edit = QLineEdit()
-        self.root_sm_description_edit.setProperty("flatInput", True)
-        self.root_sm_description_edit.setPlaceholderText(
-            "Enter container description..."
-        )
-        self.root_sm_description_edit.textChanged.connect(
-            self.on_root_sm_description_changed
-        )
-        row2.addWidget(self.root_sm_description_edit)
-        metadata_layout.addLayout(row2)
-
+        metadata_widget = self._create_metadata_widget()
         right_layout.addWidget(metadata_widget)
 
         self.canvas_header = QLabel(
@@ -386,8 +412,62 @@ class EditorUiMixin:
         self.breadcrumb_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.addWidget(breadcrumb_widget)
 
-        self.runtime_controls_widget = QWidget()
-        self.runtime_controls_layout = QHBoxLayout(self.runtime_controls_widget)
+        self.runtime_controls_widget = self._create_runtime_controls_widget()
+        right_layout.addWidget(self.runtime_controls_widget)
+
+        self.canvas_frame = self._create_canvas_frame()
+        right_layout.addWidget(self.canvas_frame)
+
+        return right_panel
+
+    def _create_metadata_widget(self) -> QWidget:
+        """Create the root container metadata controls."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        row1 = QHBoxLayout()
+
+        self.root_sm_name_label = QLabel("<b>State Machine Name:</b>")
+        row1.addWidget(self.root_sm_name_label)
+
+        self.root_sm_name_edit = QLineEdit()
+        self.root_sm_name_edit.setProperty("flatInput", True)
+        self.root_sm_name_edit.setPlaceholderText("Enter container name...")
+        self.root_sm_name_edit.textChanged.connect(self.on_root_sm_name_changed)
+        row1.addWidget(self.root_sm_name_edit)
+
+        self.start_state_label = QLabel("<b>Start State:</b>")
+        row1.addWidget(self.start_state_label)
+
+        self.start_state_combo = QComboBox()
+        self.start_state_combo.setProperty("flatInput", True)
+        self.start_state_combo.addItem("(None)")
+        self.start_state_combo.currentTextChanged.connect(self.on_start_state_changed)
+        row1.addWidget(self.start_state_combo)
+
+        layout.addLayout(row1)
+
+        row2 = QHBoxLayout()
+        row2.addWidget(QLabel("<b>Description:</b>"))
+
+        self.root_sm_description_edit = QLineEdit()
+        self.root_sm_description_edit.setProperty("flatInput", True)
+        self.root_sm_description_edit.setPlaceholderText(
+            "Enter container description..."
+        )
+        self.root_sm_description_edit.textChanged.connect(
+            self.on_root_sm_description_changed
+        )
+        row2.addWidget(self.root_sm_description_edit)
+
+        layout.addLayout(row2)
+        return widget
+
+    def _create_runtime_controls_widget(self) -> QWidget:
+        """Create the runtime control bar."""
+        widget = QWidget()
+        self.runtime_controls_layout = QHBoxLayout(widget)
         self.runtime_controls_layout.setContentsMargins(0, 0, 0, 0)
 
         self.runtime_status_label = QLabel("Ready")
@@ -441,29 +521,20 @@ class EditorUiMixin:
         self.runtime_controls_layout.addWidget(self.runtime_restart_button)
 
         self.runtime_controls_layout.addStretch()
-        right_layout.addWidget(self.runtime_controls_widget)
+        return widget
 
-        self.canvas_frame = QFrame()
-        self.canvas_frame_layout = QVBoxLayout(self.canvas_frame)
+    def _create_canvas_frame(self) -> QFrame:
+        """Create the canvas frame and canvas widget."""
+        frame = QFrame()
+        self.canvas_frame_layout = QVBoxLayout(frame)
         self.canvas_frame_layout.setContentsMargins(0, 0, 0, 0)
 
         self.canvas = StateMachineCanvas()
         self.canvas.editor_ref = self
         self.canvas.scene.selectionChanged.connect(self.refresh_visual_highlighting)
         self.canvas_frame_layout.addWidget(self.canvas)
-        right_layout.addWidget(self.canvas_frame)
 
-        splitter.addWidget(left_panel)
-        splitter.addWidget(right_panel)
-
-        splitter.setSizes([300, 1000])
-        splitter.setStretchFactor(0, 0)
-        splitter.setStretchFactor(1, 1)
-
-        self.statusBar()
-        self.refresh_breadcrumbs()
-        self.update_container_controls()
-        self.update_runtime_actions()
+        return frame
 
     def _open_add_state_dialog_for_plugin(self, plugin_info: PluginInfo) -> None:
         if self.is_read_only_mode():
