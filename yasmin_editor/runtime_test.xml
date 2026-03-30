@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<StateMachine name="RuntimeTest" outcomes="done" start_state="Demo3" description="This is a test FSM for the Runtime Mode">
+  <Key name="foo_str" type="in/out" description="String containing the current counter value produced by FooState." />
+  <Key name="pose_bytes" type="in/out" description="Serialized Pose message stored as bytes in the blackboard." />
+  <Key name="pose_bytes__type" type="in/out" description="Type information for the serialized Pose message." />
+  <StateMachine name="Demo3" type="xml" file_name="demo_3.xml" package="yasmin_demos" description="Outcomes:&#10; - outcome4: Final outcome&#10;&#10;Input Keys:&#10; - pose_bytes: Serialized Pose message stored as bytes in the blackboard. (str)&#10; - pose_bytes__type: Type information for the serialized Pose message. (str)&#10;&#10;Output Keys:&#10; - pose_bytes: Serialized Pose message stored as bytes in the blackboard. (str)&#10; - pose_bytes__type: Type information for the serialized Pose message. (str)" x="-700.84" y="-110.05">
+    <Transition from="outcome4" to="Foo" />
+  </StateMachine>
+  <State name="Bar" type="cpp" class="yasmin_demos/BarState" x="-136.93" y="-115.41">
+    <Transition from="outcome3" to="Foo" />
+  </State>
+  <State name="Foo" type="cpp" class="yasmin_demos/FooState" description="Produces a counter string and stores it in the blackboard while the counter is below the threshold.&#10;&#10;Outcomes:&#10; - outcome2: Counter reached the threshold.&#10; - outcome1: Counter is below the threshold&#10;&#10;Output Keys:&#10; - foo_str: String containing the current counter value produced by FooState." x="-463.18" y="-148.59">
+    <Transition from="outcome1" to="Bar" />
+    <Transition from="outcome2" to="NestedFSM" />
+  </State>
+  <StateMachine name="NestedFSM" outcomes="done" start_state="Foo" x="-444.30" y="83.10">
+    <Key name="foo_str" type="in/out" description="Formatted counter string written by FooState." />
+    <State name="Foo" type="py" module="yasmin_demos.yasmin_demo" class="FooState" x="-252.00" y="-11.50">
+      <Transition from="outcome1" to="Bar" />
+      <Transition from="outcome2" to="done" />
+    </State>
+    <State name="Bar" type="py" module="yasmin_demos.yasmin_demo" class="BarState" x="154.05" y="-13.13">
+      <Transition from="outcome3" to="Foo" />
+    </State>
+    <FinalOutcome name="done" description="NestedFSM done" x="-40.72" y="-186.12" />
+    <Transition from="done" to="done" />
+  </StateMachine>
+  <FinalOutcome name="done" x="-451.01" y="287.40" />
+</StateMachine>
