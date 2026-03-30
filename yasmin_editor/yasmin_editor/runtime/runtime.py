@@ -85,8 +85,6 @@ class Runtime(QObject):
         self._pause_requested = False
 
         self._step_mode = False
-        self._step_target_leaf_path: Optional[tuple[str, ...]] = None
-        self._step_target_started = False
 
         self._log_entries: list[str] = []
         self._last_log_message = ""
@@ -106,6 +104,10 @@ class Runtime(QObject):
     def is_blocked(self) -> bool:
         """Return whether execution is currently paused."""
         return self._blocked
+
+    def is_step_mode(self) -> bool:
+        """Return whether single-step execution is armed."""
+        return self._step_mode
 
     def is_finished(self) -> bool:
         """Return whether the loaded state machine finished execution."""
@@ -175,8 +177,6 @@ class Runtime(QObject):
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
-        self._step_target_leaf_path = None
-        self._step_target_started = False
         self._set_last_transition(None)
         self._set_active_path(self._resolve_initial_active_path())
         self.ready_changed.emit(self.is_ready())
@@ -220,7 +220,7 @@ class Runtime(QObject):
             return
 
         self._start_execution_thread()
-        self.status_changed.emit("Runtime started")
+        self.status_changed.emit("Runtime will execute one state")
 
     def cancel_state(self) -> None:
         """Request cancellation of the currently active state."""
@@ -276,8 +276,6 @@ class Runtime(QObject):
         self._finished = False
         self._final_outcome = None
         self._step_mode = False
-        self._step_target_leaf_path = None
-        self._step_target_started = False
 
         if sm is not None:
             try:
@@ -304,8 +302,6 @@ class Runtime(QObject):
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
-        self._step_target_leaf_path = None
-        self._step_target_started = False
 
         if RuntimeLoggingBridge.get_current_runtime() is self:
             RuntimeLoggingBridge.set_current_runtime(None)
@@ -338,14 +334,6 @@ class Runtime(QObject):
         with self._pause_condition:
             self._step_mode = step_once
             self._pause_requested = False
-            if step_once and self._is_leaf_state_path(self._active_path):
-                # When stepping from a paused leaf state, continue until this exact
-                # leaf finishes and the next state is about to start.
-                self._step_target_leaf_path = tuple(self._active_path)
-                self._step_target_started = True
-            else:
-                self._step_target_leaf_path = None
-                self._step_target_started = False
             self._pause_condition.notify_all()
         if self._blocked:
             self._set_blocked(False)
@@ -437,35 +425,6 @@ class Runtime(QObject):
         """Resolve the best available live execution path for the UI."""
         live_path = self._expand_to_deepest_known_path(tuple())
         return live_path if live_path else fallback
-
-    def _is_leaf_state_path(self, path: tuple[str, ...]) -> bool:
-        """Return whether a path points to a non-container state."""
-        return bool(path) and not is_container_object(self._resolve_container(path))
-
-    def _set_step_target_from_active_path(self, active_path: tuple[str, ...]) -> None:
-        """Initialize single-step tracking once a leaf state becomes active."""
-        if not self._step_mode or not self._is_leaf_state_path(active_path):
-            return
-        if self._step_target_leaf_path is None:
-            self._step_target_leaf_path = active_path
-        if active_path == self._step_target_leaf_path:
-            self._step_target_started = True
-
-    def _complete_step_for_finished_leaf(self, leaf_path: tuple[str, ...]) -> bool:
-        """Finalize a single-step cycle when the tracked leaf state finished."""
-        with self._pause_condition:
-            if not self._step_mode:
-                return False
-            if self._step_target_leaf_path != leaf_path:
-                return False
-            if not self._step_target_started:
-                return False
-
-            self._step_mode = False
-            self._step_target_leaf_path = None
-            self._step_target_started = False
-            self._pause_requested = True
-            return True
 
     def _pause_if_requested(self) -> None:
         """Block the worker thread while a pause request is active."""
@@ -569,7 +528,6 @@ class Runtime(QObject):
         self._set_running(True)
         active_path = self._expand_to_deepest_known_path(prefix + (str(start_state),))
         self._set_active_path(active_path)
-        self._set_step_target_from_active_path(active_path)
 
     def end_cb(
         self,
@@ -583,19 +541,12 @@ class Runtime(QObject):
 
         if prefix:
             self._set_active_path(prefix)
-            if (
-                self._step_target_leaf_path is not None
-                and self._step_target_leaf_path[: len(prefix)] == prefix
-            ):
-                self._complete_step_for_finished_leaf(self._step_target_leaf_path)
             self._pause_if_requested()
             return
 
         with self._pause_condition:
             self._pause_requested = False
             self._step_mode = False
-            self._step_target_leaf_path = None
-            self._step_target_started = False
             self._pause_condition.notify_all()
 
         self._finished = True
@@ -630,8 +581,13 @@ class Runtime(QObject):
             to_path = prefix + (str(to_state),)
 
             self._set_last_transition((from_path, to_path, str(outcome)))
-            self._complete_step_for_finished_leaf(from_path)
             self._set_active_path(self._expand_to_deepest_known_path(to_path))
+
+            with self._pause_condition:
+                if self._step_mode:
+                    self._step_mode = False
+                    self._pause_requested = True
+
             self._pause_if_requested()
         finally:
             try:

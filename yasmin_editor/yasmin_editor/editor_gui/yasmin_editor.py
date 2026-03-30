@@ -2122,6 +2122,7 @@ class YasminEditor(QMainWindow):
         runtime_running = runtime_ready and runtime.is_running()
         runtime_blocked = runtime_running and runtime.is_blocked()
         runtime_playing = runtime_running and not runtime_blocked
+        runtime_step_mode = runtime_running and runtime.is_step_mode()
         runtime_finished = runtime_ready and runtime.is_finished()
 
         self._set_runtime_mode_button_checked(self.runtime_mode_enabled)
@@ -2139,7 +2140,7 @@ class YasminEditor(QMainWindow):
             "runtime_play_button": runtime_ready
             and not runtime_playing
             and not runtime_finished,
-            "runtime_pause_button": runtime_playing,
+            "runtime_pause_button": runtime_playing and not runtime_step_mode,
             "runtime_step_button": runtime_ready
             and not runtime_playing
             and not runtime_finished,
