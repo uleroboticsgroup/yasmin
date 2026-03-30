@@ -18,24 +18,11 @@
 from typing import Dict, List, Optional
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (
-    QComboBox,
-    QDialog,
-    QDialogButtonBox,
-    QFormLayout,
-    QHBoxLayout,
-    QHeaderView,
-    QLabel,
-    QLineEdit,
-    QMessageBox,
-    QPushButton,
-    QSizePolicy,
-    QTableWidget,
-    QTableWidgetItem,
-    QTextEdit,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFormLayout,
+                             QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+                             QMessageBox, QPushButton, QSizePolicy,
+                             QTableWidget, QTableWidgetItem, QTextEdit,
+                             QVBoxLayout, QWidget)
 
 
 class ContainerDialogBase(QDialog):
@@ -109,7 +96,7 @@ class ContainerDialogBase(QDialog):
 
     def _create_description_row(self, description: str) -> None:
         """Create the optional description editor."""
-        description_label = QLabel("<b>Description (optional):</b>")
+        description_label = QLabel("<b>Description:</b>")
         self.description_edit = QTextEdit()
         self.description_edit.setMaximumHeight(60)
 
@@ -120,14 +107,16 @@ class ContainerDialogBase(QDialog):
 
     def _create_remappings_row(self, remappings: Dict[str, str]) -> None:
         """Create the remappings editor table and controls."""
-        remappings_label = QLabel("<b>Remappings (optional):</b>")
+        remappings_label = QLabel("<b>Remappings:</b>")
         remappings_widget = QWidget()
         remappings_layout = QVBoxLayout(remappings_widget)
         remappings_layout.setContentsMargins(0, 0, 0, 0)
 
         self.remappings_table = QTableWidget(0, 2)
         self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
-        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.remappings_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.Stretch
+        )
         self.remappings_table.setMinimumHeight(80)
         self.remappings_table.setMaximumHeight(150)
         remappings_layout.addWidget(self.remappings_table)
@@ -173,7 +162,9 @@ class ContainerDialogBase(QDialog):
     def parse_outcomes(self) -> List[str]:
         """Return the read-only outcomes as a normalized list."""
         outcomes_text = self.outcomes_display.text().strip()
-        return [outcome.strip() for outcome in outcomes_text.split(",") if outcome.strip()]
+        return [
+            outcome.strip() for outcome in outcomes_text.split(",") if outcome.strip()
+        ]
 
     def parse_remappings(self) -> Dict[str, str]:
         """Return remappings from the table, skipping incomplete rows."""

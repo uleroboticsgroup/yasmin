@@ -15,16 +15,8 @@
 
 from typing import Dict, Optional
 
-from PyQt5.QtWidgets import (
-    QComboBox,
-    QDialog,
-    QDialogButtonBox,
-    QFormLayout,
-    QLabel,
-    QLineEdit,
-    QMessageBox,
-    QTextEdit,
-)
+from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFormLayout,
+                             QLabel, QLineEdit, QMessageBox, QTextEdit)
 
 
 class BlackboardKeyDialog(QDialog):
@@ -71,7 +63,7 @@ class BlackboardKeyDialog(QDialog):
         self.description_edit.setMaximumHeight(80)
         self.description_edit.setPlainText(key_data.get("description", ""))
         self.description_edit.setReadOnly(self.readonly)
-        layout.addRow(QLabel("<b>Description (optional):</b>"), self.description_edit)
+        layout.addRow(QLabel("<b>Description:</b>"), self.description_edit)
 
         self.default_type_combo = QComboBox()
         self.default_type_combo.addItem("No default", "")
@@ -86,10 +78,14 @@ class BlackboardKeyDialog(QDialog):
         self.default_type_combo.currentIndexChanged.connect(
             self._update_default_value_state
         )
-        self.default_type_combo.setEnabled(not self.readonly and self.default_type_combo.isEnabled())
+        self.default_type_combo.setEnabled(
+            not self.readonly and self.default_type_combo.isEnabled()
+        )
         layout.addRow("Default Type:", self.default_type_combo)
 
-        self.default_value_edit = QLineEdit(str(key_data.get("default_value", "") or ""))
+        self.default_value_edit = QLineEdit(
+            str(key_data.get("default_value", "") or "")
+        )
         self.default_value_edit.setReadOnly(self.readonly)
         self.default_value_edit.setPlaceholderText(
             "Default value. Leave empty for an empty string when type is str"
@@ -99,7 +95,11 @@ class BlackboardKeyDialog(QDialog):
         self.type_combo.currentTextChanged.connect(self._update_default_fields)
         self._update_default_fields(self.type_combo.currentText())
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Close if self.readonly else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel))
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Close
+            if self.readonly
+            else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        )
         if self.readonly:
             buttons.rejected.connect(self.reject)
         else:

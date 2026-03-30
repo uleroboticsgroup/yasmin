@@ -16,22 +16,10 @@
 import os
 from typing import Dict, List, Optional, Tuple
 
-from PyQt5.QtWidgets import (
-    QComboBox,
-    QDialog,
-    QDialogButtonBox,
-    QFormLayout,
-    QHBoxLayout,
-    QHeaderView,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QTableWidget,
-    QTableWidgetItem,
-    QTextEdit,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFormLayout,
+                             QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+                             QPushButton, QTableWidget, QTableWidgetItem,
+                             QTextEdit, QVBoxLayout, QWidget)
 from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
@@ -120,14 +108,16 @@ class StatePropertiesDialog(QDialog):
         self.description_edit.setProperty("viewerText", True)
         layout.addRow(desc_label, self.description_edit)
 
-        remappings_label: QLabel = QLabel("<b>Remappings (optional):</b>")
+        remappings_label: QLabel = QLabel("<b>Remappings:</b>")
         remappings_widget: QWidget = QWidget()
         remappings_layout: QVBoxLayout = QVBoxLayout(remappings_widget)
         remappings_layout.setContentsMargins(0, 0, 0, 0)
 
         self.remappings_table: QTableWidget = QTableWidget(0, 2)
         self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
-        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.remappings_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.Stretch
+        )
         self.remappings_table.setMinimumHeight(80)
         self.remappings_table.setMaximumHeight(150)
         self.remappings_table.setEnabled(not self.readonly)
@@ -173,7 +163,9 @@ class StatePropertiesDialog(QDialog):
             )
 
         buttons: QDialogButtonBox = QDialogButtonBox(
-            QDialogButtonBox.Close if self.readonly else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            QDialogButtonBox.Close
+            if self.readonly
+            else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         )
         if self.readonly:
             buttons.rejected.connect(self.reject)
@@ -186,7 +178,10 @@ class StatePropertiesDialog(QDialog):
         key_name = str(key_info.get("name", "")).strip()
         key_desc = str(key_info.get("description", "")).strip()
         key_type = str(
-            key_info.get("type", key_info.get("default_value_type", key_info.get("default_type", "")))
+            key_info.get(
+                "type",
+                key_info.get("default_value_type", key_info.get("default_type", "")),
+            )
         ).strip()
 
         line = key_name if key_name else "(unnamed)"
@@ -215,7 +210,9 @@ class StatePropertiesDialog(QDialog):
         fallback_output_keys: Optional[List[Dict[str, str]]] = None,
     ) -> str:
         if plugin_info:
-            base_description = str(getattr(plugin_info, "description", "") or "").strip()
+            base_description = str(
+                getattr(plugin_info, "description", "") or ""
+            ).strip()
             input_keys = list(getattr(plugin_info, "input_keys", []) or [])
             output_keys = list(getattr(plugin_info, "output_keys", []) or [])
             outcomes = list(getattr(plugin_info, "outcomes", []) or [])
@@ -278,7 +275,9 @@ class StatePropertiesDialog(QDialog):
         self.remappings_table.setItem(row, 1, QTableWidgetItem(new_key))
 
     def update_description(self) -> None:
-        plugin_info: Optional[PluginInfo] = None if self._container_kind else self.plugin_combo.currentData()
+        plugin_info: Optional[PluginInfo] = (
+            None if self._container_kind else self.plugin_combo.currentData()
+        )
         description_text = self._build_description_text(
             plugin_info,
             fallback_description=self._base_description,
@@ -329,7 +328,9 @@ class StatePropertiesDialog(QDialog):
         List[Dict[str, str]],
     ]:
         name: str = self.name_edit.text().strip()
-        plugin: Optional[PluginInfo] = None if self._container_kind else self.plugin_combo.currentData()
+        plugin: Optional[PluginInfo] = (
+            None if self._container_kind else self.plugin_combo.currentData()
+        )
 
         remappings: Dict[str, str] = {}
         for row in range(self.remappings_table.rowCount()):
