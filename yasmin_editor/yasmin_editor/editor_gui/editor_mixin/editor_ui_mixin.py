@@ -16,11 +16,10 @@
 from typing import Optional
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QAbstractItemView, QAction, QComboBox, QDialog,
-                             QFileDialog, QFrame, QHBoxLayout, QInputDialog,
-                             QLabel, QLineEdit, QListWidget, QListWidgetItem,
+from PyQt5.QtWidgets import (QDialog, QFileDialog, QHBoxLayout,
+                             QInputDialog, QListWidget, QListWidgetItem,
                              QMessageBox, QPushButton, QSplitter, QTextBrowser,
-                             QToolBar, QVBoxLayout, QWidget)
+                             QVBoxLayout, QWidget)
 from yasmin_plugins_manager.plugin_manager import PluginInfo
 
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -36,11 +35,12 @@ from yasmin_editor.editor_gui.nodes.container_state_node import \
     ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
-from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
+from yasmin_editor.editor_gui.ui.panels import build_right_panel
+from yasmin_editor.editor_gui.ui.sidebars import build_left_panel
+from yasmin_editor.editor_gui.ui.toolbar import build_toolbar
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state_machine import StateMachine
-
 
 class EditorUiMixin:
     """Mixin for editor functionality split from the main window."""
@@ -176,10 +176,10 @@ class EditorUiMixin:
         splitter = QSplitter(Qt.Horizontal)
         main_layout.addWidget(splitter)
 
-        self._create_toolbar()
+        build_toolbar(self)
 
-        left_panel = self._create_left_panel()
-        right_panel = self._create_right_panel()
+        left_panel = build_left_panel(self)
+        right_panel = build_right_panel(self)
 
         splitter.addWidget(left_panel)
         splitter.addWidget(right_panel)
@@ -191,350 +191,6 @@ class EditorUiMixin:
         self.refresh_breadcrumbs()
         self.update_container_controls()
         self.update_runtime_actions()
-
-    def _create_toolbar(self) -> None:
-        """Create the main toolbar."""
-        toolbar = QToolBar()
-        self.addToolBar(toolbar)
-
-        self.new_action = QAction("New", self)
-        self.new_action.setShortcut("Ctrl+N")
-        self.new_action.triggered.connect(self.new_state_machine)
-        toolbar.addAction(self.new_action)
-
-        self.open_action = QAction("Open", self)
-        self.open_action.setShortcut("Ctrl+O")
-        self.open_action.triggered.connect(self.open_state_machine)
-        toolbar.addAction(self.open_action)
-
-        self.save_action = QAction("Save", self)
-        self.save_action.setShortcut("Ctrl+S")
-        self.save_action.triggered.connect(self.save_state_machine)
-        toolbar.addAction(self.save_action)
-
-        toolbar.addSeparator()
-
-        self.add_state_action = QAction("Add State", self)
-        self.add_state_action.triggered.connect(self.add_state)
-        toolbar.addAction(self.add_state_action)
-
-        self.add_state_machine_action = QAction("Add State Machine", self)
-        self.add_state_machine_action.triggered.connect(self.add_state_machine)
-        toolbar.addAction(self.add_state_machine_action)
-
-        self.add_concurrence_action = QAction("Add Concurrence", self)
-        self.add_concurrence_action.triggered.connect(self.add_concurrence)
-        toolbar.addAction(self.add_concurrence_action)
-
-        self.add_final_action = QAction("Add Final Outcome", self)
-        self.add_final_action.triggered.connect(self.add_final_outcome)
-        toolbar.addAction(self.add_final_action)
-
-        toolbar.addSeparator()
-
-        self.edit_current_action = QAction("Edit Current Container", self)
-        self.edit_current_action.triggered.connect(self.edit_current_container)
-        toolbar.addAction(self.edit_current_action)
-
-        self.delete_action = QAction("Delete Selected", self)
-        self.delete_action.triggered.connect(self.delete_selected)
-        toolbar.addAction(self.delete_action)
-
-        toolbar.addSeparator()
-
-        help_action = QAction("Help", self)
-        help_action.triggered.connect(self.show_help)
-        toolbar.addAction(help_action)
-
-        toolbar.addSeparator()
-
-        self.runtime_mode_button = QPushButton("Runtime Mode")
-        self.runtime_mode_button.setCheckable(True)
-        self.runtime_mode_button.setToolTip(
-            "Enter or leave runtime mode using the current state machine XML snapshot."
-        )
-        self.runtime_mode_button.clicked.connect(self.toggle_runtime_mode)
-        toolbar.addWidget(self.runtime_mode_button)
-
-    def _create_left_panel(self) -> QWidget:
-        """Create the complete left panel."""
-        left_panel = QWidget()
-        left_layout = QVBoxLayout(left_panel)
-
-        self.blackboard_widget = self._create_blackboard_widget()
-        left_layout.addWidget(self.blackboard_widget)
-
-        self.editor_sidebar_widget = self._create_editor_sidebar_widget()
-        left_layout.addWidget(self.editor_sidebar_widget)
-
-        self.runtime_sidebar_widget = self._create_runtime_sidebar_widget()
-        left_layout.addWidget(self.runtime_sidebar_widget)
-
-        return left_panel
-
-    def _create_blackboard_widget(self) -> QWidget:
-        """Create the blackboard panel."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        layout.addWidget(QLabel("<b>Blackboard Keys:</b>"))
-
-        self.blackboard_filter = QLineEdit()
-        self.blackboard_filter.setPlaceholderText("Filter blackboard keys...")
-        self.blackboard_filter.textChanged.connect(self.filter_blackboard_keys)
-        layout.addWidget(self.blackboard_filter)
-
-        self.blackboard_list = QListWidget()
-        self.blackboard_list.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.blackboard_list.itemSelectionChanged.connect(
-            self.on_blackboard_selection_changed
-        )
-        self.blackboard_list.itemDoubleClicked.connect(
-            self.edit_selected_blackboard_key
-        )
-        layout.addWidget(self.blackboard_list)
-
-        button_row = QHBoxLayout()
-        self.highlight_blackboard_btn = QPushButton("Highlight: On")
-        self.highlight_blackboard_btn.setCheckable(True)
-        self.highlight_blackboard_btn.setChecked(True)
-        self.highlight_blackboard_btn.toggled.connect(
-            self.toggle_blackboard_highlighting
-        )
-        button_row.addWidget(self.highlight_blackboard_btn)
-        layout.addLayout(button_row)
-
-        return widget
-
-    def _create_editor_sidebar_widget(self) -> QWidget:
-        """Create the editor sidebar with available plugins."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        self.python_filter, self.python_list = self._create_filterable_list_section(
-            layout,
-            "<b>Python States:</b>",
-            "Filter Python states...",
-            lambda value: self.filter_list(self.python_list, value),
-            self.on_plugin_double_clicked,
-        )
-
-        self.cpp_filter, self.cpp_list = self._create_filterable_list_section(
-            layout,
-            "<b>C++ States:</b>",
-            "Filter C++ states...",
-            lambda value: self.filter_list(self.cpp_list, value),
-            self.on_plugin_double_clicked,
-        )
-
-        self.xml_filter, self.xml_list = self._create_filterable_list_section(
-            layout,
-            "<b>XML State Machines:</b>",
-            "Filter XML state machines...",
-            lambda value: self.filter_list(self.xml_list, value),
-            self.on_xml_double_clicked,
-        )
-
-        return widget
-
-    def _create_filterable_list_section(
-        self,
-        layout: QVBoxLayout,
-        title: str,
-        placeholder: str,
-        filter_handler,
-        double_click_handler,
-    ) -> tuple[QLineEdit, QListWidget]:
-        """Create a titled filter + list section."""
-        layout.addWidget(QLabel(title))
-
-        filter_edit = QLineEdit()
-        filter_edit.setPlaceholderText(placeholder)
-        filter_edit.textChanged.connect(filter_handler)
-        layout.addWidget(filter_edit)
-
-        list_widget = QListWidget()
-        list_widget.itemDoubleClicked.connect(double_click_handler)
-        layout.addWidget(list_widget)
-
-        return filter_edit, list_widget
-
-    def _create_runtime_sidebar_widget(self) -> QWidget:
-        """Create the runtime log sidebar."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        header_layout = QHBoxLayout()
-        header_layout.addWidget(QLabel("<b>Logs:</b>"))
-        header_layout.addStretch()
-
-        self.runtime_log_level_combo = QComboBox()
-        self.runtime_log_level_combo.setProperty("flatInput", True)
-        self.runtime_log_level_combo.addItems(["ERROR", "WARN", "INFO", "DEBUG"])
-        self.runtime_log_level_combo.setCurrentText("INFO")
-        self.runtime_log_level_combo.currentTextChanged.connect(
-            self.on_runtime_log_level_changed
-        )
-        header_layout.addWidget(self.runtime_log_level_combo)
-        layout.addLayout(header_layout)
-
-        self.runtime_log_view = QTextBrowser()
-        self.runtime_log_view.setReadOnly(True)
-        self.runtime_log_view.setOpenExternalLinks(False)
-        self.runtime_log_view.setOpenLinks(False)
-        self.runtime_log_view.setLineWrapMode(QTextBrowser.NoWrap)
-        self.runtime_log_view.setProperty("viewerText", True)
-        self.runtime_log_view.document().setDocumentMargin(8)
-        layout.addWidget(self.runtime_log_view)
-
-        widget.setVisible(False)
-        return widget
-
-    def _create_right_panel(self) -> QWidget:
-        """Create the complete right panel."""
-        right_panel = QWidget()
-        right_layout = QVBoxLayout(right_panel)
-
-        metadata_widget = self._create_metadata_widget()
-        right_layout.addWidget(metadata_widget)
-
-        self.canvas_header = QLabel(
-            "<b>State Machine Canvas:</b> "
-            "<i>(Ctrl + double-click a nested container to enter it, drag from blue port to create transitions, scroll to zoom, right-click for options)</i>"
-        )
-        right_layout.addWidget(self.canvas_header)
-
-        breadcrumb_widget = QWidget()
-        self.breadcrumb_layout = QHBoxLayout(breadcrumb_widget)
-        self.breadcrumb_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.addWidget(breadcrumb_widget)
-
-        self.runtime_controls_widget = self._create_runtime_controls_widget()
-        right_layout.addWidget(self.runtime_controls_widget)
-
-        self.canvas_frame = self._create_canvas_frame()
-        right_layout.addWidget(self.canvas_frame)
-
-        return right_panel
-
-    def _create_metadata_widget(self) -> QWidget:
-        """Create the root container metadata controls."""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        row1 = QHBoxLayout()
-
-        self.root_sm_name_label = QLabel("<b>State Machine Name:</b>")
-        row1.addWidget(self.root_sm_name_label)
-
-        self.root_sm_name_edit = QLineEdit()
-        self.root_sm_name_edit.setProperty("flatInput", True)
-        self.root_sm_name_edit.setPlaceholderText("Enter container name...")
-        self.root_sm_name_edit.textChanged.connect(self.on_root_sm_name_changed)
-        row1.addWidget(self.root_sm_name_edit)
-
-        self.start_state_label = QLabel("<b>Start State:</b>")
-        row1.addWidget(self.start_state_label)
-
-        self.start_state_combo = QComboBox()
-        self.start_state_combo.setProperty("flatInput", True)
-        self.start_state_combo.addItem("(None)")
-        self.start_state_combo.currentTextChanged.connect(self.on_start_state_changed)
-        row1.addWidget(self.start_state_combo)
-
-        layout.addLayout(row1)
-
-        row2 = QHBoxLayout()
-        row2.addWidget(QLabel("<b>Description:</b>"))
-
-        self.root_sm_description_edit = QLineEdit()
-        self.root_sm_description_edit.setProperty("flatInput", True)
-        self.root_sm_description_edit.setPlaceholderText(
-            "Enter container description..."
-        )
-        self.root_sm_description_edit.textChanged.connect(
-            self.on_root_sm_description_changed
-        )
-        row2.addWidget(self.root_sm_description_edit)
-
-        layout.addLayout(row2)
-        return widget
-
-    def _create_runtime_controls_widget(self) -> QWidget:
-        """Create the runtime control bar."""
-        widget = QWidget()
-        self.runtime_controls_layout = QHBoxLayout(widget)
-        self.runtime_controls_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.runtime_status_label = QLabel("Ready")
-        self.runtime_status_label.setAlignment(Qt.AlignCenter)
-        self.runtime_status_label.setMinimumWidth(120)
-        self.runtime_status_label.setTextFormat(Qt.PlainText)
-        self.runtime_controls_layout.addWidget(self.runtime_status_label)
-
-        self.runtime_play_button = QPushButton("Play")
-        self.runtime_play_button.setToolTip(
-            "Start the runtime or resume execution after a pause."
-        )
-        self.runtime_play_button.clicked.connect(self.on_runtime_play_clicked)
-        self.runtime_controls_layout.addWidget(self.runtime_play_button)
-
-        self.runtime_pause_button = QPushButton("Pause")
-        self.runtime_pause_button.setToolTip(
-            "Pause execution at the next state boundary."
-        )
-        self.runtime_pause_button.clicked.connect(self.on_runtime_pause_clicked)
-        self.runtime_controls_layout.addWidget(self.runtime_pause_button)
-
-        self.runtime_step_button = QPushButton("Play Once")
-        self.runtime_step_button.setToolTip(
-            "Execute exactly one state and pause before the following state starts."
-        )
-        self.runtime_step_button.clicked.connect(self.on_runtime_step_clicked)
-        self.runtime_controls_layout.addWidget(self.runtime_step_button)
-
-        self.runtime_cancel_state_button = QPushButton("Cancel State")
-        self.runtime_cancel_state_button.setToolTip(
-            "Request cancellation of the currently active state."
-        )
-        self.runtime_cancel_state_button.clicked.connect(
-            self.on_runtime_cancel_state_clicked
-        )
-        self.runtime_controls_layout.addWidget(self.runtime_cancel_state_button)
-
-        self.runtime_cancel_sm_button = QPushButton("Cancel State Machine")
-        self.runtime_cancel_sm_button.setToolTip(
-            "Request cancellation of the complete runtime state machine."
-        )
-        self.runtime_cancel_sm_button.clicked.connect(self.on_runtime_cancel_sm_clicked)
-        self.runtime_controls_layout.addWidget(self.runtime_cancel_sm_button)
-
-        self.runtime_restart_button = QPushButton("Restart")
-        self.runtime_restart_button.setToolTip(
-            "Recreate the runtime state machine from a fresh XML snapshot."
-        )
-        self.runtime_restart_button.clicked.connect(self.restart_runtime_mode)
-        self.runtime_controls_layout.addWidget(self.runtime_restart_button)
-
-        self.runtime_controls_layout.addStretch()
-        return widget
-
-    def _create_canvas_frame(self) -> QFrame:
-        """Create the canvas frame and canvas widget."""
-        frame = QFrame()
-        self.canvas_frame_layout = QVBoxLayout(frame)
-        self.canvas_frame_layout.setContentsMargins(0, 0, 0, 0)
-
-        self.canvas = StateMachineCanvas()
-        self.canvas.editor_ref = self
-        self.canvas.scene.selectionChanged.connect(self.refresh_visual_highlighting)
-        self.canvas_frame_layout.addWidget(self.canvas)
-
-        return frame
 
     def _open_add_state_dialog_for_plugin(self, plugin_info: PluginInfo) -> None:
         if self.is_read_only_mode():
