@@ -30,13 +30,10 @@ from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from yasmin_editor.runtime.logging import RuntimeLoggingBridge
-from yasmin_editor.runtime.traversal import (
-    child_state,
-    container_states,
-    expand_to_deepest_known_path,
-    is_container_object,
-    resolve_container,
-)
+from yasmin_editor.runtime.traversal import (child_state, container_states,
+                                             expand_to_deepest_known_path,
+                                             is_container_object,
+                                             resolve_container)
 
 from yasmin import Blackboard, StateMachine
 from yasmin_factory import YasminFactory
@@ -302,9 +299,12 @@ class Runtime(QObject):
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
+        self._step_target_leaf_path = None
+        self._step_target_started = False
 
         if RuntimeLoggingBridge.get_current_runtime() is self:
             RuntimeLoggingBridge.set_current_runtime(None)
+            RuntimeLoggingBridge.uninstall()
 
         if reset_disposed:
             self._disposed = True
