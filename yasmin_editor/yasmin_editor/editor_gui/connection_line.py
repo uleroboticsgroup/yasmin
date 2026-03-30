@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-from typing import TYPE_CHECKING, Any, List, Union
+from typing import TYPE_CHECKING, Any, List, Tuple, Union
 
 from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer
 from PyQt5.QtGui import QBrush, QFont, QPainterPath, QPen, QPolygonF
@@ -106,7 +106,7 @@ class ConnectionLine(QGraphicsPathItem):
         self.arrow_head: QGraphicsPolygonItem = QGraphicsPolygonItem()
         self.arrow_head.setBrush(QBrush(PALETTE.connection_line))
         self.arrow_head.setPen(QPen(PALETTE.connection_line))
-        self.arrow_head.setZValue(-2)
+        self.arrow_head.setZValue(-1)
 
         self.label_bg: QGraphicsRectItem = _ConnectionLabelRectItem(self)
         self.label_bg.setBrush(QBrush(PALETTE.connection_label_bg))
@@ -184,18 +184,76 @@ class ConnectionLine(QGraphicsPathItem):
             return 0.0
         return 35.0
 
-    def _set_arrow_polygon(self, target_pos: QPointF, angle: float) -> None:
-        """Update the arrow head polygon for the current end point and angle."""
-        arrow_size: float = 12
+    def _vector_length(self, vector: QPointF) -> float:
+        return math.hypot(vector.x(), vector.y())
+
+    def _normalize_vector(self, vector: QPointF) -> QPointF:
+        length = self._vector_length(vector)
+        if length <= 1e-9:
+            return QPointF(0.0, 0.0)
+        return QPointF(vector.x() / length, vector.y() / length)
+
+    def _build_arrow_geometry(
+        self,
+        target_pos: QPointF,
+        target_direction: QPointF,
+    ) -> Tuple[QPointF, float]:
+        """Update the arrow head polygon and return the shaft end point and angle."""
+        direction = self._normalize_vector(target_direction)
+        if self._vector_length(direction) <= 1e-9:
+            direction = QPointF(1.0, 0.0)
+
+        angle = math.atan2(direction.y(), direction.x())
+        arrow_size: float = 12.0
         arrow_p1: QPointF = target_pos - QPointF(
-            math.cos(angle - math.pi / 6) * arrow_size,
-            math.sin(angle - math.pi / 6) * arrow_size,
+            math.cos(angle - math.pi / 6.0) * arrow_size,
+            math.sin(angle - math.pi / 6.0) * arrow_size,
         )
         arrow_p2: QPointF = target_pos - QPointF(
-            math.cos(angle + math.pi / 6) * arrow_size,
-            math.sin(angle + math.pi / 6) * arrow_size,
+            math.cos(angle + math.pi / 6.0) * arrow_size,
+            math.sin(angle + math.pi / 6.0) * arrow_size,
         )
         self.arrow_head.setPolygon(QPolygonF([target_pos, arrow_p1, arrow_p2]))
+
+        base_offset: float = arrow_size * math.cos(math.pi / 6.0)
+        line_end = QPointF(
+            target_pos.x() - direction.x() * base_offset,
+            target_pos.y() - direction.y() * base_offset,
+        )
+        return line_end, angle
+
+    def _offset_point(
+        self, point: QPointF, direction: QPointF, distance: float
+    ) -> QPointF:
+        return QPointF(
+            point.x() + direction.x() * distance,
+            point.y() + direction.y() * distance,
+        )
+
+    def _compute_arrow_direction(
+        self,
+        tip_pos: QPointF,
+        control_pos: QPointF,
+        fallback_direction: QPointF,
+    ) -> QPointF:
+        direction = self._normalize_vector(
+            QPointF(tip_pos.x() - control_pos.x(), tip_pos.y() - control_pos.y())
+        )
+        if self._vector_length(direction) <= 1e-9:
+            direction = self._normalize_vector(fallback_direction)
+        if self._vector_length(direction) <= 1e-9:
+            direction = QPointF(1.0, 0.0)
+        return direction
+
+    def _use_upward_label_stack(
+        self,
+        from_center: QPointF,
+        to_center: QPointF,
+    ) -> bool:
+        """Return True when this connection group should place labels above the path."""
+        if abs(from_center.x() - to_center.x()) > 1e-6:
+            return from_center.x() < to_center.x()
+        return from_center.y() < to_center.y()
 
     def _hide_path_and_arrow(self) -> None:
         """Hide the rendered path for grouped transitions."""
@@ -221,6 +279,7 @@ class ConnectionLine(QGraphicsPathItem):
         self,
         group: List["ConnectionLine"],
         anchor_point: QPointF,
+        stack_direction: str = "center",
     ) -> None:
         """Layout the labels of a grouped connection as a vertical stack."""
         if not group:
@@ -238,7 +297,12 @@ class ConnectionLine(QGraphicsPathItem):
             total_height += box_height
 
         total_height += spacing * max(0, len(group) - 1)
-        current_top = anchor_point.y() - total_height / 2.0
+        if stack_direction == "down":
+            current_top = anchor_point.y() - total_height
+        elif stack_direction == "up":
+            current_top = anchor_point.y()
+        else:
+            current_top = anchor_point.y() - total_height / 2.0
 
         for connection, box_height in zip(group, box_heights):
             label_rect = connection.label.boundingRect()
@@ -291,7 +355,6 @@ class ConnectionLine(QGraphicsPathItem):
         offset for multiple connections, arrow head position, and label placement.
         For self-loops, draws a loop arc above the node.
         """
-        # Check if this is a self-loop
         if self.from_node == self.to_node:
             self._update_self_loop_position()
             return
@@ -301,8 +364,6 @@ class ConnectionLine(QGraphicsPathItem):
 
         from_center: QPointF = self.from_node.get_connection_point()
         to_center: QPointF = self.to_node.get_connection_point()
-        from_pos: QPointF = self.from_node.get_edge_point(to_center)
-        to_pos: QPointF = self.to_node.get_edge_point(from_center)
 
         opposite_direction: List["ConnectionLine"] = (
             self._get_opposite_direction_group()
@@ -315,40 +376,94 @@ class ConnectionLine(QGraphicsPathItem):
             else:
                 offset_amount = -35.0
 
+        center_vector = QPointF(
+            to_center.x() - from_center.x(), to_center.y() - from_center.y()
+        )
+        center_direction = self._normalize_vector(center_vector)
+        if self._vector_length(center_direction) <= 1e-9:
+            center_direction = QPointF(1.0, 0.0)
+
+        normal_direction = QPointF(-center_direction.y(), center_direction.x())
+        anchor_offset = self._offset_point(
+            QPointF(0.0, 0.0), normal_direction, offset_amount
+        )
+        from_pos: QPointF = self.from_node.get_edge_point(
+            QPointF(
+                to_center.x() + anchor_offset.x(), to_center.y() + anchor_offset.y()
+            )
+        )
+        to_pos: QPointF = self.to_node.get_edge_point(
+            QPointF(
+                from_center.x() + anchor_offset.x(), from_center.y() + anchor_offset.y()
+            )
+        )
+        source_direction = self._normalize_vector(
+            QPointF(from_pos.x() - from_center.x(), from_pos.y() - from_center.y())
+        )
+        target_radial_direction = self._normalize_vector(
+            QPointF(to_center.x() - to_pos.x(), to_center.y() - to_pos.y())
+        )
+
+        if self._vector_length(source_direction) <= 1e-9:
+            source_direction = center_direction
+        if self._vector_length(target_radial_direction) <= 1e-9:
+            target_radial_direction = center_direction
+
+        path_length = self._vector_length(
+            QPointF(to_pos.x() - from_pos.x(), to_pos.y() - from_pos.y())
+        )
+        tangent_length = max(36.0, min(90.0, path_length * 0.35))
+        offset_vector = QPointF(
+            normal_direction.x() * offset_amount,
+            normal_direction.y() * offset_amount,
+        )
+
+        ctrl1 = QPointF(
+            from_pos.x() + source_direction.x() * tangent_length + offset_vector.x(),
+            from_pos.y() + source_direction.y() * tangent_length + offset_vector.y(),
+        )
+        ctrl2 = QPointF(
+            to_pos.x()
+            - target_radial_direction.x() * tangent_length
+            + offset_vector.x(),
+            to_pos.y()
+            - target_radial_direction.y() * tangent_length
+            + offset_vector.y(),
+        )
+
+        target_direction = self._compute_arrow_direction(
+            to_pos,
+            ctrl2,
+            QPointF(to_center.x() - from_center.x(), to_center.y() - from_center.y()),
+        )
+        line_end, _ = self._build_arrow_geometry(to_pos, target_direction)
+
         path: QPainterPath = QPainterPath()
         path.moveTo(from_pos)
-
-        dx: float = to_pos.x() - from_pos.x()
-        dy: float = to_pos.y() - from_pos.y()
-
-        angle: float = math.atan2(dy, dx)
-        perp_angle: float = angle + math.pi / 2
-
-        ctrl1: QPointF = QPointF(
-            from_pos.x() + dx * 0.25 + math.cos(perp_angle) * offset_amount,
-            from_pos.y() + dy * 0.25 + math.sin(perp_angle) * offset_amount,
-        )
-        ctrl2: QPointF = QPointF(
-            from_pos.x() + dx * 0.75 + math.cos(perp_angle) * offset_amount,
-            from_pos.y() + dy * 0.75 + math.sin(perp_angle) * offset_amount,
-        )
-
-        path.cubicTo(ctrl1, ctrl2, to_pos)
+        path.cubicTo(ctrl1, ctrl2, line_end)
 
         if self == representative:
             self.setPath(path)
-            tangent_point: QPointF = path.pointAtPercent(0.95)
-            angle = math.atan2(
-                to_pos.y() - tangent_point.y(),
-                to_pos.x() - tangent_point.x(),
-            )
-            self._set_arrow_polygon(to_pos, angle)
             self.arrow_head.setVisible(True)
         else:
             self._hide_path_and_arrow()
 
         mid_point: QPointF = path.pointAtPercent(0.5)
-        self._layout_stacked_labels(direction_group, mid_point)
+        label_anchor = QPointF(mid_point)
+        label_stack_direction = "center"
+        if opposite_direction:
+            label_gap = 8.0
+            if self._use_upward_label_stack(from_center, to_center):
+                label_anchor.setY(label_anchor.y() - label_gap)
+                label_stack_direction = "up"
+            else:
+                label_anchor.setY(label_anchor.y() + label_gap)
+                label_stack_direction = "down"
+        self._layout_stacked_labels(
+            direction_group,
+            label_anchor,
+            label_stack_direction,
+        )
         self._update_label_style()
 
     def _update_self_loop_position(self) -> None:
@@ -379,13 +494,16 @@ class ConnectionLine(QGraphicsPathItem):
         ctrl1 = QPointF(start_x - loop_width / 2.0, node_top - loop_height)
         ctrl2 = QPointF(end_x + loop_width / 2.0, node_top - loop_height)
 
+        arrow_angle = math.pi / 2.0 + math.radians(16.0)
+        target_direction = QPointF(math.cos(arrow_angle), math.sin(arrow_angle))
+        line_end, _ = self._build_arrow_geometry(end_pos, target_direction)
+
         path: QPainterPath = QPainterPath()
         path.moveTo(start_pos)
-        path.cubicTo(ctrl1, ctrl2, end_pos)
+        path.cubicTo(ctrl1, ctrl2, line_end)
 
         if self == representative:
             self.setPath(path)
-            self._set_arrow_polygon(end_pos, math.pi / 2.0)
             self.arrow_head.setVisible(True)
         else:
             self._hide_path_and_arrow()

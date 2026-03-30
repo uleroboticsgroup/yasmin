@@ -13,14 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import math
-from typing import Dict, List, Optional, Union, Any, Set, TYPE_CHECKING
+from typing import Dict, List, Optional, Union, Any, TYPE_CHECKING
 
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem, QMenu
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QFont
 from yasmin_editor.editor_gui.colors import PALETTE
 
+from yasmin_editor.editor_gui.base_node import BaseNodeMixin
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
-class ContainerStateNode(QGraphicsRectItem):
+class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
     """Graphical representation of a nested State Machine or Concurrence."""
 
     def __init__(
@@ -74,17 +74,12 @@ class ContainerStateNode(QGraphicsRectItem):
         self.is_concurrence = isinstance(self.model, Concurrence)
         self.is_xml_reference = bool(is_xml_reference)
         self.state_kind_label = state_kind_label or ("XML" if self.is_xml_reference else None)
-        self.connections: List["ConnectionLine"] = []
-        self.parent_container = None
         self.child_states = {}
         self.final_outcomes = {}
         self.defaults: List[Dict[str, str]] = defaults or []
         self.xml_file: Optional[str] = None
 
-        self.setPos(x, y)
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+        self._initialize_base_node_graphics(x, y)
 
         self._apply_default_style()
 
@@ -195,10 +190,8 @@ class ContainerStateNode(QGraphicsRectItem):
         self.update_visual_elements()
 
     def update_visual_elements(self) -> None:
-        title_rect = self.title.boundingRect()
-        self.title.setPos(-title_rect.width() / 2, -22)
-        type_rect = self.type_label.boundingRect()
-        self.type_label.setPos(-type_rect.width() / 2, 6)
+        self.center_text_item(self.title, -22)
+        self.center_text_item(self.type_label, 6)
         self.connection_port.update_position_for_container()
 
     def mouseDoubleClickEvent(self, event: Any) -> None:
@@ -243,49 +236,10 @@ class ContainerStateNode(QGraphicsRectItem):
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
-            for connection in self.connections:
-                connection.update_position()
+            self.update_attached_connections()
         elif change == QGraphicsItem.ItemSelectedChange:
-            if value:
-                self.setPen(QPen(PALETTE.selection_pen, 4))
-            else:
-                self._apply_default_style()
+            self.update_selection_pen(bool(value), default_pen_callback=self._apply_default_style)
         return super().itemChange(change, value)
 
-    def add_connection(self, connection: "ConnectionLine") -> None:
-        if connection not in self.connections:
-            self.connections.append(connection)
-
-    def remove_connection(self, connection: "ConnectionLine") -> None:
-        if connection in self.connections:
-            self.connections.remove(connection)
-
-    def get_used_outcomes(self) -> Set[str]:
-        return {
-            connection.outcome
-            for connection in self.connections
-            if connection.from_node == self
-        }
-
-    def get_connection_point(self) -> QPointF:
-        return self.connection_port.scenePos()
-
     def get_edge_point(self, target_pos: QPointF) -> QPointF:
-        rect = self.rect()
-        center = self.scenePos()
-        angle = math.atan2(target_pos.y() - center.y(), target_pos.x() - center.x())
-        w = rect.width() / 2
-        h = rect.height() / 2
-        abs_tan = abs(math.tan(angle)) if math.cos(angle) != 0 else float("inf")
-
-        if abs_tan <= h / w:
-            x = center.x() + w * (1 if math.cos(angle) > 0 else -1)
-            y = center.y() + w * math.tan(angle) * (1 if math.cos(angle) > 0 else -1)
-        else:
-            y = center.y() + h * (1 if math.sin(angle) > 0 else -1)
-            x = (
-                center.x() + h / math.tan(angle) * (1 if math.sin(angle) > 0 else -1)
-                if math.sin(angle) != 0
-                else center.x()
-            )
-        return QPointF(x, y)
+        return BaseNodeMixin.get_edge_point(self, target_pos)

@@ -13,15 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import math
-from typing import List, Optional, Any, TYPE_CHECKING
+from typing import Optional, Any, TYPE_CHECKING
 
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QFont
 from yasmin_editor.editor_gui.colors import PALETTE
 
-from yasmin_editor.editor_gui.connection_port import ConnectionPort
+from yasmin_editor.editor_gui.base_node import BaseNodeMixin
 from yasmin_editor.model.outcome import Outcome
 
 if TYPE_CHECKING:
@@ -29,7 +28,7 @@ if TYPE_CHECKING:
     from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
 
 
-class FinalOutcomeNode(QGraphicsRectItem):
+class FinalOutcomeNode(QGraphicsRectItem, BaseNodeMixin):
     """Graphical representation of a final outcome."""
 
     def __init__(
@@ -43,14 +42,9 @@ class FinalOutcomeNode(QGraphicsRectItem):
     ) -> None:
         super().__init__(-60, -30, 120, 60)
         self.model: Outcome = model or Outcome(name=name, description=description)
-        self.connections: List["ConnectionLine"] = []
-        self.parent_container: Optional["ContainerStateNode"] = None
         self.inside_container: bool = inside_container
 
-        self.setPos(x, y)
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+        self._initialize_base_node_graphics(x, y)
 
         self.setBrush(QBrush(PALETTE.final_outcome_fill))
         self.setPen(QPen(PALETTE.final_outcome_pen, 3))
@@ -62,8 +56,7 @@ class FinalOutcomeNode(QGraphicsRectItem):
         font.setBold(True)
         self.text.setFont(font)
 
-        text_rect = self.text.boundingRect()
-        self.text.setPos(-text_rect.width() / 2, -text_rect.height() / 2)
+        self.center_text_item(self.text, -self.text.boundingRect().height() / 2)
 
         self.update_tooltip()
 
@@ -76,8 +69,7 @@ class FinalOutcomeNode(QGraphicsRectItem):
         self.model.name = value
         if hasattr(self, "text"):
             self.text.setPlainText(value)
-            text_rect = self.text.boundingRect()
-            self.text.setPos(-text_rect.width() / 2, -text_rect.height() / 2)
+            self.center_text_item(self.text, -self.text.boundingRect().height() / 2)
         self.update_tooltip()
 
     @property
@@ -105,67 +97,17 @@ class FinalOutcomeNode(QGraphicsRectItem):
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
-            if self.parent_container:
-                container_rect = self.parent_container.rect()
-                outcome_rect = self.boundingRect()
-                new_pos: QPointF = value
-
-                min_x: float = container_rect.left() - outcome_rect.left() + 10
-                max_x: float = container_rect.right() - outcome_rect.right() - 10
-                min_y: float = container_rect.top() - outcome_rect.top() + 40
-                max_y: float = container_rect.bottom() - outcome_rect.bottom() - 10
-
-                constrained_x: float = max(min_x, min(new_pos.x(), max_x))
-                constrained_y: float = max(min_y, min(new_pos.y(), max_y))
-                value = QPointF(constrained_x, constrained_y)
-
-            for connection in self.connections:
-                connection.update_position()
+            value = self.constrain_position_to_parent(value)
+            self.update_attached_connections()
 
         elif change == QGraphicsItem.ItemPositionHasChanged:
-            if self.parent_container:
-                self.parent_container.auto_resize_for_children()
+            self.notify_parent_container_resized()
 
         elif change == QGraphicsItem.ItemSelectedChange:
-            if value:
-                self.setPen(QPen(PALETTE.selection_pen, 4))
-            else:
-                self.setPen(QPen(PALETTE.final_outcome_pen, 3))
+            self.update_selection_pen(bool(value), QPen(PALETTE.final_outcome_pen, 3))
 
         return super().itemChange(change, value)
 
-    def add_connection(self, connection: "ConnectionLine") -> None:
-        if connection not in self.connections:
-            self.connections.append(connection)
-
-    def remove_connection(self, connection: "ConnectionLine") -> None:
-        if connection in self.connections:
-            self.connections.remove(connection)
-
-    def get_connection_point(self) -> QPointF:
-        """Get the point where connections should attach."""
-        return self.scenePos()
-
     def get_edge_point(self, target_pos: QPointF) -> QPointF:
-        """Get the point on the rectangle edge closest to target."""
-        center: QPointF = self.scenePos()
-        angle: float = math.atan2(
-            target_pos.y() - center.y(), target_pos.x() - center.x()
-        )
-        w: float = 60
-        h: float = 30
-        abs_tan: float = abs(math.tan(angle)) if math.cos(angle) != 0 else float("inf")
-
-        if abs_tan <= h / w:
-            x: float = center.x() + w * (1 if math.cos(angle) > 0 else -1)
-            y: float = center.y() + w * math.tan(angle) * (
-                1 if math.cos(angle) > 0 else -1
-            )
-        else:
-            y = center.y() + h * (1 if math.sin(angle) > 0 else -1)
-            x = (
-                center.x() + h / math.tan(angle) * (1 if math.sin(angle) > 0 else -1)
-                if math.sin(angle) != 0
-                else center.x()
-            )
-        return QPointF(x, y)
+        """Get the point on the node edge that is centered on the closest side."""
+        return BaseNodeMixin.get_edge_point(self, target_pos)
