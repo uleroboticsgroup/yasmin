@@ -23,7 +23,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 from PyQt5.QtCore import Qt, QLineF, QTimer, QPointF, QEvent
-from PyQt5.QtGui import QPen, QBrush, QPainter
+from PyQt5.QtGui import QPen, QBrush, QPainter, QCursor
 from yasmin_editor.editor_gui.colors import PALETTE
 
 from yasmin_editor.editor_gui.state_node import StateNode
@@ -46,6 +46,8 @@ class StateMachineCanvas(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setBackgroundBrush(QBrush(PALETTE.background))
+        self.setMouseTracking(True)
+        self.viewport().setMouseTracking(True)
 
         self.is_dragging_connection: bool = False
         self.drag_start_node: Optional[
@@ -54,6 +56,40 @@ class StateMachineCanvas(QGraphicsView):
         self.temp_line: Optional[QGraphicsLineItem] = None
         self.drag_rewire_connection: Optional["ConnectionLine"] = None
         self.editor_ref: Optional["YasminEditor"] = None
+        self.pending_placement_item: Optional[
+            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
+        ] = None
+
+    def get_preferred_placement_scene_pos(self) -> QPointF:
+        viewport_pos = self.viewport().mapFromGlobal(QCursor.pos())
+        if not self.viewport().rect().contains(viewport_pos):
+            viewport_pos = self.viewport().rect().center()
+        return self.mapToScene(viewport_pos)
+
+    def start_pending_placement(
+        self,
+        item: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
+    ) -> None:
+        self.pending_placement_item = item
+        self.setDragMode(QGraphicsView.NoDrag)
+        self._update_pending_placement_item(self.get_preferred_placement_scene_pos())
+        item.setSelected(True)
+        if self.editor_ref:
+            self.editor_ref.statusBar().showMessage(
+                f"Place '{item.name}' with left click. Right click or Escape cancels.",
+                0,
+            )
+
+    def clear_pending_placement(self) -> None:
+        if self.pending_placement_item is not None:
+            self.pending_placement_item = None
+        if not self.is_dragging_connection:
+            self.setDragMode(QGraphicsView.ScrollHandDrag)
+
+    def _update_pending_placement_item(self, scene_pos: QPointF) -> None:
+        if self.pending_placement_item is None:
+            return
+        self.pending_placement_item.setPos(scene_pos)
 
     def is_valid_connection(
         self,
@@ -84,6 +120,17 @@ class StateMachineCanvas(QGraphicsView):
                 self.editor_ref.delete_selected()
                 event.accept()
                 return
+
+        if event.key() == Qt.Key_Escape and self.pending_placement_item is not None:
+            if self.editor_ref:
+                self.editor_ref.cancel_pending_node_placement(
+                    self.pending_placement_item
+                )
+            else:
+                self.clear_pending_placement()
+            event.accept()
+            return
+
         super().keyPressEvent(event)
 
     def wheelEvent(self, event: QEvent) -> None:
@@ -111,6 +158,9 @@ class StateMachineCanvas(QGraphicsView):
         from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
         event: QEvent,
     ) -> None:
+        if self.pending_placement_item is not None:
+            event.ignore()
+            return
         if self.editor_ref and self.editor_ref.is_read_only_mode():
             event.ignore()
             return
@@ -118,6 +168,8 @@ class StateMachineCanvas(QGraphicsView):
         self._begin_connection_drag(from_node)
 
     def start_rewire_drag(self, connection: "ConnectionLine") -> None:
+        if self.pending_placement_item is not None:
+            return
         if self.editor_ref and self.editor_ref.is_read_only_mode():
             return
         self.drag_rewire_connection = connection
@@ -128,6 +180,29 @@ class StateMachineCanvas(QGraphicsView):
             )
 
     def mousePressEvent(self, event: QEvent) -> None:
+        if self.pending_placement_item is not None:
+            if event.button() == Qt.LeftButton:
+                scene_pos = self.mapToScene(event.pos())
+                if self.editor_ref:
+                    self.editor_ref.finalize_pending_node_placement(
+                        self.pending_placement_item,
+                        scene_pos,
+                    )
+                else:
+                    self.clear_pending_placement()
+                event.accept()
+                return
+
+            if event.button() == Qt.RightButton:
+                if self.editor_ref:
+                    self.editor_ref.cancel_pending_node_placement(
+                        self.pending_placement_item
+                    )
+                else:
+                    self.clear_pending_placement()
+                event.accept()
+                return
+
         if event.button() == Qt.BackButton and self.editor_ref:
             self.editor_ref.navigate_up_one_level()
             event.accept()
@@ -135,6 +210,11 @@ class StateMachineCanvas(QGraphicsView):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: QEvent) -> None:
+        if self.pending_placement_item is not None:
+            self._update_pending_placement_item(self.mapToScene(event.pos()))
+            event.accept()
+            return
+
         if self.is_dragging_connection and self.temp_line and self.drag_start_node:
             port_scene_pos: QPointF = self.drag_start_node.connection_port.scenePos()
             scene_pos: QPointF = self.mapToScene(event.pos())
@@ -234,6 +314,10 @@ class StateMachineCanvas(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def contextMenuEvent(self, event: QEvent) -> None:
+        if self.pending_placement_item is not None:
+            event.accept()
+            return
+
         item = self.itemAt(event.pos())
         if item is None and self.editor_ref:
             menu: QMenu = QMenu()

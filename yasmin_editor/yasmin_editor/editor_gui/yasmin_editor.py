@@ -281,6 +281,7 @@ class YasminEditor(QMainWindow):
         self._delete_runtime_snapshot()
 
         # Clear all references
+        self.canvas.clear_pending_placement()
         self.canvas.scene.clear()
         self.state_nodes.clear()
         self.final_outcomes.clear()
@@ -808,8 +809,14 @@ class YasminEditor(QMainWindow):
                 outcomes=outcomes,
             )
 
-        self.add_model_state(model, defaults=defaults)
-        self.statusBar().showMessage(f"Added state: {name}", 2000)
+        scene_pos = self.canvas.get_preferred_placement_scene_pos()
+        node = self.add_model_state(
+            model,
+            defaults=defaults,
+            x=float(scene_pos.x()),
+            y=float(scene_pos.y()),
+        )
+        self.start_pending_node_placement(node)
 
     def add_container(self, is_concurrence: bool = False) -> None:
         """Add a new container (State Machine or Concurrence)."""
@@ -970,6 +977,7 @@ class YasminEditor(QMainWindow):
             model.default_outcome = value
 
     def clear_current_scene(self) -> None:
+        self.canvas.clear_pending_placement()
         self.canvas.scene.clear()
         self.state_nodes.clear()
         self.final_outcomes.clear()
@@ -1137,6 +1145,62 @@ class YasminEditor(QMainWindow):
         self.sync_blackboard_keys()
         self.refresh_connection_port_visibility()
         return node
+
+    def start_pending_node_placement(
+        self,
+        node: StateNode | ContainerStateNode | FinalOutcomeNode,
+    ) -> None:
+        existing_pending = self.canvas.pending_placement_item
+        if existing_pending is not None and existing_pending is not node:
+            self.cancel_pending_node_placement(existing_pending)
+        self.canvas.start_pending_placement(node)
+
+    def finalize_pending_node_placement(
+        self,
+        node: StateNode | ContainerStateNode | FinalOutcomeNode,
+        scene_pos: QPointF,
+    ) -> None:
+        node.setPos(scene_pos)
+
+        if isinstance(node, FinalOutcomeNode):
+            self.current_container_model.layout.set_outcome_position(
+                node.name,
+                float(scene_pos.x()),
+                float(scene_pos.y()),
+            )
+            self.statusBar().showMessage(f"Added final outcome: {node.name}", 2000)
+        else:
+            self.current_container_model.layout.set_state_position(
+                node.name,
+                float(scene_pos.x()),
+                float(scene_pos.y()),
+            )
+            self.statusBar().showMessage(f"Added state: {node.name}", 2000)
+
+        self.canvas.clear_pending_placement()
+        self.canvas.scene.clearSelection()
+        node.setSelected(True)
+        self.sync_current_container_layout()
+
+    def cancel_pending_node_placement(
+        self,
+        node: StateNode | ContainerStateNode | FinalOutcomeNode,
+    ) -> None:
+        if isinstance(node, FinalOutcomeNode):
+            self.current_container_model.remove_outcome(node.name)
+            self.final_outcomes.pop(node.name, None)
+            message = f"Canceled final outcome: {node.name}"
+        else:
+            self.current_container_model.remove_state(node.name)
+            self.state_nodes.pop(node.name, None)
+            self.sync_blackboard_keys()
+            message = f"Canceled state: {node.name}"
+
+        self.canvas.scene.removeItem(node)
+        self.canvas.clear_pending_placement()
+        self.update_start_state_combo()
+        self.refresh_connection_port_visibility()
+        self.statusBar().showMessage(message, 2000)
 
     def register_connection_in_model(self, from_node, to_node, outcome: str) -> None:
         owner_model = self.current_container_model
@@ -2843,12 +2907,19 @@ class YasminEditor(QMainWindow):
                 )
                 return
 
-            x = 700
-            y = len(self.final_outcomes) * 170
+            scene_pos = self.canvas.get_preferred_placement_scene_pos()
             model = Outcome(name=outcome_name)
             current_model.add_outcome(model)
-            current_model.layout.set_outcome_position(outcome_name, x, y)
-            self.model_adapter.create_final_outcome_view(model, x=x, y=y)
+            current_model.layout.set_outcome_position(
+                outcome_name,
+                float(scene_pos.x()),
+                float(scene_pos.y()),
+            )
+            node = self.model_adapter.create_final_outcome_view(
+                model,
+                x=float(scene_pos.x()),
+                y=float(scene_pos.y()),
+            )
 
             if isinstance(current_model, Concurrence):
                 if (
@@ -2859,10 +2930,7 @@ class YasminEditor(QMainWindow):
 
             self.update_start_state_combo()
             self.refresh_connection_port_visibility()
-            self.statusBar().showMessage(
-                f"Added final outcome: {outcome_name}",
-                2000,
-            )
+            self.start_pending_node_placement(node)
 
     def create_connection_from_drag(
         self, from_node: StateNode, to_node: StateNode
