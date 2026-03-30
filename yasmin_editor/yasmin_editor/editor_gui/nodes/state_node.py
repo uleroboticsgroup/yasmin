@@ -13,20 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Dict, List, Optional, Any, TYPE_CHECKING
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem, QGraphicsTextItem
-from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtGui import QPen, QBrush, QFont
-from yasmin_editor.editor_gui.colors import PALETTE
-from yasmin_plugins_manager.plugin_info import PluginInfo
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from yasmin_editor.editor_gui.base_node import BaseNodeMixin
+from PyQt5.QtCore import QPointF, Qt
+from PyQt5.QtGui import QBrush, QFont, QPen
+from PyQt5.QtWidgets import (QGraphicsEllipseItem, QGraphicsItem,
+                             QGraphicsTextItem)
+from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
+from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
 from yasmin_editor.model.state import State
+
+from yasmin_plugins_manager.plugin_info import PluginInfo
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
-    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+    from yasmin_editor.editor_gui.container_state_node import \
+        ContainerStateNode
 
 
 class StateNode(QGraphicsEllipseItem, BaseNodeMixin):
@@ -56,7 +59,9 @@ class StateNode(QGraphicsEllipseItem, BaseNodeMixin):
 
         self._initialize_base_node_graphics(x, y)
 
-        self.setBrush(QBrush(PALETTE.state_fill(plugin_info.plugin_type if plugin_info else None)))
+        self.setBrush(
+            QBrush(PALETTE.state_fill(plugin_info.plugin_type if plugin_info else None))
+        )
         self.setPen(QPen(PALETTE.state_pen, 3))
 
         self.text: QGraphicsTextItem = QGraphicsTextItem(self.name, self)
@@ -144,5 +149,5 @@ class StateNode(QGraphicsEllipseItem, BaseNodeMixin):
         if denominator <= 1e-9:
             return center
 
-        scale = 1.0 / (denominator ** 0.5)
+        scale = 1.0 / (denominator**0.5)
         return QPointF(center.x() + dx * scale, center.y() + dy * scale)

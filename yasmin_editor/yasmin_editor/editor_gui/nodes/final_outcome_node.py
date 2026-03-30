@@ -13,19 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Optional, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
-from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtGui import QPen, QBrush, QFont
+from PyQt5.QtCore import QPointF, Qt
+from PyQt5.QtGui import QBrush, QFont, QPen
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem
 from yasmin_editor.editor_gui.colors import PALETTE
-
-from yasmin_editor.editor_gui.base_node import BaseNodeMixin
+from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
 from yasmin_editor.model.outcome import Outcome
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
-    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+    from yasmin_editor.editor_gui.container_state_node import \
+        ContainerStateNode
 
 
 class FinalOutcomeNode(QGraphicsRectItem, BaseNodeMixin):

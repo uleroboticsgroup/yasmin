@@ -13,15 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Dict, List, Optional, Union, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem, QMenu
-from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtGui import QPen, QBrush, QFont
+from PyQt5.QtCore import QPointF, Qt
+from PyQt5.QtGui import QBrush, QFont, QPen
+from PyQt5.QtWidgets import (QGraphicsItem, QGraphicsRectItem,
+                             QGraphicsTextItem, QMenu)
 from yasmin_editor.editor_gui.colors import PALETTE
-
-from yasmin_editor.editor_gui.base_node import BaseNodeMixin
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
+from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
@@ -29,6 +29,7 @@ from yasmin_editor.model.state_machine import StateMachine
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
+
     from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
@@ -73,7 +74,9 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
         self.is_state_machine = isinstance(self.model, StateMachine)
         self.is_concurrence = isinstance(self.model, Concurrence)
         self.is_xml_reference = bool(is_xml_reference)
-        self.state_kind_label = state_kind_label or ("XML" if self.is_xml_reference else None)
+        self.state_kind_label = state_kind_label or (
+            "XML" if self.is_xml_reference else None
+        )
         self.child_states = {}
         self.final_outcomes = {}
         self.defaults: List[Dict[str, str]] = defaults or []
@@ -140,7 +143,9 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
 
     @property
     def default_outcome(self) -> Optional[str]:
-        return self.model.default_outcome if isinstance(self.model, Concurrence) else None
+        return (
+            self.model.default_outcome if isinstance(self.model, Concurrence) else None
+        )
 
     @default_outcome.setter
     def default_outcome(self, value: Optional[str]) -> None:
@@ -180,7 +185,9 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
                 tooltip_lines.append(f"XML: {self.model.file_name}")
         elif self.is_concurrence:
             tooltip_lines.append(
-                f"Default: {self.default_outcome}" if self.default_outcome else "Default: (none)"
+                f"Default: {self.default_outcome}"
+                if self.default_outcome
+                else "Default: (none)"
             )
         else:
             tooltip_lines.append(
@@ -238,7 +245,9 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
             self.update_attached_connections()
         elif change == QGraphicsItem.ItemSelectedChange:
-            self.update_selection_pen(bool(value), default_pen_callback=self._apply_default_style)
+            self.update_selection_pen(
+                bool(value), default_pen_callback=self._apply_default_style
+            )
         return super().itemChange(change, value)
 
     def get_edge_point(self, target_pos: QPointF) -> QPointF:
