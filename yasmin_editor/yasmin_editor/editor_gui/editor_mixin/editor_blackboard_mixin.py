@@ -175,15 +175,6 @@ class EditorBlackboardMixin:
         key_data = item.data(Qt.UserRole) or {}
         return key_data.get("name")
 
-    def add_root_default_row(self) -> None:
-        pass
-
-    def remove_root_default_row(self) -> None:
-        pass
-
-    def get_root_defaults(self) -> list:
-        return []
-
     def on_blackboard_selection_changed(self) -> None:
         self.update_blackboard_usage_highlighting()
 
