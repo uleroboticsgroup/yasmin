@@ -107,7 +107,7 @@ def _validate_single_file(state_machine_file: str, strict_mode: bool) -> int:
 
     if not xml_path.is_file():
         print(f"[FAIL] {state_machine_file}")
-        print(f"       File does not exist: {state_machine_file}")
+        print(f"       File does not exist")
         return 1
 
     success, message = _validate_xml_file(str(xml_path), strict_mode)
