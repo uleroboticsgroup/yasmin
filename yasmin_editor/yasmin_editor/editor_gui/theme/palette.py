@@ -21,7 +21,7 @@ from typing import Optional
 
 from PyQt5.QtGui import QColor
 
-YASMIN_EDITOR_COLOR_ENV = "YASMIN_EDITOR_COLOR"
+YASMIN_EDITOR_THEME_ENV = "YASMIN_EDITOR_THEME"
 DEFAULT_PALETTE_NAME = "default"
 DARKMODE_PALETTE_NAME = "darkmode"
 
@@ -100,7 +100,7 @@ def normalize_palette_name(value: str) -> str:
     return DEFAULT_PALETTE_NAME
 
 
-def get_palette_name_from_env(env_var: str = YASMIN_EDITOR_COLOR_ENV) -> str:
+def get_palette_name_from_env(env_var: str = YASMIN_EDITOR_THEME_ENV) -> str:
     """Resolve the active palette name from the configured environment variable."""
     return normalize_palette_name(os.getenv(env_var, DEFAULT_PALETTE_NAME))
 

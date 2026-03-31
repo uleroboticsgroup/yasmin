@@ -15,17 +15,16 @@
 
 """Public theme API for editor colors, palette selection and stylesheet generation."""
 
-from yasmin_editor.editor_gui.theme.palette import (
-    DARKMODE_PALETTE_NAME,
-    DEFAULT_PALETTE_NAME,
-    PALETTE_NAME,
-    EditorPalette,
-    YASMIN_EDITOR_COLOR_ENV,
-    get_palette_name_from_env,
-    normalize_palette_name,
-)
+from yasmin_editor.editor_gui.theme.palette import (DARKMODE_PALETTE_NAME,
+                                                    DEFAULT_PALETTE_NAME,
+                                                    PALETTE_NAME,
+                                                    YASMIN_EDITOR_THEME_ENV,
+                                                    EditorPalette,
+                                                    get_palette_name_from_env,
+                                                    normalize_palette_name)
 from yasmin_editor.editor_gui.theme.palette_data import PALETTES
-from yasmin_editor.editor_gui.theme.qt_style import build_qt_palette, build_stylesheet
+from yasmin_editor.editor_gui.theme.qt_style import (build_qt_palette,
+                                                     build_stylesheet)
 
 PALETTE = PALETTES[PALETTE_NAME]
 
@@ -36,7 +35,7 @@ __all__ = [
     "PALETTE",
     "PALETTES",
     "PALETTE_NAME",
-    "YASMIN_EDITOR_COLOR_ENV",
+    "YASMIN_EDITOR_THEME_ENV",
     "build_qt_palette",
     "build_stylesheet",
     "get_palette_name_from_env",
