@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<StateMachine name="RuntimeTest" outcomes="done" start_state="test" description="This is a test FSM for the Runtime Mode">
+<StateMachine name="RuntimeTest" outcomes="done" start_state="Demo3" description="This is a test FSM for the Runtime Mode">
   <Key name="foo_str" type="in/out" description="String containing the current counter value produced by FooState." />
   <Key name="foo_str2" type="in/out" description="String containing the current counter value produced by FooState." />
   <Key name="pose_bytes" type="in/out" description="Serialized Pose message stored as bytes in the blackboard." />
   <Key name="pose_bytes__type" type="in/out" description="Type information for the serialized Pose message." />
-  <StateMachine name="Demo3" type="xml" file_name="demo_3.xml" package="yasmin_demos" description="Outcomes:&#10; - outcome4: Final outcome&#10;&#10;Input Keys:&#10; - pose_bytes: Serialized Pose message stored as bytes in the blackboard. (str)&#10; - pose_bytes__type: Type information for the serialized Pose message. (str)&#10;&#10;Output Keys:&#10; - pose_bytes: Serialized Pose message stored as bytes in the blackboard. (str)&#10; - pose_bytes__type: Type information for the serialized Pose message. (str)" x="-700.84" y="-110.05">
-    <Transition from="outcome4" to="Foo" />
+  <StateMachine name="Demo3" type="xml" file_name="demo_3.xml" package="yasmin_demos" description="Outcomes:&#10; - outcome4: Final outcome&#10;&#10;Input Keys:&#10; - pose_bytes: Serialized Pose message stored as bytes in the blackboard. (str)&#10; - pose_bytes__type: Type information for the serialized Pose message. (str)&#10;&#10;Output Keys:&#10; - pose_bytes: Serialized Pose message stored as bytes in the blackboard. (str)&#10; - pose_bytes__type: Type information for the serialized Pose message. (str)" x="-789.81" y="119.29">
+    <Transition from="outcome4" to="test" />
   </StateMachine>
   <State name="Bar" type="cpp" class="yasmin_demos/BarState" x="-136.93" y="-115.41">
     <Transition from="outcome3" to="Foo" />
@@ -35,7 +35,7 @@
     <FinalOutcome name="done" description="NestedFSM done" x="-40.72" y="-186.12" />
     <Transition from="done" to="done" />
   </StateMachine>
-  <Concurrence name="test" outcomes="s" default_outcome="s" x="-155.56" y="88.10">
+  <Concurrence name="test" outcomes="s" default_outcome="s" x="-794.80" y="-116.19">
     <Key name="foo_str" type="in/out" description="String containing the current counter value produced by FooState." />
     <Key name="foo_str2" type="in/out" description="String containing the current counter value produced by FooState." />
     <StateMachine name="a" type="xml" file_name="demo_1.xml" package="yasmin_demos" description="Demo FSM that alternates between Foo and Bar states&#10;&#10;Outcomes:&#10; - outcome4: Final outcome&#10;&#10;Input Keys:&#10; - foo_str: String containing the current counter value produced by FooState. (str)&#10;&#10;Output Keys:&#10; - foo_str: String containing the current counter value produced by FooState. (str)" x="-316.89" y="-79.81" />
@@ -47,7 +47,7 @@
       <Item state="a" outcome="outcome4" />
       <Item state="b" outcome="outcome4" />
     </OutcomeMap>
-    <Transition from="s" to="done" />
+    <Transition from="s" to="Foo" />
   </Concurrence>
   <FinalOutcome name="done" description="Final outcome" x="-451.01" y="287.40" />
 </StateMachine>
