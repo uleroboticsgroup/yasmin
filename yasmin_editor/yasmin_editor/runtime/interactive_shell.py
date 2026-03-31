@@ -182,6 +182,8 @@ class InteractiveShellManager(QObject):
             "\n"
             "bb -> safe blackboard proxy\n"
             "sm -> root state machine\n"
+            "current_state -> currently active state object\n"
+            "last_state -> previously active state object\n"
             "\n"
             "Use bb['key'] or bb.get('key').\n"
             "Attribute-style access is disabled to keep IPython introspection stable.\n"
@@ -206,9 +208,20 @@ class InteractiveShellManager(QObject):
     def is_open(self) -> bool:
         return self._dialog is not None and self._dialog.isVisible()
 
-    def open_shell(self, bb: Any, sm: Any) -> None:
+    def open_shell(
+        self,
+        bb: Any,
+        sm: Any,
+        current_state: Any = None,
+        last_state: Any = None,
+    ) -> None:
         self._ensure_shell()
-        self._push_context(bb=bb, sm=sm)
+        self._push_context(
+            bb=bb,
+            sm=sm,
+            current_state=current_state,
+            last_state=last_state,
+        )
 
         if self._dialog is None:
             return
@@ -266,7 +279,13 @@ class InteractiveShellManager(QObject):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._widget)
 
-    def _push_context(self, bb: Any, sm: Any) -> None:
+    def _push_context(
+        self,
+        bb: Any,
+        sm: Any,
+        current_state: Any = None,
+        last_state: Any = None,
+    ) -> None:
         if self._kernel_manager is None:
             return
 
@@ -274,6 +293,8 @@ class InteractiveShellManager(QObject):
         namespace = {
             "bb": proxy,
             "sm": sm,
+            "current_state": current_state,
+            "last_state": last_state,
             "BlackboardAccessError": BlackboardAccessError,
             "SafeBlackboardProxy": SafeBlackboardProxy,
         }

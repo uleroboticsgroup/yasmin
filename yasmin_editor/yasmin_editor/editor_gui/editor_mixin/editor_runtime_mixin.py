@@ -244,7 +244,12 @@ class EditorRuntimeMixin:
         if bb is None or sm is None:
             return
 
-        shell.open_shell(bb=bb, sm=sm)
+        shell.open_shell(
+            bb=bb,
+            sm=sm,
+            current_state=runtime.get_current_state_ref(),
+            last_state=runtime.get_last_state_ref(),
+        )
 
     def _close_runtime_shell(self) -> None:
         shell = getattr(self, "runtime_shell", None)
@@ -376,7 +381,12 @@ class EditorRuntimeMixin:
             )
             return
 
-        shell.open_shell(bb=runtime.bb, sm=runtime.sm)
+        shell.open_shell(
+            bb=runtime.bb,
+            sm=runtime.sm,
+            current_state=runtime.get_current_state_ref(),
+            last_state=runtime.get_last_state_ref(),
+        )
         self.update_runtime_actions()
 
     def on_runtime_shell_visibility_changed(self, visible: bool) -> None:

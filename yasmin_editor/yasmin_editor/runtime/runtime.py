@@ -30,7 +30,7 @@ from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from yasmin_editor.runtime.logging import RuntimeLogger
-from yasmin_editor.runtime.traversal import (container_states,
+from yasmin_editor.runtime.traversal import (child_state, container_states,
                                              expand_to_deepest_known_path,
                                              is_container_object,
                                              resolve_container)
@@ -71,6 +71,8 @@ class Runtime(QObject):
         self._finished = False
         self._final_outcome: Optional[str] = None
         self._disposed = False
+        self._current_state_ref: Optional[Any] = None
+        self._last_state_ref: Optional[Any] = None
         self._shutting_down = False
 
         self._active_path: tuple[str, ...] = tuple()
@@ -130,6 +132,14 @@ class Runtime(QObject):
     def get_current_state(self) -> Optional[str]:
         """Return the currently active leaf state name if available."""
         return self._active_path[-1] if self._active_path else None
+
+    def get_current_state_ref(self) -> Optional[Any]:
+        """Return the currently highlighted runtime state object."""
+        return self._current_state_ref
+
+    def get_last_state_ref(self) -> Optional[Any]:
+        """Return the previously active runtime state object."""
+        return self._last_state_ref
 
     def get_active_path(self) -> tuple[str, ...]:
         """Return the last known active path inside the loaded machine."""
@@ -191,7 +201,10 @@ class Runtime(QObject):
         self._step_mode = False
         self.logger.reset_depth()
         self._set_last_transition(None)
-        self._set_active_path(self._resolve_initial_active_path())
+        initial_active_path = self._resolve_initial_active_path()
+        self._set_active_path(initial_active_path)
+        self._last_state_ref = None
+        self._current_state_ref = self._resolve_state_reference(initial_active_path)
         self.ready_changed.emit(self.is_ready())
         self.status_changed.emit("Runtime state machine loaded")
         return self.is_ready()
@@ -301,6 +314,8 @@ class Runtime(QObject):
         self._set_blocked(False)
         self._set_active_path(tuple())
         self._set_last_transition(None)
+        self._current_state_ref = None
+        self._last_state_ref = None
         self.ready_changed.emit(False)
         self.status_changed.emit("Runtime stopped")
 
@@ -379,6 +394,27 @@ class Runtime(QObject):
             return
         self._last_transition = transition
         self.active_transition_changed.emit(transition)
+
+    def _resolve_state_reference(self, path: tuple[str, ...]) -> Optional[Any]:
+        """Resolve a live state object from a runtime path."""
+        if self.sm is None or not path:
+            return None
+
+        container = resolve_container(self.sm, path[:-1])
+        if container is None:
+            return None
+
+        return child_state(container, path[-1])
+
+    def _update_shell_state_refs(
+        self,
+        current_path: tuple[str, ...],
+        last_path: Optional[tuple[str, ...]] = None,
+    ) -> None:
+        """Update the live state references exposed in the shell."""
+        if last_path is not None:
+            self._last_state_ref = self._resolve_state_reference(last_path)
+        self._current_state_ref = self._resolve_state_reference(current_path)
 
     def _resolve_container(self, path: tuple[str, ...]) -> Optional[Any]:
         """Resolve a container object for the given path inside the live machine."""
@@ -508,6 +544,7 @@ class Runtime(QObject):
         self._set_running(True)
         active_path = self._expand_to_deepest_known_path(prefix + (str(start_state),))
         self._set_active_path(active_path)
+        self._current_state_ref = self._resolve_state_reference(active_path)
 
     def end_cb(
         self,
@@ -527,6 +564,7 @@ class Runtime(QObject):
 
         if prefix:
             self._set_active_path(prefix)
+            self._current_state_ref = self._resolve_state_reference(prefix)
             self._pause_if_requested()
             return
 
@@ -540,6 +578,8 @@ class Runtime(QObject):
         self._set_running(False)
         self._set_blocked(False)
         self._set_last_transition(None)
+        self._current_state_ref = None
+        self._last_state_ref = None
         self.outcome_changed.emit(self._final_outcome)
         self.status_changed.emit(f"Runtime finished with outcome: {outcome}")
 
@@ -572,12 +612,15 @@ class Runtime(QObject):
             )
             self._set_last_transition((from_path, to_path, str(outcome)))
 
+            active_path = self._expand_to_deepest_known_path(to_path)
+            self._update_shell_state_refs(active_path, from_path)
+
             with self._pause_condition:
                 if self._step_mode:
                     self._step_mode = False
                     self._pause_requested = True
 
-            self._set_active_path(self._expand_to_deepest_known_path(to_path))
+            self._set_active_path(active_path)
             self._pause_if_requested()
         finally:
             try:
