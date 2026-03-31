@@ -187,14 +187,20 @@ class EditorRuntimeMixin:
         self.runtime_mode_button.setChecked(checked)
         self.runtime_mode_button.blockSignals(False)
 
-    def _set_runtime_auto_follow_button_checked(self, checked: bool) -> None:
-        if not hasattr(self, "runtime_auto_follow_button"):
+    def _set_runtime_toggle_button_checked(
+        self,
+        button_name: str,
+        checked: bool,
+        checked_text: str,
+        unchecked_text: str,
+    ) -> None:
+        button = getattr(self, button_name, None)
+        if button is None:
             return
 
-        button = self.runtime_auto_follow_button
         button.blockSignals(True)
         button.setChecked(checked)
-        button.setText("Auto Follow: ON" if checked else "Auto Follow: OFF")
+        button.setText(checked_text if checked else unchecked_text)
 
         if checked:
             button.setStyleSheet(
@@ -218,6 +224,22 @@ class EditorRuntimeMixin:
             )
 
         button.blockSignals(False)
+
+    def _set_runtime_auto_follow_button_checked(self, checked: bool) -> None:
+        self._set_runtime_toggle_button_checked(
+            "runtime_auto_follow_button",
+            checked,
+            "Auto Follow: ON",
+            "Auto Follow: OFF",
+        )
+
+    def _set_runtime_cancel_sm_button_checked(self, checked: bool) -> None:
+        self._set_runtime_toggle_button_checked(
+            "runtime_cancel_sm_button",
+            checked,
+            "Canceling State Machine",
+            "Cancel State Machine",
+        )
 
     def _ensure_runtime_shell(self) -> Optional[InteractiveShellManager]:
         shell = getattr(self, "runtime_shell", None)
@@ -271,6 +293,23 @@ class EditorRuntimeMixin:
         if runtime is None:
             return False
         return self._is_runtime_shell_open() and runtime.is_blocked()
+
+    def _runtime_requires_finish_before_leaving(self) -> bool:
+        runtime = self.runtime
+        return bool(
+            self.runtime_mode_enabled
+            and runtime is not None
+            and runtime.is_running()
+            and not runtime.is_finished()
+        )
+
+    def _show_runtime_finish_required_popup(self) -> None:
+        QMessageBox.information(
+            self,
+            "Runtime Still Running",
+            "The state machine is still running. Cancel the state machine and "
+            "wait until it finishes before leaving runtime mode.",
+        )
 
     def _enter_runtime_mode(self) -> bool:
         self._close_runtime_shell()
@@ -333,17 +372,23 @@ class EditorRuntimeMixin:
             self.runtime.cancel_state()
 
     def on_runtime_cancel_sm_clicked(self) -> None:
-        if self._runtime_shell_resume_blocked():
-            self.statusBar().showMessage(
-                "Close the interactive shell before resuming execution.",
-                3000,
-            )
+        runtime = self.runtime
+        if runtime is None:
             return
-        if self.runtime is not None:
-            self.runtime.cancel()
+
+        if runtime.is_canceling_state_machine():
+            runtime.stop_cancel_state_machine()
+        else:
+            runtime.start_cancel_state_machine()
+        self.update_runtime_actions()
 
     def restart_runtime_mode(self) -> None:
-        if not self.runtime_mode_enabled:
+        runtime = self.runtime
+        if (
+            not self.runtime_mode_enabled
+            or runtime is None
+            or not runtime.is_finished()
+        ):
             return
 
         self.runtime_active_path = tuple()
@@ -401,6 +446,11 @@ class EditorRuntimeMixin:
             self._enter_runtime_mode()
             return
 
+        if self._runtime_requires_finish_before_leaving():
+            self._set_runtime_mode_button_checked(True)
+            self._show_runtime_finish_required_popup()
+            return
+
         self._close_runtime_shell()
         self.runtime_mode_enabled = False
         self.runtime_active_path = tuple()
@@ -423,11 +473,11 @@ class EditorRuntimeMixin:
 
         if hasattr(self, "canvas_frame"):
             border_width = 3 if self.runtime_mode_enabled else 1
-            border_color = (
-                PALETTE.runtime_canvas_border
-                if self.runtime_mode_enabled
-                else PALETTE.ui_border
-            )
+            if self.runtime_mode_enabled and self.runtime is not None:
+                status = self.runtime.get_status_label()
+                border_color = self._runtime_status_badge_colors(status)[0]
+            else:
+                border_color = PALETTE.ui_border
             self.canvas_frame.setStyleSheet(
                 f"QFrame {{ border: {border_width}px solid {border_color.name()}; }}"
             )
@@ -447,8 +497,8 @@ class EditorRuntimeMixin:
             else:
                 self.runtime_mode_button.setStyleSheet("")
 
-    def _runtime_status_badge_style(self, status: str) -> str:
-        """Return the stylesheet for the runtime status badge."""
+    def _runtime_status_badge_colors(self, status: str) -> tuple[QColor, QColor, QColor]:
+        """Return background, foreground and border colors for the runtime badge."""
         normalized = str(status).strip().lower()
 
         background = QColor(205, 210, 214)
@@ -479,6 +529,12 @@ class EditorRuntimeMixin:
             background = QColor(176, 60, 60)
             foreground = QColor(255, 255, 255)
             border = QColor(120, 40, 40)
+
+        return background, foreground, border
+
+    def _runtime_status_badge_style(self, status: str) -> str:
+        """Return the stylesheet for the runtime status badge."""
+        background, foreground, border = self._runtime_status_badge_colors(status)
 
         return (
             "QLabel {"
@@ -655,6 +711,7 @@ class EditorRuntimeMixin:
         runtime_playing = runtime_running and not runtime_blocked
         runtime_step_mode = runtime_running and runtime.is_step_mode()
         runtime_finished = runtime_ready and runtime.is_finished()
+        runtime_canceling = runtime_running and runtime.is_canceling_state_machine()
         runtime_shell_open = self._runtime_shell_resume_blocked()
 
         self._set_runtime_mode_button_checked(self.runtime_mode_enabled)
@@ -678,9 +735,11 @@ class EditorRuntimeMixin:
             "runtime_step_button": runtime_ready
             and not runtime_playing
             and not runtime_finished,
-            "runtime_cancel_state_button": runtime_running and not runtime_finished,
+            "runtime_cancel_state_button": runtime_running
+            and not runtime_finished
+            and not runtime_canceling,
             "runtime_cancel_sm_button": runtime_running and not runtime_finished,
-            "runtime_restart_button": runtime_ready,
+            "runtime_restart_button": runtime_finished,
         }
         for button_name, visible in runtime_button_visibility.items():
             button = getattr(self, button_name, None)
@@ -689,11 +748,12 @@ class EditorRuntimeMixin:
                 if button_name in {
                     "runtime_play_button",
                     "runtime_step_button",
-                    "runtime_cancel_sm_button",
                 }:
                     enabled = visible and not runtime_shell_open
                 button.setVisible(visible)
                 button.setEnabled(enabled)
+
+        self._set_runtime_cancel_sm_button_checked(runtime_canceling)
 
         auto_follow_button = getattr(self, "runtime_auto_follow_button", None)
         if auto_follow_button is not None:

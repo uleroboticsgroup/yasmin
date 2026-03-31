@@ -36,9 +36,9 @@ def build_runtime_controls_widget(editor) -> QWidget:
     editor.runtime_play_button.clicked.connect(editor.on_runtime_play_clicked)
     editor.runtime_controls_layout.addWidget(editor.runtime_play_button)
 
-    editor.runtime_pause_button = QPushButton("Pause")
+    editor.runtime_pause_button = QPushButton("Request Pause")
     editor.runtime_pause_button.setToolTip(
-        "Pause execution at the next state boundary."
+        "Pause at next transition."
     )
     editor.runtime_pause_button.clicked.connect(editor.on_runtime_pause_clicked)
     editor.runtime_controls_layout.addWidget(editor.runtime_pause_button)
@@ -60,8 +60,9 @@ def build_runtime_controls_widget(editor) -> QWidget:
     editor.runtime_controls_layout.addWidget(editor.runtime_cancel_state_button)
 
     editor.runtime_cancel_sm_button = QPushButton("Cancel State Machine")
+    editor.runtime_cancel_sm_button.setCheckable(True)
     editor.runtime_cancel_sm_button.setToolTip(
-        "Request cancellation of the complete runtime state machine."
+        "Toggle repeated cancellation requests for the complete runtime state machine."
     )
     editor.runtime_cancel_sm_button.clicked.connect(editor.on_runtime_cancel_sm_clicked)
     editor.runtime_controls_layout.addWidget(editor.runtime_cancel_sm_button)
