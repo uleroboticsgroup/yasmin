@@ -87,7 +87,7 @@ def build_runtime_controls_widget(editor) -> QWidget:
 
     editor.runtime_shell_button = QPushButton("Interactive Shell")
     editor.runtime_shell_button.setToolTip(
-        "Open an interactive shell with access to bb and sm while execution is paused."
+        "Open an interactive shell with access to bb and sm while execution is paused or after the root state machine finished."
     )
     editor.runtime_shell_button.clicked.connect(editor.on_runtime_shell_clicked)
     editor.runtime_shell_button.setVisible(False)

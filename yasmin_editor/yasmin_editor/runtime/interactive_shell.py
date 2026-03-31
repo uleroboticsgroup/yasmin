@@ -182,7 +182,7 @@ class InteractiveShellManager(QObject):
             "\n"
             "bb -> safe blackboard proxy\n"
             "sm -> root state machine\n"
-            "current_state -> currently active state object\n"
+            "current_state -> currently active state object or None after completion\n"
             "last_state -> previously active state object\n"
             "\n"
             "Use bb['key'] or bb.get('key').\n"

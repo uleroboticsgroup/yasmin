@@ -619,13 +619,13 @@ class Runtime(QObject):
             self._pause_condition.notify_all()
 
         self.stop_cancel_state_machine(emit_status=False)
+        self.bb = bb
         self._finished = True
         self._final_outcome = str(outcome)
         self._set_running(False)
         self._set_blocked(False)
         self._set_last_transition(None)
         self._current_state_ref = None
-        self._last_state_ref = None
         self.outcome_changed.emit(self._final_outcome)
         self.status_changed.emit(f"Runtime finished with outcome: {outcome}")
 

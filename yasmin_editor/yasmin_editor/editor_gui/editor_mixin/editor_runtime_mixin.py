@@ -269,7 +269,9 @@ class EditorRuntimeMixin:
         shell.open_shell(
             bb=bb,
             sm=sm,
-            current_state=runtime.get_current_state_ref(),
+            current_state=(
+                runtime.get_current_state_ref() if runtime.is_blocked() else None
+            ),
             last_state=runtime.get_last_state_ref(),
         )
 
@@ -407,9 +409,14 @@ class EditorRuntimeMixin:
 
     def on_runtime_shell_clicked(self) -> None:
         runtime = self.runtime
-        if runtime is None or not runtime.is_blocked() or runtime.bb is None:
+        shell_allowed = bool(
+            runtime is not None
+            and runtime.bb is not None
+            and (runtime.is_blocked() or runtime.is_finished())
+        )
+        if not shell_allowed:
             self.statusBar().showMessage(
-                "The interactive shell is only available while a transition is paused.",
+                "The interactive shell is only available while paused or after the root state machine finished.",
                 3000,
             )
             return
@@ -429,7 +436,9 @@ class EditorRuntimeMixin:
         shell.open_shell(
             bb=runtime.bb,
             sm=runtime.sm,
-            current_state=runtime.get_current_state_ref(),
+            current_state=(
+                runtime.get_current_state_ref() if runtime.is_blocked() else None
+            ),
             last_state=runtime.get_last_state_ref(),
         )
         self.update_runtime_actions()
@@ -767,9 +776,9 @@ class EditorRuntimeMixin:
         if shell_button is not None:
             shell_visible = (
                 self.runtime_mode_enabled
-                and runtime_blocked
                 and runtime is not None
                 and getattr(runtime, "bb", None) is not None
+                and (runtime_blocked or runtime_finished)
             )
             shell_button.setVisible(shell_visible)
             shell_button.setEnabled(shell_visible)
