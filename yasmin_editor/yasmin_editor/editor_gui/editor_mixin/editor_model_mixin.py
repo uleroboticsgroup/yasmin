@@ -188,7 +188,11 @@ class EditorModelMixin:
                 new_name,
                 getattr(state_node, "parent_container", None),
             ):
-                QMessageBox.warning(self, "Error", f"State '{new_name}' already exists!")
+                QMessageBox.warning(
+                    self,
+                    "Error",
+                    f"State '{new_name}' conflicts with an existing state or final outcome in this container!",
+                )
                 return False
             self._rename_state_node(state_node, new_name)
 
@@ -216,7 +220,11 @@ class EditorModelMixin:
             return
 
         if self.has_state_name_conflict(name):
-            QMessageBox.warning(self, "Error", f"State '{name}' already exists!")
+            QMessageBox.warning(
+                self,
+                "Error",
+                f"State '{name}' conflicts with an existing state or final outcome in this container!",
+            )
             return
 
         if is_state_machine or is_concurrence:
@@ -455,7 +463,20 @@ class EditorModelMixin:
         state_name: str,
         parent_container: Optional[ContainerStateNode] = None,
     ) -> bool:
-        return state_name in self.current_container_model.states
+        container_model = (
+            self.current_container_model
+            if parent_container is None
+            else parent_container.model
+        )
+        return state_name in container_model.states or any(
+            outcome.name == state_name for outcome in container_model.outcomes
+        )
+
+    def has_final_outcome_name_conflict(self, outcome_name: str) -> bool:
+        return (
+            outcome_name in self.final_outcomes
+            or outcome_name in self.current_container_model.states
+        )
 
     def add_model_state(
         self,

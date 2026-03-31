@@ -36,10 +36,36 @@ class StateMachine(State):
         """Return whether this state contains child states."""
         return True
 
+    def _assert_child_name_available(
+        self,
+        name: str,
+        *,
+        exclude_state: str | None = None,
+        exclude_outcome: str | None = None,
+    ) -> None:
+        """Validate that a child state or final outcome name is available."""
+        if name in self.states and name != exclude_state:
+            raise ValueError(
+                f"Name '{name}' is already used by a child state in this state machine"
+            )
+        if any(
+            outcome.name == name and outcome.name != exclude_outcome
+            for outcome in self.outcomes
+        ):
+            raise ValueError(
+                f"Name '{name}' is already used by a final outcome in this state machine"
+            )
+
     def add_state(self, state: State) -> None:
         """Add a child state to the state machine."""
+        self._assert_child_name_available(state.name)
         self.states[state.name] = state
         self.transitions.setdefault(state.name, [])
+
+    def add_outcome(self, outcome) -> None:
+        """Add a final outcome to the state machine."""
+        self._assert_child_name_available(outcome.name)
+        State.add_outcome(self, outcome)
 
     def add_transition(self, state_name: str, transition: Transition) -> None:
         """Add a transition for a child state."""
@@ -99,6 +125,7 @@ class StateMachine(State):
         """Rename a child state and update all related references."""
         if old_name == new_name:
             return
+        self._assert_child_name_available(new_name, exclude_state=old_name)
         state = self.states.pop(old_name)
         state.name = new_name
         self.states[new_name] = state
@@ -117,6 +144,7 @@ class StateMachine(State):
         """Rename a final outcome and update all related references."""
         if old_name == new_name:
             return
+        self._assert_child_name_available(new_name, exclude_outcome=old_name)
         State.rename_outcome(self, old_name, new_name)
         self.rename_transition_owner(old_name, new_name)
         for transitions in self.transitions.values():

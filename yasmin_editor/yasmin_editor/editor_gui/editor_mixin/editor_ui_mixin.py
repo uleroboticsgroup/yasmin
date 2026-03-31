@@ -320,11 +320,11 @@ class EditorUiMixin:
             self, "Final Outcome", "Enter final outcome name:"
         )
         if ok and outcome_name:
-            if outcome_name in self.final_outcomes:
+            if self.has_final_outcome_name_conflict(outcome_name):
                 QMessageBox.warning(
                     self,
                     "Error",
-                    f"Final outcome '{outcome_name}' already exists in this container!",
+                    f"Final outcome '{outcome_name}' conflicts with an existing state or final outcome in this container!",
                 )
                 return
 
@@ -535,11 +535,13 @@ class EditorUiMixin:
                 )
                 return
 
-            if new_name != outcome_node.name and new_name in self.final_outcomes:
+            if new_name != outcome_node.name and self.has_final_outcome_name_conflict(
+                new_name
+            ):
                 QMessageBox.warning(
                     self,
                     "Error",
-                    f"Final outcome '{new_name}' already exists in this container!",
+                    f"Final outcome '{new_name}' conflicts with an existing state or final outcome in this container!",
                 )
                 return
 
@@ -588,9 +590,14 @@ class EditorUiMixin:
                     if isinstance(model, StateMachine):
                         model.rename_transition_owner(old_name, name)
                 else:
-                    if name != old_name and name in parent_model.states:
+                    if name != old_name and (
+                        name in parent_model.states
+                        or any(outcome.name == name for outcome in parent_model.outcomes)
+                    ):
                         QMessageBox.warning(
-                            self, "Error", f"State '{name}' already exists!"
+                            self,
+                            "Error",
+                            f"State '{name}' conflicts with an existing state or final outcome in this container!",
                         )
                         return
                     if name != old_name:

@@ -180,6 +180,12 @@ def _validate_state_machine(
 
     state_names = set(state_machine.states.keys())
     outcome_names = {outcome.name for outcome in state_machine.outcomes}
+    conflicting_names = sorted(state_names & outcome_names)
+    for name in conflicting_names:
+        result.add_error(
+            path,
+            f"Name '{name}' is used by both a child state and a final outcome",
+        )
     local_targets = state_names | outcome_names
     nested_parent_targets = local_targets | (parent_targets or set())
 
@@ -268,6 +274,12 @@ def _validate_concurrence(
 
     state_names = set(concurrence.states.keys())
     outcome_names = {outcome.name for outcome in concurrence.outcomes}
+    conflicting_names = sorted(state_names & outcome_names)
+    for name in conflicting_names:
+        result.add_error(
+            path,
+            f"Name '{name}' is used by both a child state and a final outcome",
+        )
     nested_parent_targets = state_names | outcome_names | (parent_targets or set())
 
     if not outcome_names:
