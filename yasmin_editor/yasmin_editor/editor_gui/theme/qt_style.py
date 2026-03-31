@@ -84,7 +84,6 @@ QLabel {{
     color: {text_primary};
 }}
 
-QToolBar,
 QStatusBar,
 QMenuBar,
 QMenu,
@@ -95,20 +94,23 @@ QSplitter::handle {{
     border-color: {border};
 }}
 
-QToolBar {{
+QToolBar#yasminEditorToolbar {{
+    background-color: {panel_bg};
+    color: {text_primary};
+    border-color: {border};
     border-bottom: 1px solid {border};
     spacing: 0px;
     padding: 0px;
 }}
 
-QToolBar::separator {{
+QToolBar#yasminEditorToolbar::separator {{
     background: transparent;
     width: 1px;
     margin: 6px 6px;
     border-left: 1px solid {border};
 }}
 
-QToolButton {{
+QToolBar#yasminEditorToolbar QToolButton {{
     background-color: transparent;
     color: {text_primary};
     border: none;
@@ -116,12 +118,12 @@ QToolButton {{
     margin: 0px;
 }}
 
-QToolButton:hover {{
+QToolBar#yasminEditorToolbar QToolButton:hover {{
     background-color: {button_hover_bg};
 }}
 
-QToolButton:pressed,
-QToolButton:checked {{
+QToolBar#yasminEditorToolbar QToolButton:pressed,
+QToolBar#yasminEditorToolbar QToolButton:checked {{
     background-color: {button_pressed_bg};
 }}
 

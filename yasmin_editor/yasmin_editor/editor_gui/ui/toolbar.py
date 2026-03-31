@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import QAction, QPushButton, QToolBar
 def build_toolbar(editor) -> None:
     """Create the main toolbar."""
     toolbar = QToolBar()
+    toolbar.setObjectName("yasminEditorToolbar")
     editor.addToolBar(toolbar)
 
     editor.new_action = QAction("New", editor)
