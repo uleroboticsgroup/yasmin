@@ -624,7 +624,7 @@ class Runtime(QObject):
             self._pause_condition.notify_all()
 
         self.stop_cancel_state_machine(emit_status=False)
-        final_active_path = self._resolve_current_execution_path(self._active_path)
+        final_active_path = tuple(self._active_path)
         if final_active_path:
             self._set_active_path(final_active_path)
             self._last_state_ref = self._resolve_state_reference(final_active_path)
