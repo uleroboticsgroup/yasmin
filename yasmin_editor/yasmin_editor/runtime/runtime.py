@@ -161,10 +161,6 @@ class Runtime(QObject):
         """Return the last known active path inside the loaded machine."""
         return self._active_path
 
-    def get_live_active_path(self) -> tuple[str, ...]:
-        """Resolve the current execution path directly from the live machine."""
-        return self._resolve_current_execution_path(tuple())
-
     def get_last_transition(
         self,
     ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
@@ -476,13 +472,6 @@ class Runtime(QObject):
     def _resolve_initial_active_path(self) -> tuple[str, ...]:
         """Return the initial path that should be highlighted before execution."""
         return self._expand_to_deepest_known_path(tuple())
-
-    def _resolve_current_execution_path(
-        self, fallback: tuple[str, ...]
-    ) -> tuple[str, ...]:
-        """Resolve the best available live execution path for the UI."""
-        live_path = self._expand_to_deepest_known_path(tuple())
-        return live_path if live_path else fallback
 
     def _pause_if_requested(self) -> None:
         """Block the worker thread while a pause request is active."""
