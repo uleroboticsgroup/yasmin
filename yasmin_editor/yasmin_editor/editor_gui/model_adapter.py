@@ -21,11 +21,13 @@ from typing import TYPE_CHECKING
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
+from yasmin_editor.model.text_block import TextBlock
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
@@ -59,6 +61,9 @@ class EditorModelAdapter:
 
     def rebuild_scene(self, model: StateMachine | Concurrence) -> None:
         self.editor.clear_current_scene()
+
+        for text_block in model.text_blocks:
+            self.create_text_block_view(text_block)
 
         for state in model.states.values():
             self.create_state_view(state)
@@ -159,6 +164,27 @@ class EditorModelAdapter:
 
         self.editor.canvas.scene.addItem(node)
         self.editor.register_state_node(node)
+        return node
+
+    def create_text_block_view(
+        self,
+        text_block_model: TextBlock,
+        x: float | None = None,
+        y: float | None = None,
+    ) -> TextBlockNode:
+        if x is None:
+            x = text_block_model.x
+        if y is None:
+            y = text_block_model.y
+
+        node = TextBlockNode(
+            x=float(x),
+            y=float(y),
+            content=text_block_model.content,
+            model=text_block_model,
+        )
+        self.editor.canvas.scene.addItem(node)
+        self.editor.text_blocks.append(node)
         return node
 
     def create_final_outcome_view(

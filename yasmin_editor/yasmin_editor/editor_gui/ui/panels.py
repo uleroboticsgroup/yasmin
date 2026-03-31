@@ -31,7 +31,7 @@ def build_right_panel(editor) -> QWidget:
 
     editor.canvas_header = QLabel(
         "<b>State Machine Canvas:</b> "
-        "<i>(Ctrl + double-click a nested container to enter it, drag from blue port to create transitions, scroll to zoom, right-click for options)</i>"
+        "<i>(Ctrl + double-click a nested container to enter it, drag from blue port to create transitions, double-click text blocks to edit inline, scroll to zoom, right-click for options)</i>"
     )
     right_layout.addWidget(editor.canvas_header)
 

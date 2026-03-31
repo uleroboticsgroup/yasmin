@@ -16,9 +16,12 @@
 """State machine model."""
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
+
 from .layout import Layout
 from .state import State
+from .text_block import TextBlock
 from .transition import Transition
 
 
@@ -30,6 +33,7 @@ class StateMachine(State):
     states: dict[str, State] = field(default_factory=dict)
     transitions: dict[str, list[Transition]] = field(default_factory=dict)
     layout: Layout = field(default_factory=Layout)
+    text_blocks: list[TextBlock] = field(default_factory=list)
 
     @property
     def is_container(self) -> bool:
@@ -66,6 +70,14 @@ class StateMachine(State):
         """Add a final outcome to the state machine."""
         self._assert_child_name_available(outcome.name)
         State.add_outcome(self, outcome)
+
+    def add_text_block(self, text_block: TextBlock) -> None:
+        """Add a free-form text block to the container."""
+        self.text_blocks.append(text_block)
+
+    def remove_text_block(self, text_block: TextBlock) -> None:
+        """Remove one free-form text block from the container."""
+        self.text_blocks = [item for item in self.text_blocks if item is not text_block]
 
     def add_transition(self, state_name: str, transition: Transition) -> None:
         """Add a transition for a child state."""
@@ -234,6 +246,13 @@ class StateMachine(State):
                             for source, target in state.remappings.items()
                         )
                     )
+        if self.text_blocks:
+            lines.append(f"{prefix}  text blocks:")
+            for text_block in self.text_blocks:
+                preview = text_block.content.replace("\n", "\\n")
+                lines.append(
+                    f"{prefix}    - ({text_block.x:.2f}, {text_block.y:.2f}): {preview}"
+                )
         if self.outcomes:
             lines.append(f"{prefix}  final outcomes:")
             for outcome in self.outcomes:

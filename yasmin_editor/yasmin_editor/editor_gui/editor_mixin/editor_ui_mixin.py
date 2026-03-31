@@ -42,6 +42,7 @@ from yasmin_editor.editor_gui.dialogs.state_properties_dialog import StateProper
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.editor_gui.ui.panels import build_right_panel
 from yasmin_editor.editor_gui.ui.sidebars import build_left_panel
 from yasmin_editor.editor_gui.ui.toolbar import build_toolbar
@@ -89,12 +90,14 @@ class EditorUiMixin:
         <b>Add State:</b> Add regular state (Python/C++/XML).<br>
         <b>Add State Machine:</b> Add nested container.<br>
         <b>Add Concurrence:</b> Add parallel container.<br>
-        <b>Add Final Outcome:</b> Add exit point.
+        <b>Add Final Outcome:</b> Add exit point.<br>
+        <b>Add Text:</b> Add free-form documentation blocks with inline editing.
         <h3>Working with States</h3>
         <b>Double-click:</b> Plugin to add state.<br>
         <b>Right-click:</b> State options.<br>
         <b>Drag:</b> Reposition states.<br>
-        <b>Delete Selected:</b> Remove items.
+        <b>Delete Selected:</b> Remove items.<br>
+        <b>Text Blocks:</b> Double-click to edit inline, use Ctrl+B / Ctrl+I for Markdown markers.
         <h3>Creating Transitions</h3>
         <b>Drag from blue port:</b> Create transitions.<br>
         <b>Select outcome:</b> Choose trigger.
@@ -311,6 +314,15 @@ class EditorUiMixin:
                     defaults=defaults,
                 )
 
+    def add_text_block(self) -> None:
+        """Add a free-form text block to the current container."""
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+
+        node = self.add_text_block_model()
+        self.start_pending_node_placement(node)
+
     def add_final_outcome(self) -> None:
         if self.is_read_only_mode():
             self._show_read_only_message()
@@ -501,6 +513,9 @@ class EditorUiMixin:
                 return
             if isinstance(item, FinalOutcomeNode):
                 self.delete_final_outcome_item(item)
+                return
+            if isinstance(item, TextBlockNode):
+                self.delete_text_block_item(item)
                 return
             if isinstance(item, (StateNode, ContainerStateNode)):
                 self.delete_state_item(item)

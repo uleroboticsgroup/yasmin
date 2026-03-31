@@ -55,6 +55,10 @@ def build_toolbar(editor) -> None:
     editor.add_final_action.triggered.connect(editor.add_final_outcome)
     toolbar.addAction(editor.add_final_action)
 
+    editor.add_text_action = QAction("Add Text", editor)
+    editor.add_text_action.triggered.connect(editor.add_text_block)
+    toolbar.addAction(editor.add_text_action)
+
     toolbar.addSeparator()
 
     editor.edit_current_action = QAction("Edit Current Container", editor)

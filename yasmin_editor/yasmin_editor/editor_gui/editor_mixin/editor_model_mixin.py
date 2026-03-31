@@ -25,10 +25,12 @@ from yasmin_editor.editor_gui.dialogs.state_machine_dialog import StateMachineDi
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
+from yasmin_editor.model.text_block import TextBlock
 from yasmin_editor.model.transition import Transition
 from yasmin_editor.model.validation import validate_model
 
@@ -327,6 +329,7 @@ class EditorModelMixin:
         self.state_nodes.clear()
         self.final_outcomes.clear()
         self.connections.clear()
+        self.text_blocks.clear()
 
     def sync_current_container_layout(self) -> None:
         container_model = self.current_container_model
@@ -342,6 +345,10 @@ class EditorModelMixin:
                 float(outcome_view.pos().x()),
                 float(outcome_view.pos().y()),
             )
+        for text_block_view in self.text_blocks:
+            text_block_view.model.x = float(text_block_view.pos().x())
+            text_block_view.model.y = float(text_block_view.pos().y())
+            text_block_view.model.content = text_block_view.content
 
     def update_container_controls(self) -> None:
         if not hasattr(self, "root_sm_name_edit"):
@@ -506,7 +513,7 @@ class EditorModelMixin:
 
     def start_pending_node_placement(
         self,
-        node: StateNode | ContainerStateNode | FinalOutcomeNode,
+        node: StateNode | ContainerStateNode | FinalOutcomeNode | TextBlockNode,
     ) -> None:
         existing_pending = self.canvas.pending_placement_item
         if existing_pending is not None and existing_pending is not node:
@@ -515,7 +522,7 @@ class EditorModelMixin:
 
     def finalize_pending_node_placement(
         self,
-        node: StateNode | ContainerStateNode | FinalOutcomeNode,
+        node: StateNode | ContainerStateNode | FinalOutcomeNode | TextBlockNode,
         scene_pos: QPointF,
     ) -> None:
         node.setPos(scene_pos)
@@ -527,6 +534,10 @@ class EditorModelMixin:
                 float(scene_pos.y()),
             )
             self.statusBar().showMessage(f"Added final outcome: {node.name}", 2000)
+        elif isinstance(node, TextBlockNode):
+            node.model.x = float(scene_pos.x())
+            node.model.y = float(scene_pos.y())
+            self.statusBar().showMessage("Added text block", 2000)
         else:
             self.current_container_model.layout.set_state_position(
                 node.name,
@@ -540,14 +551,22 @@ class EditorModelMixin:
         node.setSelected(True)
         self.sync_current_container_layout()
 
+        if isinstance(node, TextBlockNode):
+            node.enter_edit_mode()
+
     def cancel_pending_node_placement(
         self,
-        node: StateNode | ContainerStateNode | FinalOutcomeNode,
+        node: StateNode | ContainerStateNode | FinalOutcomeNode | TextBlockNode,
     ) -> None:
         if isinstance(node, FinalOutcomeNode):
             self.current_container_model.remove_outcome(node.name)
             self.final_outcomes.pop(node.name, None)
             message = f"Canceled final outcome: {node.name}"
+        elif isinstance(node, TextBlockNode):
+            self.current_container_model.remove_text_block(node.model)
+            if node in self.text_blocks:
+                self.text_blocks.remove(node)
+            message = "Canceled text block"
         else:
             self.current_container_model.remove_state(node.name)
             self.state_nodes.pop(node.name, None)
@@ -647,6 +666,30 @@ class EditorModelMixin:
             2000,
         )
 
+    def delete_text_block_item(self, text_block_node: TextBlockNode) -> None:
+        """Delete one free-form text block from the current container."""
+        self.current_container_model.remove_text_block(text_block_node.model)
+        if text_block_node in self.text_blocks:
+            self.text_blocks.remove(text_block_node)
+        self.canvas.scene.removeItem(text_block_node)
+        self.statusBar().showMessage("Deleted text block", 2000)
+
+    def add_text_block_model(
+        self,
+        content: str = "# Notes\n",
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+    ) -> TextBlockNode:
+        """Create a new inline-editable text block in the current container."""
+        position = self.get_free_position()
+        x = position.x() if x is None else x
+        y = position.y() if y is None else y
+
+        model = TextBlock(x=float(x), y=float(y), content=content)
+        self.current_container_model.add_text_block(model)
+        node = self.model_adapter.create_text_block_view(model, x=float(x), y=float(y))
+        return node
+
     def add_state_to_container(self) -> None:
         self.add_state()
 
@@ -704,6 +747,7 @@ class EditorModelMixin:
             item.pos()
             for item in list(self.state_nodes.values())
             + list(self.final_outcomes.values())
+            + list(self.text_blocks)
         ]
         spacing_x = 180.0
         spacing_y = 130.0

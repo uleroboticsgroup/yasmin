@@ -29,6 +29,7 @@ from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence
 
 if TYPE_CHECKING:
@@ -51,13 +52,13 @@ class StateMachineCanvas(QGraphicsView):
 
         self.is_dragging_connection: bool = False
         self.drag_start_node: Optional[
-            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
+            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"]
         ] = None
         self.temp_line: Optional[QGraphicsLineItem] = None
         self.drag_rewire_connection: Optional["ConnectionLine"] = None
         self.editor_ref: Optional["YasminEditor"] = None
         self.pending_placement_item: Optional[
-            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
+            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"]
         ] = None
 
     def get_preferred_placement_scene_pos(self) -> QPointF:
@@ -68,7 +69,9 @@ class StateMachineCanvas(QGraphicsView):
 
     def start_pending_placement(
         self,
-        item: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
+        item: Union[
+            "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+        ],
     ) -> None:
         self.pending_placement_item = item
         self.setDragMode(QGraphicsView.NoDrag)
@@ -76,7 +79,7 @@ class StateMachineCanvas(QGraphicsView):
         item.setSelected(True)
         if self.editor_ref:
             self.editor_ref.statusBar().showMessage(
-                f"Place '{item.name}' with left click. Right click or Escape cancels.",
+                f"Place '{getattr(item, 'placement_label', getattr(item, 'name', 'item'))}' with left click. Right click or Escape cancels.",
                 0,
             )
 
@@ -114,8 +117,27 @@ class StateMachineCanvas(QGraphicsView):
 
         return True
 
+    def _is_inline_text_editing_active(self) -> bool:
+        """Return whether a text block currently owns the keyboard for inline editing."""
+        focus_item = self.scene.focusItem()
+
+        while focus_item is not None:
+            if isinstance(focus_item, TextBlockNode):
+                return bool(getattr(focus_item, "_is_editing", False))
+            focus_item = focus_item.parentItem()
+
+        for item in self.scene.selectedItems():
+            if isinstance(item, TextBlockNode) and getattr(item, "_is_editing", False):
+                return True
+
+        return False
+
     def keyPressEvent(self, event: QEvent) -> None:
         if event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
+            if self._is_inline_text_editing_active():
+                super().keyPressEvent(event)
+                return
+
             if self.editor_ref:
                 self.editor_ref.delete_selected()
                 event.accept()
@@ -226,7 +248,9 @@ class StateMachineCanvas(QGraphicsView):
 
             item = self.itemAt(event.pos())
             target: Optional[
-                Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
+                Union[
+                    "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+                ]
             ] = None
             if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                 target = item
@@ -249,7 +273,9 @@ class StateMachineCanvas(QGraphicsView):
             items = self.scene.items(scene_pos)
 
             target_node: Optional[
-                Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
+                Union[
+                    "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+                ]
             ] = None
             for item in items:
                 if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
@@ -335,6 +361,7 @@ class StateMachineCanvas(QGraphicsView):
             add_cc_action = menu.addAction("Add Concurrence")
             menu.addSeparator()
             add_outcome_action = menu.addAction("Add Final Outcome")
+            add_text_action = menu.addAction("Add Text")
             menu.addSeparator()
             edit_container_action = menu.addAction("Edit Current Container")
 
@@ -348,6 +375,8 @@ class StateMachineCanvas(QGraphicsView):
                 self.editor_ref.add_concurrence()
             elif action == add_outcome_action:
                 self.editor_ref.add_final_outcome()
+            elif action == add_text_action:
+                self.editor_ref.add_text_block()
             elif action == edit_container_action:
                 self.editor_ref.edit_current_container()
 

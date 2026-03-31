@@ -25,6 +25,7 @@ from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence
 
 
@@ -395,6 +396,8 @@ class EditorCanvasMixin:
             item.setFlag(item.ItemIsMovable, not readonly)
             if hasattr(item, "connection_port") and readonly:
                 item.connection_port.setVisible(False)
+        for text_block in self.text_blocks:
+            text_block.set_read_only(readonly)
         if not readonly:
             self.refresh_connection_port_visibility()
         if hasattr(self, "root_sm_name_edit"):

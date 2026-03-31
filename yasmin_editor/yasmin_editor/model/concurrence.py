@@ -16,9 +16,12 @@
 """Concurrence model."""
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
+
 from .layout import Layout
 from .state import State
+from .text_block import TextBlock
 
 
 @dataclass(slots=True, repr=False)
@@ -29,6 +32,7 @@ class Concurrence(State):
     states: dict[str, State] = field(default_factory=dict)
     outcome_map: dict[str, dict[str, str]] = field(default_factory=dict)
     layout: Layout = field(default_factory=Layout)
+    text_blocks: list[TextBlock] = field(default_factory=list)
 
     @property
     def is_container(self) -> bool:
@@ -64,6 +68,14 @@ class Concurrence(State):
         """Add a final outcome to the concurrence."""
         self._assert_child_name_available(outcome.name)
         State.add_outcome(self, outcome)
+
+    def add_text_block(self, text_block: TextBlock) -> None:
+        """Add a free-form text block to the container."""
+        self.text_blocks.append(text_block)
+
+    def remove_text_block(self, text_block: TextBlock) -> None:
+        """Remove one free-form text block from the container."""
+        self.text_blocks = [item for item in self.text_blocks if item is not text_block]
 
     def set_outcome_rule(
         self,
@@ -167,6 +179,13 @@ class Concurrence(State):
                     lines.append(state.to_string(indent + 8))
                 else:
                     lines.append(f"{prefix}    - {state._format_header()}")
+        if self.text_blocks:
+            lines.append(f"{prefix}  text blocks:")
+            for text_block in self.text_blocks:
+                preview = text_block.content.replace("\n", "\\n")
+                lines.append(
+                    f"{prefix}    - ({text_block.x:.2f}, {text_block.y:.2f}): {preview}"
+                )
         if self.outcome_map:
             lines.append(f"{prefix}  outcome map:")
             for outcome_name, mapping in self.outcome_map.items():

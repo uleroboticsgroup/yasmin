@@ -27,6 +27,7 @@ from yasmin_editor.model.key import Key
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
+from yasmin_editor.model.text_block import TextBlock
 from yasmin_editor.model.transition import Transition
 
 
@@ -88,6 +89,9 @@ def _state_machine_to_element(
 
     _append_remaps(element, model.remappings)
 
+    for text_block in model.text_blocks:
+        element.append(_text_block_to_element(text_block))
+
     for state in model.states.values():
         element.append(_state_to_element(state, model))
 
@@ -126,6 +130,9 @@ def _concurrence_to_element(
         element.append(_key_to_element(key))
 
     _append_remaps(element, model.remappings)
+
+    for text_block in model.text_blocks:
+        element.append(_text_block_to_element(text_block))
 
     for state in model.states.values():
         element.append(_state_to_element(state, model))
@@ -172,6 +179,15 @@ def _state_to_element(state: State, parent: StateMachine | Concurrence) -> ET.El
 
     _append_remaps(element, state.remappings)
     _append_owner_transitions(element, parent, state.name)
+    return element
+
+
+def _text_block_to_element(text_block: TextBlock) -> ET.Element:
+    """Serialize one free-form text block."""
+    element = ET.Element("Text")
+    element.set("x", f"{text_block.x:.2f}")
+    element.set("y", f"{text_block.y:.2f}")
+    element.set("content", _encode_text_content(text_block.content))
     return element
 
 
@@ -307,6 +323,10 @@ def _parse_state_machine_content(
         if child.tag in {"Key", "Remap"}:
             continue
 
+        if child.tag == "Text":
+            model.add_text_block(_parse_text_block(child))
+            continue
+
         if child.tag == "FinalOutcome":
             _merge_final_outcome(model, child)
             continue
@@ -340,6 +360,10 @@ def _parse_concurrence_content(
 
     for child in element:
         if child.tag in {"Key", "Remap"}:
+            continue
+
+        if child.tag == "Text":
+            model.add_text_block(_parse_text_block(child))
             continue
 
         if child.tag == "FinalOutcome":
@@ -420,6 +444,15 @@ def _parse_state_like(element: ET.Element) -> State:
     return state
 
 
+def _parse_text_block(element: ET.Element) -> TextBlock:
+    """Deserialize one free-form text block."""
+    return TextBlock(
+        x=_parse_float(element.get("x")) or 0.0,
+        y=_parse_float(element.get("y")) or 0.0,
+        content=_decode_text_content(element.get("content", "")),
+    )
+
+
 def _parse_transition(element: ET.Element) -> Transition:
     return Transition(
         source_outcome=element.get("from", ""),
@@ -450,6 +483,47 @@ def _parse_remaps(element: ET.Element) -> dict[str, str]:
         if old and new:
             remappings[old] = new
     return remappings
+
+
+def _encode_text_content(value: str) -> str:
+    """Persist multiline text safely inside an XML attribute."""
+    return (
+        value.replace("\\", "\\\\")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+    )
+
+
+def _decode_text_content(value: str) -> str:
+    """Restore escaped multiline text saved inside an XML attribute."""
+    if not value:
+        return ""
+
+    result: list[str] = []
+    index = 0
+    while index < len(value):
+        char = value[index]
+        if char != "\\" or index + 1 >= len(value):
+            result.append(char)
+            index += 1
+            continue
+
+        next_char = value[index + 1]
+        if next_char == "n":
+            result.append("\n")
+        elif next_char == "r":
+            result.append("\r")
+        elif next_char == "t":
+            result.append("\t")
+        elif next_char == "\\":
+            result.append("\\")
+        else:
+            result.append("\\")
+            result.append(next_char)
+        index += 2
+
+    return "".join(result)
 
 
 def _parse_float(value: str | None) -> float | None:

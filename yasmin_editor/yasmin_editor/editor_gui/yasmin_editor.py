@@ -34,6 +34,7 @@ from yasmin_editor.editor_gui.model_adapter import EditorModelAdapter
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.state_machine import StateMachine
 
 
@@ -67,6 +68,7 @@ class YasminEditor(
         self.state_nodes: Dict[str, StateNode | ContainerStateNode] = {}
         self.final_outcomes: Dict[str, FinalOutcomeNode] = {}
         self.connections: List[ConnectionLine] = []
+        self.text_blocks: List[TextBlockNode] = []
         self._blackboard_keys: List[Dict[str, str]] = []
         self._blackboard_key_metadata: Dict[str, Dict[str, str]] = {}
         self._highlight_blackboard_usage = True
@@ -125,6 +127,7 @@ class YasminEditor(
         self.state_nodes.clear()
         self.final_outcomes.clear()
         self.connections.clear()
+        self.text_blocks.clear()
 
         event.accept()
         QApplication.quit()
