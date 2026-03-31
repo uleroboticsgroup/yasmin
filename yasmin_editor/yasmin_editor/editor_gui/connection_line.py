@@ -20,25 +20,32 @@ from typing import TYPE_CHECKING, Any, List, Tuple, Union
 
 from PyQt5.QtCore import QPointF, Qt, QTimer
 from PyQt5.QtGui import QBrush, QFont, QPainterPath, QPen
-from PyQt5.QtWidgets import (QGraphicsItem, QGraphicsPathItem,
-                             QGraphicsPolygonItem)
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsPathItem, QGraphicsPolygonItem
 
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection.geometry import (
-    ZERO_POINT, build_arrow_polygon, compute_arrow_direction, normalize_vector,
-    offset_point, use_upward_label_stack, vector_length)
+    ZERO_POINT,
+    build_arrow_polygon,
+    compute_arrow_direction,
+    normalize_vector,
+    offset_point,
+    use_upward_label_stack,
+    vector_length,
+)
 from yasmin_editor.editor_gui.connection.groups import (
-    get_direction_group, get_opposite_direction_group, get_self_loop_group)
+    get_direction_group,
+    get_opposite_direction_group,
+    get_self_loop_group,
+)
 from yasmin_editor.editor_gui.connection.label_items import (
-    ConnectionLabelRectItem, ConnectionLabelTextItem)
-from yasmin_editor.editor_gui.connection.label_layout import \
-    layout_stacked_labels
+    ConnectionLabelRectItem,
+    ConnectionLabelTextItem,
+)
+from yasmin_editor.editor_gui.connection.label_layout import layout_stacked_labels
 
 if TYPE_CHECKING:
-    from yasmin_editor.editor_gui.nodes.container_state_node import \
-        ContainerStateNode
-    from yasmin_editor.editor_gui.nodes.final_outcome_node import \
-        FinalOutcomeNode
+    from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
+    from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
     from yasmin_editor.editor_gui.nodes.state_node import StateNode
 
 

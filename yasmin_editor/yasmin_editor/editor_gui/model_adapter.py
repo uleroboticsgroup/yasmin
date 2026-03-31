@@ -18,8 +18,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from yasmin_editor.editor_gui.nodes.container_state_node import \
-    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
@@ -44,9 +43,7 @@ class EditorModelAdapter:
     def load_from_xml(self, file_path: str) -> StateMachine:
         model = model_from_xml(Path(file_path))
         self.editor.reset_editor_state(model)
-        self.editor.set_blackboard_keys(
-            self.editor.keys_to_dicts(model.keys), sync=False
-        )
+        self.editor.set_blackboard_keys(self.editor.keys_to_dicts(model.keys), sync=False)
         self.editor.render_current_container()
         return model
 

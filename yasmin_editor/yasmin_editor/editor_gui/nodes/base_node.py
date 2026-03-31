@@ -24,8 +24,7 @@ from yasmin_editor.editor_gui.colors import PALETTE
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
-    from yasmin_editor.editor_gui.nodes.container_state_node import \
-        ContainerStateNode
+    from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 
 
 class BaseNodeMixin:

@@ -37,9 +37,7 @@ def build_runtime_controls_widget(editor) -> QWidget:
     editor.runtime_controls_layout.addWidget(editor.runtime_play_button)
 
     editor.runtime_pause_button = QPushButton("Request Pause")
-    editor.runtime_pause_button.setToolTip(
-        "Pause at next transition."
-    )
+    editor.runtime_pause_button.setToolTip("Pause at next transition.")
     editor.runtime_pause_button.clicked.connect(editor.on_runtime_pause_clicked)
     editor.runtime_controls_layout.addWidget(editor.runtime_pause_button)
 

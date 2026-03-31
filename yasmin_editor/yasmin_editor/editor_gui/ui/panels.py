@@ -21,7 +21,6 @@ from yasmin_editor.editor_gui.ui.runtime_controls import build_runtime_controls_
 from yasmin_editor.editor_gui.ui.sidebars import build_left_panel
 
 
-
 def build_right_panel(editor) -> QWidget:
     """Create the complete right panel."""
     right_panel = QWidget()

@@ -18,7 +18,6 @@ from __future__ import annotations
 from typing import Any, Optional
 
 
-
 def container_states(container: Any) -> dict[str, Any]:
     if container is None:
         return {}

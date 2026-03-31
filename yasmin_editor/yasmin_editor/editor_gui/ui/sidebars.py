@@ -46,7 +46,6 @@ def build_left_panel(editor) -> QWidget:
     return left_panel
 
 
-
 def build_blackboard_widget(editor) -> QWidget:
     """Create the blackboard panel."""
     widget = QWidget()
@@ -65,23 +64,18 @@ def build_blackboard_widget(editor) -> QWidget:
     editor.blackboard_list.itemSelectionChanged.connect(
         editor.on_blackboard_selection_changed
     )
-    editor.blackboard_list.itemDoubleClicked.connect(
-        editor.edit_selected_blackboard_key
-    )
+    editor.blackboard_list.itemDoubleClicked.connect(editor.edit_selected_blackboard_key)
     layout.addWidget(editor.blackboard_list)
 
     button_row = QHBoxLayout()
     editor.highlight_blackboard_btn = QPushButton("Highlight: On")
     editor.highlight_blackboard_btn.setCheckable(True)
     editor.highlight_blackboard_btn.setChecked(True)
-    editor.highlight_blackboard_btn.toggled.connect(
-        editor.toggle_blackboard_highlighting
-    )
+    editor.highlight_blackboard_btn.toggled.connect(editor.toggle_blackboard_highlighting)
     button_row.addWidget(editor.highlight_blackboard_btn)
     layout.addLayout(button_row)
 
     return widget
-
 
 
 def build_editor_sidebar_widget(editor) -> QWidget:
@@ -117,7 +111,6 @@ def build_editor_sidebar_widget(editor) -> QWidget:
     return widget
 
 
-
 def build_filterable_list_section(
     layout: QVBoxLayout,
     title: str,
@@ -138,7 +131,6 @@ def build_filterable_list_section(
     layout.addWidget(list_widget)
 
     return filter_edit, list_widget
-
 
 
 def build_runtime_sidebar_widget(editor) -> QWidget:

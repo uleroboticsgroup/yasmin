@@ -18,8 +18,7 @@ from typing import Dict, List, Optional
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QListWidgetItem
 
-from yasmin_editor.editor_gui.dialogs.blackboard_key_dialog import \
-    BlackboardKeyDialog
+from yasmin_editor.editor_gui.dialogs.blackboard_key_dialog import BlackboardKeyDialog
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
@@ -461,9 +460,7 @@ class EditorBlackboardMixin:
 
         self.update_blackboard_usage_highlighting()
 
-    def set_blackboard_keys(
-        self, keys: List[Dict[str, str]], sync: bool = True
-    ) -> None:
+    def set_blackboard_keys(self, keys: List[Dict[str, str]], sync: bool = True) -> None:
 
         self.root_model.keys = self.dicts_to_keys(keys)
         self._blackboard_key_metadata = self._get_container_metadata_map(
@@ -500,9 +497,7 @@ class EditorBlackboardMixin:
                 effective_name = remappings.get(effective_name, effective_name)
             return effective_name
 
-        def model_uses_key(
-            state_model: State, remap_chain: List[Dict[str, str]]
-        ) -> bool:
+        def model_uses_key(state_model: State, remap_chain: List[Dict[str, str]]) -> bool:
             current_chain = remap_chain + [
                 dict(getattr(state_model, "remappings", {}) or {})
             ]
@@ -580,9 +575,7 @@ class EditorBlackboardMixin:
             return
         if dlg.exec_():
             updated_key = dlg.get_key_data()
-            metadata_map = self._get_container_metadata_map(
-                self.current_container_model
-            )
+            metadata_map = self._get_container_metadata_map(self.current_container_model)
             metadata_map[key_name] = {
                 "description": updated_key.get("description", ""),
                 "key_type": key_data.get("key_type", "in"),

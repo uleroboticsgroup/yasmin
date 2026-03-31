@@ -30,11 +30,14 @@ from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from yasmin_editor.runtime.logging import RuntimeLogger
-from yasmin_editor.runtime.traversal import (child_state, container_states,
-                                             expand_to_deepest_known_path,
-                                             is_concurrence_object,
-                                             is_container_object,
-                                             resolve_container)
+from yasmin_editor.runtime.traversal import (
+    child_state,
+    container_states,
+    expand_to_deepest_known_path,
+    is_concurrence_object,
+    is_container_object,
+    resolve_container,
+)
 
 import yasmin
 from yasmin import Blackboard, StateMachine
@@ -77,9 +80,9 @@ class Runtime(QObject):
         self._shutting_down = False
 
         self._active_path: tuple[str, ...] = tuple()
-        self._last_transition: Optional[
-            tuple[tuple[str, ...], tuple[str, ...], str]
-        ] = None
+        self._last_transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]] = (
+            None
+        )
 
         self._execution_thread: Optional[threading.Thread] = None
         self._cancel_state_machine_thread: Optional[threading.Thread] = None

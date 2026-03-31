@@ -16,10 +16,22 @@
 import os
 from typing import Dict, List, Optional, Tuple
 
-from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFormLayout,
-                             QHBoxLayout, QHeaderView, QLabel, QLineEdit,
-                             QPushButton, QTableWidget, QTableWidgetItem,
-                             QTextEdit, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
@@ -115,9 +127,7 @@ class StatePropertiesDialog(QDialog):
 
         self.remappings_table: QTableWidget = QTableWidget(0, 2)
         self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
-        self.remappings_table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.Stretch
-        )
+        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.remappings_table.setMinimumHeight(80)
         self.remappings_table.setMaximumHeight(150)
         self.remappings_table.setEnabled(not self.readonly)
@@ -210,9 +220,7 @@ class StatePropertiesDialog(QDialog):
         fallback_output_keys: Optional[List[Dict[str, str]]] = None,
     ) -> str:
         if plugin_info:
-            base_description = str(
-                getattr(plugin_info, "description", "") or ""
-            ).strip()
+            base_description = str(getattr(plugin_info, "description", "") or "").strip()
             input_keys = list(getattr(plugin_info, "input_keys", []) or [])
             output_keys = list(getattr(plugin_info, "output_keys", []) or [])
             outcomes = list(getattr(plugin_info, "outcomes", []) or [])

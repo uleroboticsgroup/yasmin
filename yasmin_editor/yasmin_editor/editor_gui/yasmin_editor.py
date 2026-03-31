@@ -21,21 +21,17 @@ from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from yasmin_plugins_manager.plugin_manager import PluginManager
 
-from yasmin_editor.editor_gui.colors import (PALETTE, build_qt_palette,
-                                             build_stylesheet)
+from yasmin_editor.editor_gui.colors import PALETTE, build_qt_palette, build_stylesheet
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.editor_mixin.editor_blackboard_mixin import \
-    EditorBlackboardMixin
-from yasmin_editor.editor_gui.editor_mixin.editor_canvas_mixin import \
-    EditorCanvasMixin
-from yasmin_editor.editor_gui.editor_mixin.editor_model_mixin import \
-    EditorModelMixin
-from yasmin_editor.editor_gui.editor_mixin.editor_runtime_mixin import \
-    EditorRuntimeMixin
+from yasmin_editor.editor_gui.editor_mixin.editor_blackboard_mixin import (
+    EditorBlackboardMixin,
+)
+from yasmin_editor.editor_gui.editor_mixin.editor_canvas_mixin import EditorCanvasMixin
+from yasmin_editor.editor_gui.editor_mixin.editor_model_mixin import EditorModelMixin
+from yasmin_editor.editor_gui.editor_mixin.editor_runtime_mixin import EditorRuntimeMixin
 from yasmin_editor.editor_gui.editor_mixin.editor_ui_mixin import EditorUiMixin
 from yasmin_editor.editor_gui.model_adapter import EditorModelAdapter
-from yasmin_editor.editor_gui.nodes.container_state_node import \
-    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.state_machine import StateMachine

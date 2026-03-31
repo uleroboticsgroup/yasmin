@@ -57,9 +57,7 @@ def layout_stacked_labels(
         label_rect = connection.label.boundingRect()
         box_width = label_rect.width() + LABEL_PADDING * 2
         box_left = anchor_point.x() - box_width / 2.0
-        connection.label_bg.setRect(
-            QRectF(box_left, current_top, box_width, box_height)
-        )
+        connection.label_bg.setRect(QRectF(box_left, current_top, box_width, box_height))
         connection.label.setPos(
             box_left + LABEL_PADDING,
             current_top + LABEL_PADDING,

@@ -16,23 +16,30 @@
 from typing import Optional
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QDialog, QFileDialog, QHBoxLayout,
-                             QInputDialog, QListWidget, QListWidgetItem,
-                             QMessageBox, QPushButton, QSplitter, QTextBrowser,
-                             QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (
+    QDialog,
+    QFileDialog,
+    QHBoxLayout,
+    QInputDialog,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QSplitter,
+    QTextBrowser,
+    QVBoxLayout,
+    QWidget,
+)
 from yasmin_plugins_manager.plugin_manager import PluginInfo
 
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.dialogs.concurrence_dialog import \
-    ConcurrenceDialog
-from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import \
-    OutcomeDescriptionDialog
-from yasmin_editor.editor_gui.dialogs.state_machine_dialog import \
-    StateMachineDialog
-from yasmin_editor.editor_gui.dialogs.state_properties_dialog import \
-    StatePropertiesDialog
-from yasmin_editor.editor_gui.nodes.container_state_node import \
-    ContainerStateNode
+from yasmin_editor.editor_gui.dialogs.concurrence_dialog import ConcurrenceDialog
+from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import (
+    OutcomeDescriptionDialog,
+)
+from yasmin_editor.editor_gui.dialogs.state_machine_dialog import StateMachineDialog
+from yasmin_editor.editor_gui.dialogs.state_properties_dialog import StatePropertiesDialog
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.ui.panels import build_right_panel
@@ -41,6 +48,7 @@ from yasmin_editor.editor_gui.ui.toolbar import build_toolbar
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state_machine import StateMachine
+
 
 class EditorUiMixin:
     """Mixin for editor functionality split from the main window."""
@@ -335,10 +343,7 @@ class EditorUiMixin:
             )
 
             if isinstance(current_model, Concurrence):
-                if (
-                    len(current_model.outcomes) == 1
-                    and not current_model.default_outcome
-                ):
+                if len(current_model.outcomes) == 1 and not current_model.default_outcome:
                     current_model.default_outcome = outcome_name
 
             self.update_start_state_combo()
@@ -501,9 +506,7 @@ class EditorUiMixin:
                 self.delete_state_item(item)
                 return
 
-    def edit_final_outcome(
-        self, outcome_node: Optional[FinalOutcomeNode] = None
-    ) -> None:
+    def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
         if outcome_node is None:
             outcome_node = self.find_selected_item(FinalOutcomeNode)
 
@@ -614,9 +617,7 @@ class EditorUiMixin:
         )
 
         if is_container:
-            input_keys, output_keys = self._collect_container_key_lists(
-                state_node.model
-            )
+            input_keys, output_keys = self._collect_container_key_lists(state_node.model)
             dialog = StatePropertiesDialog(
                 state_name=state_node.name,
                 plugin_info=None,

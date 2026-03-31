@@ -18,7 +18,6 @@ from PyQt5.QtWidgets import QFrame, QVBoxLayout
 from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
 
 
-
 def build_canvas_frame(editor) -> QFrame:
     """Create the canvas frame and canvas widget."""
     frame = QFrame()

@@ -24,8 +24,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.nodes.container_state_node import \
-    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.runtime import Runtime
 from yasmin_editor.runtime.interactive_shell import InteractiveShellManager
 
@@ -40,9 +39,7 @@ class EditorRuntimeMixin:
         self.runtime.running_changed.connect(self.update_runtime_actions)
         self.runtime.blocked_changed.connect(self.update_runtime_actions)
         self.runtime.active_state_changed.connect(self.on_runtime_active_state_changed)
-        self.runtime.active_transition_changed.connect(
-            self.on_runtime_transition_changed
-        )
+        self.runtime.active_transition_changed.connect(self.on_runtime_transition_changed)
         self.runtime.outcome_changed.connect(self.on_runtime_outcome_changed)
         self.runtime.status_changed.connect(self.on_runtime_status_changed)
         self.runtime.error_occurred.connect(self.on_runtime_error)
@@ -386,11 +383,7 @@ class EditorRuntimeMixin:
 
     def restart_runtime_mode(self) -> None:
         runtime = self.runtime
-        if (
-            not self.runtime_mode_enabled
-            or runtime is None
-            or not runtime.is_finished()
-        ):
+        if not self.runtime_mode_enabled or runtime is None or not runtime.is_finished():
             return
 
         self.runtime_active_path = tuple()
@@ -768,9 +761,7 @@ class EditorRuntimeMixin:
         if auto_follow_button is not None:
             auto_follow_button.setVisible(self.runtime_mode_enabled)
             auto_follow_button.setEnabled(runtime_ready)
-            self._set_runtime_auto_follow_button_checked(
-                self.runtime_auto_follow_enabled
-            )
+            self._set_runtime_auto_follow_button_checked(self.runtime_auto_follow_enabled)
 
         shell_button = getattr(self, "runtime_shell_button", None)
         if shell_button is not None:
@@ -818,9 +809,7 @@ class EditorRuntimeMixin:
     def _get_current_runtime_container_path(self) -> tuple[str, ...]:
         if self.current_runtime_container_path:
             return tuple(self.current_runtime_container_path)
-        return tuple(
-            str(container.name) for container in self.current_container_path[1:]
-        )
+        return tuple(str(container.name) for container in self.current_container_path[1:])
 
     def _get_runtime_state_name_for_current_container(self) -> Optional[str]:
         if not self.runtime_mode_enabled:

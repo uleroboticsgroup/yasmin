@@ -14,26 +14,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """State machine model."""
+
 from __future__ import annotations
 from dataclasses import dataclass, field
 from .layout import Layout
 from .state import State
 from .transition import Transition
+
+
 @dataclass(slots=True, repr=False)
 class StateMachine(State):
     """Represents a YASMIN state machine container."""
+
     start_state: str | None = None
     states: dict[str, State] = field(default_factory=dict)
     transitions: dict[str, list[Transition]] = field(default_factory=dict)
     layout: Layout = field(default_factory=Layout)
+
     @property
     def is_container(self) -> bool:
         """Return whether this state contains child states."""
         return True
+
     def add_state(self, state: State) -> None:
         """Add a child state to the state machine."""
         self.states[state.name] = state
         self.transitions.setdefault(state.name, [])
+
     def add_transition(self, state_name: str, transition: Transition) -> None:
         """Add a transition for a child state."""
         transition_list = self.transitions.setdefault(state_name, [])
@@ -44,6 +51,7 @@ class StateMachine(State):
             ):
                 return
         transition_list.append(transition)
+
     def remove_transition(
         self,
         state_name: str,
@@ -59,6 +67,7 @@ class StateMachine(State):
         ]
         if not self.transitions.get(state_name):
             self.transitions.pop(state_name, None)
+
     def remove_state(self, name: str) -> None:
         """Remove a child state and all related transitions."""
         self.states.pop(name, None)
@@ -68,6 +77,7 @@ class StateMachine(State):
         if self.start_state == name:
             self.start_state = None
         self.layout.remove_state_position(name)
+
     def rename_transition_owner(self, old_owner: str, new_owner: str) -> None:
         """Rename one transition owner entry inside this container."""
         if old_owner == new_owner:
@@ -84,6 +94,7 @@ class StateMachine(State):
             ):
                 continue
             merged.append(transition)
+
     def rename_state(self, old_name: str, new_name: str) -> None:
         """Rename a child state and update all related references."""
         if old_name == new_name:
@@ -101,6 +112,7 @@ class StateMachine(State):
         if self.start_state == old_name:
             self.start_state = new_name
         self.layout.rename_state_position(old_name, new_name)
+
     def rename_outcome(self, old_name: str, new_name: str) -> None:
         """Rename a final outcome and update all related references."""
         if old_name == new_name:
@@ -112,6 +124,7 @@ class StateMachine(State):
                 if transition.target == old_name:
                     transition.target = new_name
         self.layout.rename_outcome_position(old_name, new_name)
+
     def rename_child_state_outcome(
         self,
         state_name: str,
@@ -142,6 +155,7 @@ class StateMachine(State):
             self.transitions[state_name] = deduplicated
         else:
             self.transitions.pop(state_name, None)
+
     def remove_outcome(self, name: str) -> None:
         """Remove a final outcome and all related transitions."""
         self.outcomes = [outcome for outcome in self.outcomes if outcome.name != name]
@@ -149,9 +163,11 @@ class StateMachine(State):
         for transitions in self.transitions.values():
             transitions[:] = [item for item in transitions if item.target != name]
         self.layout.remove_outcome_position(name)
+
     def get_state(self, name: str) -> State | None:
         """Return a child state by name."""
         return self.states.get(name)
+
     def to_string(self, indent: int = 0) -> str:
         """Return a human-readable representation of the state machine."""
         prefix = " " * indent
@@ -205,7 +221,9 @@ class StateMachine(State):
                     f"{prefix}    {transition.source_outcome} -> {transition.target}"
                 )
         return "\n".join(lines)
+
     def __str__(self) -> str:
         """Return a compact human-readable representation."""
         return self.to_string()
+
     __repr__ = __str__

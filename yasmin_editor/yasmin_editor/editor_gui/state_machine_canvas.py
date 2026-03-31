@@ -17,12 +17,16 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from PyQt5.QtCore import QEvent, QLineF, QPointF, Qt, QTimer
 from PyQt5.QtGui import QBrush, QCursor, QPainter, QPen
-from PyQt5.QtWidgets import (QGraphicsLineItem, QGraphicsScene, QGraphicsView,
-                             QMenu, QWidget)
+from PyQt5.QtWidgets import (
+    QGraphicsLineItem,
+    QGraphicsScene,
+    QGraphicsView,
+    QMenu,
+    QWidget,
+)
 
 from yasmin_editor.editor_gui.colors import PALETTE
-from yasmin_editor.editor_gui.nodes.container_state_node import \
-    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
@@ -119,9 +123,7 @@ class StateMachineCanvas(QGraphicsView):
 
         if event.key() == Qt.Key_Escape and self.pending_placement_item is not None:
             if self.editor_ref:
-                self.editor_ref.cancel_pending_node_placement(
-                    self.pending_placement_item
-                )
+                self.editor_ref.cancel_pending_node_placement(self.pending_placement_item)
             else:
                 self.clear_pending_placement()
             event.accept()
@@ -230,9 +232,7 @@ class StateMachineCanvas(QGraphicsView):
                 target = item
             elif hasattr(item, "parentItem"):
                 parent = item.parentItem()
-                if isinstance(
-                    parent, (StateNode, FinalOutcomeNode, ContainerStateNode)
-                ):
+                if isinstance(parent, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                     target = parent
 
             if target and self.is_valid_connection(self.drag_start_node, target):

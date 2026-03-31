@@ -22,8 +22,7 @@ from PyQt5.QtWidgets import QLabel, QMessageBox, QPushButton
 
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.nodes.container_state_node import \
-    ContainerStateNode
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
@@ -74,9 +73,7 @@ class EditorCanvasMixin:
             for final_outcome in state_node.final_outcomes.values():
                 yield final_outcome
 
-    def _remove_state_node_entries(
-        self, state_node: StateNode, prefix: str = ""
-    ) -> None:
+    def _remove_state_node_entries(self, state_node: StateNode, prefix: str = "") -> None:
         full_name = f"{prefix}.{state_node.name}" if prefix else state_node.name
         if isinstance(state_node, ContainerStateNode):
             for child_state in list(state_node.child_states.values()):
@@ -348,8 +345,7 @@ class EditorCanvasMixin:
 
         if file_name and package_name:
             try:
-                from ament_index_python.packages import \
-                    get_package_share_directory
+                from ament_index_python.packages import get_package_share_directory
 
                 share_dir = get_package_share_directory(str(package_name))
                 direct_candidate = os.path.join(share_dir, str(file_name))
@@ -395,9 +391,7 @@ class EditorCanvasMixin:
 
     def _set_scene_read_only_state(self) -> None:
         readonly = self.is_read_only_mode()
-        for item in list(self.state_nodes.values()) + list(
-            self.final_outcomes.values()
-        ):
+        for item in list(self.state_nodes.values()) + list(self.final_outcomes.values()):
             item.setFlag(item.ItemIsMovable, not readonly)
             if hasattr(item, "connection_port") and readonly:
                 item.connection_port.setVisible(False)
@@ -484,9 +478,7 @@ class EditorCanvasMixin:
                 )
                 return
             try:
-                external_model = self.model_adapter.load_external_xml_model(
-                    xml_file_path
-                )
+                external_model = self.model_adapter.load_external_xml_model(xml_file_path)
             except Exception as exc:
                 QMessageBox.critical(
                     self,

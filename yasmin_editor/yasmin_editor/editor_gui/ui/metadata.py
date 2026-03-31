@@ -13,8 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
-
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 def build_metadata_widget(editor) -> QWidget:
@@ -50,9 +56,7 @@ def build_metadata_widget(editor) -> QWidget:
 
     editor.root_sm_description_edit = QLineEdit()
     editor.root_sm_description_edit.setProperty("flatInput", True)
-    editor.root_sm_description_edit.setPlaceholderText(
-        "Enter container description..."
-    )
+    editor.root_sm_description_edit.setPlaceholderText("Enter container description...")
     editor.root_sm_description_edit.textChanged.connect(
         editor.on_root_sm_description_changed
     )

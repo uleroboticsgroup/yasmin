@@ -17,8 +17,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from PyQt5.QtCore import QPointF, Qt
 from PyQt5.QtGui import QBrush, QFont, QPen
-from PyQt5.QtWidgets import (QGraphicsItem, QGraphicsRectItem,
-                             QGraphicsTextItem, QMenu)
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem, QMenu
 
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
@@ -142,9 +141,7 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
 
     @property
     def default_outcome(self) -> Optional[str]:
-        return (
-            self.model.default_outcome if isinstance(self.model, Concurrence) else None
-        )
+        return self.model.default_outcome if isinstance(self.model, Concurrence) else None
 
     @default_outcome.setter
     def default_outcome(self, value: Optional[str]) -> None:

@@ -20,12 +20,9 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from yasmin_plugins_manager.plugin_manager import PluginInfo
 
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.dialogs.concurrence_dialog import \
-    ConcurrenceDialog
-from yasmin_editor.editor_gui.dialogs.state_machine_dialog import \
-    StateMachineDialog
-from yasmin_editor.editor_gui.nodes.container_state_node import \
-    ContainerStateNode
+from yasmin_editor.editor_gui.dialogs.concurrence_dialog import ConcurrenceDialog
+from yasmin_editor.editor_gui.dialogs.state_machine_dialog import StateMachineDialog
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.model.concurrence import Concurrence
@@ -45,8 +42,7 @@ class EditorModelMixin:
                 (
                     item
                     for item in self.plugin_manager.python_plugins
-                    if item.module == model.module
-                    and item.class_name == model.class_name
+                    if item.module == model.module and item.class_name == model.class_name
                 ),
                 None,
             )
@@ -66,8 +62,7 @@ class EditorModelMixin:
                     for item in self.plugin_manager.xml_files
                     if item.file_name == model.file_name
                     and (
-                        not model.package_name
-                        or item.package_name == model.package_name
+                        not model.package_name or item.package_name == model.package_name
                     )
                 ),
                 None,
@@ -108,9 +103,7 @@ class EditorModelMixin:
             package_name=getattr(plugin_info, "package_name", None),
             file_name=getattr(plugin_info, "file_name", None),
         )
-        for outcome_name in list(
-            outcomes or getattr(plugin_info, "outcomes", []) or []
-        ):
+        for outcome_name in list(outcomes or getattr(plugin_info, "outcomes", []) or []):
             model.add_outcome(Outcome(name=outcome_name))
         return model
 
@@ -142,9 +135,7 @@ class EditorModelMixin:
             model.add_outcome(Outcome(name=outcome_name))
         return model
 
-    def _create_connection_view(
-        self, from_node, to_node, outcome: str
-    ) -> ConnectionLine:
+    def _create_connection_view(self, from_node, to_node, outcome: str) -> ConnectionLine:
         connection = ConnectionLine(from_node, to_node, outcome)
         self.canvas.scene.addItem(connection)
         self.canvas.scene.addItem(connection.arrow_head)
@@ -197,9 +188,7 @@ class EditorModelMixin:
                 new_name,
                 getattr(state_node, "parent_container", None),
             ):
-                QMessageBox.warning(
-                    self, "Error", f"State '{new_name}' already exists!"
-                )
+                QMessageBox.warning(self, "Error", f"State '{new_name}' already exists!")
                 return False
             self._rename_state_node(state_node, new_name)
 
@@ -705,9 +694,7 @@ class EditorModelMixin:
                     if max(abs(dx), abs(dy)) != radius:
                         continue
                     candidates.append(
-                        QPointF(
-                            center.x() + dx * spacing_x, center.y() + dy * spacing_y
-                        )
+                        QPointF(center.x() + dx * spacing_x, center.y() + dy * spacing_y)
                     )
 
         def is_free(candidate: QPointF) -> bool:

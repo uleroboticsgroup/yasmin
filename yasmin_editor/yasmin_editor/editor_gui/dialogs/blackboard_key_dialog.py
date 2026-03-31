@@ -15,8 +15,16 @@
 
 from typing import Dict, Optional
 
-from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFormLayout,
-                             QLabel, QLineEdit, QMessageBox, QTextEdit)
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QTextEdit,
+)
 
 
 class BlackboardKeyDialog(QDialog):
@@ -83,9 +91,7 @@ class BlackboardKeyDialog(QDialog):
         )
         layout.addRow("Default Type:", self.default_type_combo)
 
-        self.default_value_edit = QLineEdit(
-            str(key_data.get("default_value", "") or "")
-        )
+        self.default_value_edit = QLineEdit(str(key_data.get("default_value", "") or ""))
         self.default_value_edit.setReadOnly(self.readonly)
         self.default_value_edit.setPlaceholderText(
             "Default value. Leave empty for an empty string when type is str"

@@ -17,8 +17,7 @@ from typing import Any, Dict, List, Optional
 
 from PyQt5.QtCore import QPointF
 from PyQt5.QtGui import QBrush, QFont, QPen
-from PyQt5.QtWidgets import (QGraphicsEllipseItem, QGraphicsItem,
-                             QGraphicsTextItem)
+from PyQt5.QtWidgets import QGraphicsEllipseItem, QGraphicsItem, QGraphicsTextItem
 from yasmin_plugins_manager.plugin_info import PluginInfo
 
 from yasmin_editor.editor_gui.colors import PALETTE

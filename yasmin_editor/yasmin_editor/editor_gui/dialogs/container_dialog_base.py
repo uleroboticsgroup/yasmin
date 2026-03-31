@@ -18,11 +18,24 @@
 from typing import Dict, List, Optional
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFormLayout,
-                             QHBoxLayout, QHeaderView, QLabel, QLineEdit,
-                             QMessageBox, QPushButton, QSizePolicy,
-                             QTableWidget, QTableWidgetItem, QTextEdit,
-                             QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QSizePolicy,
+    QTableWidget,
+    QTableWidgetItem,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class ContainerDialogBase(QDialog):
@@ -114,9 +127,7 @@ class ContainerDialogBase(QDialog):
 
         self.remappings_table = QTableWidget(0, 2)
         self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
-        self.remappings_table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.Stretch
-        )
+        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.remappings_table.setMinimumHeight(80)
         self.remappings_table.setMaximumHeight(150)
         remappings_layout.addWidget(self.remappings_table)
