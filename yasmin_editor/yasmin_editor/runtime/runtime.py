@@ -68,7 +68,7 @@ class Runtime(QObject):
 
         self.factory = YasminFactory()
         self.sm: Optional[StateMachine] = None
-        self.bb: Optional[Blackboard] = None
+        self.bb: Blackboard = Blackboard()
 
         self._running = False
         self._blocked = False
@@ -145,6 +145,8 @@ class Runtime(QObject):
 
     def get_current_state(self) -> Optional[str]:
         """Return the currently active leaf state name if available."""
+        if self._finished:
+            return None
         return self._active_path[-1] if self._active_path else None
 
     def get_current_state_ref(self) -> Optional[Any]:
@@ -199,6 +201,7 @@ class Runtime(QObject):
         try:
             self.logger.configure()
             self.sm = self.factory.create_sm_from_file(path)
+            self.bb = Blackboard()
             self._register_callbacks()
         except Exception as exc:
             self.sm = None
@@ -334,7 +337,6 @@ class Runtime(QObject):
             self._execution_thread.join(timeout=1.0)
 
         self.sm = None
-        self.bb = None
         self._execution_thread = None
         self._cancel_state_machine_thread = None
         self._cancel_state_machine_stop_event.clear()
@@ -504,7 +506,7 @@ class Runtime(QObject):
 
         try:
             self.logger.configure()
-            sm()
+            sm(self.bb)
         except Exception as exc:
             if not self._disposed:
                 self._set_running(False)
@@ -622,7 +624,10 @@ class Runtime(QObject):
             self._pause_condition.notify_all()
 
         self.stop_cancel_state_machine(emit_status=False)
-        self.bb = bb
+        final_active_path = self._resolve_current_execution_path(self._active_path)
+        if final_active_path:
+            self._set_active_path(final_active_path)
+            self._last_state_ref = self._resolve_state_reference(final_active_path)
         self._finished = True
         self._final_outcome = str(outcome)
         self._set_running(False)
@@ -650,7 +655,6 @@ class Runtime(QObject):
 
         try:
             bb.set_remappings({})
-            self.bb = bb
 
             from_path = prefix + (str(from_state),)
             to_path = prefix + (str(to_state),)
@@ -672,7 +676,4 @@ class Runtime(QObject):
             self._set_active_path(active_path)
             self._pause_if_requested()
         finally:
-            try:
-                bb.set_remappings(remappings)
-            finally:
-                self.bb = None
+            bb.set_remappings(remappings)

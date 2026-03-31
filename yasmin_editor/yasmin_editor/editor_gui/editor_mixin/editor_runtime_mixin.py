@@ -263,12 +263,11 @@ class EditorRuntimeMixin:
         if bb is None or sm is None:
             return
 
+        runtime_playing = runtime.is_running() and not runtime.is_blocked()
         shell.open_shell(
             bb=bb,
             sm=sm,
-            current_state=(
-                runtime.get_current_state_ref() if runtime.is_blocked() else None
-            ),
+            current_state=(None if runtime_playing else runtime.get_current_state_ref()),
             last_state=runtime.get_last_state_ref(),
         )
 
@@ -287,11 +286,16 @@ class EditorRuntimeMixin:
         shell = getattr(self, "runtime_shell", None)
         return bool(shell is not None and shell.is_open())
 
-    def _runtime_shell_resume_blocked(self) -> bool:
+    def _runtime_shell_execution_blocked(self) -> bool:
         runtime = self.runtime
         if runtime is None:
             return False
-        return self._is_runtime_shell_open() and runtime.is_blocked()
+        runtime_playing = runtime.is_running() and not runtime.is_blocked()
+        return (
+            self._is_runtime_shell_open()
+            and not runtime.is_finished()
+            and not runtime_playing
+        )
 
     def _runtime_requires_finish_before_leaving(self) -> bool:
         runtime = self.runtime
@@ -343,9 +347,9 @@ class EditorRuntimeMixin:
         return True
 
     def on_runtime_play_clicked(self) -> None:
-        if self._runtime_shell_resume_blocked():
+        if self._runtime_shell_execution_blocked():
             self.statusBar().showMessage(
-                "Close the interactive shell before resuming execution.",
+                "Close the interactive shell before starting or resuming execution.",
                 3000,
             )
             return
@@ -357,9 +361,9 @@ class EditorRuntimeMixin:
             self.runtime.pause()
 
     def on_runtime_step_clicked(self) -> None:
-        if self._runtime_shell_resume_blocked():
+        if self._runtime_shell_execution_blocked():
             self.statusBar().showMessage(
-                "Close the interactive shell before resuming execution.",
+                "Close the interactive shell before starting or resuming execution.",
                 3000,
             )
             return
@@ -402,14 +406,19 @@ class EditorRuntimeMixin:
 
     def on_runtime_shell_clicked(self) -> None:
         runtime = self.runtime
+        runtime_playing = bool(
+            runtime is not None and runtime.is_running() and not runtime.is_blocked()
+        )
         shell_allowed = bool(
             runtime is not None
+            and runtime.is_ready()
             and runtime.bb is not None
-            and (runtime.is_blocked() or runtime.is_finished())
+            and runtime.sm is not None
+            and not runtime_playing
         )
         if not shell_allowed:
             self.statusBar().showMessage(
-                "The interactive shell is only available while paused or after the root state machine finished.",
+                "The interactive shell is only available before start, while paused, or after the root state machine finished.",
                 3000,
             )
             return
@@ -429,9 +438,7 @@ class EditorRuntimeMixin:
         shell.open_shell(
             bb=runtime.bb,
             sm=runtime.sm,
-            current_state=(
-                runtime.get_current_state_ref() if runtime.is_blocked() else None
-            ),
+            current_state=runtime.get_current_state_ref(),
             last_state=runtime.get_last_state_ref(),
         )
         self.update_runtime_actions()
@@ -714,7 +721,7 @@ class EditorRuntimeMixin:
         runtime_step_mode = runtime_running and runtime.is_step_mode()
         runtime_finished = runtime_ready and runtime.is_finished()
         runtime_canceling = runtime_running and runtime.is_canceling_state_machine()
-        runtime_shell_open = self._runtime_shell_resume_blocked()
+        runtime_shell_open = self._runtime_shell_execution_blocked()
 
         self._set_runtime_mode_button_checked(self.runtime_mode_enabled)
         self.set_canvas_runtime_visual_state()
@@ -768,8 +775,9 @@ class EditorRuntimeMixin:
             shell_visible = (
                 self.runtime_mode_enabled
                 and runtime is not None
+                and runtime.is_ready()
                 and getattr(runtime, "bb", None) is not None
-                and (runtime_blocked or runtime_finished)
+                and not runtime_playing
             )
             shell_button.setVisible(shell_visible)
             shell_button.setEnabled(shell_visible)
