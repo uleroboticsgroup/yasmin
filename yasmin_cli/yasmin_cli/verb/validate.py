@@ -117,7 +117,6 @@ def _validate_single_file(state_machine_file: str, strict_mode: bool) -> int:
         return 0
 
     print(f"[FAIL] {state_machine_file}")
-    print(f"       File: {xml_path}")
     print(f"       {message}")
     return 1
 
