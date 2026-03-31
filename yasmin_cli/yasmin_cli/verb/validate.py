@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 from ament_index_python import get_package_share_path
@@ -48,13 +49,14 @@ def _resolve_plugin_xml_files() -> list[tuple[str, Path]]:
 
         if plugin.relative_path:
             xml_path = (package_share_path / plugin.relative_path).resolve()
+            display_path = plugin.relative_path
         elif plugin.file_name:
             xml_path = (package_share_path / plugin.file_name).resolve()
+            display_path = plugin.file_name
         else:
             continue
 
-        label = f"{plugin.package_name}/{plugin.relative_path or plugin.file_name}"
-        xml_files.append((label, xml_path))
+        xml_files.append((f"{plugin.package_name}/{display_path}", xml_path))
 
     xml_files.sort(key=lambda item: item[0])
     return xml_files
@@ -87,7 +89,7 @@ def _validate_xml_file(xml_file: str, strict_mode: bool) -> tuple[bool, str]:
 
 def _validate_single_file(state_machine_file: str, strict_mode: bool) -> int:
     """
-    Validate one XML state machine file.
+    Validate one XML state machine file in the current process.
 
     Parameters
     ----------
@@ -101,7 +103,7 @@ def _validate_single_file(state_machine_file: str, strict_mode: bool) -> int:
     int
         CLI return code.
     """
-    xml_path = Path(state_machine_file)
+    xml_path = Path(state_machine_file).resolve()
 
     if not xml_path.is_file():
         print(f"[FAIL] {state_machine_file}")
@@ -111,17 +113,56 @@ def _validate_single_file(state_machine_file: str, strict_mode: bool) -> int:
     success, message = _validate_xml_file(str(xml_path), strict_mode)
 
     if success:
-        print(f"[OK]   {xml_path}")
+        print(f"[OK]   {state_machine_file}")
         return 0
 
-    print(f"[FAIL] {xml_path}")
+    print(f"[FAIL] {state_machine_file}")
+    print(f"       File: {xml_path}")
     print(f"       {message}")
     return 1
+
+
+def _run_single_validation_subprocess(xml_path: Path, strict_mode: bool) -> int:
+    """
+    Validate one XML file in a fresh subprocess.
+
+    This keeps batch validation robust even if native plugins or imported state
+    modules do not tolerate repeated loading in a single Python process.
+
+    Parameters
+    ----------
+    xml_path : Path
+        XML file to validate.
+    strict_mode : bool
+        Whether strict validation should be enabled.
+
+    Returns
+    -------
+    int
+        Subprocess return code.
+    """
+    command = ["ros2", "yasmin", "validate", str(xml_path)]
+
+    if not strict_mode:
+        command.append("--no-strict")
+
+    try:
+        completed = subprocess.run(command, check=False)
+        return completed.returncode
+    except KeyboardInterrupt:
+        return 130
+    except FileNotFoundError as exc:
+        print(f"[FAIL] {xml_path}")
+        print(f"       Failed to execute command: {exc}")
+        return 1
 
 
 def _validate_all_plugin_xml_files(strict_mode: bool) -> int:
     """
     Validate all XML state machines discovered by the plugin manager.
+
+    Each XML file is validated in its own subprocess to avoid cross-file side
+    effects from plugin loading and native state factories.
 
     Parameters
     ----------
@@ -141,16 +182,10 @@ def _validate_all_plugin_xml_files(strict_mode: bool) -> int:
 
     failed = 0
 
-    for label, xml_path in xml_files:
-        success, message = _validate_xml_file(str(xml_path), strict_mode)
-
-        if success:
-            print(f"[OK]   {label}")
-        else:
+    for _, xml_path in xml_files:
+        return_code = _run_single_validation_subprocess(xml_path, strict_mode)
+        if return_code != 0:
             failed += 1
-            print(f"[FAIL] {label}")
-            print(f"       File: {xml_path}")
-            print(f"       {message}")
 
     print("")
     print(
