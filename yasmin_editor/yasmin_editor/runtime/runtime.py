@@ -32,6 +32,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from yasmin_editor.runtime.logging import RuntimeLogger
 from yasmin_editor.runtime.traversal import (child_state, container_states,
                                              expand_to_deepest_known_path,
+                                             is_concurrence_object,
                                              is_container_object,
                                              resolve_container)
 
@@ -518,6 +519,9 @@ class Runtime(QObject):
                         current_prefix,
                     )
                 )
+
+            if is_concurrence_object(container):
+                return
 
             for state_name, nested_state in container_states(container).items():
                 if is_container_object(nested_state):

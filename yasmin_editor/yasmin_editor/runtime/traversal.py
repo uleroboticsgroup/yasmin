@@ -18,6 +18,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 
+
 def container_states(container: Any) -> dict[str, Any]:
     if container is None:
         return {}
@@ -60,6 +61,23 @@ def container_states(container: Any) -> dict[str, Any]:
 
 def child_state(container: Any, state_name: str) -> Optional[Any]:
     return container_states(container).get(str(state_name))
+
+
+def is_concurrence_object(state: Any) -> bool:
+    if state is None:
+        return False
+
+    try:
+        import yasmin
+
+        concurrence_type = getattr(yasmin, "Concurrence", None)
+        if concurrence_type is not None and isinstance(state, concurrence_type):
+            return True
+    except Exception:
+        pass
+
+    state_type = type(state)
+    return state_type.__name__ == "Concurrence"
 
 
 def is_container_object(state: Any) -> bool:
@@ -121,6 +139,9 @@ def expand_to_deepest_known_path(
     visited: set[int] = set()
 
     while is_container_object(container) and id(container) not in visited:
+        if is_concurrence_object(container):
+            break
+
         visited.add(id(container))
         child_name = get_container_entry_state_name(container)
         if not child_name:
