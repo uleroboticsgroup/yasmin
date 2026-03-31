@@ -193,6 +193,22 @@ class EditorCanvasMixin:
         self.canvas.fitInView(padded, Qt.KeepAspectRatio)
         self.canvas.centerOn(bounds.center())
 
+    def _get_breadcrumb_label(self, index: int, container_model: object) -> str:
+        if index == 0:
+            return "root"
+
+        self._ensure_external_xml_state()
+        if (
+            self.extern_xml is not None
+            and self.extern_xml_source_state is not None
+            and self.extern_xml_path_start_index is not None
+            and index == self.extern_xml_path_start_index
+            and container_model is self.extern_xml
+        ):
+            return str(self.extern_xml_source_state.name)
+
+        return str(container_model.name)
+
     def refresh_breadcrumbs(self) -> None:
         if not hasattr(self, "breadcrumb_layout"):
             return
@@ -203,7 +219,7 @@ class EditorCanvasMixin:
                 widget.deleteLater()
 
         for index, container_model in enumerate(self.current_container_path):
-            label = "root" if index == 0 else container_model.name
+            label = self._get_breadcrumb_label(index, container_model)
             button = QPushButton(label)
             button.setFlat(True)
             button.clicked.connect(
