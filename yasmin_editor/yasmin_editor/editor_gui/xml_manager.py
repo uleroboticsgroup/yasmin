@@ -38,6 +38,25 @@ class XmlManager:
                 remap.set("old", old)
                 remap.set("new", new)
 
+    def add_blackboard_keys(self, elem: ET.Element, keys: list) -> None:
+        for key_data in keys:
+            key_name = key_data.get("name", "")
+            if not key_name:
+                continue
+
+            key_elem = ET.SubElement(elem, "Key")
+            key_elem.set("name", key_name)
+            key_elem.set("type", key_data.get("key_type", "in"))
+
+            if key_data.get("description"):
+                key_elem.set("description", key_data["description"])
+
+            if key_data.get("key_type") in ("in", "in/out") and key_data.get(
+                "default_type", ""
+            ):
+                key_elem.set("default_type", key_data.get("default_type", "str"))
+                key_elem.set("default_value", key_data.get("default_value", ""))
+
     def save_container(
         self, parent_elem: ET.Element, state_node: StateNode, tag: str
     ) -> None:
@@ -53,14 +72,6 @@ class XmlManager:
             cont_elem.set("outcomes", " ".join(state_node.final_outcomes.keys()))
         if getattr(state_node, "description", ""):
             cont_elem.set("description", state_node.description)
-        for default in getattr(state_node, "defaults", []):
-            if default.get("key"):
-                def_elem = ET.SubElement(cont_elem, "Default")
-                def_elem.set("key", default["key"])
-                def_elem.set("value", default.get("value", ""))
-                def_elem.set("type", default.get("type", "str"))
-                if default.get("description"):
-                    def_elem.set("description", default["description"])
         if state_node.remappings:
             self.add_remappings(cont_elem, state_node.remappings)
         if hasattr(state_node, "child_states") and state_node.child_states:
@@ -72,6 +83,8 @@ class XmlManager:
                 outcome_elem.set("name", outcome_node.name)
                 outcome_elem.set("x", f"{outcome_node.pos().x():.2f}")
                 outcome_elem.set("y", f"{outcome_node.pos().y():.2f}")
+                if getattr(outcome_node, "description", ""):
+                    outcome_elem.set("description", outcome_node.description)
 
         self.save_transitions(cont_elem, state_node)
         if hasattr(state_node, "final_outcomes") and state_node.final_outcomes:
@@ -94,14 +107,7 @@ class XmlManager:
         fsm_description = self.editor.root_sm_description_edit.text().strip()
         if fsm_description:
             root.set("description", fsm_description)
-        for default in self.editor.get_root_defaults():
-            if default.get("key"):
-                def_elem = ET.SubElement(root, "Default")
-                def_elem.set("key", default["key"])
-                def_elem.set("value", default.get("value", ""))
-                def_elem.set("type", default.get("type", "str"))
-                if default.get("description"):
-                    def_elem.set("description", default["description"])
+        self.add_blackboard_keys(root, self.editor.get_blackboard_keys())
         root_level_states = {
             name: node
             for name, node in self.editor.state_nodes.items()
@@ -114,6 +120,8 @@ class XmlManager:
             outcome_elem.set("name", outcome_node.name)
             outcome_elem.set("x", f"{outcome_node.pos().x():.2f}")
             outcome_elem.set("y", f"{outcome_node.pos().y():.2f}")
+            if getattr(outcome_node, "description", ""):
+                outcome_elem.set("description", outcome_node.description)
 
         tree = ET.ElementTree(root)
         tree.write(
@@ -160,14 +168,6 @@ class XmlManager:
                     self.add_remappings(state_elem, state_node.remappings)
                 if getattr(state_node, "description", ""):
                     state_elem.set("description", state_node.description)
-                for default in getattr(state_node, "defaults", []):
-                    if default.get("key"):
-                        def_elem = ET.SubElement(state_elem, "Default")
-                        def_elem.set("key", default["key"])
-                        def_elem.set("value", default.get("value", ""))
-                        def_elem.set("type", default.get("type", "str"))
-                        if default.get("description"):
-                            def_elem.set("description", default["description"])
                 self.save_transitions(state_elem, state_node)
 
     def save_transitions(self, parent_elem: ET.Element, state_node: StateNode) -> None:
@@ -193,10 +193,7 @@ class XmlManager:
         fsm_description = root.get("description", "")
         self.editor.root_sm_description_edit.setText(fsm_description)
 
-        # Load root defaults
-        root_defaults = self.load_defaults(root)
-        for default_data in root_defaults:
-            self.editor.add_root_default_row_with_data(default_data)
+        self.editor.set_blackboard_keys(self.load_blackboard_keys(root), sync=False)
 
         start_state = root.get("start_state", "")
 
@@ -225,6 +222,9 @@ class XmlManager:
             outcome_node = self.editor.final_outcomes.get(outcome_name)
             if outcome_node is None:
                 continue
+
+            outcome_node.description = outcome_elem.get("description", "")
+            outcome_node.update_tooltip()
 
             x = outcome_elem.get("x")
             y = outcome_elem.get("y")
@@ -255,10 +255,14 @@ class XmlManager:
                 for conn in state.connections:
                     conn.update_position()
 
+        self.editor.sync_blackboard_keys()
+
         for outcome in self.editor.final_outcomes.values():
             if hasattr(outcome, "connections"):
                 for conn in outcome.connections:
                     conn.update_position()
+
+        self.editor.sync_blackboard_keys()
 
         for _ in range(3):
             self.editor.canvas.scene.update()
@@ -582,28 +586,26 @@ class XmlManager:
             self.editor.state_nodes[f"{parent_container.name}.{state_name}"] = node
 
     def load_states_from_xml(
-        self,
-        parent_elem: ET.Element,
-        parent_container: ContainerStateNode = None,
+        self, parent_elem: ET.Element, parent_container: ContainerStateNode = None
     ) -> None:
-        """Recursively load states from XML."""
+        """Recursively load states and containers from XML."""
         for elem in parent_elem:
-            if elem.tag == "State" or (
-                elem.tag == "StateMachine" and elem.get("file_name")
-            ):
+            is_xml_plugin_state = elem.tag == "StateMachine" and elem.get("file_name")
+            is_regular_state = elem.tag == "State"
+            if is_regular_state or is_xml_plugin_state:
                 state_name = elem.get("name")
-                state_type = elem.get("type")
+                state_type = elem.get("type", "py")
                 remappings = self.load_remappings(elem)
-
                 plugin_info = None
+
                 if state_type == "py":
-                    module = elem.get("module")
+                    module_name = elem.get("module")
                     class_name = elem.get("class")
                     plugin_info = next(
                         (
                             p
                             for p in self.editor.plugin_manager.python_plugins
-                            if p.module == module and p.class_name == class_name
+                            if p.module == module_name and p.class_name == class_name
                         ),
                         None,
                     )
@@ -619,15 +621,26 @@ class XmlManager:
                     )
                 elif state_type == "xml":
                     file_name = elem.get("file_name")
+                    package_name = elem.get("package")
                     plugin_info = next(
                         (
                             p
                             for p in self.editor.plugin_manager.xml_files
                             if p.file_name == file_name
+                            and (package_name is None or p.package_name == package_name)
                         ),
                         None,
                     )
 
+                    if plugin_info is None:
+                        plugin_info = next(
+                            (
+                                p
+                                for p in self.editor.plugin_manager.xml_files
+                                if p.file_name == file_name
+                            ),
+                            None,
+                        )
                 if plugin_info:
                     description = elem.get("description", "")
                     defaults = self.load_defaults(elem)
@@ -701,6 +714,9 @@ class XmlManager:
                     if outcome_node is None:
                         continue
 
+                    outcome_node.description = outcome_elem.get("description", "")
+                    outcome_node.update_tooltip()
+
                     ox = outcome_elem.get("x")
                     oy = outcome_elem.get("y")
                     if ox is not None and oy is not None:
@@ -762,6 +778,9 @@ class XmlManager:
                     if outcome_node is None:
                         continue
 
+                    outcome_node.description = outcome_elem.get("description", "")
+                    outcome_node.update_tooltip()
+
                     ox = outcome_elem.get("x")
                     oy = outcome_elem.get("y")
                     if ox is not None and oy is not None:
@@ -794,6 +813,43 @@ class XmlManager:
                 }
             )
         return defaults
+
+    def load_blackboard_keys(self, elem: ET.Element) -> list:
+        """Load blackboard keys from XML element."""
+        keys = []
+
+        for key_elem in elem.findall("Key"):
+            key_name = key_elem.get("name", "")
+            if not key_name:
+                continue
+
+            keys.append(
+                {
+                    "name": key_name,
+                    "key_type": key_elem.get("type", "in"),
+                    "description": key_elem.get("description", ""),
+                    "default_type": key_elem.get("default_type", ""),
+                    "default_value": key_elem.get("default_value", ""),
+                }
+            )
+
+        if keys:
+            return keys
+
+        for default_data in self.load_defaults(elem):
+            if not default_data.get("key"):
+                continue
+            keys.append(
+                {
+                    "name": default_data.get("key", ""),
+                    "key_type": "in",
+                    "description": default_data.get("description", ""),
+                    "default_type": default_data.get("type", "str"),
+                    "default_value": default_data.get("value", ""),
+                }
+            )
+
+        return keys
 
     def find_to_node(
         self, to_name: str, parent_container: ContainerStateNode = None

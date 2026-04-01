@@ -214,6 +214,9 @@ private:
   get_optional_attribute(tinyxml2::XMLElement *element,
                          const std::string &attr_name,
                          const std::string &default_value = "") const;
+
+  void add_blackboard_keys(yasmin::State::SharedPtr owner,
+                           tinyxml2::XMLElement *parent) const;
 };
 
 } // namespace yasmin_factory

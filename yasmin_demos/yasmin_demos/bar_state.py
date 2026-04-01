@@ -35,6 +35,7 @@ class BarState(State):
         self.set_description(
             "Prints the value stored in 'foo_str' from the blackboard and transitions back to the Foo state."
         )
+        self.set_outcome_description("outcome3", "Final outcome")
         self.add_input_key(
             "foo_str",
             "String produced by FooState and printed by this state.",

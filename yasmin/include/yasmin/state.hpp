@@ -19,6 +19,7 @@
 #include <atomic>
 #include <functional>
 #include <string>
+#include <unordered_map>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/blackboard_key_info.hpp"
@@ -172,6 +173,30 @@ public:
    * @return The description of the state.
    */
   const std::string &get_description() const;
+
+  /**
+   * @brief Sets a human-readable description for an outcome.
+   * @param outcome The outcome name.
+   * @param description The description of the outcome.
+   * @throws std::invalid_argument If the outcome is not part of this state.
+   */
+  void set_outcome_description(const std::string &outcome,
+                               const std::string &description);
+
+  /**
+   * @brief Gets the human-readable description for an outcome.
+   * @param outcome The outcome name.
+   * @return The description of the outcome, or an empty string if none exists.
+   * @throws std::invalid_argument If the outcome is not part of this state.
+   */
+  const std::string &get_outcome_description(const std::string &outcome) const;
+
+  /**
+   * @brief Gets all outcome descriptions.
+   * @return A constant reference to the outcome description map.
+   */
+  const std::unordered_map<std::string, std::string> &
+  get_outcome_descriptions() const;
 
   /**
    * @brief Adds an input key to the state's metadata.
