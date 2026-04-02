@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <StateMachine name="Demo3" outcomes="outcome4" start_state="PoseWriter">
+  <Param name="Test" description="This is a test"/>
+  <Param name="Test2" description="This is a seccond test" default_type="str" default_value="Hallo"/>
   <Key name="pose_bytes" type="in/out" description="Serialized Pose message stored as bytes in the blackboard."/>
   <Key name="pose_bytes__type" type="in/out" description="Type information for the serialized Pose message."/>
   <State name="PoseWriter" x="157.80" y="84.20" type="cpp" class="yasmin_demos/PoseWriterState">

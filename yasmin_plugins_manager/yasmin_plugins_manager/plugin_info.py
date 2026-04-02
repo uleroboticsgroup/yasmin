@@ -111,6 +111,21 @@ class PluginInfo:
                 if outcome_name and outcome_description:
                     self.outcome_descriptions[outcome_name] = outcome_description
 
+            for param_elem in root.findall("Param"):
+                param_name = param_elem.attrib.get("name", "")
+                if not param_name:
+                    continue
+
+                param_data = {
+                    "name": param_name,
+                    "description": param_elem.attrib.get("description", ""),
+                    "default_value_type": param_elem.attrib.get("default_type", "str"),
+                    "default_value": param_elem.attrib.get("default_value", ""),
+                    "has_default": "default_value" in param_elem.attrib,
+                }
+
+                self.parameters.append(dict(param_data))
+
             for key_elem in root.findall("Key"):
                 key_name = key_elem.attrib.get("name", "")
                 if not key_name:
@@ -139,7 +154,9 @@ class PluginInfo:
                         {
                             "name": key_name,
                             "description": default_elem.attrib.get("description", ""),
-                            "default_value_type": default_elem.attrib.get("type", "str"),
+                            "default_value_type": default_elem.attrib.get(
+                                "type", "str"
+                            ),
                             "default_value": default_elem.attrib.get("value", ""),
                             "has_default": True,
                         }
