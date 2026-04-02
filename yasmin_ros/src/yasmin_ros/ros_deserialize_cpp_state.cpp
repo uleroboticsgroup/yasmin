@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "pluginlib/class_list_macros.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 
 namespace yasmin_ros {
@@ -28,6 +29,23 @@ namespace {
 const std::string SUCCEED = "succeed";
 const std::string TYPE_ERROR = "type_error";
 const std::string ERROR = "error";
+const std::string SERIALIZED_BYTES_TYPE =
+    yasmin::demangle_type(typeid(std::vector<uint8_t>).name());
+
+void validate_blackboard_key_type(
+    const yasmin::Blackboard::SharedPtr &blackboard, const std::string &key,
+    const std::string &expected_type) {
+  if (!blackboard->contains(key)) {
+    throw std::runtime_error("Element '" + key +
+                             "' does not exist in the blackboard");
+  }
+
+  const std::string actual_type = blackboard->get_type(key);
+  if (actual_type != expected_type) {
+    throw std::runtime_error("Element '" + key + "' has type '" + actual_type +
+                             "' but expected '" + expected_type + "'");
+  }
+}
 
 } // namespace
 
@@ -65,6 +83,8 @@ void RosDeserializeCppState::configure() {
 std::string
 RosDeserializeCppState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   try {
+    validate_blackboard_key_type(blackboard, "input", SERIALIZED_BYTES_TYPE);
+
     const std::vector<uint8_t> serialized_data =
         blackboard->get<std::vector<uint8_t>>("input");
     this->handler_->deserialize_to_blackboard(blackboard, "output",

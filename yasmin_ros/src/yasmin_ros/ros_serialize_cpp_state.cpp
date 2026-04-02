@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "pluginlib/class_list_macros.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 
 namespace yasmin_ros {
@@ -28,6 +29,21 @@ namespace {
 const std::string SUCCEED = "succeed";
 const std::string TYPE_ERROR = "type_error";
 const std::string ERROR = "error";
+
+void validate_blackboard_key_type(
+    const yasmin::Blackboard::SharedPtr &blackboard, const std::string &key,
+    const std::string &expected_type) {
+  if (!blackboard->contains(key)) {
+    throw std::runtime_error("Element '" + key +
+                             "' does not exist in the blackboard");
+  }
+
+  const std::string actual_type = blackboard->get_type(key);
+  if (actual_type != expected_type) {
+    throw std::runtime_error("Element '" + key + "' has type '" + actual_type +
+                             "' but expected '" + expected_type + "'");
+  }
+}
 
 } // namespace
 
@@ -65,6 +81,9 @@ void RosSerializeCppState::configure() {
 std::string
 RosSerializeCppState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   try {
+    validate_blackboard_key_type(blackboard, "input",
+                                 this->handler_->blackboard_type);
+
     const std::vector<uint8_t> serialized_data =
         this->handler_->serialize_from_blackboard(blackboard, "input");
     blackboard->set<std::vector<uint8_t>>("output", serialized_data);

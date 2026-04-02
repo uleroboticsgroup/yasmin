@@ -22,6 +22,7 @@
 #include "geometry_msgs/msg/pose.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "std_srvs/srv/trigger.hpp"
+#include "yasmin/blackboard.hpp"
 #include "yasmin_ros/interface_serialization.hpp"
 
 namespace yasmin_ros {
@@ -37,7 +38,8 @@ template <typename InterfaceT> InterfaceSerializationHandler make_handler() {
          const std::vector<uint8_t> &serialized_data) {
         blackboard->set<InterfaceT>(
             key, deserialize_interface<InterfaceT>(serialized_data));
-      }};
+      },
+      yasmin::demangle_type(typeid(InterfaceT).name())};
 }
 
 const std::unordered_map<std::string, InterfaceSerializationHandler>

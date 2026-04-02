@@ -108,10 +108,22 @@ if(BUILD_TESTING)
     test_service_client_state
     test_monitor_state
     test_publisher_state
+    test_ros_serialize_state
+    test_ros_deserialize_state
   )
 
   foreach(_test_name ${_pytest_tests})
     ament_add_pytest_test(${_test_name} test/${_test_name}.py TIMEOUT 300)
+  endforeach()
+
+  set(_gtest_tests
+    test_action_client_state
+    test_service_client_state
+    test_monitor_state
+    test_publisher_state
+  )
+
+  foreach(_test_name ${_gtest_tests})
     ament_add_gtest(${_test_name}_cpp test/${_test_name}.cpp TIMEOUT 300)
     if(TARGET ${_test_name}_cpp)
       target_link_libraries(${_test_name}_cpp
@@ -119,11 +131,27 @@ if(BUILD_TESTING)
         yasmin::yasmin
         rclcpp::rclcpp
         rclcpp_action::rclcpp_action
+        ${geometry_msgs_TARGETS}
         ${std_msgs_TARGETS}
+        ${std_srvs_TARGETS}
         ${example_interfaces_TARGETS}
       )
     endif()
   endforeach()
+
+  ament_add_gtest(test_ros_serialization_states_cpp test/test_ros_serialization_states.cpp TIMEOUT 300)
+  if(TARGET test_ros_serialization_states_cpp)
+    target_link_libraries(test_ros_serialization_states_cpp
+      ${PROJECT_NAME}
+      yasmin::yasmin
+      rclcpp::rclcpp
+      rclcpp_action::rclcpp_action
+      ${geometry_msgs_TARGETS}
+      ${std_msgs_TARGETS}
+      ${std_srvs_TARGETS}
+      ${example_interfaces_TARGETS}
+    )
+  endif()
 
 endif()
 

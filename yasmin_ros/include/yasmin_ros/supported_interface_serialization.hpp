@@ -32,6 +32,7 @@ struct InterfaceSerializationHandler {
   std::function<void(yasmin::Blackboard::SharedPtr, const std::string &,
                      const std::vector<uint8_t> &)>
       deserialize_to_blackboard;
+  std::string blackboard_type;
 };
 
 const std::unordered_map<std::string, InterfaceSerializationHandler> &
