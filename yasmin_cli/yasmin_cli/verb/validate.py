@@ -82,6 +82,8 @@ def _validate_xml_file(xml_file: str, strict_mode: bool) -> tuple[bool, str]:
         factory = YasminFactory()
         state_machine = factory.create_sm_from_file(xml_file)
         state_machine.validate(strict_mode=strict_mode)
+        del state_machine
+        del factory
         return True, "OK"
     except Exception as exc:
         return False, str(exc)
