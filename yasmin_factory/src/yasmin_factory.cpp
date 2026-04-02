@@ -37,7 +37,8 @@ PythonStateHolder::PythonStateHolder(yasmin::State::SharedPtr cpp_state,
       py_state_(py_state) {
   this->set_description(cpp_state->get_description());
 
-  for (const auto &[outcome, description] : cpp_state->get_outcome_descriptions()) {
+  for (const auto &[outcome, description] :
+       cpp_state->get_outcome_descriptions()) {
     this->set_outcome_description(outcome, description);
   }
 
@@ -61,7 +62,8 @@ void PythonStateHolder::configure() {
     }
 
     if (this->has_parameter(parameter.name)) {
-      this->cpp_state_->copy_parameter_from(*this, parameter.name, parameter.name);
+      this->cpp_state_->copy_parameter_from(*this, parameter.name,
+                                            parameter.name);
     }
   }
 
