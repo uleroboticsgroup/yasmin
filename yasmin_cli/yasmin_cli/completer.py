@@ -89,6 +89,9 @@ def filter_plugins(plugins, plugin_type: str = "all", search: str | None = None)
                 " ".join(plugin.outcomes),
                 " ".join(key.get("name", "") for key in plugin.input_keys),
                 " ".join(key.get("name", "") for key in plugin.output_keys),
+                " ".join(
+                    param.get("name", "") for param in getattr(plugin, "parameters", [])
+                ),
             ]
 
             if not any(lowered_search in entry.lower() for entry in haystack):
@@ -123,6 +126,33 @@ def test_plugin_completer(prefix, parsed_args, **kwargs):
     return matches
 
 
+def _get_used_assignment_names(values) -> set[str]:
+    used_names: set[str] = set()
+
+    for entry in values or []:
+        if "=" not in entry:
+            continue
+        key, _ = entry.split("=", 1)
+        used_names.add(key.strip())
+
+    return used_names
+
+
+def _assignment_completer(prefix, entries, used_names: set[str]):
+    matches: list[str] = []
+
+    for entry in entries:
+        name = entry.get("name", "")
+        if not name or name in used_names:
+            continue
+
+        suggestion = f"{name}="
+        if suggestion.startswith(prefix):
+            matches.append(suggestion)
+
+    return matches
+
+
 def input_completer(prefix, parsed_args, **kwargs):
     selected_plugin_id = getattr(parsed_args, "plugin_id", None)
     if not selected_plugin_id:
@@ -132,26 +162,23 @@ def input_completer(prefix, parsed_args, **kwargs):
     if plugin is None:
         return []
 
-    already_used = set()
     raw_inputs = getattr(parsed_args, "input", None) or []
+    already_used = _get_used_assignment_names(raw_inputs)
+    return _assignment_completer(prefix, plugin.input_keys, already_used)
 
-    for entry in raw_inputs:
-        if "=" not in entry:
-            continue
-        key, _ = entry.split("=", 1)
-        already_used.add(key.strip())
 
-    matches: list[str] = []
-    for key in plugin.input_keys:
-        name = key.get("name", "")
-        if not name or name in already_used:
-            continue
+def parameter_completer(prefix, parsed_args, **kwargs):
+    selected_plugin_id = getattr(parsed_args, "plugin_id", None)
+    if not selected_plugin_id:
+        return []
 
-        suggestion = f"{name}="
-        if suggestion.startswith(prefix):
-            matches.append(suggestion)
+    plugin = find_plugin(selected_plugin_id, include_xml=False)
+    if plugin is None:
+        return []
 
-    return matches
+    raw_parameters = getattr(parsed_args, "param", None) or []
+    already_used = _get_used_assignment_names(raw_parameters)
+    return _assignment_completer(prefix, getattr(plugin, "parameters", []), already_used)
 
 
 def strip_namespace(tag: str) -> str:
@@ -210,6 +237,36 @@ def get_state_machine_input_keys(state_machine_file: str) -> list[dict[str, str]
     return [key for key in keys if key.get("name", "")]
 
 
+def get_state_machine_parameters(state_machine_file: str) -> list[dict[str, str]]:
+    try:
+        root = ET.parse(state_machine_file).getroot()
+    except (ET.ParseError, OSError):
+        return []
+
+    if strip_namespace(root.tag) != "StateMachine":
+        return []
+
+    parameters: list[dict[str, str]] = []
+    for child in _iter_root_children(root):
+        if strip_namespace(child.tag) != "Param":
+            continue
+
+        param_name = child.attrib.get("name", "")
+        if not param_name:
+            continue
+
+        parameters.append(
+            {
+                "name": param_name,
+                "description": child.attrib.get("description", ""),
+                "default_type": child.attrib.get("default_type", "str"),
+                "default_value": child.attrib.get("default_value", ""),
+            }
+        )
+
+    return parameters
+
+
 def run_input_completer(prefix, parsed_args, **kwargs):
     state_machine_file = getattr(parsed_args, "state_machine_file", None)
     if not state_machine_file:
@@ -219,26 +276,23 @@ def run_input_completer(prefix, parsed_args, **kwargs):
     if not input_keys:
         return []
 
-    already_used = set()
     raw_inputs = getattr(parsed_args, "input", None) or []
+    already_used = _get_used_assignment_names(raw_inputs)
+    return _assignment_completer(prefix, input_keys, already_used)
 
-    for entry in raw_inputs:
-        if "=" not in entry:
-            continue
-        key, _ = entry.split("=", 1)
-        already_used.add(key.strip())
 
-    matches: list[str] = []
-    for key in input_keys:
-        name = key.get("name", "")
-        if not name or name in already_used:
-            continue
+def run_param_completer(prefix, parsed_args, **kwargs):
+    state_machine_file = getattr(parsed_args, "state_machine_file", None)
+    if not state_machine_file:
+        return []
 
-        suggestion = f"{name}="
-        if suggestion.startswith(prefix):
-            matches.append(suggestion)
+    parameters = get_state_machine_parameters(state_machine_file)
+    if not parameters:
+        return []
 
-    return matches
+    raw_parameters = getattr(parsed_args, "param", None) or []
+    already_used = _get_used_assignment_names(raw_parameters)
+    return _assignment_completer(prefix, parameters, already_used)
 
 
 def xml_file_completer(prefix, parsed_args, **kwargs):

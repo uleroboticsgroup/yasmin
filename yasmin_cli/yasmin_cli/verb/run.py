@@ -24,8 +24,10 @@ from pathlib import Path
 
 from yasmin_cli.completer import (
     get_state_machine_input_keys,
+    get_state_machine_parameters,
     is_state_machine_xml,
     run_input_completer,
+    run_param_completer,
     strip_namespace,
     xml_file_completer,
 )
@@ -33,19 +35,21 @@ from yasmin_cli.completer import (
 INPUT_KEY_TYPES = {"in", "in/out"}
 
 
-def _parse_input_assignments(values: list[str]) -> dict[str, str]:
+def _parse_assignments(values: list[str], assignment_kind: str) -> dict[str, str]:
     result: dict[str, str] = {}
 
     for value in values:
         if "=" not in value:
-            raise ValueError(f"Invalid input assignment '{value}'. Expected KEY=VALUE.")
+            raise ValueError(
+                f"Invalid {assignment_kind} assignment '{value}'. Expected NAME=VALUE."
+            )
 
         key, raw_value = value.split("=", 1)
         key = key.strip()
 
         if not key:
             raise ValueError(
-                f"Invalid input assignment '{value}'. Empty key is not allowed."
+                f"Invalid {assignment_kind} assignment '{value}'. Empty name is not allowed."
             )
 
         result[key] = raw_value
@@ -148,6 +152,22 @@ def _find_input_key_map(root: ET.Element) -> dict[str, ET.Element]:
     return result
 
 
+def _find_parameter_map(root: ET.Element) -> dict[str, ET.Element]:
+    result: dict[str, ET.Element] = {}
+
+    for child in root:
+        if strip_namespace(child.tag) != "Param":
+            continue
+
+        parameter_name = child.attrib.get("name", "").strip()
+        if not parameter_name:
+            continue
+
+        result[parameter_name] = child
+
+    return result
+
+
 def _find_default_element(root: ET.Element, key_name: str) -> ET.Element | None:
     for child in root:
         if strip_namespace(child.tag) != "Default":
@@ -157,7 +177,11 @@ def _find_default_element(root: ET.Element, key_name: str) -> ET.Element | None:
     return None
 
 
-def _inject_inputs_into_xml(xml_path: str, provided_inputs: dict[str, str]) -> str:
+def _inject_overrides_into_xml(
+    xml_path: str,
+    provided_inputs: dict[str, str],
+    provided_parameters: dict[str, str],
+) -> str:
     tree = ET.parse(xml_path)
     root = tree.getroot()
 
@@ -169,6 +193,15 @@ def _inject_inputs_into_xml(xml_path: str, provided_inputs: dict[str, str]) -> s
     if unknown_inputs:
         raise ValueError(
             f"Unknown input keys for state machine '{xml_path}': {', '.join(unknown_inputs)}"
+        )
+
+    parameter_map = _find_parameter_map(root)
+    unknown_parameters = sorted(
+        name for name in provided_parameters if name not in parameter_map
+    )
+    if unknown_parameters:
+        raise ValueError(
+            f"Unknown parameters for state machine '{xml_path}': {', '.join(unknown_parameters)}"
         )
 
     for key_name, raw_value in provided_inputs.items():
@@ -184,6 +217,15 @@ def _inject_inputs_into_xml(xml_path: str, provided_inputs: dict[str, str]) -> s
         if default_element is not None:
             default_element.set("value", serialized_value)
             default_element.set("type", _normalize_type(default_type))
+
+    for parameter_name, raw_value in provided_parameters.items():
+        parameter_element = parameter_map[parameter_name]
+        default_type = parameter_element.attrib.get("default_type", "").strip() or "str"
+        typed_value = _convert_value(raw_value, default_type)
+        serialized_value = _format_default_value(typed_value, default_type)
+
+        parameter_element.set("default_value", serialized_value)
+        parameter_element.set("default_type", _normalize_type(default_type))
 
     _indent_xml(root)
     return ET.tostring(root, encoding="unicode")
@@ -240,6 +282,15 @@ def add_run_verb(subparsers):
     )
     input_arg.completer = run_input_completer
 
+    param_arg = parser.add_argument(
+        "--param",
+        action="append",
+        default=[],
+        metavar="PARAM=VALUE",
+        help="Override a declared parameter from the XML state machine, may be given multiple times",
+    )
+    param_arg.completer = run_param_completer
+
     parser.add_argument(
         "--disable-viewer-pub",
         action="store_true",
@@ -265,12 +316,13 @@ def _main_run(args):
         return 1
 
     try:
-        provided_inputs = _parse_input_assignments(args.input)
+        provided_inputs = _parse_assignments(args.input, "input")
+        provided_parameters = _parse_assignments(args.param, "parameter")
     except ValueError as exc:
         print(str(exc))
         return 1
 
-    if not provided_inputs:
+    if not provided_inputs and not provided_parameters:
         return run_factory_node(
             state_machine_file=args.state_machine_file,
             disable_viewer_pub=args.disable_viewer_pub,
@@ -291,8 +343,26 @@ def _main_run(args):
         )
         return 1
 
+    valid_parameter_names = {
+        parameter.get("name", "")
+        for parameter in get_state_machine_parameters(args.state_machine_file)
+    }
+    unknown_parameters = sorted(
+        name for name in provided_parameters if name not in valid_parameter_names
+    )
+    if unknown_parameters:
+        print(
+            f"Unknown parameters for state machine '{args.state_machine_file}': "
+            f"{', '.join(unknown_parameters)}"
+        )
+        return 1
+
     try:
-        xml_content = _inject_inputs_into_xml(args.state_machine_file, provided_inputs)
+        xml_content = _inject_overrides_into_xml(
+            args.state_machine_file,
+            provided_inputs,
+            provided_parameters,
+        )
     except ValueError as exc:
         print(str(exc))
         return 1

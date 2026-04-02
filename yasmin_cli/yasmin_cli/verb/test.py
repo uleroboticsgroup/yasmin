@@ -24,25 +24,28 @@ from pathlib import Path
 from yasmin_cli.completer import (
     build_plugin_info,
     input_completer,
+    parameter_completer,
     plugin_id,
     test_plugin_completer,
 )
 from yasmin_cli.verb.run import run_factory_node
 
 
-def _parse_input_assignments(values: list[str]) -> dict[str, str]:
+def _parse_assignments(values: list[str], assignment_kind: str) -> dict[str, str]:
     result: dict[str, str] = {}
 
     for value in values:
         if "=" not in value:
-            raise ValueError(f"Invalid input assignment '{value}'. Expected KEY=VALUE.")
+            raise ValueError(
+                f"Invalid {assignment_kind} assignment '{value}'. Expected NAME=VALUE."
+            )
 
         key, raw_value = value.split("=", 1)
         key = key.strip()
 
         if not key:
             raise ValueError(
-                f"Invalid input assignment '{value}'. Empty key is not allowed."
+                f"Invalid {assignment_kind} assignment '{value}'. Empty name is not allowed."
             )
 
         result[key] = raw_value
@@ -93,6 +96,13 @@ def _get_input_meta(plugin, key_name: str) -> dict | None:
     return None
 
 
+def _get_parameter_meta(plugin, parameter_name: str) -> dict | None:
+    for parameter in getattr(plugin, "parameters", []):
+        if parameter.get("name", "") == parameter_name:
+            return parameter
+    return None
+
+
 def _resolve_input_type(plugin, key_name: str, raw_value: str) -> str:
     key_meta = _get_input_meta(plugin, key_name)
     if key_meta is None:
@@ -104,6 +114,29 @@ def _resolve_input_type(plugin, key_name: str, raw_value: str) -> str:
 
     if key_meta.get("has_default", False):
         default_value = key_meta.get("default_value")
+        if isinstance(default_value, bool):
+            return "bool"
+        if isinstance(default_value, int) and not isinstance(default_value, bool):
+            return "int"
+        if isinstance(default_value, float):
+            return "float"
+        if isinstance(default_value, str):
+            return "str"
+
+    return _infer_value_type(raw_value)
+
+
+def _resolve_parameter_type(plugin, parameter_name: str, raw_value: str) -> str:
+    parameter_meta = _get_parameter_meta(plugin, parameter_name)
+    if parameter_meta is None:
+        return _infer_value_type(raw_value)
+
+    default_type = parameter_meta.get("default_value_type", "")
+    if default_type:
+        return _normalize_type(default_type)
+
+    if parameter_meta.get("has_default", False):
+        default_value = parameter_meta.get("default_value")
         if isinstance(default_value, bool):
             return "bool"
         if isinstance(default_value, int) and not isinstance(default_value, bool):
@@ -134,7 +167,36 @@ def _indent_xml(element: ET.Element, level: int = 0) -> None:
         element.tail = indent
 
 
-def _build_test_xml(plugin, provided_inputs: dict[str, str]) -> str:
+def _merge_plugin_keys(plugin) -> list[dict]:
+    merged_keys: dict[str, dict] = {}
+
+    for key in plugin.input_keys:
+        name = key.get("name", "")
+        if not name:
+            continue
+
+        merged_keys[name] = dict(key)
+        merged_keys[name]["direction"] = "in"
+
+    for key in plugin.output_keys:
+        name = key.get("name", "")
+        if not name:
+            continue
+
+        if name in merged_keys:
+            merged_keys[name]["direction"] = "in/out"
+        else:
+            merged_keys[name] = dict(key)
+            merged_keys[name]["direction"] = "out"
+
+    return list(merged_keys.values())
+
+
+def _build_test_xml(
+    plugin,
+    provided_inputs: dict[str, str],
+    provided_parameters: dict[str, str],
+) -> str:
     outcomes = [outcome for outcome in plugin.outcomes if outcome]
     if not outcomes:
         outcomes = ["done"]
@@ -144,23 +206,75 @@ def _build_test_xml(plugin, provided_inputs: dict[str, str]) -> str:
         {
             "name": "TestStateMachine",
             "outcomes": " ".join(outcomes),
+            "start_state": "TestState",
         },
     )
 
-    for key_name, raw_value in provided_inputs.items():
-        key_meta = _get_input_meta(plugin, key_name)
-        attributes = {
-            "key": key_name,
-            "value": raw_value,
-            "type": _resolve_input_type(plugin, key_name, raw_value),
+    for key in _merge_plugin_keys(plugin):
+        key_name = key.get("name", "")
+        if not key_name:
+            continue
+
+        key_attributes = {
+            "name": key_name,
+            "type": key.get("direction", "in"),
         }
 
-        if key_meta is not None:
-            description = key_meta.get("description", "")
-            if description:
-                attributes["description"] = description
+        description = key.get("description", "")
+        if description:
+            key_attributes["description"] = description
 
-        ET.SubElement(root, "Default", attributes)
+        if key_name in provided_inputs:
+            key_attributes["default_value"] = provided_inputs[key_name]
+            key_attributes["default_type"] = _resolve_input_type(
+                plugin, key_name, provided_inputs[key_name]
+            )
+        elif key.get("has_default", False):
+            key_attributes["default_value"] = str(key.get("default_value", ""))
+            key_attributes["default_type"] = _normalize_type(
+                key.get("default_value_type", "str")
+            )
+        elif key.get("default_value_type"):
+            key_attributes["default_type"] = _normalize_type(
+                key.get("default_value_type", "str")
+            )
+
+        ET.SubElement(root, "Key", key_attributes)
+
+    declared_parameter_names: list[str] = []
+    for parameter in getattr(plugin, "parameters", []):
+        parameter_name = parameter.get("name", "")
+        if not parameter_name:
+            continue
+
+        if parameter_name not in provided_parameters and not parameter.get(
+            "has_default", False
+        ):
+            continue
+
+        parameter_attributes = {
+            "name": parameter_name,
+            "default_type": _normalize_type(parameter.get("default_value_type", "str")),
+        }
+
+        description = parameter.get("description", "")
+        if description:
+            parameter_attributes["description"] = description
+
+        if parameter_name in provided_parameters:
+            parameter_attributes["default_value"] = provided_parameters[parameter_name]
+            parameter_attributes["default_type"] = _resolve_parameter_type(
+                plugin,
+                parameter_name,
+                provided_parameters[parameter_name],
+            )
+        elif parameter.get("has_default", False):
+            parameter_attributes["default_value"] = str(
+                parameter.get("default_value", "")
+            )
+
+        ET.SubElement(root, "Param", parameter_attributes)
+        declared_parameter_names.append(parameter_name)
 
     state_attributes = {
         "name": "TestState",
@@ -177,7 +291,7 @@ def _build_test_xml(plugin, provided_inputs: dict[str, str]) -> str:
 
     state = ET.SubElement(root, "State", state_attributes)
 
-    for key in plugin.input_keys:
+    for key in _merge_plugin_keys(plugin):
         key_name = key.get("name", "")
         if not key_name:
             continue
@@ -188,6 +302,16 @@ def _build_test_xml(plugin, provided_inputs: dict[str, str]) -> str:
             {
                 "old": key_name,
                 "new": key_name,
+            },
+        )
+
+    for parameter_name in declared_parameter_names:
+        ET.SubElement(
+            state,
+            "ParamRemap",
+            {
+                "old": parameter_name,
+                "new": parameter_name,
             },
         )
 
@@ -230,6 +354,32 @@ def _print_plugin_input_summary(plugin, provided_inputs: dict[str, str]) -> None
             print(f"      {description}")
 
 
+def _print_plugin_parameter_summary(plugin, provided_parameters: dict[str, str]) -> None:
+    parameters = getattr(plugin, "parameters", [])
+    if not parameters:
+        return
+
+    print("Parameters:")
+    for parameter in parameters:
+        name = parameter.get("name", "")
+        description = parameter.get("description", "")
+        has_default = parameter.get("has_default", False)
+        default_value = parameter.get("default_value")
+
+        line = f"  - {name}"
+        if name in provided_parameters:
+            line += f" = {provided_parameters[name]!r}"
+        elif has_default:
+            line += f" [plugin-default={default_value!r}]"
+        else:
+            line += " [not set]"
+
+        print(line)
+
+        if description:
+            print(f"      {description}")
+
+
 def add_test_verb(subparsers):
     parser = subparsers.add_parser(
         "test",
@@ -251,6 +401,15 @@ def add_test_verb(subparsers):
         help="Input value for the selected state, may be given multiple times",
     )
     input_arg.completer = input_completer
+
+    param_arg = parser.add_argument(
+        "--param",
+        action="append",
+        default=[],
+        metavar="PARAM=VALUE",
+        help="Parameter override for the selected state, may be given multiple times",
+    )
+    param_arg.completer = parameter_completer
 
     parser.add_argument(
         "--disable-viewer-pub",
@@ -290,7 +449,8 @@ def _main_test(args):
         return 1
 
     try:
-        provided_inputs = _parse_input_assignments(args.input)
+        provided_inputs = _parse_assignments(args.input, "input")
+        provided_parameters = _parse_assignments(args.param, "parameter")
     except ValueError as exc:
         print(str(exc))
         return 1
@@ -306,13 +466,28 @@ def _main_test(args):
         )
         return 1
 
-    xml_content = _build_test_xml(plugin, provided_inputs)
+    valid_parameter_names = {
+        parameter.get("name", "") for parameter in getattr(plugin, "parameters", [])
+    }
+    unknown_parameters = sorted(
+        name for name in provided_parameters if name not in valid_parameter_names
+    )
+    if unknown_parameters:
+        print(
+            f"Unknown parameters for plugin '{args.plugin_id}': "
+            f"{', '.join(unknown_parameters)}"
+        )
+        return 1
+
+    xml_content = _build_test_xml(plugin, provided_inputs, provided_parameters)
 
     if args.print_xml:
         print(xml_content)
 
     if provided_inputs:
         _print_plugin_input_summary(plugin, provided_inputs)
+    if provided_parameters:
+        _print_plugin_parameter_summary(plugin, provided_parameters)
 
     if args.keep_temp_file:
         safe_name = plugin_id(plugin).replace("/", "_").replace(".", "_")
