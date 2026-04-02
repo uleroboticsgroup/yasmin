@@ -32,14 +32,30 @@ class BarState(State):
             outcome3: Indicates the state should transition back to the Foo state.
         """
         super().__init__(outcomes=["outcome3"])
+        self.log_prefix = "Observed value"
+        self.sleep_ms = 300
         self.set_description(
             "Prints the value stored in 'foo_str' from the blackboard and transitions back to the Foo state."
         )
         self.set_outcome_description("outcome3", "Final outcome")
+        self.declare_parameter(
+            "log_prefix",
+            "Prefix printed before the blackboard value.",
+            "Observed value",
+        )
+        self.declare_parameter(
+            "sleep_ms",
+            "Delay in milliseconds before each execution.",
+            300,
+        )
         self.add_input_key(
             "foo_str",
             "String produced by FooState and printed by this state.",
         )
+
+    def configure(self) -> None:
+        self.log_prefix = self.get_parameter("log_prefix")
+        self.sleep_ms = self.get_parameter("sleep_ms")
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -55,7 +71,7 @@ class BarState(State):
             Exception: May raise exceptions related to state execution.
         """
         yasmin.YASMIN_LOG_INFO("Executing state BAR")
-        time.sleep(3)  # Simulate work by sleeping
+        time.sleep(self.sleep_ms / 1000.0)
 
-        yasmin.YASMIN_LOG_INFO(blackboard["foo_str"])
+        yasmin.YASMIN_LOG_INFO(f"{self.log_prefix}: {blackboard['foo_str']}")
         return "outcome3"

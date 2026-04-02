@@ -1,11 +1,20 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<StateMachine name="Demo2" outcomes="outcome4" start_state="Foo">
+<StateMachine name="Demo2" outcomes="outcome4" start_state="Foo" description="Demo FSM loaded through the factory that configures both Python and C++ child states through parameter remapping.">
+  <Param name="shared_delay_ms" description="Delay in milliseconds reused by both states." default_type="int" default_value="200"/>
+  <Param name="python_counter_prefix" description="Prefix used by the Python FooState when formatting the counter string." default_type="str" default_value="FactoryDemo"/>
+  <Param name="python_max_count" description="Maximum number of loops executed by the Python FooState." default_type="int" default_value="3"/>
+  <Param name="cpp_log_prefix" description="Prefix used by the C++ BarState when printing the received counter string." default_type="str" default_value="FactoryObserver"/>
   <Key name="foo_str" type="in/out" description="String containing the current counter value produced by FooState."/>
   <State name="Foo" x="473.60" y="93.62" type="py" module="yasmin_demos.foo_state" class="FooState">
+    <ParamRemap old="counter_prefix" new="python_counter_prefix"/>
+    <ParamRemap old="max_count" new="python_max_count"/>
+    <ParamRemap old="sleep_ms" new="shared_delay_ms"/>
     <Transition from="outcome1" to="Bar"/>
     <Transition from="outcome2" to="outcome4"/>
   </State>
   <State name="Bar" x="897.20" y="90.20" type="cpp" class="yasmin_demos/BarState">
+    <ParamRemap old="log_prefix" new="cpp_log_prefix"/>
+    <ParamRemap old="sleep_ms" new="shared_delay_ms"/>
     <Transition from="outcome3" to="Foo"/>
   </State>
   <FinalOutcome name="outcome4" x="473.80" y="338.80" description="Final outcome"/>
