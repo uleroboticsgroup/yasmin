@@ -81,5 +81,37 @@ class TestState(unittest.TestCase):
         self.assertIn("FOO2 (FooState)", string)
 
 
+class ConfigurableConcurrentState(State):
+    def __init__(self):
+        super().__init__(["done"])
+        self.declare_parameter("topic", "Concurrent topic")
+        self.configure_count = 0
+        self.configured_topic = None
+
+    def configure(self):
+        self.configure_count += 1
+        self.configured_topic = self.get_parameter("topic")
+
+    def execute(self, blackboard):
+        return "done"
+
+
+class TestConcurrenceConfigure(unittest.TestCase):
+    def test_configure_applies_parameter_mappings_and_runs_once(self):
+        child = ConfigurableConcurrentState()
+        state = Concurrence(
+            states={"CHILD": child},
+            default_outcome="done",
+            outcome_map={"done": {"CHILD": "done"}},
+        )
+        state.declare_parameter("topic", "Parent topic", "/concurrent")
+        state.set_parameter_mappings("CHILD", {"topic": "topic"})
+
+        self.assertEqual("done", state())
+        self.assertEqual("done", state())
+        self.assertEqual(1, child.configure_count)
+        self.assertEqual("/concurrent", child.configured_topic)
+
+
 if __name__ == "__main__":
     unittest.main()

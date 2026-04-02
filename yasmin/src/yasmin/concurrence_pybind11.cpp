@@ -35,9 +35,11 @@ PYBIND11_MODULE(concurrence, m) {
       concurrence_class(m, "Concurrence");
 
   concurrence_class
-      .def(py::init<yasmin::StateMap, std::string, yasmin::OutcomeMap>(),
+      .def(py::init<yasmin::StateMap, std::string, yasmin::OutcomeMap,
+                    yasmin::ParameterMappingsMap>(),
            py::arg("states"), py::arg("default_outcome"),
            py::arg("outcome_map") = yasmin::OutcomeMap(),
+           py::arg("parameter_mappings") = yasmin::ParameterMappingsMap(),
            py::keep_alive<1, 2>()) // Keep states (arg 2) alive as long as self
                                    // (arg 1) is alive
       // Getters for states, outcome_map, and default_outcome
@@ -49,6 +51,15 @@ PYBIND11_MODULE(concurrence, m) {
            py::return_value_policy::reference_internal)
       .def("get_default_outcome", &yasmin::Concurrence::get_default_outcome,
            "Get the default outcome for this concurrence state")
+
+      .def("set_parameter_mappings", &yasmin::Concurrence::set_parameter_mappings,
+           "Set parameter mappings for a child state", py::arg("state_name"),
+           py::arg("parameter_mappings"))
+      .def("get_parameter_mappings", &yasmin::Concurrence::get_parameter_mappings,
+           "Get parameter mappings for all child states",
+           py::return_value_policy::reference_internal)
+      .def("configure", &yasmin::Concurrence::configure,
+           "Configure the concurrence and all child states")
       // Cancel state method
       .def("cancel_state", &yasmin::Concurrence::cancel_state,
            "Cancel the current state execution")

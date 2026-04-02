@@ -272,6 +272,23 @@ bool State::has_parameter(const std::string &parameter_name) const {
   return this->get_parameters_blackboard()->contains(parameter_name);
 }
 
+
+bool State::is_parameter_declared(const std::string &parameter_name) const {
+  const auto &parameters = this->get_metadata_ref().parameters;
+  return std::any_of(parameters.begin(), parameters.end(),
+                     [&](const BlackboardKeyInfo &info) {
+                       return info.name == parameter_name;
+                     });
+}
+
+void State::copy_parameter_from(const State &source_state,
+                                const std::string &source_parameter_name,
+                                const std::string &target_parameter_name) {
+  this->get_parameters_blackboard()->copy_value_from(
+      *source_state.get_parameters_blackboard(), source_parameter_name,
+      target_parameter_name);
+}
+
 const std::vector<BlackboardKeyInfo> &State::get_parameters() const {
   return this->get_metadata_ref().parameters;
 }

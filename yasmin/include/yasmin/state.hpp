@@ -344,6 +344,24 @@ public:
     this->get_parameters_blackboard()->set<T>(parameter_name, value);
   }
 
+
+  /**
+   * @brief Checks whether a parameter was declared in the state metadata.
+   * @param parameter_name The parameter name.
+   * @return True if the parameter was declared, otherwise false.
+   */
+  bool is_parameter_declared(const std::string &parameter_name) const;
+
+  /**
+   * @brief Copies a parameter value from another state.
+   * @param source_state The source state.
+   * @param source_parameter_name The parameter name in the source state.
+   * @param target_parameter_name The parameter name in this state.
+   */
+  void copy_parameter_from(const State &source_state,
+                           const std::string &source_parameter_name,
+                           const std::string &target_parameter_name);
+
   /**
    * @brief Gets the declared parameter metadata.
    * @return A constant reference to the vector of parameter metadata.

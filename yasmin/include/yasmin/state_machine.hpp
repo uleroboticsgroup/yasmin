@@ -97,7 +97,8 @@ public:
    */
   void add_state(const std::string &name, State::SharedPtr state,
                  const Transitions &transitions = {},
-                 const Remappings &remappings = {});
+                 const Remappings &remappings = {},
+                 const ParameterMappings &parameter_mappings = {});
 
   /**
    * @brief Sets the name of the state machine.
@@ -170,6 +171,25 @@ public:
    */
   void add_end_cb(EndCallbackType cb);
 
+
+  /**
+   * @brief Sets parameter mappings for a child state.
+   *
+   * Each mapping entry is interpreted as:
+   *   child_parameter -> parent_parameter
+   *
+   * @param state_name The child state name.
+   * @param parameter_mappings The parameter mappings to apply.
+   */
+  void set_parameter_mappings(const std::string &state_name,
+                              const ParameterMappings &parameter_mappings);
+
+  /**
+   * @brief Gets all parameter mappings.
+   * @return A constant reference to the parameter mappings.
+   */
+  const ParameterMappingsMap &get_parameter_mappings() const noexcept;
+
   /**
    * @brief Validates the state machine configuration.
    *
@@ -187,6 +207,8 @@ public:
    * @throws std::runtime_error If the execution cannot be completed due to
    *                            invalid states or transitions.
    */
+  void configure() override;
+
   std::string execute(Blackboard::SharedPtr blackboard) override;
 
   /**
@@ -234,6 +256,8 @@ private:
   TransitionsMap transitions;
   /// A dictionary of remappings to set in the blackboard in each transition
   RemappingsMap remappings;
+  /// Per-child parameter mappings applied during configure()
+  ParameterMappingsMap parameter_mappings;
 
   /// Name of the start state
   std::string start_state;
@@ -246,6 +270,8 @@ private:
 
   /// Flag to indicate if the state machine has been validated
   std::atomic_bool validated{false};
+  /// Flag to indicate if the state machine has been configured
+  std::atomic_bool configured{false};
 
   /// Start callbacks executed before the state machine
   std::vector<StartCallbackType> start_cbs;
@@ -260,6 +286,15 @@ private:
    * @param state_name The name of the state to set as the current state.
    */
   void set_current_state(const std::string &state_name);
+
+
+  /**
+   * @brief Applies this container's parameter mappings to a direct child.
+   * @param state_name The child state name.
+   * @param state The child state instance.
+   */
+  void apply_parameter_mappings(const std::string &state_name,
+                                const State::SharedPtr &state);
 
   /**
    * @brief Calls start callbacks with the given blackboard and start state.

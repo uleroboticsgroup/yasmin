@@ -101,3 +101,38 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+
+class ConfigurableConcurrentState : public State {
+public:
+  int configure_count{0};
+  std::string configured_topic;
+
+  ConfigurableConcurrentState() : State({"done"}) {
+    this->declare_parameter("topic", "Concurrent topic");
+  }
+
+  void configure() override {
+    configure_count++;
+    configured_topic = this->get_parameter<std::string>("topic");
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    return "done";
+  }
+};
+
+TEST_F(TestConcurrence, TestConfigureAppliesParameterMappingsAndRunsOnce) {
+  auto child = std::make_shared<ConfigurableConcurrentState>();
+  auto concurrent = yasmin::Concurrence::make_shared(
+      yasmin::StateMap{{"CHILD", child}}, "done",
+      yasmin::OutcomeMap{{"done", {{"CHILD", "done"}}}});
+  concurrent->declare_parameter<std::string>("topic", "Parent topic",
+                                             std::string("/concurrent"));
+  concurrent->set_parameter_mappings("CHILD", {{"topic", "topic"}});
+
+  EXPECT_EQ((*concurrent)(blackboard), "done");
+  EXPECT_EQ((*concurrent)(blackboard), "done");
+  EXPECT_EQ(child->configure_count, 1);
+  EXPECT_EQ(child->configured_topic, "/concurrent");
+}
