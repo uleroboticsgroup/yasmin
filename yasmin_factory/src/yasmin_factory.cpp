@@ -253,13 +253,11 @@ void YasminFactory::add_parameters(yasmin::State::SharedPtr owner,
 
     if (default_value_attr) {
       if (default_type == "int") {
-        owner->declare_parameter(
-            parameter_name, parameter_description,
-            std::stoi(std::string(default_value_attr)));
+        owner->declare_parameter(parameter_name, parameter_description,
+                                 std::stoi(std::string(default_value_attr)));
       } else if (default_type == "float" || default_type == "double") {
-        owner->declare_parameter(
-            parameter_name, parameter_description,
-            std::stod(std::string(default_value_attr)));
+        owner->declare_parameter(parameter_name, parameter_description,
+                                 std::stod(std::string(default_value_attr)));
       } else if (default_type == "bool") {
         const std::string value_str(default_value_attr);
         owner->declare_parameter(parameter_name, parameter_description,
@@ -281,7 +279,8 @@ yasmin::ParameterMappings
 YasminFactory::get_parameter_mappings(tinyxml2::XMLElement *parent) const {
   yasmin::ParameterMappings parameter_mappings;
 
-  for (tinyxml2::XMLElement *remap_elem = parent->FirstChildElement("ParamRemap");
+  for (tinyxml2::XMLElement *remap_elem =
+           parent->FirstChildElement("ParamRemap");
        remap_elem; remap_elem = remap_elem->NextSiblingElement("ParamRemap")) {
     const std::string from = this->get_required_attribute(remap_elem, "old");
     const std::string to = this->get_required_attribute(remap_elem, "new");
@@ -290,7 +289,6 @@ YasminFactory::get_parameter_mappings(tinyxml2::XMLElement *parent) const {
 
   return parameter_mappings;
 }
-
 
 yasmin::State::SharedPtr
 YasminFactory::create_state(tinyxml2::XMLElement *state_elem) const {
@@ -385,9 +383,8 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
     }
   }
 
-  auto concurrence =
-      yasmin::Concurrence::make_shared(states, default_outcome, outcome_map,
-                                       parameter_mappings);
+  auto concurrence = yasmin::Concurrence::make_shared(
+      states, default_outcome, outcome_map, parameter_mappings);
 
   this->add_blackboard_keys(concurrence, conc_elem);
   this->add_parameters(concurrence, conc_elem);
