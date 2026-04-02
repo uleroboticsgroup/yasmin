@@ -217,6 +217,12 @@ private:
 
   void add_blackboard_keys(yasmin::State::SharedPtr owner,
                            tinyxml2::XMLElement *parent) const;
+
+  void add_parameters(yasmin::State::SharedPtr owner,
+                      tinyxml2::XMLElement *parent) const;
+
+  yasmin::ParameterMappings
+  get_parameter_mappings(tinyxml2::XMLElement *parent) const;
 };
 
 } // namespace yasmin_factory

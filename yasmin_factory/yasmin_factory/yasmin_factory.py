@@ -59,6 +59,7 @@ class YasminFactory:
             raise ValueError(f"Unknown state type: {state_type}")
 
         self._add_blackboard_keys(state, state_elem)
+        self._add_parameters(state, state_elem)
         return state
 
     def create_concurrence(self, conc_elem: ET.Element) -> Concurrence:
@@ -76,16 +77,26 @@ class YasminFactory:
 
         states = {}
         outcome_map = {}
+        parameter_mappings = {}
 
         for child in conc_elem:
             if child.tag == "State":
                 states[child.attrib["name"]] = self.create_state(child)
+                parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
+                    child
+                )
 
             elif child.tag == "Concurrence":
                 states[child.attrib["name"]] = self.create_concurrence(child)
+                parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
+                    child
+                )
 
             elif child.tag == "StateMachine":
                 states[child.attrib["name"]] = self.create_sm(child)
+                parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
+                    child
+                )
 
             elif child.tag == "OutcomeMap":
                 outcome_name = child.attrib["outcome"]
@@ -101,7 +112,11 @@ class YasminFactory:
             states=states,
             outcome_map=outcome_map,
             default_outcome=default_outcome,
+            parameter_mappings=parameter_mappings,
         )
+
+        self._add_blackboard_keys(concurrence, conc_elem)
+        self._add_parameters(concurrence, conc_elem)
 
         for outcome_elem in conc_elem.findall("FinalOutcome"):
             outcome_name = outcome_elem.attrib["name"]
@@ -152,12 +167,15 @@ class YasminFactory:
 
             transitions = {}
             remappings = {}
+            parameter_mappings = {}
 
             for cchild in child:
                 if cchild.tag == "Transition":
                     transitions[cchild.attrib["from"]] = cchild.attrib["to"]
                 elif cchild.tag == "Remap":
                     remappings[cchild.attrib["old"]] = cchild.attrib["new"]
+                elif cchild.tag == "ParamRemap":
+                    parameter_mappings[cchild.attrib["old"]] = cchild.attrib["new"]
 
             if child.tag == "State":
                 state = self.create_state(child)
@@ -176,6 +194,7 @@ class YasminFactory:
                 state,
                 transitions=transitions,
                 remappings=remappings,
+                parameter_mappings=parameter_mappings,
             )
 
         if set_start_state:
@@ -193,6 +212,7 @@ class YasminFactory:
                 sm.set_outcome_description(outcome_name, outcome_description)
 
         self._add_blackboard_keys(sm, root)
+        self._add_parameters(sm, root)
         return sm
 
     def create_sm_from_file(self, xml_file: str) -> StateMachine:
@@ -230,6 +250,28 @@ class YasminFactory:
         if type_str == "bool":
             return value_str.lower() in ("true", "1")
         return value_str
+
+    def _add_parameters(self, owner, parent_elem: ET.Element) -> None:
+        """Parse Param elements into state-local parameters."""
+        for param_elem in parent_elem.findall("Param"):
+            parameter_name = param_elem.attrib["name"]
+            parameter_description = param_elem.attrib.get("description", "")
+            default_type = param_elem.attrib.get("default_type", "str")
+            default_value = param_elem.attrib.get("default_value")
+
+            if default_value is not None:
+                value = self._parse_key_value(default_value, default_type)
+                owner.declare_parameter(parameter_name, parameter_description, value)
+            elif parameter_description:
+                owner.declare_parameter(parameter_name, parameter_description)
+            else:
+                owner.declare_parameter(parameter_name)
+
+    def _get_parameter_mappings(self, parent_elem: ET.Element) -> dict[str, str]:
+        parameter_mappings = {}
+        for remap_elem in parent_elem.findall("ParamRemap"):
+            parameter_mappings[remap_elem.attrib["old"]] = remap_elem.attrib["new"]
+        return parameter_mappings
 
     def _add_blackboard_keys(self, owner, parent_elem: ET.Element) -> None:
         """Parse new Key syntax and legacy Default syntax."""
