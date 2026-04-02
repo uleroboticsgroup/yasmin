@@ -107,7 +107,6 @@ TEST_F(TestYasminFactory, TestCreatePythonState) {
   }
 }
 
-
 TEST_F(TestYasminFactory, TestPythonStateParametersSurviveCppFactoryWrapping) {
   std::string xml_content = R"(
     <StateMachine outcomes="end">
