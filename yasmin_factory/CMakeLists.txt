@@ -142,6 +142,11 @@ if(BUILD_TESTING)
   target_include_directories(test_yasmin_factory_cpp PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
   )
+  if(TARGET test_yasmin_factory_cpp)
+    set_tests_properties(test_yasmin_factory_cpp PROPERTIES
+      ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR}:$ENV{PYTHONPATH}"
+    )
+  endif()
 
 endif()
 
