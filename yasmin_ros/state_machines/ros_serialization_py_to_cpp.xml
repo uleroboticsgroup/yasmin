@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<StateMachine name="RosSerializationPyToCpp" outcomes="done type_error error" start_state="SerializePy" description="Serializes a Python ROS interface object into bytes and reconstructs it as a native C++ ROS interface object.">
+  <Param name="interface_type" description="Concrete ROS interface type passed to both conversion states." default_type="str" default_value="geometry_msgs/msg/Pose" />
+  <Key name="input" type="in/out" description="Python ROS interface instance that should be serialized." />
+  <Key name="bytes" type="in/out" description="Serialized byte buffer shared between both conversion states." />
+  <Key name="output" type="in/out" description="Final C++ ROS interface instance reconstructed from the byte buffer." />
+  <State name="SerializePy" type="py" module="yasmin_ros.ros_serialize_py_state" class="RosSerializePyState" x="245.43" y="-106.24">
+    <ParamRemap old="interface_type" new="interface_type" />
+    <Remap old="input" new="input" />
+    <Remap old="output" new="bytes" />
+    <Transition from="succeed" to="DeserializeCpp" />
+    <Transition from="type_error" to="type_error" />
+    <Transition from="error" to="error" />
+  </State>
+  <State name="DeserializeCpp" type="cpp" class="yasmin_ros/RosDeserializeCppState" x="253.26" y="120.30">
+    <ParamRemap old="interface_type" new="interface_type" />
+    <Remap old="input" new="bytes" />
+    <Remap old="output" new="output" />
+    <Transition from="succeed" to="done" />
+    <Transition from="type_error" to="type_error" />
+    <Transition from="error" to="error" />
+  </State>
+  <FinalOutcome name="done" description="The interface was serialized in Python and deserialized in C++." x="257.86" y="289.22" />
+  <FinalOutcome name="type_error" description="The configured interface type did not match the runtime blackboard data." x="7.70" y="10.43" />
+  <FinalOutcome name="error" description="Serialization or deserialization failed." x="522.15" y="-1.58" />
+</StateMachine>

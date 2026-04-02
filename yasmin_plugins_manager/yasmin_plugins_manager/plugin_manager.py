@@ -327,7 +327,6 @@ class PluginManager:
             Optional list that receives the package directory signature.
         """
         skip_packages: set = {
-            "yasmin_ros",
             "rosidl_adapter",
             "rosidl_cli",
             "rosidl_generator_c",
