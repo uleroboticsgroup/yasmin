@@ -49,14 +49,39 @@ private:
   /// @brief Underlying C++ Blackboard instance
   Blackboard ::SharedPtr blackboard;
 
-  static std::vector<uint8_t> py_bytes_to_vector(const py::bytes &value) {
-    const std::string data = value;
-    return std::vector<uint8_t>(data.begin(), data.end());
+  static std::vector<uint8_t> py_buffer_to_vector(const py::handle &value) {
+    char *data = nullptr;
+    py::ssize_t size = 0;
+
+    if (PyBytes_Check(value.ptr()) != 0) {
+      if (PyBytes_AsStringAndSize(value.ptr(), &data, &size) != 0) {
+        throw py::error_already_set();
+      }
+    } else if (PyByteArray_Check(value.ptr()) != 0) {
+      data = PyByteArray_AsString(value.ptr());
+      size = PyByteArray_Size(value.ptr());
+    } else {
+      throw std::runtime_error("Expected bytes or bytearray object");
+    }
+
+    return std::vector<uint8_t>(reinterpret_cast<uint8_t *>(data),
+                                reinterpret_cast<uint8_t *>(data) + size);
   }
 
   static py::bytes vector_to_py_bytes(const std::vector<uint8_t> &value) {
     return py::bytes(reinterpret_cast<const char *>(value.data()),
                      static_cast<py::ssize_t>(value.size()));
+  }
+
+  static bool is_python_bytes_like(const py::handle &value) {
+    return PyBytes_Check(value.ptr()) != 0 ||
+           PyByteArray_Check(value.ptr()) != 0;
+  }
+
+  static bool is_cpp_byte_vector_type(const std::string &type) {
+    return type.find("std::vector<unsigned char") != std::string::npos ||
+           type.find("std::vector<uint8_t") != std::string::npos ||
+           type.find("std::vector<char") != std::string::npos;
   }
 
 public:
@@ -90,11 +115,10 @@ public:
       }
     } else if (py::isinstance<py::float_>(value)) {
       this->blackboard->set<double>(key, value.cast<double>());
+    } else if (is_python_bytes_like(value)) {
+      this->blackboard->set<std::vector<uint8_t>>(key, py_buffer_to_vector(value));
     } else if (py::isinstance<py::str>(value)) {
       this->blackboard->set<std::string>(key, value.cast<std::string>());
-    } else if (py::isinstance<py::bytes>(value)) {
-      this->blackboard->set<std::vector<uint8_t>>(
-          key, py_bytes_to_vector(value.cast<py::bytes>()));
     } else {
       this->blackboard->set<py::object>(key, value);
     }
@@ -112,8 +136,7 @@ public:
 
     // Check if it's a byte array (C++ std::vector<uint8_t>) - convert to Python
     // bytes
-    if (type.find("std::vector<unsigned char") != std::string::npos ||
-        type.find("std::vector<uint8_t") != std::string::npos) {
+    if (is_cpp_byte_vector_type(type)) {
       std::vector<uint8_t> cpp_value =
           this->blackboard->get<std::vector<uint8_t>>(key);
       return vector_to_py_bytes(cpp_value);
