@@ -28,6 +28,7 @@ from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
+from yasmin_editor.model.parameter import Parameter
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.text_block import TextBlock
@@ -37,6 +38,101 @@ from yasmin_editor.model.validation import validate_model
 
 class EditorModelMixin:
     """Mixin for editor functionality split from the main window."""
+
+    @staticmethod
+    def parameters_to_dicts(parameters: List[Parameter]) -> List[Dict[str, str]]:
+        return [
+            {
+                "name": parameter.name,
+                "description": parameter.description,
+                "default_type": parameter.default_type,
+                "default_value": parameter.default_value,
+                "has_default": parameter.has_default,
+            }
+            for parameter in parameters
+        ]
+
+    @staticmethod
+    def dicts_to_parameters(parameters: List[Dict[str, str]]) -> List[Parameter]:
+        normalized: List[Parameter] = []
+        for item in parameters:
+            name = str(item.get("name", "") or "").strip()
+            if not name:
+                continue
+            normalized.append(
+                Parameter(
+                    name=name,
+                    description=str(item.get("description", "") or "").strip(),
+                    default_type=str(item.get("default_type", "") or "").strip(),
+                    default_value=item.get("default_value"),
+                )
+            )
+        return normalized
+
+    def get_parameter_overwrites_for_child(
+        self,
+        container_model: StateMachine | Concurrence,
+        child_model: State,
+    ) -> List[Dict[str, str]]:
+        declared_by_name = {
+            parameter.name: parameter for parameter in container_model.parameters
+        }
+        overwrites: List[Dict[str, str]] = []
+        for child_parameter, parent_parameter in child_model.parameter_mappings.items():
+            declared = declared_by_name.get(parent_parameter)
+            overwrites.append(
+                {
+                    "name": parent_parameter,
+                    "child_parameter": child_parameter,
+                    "description": getattr(declared, "description", ""),
+                    "default_type": getattr(declared, "default_type", ""),
+                    "default_value": getattr(declared, "default_value", ""),
+                }
+            )
+        return overwrites
+
+    def apply_parameter_overwrites(
+        self,
+        container_model: StateMachine | Concurrence,
+        child_model: State,
+        overwrites: List[Dict[str, str]],
+    ) -> None:
+        child_model.parameter_mappings.clear()
+        for item in overwrites:
+            child_parameter = str(item.get("child_parameter", "") or "").strip()
+            parent_parameter = str(item.get("name", "") or "").strip()
+            if child_parameter and parent_parameter:
+                child_model.parameter_mappings[child_parameter] = parent_parameter
+
+        declarations_by_name = {
+            parameter.name: parameter for parameter in container_model.parameters
+        }
+        declaration_order = [parameter.name for parameter in container_model.parameters]
+
+        for item in overwrites:
+            name = str(item.get("name", "") or "").strip()
+            if not name:
+                continue
+            declarations_by_name[name] = Parameter(
+                name=name,
+                description=str(item.get("description", "") or "").strip(),
+                default_type=str(item.get("default_type", "") or "").strip(),
+                default_value=item.get("default_value"),
+            )
+            if name not in declaration_order:
+                declaration_order.append(name)
+
+        used_names = {
+            parent_name
+            for state in container_model.states.values()
+            for parent_name in state.parameter_mappings.values()
+        }
+
+        container_model.parameters = [
+            declarations_by_name[name]
+            for name in declaration_order
+            if name in used_names and name in declarations_by_name
+        ]
 
     def resolve_plugin_info_for_model(self, model: State) -> PluginInfo:
         if model.state_type == "py":
@@ -89,6 +185,7 @@ class EditorModelMixin:
         plugin_info: PluginInfo,
         description: str = "",
         remappings: Optional[Dict[str, str]] = None,
+        parameter_mappings: Optional[Dict[str, str]] = None,
         outcomes: Optional[List[str]] = None,
     ) -> State:
         state_type = {"python": "py", "cpp": "cpp", "xml": "xml"}.get(
@@ -99,6 +196,7 @@ class EditorModelMixin:
             name=name,
             description=description or "",
             remappings=dict(remappings or {}),
+            parameter_mappings=dict(parameter_mappings or {}),
             state_type=state_type,
             module=getattr(plugin_info, "module", None),
             class_name=getattr(plugin_info, "class_name", None),
@@ -118,6 +216,7 @@ class EditorModelMixin:
         start_state: Optional[str] = None,
         default_outcome: Optional[str] = None,
         description: str = "",
+        parameter_mappings: Optional[Dict[str, str]] = None,
     ) -> StateMachine | Concurrence:
         if is_concurrence:
             model: StateMachine | Concurrence = Concurrence(
@@ -125,6 +224,7 @@ class EditorModelMixin:
                 description=description or "",
                 default_outcome=default_outcome,
                 remappings=dict(remappings or {}),
+                parameter_mappings=dict(parameter_mappings or {}),
             )
         else:
             model = StateMachine(
@@ -132,6 +232,7 @@ class EditorModelMixin:
                 description=description or "",
                 start_state=start_state,
                 remappings=dict(remappings or {}),
+                parameter_mappings=dict(parameter_mappings or {}),
             )
         for outcome_name in outcomes or []:
             model.add_outcome(Outcome(name=outcome_name))
@@ -184,6 +285,7 @@ class EditorModelMixin:
         remappings: Dict[str, str],
         description: str,
         defaults: List[Dict[str, str]],
+        parameter_overwrites: Optional[List[Dict[str, str]]] = None,
     ) -> bool:
         if new_name != state_node.name:
             if self.has_state_name_conflict(
@@ -201,6 +303,11 @@ class EditorModelMixin:
         state_node.remappings = remappings
         state_node.description = description
         state_node.defaults = defaults
+        self.apply_parameter_overwrites(
+            self.current_container_model,
+            state_node.model,
+            list(parameter_overwrites or []),
+        )
         return True
 
     def create_state_node(
@@ -215,6 +322,7 @@ class EditorModelMixin:
         default_outcome: str = None,
         description: str = "",
         defaults: List[Dict[str, str]] = None,
+        parameter_overwrites: List[Dict[str, str]] = None,
     ) -> None:
         """Create a new state node in the canvas."""
         if not name:
@@ -238,6 +346,11 @@ class EditorModelMixin:
                 start_state=start_state,
                 default_outcome=default_outcome,
                 description=description,
+                parameter_mappings={
+                    item.get("child_parameter", ""): item.get("name", "")
+                    for item in (parameter_overwrites or [])
+                    if item.get("child_parameter") and item.get("name")
+                },
             )
         else:
             model = self.create_leaf_model(
@@ -245,6 +358,11 @@ class EditorModelMixin:
                 plugin_info=plugin_info,
                 description=description,
                 remappings=remappings,
+                parameter_mappings={
+                    item.get("child_parameter", ""): item.get("name", "")
+                    for item in (parameter_overwrites or [])
+                    if item.get("child_parameter") and item.get("name")
+                },
                 outcomes=outcomes,
             )
 
@@ -252,6 +370,7 @@ class EditorModelMixin:
         node = self.add_model_state(
             model,
             defaults=defaults,
+            parameter_overwrites=parameter_overwrites,
             x=float(scene_pos.x()),
             y=float(scene_pos.y()),
         )
@@ -490,6 +609,7 @@ class EditorModelMixin:
         model: State,
         defaults: Optional[List[Dict[str, str]]] = None,
         parent_container: Optional[ContainerStateNode] = None,
+        parameter_overwrites: Optional[List[Dict[str, str]]] = None,
         x: Optional[float] = None,
         y: Optional[float] = None,
     ) -> StateNode | ContainerStateNode:
@@ -499,6 +619,11 @@ class EditorModelMixin:
 
         container_model = self.current_container_model
         container_model.add_state(model)
+        self.apply_parameter_overwrites(
+            container_model,
+            model,
+            list(parameter_overwrites or []),
+        )
         container_model.layout.set_state_position(model.name, x, y)
         node = self.model_adapter.create_state_view(model, x=x, y=y)
         node.defaults = defaults or []

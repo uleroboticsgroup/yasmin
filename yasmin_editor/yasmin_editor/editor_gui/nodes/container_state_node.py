@@ -197,6 +197,15 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
         self.center_text_item(self.type_label, 6)
         self.connection_port.update_position_for_container()
 
+    @property
+    def parameter_mappings(self) -> Dict[str, str]:
+        return self.model.parameter_mappings
+
+    @parameter_mappings.setter
+    def parameter_mappings(self, value: Dict[str, str]) -> None:
+        self.model.parameter_mappings.clear()
+        self.model.parameter_mappings.update(value or {})
+
     def mouseDoubleClickEvent(self, event: Any) -> None:
         if self.scene() and self.scene().views():
             canvas = self.scene().views()[0]

@@ -106,6 +106,15 @@ class StateNode(QGraphicsEllipseItem, BaseNodeMixin):
         self.model.remappings.clear()
         self.model.remappings.update(value or {})
 
+    @property
+    def parameter_mappings(self) -> Dict[str, str]:
+        return self.model.parameter_mappings
+
+    @parameter_mappings.setter
+    def parameter_mappings(self, value: Dict[str, str]) -> None:
+        self.model.parameter_mappings.clear()
+        self.model.parameter_mappings.update(value or {})
+
     def mouseDoubleClickEvent(self, event: Any) -> None:
         """Handle double-click to edit state."""
         if self.scene() and self.scene().views():

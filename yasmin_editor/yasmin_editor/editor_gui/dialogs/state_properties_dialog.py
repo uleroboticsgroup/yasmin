@@ -16,6 +16,7 @@
 import os
 from typing import Dict, List, Optional, Tuple
 
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QComboBox,
     QDialog,
@@ -32,6 +33,10 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from yasmin_editor.editor_gui.dialogs.parameter_overwrite_dialog import (
+    ParameterOverwriteDialog,
+)
+
 from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
@@ -44,6 +49,8 @@ class StatePropertiesDialog(QDialog):
         plugin_info: Optional[PluginInfo] = None,
         available_plugins: Optional[List[PluginInfo]] = None,
         remappings: Optional[Dict[str, str]] = None,
+        parameter_overwrites: Optional[List[Dict[str, str]]] = None,
+        declared_parent_parameters: Optional[List[Dict[str, str]]] = None,
         outcomes: Optional[List[str]] = None,
         edit_mode: bool = False,
         parent: Optional[QDialog] = None,
@@ -51,8 +58,10 @@ class StatePropertiesDialog(QDialog):
         defaults: Optional[List[Dict[str, str]]] = None,
         fallback_input_keys: Optional[List[Dict[str, str]]] = None,
         fallback_output_keys: Optional[List[Dict[str, str]]] = None,
+        fallback_parameters: Optional[List[Dict[str, str]]] = None,
         container_kind: Optional[str] = None,
         readonly: bool = False,
+        enable_parameter_overwrites: bool = True,
     ) -> None:
         super().__init__(parent)
         self.readonly: bool = readonly
@@ -60,15 +69,23 @@ class StatePropertiesDialog(QDialog):
         if self.readonly:
             title += " (Readonly)"
         self.setWindowTitle(title)
-        self.resize(600, 700)
+        self.resize(700, 820)
         self.edit_mode: bool = edit_mode
         self._base_description: str = description
         self._fallback_outcomes: List[str] = outcomes or []
         self._fallback_input_keys: List[Dict[str, str]] = fallback_input_keys or []
         self._fallback_output_keys: List[Dict[str, str]] = fallback_output_keys or []
+        self._fallback_parameters: List[Dict[str, str]] = fallback_parameters or []
         self._container_kind: Optional[str] = container_kind
+        self._declared_parent_parameters: Dict[str, Dict[str, str]] = {
+            str(item.get("name", "") or "").strip(): dict(item)
+            for item in (declared_parent_parameters or [])
+            if str(item.get("name", "") or "").strip()
+        }
+        self._enable_parameter_overwrites = enable_parameter_overwrites
 
         layout: QFormLayout = QFormLayout(self)
+        self._layout = layout
 
         self.name_edit: QLineEdit = QLineEdit(state_name)
         self.name_edit.setPlaceholderText("Enter state name (required)")
@@ -120,6 +137,45 @@ class StatePropertiesDialog(QDialog):
         self.description_edit.setProperty("viewerText", True)
         layout.addRow(desc_label, self.description_edit)
 
+        self.parameter_table = QTableWidget(0, 4)
+        self.parameter_table.setHorizontalHeaderLabels(
+            ["Name", "Overrides", "Type", "Default"]
+        )
+        self.parameter_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.parameter_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.parameter_table.setSelectionMode(QTableWidget.SingleSelection)
+        self.parameter_table.setMinimumHeight(100)
+        self.parameter_table.setMaximumHeight(180)
+        self.parameter_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.parameter_table.setEnabled(
+            self._enable_parameter_overwrites and not self.readonly
+        )
+        self.parameter_table.itemDoubleClicked.connect(self.edit_parameter_overwrite_row)
+
+        if self._enable_parameter_overwrites:
+            params_label = QLabel("<b>Params:</b>")
+            params_widget = QWidget()
+            params_layout = QVBoxLayout(params_widget)
+            params_layout.setContentsMargins(0, 0, 0, 0)
+            params_layout.addWidget(self.parameter_table)
+
+            param_btn_layout = QHBoxLayout()
+            add_param_btn = QPushButton("Add Param Overwrite")
+            add_param_btn.setEnabled(not self.readonly)
+            add_param_btn.clicked.connect(self.add_parameter_overwrite_row)
+            param_btn_layout.addWidget(add_param_btn)
+
+            remove_param_btn = QPushButton("Remove Param Overwrite")
+            remove_param_btn.setEnabled(not self.readonly)
+            remove_param_btn.clicked.connect(self.remove_parameter_overwrite_row)
+            param_btn_layout.addWidget(remove_param_btn)
+            param_btn_layout.addStretch()
+            params_layout.addLayout(param_btn_layout)
+            layout.addRow(params_label, params_widget)
+
+            for parameter_data in parameter_overwrites or []:
+                self._add_parameter_row_with_data(parameter_data)
+
         remappings_label: QLabel = QLabel("<b>Remappings:</b>")
         remappings_widget: QWidget = QWidget()
         remappings_layout: QVBoxLayout = QVBoxLayout(remappings_widget)
@@ -167,6 +223,7 @@ class StatePropertiesDialog(QDialog):
                     None,
                     fallback_description=self._base_description,
                     fallback_outcomes=self._fallback_outcomes,
+                    fallback_parameters=self._fallback_parameters,
                     fallback_input_keys=self._fallback_input_keys,
                     fallback_output_keys=self._fallback_output_keys,
                 )
@@ -211,11 +268,34 @@ class StatePropertiesDialog(QDialog):
 
         return line
 
+    def _format_parameter_line(self, parameter_info: Dict[str, str]) -> str:
+        param_name = str(parameter_info.get("name", "")).strip()
+        param_desc = str(parameter_info.get("description", "")).strip()
+        param_type = str(
+            parameter_info.get(
+                "type",
+                parameter_info.get(
+                    "default_value_type", parameter_info.get("default_type", "")
+                ),
+            )
+        ).strip()
+        line = param_name if param_name else "(unnamed)"
+        if param_desc:
+            line += f": {param_desc}"
+        if parameter_info.get("has_default"):
+            line += f" Default: {str(parameter_info.get('default_value', '')).strip()}"
+        elif parameter_info.get("default_value") not in (None, ""):
+            line += f" Default: {str(parameter_info.get('default_value', '')).strip()}"
+        if param_type:
+            line += f" ({param_type})"
+        return line
+
     def _build_description_text(
         self,
         plugin_info: Optional[PluginInfo],
         fallback_description: str = "",
         fallback_outcomes: Optional[List[str]] = None,
+        fallback_parameters: Optional[List[Dict[str, str]]] = None,
         fallback_input_keys: Optional[List[Dict[str, str]]] = None,
         fallback_output_keys: Optional[List[Dict[str, str]]] = None,
     ) -> str:
@@ -223,6 +303,7 @@ class StatePropertiesDialog(QDialog):
             base_description = str(getattr(plugin_info, "description", "") or "").strip()
             input_keys = list(getattr(plugin_info, "input_keys", []) or [])
             output_keys = list(getattr(plugin_info, "output_keys", []) or [])
+            parameters = list(getattr(plugin_info, "parameters", []) or [])
             outcomes = list(getattr(plugin_info, "outcomes", []) or [])
             outcome_descriptions = dict(
                 getattr(plugin_info, "outcome_descriptions", {}) or {}
@@ -231,6 +312,7 @@ class StatePropertiesDialog(QDialog):
             base_description = fallback_description.strip()
             input_keys = list(fallback_input_keys or [])
             output_keys = list(fallback_output_keys or [])
+            parameters = list(fallback_parameters or [])
             outcomes = list(fallback_outcomes or [])
             outcome_descriptions = {}
 
@@ -249,6 +331,14 @@ class StatePropertiesDialog(QDialog):
                     line += f": {desc}"
                 sections.append(line)
 
+        if parameters:
+            if sections:
+                sections.append("")
+            lines = ["Parameters:"]
+            for parameter_info in parameters:
+                lines.append(" - " + self._format_parameter_line(parameter_info))
+            sections.append("\n".join(lines))
+
         if input_keys:
             if sections:
                 sections.append("")
@@ -266,6 +356,91 @@ class StatePropertiesDialog(QDialog):
             sections.append("\n".join(lines))
 
         return "\n".join(sections).strip()
+
+    def _declared_state_parameters(self) -> List[Dict[str, str]]:
+        plugin_info: Optional[PluginInfo] = (
+            None if self._container_kind else self.plugin_combo.currentData()
+        )
+        if plugin_info is not None:
+            return list(getattr(plugin_info, "parameters", []) or [])
+        return list(self._fallback_parameters)
+
+    def add_parameter_overwrite_row(self) -> None:
+        dialog = ParameterOverwriteDialog(
+            declared_parameters=self._declared_state_parameters(),
+            parent=self,
+        )
+        if dialog.exec_():
+            self._add_parameter_row_with_data(dialog.get_parameter_data())
+
+    def edit_parameter_overwrite_row(self, *_args) -> None:
+        if self.readonly or not self._enable_parameter_overwrites:
+            return
+        row = self.parameter_table.currentRow()
+        if row < 0:
+            return
+        current_data = self._parameter_row_data(row)
+        dialog = ParameterOverwriteDialog(
+            declared_parameters=self._declared_state_parameters(),
+            param_data=current_data,
+            parent=self,
+        )
+        if dialog.exec_():
+            self._set_parameter_row_data(row, dialog.get_parameter_data())
+
+    def remove_parameter_overwrite_row(self) -> None:
+        row = self.parameter_table.currentRow()
+        if row >= 0:
+            self.parameter_table.removeRow(row)
+
+    def _parameter_row_data(self, row: int) -> Dict[str, str]:
+        name_item = self.parameter_table.item(row, 0)
+        child_item = self.parameter_table.item(row, 1)
+        type_item = self.parameter_table.item(row, 2)
+        default_item = self.parameter_table.item(row, 3)
+        return {
+            "name": name_item.text().strip() if name_item else "",
+            "child_parameter": child_item.data(Qt.UserRole) if child_item else "",
+            "description": name_item.data(Qt.UserRole) if name_item else "",
+            "default_type": type_item.text().strip() if type_item else "",
+            "default_value": default_item.text().strip() if default_item else "",
+        }
+
+    def _set_parameter_row_data(self, row: int, parameter_data: Dict[str, str]) -> None:
+        name = str(parameter_data.get("name", "") or "").strip()
+        child_parameter = str(parameter_data.get("child_parameter", "") or "").strip()
+        description = str(parameter_data.get("description", "") or "").strip()
+        default_type = str(parameter_data.get("default_type", "") or "").strip()
+        default_value = str(parameter_data.get("default_value", "") or "").strip()
+
+        name_item = QTableWidgetItem(name)
+        name_item.setData(Qt.UserRole, description)
+        if description:
+            name_item.setToolTip(description)
+
+        child_item = QTableWidgetItem(child_parameter)
+        child_item.setData(Qt.UserRole, child_parameter)
+
+        type_item = QTableWidgetItem(default_type)
+        default_item = QTableWidgetItem(default_value)
+
+        self.parameter_table.setItem(row, 0, name_item)
+        self.parameter_table.setItem(row, 1, child_item)
+        self.parameter_table.setItem(row, 2, type_item)
+        self.parameter_table.setItem(row, 3, default_item)
+
+    def _add_parameter_row_with_data(self, parameter_data: Dict[str, str]) -> None:
+        row = self.parameter_table.rowCount()
+        self.parameter_table.insertRow(row)
+        self._set_parameter_row_data(row, parameter_data)
+
+    def get_parameter_overwrites(self) -> List[Dict[str, str]]:
+        overwrites: List[Dict[str, str]] = []
+        for row in range(self.parameter_table.rowCount()):
+            row_data = self._parameter_row_data(row)
+            if row_data["name"] and row_data["child_parameter"]:
+                overwrites.append(row_data)
+        return overwrites
 
     def add_remapping_row(self) -> None:
         row = self.remappings_table.rowCount()
@@ -290,6 +465,7 @@ class StatePropertiesDialog(QDialog):
             plugin_info,
             fallback_description=self._base_description,
             fallback_outcomes=self._fallback_outcomes,
+            fallback_parameters=self._fallback_parameters,
             fallback_input_keys=self._fallback_input_keys,
             fallback_output_keys=self._fallback_output_keys,
         )
@@ -334,6 +510,7 @@ class StatePropertiesDialog(QDialog):
         Dict[str, str],
         str,
         List[Dict[str, str]],
+        List[Dict[str, str]],
     ]:
         name: str = self.name_edit.text().strip()
         plugin: Optional[PluginInfo] = (
@@ -355,4 +532,12 @@ class StatePropertiesDialog(QDialog):
             outcomes_list = list(self._fallback_outcomes)
 
         description: str = self.description_edit.toPlainText().strip()
-        return name, plugin, outcomes_list, remappings, description, []
+        return (
+            name,
+            plugin,
+            outcomes_list,
+            remappings,
+            description,
+            [],
+            self.get_parameter_overwrites(),
+        )
