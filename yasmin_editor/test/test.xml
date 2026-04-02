@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='utf-8'?>
+<StateMachine name="test" outcomes="done" start_state="foo" description="this is a test">
+  <Key name="foo_str" type="in/out" description="String containing the current counter value produced by FooState." />
+  <Key name="nodom" type="in" description="Odometry message received from the monitored ROS topic." />
+  <Key name="odom" type="in" description="Odometry message received from the monitored ROS topic." />
+  <Key name="pose_bytes" type="in/out" description="Serialized Pose message stored as bytes in the blackboard." />
+  <Key name="pose_bytes__type" type="in/out" description="Type information for the serialized Pose message." />
+  <State name="foo" type="py" module="yasmin_demos.foo_state" class="FooState" x="-944.48" y="-458.52">
+    <Transition from="outcome2" to="bar" />
+    <Transition from="outcome1" to="bar" />
+  </State>
+  <State name="bar" type="cpp" class="yasmin_demos/BarState" x="-683.00" y="-455.50">
+    <Transition from="outcome3" to="demo3" />
+  </State>
+  <StateMachine name="demo3" type="xml" file_name="demo_3.xml" package="yasmin_demos" x="-634.00" y="-236.44">
+    <Transition from="outcome4" to="done" />
+  </StateMachine>
+  <StateMachine name="nested" outcomes="done loop" start_state="deeperNested" x="-631.14" y="-629.58">
+    <Remap old="odom" new="nodom" />
+    <StateMachine name="deeperNested" outcomes="done" start_state="print_odom" x="0.38" y="0.50">
+      <Key name="odom" type="in" description="Odometry message received from the monitored ROS topic." />
+      <State name="print_odom" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-219.88" y="-138.66">
+        <Transition from="timeout" to="done" />
+        <Transition from="canceled" to="done" />
+        <Transition from="outcome2" to="done" />
+        <Transition from="outcome1" to="done" />
+      </State>
+      <FinalOutcome name="done" x="152.45" y="-70.01" />
+      <Transition from="done" to="loop" />
+    </StateMachine>
+    <FinalOutcome name="done" x="-7.66" y="-200.52" />
+    <FinalOutcome name="loop" x="143.94" y="-212.86" />
+    <Transition from="done" to="done" />
+    <Transition from="loop" to="nested" />
+  </StateMachine>
+  <Concurrence name="cc" outcomes="done" default_outcome="done" x="-870.79" y="-625.74">
+    <FinalOutcome name="done" x="700.00" y="0.00" />
+    <Transition from="done" to="cc" />
+  </Concurrence>
+  <StateMachine name="test" type="xml" file_name="demo_1.xml" package="yasmin_demos" x="-1101.54" y="-625.93">
+    <Transition from="outcome4" to="test" />
+  </StateMachine>
+  <State name="a" type="cpp" class="yasmin_demos/FooState" x="-1338.33" y="-559.49">
+    <Transition from="outcome1" to="a" />
+    <Transition from="outcome2" to="a" />
+  </State>
+  <State name="b" type="py" module="yasmin_demos.foo_state" class="FooState" x="-367.91" y="-610.75">
+    <Transition from="outcome1" to="b" />
+  </State>
+  <State name="lot_transitions" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-1093.62" y="-297.36">
+    <Transition from="timeout" to="more_transitions" />
+    <Transition from="outcome2" to="more_transitions" />
+    <Transition from="outcome1" to="more_transitions" />
+    <Transition from="canceled" to="more_transitions" />
+  </State>
+  <State name="more_transitions" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-1398.87" y="-317.03">
+    <Transition from="timeout" to="lot_transitions" />
+    <Transition from="outcome2" to="lot_transitions" />
+    <Transition from="outcome1" to="lot_transitions" />
+    <Transition from="canceled" to="lot_transitions" />
+  </State>
+  <State name="l" type="py" module="yasmin_demos.monitor_demo" class="PrintOdometryState" x="-908.62" y="-229.37">
+    <Transition from="outcome2" to="bar" />
+    <Transition from="outcome1" to="bar" />
+    <Transition from="canceled" to="l" />
+    <Transition from="timeout" to="l" />
+  </State>
+  <FinalOutcome name="done" x="-400.74" y="-421.63" />
+</StateMachine>

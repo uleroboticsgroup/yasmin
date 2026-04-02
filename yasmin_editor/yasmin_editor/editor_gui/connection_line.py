@@ -13,324 +13,447 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Graphical connection item used to render transitions between states."""
+
 import math
-from typing import Union, List, Any, TYPE_CHECKING
-from PyQt5.QtWidgets import (
-    QGraphicsItem,
-    QGraphicsTextItem,
-    QGraphicsRectItem,
-    QGraphicsPolygonItem,
-    QGraphicsPathItem,
+from typing import TYPE_CHECKING, Any, List, Tuple, Union
+
+from PyQt5.QtCore import QPointF, Qt, QTimer
+from PyQt5.QtGui import QBrush, QFont, QPainterPath, QPen
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsPathItem, QGraphicsPolygonItem
+
+from yasmin_editor.editor_gui.colors import PALETTE
+from yasmin_editor.editor_gui.connection.geometry import (
+    ZERO_POINT,
+    build_arrow_polygon,
+    compute_arrow_direction,
+    normalize_vector,
+    offset_point,
+    use_upward_label_stack,
+    vector_length,
 )
-from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtGui import QPen, QBrush, QColor, QFont, QPolygonF, QPainterPath
+from yasmin_editor.editor_gui.connection.groups import (
+    get_direction_group,
+    get_opposite_direction_group,
+    get_self_loop_group,
+)
+from yasmin_editor.editor_gui.connection.label_items import (
+    ConnectionLabelRectItem,
+    ConnectionLabelTextItem,
+)
+from yasmin_editor.editor_gui.connection.label_layout import layout_stacked_labels
 
 if TYPE_CHECKING:
-    from yasmin_editor.editor_gui.state_node import StateNode
-    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-    from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+    from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
+    from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
+    from yasmin_editor.editor_gui.nodes.state_node import StateNode
+
+
+NodeItem = Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
 
 
 class ConnectionLine(QGraphicsPathItem):
-    """Graphical representation of a transition between states with curved line.
+    """Visual representation of a transition between two state nodes.
 
-    Provides a visual representation of state transitions using Bezier curves,
-    with automatic routing to avoid overlaps and visual feedback for selection.
+    The line is rendered as a cubic Bezier curve with an arrow head and a
+    clickable outcome label. Grouped transitions share a path while their labels
+    are stacked to avoid overlap.
     """
 
     def __init__(
         self,
-        from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
-        to_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
+        from_node: NodeItem,
+        to_node: NodeItem,
         outcome: str,
     ) -> None:
         """Initialize a connection line between two nodes.
 
         Args:
-            from_node: The source state node.
-            to_node: The destination state node.
-            outcome: The outcome name that triggers this transition.
+            from_node: Source node of the transition.
+            to_node: Destination node of the transition.
+            outcome: Outcome name that triggers this transition.
         """
         super().__init__()
-        self.from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"] = (
-            from_node
-        )
-        self.to_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"] = (
-            to_node
-        )
+        self.from_node: NodeItem = from_node
+        self.to_node: NodeItem = to_node
         self.outcome: str = outcome
 
-        pen: QPen = QPen(QColor(60, 60, 180), 3, Qt.SolidLine)
-        pen.setCapStyle(Qt.RoundCap)
-        pen.setJoinStyle(Qt.RoundJoin)
-        self.setPen(pen)
+        self.normal_pen = self._create_normal_pen()
+        self.selected_pen = self._create_selected_pen()
+        self.setPen(self.normal_pen)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.setZValue(-2)
 
-        self.normal_pen: QPen = pen
-        self.selected_pen: QPen = QPen(QColor(255, 100, 0), 4, Qt.SolidLine)
-        self.selected_pen.setCapStyle(Qt.RoundCap)
-
-        self.arrow_head: QGraphicsPolygonItem = QGraphicsPolygonItem()
-        self.arrow_head.setBrush(QBrush(QColor(60, 60, 180)))
-        self.arrow_head.setPen(QPen(QColor(60, 60, 180)))
-
-        self.label_bg: QGraphicsRectItem = QGraphicsRectItem()
-        self.label_bg.setBrush(QBrush(QColor(255, 255, 255, 230)))
-        self.label_bg.setPen(QPen(QColor(60, 60, 180), 1))
-
-        self.label: QGraphicsTextItem = QGraphicsTextItem(outcome)
-        self.label.setDefaultTextColor(QColor(0, 0, 100))
-        font: QFont = QFont()
-        font.setPointSize(9)
-        font.setBold(True)
-        self.label.setFont(font)
-
-        self.update_position()
+        self.arrow_head = self._create_arrow_head_item()
+        self.label_bg = self._create_label_background_item()
+        self.label = self._create_label_text_item(outcome)
 
         from_node.add_connection(self)
         to_node.add_connection(self)
+        self.update_position()
+
+    def _create_normal_pen(self) -> QPen:
+        """Create the default pen used for the connection line."""
+        pen = QPen(PALETTE.connection_line, 3, Qt.SolidLine)
+        pen.setCapStyle(Qt.RoundCap)
+        pen.setJoinStyle(Qt.RoundJoin)
+        return pen
+
+    def _create_selected_pen(self) -> QPen:
+        """Create the pen used when the connection is selected."""
+        pen = QPen(PALETTE.connection_selected, 4, Qt.SolidLine)
+        pen.setCapStyle(Qt.RoundCap)
+        return pen
+
+    def _create_arrow_head_item(self) -> QGraphicsPolygonItem:
+        """Create the arrow head graphics item."""
+        arrow_head = QGraphicsPolygonItem()
+        arrow_head.setBrush(QBrush(PALETTE.connection_line))
+        arrow_head.setPen(QPen(PALETTE.connection_line))
+        arrow_head.setZValue(-1)
+        return arrow_head
+
+    def _create_label_background_item(self) -> ConnectionLabelRectItem:
+        """Create the clickable label background."""
+        label_bg = ConnectionLabelRectItem(self)
+        label_bg.setBrush(QBrush(PALETTE.connection_label_bg))
+        label_bg.setPen(QPen(PALETTE.connection_label_pen, 1))
+        label_bg.setZValue(1)
+        return label_bg
+
+    def _create_label_text_item(self, text: str) -> ConnectionLabelTextItem:
+        """Create the clickable text item that displays the outcome name."""
+        label = ConnectionLabelTextItem(self, text)
+        label.setDefaultTextColor(PALETTE.connection_label_text)
+
+        font = QFont()
+        font.setPointSize(9)
+        font.setBold(True)
+        label.setFont(font)
+        label.setZValue(2)
+        return label
+
+    def _get_direction_group(self) -> List["ConnectionLine"]:
+        """Return all connections with the same source and target nodes."""
+        return get_direction_group(self)
+
+    def _get_opposite_direction_group(self) -> List["ConnectionLine"]:
+        """Return all connections with reversed source and target nodes."""
+        return get_opposite_direction_group(self)
+
+    def _get_self_loop_group(self) -> List["ConnectionLine"]:
+        """Return all self-loop connections on the source node."""
+        return get_self_loop_group(self)
 
     def _calculate_offset(self) -> float:
-        """Calculate offset for this connection to avoid overlap with other connections.
+        """Calculate a path offset to separate opposite connection directions."""
+        if not self._get_opposite_direction_group():
+            return 0.0
+        return 35.0
 
-        Computes a perpendicular offset based on the number and direction of
-        connections between the same pair of nodes to prevent visual overlap.
+    def _build_arrow_geometry(
+        self,
+        target_pos: QPointF,
+        target_direction: QPointF,
+    ) -> Tuple[QPointF, float]:
+        """Update the arrow head polygon and return the shaft end point and angle."""
+        polygon, line_end, angle = build_arrow_polygon(target_pos, target_direction)
+        self.arrow_head.setPolygon(polygon)
+        return line_end, angle
 
-        Returns:
-            The offset amount in pixels (positive or negative).
-        """
-        same_direction: List["ConnectionLine"] = []
-        opposite_direction: List["ConnectionLine"] = []
+    def _hide_path_and_arrow(self) -> None:
+        """Hide the rendered path for grouped transitions."""
+        self.setPath(QPainterPath())
+        self.arrow_head.setVisible(False)
 
-        all_connections: List["ConnectionLine"] = list(self.from_node.connections) + list(
-            self.to_node.connections
-        )
+    def _update_label_style(self, selected: bool | None = None) -> None:
+        """Apply the current visual style based on the selection state."""
+        if selected is None:
+            selected = self.isSelected()
 
-        for conn in all_connections:
-            if conn.from_node == self.from_node and conn.to_node == self.to_node:
-                if conn not in same_direction:
-                    same_direction.append(conn)
-            elif conn.from_node == self.to_node and conn.to_node == self.from_node:
-                if conn not in opposite_direction:
-                    opposite_direction.append(conn)
+        if selected:
+            self.setPen(self.selected_pen)
+            self.arrow_head.setBrush(QBrush(PALETTE.connection_selected))
+            self.arrow_head.setPen(QPen(PALETTE.connection_selected))
+            self.label_bg.setPen(QPen(PALETTE.connection_selected, 2))
+            return
 
-        is_same_direction: bool = self in same_direction
-        connections_in_my_direction: List["ConnectionLine"] = (
-            same_direction if is_same_direction else opposite_direction
-        )
-        connections_in_other_direction: List["ConnectionLine"] = (
-            opposite_direction if is_same_direction else same_direction
-        )
+        self.setPen(self.normal_pen)
+        self.arrow_head.setBrush(QBrush(PALETTE.connection_line))
+        self.arrow_head.setPen(QPen(PALETTE.connection_line))
+        self.label_bg.setPen(QPen(PALETTE.connection_label_pen, 1))
 
-        if len(connections_in_my_direction) <= 1:
-            if len(connections_in_other_direction) > 0:
-                return 35 if is_same_direction else -35
-            else:
-                return 0
+    def select_from_label(self, event: Any) -> None:
+        """Select the connection when the label or label background is clicked."""
+        scene = self.scene()
+        if scene is not None and not bool(event.modifiers() & Qt.ControlModifier):
+            scene.clearSelection()
+        self.setSelected(True)
+        event.accept()
 
-        connections_in_my_direction.sort(key=lambda c: c.outcome)
-
-        try:
-            my_index: int = connections_in_my_direction.index(self)
-        except ValueError:
-            return 0
-
-        num_in_direction: int = len(connections_in_my_direction)
-        has_opposite: bool = len(connections_in_other_direction) > 0
-
-        base_offset: float = (
-            35 if (is_same_direction and has_opposite) else (-35 if has_opposite else 0)
-        )
-        spacing: float = 40
-
-        if num_in_direction == 2:
-            offset: float = spacing * (0.5 if my_index == 0 else -0.5)
-        else:
-            center_index: float = (num_in_direction - 1) / 2
-            offset_from_center: float = my_index - center_index
-            offset = offset_from_center * spacing * 0.7
-
-        return base_offset + offset
+    def start_rewire_from_label(self, event: Any) -> None:
+        """Start rewiring mode when the transition label is double-clicked."""
+        self.select_from_label(event)
+        if self.scene() and self.scene().views():
+            canvas = self.scene().views()[0]
+            if hasattr(canvas, "start_rewire_drag"):
+                QTimer.singleShot(
+                    0,
+                    lambda connection=self: canvas.start_rewire_drag(connection),
+                )
+                return
+        event.ignore()
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
-        """Handle item changes like selection state.
-
-        Args:
-            change: The type of change occurring.
-            value: The new value for the change.
-
-        Returns:
-            The potentially modified value.
-        """
+        """Update selection styling when the graphics item state changes."""
         if change == QGraphicsItem.ItemSelectedChange:
-            if value:
-                self.setPen(self.selected_pen)
-                self.arrow_head.setBrush(QBrush(QColor(255, 100, 0)))
-                self.arrow_head.setPen(QPen(QColor(255, 100, 0)))
-            else:
-                self.setPen(self.normal_pen)
-                self.arrow_head.setBrush(QBrush(QColor(60, 60, 180)))
-                self.arrow_head.setPen(QPen(QColor(60, 60, 180)))
+            self._update_label_style(bool(value))
         return super().itemChange(change, value)
 
     def update_position(self) -> None:
-        """Update the connection line with a smooth curved path.
-
-        Recalculates the cubic Bezier curve path between nodes, including
-        offset for multiple connections, arrow head position, and label placement.
-        For self-loops, draws a loop arc above the node.
-        """
-        # Check if this is a self-loop
+        """Recompute the path, arrow position, and label placement."""
         if self.from_node == self.to_node:
             self._update_self_loop_position()
             return
 
-        from_center: QPointF = self.from_node.get_connection_point()
-        to_center: QPointF = self.to_node.get_connection_point()
-        from_pos: QPointF = self.from_node.get_edge_point(to_center)
-        to_pos: QPointF = self.to_node.get_edge_point(from_center)
+        direction_group = self._get_direction_group()
+        representative = direction_group[0] if direction_group else self
 
-        offset_amount: float = self._calculate_offset()
+        from_center = self.from_node.get_connection_point()
+        to_center = self.to_node.get_connection_point()
 
-        path: QPainterPath = QPainterPath()
+        opposite_direction = self._get_opposite_direction_group()
+        offset_amount = self._resolve_offset_amount(opposite_direction, representative)
+
+        center_vector = QPointF(
+            to_center.x() - from_center.x(),
+            to_center.y() - from_center.y(),
+        )
+        center_direction = normalize_vector(center_vector)
+        if vector_length(center_direction) <= 1e-9:
+            center_direction = QPointF(1.0, 0.0)
+
+        normal_direction = QPointF(-center_direction.y(), center_direction.x())
+        anchor_offset = offset_point(ZERO_POINT, normal_direction, offset_amount)
+        from_pos, to_pos = self._compute_edge_points(
+            from_center,
+            to_center,
+            anchor_offset,
+        )
+        source_direction, target_direction = self._compute_radial_directions(
+            from_center,
+            from_pos,
+            to_center,
+            to_pos,
+            center_direction,
+        )
+
+        ctrl1, ctrl2 = self._compute_control_points(
+            from_pos,
+            to_pos,
+            source_direction,
+            target_direction,
+            normal_direction,
+            offset_amount,
+        )
+        shaft_end = self._update_arrow_head(from_center, to_center, to_pos, ctrl2)
+        path = self._build_curve_path(from_pos, ctrl1, ctrl2, shaft_end)
+
+        if self == representative:
+            self.setPath(path)
+            self.arrow_head.setVisible(True)
+        else:
+            self._hide_path_and_arrow()
+
+        self._update_label_positions(
+            path,
+            direction_group,
+            opposite_direction,
+            from_center,
+            to_center,
+        )
+        self._update_label_style()
+
+    def _resolve_offset_amount(
+        self,
+        opposite_direction: List["ConnectionLine"],
+        representative: "ConnectionLine",
+    ) -> float:
+        """Resolve the lateral offset used for parallel opposite directions."""
+        offset_amount = self._calculate_offset()
+        if not opposite_direction:
+            return offset_amount
+
+        opposite_representative = opposite_direction[0]
+        if representative.from_node == opposite_representative.to_node:
+            return 35.0
+        return -35.0
+
+    def _compute_edge_points(
+        self,
+        from_center: QPointF,
+        to_center: QPointF,
+        anchor_offset: QPointF,
+    ) -> Tuple[QPointF, QPointF]:
+        """Compute the path start and end points on the node boundaries."""
+        from_pos = self.from_node.get_edge_point(
+            QPointF(
+                to_center.x() + anchor_offset.x(),
+                to_center.y() + anchor_offset.y(),
+            )
+        )
+        to_pos = self.to_node.get_edge_point(
+            QPointF(
+                from_center.x() + anchor_offset.x(),
+                from_center.y() + anchor_offset.y(),
+            )
+        )
+        return from_pos, to_pos
+
+    def _compute_radial_directions(
+        self,
+        from_center: QPointF,
+        from_pos: QPointF,
+        to_center: QPointF,
+        to_pos: QPointF,
+        center_direction: QPointF,
+    ) -> Tuple[QPointF, QPointF]:
+        """Compute the tangent directions at the start and end of the path."""
+        source_direction = normalize_vector(
+            QPointF(from_pos.x() - from_center.x(), from_pos.y() - from_center.y())
+        )
+        target_direction = normalize_vector(
+            QPointF(to_center.x() - to_pos.x(), to_center.y() - to_pos.y())
+        )
+
+        if vector_length(source_direction) <= 1e-9:
+            source_direction = center_direction
+        if vector_length(target_direction) <= 1e-9:
+            target_direction = center_direction
+        return source_direction, target_direction
+
+    def _compute_control_points(
+        self,
+        from_pos: QPointF,
+        to_pos: QPointF,
+        source_direction: QPointF,
+        target_direction: QPointF,
+        normal_direction: QPointF,
+        offset_amount: float,
+    ) -> Tuple[QPointF, QPointF]:
+        """Compute the cubic Bezier control points for the transition path."""
+        path_length = vector_length(
+            QPointF(to_pos.x() - from_pos.x(), to_pos.y() - from_pos.y())
+        )
+        tangent_length = max(36.0, min(90.0, path_length * 0.35))
+        offset_vector = QPointF(
+            normal_direction.x() * offset_amount,
+            normal_direction.y() * offset_amount,
+        )
+
+        ctrl1 = QPointF(
+            from_pos.x() + source_direction.x() * tangent_length + offset_vector.x(),
+            from_pos.y() + source_direction.y() * tangent_length + offset_vector.y(),
+        )
+        ctrl2 = QPointF(
+            to_pos.x() - target_direction.x() * tangent_length + offset_vector.x(),
+            to_pos.y() - target_direction.y() * tangent_length + offset_vector.y(),
+        )
+        return ctrl1, ctrl2
+
+    def _update_arrow_head(
+        self,
+        from_center: QPointF,
+        to_center: QPointF,
+        to_pos: QPointF,
+        ctrl2: QPointF,
+    ) -> QPointF:
+        """Update the arrow head and return the path end point before the arrow."""
+        target_direction = compute_arrow_direction(
+            to_pos,
+            ctrl2,
+            QPointF(to_center.x() - from_center.x(), to_center.y() - from_center.y()),
+        )
+        line_end, _ = self._build_arrow_geometry(to_pos, target_direction)
+        return line_end
+
+    def _build_curve_path(
+        self,
+        from_pos: QPointF,
+        ctrl1: QPointF,
+        ctrl2: QPointF,
+        line_end: QPointF,
+    ) -> QPainterPath:
+        """Build the cubic Bezier path used for the rendered connection."""
+        path = QPainterPath()
         path.moveTo(from_pos)
+        path.cubicTo(ctrl1, ctrl2, line_end)
+        return path
 
-        dx: float = to_pos.x() - from_pos.x()
-        dy: float = to_pos.y() - from_pos.y()
+    def _update_label_positions(
+        self,
+        path: QPainterPath,
+        direction_group: List["ConnectionLine"],
+        opposite_direction: List["ConnectionLine"],
+        from_center: QPointF,
+        to_center: QPointF,
+    ) -> None:
+        """Update label positions for grouped and opposing transitions."""
+        label_anchor = QPointF(path.pointAtPercent(0.5))
+        label_stack_direction = "center"
 
-        angle: float = math.atan2(dy, dx)
-        perp_angle: float = angle + math.pi / 2
+        if opposite_direction:
+            label_gap = 8.0
+            if use_upward_label_stack(from_center, to_center):
+                label_anchor.setY(label_anchor.y() - label_gap)
+                label_stack_direction = "up"
+            else:
+                label_anchor.setY(label_anchor.y() + label_gap)
+                label_stack_direction = "down"
 
-        ctrl1: QPointF = QPointF(
-            from_pos.x() + dx * 0.25 + math.cos(perp_angle) * offset_amount,
-            from_pos.y() + dy * 0.25 + math.sin(perp_angle) * offset_amount,
-        )
-        ctrl2: QPointF = QPointF(
-            from_pos.x() + dx * 0.75 + math.cos(perp_angle) * offset_amount,
-            from_pos.y() + dy * 0.75 + math.sin(perp_angle) * offset_amount,
-        )
-
-        path.cubicTo(ctrl1, ctrl2, to_pos)
-        self.setPath(path)
-
-        t: float = 0.95
-        tangent_point: QPointF = path.pointAtPercent(t)
-        angle = math.atan2(to_pos.y() - tangent_point.y(), to_pos.x() - tangent_point.x())
-
-        arrow_size: float = 12
-        arrow_p1: QPointF = to_pos - QPointF(
-            math.cos(angle - math.pi / 6) * arrow_size,
-            math.sin(angle - math.pi / 6) * arrow_size,
-        )
-        arrow_p2: QPointF = to_pos - QPointF(
-            math.cos(angle + math.pi / 6) * arrow_size,
-            math.sin(angle + math.pi / 6) * arrow_size,
-        )
-
-        arrow_polygon: QPolygonF = QPolygonF([to_pos, arrow_p1, arrow_p2])
-        self.arrow_head.setPolygon(arrow_polygon)
-
-        mid_point: QPointF = path.pointAtPercent(0.5)
-        label_rect = self.label.boundingRect()
-        padding: float = 4
-
-        self.label_bg.setRect(
-            mid_point.x() - label_rect.width() / 2 - padding,
-            mid_point.y() - label_rect.height() / 2 - padding,
-            label_rect.width() + padding * 2,
-            label_rect.height() + padding * 2,
-        )
-        self.label.setPos(
-            mid_point.x() - label_rect.width() / 2,
-            mid_point.y() - label_rect.height() / 2,
-        )
+        layout_stacked_labels(direction_group, label_anchor, label_stack_direction)
 
     def _update_self_loop_position(self) -> None:
-        """Update position for a self-loop (transition from a state to itself).
+        """Update position for a self-loop transition.
 
-        Draws a loop arc above the node with an arrow pointing back into the node.
-        Multiple self-loops on the same node are offset to avoid overlap.
+        Self-loops are rendered as an arc above the node. Multiple self-loops on
+        the same node share the path while their labels are stacked.
         """
         node = self.from_node
-        center: QPointF = node.get_connection_point()
+        bounds = node.sceneBoundingRect()
+        center_x = bounds.center().x()
+        node_top = bounds.top() + 4.0
+        node_width = bounds.width()
 
-        # Calculate offset for multiple self-loops on the same node
-        self_loops = [
-            conn
-            for conn in node.connections
-            if conn.from_node == conn.to_node and conn.from_node == node
-        ]
-        self_loops.sort(key=lambda c: c.outcome)
+        self_loops = self._get_self_loop_group()
+        representative = self_loops[0] if self_loops else self
 
-        try:
-            loop_index: int = self_loops.index(self)
-        except ValueError:
-            loop_index = 0
+        loop_height = max(72.0, bounds.height() + 16.0)
+        loop_width = max(60.0, node_width * 0.45)
+        anchor_half_width = max(16.0, min(24.0, node_width * 0.16))
 
-        num_loops: int = len(self_loops)
-
-        # Base loop parameters
-        loop_height: float = 80  # How far the loop extends above the node
-        loop_width: float = 60  # Width of the loop
-
-        # Offset multiple loops horizontally
-        horizontal_spacing: float = 50
-        if num_loops > 1:
-            center_offset = (num_loops - 1) / 2
-            horizontal_offset = (loop_index - center_offset) * horizontal_spacing
-        else:
-            horizontal_offset = 0
-
-        # Calculate start and end points on the top edge of the node
-        # Start point is slightly to the left, end point slightly to the right
-        start_x = center.x() + horizontal_offset - 20
-        end_x = center.x() + horizontal_offset + 20
-
-        # Get the top of the node (approximate)
-        node_top = center.y() - 40  # Approximate top of node
-
+        start_x = center_x - anchor_half_width
+        end_x = center_x + anchor_half_width
         start_pos = QPointF(start_x, node_top)
         end_pos = QPointF(end_x, node_top)
 
-        # Control points for the loop curve (above the node)
-        ctrl1 = QPointF(start_x - loop_width / 2, node_top - loop_height)
-        ctrl2 = QPointF(end_x + loop_width / 2, node_top - loop_height)
+        ctrl1 = QPointF(start_x - loop_width / 2.0, node_top - loop_height)
+        ctrl2 = QPointF(end_x + loop_width / 2.0, node_top - loop_height)
 
-        # Create the path
-        path: QPainterPath = QPainterPath()
+        arrow_angle = math.pi / 2.0 + math.radians(16.0)
+        target_direction = QPointF(math.cos(arrow_angle), math.sin(arrow_angle))
+        line_end, _ = self._build_arrow_geometry(end_pos, target_direction)
+
+        path = QPainterPath()
         path.moveTo(start_pos)
-        path.cubicTo(ctrl1, ctrl2, end_pos)
-        self.setPath(path)
+        path.cubicTo(ctrl1, ctrl2, line_end)
 
-        # Arrow head pointing down into the node
-        arrow_size: float = 12
-        # Arrow points downward
-        angle = math.pi / 2  # 90 degrees (pointing down)
+        if self == representative:
+            self.setPath(path)
+            self.arrow_head.setVisible(True)
+        else:
+            self._hide_path_and_arrow()
 
-        arrow_p1: QPointF = end_pos - QPointF(
-            math.cos(angle - math.pi / 6) * arrow_size,
-            math.sin(angle - math.pi / 6) * arrow_size,
-        )
-        arrow_p2: QPointF = end_pos - QPointF(
-            math.cos(angle + math.pi / 6) * arrow_size,
-            math.sin(angle + math.pi / 6) * arrow_size,
-        )
-
-        arrow_polygon: QPolygonF = QPolygonF([end_pos, arrow_p1, arrow_p2])
-        self.arrow_head.setPolygon(arrow_polygon)
-
-        # Position label at the top of the loop
-        mid_point = QPointF(center.x() + horizontal_offset, node_top - loop_height + 10)
-        label_rect = self.label.boundingRect()
-        padding: float = 4
-
-        self.label_bg.setRect(
-            mid_point.x() - label_rect.width() / 2 - padding,
-            mid_point.y() - label_rect.height() / 2 - padding,
-            label_rect.width() + padding * 2,
-            label_rect.height() + padding * 2,
-        )
-        self.label.setPos(
-            mid_point.x() - label_rect.width() / 2,
-            mid_point.y() - label_rect.height() / 2,
-        )
+        label_anchor = QPointF(center_x, node_top - loop_height + 8.0)
+        layout_stacked_labels(self_loops, label_anchor)
+        self._update_label_style()

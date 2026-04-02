@@ -13,22 +13,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
+
+from PyQt5.QtCore import QEvent, QLineF, QPointF, Qt, QTimer
+from PyQt5.QtGui import QBrush, QCursor, QPainter, QPen
 from PyQt5.QtWidgets import (
-    QGraphicsView,
-    QGraphicsScene,
     QGraphicsLineItem,
+    QGraphicsScene,
+    QGraphicsView,
     QMenu,
     QWidget,
 )
-from PyQt5.QtCore import Qt, QLineF, QTimer, QPointF, QEvent
-from PyQt5.QtGui import QPen, QBrush, QColor, QPainter
 
-from yasmin_editor.editor_gui.state_node import StateNode
-from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.colors import PALETTE
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
+from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
+from yasmin_editor.editor_gui.nodes.state_node import StateNode
+from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
+from yasmin_editor.model.concurrence import Concurrence
 
 if TYPE_CHECKING:
+    from yasmin_editor.editor_gui.connection_line import ConnectionLine
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
@@ -41,97 +46,195 @@ class StateMachineCanvas(QGraphicsView):
         self.setScene(self.scene)
         self.setRenderHint(QPainter.Antialiasing)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
-        self.setBackgroundBrush(QBrush(QColor(255, 255, 255)))
+        self.setBackgroundBrush(QBrush(PALETTE.background))
+        self.setMouseTracking(True)
+        self.viewport().setMouseTracking(True)
 
         self.is_dragging_connection: bool = False
         self.drag_start_node: Optional[
-            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
+            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"]
         ] = None
         self.temp_line: Optional[QGraphicsLineItem] = None
+        self.drag_rewire_connection: Optional["ConnectionLine"] = None
         self.editor_ref: Optional["YasminEditor"] = None
+        self.pending_placement_item: Optional[
+            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"]
+        ] = None
+
+    def get_preferred_placement_scene_pos(self) -> QPointF:
+        viewport_pos = self.viewport().mapFromGlobal(QCursor.pos())
+        if not self.viewport().rect().contains(viewport_pos):
+            viewport_pos = self.viewport().rect().center()
+        return self.mapToScene(viewport_pos)
+
+    def start_pending_placement(
+        self,
+        item: Union[
+            "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+        ],
+    ) -> None:
+        self.pending_placement_item = item
+        self.setDragMode(QGraphicsView.NoDrag)
+        self._update_pending_placement_item(self.get_preferred_placement_scene_pos())
+        item.setSelected(True)
+        if self.editor_ref:
+            self.editor_ref.statusBar().showMessage(
+                f"Place '{getattr(item, 'placement_label', getattr(item, 'name', 'item'))}' with left click. Right click or Escape cancels.",
+                0,
+            )
+
+    def clear_pending_placement(self) -> None:
+        if self.pending_placement_item is not None:
+            self.pending_placement_item = None
+        if not self.is_dragging_connection:
+            self.setDragMode(QGraphicsView.ScrollHandDrag)
+
+    def _update_pending_placement_item(self, scene_pos: QPointF) -> None:
+        if self.pending_placement_item is None:
+            return
+        self.pending_placement_item.setPos(scene_pos)
 
     def is_valid_connection(
         self,
         source_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
         target_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
     ) -> bool:
-        """Validate if a connection between two nodes is allowed."""
-        if source_node == target_node:
-            # Allow self-loops for regular StateNodes (not containers or final outcomes)
-            if isinstance(source_node, StateNode) and not isinstance(
-                source_node, ContainerStateNode
-            ):
-                return True
+        if self.editor_ref is None:
             return False
 
-        source_container: Optional["ContainerStateNode"] = getattr(
-            source_node, "parent_container", None
-        )
-        target_container: Optional["ContainerStateNode"] = getattr(
-            target_node, "parent_container", None
-        )
+        current_model = self.editor_ref.current_container_model
+
+        if isinstance(current_model, Concurrence):
+            return not isinstance(source_node, FinalOutcomeNode) and isinstance(
+                target_node, FinalOutcomeNode
+            )
 
         if isinstance(source_node, FinalOutcomeNode):
-            if isinstance(target_node, ContainerStateNode):
-                if source_container == target_node:
-                    return True
+            return False
+
+        if source_node == target_node:
+            return True
+
+        return True
+
+    def _is_inline_text_editing_active(self) -> bool:
+        """Return whether a text block currently owns the keyboard for inline editing."""
+        focus_item = self.scene.focusItem()
+
+        while focus_item is not None:
+            if isinstance(focus_item, TextBlockNode):
+                return bool(getattr(focus_item, "_is_editing", False))
+            focus_item = focus_item.parentItem()
+
+        for item in self.scene.selectedItems():
+            if isinstance(item, TextBlockNode) and getattr(item, "_is_editing", False):
                 return True
-
-            if isinstance(target_node, FinalOutcomeNode):
-                if (
-                    source_container
-                    and target_container == source_container.parent_container
-                ):
-                    return True
-                if source_container == target_container:
-                    return True
-
-            return source_container != target_container and target_container is None
-
-        if isinstance(source_node, (StateNode, ContainerStateNode)):
-            if isinstance(target_node, FinalOutcomeNode):
-                return source_container == target_container
-
-            if isinstance(target_node, (StateNode, ContainerStateNode)):
-                return source_container == target_container
 
         return False
 
     def keyPressEvent(self, event: QEvent) -> None:
-        """Handle keyboard shortcuts."""
         if event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
+            if self._is_inline_text_editing_active():
+                super().keyPressEvent(event)
+                return
+
             if self.editor_ref:
                 self.editor_ref.delete_selected()
                 event.accept()
                 return
+
+        if event.key() == Qt.Key_Escape and self.pending_placement_item is not None:
+            if self.editor_ref:
+                self.editor_ref.cancel_pending_node_placement(self.pending_placement_item)
+            else:
+                self.clear_pending_placement()
+            event.accept()
+            return
+
         super().keyPressEvent(event)
 
     def wheelEvent(self, event: QEvent) -> None:
         factor: float = 1.2 if event.angleDelta().y() > 0 else 1.0 / 1.2
         self.scale(factor, factor)
 
-    def start_connection_drag(
+    def _begin_connection_drag(
         self,
         from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
-        event: QEvent,
     ) -> None:
-        """Start dragging a connection from a node's port."""
         self.drag_start_node = from_node
         self.is_dragging_connection = True
         self.setDragMode(QGraphicsView.NoDrag)
 
         self.temp_line = QGraphicsLineItem()
-        pen: QPen = QPen(QColor(100, 100, 255), 3, Qt.DashLine)
+        pen: QPen = QPen(PALETTE.temp_connection, 3, Qt.DashLine)
         self.temp_line.setPen(pen)
         self.scene.addItem(self.temp_line)
 
         port_scene_pos: QPointF = from_node.connection_port.scenePos()
         self.temp_line.setLine(QLineF(port_scene_pos, port_scene_pos))
 
+    def start_connection_drag(
+        self,
+        from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
+        event: QEvent,
+    ) -> None:
+        if self.pending_placement_item is not None:
+            event.ignore()
+            return
+        if self.editor_ref and self.editor_ref.is_read_only_mode():
+            event.ignore()
+            return
+        self.drag_rewire_connection = None
+        self._begin_connection_drag(from_node)
+
+    def start_rewire_drag(self, connection: "ConnectionLine") -> None:
+        if self.pending_placement_item is not None:
+            return
+        if self.editor_ref and self.editor_ref.is_read_only_mode():
+            return
+        self.drag_rewire_connection = connection
+        self._begin_connection_drag(connection.from_node)
+        if self.editor_ref:
+            self.editor_ref.statusBar().showMessage(
+                f"Rewiring transition '{connection.outcome}' from {connection.from_node.name}. Click a new target state."
+            )
+
     def mousePressEvent(self, event: QEvent) -> None:
+        if self.pending_placement_item is not None:
+            if event.button() == Qt.LeftButton:
+                scene_pos = self.mapToScene(event.pos())
+                if self.editor_ref:
+                    self.editor_ref.finalize_pending_node_placement(
+                        self.pending_placement_item,
+                        scene_pos,
+                    )
+                else:
+                    self.clear_pending_placement()
+                event.accept()
+                return
+
+            if event.button() == Qt.RightButton:
+                if self.editor_ref:
+                    self.editor_ref.cancel_pending_node_placement(
+                        self.pending_placement_item
+                    )
+                else:
+                    self.clear_pending_placement()
+                event.accept()
+                return
+
+        if event.button() == Qt.BackButton and self.editor_ref:
+            self.editor_ref.navigate_up_one_level()
+            event.accept()
+            return
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event: QEvent) -> None:
+        if self.pending_placement_item is not None:
+            self._update_pending_placement_item(self.mapToScene(event.pos()))
+            event.accept()
+            return
+
         if self.is_dragging_connection and self.temp_line and self.drag_start_node:
             port_scene_pos: QPointF = self.drag_start_node.connection_port.scenePos()
             scene_pos: QPointF = self.mapToScene(event.pos())
@@ -145,7 +248,9 @@ class StateMachineCanvas(QGraphicsView):
 
             item = self.itemAt(event.pos())
             target: Optional[
-                Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
+                Union[
+                    "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+                ]
             ] = None
             if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                 target = item
@@ -168,7 +273,9 @@ class StateMachineCanvas(QGraphicsView):
             items = self.scene.items(scene_pos)
 
             target_node: Optional[
-                Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
+                Union[
+                    "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+                ]
             ] = None
             for item in items:
                 if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
@@ -192,10 +299,10 @@ class StateMachineCanvas(QGraphicsView):
                 ):
                     scene_item.setOpacity(1.0)
 
-            source_node: Optional[
-                Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
-            ] = self.drag_start_node
+            source_node = self.drag_start_node
+            rewire_connection = self.drag_rewire_connection
             self.drag_start_node = None
+            self.drag_rewire_connection = None
             self.is_dragging_connection = False
             self.setDragMode(QGraphicsView.ScrollHandDrag)
 
@@ -205,12 +312,25 @@ class StateMachineCanvas(QGraphicsView):
                 and self.is_valid_connection(source_node, target_node)
             ):
                 if self.editor_ref:
-                    QTimer.singleShot(
-                        0,
-                        lambda src=source_node, tgt=target_node: self.editor_ref.create_connection_from_drag(
-                            src, tgt
-                        ),
-                    )
+                    if rewire_connection is not None:
+                        QTimer.singleShot(
+                            0,
+                            lambda connection=rewire_connection, tgt=target_node: self.editor_ref.rewire_connection(
+                                connection, tgt
+                            ),
+                        )
+                    else:
+                        QTimer.singleShot(
+                            0,
+                            lambda src=source_node, tgt=target_node: self.editor_ref.create_connection_from_drag(
+                                src, tgt
+                            ),
+                        )
+            elif rewire_connection is not None and self.editor_ref:
+                self.editor_ref.statusBar().showMessage(
+                    "Rewiring canceled",
+                    2000,
+                )
 
             event.accept()
             return
@@ -218,30 +338,49 @@ class StateMachineCanvas(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def contextMenuEvent(self, event: QEvent) -> None:
-        """Handle right-click context menu on canvas background."""
+        if self.pending_placement_item is not None:
+            event.accept()
+            return
+
         item = self.itemAt(event.pos())
-        if item is None:
-            if self.editor_ref:
-                menu: QMenu = QMenu()
-
-                add_state_action = menu.addAction("Add State")
-                add_sm_action = menu.addAction("Add State Machine")
-                add_cc_action = menu.addAction("Add Concurrence")
-                menu.addSeparator()
-                add_outcome_action = menu.addAction("Add Final Outcome")
-
+        if item is None and self.editor_ref:
+            menu: QMenu = QMenu()
+            if self.editor_ref.is_read_only_mode():
+                view_container_action = menu.addAction("View Current Container")
+                fit_action = menu.addAction("Fit")
                 action = menu.exec_(event.globalPos())
-
-                if action == add_state_action:
-                    self.editor_ref.add_state()
-                elif action == add_sm_action:
-                    self.editor_ref.add_state_machine()
-                elif action == add_cc_action:
-                    self.editor_ref.add_concurrence()
-                elif action == add_outcome_action:
-                    self.editor_ref.add_final_outcome()
-
+                if action == view_container_action:
+                    self.editor_ref.edit_current_container()
+                elif action == fit_action:
+                    self.editor_ref.fit_current_view()
                 event.accept()
                 return
+
+            add_state_action = menu.addAction("Add State")
+            add_sm_action = menu.addAction("Add State Machine")
+            add_cc_action = menu.addAction("Add Concurrence")
+            menu.addSeparator()
+            add_outcome_action = menu.addAction("Add Final Outcome")
+            add_text_action = menu.addAction("Add Text")
+            menu.addSeparator()
+            edit_container_action = menu.addAction("Edit Current Container")
+
+            action = menu.exec_(event.globalPos())
+
+            if action == add_state_action:
+                self.editor_ref.add_state()
+            elif action == add_sm_action:
+                self.editor_ref.add_state_machine()
+            elif action == add_cc_action:
+                self.editor_ref.add_concurrence()
+            elif action == add_outcome_action:
+                self.editor_ref.add_final_outcome()
+            elif action == add_text_action:
+                self.editor_ref.add_text_block()
+            elif action == edit_container_action:
+                self.editor_ref.edit_current_container()
+
+            event.accept()
+            return
 
         super().contextMenuEvent(event)

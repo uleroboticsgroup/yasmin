@@ -18,9 +18,8 @@ import os
 
 from ament_index_python import get_package_share_path
 from lxml import etree as ET
-from yasmin_pybind_bridge import CppStateFactory
-
 from yasmin import Concurrence, State, StateMachine
+from yasmin_pybind_bridge import CppStateFactory
 
 
 class YasminFactory:
@@ -79,15 +78,6 @@ class YasminFactory:
         outcome_map = {}
 
         for child in conc_elem:
-            for cchild in child:
-                if cchild.tag == "Outcome":
-                    outcome_map[cchild.attrib["to"]] = {}
-                    for ccchild in cchild:
-                        if ccchild.tag == "Transition":
-                            outcome_map[cchild.attrib["to"]][
-                                states[ccchild.attrib["state"]]
-                            ] = ccchild.attrib["outcome"]
-
             if child.tag == "State":
                 states[child.attrib["name"]] = self.create_state(child)
 
@@ -97,8 +87,18 @@ class YasminFactory:
             elif child.tag == "StateMachine":
                 states[child.attrib["name"]] = self.create_sm(child)
 
+            elif child.tag == "OutcomeMap":
+                outcome_name = child.attrib["outcome"]
+                outcome_map[outcome_name] = {}
+
+                for item in child:
+                    if item.tag == "Item":
+                        state_name = item.attrib["state"]
+                        outcome = item.attrib["outcome"]
+                        outcome_map[outcome_name][state_name] = outcome
+
         concurrence = Concurrence(
-            states=list(states.values()),
+            states=states,
             outcome_map=outcome_map,
             default_outcome=default_outcome,
         )

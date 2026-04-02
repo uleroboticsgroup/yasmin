@@ -13,15 +13,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Union, TYPE_CHECKING
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
-from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtGui import QPen, QBrush, QColor
+from typing import TYPE_CHECKING, Union
+
+from PyQt5.QtCore import QEvent, Qt
+from PyQt5.QtGui import QBrush, QPen
+from PyQt5.QtWidgets import QGraphicsEllipseItem, QGraphicsItem
+
+from yasmin_editor.editor_gui.colors import PALETTE
 
 if TYPE_CHECKING:
-    from yasmin_editor.editor_gui.state_node import StateNode
-    from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
-    from yasmin_editor.editor_gui.final_outcome_node import FinalOutcomeNode
+    from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
+    from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
+    from yasmin_editor.editor_gui.nodes.state_node import StateNode
 
 
 class ConnectionPort(QGraphicsEllipseItem):
@@ -34,10 +37,10 @@ class ConnectionPort(QGraphicsEllipseItem):
         self.parent_state: Union[
             "StateNode", "ContainerStateNode", "FinalOutcomeNode"
         ] = parent_state
-        self.setBrush(QBrush(QColor(100, 100, 255)))
-        self.setPen(QPen(QColor(0, 0, 100), 1))
+        self.setBrush(QBrush(PALETTE.connection_port_fill))
+        self.setPen(QPen(PALETTE.connection_port_pen, 1))
 
-        from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+        from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 
         if isinstance(parent_state, ContainerStateNode):
             self.update_position_for_container()
@@ -50,7 +53,7 @@ class ConnectionPort(QGraphicsEllipseItem):
 
     def update_position_for_container(self) -> None:
         """Update position for container parent."""
-        from yasmin_editor.editor_gui.container_state_node import ContainerStateNode
+        from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 
         if isinstance(self.parent_state, ContainerStateNode):
             rect = self.parent_state.rect()
