@@ -30,7 +30,8 @@ namespace {
 template <typename InterfaceT> InterfaceSerializationHandler make_handler() {
   return InterfaceSerializationHandler{
       [](yasmin::Blackboard::SharedPtr blackboard, const std::string &key) {
-        return serialize_interface<InterfaceT>(blackboard->get<InterfaceT>(key));
+        return serialize_interface<InterfaceT>(
+            blackboard->get<InterfaceT>(key));
       },
       [](yasmin::Blackboard::SharedPtr blackboard, const std::string &key,
          const std::vector<uint8_t> &serialized_data) {
@@ -70,8 +71,8 @@ const InterfaceSerializationHandler &
 get_interface_serialization_handler(const std::string &interface_type) {
   auto it = supported_handlers.find(interface_type);
   if (it == supported_handlers.end()) {
-    throw std::invalid_argument("Unsupported interface type '" + interface_type +
-                                "'.");
+    throw std::invalid_argument("Unsupported interface type '" +
+                                interface_type + "'.");
   }
   return it->second;
 }

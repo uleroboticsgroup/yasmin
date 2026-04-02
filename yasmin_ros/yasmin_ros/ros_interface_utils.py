@@ -17,7 +17,6 @@ from typing import Type
 
 from rosidl_runtime_py.utilities import get_action, get_message, get_service
 
-
 _ACTION_SUFFIXES = {
     "_Goal": "Goal",
     "_Result": "Result",

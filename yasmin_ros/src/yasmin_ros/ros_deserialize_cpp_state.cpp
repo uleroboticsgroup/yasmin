@@ -43,16 +43,13 @@ RosDeserializeCppState::RosDeserializeCppState()
       "The value stored in 'input' is not a byte array or the target type "
       "does not match.");
   this->set_outcome_description(
-      ERROR,
-      "Deserialization failed because the serialized data could not be "
-      "decoded.");
+      ERROR, "Deserialization failed because the serialized data could not be "
+             "decoded.");
   this->add_input_key(
-      "input",
-      "Serialized byte array that should be converted back into a ROS "
-      "interface instance.");
+      "input", "Serialized byte array that should be converted back into a ROS "
+               "interface instance.");
   this->add_output_key(
-      "output",
-      "Deserialized ROS interface instance in native C++ form.");
+      "output", "Deserialized ROS interface instance in native C++ form.");
   this->declare_parameter<std::string>(
       "interface_type",
       "ROS interface type string such as geometry_msgs/msg/Pose or "

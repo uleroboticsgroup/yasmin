@@ -29,15 +29,14 @@ class RosDeserializePyState(State):
             "Deserializes a byte array from blackboard key 'input' into a Python "
             "ROS interface instance written to blackboard key 'output'."
         )
-        self.set_outcome_description(
-            "succeed", "Deserialization finished successfully."
-        )
+        self.set_outcome_description("succeed", "Deserialization finished successfully.")
         self.set_outcome_description(
             "type_error",
             "The value stored in 'input' is not a byte array or the target type does not match.",
         )
         self.set_outcome_description(
-            "error", "Deserialization failed because the serialized data could not be decoded."
+            "error",
+            "Deserialization failed because the serialized data could not be decoded.",
         )
         self.add_input_key(
             "input",

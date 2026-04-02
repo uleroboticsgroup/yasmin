@@ -29,9 +29,7 @@ class RosSerializePyState(State):
             "Serializes a Python ROS interface instance from blackboard key "
             "'input' into a byte array written to blackboard key 'output'."
         )
-        self.set_outcome_description(
-            "succeed", "Serialization finished successfully."
-        )
+        self.set_outcome_description("succeed", "Serialization finished successfully.")
         self.set_outcome_description(
             "type_error",
             "The value stored in 'input' does not match the configured interface.",
