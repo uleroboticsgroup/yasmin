@@ -235,5 +235,44 @@ class TestStateMetadataExtended(unittest.TestCase):
         self.assertEqual(bb["items"], [1, 2, 3])
 
 
+class TestStateParameters(unittest.TestCase):
+
+    def test_configure_default_does_nothing(self):
+        state = FooState()
+        self.assertIsNone(state.configure())
+
+    def test_declare_parameter_stores_default_value(self):
+        state = FooState()
+        state.declare_parameter("topic", "Topic name", "/data")
+
+        self.assertTrue(state.has_parameter("topic"))
+        self.assertEqual(state.get_parameter("topic"), "/data")
+
+        params = state.get_parameters()
+        self.assertEqual(len(params), 1)
+        self.assertEqual(params[0]["name"], "topic")
+        self.assertEqual(params[0]["description"], "Topic name")
+        self.assertTrue(params[0]["has_default"])
+        self.assertEqual(params[0]["default_value"], "/data")
+
+    def test_set_parameter_overrides_stored_value(self):
+        state = FooState()
+        state.declare_parameter("count", "Counter", 1)
+        state.set_parameter("count", 5)
+
+        self.assertTrue(state.has_parameter("count"))
+        self.assertEqual(state.get_parameter("count"), 5)
+
+    def test_metadata_includes_parameters(self):
+        state = FooState()
+        state.declare_parameter("enabled", "Enable flag", True)
+
+        meta = state.get_metadata()
+        self.assertEqual(len(meta["parameters"]), 1)
+        self.assertEqual(meta["parameters"][0]["name"], "enabled")
+        self.assertEqual(meta["parameters"][0]["description"], "Enable flag")
+        self.assertTrue(meta["parameters"][0]["has_default"])
+
+
 if __name__ == "__main__":
     unittest.main()

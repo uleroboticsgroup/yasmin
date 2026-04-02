@@ -71,6 +71,27 @@ public:
   }
 
   /**
+   * @brief Override configure() to call Python implementation if available.
+   * The GIL must be acquired before calling into Python.
+   */
+  void configure() override {
+    py::gil_scoped_acquire acquire;
+
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
+    PYBIND11_OVERRIDE(void,      // Return type
+                      State,     // Parent class
+                      configure  // Method name (no arguments)
+    );
+#else
+    PYBIND11_OVERLOAD(void,      // Return type
+                      State,     // Parent class
+                      configure  // Method name (no arguments)
+    );
+#endif
+  }
+
+  /**
    * @brief Override cancel_state() to call Python implementation if available.
    * The GIL must be acquired before calling into Python.
    */
@@ -137,10 +158,12 @@ PYBIND11_MODULE(state, m) {
            "Checks if the state has been canceled")
       .def("is_completed", &yasmin::State::is_completed,
            "Checks if the state has completed execution")
-      // Execute and cancel methods
+      // Execute, configure, and cancel methods
       .def("execute", &yasmin::State::execute,
            "Execute the state's specific logic (override in subclass)",
            py::arg("blackboard"))
+      .def("configure", &yasmin::State::configure,
+           "Configure the state before execution")
       .def("cancel_state", &yasmin::State::cancel_state,
            "Cancel the current state execution")
       // Get outcomes method
@@ -207,6 +230,83 @@ PYBIND11_MODULE(state, m) {
           },
           "Add an output key with name and description", py::arg("key_name"),
           py::arg("description"))
+
+      .def(
+          "declare_parameter",
+          [](yasmin::State &state, const std::string &parameter_name) {
+            state.declare_parameter(parameter_name);
+          },
+          "Declare a parameter with name only", py::arg("parameter_name"))
+
+      .def(
+          "declare_parameter",
+          [](yasmin::State &state, const std::string &parameter_name,
+             const std::string &description) {
+            yasmin::BlackboardKeyInfo info(parameter_name);
+            info.description = description;
+            state.declare_parameter(info);
+          },
+          "Declare a parameter with name and description",
+          py::arg("parameter_name"), py::arg("description"))
+
+      .def(
+          "declare_parameter",
+          [](yasmin::State &state, const std::string &parameter_name,
+             const std::string &description, py::object default_value) {
+            yasmin::BlackboardKeyInfo info =
+                yasmin::BlackboardKeyInfoPy::from_pyobject(parameter_name,
+                                                           default_value);
+            info.description = description;
+            state.declare_parameter(info);
+          },
+          "Declare a parameter with a default value of any type and description",
+          py::arg("parameter_name"), py::arg("description"),
+          py::arg("default_value"))
+
+      .def(
+          "has_parameter", &yasmin::State::has_parameter,
+          "Check whether a parameter exists in the local parameter storage",
+          py::arg("parameter_name"))
+
+      .def(
+          "get_parameter",
+          [](const yasmin::State &state, const std::string &parameter_name) {
+            yasmin::BlackboardPyWrapper wrapper(state.get_parameters_blackboard());
+            return wrapper.get(parameter_name);
+          },
+          "Get a parameter from the local parameter storage",
+          py::arg("parameter_name"))
+
+      .def(
+          "set_parameter",
+          [](yasmin::State &state, const std::string &parameter_name,
+             py::object value) {
+            yasmin::BlackboardPyWrapper wrapper(state.get_parameters_blackboard());
+            wrapper.set(parameter_name, value);
+          },
+          "Set a parameter in the local parameter storage",
+          py::arg("parameter_name"), py::arg("value"))
+
+      .def(
+          "get_parameters",
+          [](const yasmin::State &state) {
+            const auto &keys = state.get_parameters();
+            py::list result;
+            for (const auto &key : keys) {
+              py::dict key_dict;
+              key_dict["name"] = key.name;
+              key_dict["description"] = key.description;
+              key_dict["has_default"] = key.has_default;
+              if (key.has_default) {
+                key_dict["default_value_type"] = key.default_value_type;
+                key_dict["default_value"] =
+                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
+              }
+              result.append(key_dict);
+            }
+            return result;
+          },
+          "Get the parameter metadata")
 
       .def(
           "get_input_keys",
@@ -288,6 +388,22 @@ PYBIND11_MODULE(state, m) {
             }
 
             result["output_keys"] = output_keys;
+
+            py::list parameters;
+            for (const auto &key : metadata.parameters) {
+              py::dict key_dict;
+              key_dict["name"] = key.name;
+              key_dict["description"] = key.description;
+              key_dict["has_default"] = key.has_default;
+              if (key.has_default) {
+                key_dict["default_value_type"] = key.default_value_type;
+                key_dict["default_value"] =
+                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
+              }
+              parameters.append(key_dict);
+            }
+
+            result["parameters"] = parameters;
 
             py::dict outcome_descriptions;
             for (const auto &[outcome, description] :
