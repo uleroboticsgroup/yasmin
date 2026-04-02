@@ -381,6 +381,7 @@ TEST_F(TestStateMachine, TestNestedRemappingsComposeAcrossStateMachines) {
   EXPECT_EQ(bb->get<std::string>("foo_toplevel"), "Counter: 1");
   EXPECT_EQ(bb->get<std::string>("foo_nested"), "Counter: 1");
   EXPECT_FALSE(bb->contains("foo_inner"));
+  EXPECT_FALSE(bb->contains("foo_str"));
 }
 
 int main(int argc, char **argv) {
