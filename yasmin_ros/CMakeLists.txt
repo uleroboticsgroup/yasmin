@@ -65,20 +65,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-target_link_libraries(${PROJECT_NAME} ${DEPENDENCIES})
-ament_target_dependencies(${PROJECT_NAME}
-  rclcpp
-  rclcpp_action
-  pluginlib
-  yasmin
-  geometry_msgs
-  std_msgs
-  std_srvs
-  example_interfaces
-)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${DEPENDENCIES})
 
 install(TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -96,9 +86,13 @@ install(FILES plugins.xml
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(EXPORT export_${PROJECT_NAME}
+  DESTINATION share/${PROJECT_NAME}/cmake
+)
+
 ament_export_include_directories("include/${PROJECT_NAME}")
 ament_export_libraries(${PROJECT_NAME})
-ament_export_targets(${PROJECT_NAME})
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${DEPENDENCIES_PACKAGE})
 
 pluginlib_export_plugin_description_file(yasmin plugins.xml)
@@ -119,21 +113,16 @@ if(BUILD_TESTING)
   foreach(_test_name ${_pytest_tests})
     ament_add_pytest_test(${_test_name} test/${_test_name}.py TIMEOUT 300)
     ament_add_gtest(${_test_name}_cpp test/${_test_name}.cpp TIMEOUT 300)
-    target_link_libraries(${_test_name}_cpp
-      ${PROJECT_NAME}
-      yasmin::yasmin
-      rclcpp::rclcpp
-      rclcpp_action::rclcpp_action
-      ${std_msgs_TARGETS}
-      ${example_interfaces_TARGETS}
-    )
-    ament_target_dependencies(${_test_name}_cpp
-      rclcpp
-      rclcpp_action
-      yasmin
-      std_msgs
-      example_interfaces
-    )
+    if(TARGET ${_test_name}_cpp)
+      target_link_libraries(${_test_name}_cpp
+        ${PROJECT_NAME}
+        yasmin::yasmin
+        rclcpp::rclcpp
+        rclcpp_action::rclcpp_action
+        ${std_msgs_TARGETS}
+        ${example_interfaces_TARGETS}
+      )
+    endif()
   endforeach()
 
 endif()
