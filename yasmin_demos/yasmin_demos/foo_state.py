@@ -39,6 +39,7 @@ class FooState(State):
         )
         self.set_outcome_description("outcome1", "Counter is below the threshold")
         self.set_outcome_description("outcome2", "Counter reached the threshold")
+        self.declare_parameter("test", "This is a parameter", "Hello World")
         self.add_output_key(
             "foo_str",
             "String containing the current counter value produced by FooState.",

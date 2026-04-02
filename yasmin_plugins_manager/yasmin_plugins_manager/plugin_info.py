@@ -65,6 +65,7 @@ class PluginInfo:
         self.outcome_descriptions: Dict[str, str] = {}
         self.input_keys: List[dict] = []
         self.output_keys: List[dict] = []
+        self.parameters: List[dict] = []
 
         if self.plugin_type == "python":
             loaded_module = importlib.import_module(self.module)
@@ -176,6 +177,11 @@ class PluginInfo:
         except Exception:
             self.output_keys = []
 
+        try:
+            self.parameters = list(instance.get_parameters())
+        except Exception:
+            self.parameters = []
+
     def to_cache_dict(self) -> dict:
         """Serialize the full plugin metadata for caching."""
         return {
@@ -190,6 +196,7 @@ class PluginInfo:
             "outcome_descriptions": self.outcome_descriptions,
             "input_keys": self.input_keys,
             "output_keys": self.output_keys,
+            "parameters": self.parameters,
         }
 
     @classmethod
@@ -212,6 +219,7 @@ class PluginInfo:
         instance.outcome_descriptions = dict(data.get("outcome_descriptions", {}))
         instance.input_keys = list(data.get("input_keys", []))
         instance.output_keys = list(data.get("output_keys", []))
+        instance.parameters = list(data.get("parameters", []))
         return instance
 
     @property
