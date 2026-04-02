@@ -25,6 +25,7 @@ from yasmin_cli.verb.list import add_list_verb
 from yasmin_cli.verb.print import add_print_verb
 from yasmin_cli.verb.run import add_run_verb
 from yasmin_cli.verb.test import add_test_verb
+from yasmin_cli.verb.validate import add_validate_verb
 from yasmin_cli.verb.viewer import add_viewer_verb
 
 
@@ -41,6 +42,7 @@ class YasminCommand(CommandExtension):
         add_print_verb(subparsers)
         add_run_verb(subparsers)
         add_test_verb(subparsers)
+        add_validate_verb(subparsers)
         add_viewer_verb(subparsers)
 
         self._parser = parser
