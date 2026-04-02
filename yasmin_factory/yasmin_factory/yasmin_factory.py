@@ -16,6 +16,8 @@
 import importlib
 import os
 
+from typing import Dict
+
 from ament_index_python import get_package_share_path
 from lxml import etree as ET
 from yasmin import Concurrence, State, StateMachine
@@ -267,7 +269,7 @@ class YasminFactory:
             else:
                 owner.declare_parameter(parameter_name)
 
-    def _get_parameter_mappings(self, parent_elem: ET.Element) -> dict[str, str]:
+    def _get_parameter_mappings(self, parent_elem: ET.Element) -> Dict[str, str]:
         parameter_mappings = {}
         for remap_elem in parent_elem.findall("ParamRemap"):
             parameter_mappings[remap_elem.attrib["old"]] = remap_elem.attrib["new"]
