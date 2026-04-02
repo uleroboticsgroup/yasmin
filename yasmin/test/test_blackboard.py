@@ -96,7 +96,6 @@ class TestBlackboard(unittest.TestCase):
         self.assertFalse(self.blackboard["bool_false"])
         self.assertIsInstance(self.blackboard["bool_false"], bool)
 
-
     def test_set_get_bytes(self):
         """Test setting and getting bytes values"""
         payload = bytes([0, 1, 2, 3, 127, 128, 255])

@@ -116,7 +116,8 @@ public:
     } else if (py::isinstance<py::float_>(value)) {
       this->blackboard->set<double>(key, value.cast<double>());
     } else if (is_python_bytes_like(value)) {
-      this->blackboard->set<std::vector<uint8_t>>(key, py_buffer_to_vector(value));
+      this->blackboard->set<std::vector<uint8_t>>(key,
+                                                  py_buffer_to_vector(value));
     } else if (py::isinstance<py::str>(value)) {
       this->blackboard->set<std::string>(key, value.cast<std::string>());
     } else {
