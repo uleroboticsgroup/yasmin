@@ -329,7 +329,8 @@ public:
    * @param parameter_name The parameter name.
    * @return The stored parameter value.
    */
-  template <typename T> T get_parameter(const std::string &parameter_name) const {
+  template <typename T>
+  T get_parameter(const std::string &parameter_name) const {
     return this->get_parameters_blackboard()->get<T>(parameter_name);
   }
 
@@ -343,7 +344,6 @@ public:
   void set_parameter(const std::string &parameter_name, T value) {
     this->get_parameters_blackboard()->set<T>(parameter_name, value);
   }
-
 
   /**
    * @brief Checks whether a parameter was declared in the state metadata.

@@ -52,10 +52,12 @@ PYBIND11_MODULE(concurrence, m) {
       .def("get_default_outcome", &yasmin::Concurrence::get_default_outcome,
            "Get the default outcome for this concurrence state")
 
-      .def("set_parameter_mappings", &yasmin::Concurrence::set_parameter_mappings,
+      .def("set_parameter_mappings",
+           &yasmin::Concurrence::set_parameter_mappings,
            "Set parameter mappings for a child state", py::arg("state_name"),
            py::arg("parameter_mappings"))
-      .def("get_parameter_mappings", &yasmin::Concurrence::get_parameter_mappings,
+      .def("get_parameter_mappings",
+           &yasmin::Concurrence::get_parameter_mappings,
            "Get parameter mappings for all child states",
            py::return_value_policy::reference_internal)
       .def("configure", &yasmin::Concurrence::configure,

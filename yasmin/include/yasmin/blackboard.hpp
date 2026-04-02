@@ -169,7 +169,6 @@ public:
    */
   bool contains(const std::string &key) const;
 
-
   /**
    * @brief Copy a value from another blackboard.
    * @param other The source blackboard.

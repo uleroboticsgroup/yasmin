@@ -171,7 +171,6 @@ public:
    */
   void add_end_cb(EndCallbackType cb);
 
-
   /**
    * @brief Sets parameter mappings for a child state.
    *
@@ -286,7 +285,6 @@ private:
    * @param state_name The name of the state to set as the current state.
    */
   void set_current_state(const std::string &state_name);
-
 
   /**
    * @brief Applies this container's parameter mappings to a direct child.

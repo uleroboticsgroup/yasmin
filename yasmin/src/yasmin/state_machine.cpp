@@ -148,7 +148,6 @@ void StateMachine::set_start_state(const std::string &state_name) {
   this->configured.store(false);
 }
 
-
 void StateMachine::set_parameter_mappings(
     const std::string &state_name,
     const ParameterMappings &parameter_mappings) {
@@ -162,7 +161,8 @@ void StateMachine::set_parameter_mappings(
   this->configured.store(false);
 }
 
-const ParameterMappingsMap &StateMachine::get_parameter_mappings() const noexcept {
+const ParameterMappingsMap &
+StateMachine::get_parameter_mappings() const noexcept {
   return this->parameter_mappings;
 }
 
@@ -175,21 +175,22 @@ void StateMachine::apply_parameter_mappings(const std::string &state_name,
 
   for (const auto &[child_parameter, parent_parameter] : mappings_it->second) {
     if (!this->is_parameter_declared(parent_parameter)) {
-      throw std::runtime_error("State machine parameter '" + parent_parameter +
-                               "' is not declared while configuring child state '" +
-                               state_name + "'");
+      throw std::runtime_error(
+          "State machine parameter '" + parent_parameter +
+          "' is not declared while configuring child state '" + state_name +
+          "'");
     }
 
     if (!this->has_parameter(parent_parameter)) {
-      throw std::runtime_error("State machine parameter '" + parent_parameter +
-                               "' has no value while configuring child state '" +
-                               state_name + "'");
+      throw std::runtime_error(
+          "State machine parameter '" + parent_parameter +
+          "' has no value while configuring child state '" + state_name + "'");
     }
 
     if (!state->is_parameter_declared(child_parameter)) {
       throw std::runtime_error("Child state '" + state_name +
-                               "' does not declare parameter '" + child_parameter +
-                               "'");
+                               "' does not declare parameter '" +
+                               child_parameter + "'");
     }
 
     state->copy_parameter_from(*this, parent_parameter, child_parameter);

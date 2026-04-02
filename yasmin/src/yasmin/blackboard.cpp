@@ -45,7 +45,6 @@ bool Blackboard::contains(const std::string &key) const {
   return (this->values.find(remapped_key) != this->values.end());
 }
 
-
 void Blackboard::copy_value_from(const Blackboard &other,
                                  const std::string &source_key,
                                  const std::string &target_key) {

@@ -79,14 +79,14 @@ public:
 
 #if PYBIND11_VERSION_MAJOR > 2 ||                                              \
     (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
-    PYBIND11_OVERRIDE(void,      // Return type
-                      State,     // Parent class
-                      configure  // Method name (no arguments)
+    PYBIND11_OVERRIDE(void,     // Return type
+                      State,    // Parent class
+                      configure // Method name (no arguments)
     );
 #else
-    PYBIND11_OVERLOAD(void,      // Return type
-                      State,     // Parent class
-                      configure  // Method name (no arguments)
+    PYBIND11_OVERLOAD(void,     // Return type
+                      State,    // Parent class
+                      configure // Method name (no arguments)
     );
 #endif
   }
@@ -259,19 +259,20 @@ PYBIND11_MODULE(state, m) {
             info.description = description;
             state.declare_parameter(info);
           },
-          "Declare a parameter with a default value of any type and description",
+          "Declare a parameter with a default value of any type and "
+          "description",
           py::arg("parameter_name"), py::arg("description"),
           py::arg("default_value"))
 
-      .def(
-          "has_parameter", &yasmin::State::has_parameter,
-          "Check whether a parameter exists in the local parameter storage",
-          py::arg("parameter_name"))
+      .def("has_parameter", &yasmin::State::has_parameter,
+           "Check whether a parameter exists in the local parameter storage",
+           py::arg("parameter_name"))
 
       .def(
           "get_parameter",
           [](const yasmin::State &state, const std::string &parameter_name) {
-            yasmin::BlackboardPyWrapper wrapper(state.get_parameters_blackboard());
+            yasmin::BlackboardPyWrapper wrapper(
+                state.get_parameters_blackboard());
             return wrapper.get(parameter_name);
           },
           "Get a parameter from the local parameter storage",
@@ -281,7 +282,8 @@ PYBIND11_MODULE(state, m) {
           "set_parameter",
           [](yasmin::State &state, const std::string &parameter_name,
              py::object value) {
-            yasmin::BlackboardPyWrapper wrapper(state.get_parameters_blackboard());
+            yasmin::BlackboardPyWrapper wrapper(
+                state.get_parameters_blackboard());
             wrapper.set(parameter_name, value);
           },
           "Set a parameter in the local parameter storage",

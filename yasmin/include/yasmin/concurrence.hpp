@@ -78,7 +78,6 @@ private:
   void apply_parameter_mappings(const std::string &state_name,
                                 const State::SharedPtr &state);
 
-
   /// @brief Helper function to generate a set of possible outcomes from an
   /// outcome map
   /// @param outcome_map
@@ -106,11 +105,11 @@ public:
               const OutcomeMap &outcome_map,
               const ParameterMappingsMap &parameter_mappings = {});
 
-
   /**
    * @brief Sets parameter mappings for a child state.
    * @param state_name The child state name.
-   * @param parameter_mappings Mapping entries child_parameter -> parent_parameter.
+   * @param parameter_mappings Mapping entries child_parameter ->
+   * parent_parameter.
    */
   void set_parameter_mappings(const std::string &state_name,
                               const ParameterMappings &parameter_mappings);

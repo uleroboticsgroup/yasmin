@@ -83,20 +83,21 @@ Concurrence::Concurrence(const StateMap &states,
   }
 }
 
-
 void Concurrence::set_parameter_mappings(
     const std::string &state_name,
     const ParameterMappings &parameter_mappings) {
   if (this->states.find(state_name) == this->states.end()) {
-    throw std::invalid_argument("State name '" + state_name +
-                                "' is not provided in the concurrent set of states to run");
+    throw std::invalid_argument(
+        "State name '" + state_name +
+        "' is not provided in the concurrent set of states to run");
   }
 
   this->parameter_mappings[state_name] = parameter_mappings;
   this->configured.store(false);
 }
 
-const ParameterMappingsMap &Concurrence::get_parameter_mappings() const noexcept {
+const ParameterMappingsMap &
+Concurrence::get_parameter_mappings() const noexcept {
   return this->parameter_mappings;
 }
 
@@ -109,21 +110,22 @@ void Concurrence::apply_parameter_mappings(const std::string &state_name,
 
   for (const auto &[child_parameter, parent_parameter] : mappings_it->second) {
     if (!this->is_parameter_declared(parent_parameter)) {
-      throw std::runtime_error("Concurrence parameter '" + parent_parameter +
-                               "' is not declared while configuring child state '" +
-                               state_name + "'");
+      throw std::runtime_error(
+          "Concurrence parameter '" + parent_parameter +
+          "' is not declared while configuring child state '" + state_name +
+          "'");
     }
 
     if (!this->has_parameter(parent_parameter)) {
-      throw std::runtime_error("Concurrence parameter '" + parent_parameter +
-                               "' has no value while configuring child state '" +
-                               state_name + "'");
+      throw std::runtime_error(
+          "Concurrence parameter '" + parent_parameter +
+          "' has no value while configuring child state '" + state_name + "'");
     }
 
     if (!state->is_parameter_declared(child_parameter)) {
       throw std::runtime_error("Child state '" + state_name +
-                               "' does not declare parameter '" + child_parameter +
-                               "'");
+                               "' does not declare parameter '" +
+                               child_parameter + "'");
     }
 
     state->copy_parameter_from(*this, parent_parameter, child_parameter);

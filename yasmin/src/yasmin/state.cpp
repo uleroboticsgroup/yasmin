@@ -272,7 +272,6 @@ bool State::has_parameter(const std::string &parameter_name) const {
   return this->get_parameters_blackboard()->contains(parameter_name);
 }
 
-
 bool State::is_parameter_declared(const std::string &parameter_name) const {
   const auto &parameters = this->get_metadata_ref().parameters;
   return std::any_of(parameters.begin(), parameters.end(),

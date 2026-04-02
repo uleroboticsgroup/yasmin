@@ -397,7 +397,8 @@ TEST_F(TestStateMachine, TestConfigureOnlyRunsOnceOnRepeatedExecution) {
   EXPECT_EQ(configurable->configured_topic, "/demo");
 }
 
-TEST_F(TestStateMachine, TestNestedConfigureAppliesParameterMappingsRecursively) {
+TEST_F(TestStateMachine,
+       TestNestedConfigureAppliesParameterMappingsRecursively) {
   auto leaf = std::make_shared<ConfigurableLeafState>();
   auto nested_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
   nested_sm->declare_parameter("nested_topic", "Nested topic");

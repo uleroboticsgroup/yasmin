@@ -154,9 +154,7 @@ class PluginInfo:
                         {
                             "name": key_name,
                             "description": default_elem.attrib.get("description", ""),
-                            "default_value_type": default_elem.attrib.get(
-                                "type", "str"
-                            ),
+                            "default_value_type": default_elem.attrib.get("type", "str"),
                             "default_value": default_elem.attrib.get("value", ""),
                             "has_default": True,
                         }

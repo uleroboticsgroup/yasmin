@@ -102,7 +102,6 @@ int main(int argc, char **argv) {
   return RUN_ALL_TESTS();
 }
 
-
 class ConfigurableConcurrentState : public State {
 public:
   int configure_count{0};

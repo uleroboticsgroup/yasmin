@@ -151,10 +151,12 @@ PYBIND11_MODULE(state_machine, m) {
           "Add a callback to be called when the state machine ends",
           py::arg("cb"))
 
-      .def("set_parameter_mappings", &yasmin::StateMachine::set_parameter_mappings,
+      .def("set_parameter_mappings",
+           &yasmin::StateMachine::set_parameter_mappings,
            "Set parameter mappings for a child state", py::arg("state_name"),
            py::arg("parameter_mappings"))
-      .def("get_parameter_mappings", &yasmin::StateMachine::get_parameter_mappings,
+      .def("get_parameter_mappings",
+           &yasmin::StateMachine::get_parameter_mappings,
            "Get parameter mappings for all child states",
            py::return_value_policy::reference_internal)
       .def("configure", &yasmin::StateMachine::configure,
