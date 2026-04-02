@@ -34,7 +34,39 @@ bool YasminFactory::py_initialized_ = false;
 PythonStateHolder::PythonStateHolder(yasmin::State::SharedPtr cpp_state,
                                      py::object py_state)
     : yasmin::State(cpp_state->get_outcomes()), cpp_state_(cpp_state),
-      py_state_(py_state) {}
+      py_state_(py_state) {
+  this->set_description(cpp_state->get_description());
+
+  for (const auto &[outcome, description] : cpp_state->get_outcome_descriptions()) {
+    this->set_outcome_description(outcome, description);
+  }
+
+  for (const auto &input_key : cpp_state->get_input_keys()) {
+    this->add_input_key(input_key);
+  }
+
+  for (const auto &output_key : cpp_state->get_output_keys()) {
+    this->add_output_key(output_key);
+  }
+
+  for (const auto &parameter : cpp_state->get_parameters()) {
+    this->declare_parameter(parameter);
+  }
+}
+
+void PythonStateHolder::configure() {
+  for (const auto &parameter : this->get_parameters()) {
+    if (!this->cpp_state_->is_parameter_declared(parameter.name)) {
+      this->cpp_state_->declare_parameter(parameter);
+    }
+
+    if (this->has_parameter(parameter.name)) {
+      this->cpp_state_->copy_parameter_from(*this, parameter.name, parameter.name);
+    }
+  }
+
+  this->cpp_state_->configure();
+}
 
 std::string
 PythonStateHolder::execute(yasmin::Blackboard::SharedPtr blackboard) {

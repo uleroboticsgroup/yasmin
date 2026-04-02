@@ -107,6 +107,40 @@ TEST_F(TestYasminFactory, TestCreatePythonState) {
   }
 }
 
+
+TEST_F(TestYasminFactory, TestPythonStateParametersSurviveCppFactoryWrapping) {
+  std::string xml_content = R"(
+    <StateMachine outcomes="end">
+      <Param name="root_sleep_ms" description="Sleep delay" default_type="int" default_value="25"/>
+      <State name="State1" type="py" module="test.test_simple_state" class="TestParameterizedState">
+        <ParamRemap old="sleep_ms" new="root_sleep_ms"/>
+        <Transition from="done" to="end"/>
+      </State>
+    </StateMachine>
+  )";
+
+  tinyxml2::XMLDocument doc;
+  doc.Parse(xml_content.c_str());
+  tinyxml2::XMLElement *root = doc.FirstChildElement("StateMachine");
+
+  ASSERT_NE(root, nullptr);
+
+  auto sm = factory->create_sm(root);
+  ASSERT_NE(sm, nullptr);
+
+  const auto &states = sm->get_states();
+  auto state_it = states.find("State1");
+  ASSERT_NE(state_it, states.end());
+  ASSERT_TRUE(state_it->second->is_parameter_declared("sleep_ms"));
+
+  sm->configure();
+  EXPECT_EQ(state_it->second->get_parameter<int>("sleep_ms"), 25);
+
+  auto blackboard = yasmin::Blackboard::make_shared();
+  EXPECT_EQ((*sm)(blackboard), "end");
+  EXPECT_EQ(blackboard->get<int>("configured_sleep_ms"), 25);
+}
+
 TEST_F(TestYasminFactory, TestCreateStateInvalidType) {
   std::string xml_content = R"(
     <State name="InvalidState" type="invalid" class="SomeClass"/>

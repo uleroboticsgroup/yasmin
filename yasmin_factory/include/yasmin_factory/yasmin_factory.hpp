@@ -54,6 +54,12 @@ public:
   PythonStateHolder(yasmin::State::SharedPtr cpp_state, py::object py_state);
 
   /**
+   * @brief Synchronizes the wrapper parameter view with the Python state and
+   *        delegates configuration to the underlying state.
+   */
+  void configure() override;
+
+  /**
    * @brief Delegates execution to the underlying Python state.
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
