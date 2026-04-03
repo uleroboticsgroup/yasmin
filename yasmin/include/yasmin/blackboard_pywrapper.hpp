@@ -499,8 +499,9 @@ public:
     }
 
     if (is_exact_cpp_type<std::unordered_map<std::string, long long>>(type)) {
-      return py::cast(this->blackboard->get<
-                      std::unordered_map<std::string, long long>>(key));
+      return py::cast(
+          this->blackboard->get<std::unordered_map<std::string, long long>>(
+              key));
     }
 
     if (is_exact_cpp_type<FloatDict>(type)) {

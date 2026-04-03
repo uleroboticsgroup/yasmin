@@ -19,8 +19,8 @@
 #include <cstdint>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <string>
 #include <stdexcept>
+#include <string>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
@@ -144,8 +144,7 @@ dict_to_unordered_map(const py::dict &dict) {
   return result;
 }
 
-template <typename T>
-inline bool is_exact_cpp_type(const std::string &type) {
+template <typename T> inline bool is_exact_cpp_type(const std::string &type) {
   return type == demangle_type(typeid(T).name());
 }
 
@@ -233,7 +232,8 @@ blackboard_key_info_from_pyobject(const std::string &key_name,
       if (dict_values_match(dict, [](const py::handle &item) {
             return py::isinstance<py::bool_>(item);
           })) {
-        return BlackboardKeyInfo(key_name, "", dict_to_unordered_map<bool>(dict));
+        return BlackboardKeyInfo(key_name, "",
+                                 dict_to_unordered_map<bool>(dict));
       }
 
       if (dict_values_match(dict, [](const py::handle &item) {
@@ -290,7 +290,8 @@ blackboard_key_info_get_py_default(const BlackboardKeyInfo &info) {
   const std::string &type = info.default_value_type;
 
   if (is_exact_cpp_type<std::vector<uint8_t>>(type)) {
-    return byte_vector_to_py_bytes(info.get_default_value<std::vector<uint8_t>>());
+    return byte_vector_to_py_bytes(
+        info.get_default_value<std::vector<uint8_t>>());
   }
   if (is_exact_cpp_type<std::vector<unsigned char>>(type)) {
     return byte_vector_to_py_bytes(
@@ -390,9 +391,9 @@ blackboard_key_info_get_py_default(const BlackboardKeyInfo &info) {
     return info.get_default_value<py::object>();
   }
 
-  throw std::runtime_error(
-      "Unsupported BlackboardKeyInfo default value type for Python conversion: " +
-      type);
+  throw std::runtime_error("Unsupported BlackboardKeyInfo default value type "
+                           "for Python conversion: " +
+                           type);
 }
 
 } // namespace yasmin
