@@ -75,11 +75,11 @@ TEST(PassThroughState, ReturnsOutsideIntervalWhenNegativeEnabled) {
   EXPECT_FLOAT_EQ(xyz_cloud.points[1].z, 2.0F);
 }
 
-TEST(PassThroughState, RestrictsFilteringToProvidedInputIndices) {
+TEST(PassThroughState, FiltersOnlyProvidedInputIndices) {
   yasmin_pcl::filters::PassThroughState state;
   state.set_parameter<std::string>("filter_field_name", "z");
-  state.set_parameter<double>("filter_limit_min", -1.0);
-  state.set_parameter<double>("filter_limit_max", 10.0);
+  state.set_parameter<double>("filter_limit_min", 1.5);
+  state.set_parameter<double>("filter_limit_max", 3.0);
   state.configure();
 
   auto blackboard = yasmin::Blackboard::make_shared();
@@ -96,7 +96,6 @@ TEST(PassThroughState, RestrictsFilteringToProvidedInputIndices) {
   ASSERT_TRUE(output_cloud != nullptr);
 
   const auto xyz_cloud = yasmin_pcl::test::to_xyz_cloud(*output_cloud);
-  ASSERT_EQ(xyz_cloud.points.size(), 2U);
-  EXPECT_FLOAT_EQ(xyz_cloud.points[0].z, 1.0F);
-  EXPECT_FLOAT_EQ(xyz_cloud.points[1].z, 2.0F);
+  ASSERT_EQ(xyz_cloud.points.size(), 1U);
+  EXPECT_FLOAT_EQ(xyz_cloud.points[0].z, 2.0F);
 }

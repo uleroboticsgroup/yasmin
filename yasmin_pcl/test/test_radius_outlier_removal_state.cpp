@@ -54,32 +54,13 @@ TEST(RadiusOutlierRemovalState, RemovesIsolatedPoint) {
   EXPECT_EQ(removed_indices.size(), 1U);
 }
 
-TEST(RadiusOutlierRemovalState, ReturnsOutlierWhenNegativeEnabled) {
+TEST(RadiusOutlierRemovalState, AbortsWhenInputCloudIsNull) {
   yasmin_pcl::filters::RadiusOutlierRemovalState state;
-  state.set_parameter<double>("radius_search", 0.2);
-  state.set_parameter<int>("min_neighbors_in_radius", 2);
-  state.set_parameter<bool>("negative", true);
   state.configure();
 
   auto blackboard = yasmin::Blackboard::make_shared();
-  blackboard->set<yasmin_pcl::common::PclPointCloud2Ptr>(
-      "input_cloud",
-      yasmin_pcl::test::create_pcl_cloud_ptr({{0.00F, 0.00F, 0.00F},
-                                              {0.05F, 0.00F, 0.00F},
-                                              {0.00F, 0.05F, 0.00F},
-                                              {0.05F, 0.05F, 0.00F},
-                                              {0.02F, 0.02F, 0.00F},
-                                              {1.00F, 1.00F, 1.00F}}));
+  blackboard->set<yasmin_pcl::common::PclPointCloud2Ptr>("input_cloud",
+                                                         nullptr);
 
-  EXPECT_EQ(state(blackboard), "succeeded");
-
-  const auto output_cloud =
-      blackboard->get<yasmin_pcl::common::PclPointCloud2Ptr>("output_cloud");
-  ASSERT_TRUE(output_cloud != nullptr);
-
-  const auto xyz_cloud = yasmin_pcl::test::to_xyz_cloud(*output_cloud);
-  ASSERT_EQ(xyz_cloud.points.size(), 1U);
-  EXPECT_FLOAT_EQ(xyz_cloud.points[0].x, 1.0F);
-  EXPECT_FLOAT_EQ(xyz_cloud.points[0].y, 1.0F);
-  EXPECT_FLOAT_EQ(xyz_cloud.points[0].z, 1.0F);
+  EXPECT_EQ(state(blackboard), "aborted");
 }
