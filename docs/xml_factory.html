@@ -757,27 +757,6 @@ install(TARGETS my_custom_state
     &lt;Transition outcome="success" target="next_state"/&gt;
 &lt;/State&gt;</code></pre>
 
-        <h3>Python States</h3>
-        <p>
-          Python states are loaded dynamically from the specified module and
-          class. The <code>type="py"</code> attribute tells the factory to use
-          Python's import system to locate and instantiate the state class.
-        </p>
-        <pre><code class="language-xml">&lt;State id="python_state" type="py" module="my_package.states" class="MyPythonState"&gt;
-    &lt;Transition outcome="success" target="next_state"/&gt;
-&lt;/State&gt;</code></pre>
-
-        <h3>C++ States</h3>
-        <p>
-          C++ states use ROS 2's pluginlib system for dynamic loading. The
-          <code>type="cpp"</code> attribute indicates that the state should be
-          loaded as a plugin, with the class name following the
-          <code>package_name/ClassName</code> convention used by pluginlib.
-        </p>
-        <pre><code class="language-xml">&lt;State id="cpp_state" type="cpp" class="my_package/MyCppState"&gt;
-    &lt;Transition outcome="success" target="next_state"/&gt;
-&lt;/State&gt;</code></pre>
-
         <h2>Loading XML State Machines</h2>
         <p>
           Once you've defined your state machine in XML, the YASMIN Factory API
