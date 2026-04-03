@@ -1,4 +1,17 @@
 // Copyright (C) 2026 Maik Knof
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <filesystem>
 
@@ -45,4 +58,22 @@ TEST(LoadPcdState, LoadsCloudAndMetadataFromPcdFile) {
   EXPECT_GE(blackboard->get<int>("pcd_version"), 0);
 
   std::filesystem::remove(file_path);
+}
+
+TEST(LoadPcdState, AbortsWhenFilePathIsEmpty) {
+  yasmin_pcl::io::LoadPcdState state;
+  state.configure();
+
+  auto blackboard = yasmin::Blackboard::make_shared();
+  EXPECT_EQ(state(blackboard), "aborted");
+}
+
+TEST(LoadPcdState, AbortsWhenFileDoesNotExist) {
+  yasmin_pcl::io::LoadPcdState state;
+  state.set_parameter<std::string>("file_path",
+                                   "/tmp/yasmin_pcl_missing_input_file.pcd");
+  state.configure();
+
+  auto blackboard = yasmin::Blackboard::make_shared();
+  EXPECT_EQ(state(blackboard), "aborted");
 }

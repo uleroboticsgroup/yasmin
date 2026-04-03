@@ -1,4 +1,17 @@
 // Copyright (C) 2026 Maik Knof
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
@@ -37,4 +50,61 @@ TEST(CropBoxState, CropsCloudAndStoresRemovedIndices) {
   const auto removed_indices =
       blackboard->get<yasmin_pcl::common::Indices>("removed_indices");
   EXPECT_EQ(removed_indices.size(), 2U);
+}
+
+TEST(CropBoxState, ReturnsOutsidePointsWhenNegativeEnabled) {
+  yasmin_pcl::filters::CropBoxState state;
+  state.set_parameter<float>("min_x", -0.5F);
+  state.set_parameter<float>("min_y", -0.5F);
+  state.set_parameter<float>("min_z", -0.5F);
+  state.set_parameter<float>("max_x", 0.5F);
+  state.set_parameter<float>("max_y", 0.5F);
+  state.set_parameter<float>("max_z", 0.5F);
+  state.set_parameter<bool>("negative", true);
+  state.configure();
+
+  auto blackboard = yasmin::Blackboard::make_shared();
+  blackboard->set<yasmin_pcl::common::PclPointCloud2Ptr>(
+      "input_cloud",
+      yasmin_pcl::test::create_pcl_cloud_ptr(
+          {{-1.0F, 0.0F, 0.0F}, {0.0F, 0.0F, 0.0F}, {2.0F, 0.0F, 0.0F}}));
+
+  EXPECT_EQ(state(blackboard), "succeeded");
+
+  const auto output_cloud =
+      blackboard->get<yasmin_pcl::common::PclPointCloud2Ptr>("output_cloud");
+  ASSERT_TRUE(output_cloud != nullptr);
+
+  const auto xyz_cloud = yasmin_pcl::test::to_xyz_cloud(*output_cloud);
+  ASSERT_EQ(xyz_cloud.points.size(), 2U);
+  EXPECT_FLOAT_EQ(xyz_cloud.points[0].x, -1.0F);
+  EXPECT_FLOAT_EQ(xyz_cloud.points[1].x, 2.0F);
+}
+
+TEST(CropBoxState, RestrictsFilteringToProvidedInputIndices) {
+  yasmin_pcl::filters::CropBoxState state;
+  state.set_parameter<float>("min_x", -10.0F);
+  state.set_parameter<float>("min_y", -10.0F);
+  state.set_parameter<float>("min_z", -10.0F);
+  state.set_parameter<float>("max_x", 10.0F);
+  state.set_parameter<float>("max_y", 10.0F);
+  state.set_parameter<float>("max_z", 10.0F);
+  state.configure();
+
+  auto blackboard = yasmin::Blackboard::make_shared();
+  blackboard->set<yasmin_pcl::common::PclPointCloud2Ptr>(
+      "input_cloud",
+      yasmin_pcl::test::create_pcl_cloud_ptr(
+          {{-5.0F, 0.0F, 0.0F}, {0.0F, 0.0F, 0.0F}, {5.0F, 0.0F, 0.0F}}));
+  blackboard->set<yasmin_pcl::common::Indices>("input_indices", {1});
+
+  EXPECT_EQ(state(blackboard), "succeeded");
+
+  const auto output_cloud =
+      blackboard->get<yasmin_pcl::common::PclPointCloud2Ptr>("output_cloud");
+  ASSERT_TRUE(output_cloud != nullptr);
+
+  const auto xyz_cloud = yasmin_pcl::test::to_xyz_cloud(*output_cloud);
+  ASSERT_EQ(xyz_cloud.points.size(), 1U);
+  EXPECT_FLOAT_EQ(xyz_cloud.points[0].x, 0.0F);
 }

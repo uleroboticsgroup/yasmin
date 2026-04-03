@@ -1,4 +1,17 @@
 // Copyright (C) 2026 Maik Knof
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 
@@ -39,4 +52,34 @@ TEST(StatisticalOutlierRemovalState, RemovesOutlier) {
   const auto removed_indices =
       blackboard->get<yasmin_pcl::common::Indices>("removed_indices");
   EXPECT_EQ(removed_indices.size(), 1U);
+}
+
+TEST(StatisticalOutlierRemovalState, ReturnsOutlierWhenNegativeEnabled) {
+  yasmin_pcl::filters::StatisticalOutlierRemovalState state;
+  state.set_parameter<int>("mean_k", 3);
+  state.set_parameter<double>("stddev_mul_thresh", 0.5);
+  state.set_parameter<bool>("negative", true);
+  state.configure();
+
+  auto blackboard = yasmin::Blackboard::make_shared();
+  blackboard->set<yasmin_pcl::common::PclPointCloud2Ptr>(
+      "input_cloud",
+      yasmin_pcl::test::create_pcl_cloud_ptr({{0.00F, 0.00F, 0.00F},
+                                              {0.05F, 0.00F, 0.00F},
+                                              {0.00F, 0.05F, 0.00F},
+                                              {0.05F, 0.05F, 0.00F},
+                                              {0.02F, 0.02F, 0.00F},
+                                              {10.0F, 10.0F, 10.0F}}));
+
+  EXPECT_EQ(state(blackboard), "succeeded");
+
+  const auto output_cloud =
+      blackboard->get<yasmin_pcl::common::PclPointCloud2Ptr>("output_cloud");
+  ASSERT_TRUE(output_cloud != nullptr);
+
+  const auto xyz_cloud = yasmin_pcl::test::to_xyz_cloud(*output_cloud);
+  ASSERT_EQ(xyz_cloud.points.size(), 1U);
+  EXPECT_FLOAT_EQ(xyz_cloud.points[0].x, 10.0F);
+  EXPECT_FLOAT_EQ(xyz_cloud.points[0].y, 10.0F);
+  EXPECT_FLOAT_EQ(xyz_cloud.points[0].z, 10.0F);
 }
