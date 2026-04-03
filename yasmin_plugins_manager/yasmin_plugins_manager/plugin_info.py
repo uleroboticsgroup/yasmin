@@ -31,27 +31,46 @@ class PluginInfo:
         """Normalize common C++ metadata type names for user-facing output."""
         normalized_type = type_name.strip()
 
-        if normalized_type in {
-            "std::string",
-            "std::basic_string<char>",
-            "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >",
-            "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>",
-        }:
-            return "string"
-
-        if normalized_type == "bool":
-            return "bool"
-
-        if normalized_type in {"float", "double", "long double"}:
-            return "float"
-
+        string_fragment_pattern = re.compile(
+            r"std::(?:__cxx11::)?basic_string<char(?:,\s*std::char_traits<char>)?(?:,\s*std::allocator<char>\s*)?>"
+        )
+        string_type_pattern = re.compile(
+            r"^std::(?:__cxx11::)?basic_string<char(?:,\s*std::char_traits<char>)?(?:,\s*std::allocator<char>\s*)?>$"
+        )
         integer_type_pattern = re.compile(
             r"^(unsigned\s+)?(short|int|long|long\s+long)(\s+int)?$"
         )
-        if integer_type_pattern.match(normalized_type):
+        vector_pattern = re.compile(r"^std::vector<(.+?)>$")
+        map_pattern = re.compile(r"^std::unordered_map<\s*(.+?)\s*,\s*(.+?)\s*>$")
+
+        if normalized_type == "std::string" or string_type_pattern.match(normalized_type):
+            return "str"
+
+        canonical_type = string_fragment_pattern.sub("std::string", normalized_type)
+
+        if canonical_type == "bool":
+            return "bool"
+
+        if canonical_type in {"float", "double", "long double"}:
+            return "float"
+
+        if integer_type_pattern.match(canonical_type):
             return "int"
 
-        return normalized_type
+        vector_match = vector_pattern.match(canonical_type)
+        if vector_match:
+            element_type = PluginInfo._normalize_cpp_metadata_type(vector_match.group(1))
+            if element_type in {"str", "int", "float", "bool"}:
+                return f"list[{element_type}]"
+
+        map_match = map_pattern.match(canonical_type)
+        if map_match:
+            key_type = PluginInfo._normalize_cpp_metadata_type(map_match.group(1))
+            value_type = PluginInfo._normalize_cpp_metadata_type(map_match.group(2))
+            if key_type == "str" and value_type in {"str", "int", "float", "bool"}:
+                return f"dict[str,{value_type}]"
+
+        return canonical_type
 
     @classmethod
     def _normalize_cpp_metadata_entries(cls, metadata_entries: List[dict]) -> List[dict]:
