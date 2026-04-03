@@ -350,6 +350,75 @@ class TestYasminFactory(unittest.TestCase):
         self.assertEqual(len(root_input_keys), 4)
         self.assertEqual(len(root_output_keys), 2)
 
+    def test_sm_container_keys_from_xml(self):
+        """Test homogeneous list and dict key defaults parsed from XML."""
+        sm_xml = """
+        <StateMachine outcomes="end">
+            <Key name="names" type="in" default_value='["alice","bob"]' default_type="list[str]"/>
+            <Key name="ids" type="in" default_value='[1,2,3]' default_type="list[int]"/>
+            <Key name="weights" type="in" default_value='[1,2.5,3]' default_type="list[float]"/>
+            <Key name="flags" type="in" default_value='[true,false,true]' default_type="list[bool]"/>
+            <Key name="name_map" type="in" default_value='{"first":"alice","second":"bob"}' default_type="dict[str,str]"/>
+            <Key name="count_map" type="in" default_value='{"a":1,"b":2}' default_type="dict[str,int]"/>
+            <Key name="ratio_map" type="in" default_value='{"a":1,"b":2.5}' default_type="dict[str,float]"/>
+            <Key name="flag_map" type="in" default_value='{"a":true,"b":false}' default_type="dict[str,bool]"/>
+            <State name="State1" type="py" module="test.test_simple_state" class="TestSimpleState">
+                <Transition from="outcome1" to="State1"/>
+                <Transition from="outcome2" to="end"/>
+            </State>
+        </StateMachine>
+        """
+        root = ET.fromstring(sm_xml)
+        sm = self.factory.create_sm(root)
+
+        input_by_name = {k["name"]: k for k in sm.get_input_keys()}
+
+        self.assertEqual(input_by_name["names"]["default_value"], ["alice", "bob"])
+        self.assertEqual(input_by_name["ids"]["default_value"], [1, 2, 3])
+        self.assertEqual(input_by_name["weights"]["default_value"], [1.0, 2.5, 3.0])
+        self.assertEqual(input_by_name["flags"]["default_value"], [True, False, True])
+        self.assertEqual(
+            input_by_name["name_map"]["default_value"],
+            {"first": "alice", "second": "bob"},
+        )
+        self.assertEqual(input_by_name["count_map"]["default_value"], {"a": 1, "b": 2})
+        self.assertEqual(
+            input_by_name["ratio_map"]["default_value"], {"a": 1.0, "b": 2.5}
+        )
+        self.assertEqual(
+            input_by_name["flag_map"]["default_value"], {"a": True, "b": False}
+        )
+
+    def test_sm_container_parameters_from_xml(self):
+        """Test homogeneous list and dict parameter defaults parsed from XML."""
+        sm_xml = """
+        <StateMachine outcomes="end">
+            <Param name="name_list" default_value='["alice","bob"]' default_type="list[str]"/>
+            <Param name="int_list" default_value='[1,2,3]' default_type="list[int]"/>
+            <Param name="float_list" default_value='[1,2.5,3]' default_type="list[float]"/>
+            <Param name="bool_list" default_value='[true,false,true]' default_type="list[bool]"/>
+            <Param name="str_dict" default_value='{"a":"x","b":"y"}' default_type="dict[str,str]"/>
+            <Param name="int_dict" default_value='{"a":1,"b":2}' default_type="dict[str,int]"/>
+            <Param name="float_dict" default_value='{"a":1,"b":2.5}' default_type="dict[str,float]"/>
+            <Param name="bool_dict" default_value='{"a":true,"b":false}' default_type="dict[str,bool]"/>
+            <State name="State1" type="py" module="test.test_simple_state" class="TestSimpleState">
+                <Transition from="outcome1" to="State1"/>
+                <Transition from="outcome2" to="end"/>
+            </State>
+        </StateMachine>
+        """
+        root = ET.fromstring(sm_xml)
+        sm = self.factory.create_sm(root)
+
+        self.assertEqual(sm.get_parameter("name_list"), ["alice", "bob"])
+        self.assertEqual(sm.get_parameter("int_list"), [1, 2, 3])
+        self.assertEqual(sm.get_parameter("float_list"), [1.0, 2.5, 3.0])
+        self.assertEqual(sm.get_parameter("bool_list"), [True, False, True])
+        self.assertEqual(sm.get_parameter("str_dict"), {"a": "x", "b": "y"})
+        self.assertEqual(sm.get_parameter("int_dict"), {"a": 1, "b": 2})
+        self.assertEqual(sm.get_parameter("float_dict"), {"a": 1.0, "b": 2.5})
+        self.assertEqual(sm.get_parameter("bool_dict"), {"a": True, "b": False})
+
 
 if __name__ == "__main__":
     unittest.main()

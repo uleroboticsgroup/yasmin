@@ -18,12 +18,325 @@
 #include <filesystem>
 #include <sstream>
 #include <stdexcept>
+#include <unordered_map>
+#include <vector>
 
 #include "yasmin/blackboard_pywrapper.hpp"
 #include "yasmin/types.hpp"
 #include "yasmin_factory/yasmin_factory.hpp"
 
 namespace yasmin_factory {
+
+namespace {
+
+using StringVector = std::vector<std::string>;
+using IntVector = std::vector<int>;
+using FloatVector = std::vector<double>;
+using BoolVector = std::vector<bool>;
+
+using StringDict = std::unordered_map<std::string, std::string>;
+using IntDict = std::unordered_map<std::string, int>;
+using FloatDict = std::unordered_map<std::string, double>;
+using BoolDict = std::unordered_map<std::string, bool>;
+
+std::string normalize_xml_value_type(const std::string &type_name) {
+  std::string normalized;
+  normalized.reserve(type_name.size());
+
+  for (unsigned char ch : type_name) {
+    if (!std::isspace(ch)) {
+      normalized.push_back(static_cast<char>(std::tolower(ch)));
+    }
+  }
+
+  if (normalized == "string") {
+    return "str";
+  }
+  if (normalized == "double") {
+    return "float";
+  }
+  if (normalized == "boolean") {
+    return "bool";
+  }
+  if (normalized == "list[string]") {
+    return "list[str]";
+  }
+  if (normalized == "list[double]") {
+    return "list[float]";
+  }
+  if (normalized == "list[boolean]") {
+    return "list[bool]";
+  }
+  if (normalized == "dict[string,str]" || normalized == "dict[str,string]" ||
+      normalized == "dict[string,string]") {
+    return "dict[str,str]";
+  }
+  if (normalized == "dict[string,int]" ||
+      normalized == "dict[string,integer]" ||
+      normalized == "dict[str,integer]") {
+    return "dict[str,int]";
+  }
+  if (normalized == "dict[string,float]" ||
+      normalized == "dict[string,double]" || normalized == "dict[str,double]") {
+    return "dict[str,float]";
+  }
+  if (normalized == "dict[string,bool]" ||
+      normalized == "dict[string,boolean]" ||
+      normalized == "dict[str,boolean]") {
+    return "dict[str,bool]";
+  }
+
+  return normalized.empty() ? "str" : normalized;
+}
+
+bool parse_bool_value(const std::string &value_str) {
+  std::string normalized;
+  normalized.reserve(value_str.size());
+
+  for (unsigned char ch : value_str) {
+    normalized.push_back(static_cast<char>(std::tolower(ch)));
+  }
+
+  if (normalized == "true" || normalized == "1" || normalized == "yes" ||
+      normalized == "on") {
+    return true;
+  }
+  if (normalized == "false" || normalized == "0" || normalized == "no" ||
+      normalized == "off") {
+    return false;
+  }
+
+  throw std::runtime_error("Invalid boolean default value '" + value_str + "'");
+}
+
+py::object load_json_value(const std::string &value_str) {
+  py::gil_scoped_acquire acquire;
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
+  py::module_ json_module = py::module_::import("json");
+#else
+  py::module json_module = py::module::import("json");
+#endif
+
+  try {
+    return json_module.attr("loads")(value_str);
+  } catch (const py::error_already_set &e) {
+    throw std::runtime_error("Invalid JSON default value '" + value_str +
+                             "': " + std::string(e.what()));
+  }
+}
+
+bool dict_has_only_string_keys(const py::dict &dict) {
+  for (auto item : dict) {
+    if (!py::isinstance<py::str>(item.first)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename Predicate>
+bool sequence_matches(const py::sequence &seq, Predicate pred) {
+  for (auto item : seq) {
+    if (!pred(item)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename Predicate>
+bool dict_values_match(const py::dict &dict, Predicate pred) {
+  for (auto item : dict) {
+    if (!pred(item.second)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename T>
+std::vector<T> sequence_to_vector(const py::sequence &seq) {
+  std::vector<T> result;
+  result.reserve(static_cast<std::size_t>(py::len(seq)));
+
+  for (auto item : seq) {
+    result.push_back(py::cast<T>(item));
+  }
+
+  return result;
+}
+
+template <typename T>
+std::unordered_map<std::string, T> dict_to_unordered_map(const py::dict &dict) {
+  std::unordered_map<std::string, T> result;
+  result.reserve(static_cast<std::size_t>(py::len(dict)));
+
+  for (auto item : dict) {
+    result.emplace(py::cast<std::string>(item.first), py::cast<T>(item.second));
+  }
+
+  return result;
+}
+
+template <typename Callback>
+void with_typed_xml_value(const std::string &value_str,
+                          const std::string &type_str, Callback &&callback) {
+  const std::string normalized_type = normalize_xml_value_type(type_str);
+
+  if (normalized_type == "str") {
+    callback(value_str);
+    return;
+  }
+
+  if (normalized_type == "int") {
+    callback(std::stoi(value_str));
+    return;
+  }
+
+  if (normalized_type == "float") {
+    callback(std::stod(value_str));
+    return;
+  }
+
+  if (normalized_type == "bool") {
+    callback(parse_bool_value(value_str));
+    return;
+  }
+
+  py::gil_scoped_acquire acquire;
+  py::object parsed = load_json_value(value_str);
+
+  if (normalized_type == "list[str]") {
+    if (!py::isinstance<py::list>(parsed)) {
+      throw std::runtime_error("Type list[str] expects a JSON array");
+    }
+    py::sequence seq = parsed.cast<py::sequence>();
+    if (!sequence_matches(seq, [](const py::handle &item) {
+          return py::isinstance<py::str>(item);
+        })) {
+      throw std::runtime_error("Type list[str] expects only string entries");
+    }
+    callback(sequence_to_vector<std::string>(seq));
+    return;
+  }
+
+  if (normalized_type == "list[int]") {
+    if (!py::isinstance<py::list>(parsed)) {
+      throw std::runtime_error("Type list[int] expects a JSON array");
+    }
+    py::sequence seq = parsed.cast<py::sequence>();
+    if (!sequence_matches(seq, [](const py::handle &item) {
+          return py::isinstance<py::int_>(item) &&
+                 !py::isinstance<py::bool_>(item);
+        })) {
+      throw std::runtime_error("Type list[int] expects only integer entries");
+    }
+    callback(sequence_to_vector<int>(seq));
+    return;
+  }
+
+  if (normalized_type == "list[float]") {
+    if (!py::isinstance<py::list>(parsed)) {
+      throw std::runtime_error("Type list[float] expects a JSON array");
+    }
+    py::sequence seq = parsed.cast<py::sequence>();
+    if (!sequence_matches(seq, [](const py::handle &item) {
+          return (py::isinstance<py::int_>(item) &&
+                  !py::isinstance<py::bool_>(item)) ||
+                 py::isinstance<py::float_>(item);
+        })) {
+      throw std::runtime_error("Type list[float] expects only numeric entries");
+    }
+    callback(sequence_to_vector<double>(seq));
+    return;
+  }
+
+  if (normalized_type == "list[bool]") {
+    if (!py::isinstance<py::list>(parsed)) {
+      throw std::runtime_error("Type list[bool] expects a JSON array");
+    }
+    py::sequence seq = parsed.cast<py::sequence>();
+    if (!sequence_matches(seq, [](const py::handle &item) {
+          return py::isinstance<py::bool_>(item);
+        })) {
+      throw std::runtime_error("Type list[bool] expects only boolean entries");
+    }
+    callback(sequence_to_vector<bool>(seq));
+    return;
+  }
+
+  if (normalized_type == "dict[str,str]") {
+    if (!py::isinstance<py::dict>(parsed)) {
+      throw std::runtime_error("Type dict[str,str] expects a JSON object");
+    }
+    py::dict dict = parsed.cast<py::dict>();
+    if (!dict_has_only_string_keys(dict) ||
+        !dict_values_match(dict, [](const py::handle &item) {
+          return py::isinstance<py::str>(item);
+        })) {
+      throw std::runtime_error(
+          "Type dict[str,str] expects string keys and values");
+    }
+    callback(dict_to_unordered_map<std::string>(dict));
+    return;
+  }
+
+  if (normalized_type == "dict[str,int]") {
+    if (!py::isinstance<py::dict>(parsed)) {
+      throw std::runtime_error("Type dict[str,int] expects a JSON object");
+    }
+    py::dict dict = parsed.cast<py::dict>();
+    if (!dict_has_only_string_keys(dict) ||
+        !dict_values_match(dict, [](const py::handle &item) {
+          return py::isinstance<py::int_>(item) &&
+                 !py::isinstance<py::bool_>(item);
+        })) {
+      throw std::runtime_error(
+          "Type dict[str,int] expects string keys and integer values");
+    }
+    callback(dict_to_unordered_map<int>(dict));
+    return;
+  }
+
+  if (normalized_type == "dict[str,float]") {
+    if (!py::isinstance<py::dict>(parsed)) {
+      throw std::runtime_error("Type dict[str,float] expects a JSON object");
+    }
+    py::dict dict = parsed.cast<py::dict>();
+    if (!dict_has_only_string_keys(dict) ||
+        !dict_values_match(dict, [](const py::handle &item) {
+          return (py::isinstance<py::int_>(item) &&
+                  !py::isinstance<py::bool_>(item)) ||
+                 py::isinstance<py::float_>(item);
+        })) {
+      throw std::runtime_error(
+          "Type dict[str,float] expects string keys and numeric values");
+    }
+    callback(dict_to_unordered_map<double>(dict));
+    return;
+  }
+
+  if (normalized_type == "dict[str,bool]") {
+    if (!py::isinstance<py::dict>(parsed)) {
+      throw std::runtime_error("Type dict[str,bool] expects a JSON object");
+    }
+    py::dict dict = parsed.cast<py::dict>();
+    if (!dict_has_only_string_keys(dict) ||
+        !dict_values_match(dict, [](const py::handle &item) {
+          return py::isinstance<py::bool_>(item);
+        })) {
+      throw std::runtime_error(
+          "Type dict[str,bool] expects string keys and boolean values");
+    }
+    callback(dict_to_unordered_map<bool>(dict));
+    return;
+  }
+
+  throw std::runtime_error("Unsupported default_type '" + type_str + "'");
+}
+
+} // namespace
 
 // Static member initialization
 std::unique_ptr<py::scoped_interpreter> YasminFactory::py_interpreter_ =
@@ -218,22 +531,11 @@ void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
 
     if (key_usage == "in" || key_usage == "in/out") {
       if (default_value_attr) {
-        if (default_type == "int") {
-          owner->add_input_key(yasmin::BlackboardKeyInfo(
-              key_name, key_description, std::stoi(default_value_attr)));
-        } else if (default_type == "float" || default_type == "double") {
-          owner->add_input_key(yasmin::BlackboardKeyInfo(
-              key_name, key_description, std::stod(default_value_attr)));
-        } else if (default_type == "bool") {
-          owner->add_input_key(yasmin::BlackboardKeyInfo(
-              key_name, key_description,
-              std::string(default_value_attr) == "true" ||
-                  std::string(default_value_attr) == "True" ||
-                  std::string(default_value_attr) == "1"));
-        } else {
-          owner->add_input_key(yasmin::BlackboardKeyInfo(
-              key_name, key_description, std::string(default_value_attr)));
-        }
+        with_typed_xml_value(std::string(default_value_attr), default_type,
+                             [&](const auto &value) {
+                               owner->add_input_key(yasmin::BlackboardKeyInfo(
+                                   key_name, key_description, value));
+                             });
       } else {
         owner->add_input_key(
             yasmin::BlackboardKeyInfo(key_name, key_description));
@@ -256,20 +558,10 @@ void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
     const std::string key_description =
         this->get_optional_attribute(def_elem, "description", "");
 
-    if (type_str == "int") {
-      owner->add_input_key(yasmin::BlackboardKeyInfo(key_name, key_description,
-                                                     std::stoi(value_str)));
-    } else if (type_str == "float" || type_str == "double") {
-      owner->add_input_key(yasmin::BlackboardKeyInfo(key_name, key_description,
-                                                     std::stod(value_str)));
-    } else if (type_str == "bool") {
-      owner->add_input_key(yasmin::BlackboardKeyInfo(
-          key_name, key_description,
-          value_str == "true" || value_str == "True" || value_str == "1"));
-    } else {
+    with_typed_xml_value(value_str, type_str, [&](const auto &value) {
       owner->add_input_key(
-          yasmin::BlackboardKeyInfo(key_name, key_description, value_str));
-    }
+          yasmin::BlackboardKeyInfo(key_name, key_description, value));
+    });
   }
 }
 
@@ -286,21 +578,11 @@ void YasminFactory::add_parameters(yasmin::State::SharedPtr owner,
     const char *default_value_attr = param_elem->Attribute("default_value");
 
     if (default_value_attr) {
-      if (default_type == "int") {
-        owner->declare_parameter(parameter_name, parameter_description,
-                                 std::stoi(std::string(default_value_attr)));
-      } else if (default_type == "float" || default_type == "double") {
-        owner->declare_parameter(parameter_name, parameter_description,
-                                 std::stod(std::string(default_value_attr)));
-      } else if (default_type == "bool") {
-        const std::string value_str(default_value_attr);
-        owner->declare_parameter(parameter_name, parameter_description,
-                                 value_str == "true" || value_str == "True" ||
-                                     value_str == "1");
-      } else {
-        owner->declare_parameter(parameter_name, parameter_description,
-                                 std::string(default_value_attr));
-      }
+      with_typed_xml_value(std::string(default_value_attr), default_type,
+                           [&](const auto &value) {
+                             owner->declare_parameter(
+                                 parameter_name, parameter_description, value);
+                           });
     } else if (!parameter_description.empty()) {
       owner->declare_parameter(parameter_name, parameter_description);
     } else {
