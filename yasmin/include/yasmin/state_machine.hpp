@@ -324,6 +324,21 @@ private:
    */
   void call_end_cbs(Blackboard::SharedPtr blackboard,
                     const std::string &outcome);
+
+  /**
+   * @brief Compose parent and state blackboard remappings.
+   *
+   * The state remappings are resolved against the currently active parent
+   * remappings. If a state target already points to a remapped parent key,
+   * the resulting mapping is flattened to the final parent target.
+   *
+   * @param parent_remappings Remappings currently active in the parent scope.
+   * @param state_remappings Remappings defined by the current state.
+   * @return Combined remapping table with state entries resolved through the
+   * parent scope.
+   */
+  static Remappings compose_remappings(const Remappings &parent_remappings,
+                                       const Remappings &state_remappings);
 };
 
 } // namespace yasmin

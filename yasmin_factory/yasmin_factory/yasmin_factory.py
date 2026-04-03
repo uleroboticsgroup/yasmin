@@ -412,6 +412,28 @@ class YasminFactory:
             parameter_mappings[remap_elem.attrib["old"]] = remap_elem.attrib["new"]
         return parameter_mappings
 
+    def _add_parameters(self, owner, parent_elem: ET.Element) -> None:
+        """Parse Param elements into state-local parameters."""
+        for param_elem in parent_elem.findall("Param"):
+            parameter_name = param_elem.attrib["name"]
+            parameter_description = param_elem.attrib.get("description", "")
+            default_type = param_elem.attrib.get("default_type", "str")
+            default_value = param_elem.attrib.get("default_value")
+
+            if default_value is not None:
+                value = self._parse_key_value(default_value, default_type)
+                owner.declare_parameter(parameter_name, parameter_description, value)
+            elif parameter_description:
+                owner.declare_parameter(parameter_name, parameter_description)
+            else:
+                owner.declare_parameter(parameter_name)
+
+    def _get_parameter_mappings(self, parent_elem: ET.Element) -> Dict[str, str]:
+        parameter_mappings = {}
+        for remap_elem in parent_elem.findall("ParamRemap"):
+            parameter_mappings[remap_elem.attrib["old"]] = remap_elem.attrib["new"]
+        return parameter_mappings
+
     def _add_blackboard_keys(self, owner, parent_elem: ET.Element) -> None:
         """Parse new Key syntax and legacy Default syntax."""
         for key_elem in parent_elem.findall("Key"):

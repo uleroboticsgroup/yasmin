@@ -183,6 +183,29 @@ def _resolve_parameter_type(plugin, parameter_name: str, raw_value: str) -> str:
     return _infer_value_type(raw_value)
 
 
+def _resolve_parameter_type(plugin, parameter_name: str, raw_value: str) -> str:
+    parameter_meta = _get_parameter_meta(plugin, parameter_name)
+    if parameter_meta is None:
+        return _infer_value_type(raw_value)
+
+    default_type = parameter_meta.get("default_value_type", "")
+    if default_type:
+        return _normalize_type(default_type)
+
+    if parameter_meta.get("has_default", False):
+        default_value = parameter_meta.get("default_value")
+        if isinstance(default_value, bool):
+            return "bool"
+        if isinstance(default_value, int) and not isinstance(default_value, bool):
+            return "int"
+        if isinstance(default_value, float):
+            return "float"
+        if isinstance(default_value, str):
+            return "str"
+
+    return _infer_value_type(raw_value)
+
+
 def _indent_xml(element: ET.Element, level: int = 0) -> None:
     indent = "\n" + level * "    "
     child_indent = "\n" + (level + 1) * "    "
