@@ -267,6 +267,25 @@
           complex interactions with robot hardware or external services.
         </p>
         <p>
+          In addition to <code>execute()</code>, a state can also override
+          <code>configure()</code>. When a state is executed as part of a
+          <code>StateMachine</code> or <code>Concurrence</code>,
+          <code>configure()</code> is called during container configuration
+          before the actual execution starts. Containers keep track of their
+          configuration state, so this step is only performed once.
+        </p>
+        <p>
+          As a general design rule, the constructor should only contain the
+          stable definition of the state, such as registering outcomes and
+          declaring metadata like descriptions, input keys, output keys, and
+          parameters. Initialization logic, validation, resource allocation, and
+          setup that depend on configured values should go into
+          <code>configure()</code>. This keeps the state interface explicit and
+          makes the implementation easier to inspect and reuse. See the
+          <a href="#state-metadata">State Metadata</a> section for the metadata
+          API.
+        </p>
+        <p>
           States can be stateless (performing the same operation every time) or
           stateful (maintaining internal variables between executions). YASMIN
           supports both patterns, giving you flexibility in how you design your
