@@ -72,6 +72,7 @@ class YasminEditor(
         self._blackboard_keys: List[Dict[str, str]] = []
         self._blackboard_key_metadata: Dict[str, Dict[str, str]] = {}
         self._highlight_blackboard_usage = True
+        self._show_hidden_blackboard_keys = False
 
         self.layout_seed = 42
         self.layout_rng = random.Random(self.layout_seed)

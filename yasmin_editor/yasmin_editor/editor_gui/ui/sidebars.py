@@ -73,6 +73,18 @@ def build_blackboard_widget(editor) -> QWidget:
     editor.highlight_blackboard_btn.setChecked(True)
     editor.highlight_blackboard_btn.toggled.connect(editor.toggle_blackboard_highlighting)
     button_row.addWidget(editor.highlight_blackboard_btn)
+
+    editor.show_hidden_blackboard_btn = QPushButton("Hidden: Off")
+    editor.show_hidden_blackboard_btn.setCheckable(True)
+    editor.show_hidden_blackboard_btn.setChecked(False)
+    editor.show_hidden_blackboard_btn.toggled.connect(
+        editor.toggle_hidden_blackboard_keys
+    )
+    editor.show_hidden_blackboard_btn.setToolTip(
+        'Blackboard keys starting with "." are hidden by default.'
+    )
+    button_row.addWidget(editor.show_hidden_blackboard_btn)
+
     layout.addLayout(button_row)
 
     return widget
