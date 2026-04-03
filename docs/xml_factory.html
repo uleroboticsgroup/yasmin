@@ -391,8 +391,8 @@ install(TARGETS my_custom_state
           >
           <p style="color: #856404">
             When mixing Python and C++ states in the same state machine, they
-            can communicate through the blackboard, but
-            <strong>only with primitive data types</strong>:
+            can communicate through the blackboard only with the data types that
+            are supported by both wrappers:
           </p>
           <ul style="margin: 10px 0 0 20px; color: #856404">
             <li>
@@ -403,9 +403,39 @@ install(TARGETS my_custom_state
                   padding: 2px 4px;
                   border-radius: 3px;
                 "
+                >bool</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >bool</code
+              >
+            </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
                 >int</code
               >
-              - Integer numbers
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::int64_t</code
+              >
             </li>
             <li>
               <code
@@ -417,9 +447,7 @@ install(TARGETS my_custom_state
                 "
                 >float</code
               >
-              - Floating-point numbers
-            </li>
-            <li>
+              ↔
               <code
                 style="
                   background-color: rgba(0, 0, 0, 0.1);
@@ -427,9 +455,8 @@ install(TARGETS my_custom_state
                   padding: 2px 4px;
                   border-radius: 3px;
                 "
-                >bool</code
+                >double</code
               >
-              - Boolean values
             </li>
             <li>
               <code
@@ -441,7 +468,16 @@ install(TARGETS my_custom_state
                 "
                 >string</code
               >
-              - Text strings
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::string</code
+              >
             </li>
             <li>
               <code
@@ -461,15 +497,233 @@ install(TARGETS my_custom_state
                   padding: 2px 4px;
                   border-radius: 3px;
                 "
+                >bytearray</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
                 >std::vector&lt;uint8_t&gt;</code
               >
-              - Binary data (can be used to exchange serialized ROS interfaces)
+            </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >list[str]</code
+              >
+              /
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >tuple[str, ...]</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::vector&lt;std::string&gt;</code
+              >
+            </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >list[int]</code
+              >
+              /
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >tuple[int, ...]</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::vector&lt;std::int64_t&gt;</code
+              >
+            </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >list[float]</code
+              >
+              /
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >tuple[float, ...]</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::vector&lt;double&gt;</code
+              >
+            </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >list[bool]</code
+              >
+              /
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >tuple[bool, ...]</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::vector&lt;bool&gt;</code
+              >
+            </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >dict[str, str]</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::unordered_map&lt;std::string, std::string&gt;</code
+              >
+            </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >dict[str, int]</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::unordered_map&lt;std::string, std::int64_t&gt;</code
+              >
+            </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >dict[str, float]</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::unordered_map&lt;std::string, double&gt;</code
+              >
+            </li>
+            <li>
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >dict[str, bool]</code
+              >
+              ↔
+              <code
+                style="
+                  background-color: rgba(0, 0, 0, 0.1);
+                  color: #000;
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                "
+                >std::unordered_map&lt;std::string, bool&gt;</code
+              >
             </li>
           </ul>
           <p style="margin-top: 10px; color: #856404">
-            Complex objects, custom classes, or ROS messages cannot be directly
-            shared between Python and C++ states through the blackboard.
-            Instead, ROS interfaces can be serialized to
+            Mixed containers, nested containers, empty containers, custom
+            classes, and arbitrary Python or C++ objects are not part of the
+            typed cross-language interface. If you need to exchange complex
+            data, serialize it explicitly, for example into
             <code
               style="
                 background-color: rgba(0, 0, 0, 0.1);
@@ -478,11 +732,30 @@ install(TARGETS my_custom_state
                 border-radius: 3px;
               "
               >bytes</code
-            >
-            and stored in the blackboard, allowing Python and C++ states to
-            exchange ROS messages through serialized binary data.
+            >.
           </p>
         </div>
+
+        <h3>Python States</h3>
+        <p>
+          Python states are loaded dynamically from the specified module and
+          class. The <code>type="py"</code> attribute tells the factory to use
+          Python's import system to locate and instantiate the state class.
+        </p>
+        <pre><code class="language-xml">&lt;State id="python_state" type="py" module="my_package.states" class="MyPythonState"&gt;
+    &lt;Transition outcome="success" target="next_state"/&gt;
+&lt;/State&gt;</code></pre>
+
+        <h3>C++ States</h3>
+        <p>
+          C++ states use ROS 2's pluginlib system for dynamic loading. The
+          <code>type="cpp"</code> attribute indicates that the state should be
+          loaded as a plugin, with the class name following the
+          <code>package_name/ClassName</code> convention used by pluginlib.
+        </p>
+        <pre><code class="language-xml">&lt;State id="cpp_state" type="cpp" class="my_package/MyCppState"&gt;
+    &lt;Transition outcome="success" target="next_state"/&gt;
+&lt;/State&gt;</code></pre>
 
         <h3>Python States</h3>
         <p>
