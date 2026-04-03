@@ -1,0 +1,74 @@
+<class_libraries>
+  <library path="yasmin_pcl_states">
+    <class name="yasmin_pcl/RosToPclPointCloud2State"
+           type="yasmin_pcl::io::RosToPclPointCloud2State"
+           base_class_type="yasmin::State">
+      <description>Converts sensor_msgs::msg::PointCloud2 to pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/PclToRosPointCloud2State"
+           type="yasmin_pcl::io::PclToRosPointCloud2State"
+           base_class_type="yasmin::State">
+      <description>Converts pcl::PCLPointCloud2 to sensor_msgs::msg::PointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/LoadPcdState"
+           type="yasmin_pcl::io::LoadPcdState"
+           base_class_type="yasmin::State">
+      <description>Loads a PCD file into pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/SavePcdState"
+           type="yasmin_pcl::io::SavePcdState"
+           base_class_type="yasmin::State">
+      <description>Saves pcl::PCLPointCloud2 to a PCD file.</description>
+    </class>
+    <class name="yasmin_pcl/LoadPlyState"
+           type="yasmin_pcl::io::LoadPlyState"
+           base_class_type="yasmin::State">
+      <description>Loads a PLY file into pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/SavePlyState"
+           type="yasmin_pcl::io::SavePlyState"
+           base_class_type="yasmin::State">
+      <description>Saves pcl::PCLPointCloud2 to a PLY file.</description>
+    </class>
+    <class name="yasmin_pcl/PassThroughState"
+           type="yasmin_pcl::filters::PassThroughState"
+           base_class_type="yasmin::State">
+      <description>Applies pcl::PassThrough to pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/CropBoxState"
+           type="yasmin_pcl::filters::CropBoxState"
+           base_class_type="yasmin::State">
+      <description>Applies pcl::CropBox to pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/VoxelGridState"
+           type="yasmin_pcl::filters::VoxelGridState"
+           base_class_type="yasmin::State">
+      <description>Applies pcl::VoxelGrid to pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/ExtractIndicesState"
+           type="yasmin_pcl::filters::ExtractIndicesState"
+           base_class_type="yasmin::State">
+      <description>Applies pcl::ExtractIndices to pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/StatisticalOutlierRemovalState"
+           type="yasmin_pcl::filters::StatisticalOutlierRemovalState"
+           base_class_type="yasmin::State">
+      <description>Applies pcl::StatisticalOutlierRemoval to pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/RadiusOutlierRemovalState"
+           type="yasmin_pcl::filters::RadiusOutlierRemovalState"
+           base_class_type="yasmin::State">
+      <description>Applies pcl::RadiusOutlierRemoval to pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/RandomSampleState"
+           type="yasmin_pcl::filters::RandomSampleState"
+           base_class_type="yasmin::State">
+      <description>Applies pcl::RandomSample to pcl::PCLPointCloud2.</description>
+    </class>
+    <class name="yasmin_pcl/ProjectInliersState"
+           type="yasmin_pcl::filters::ProjectInliersState"
+           base_class_type="yasmin::State">
+      <description>Applies pcl::ProjectInliers to pcl::PCLPointCloud2.</description>
+    </class>
+  </library>
+</class_libraries>
