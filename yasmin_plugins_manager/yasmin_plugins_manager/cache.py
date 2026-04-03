@@ -25,7 +25,7 @@ from typing import Any, Dict, Optional
 
 from ament_index_python import get_packages_with_prefixes
 
-CACHE_VERSION = 1
+CACHE_VERSION = 2
 
 
 def get_default_cache_dir() -> Path:

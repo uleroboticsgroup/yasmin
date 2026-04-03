@@ -96,6 +96,22 @@ class TestBlackboard(unittest.TestCase):
         self.assertFalse(self.blackboard["bool_false"])
         self.assertIsInstance(self.blackboard["bool_false"], bool)
 
+    def test_set_get_bytes(self):
+        """Test setting and getting bytes values"""
+        payload = bytes([0, 1, 2, 3, 127, 128, 255])
+        self.blackboard["bytes_key"] = payload
+        retrieved_payload = self.blackboard["bytes_key"]
+        self.assertIsInstance(retrieved_payload, bytes)
+        self.assertEqual(payload, retrieved_payload)
+
+    def test_set_get_bytearray(self):
+        """Test setting and getting bytearray values as bytes"""
+        payload = bytearray([0, 1, 2, 3, 127, 128, 255])
+        self.blackboard["bytearray_key"] = payload
+        retrieved_payload = self.blackboard["bytearray_key"]
+        self.assertIsInstance(retrieved_payload, bytes)
+        self.assertEqual(bytes(payload), retrieved_payload)
+
     def test_set_get_none(self):
         """Test setting and getting None value"""
         self.blackboard["none_key"] = None

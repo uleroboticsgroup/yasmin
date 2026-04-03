@@ -61,6 +61,7 @@ private:
    * the State class.
    */
   StateMetadata &get_metadata_ref() const;
+
   /// Current status of the state
   std::atomic<StateStatus> status{StateStatus::IDLE};
 
@@ -94,6 +95,14 @@ public:
    * Cleans up externally-stored metadata for this instance.
    */
   virtual ~State();
+
+  /**
+   * @brief Gets the private parameter blackboard of this state.
+   *
+   * This is primarily exposed for internal framework use and Python bindings.
+   * @return Shared pointer to the private parameter blackboard.
+   */
+  Blackboard::SharedPtr get_parameters_blackboard() const;
 
   /**
    * @brief Checks if the state is idle.
@@ -145,6 +154,15 @@ public:
     (void)blackboard; // Suppress unused parameter warning
     return "";
   }
+
+  /**
+   * @brief Configures the state before execution.
+   *
+   * This method can be overridden by derived classes to allocate resources,
+   * validate configuration, or initialize internal state. The default
+   * implementation does nothing.
+   */
+  virtual void configure() {}
 
   /**
    * @brief Cancels the current state execution.
@@ -263,6 +281,92 @@ public:
    * @return A constant reference to the vector of output key information.
    */
   const std::vector<BlackboardKeyInfo> &get_output_keys() const;
+
+  /**
+   * @brief Declares a parameter in the state metadata.
+   * @param parameter_info Information about the parameter.
+   */
+  void declare_parameter(const BlackboardKeyInfo &parameter_info);
+
+  /**
+   * @brief Declares a parameter with a name only.
+   * @param parameter_name The name of the parameter.
+   */
+  void declare_parameter(const std::string &parameter_name);
+
+  /**
+   * @brief Declares a parameter with a name and description.
+   * @param parameter_name The name of the parameter.
+   * @param description Human-readable description of the parameter.
+   */
+  void declare_parameter(const std::string &parameter_name,
+                         const std::string &description);
+
+  /**
+   * @brief Declares a parameter with a name, description, and default value.
+   * @tparam T The type of the default value.
+   * @param parameter_name The name of the parameter.
+   * @param description Human-readable description of the parameter.
+   * @param default_value The default value for the parameter.
+   */
+  template <typename T>
+  void declare_parameter(const std::string &parameter_name,
+                         const std::string &description, T default_value) {
+    this->declare_parameter(
+        BlackboardKeyInfo(parameter_name, description, default_value));
+  }
+
+  /**
+   * @brief Checks if a parameter exists in the state-local parameter storage.
+   * @param parameter_name The parameter name.
+   * @return True if the parameter exists, otherwise false.
+   */
+  bool has_parameter(const std::string &parameter_name) const;
+
+  /**
+   * @brief Gets a parameter from the state-local parameter storage.
+   * @tparam T The parameter type.
+   * @param parameter_name The parameter name.
+   * @return The stored parameter value.
+   */
+  template <typename T>
+  T get_parameter(const std::string &parameter_name) const {
+    return this->get_parameters_blackboard()->get<T>(parameter_name);
+  }
+
+  /**
+   * @brief Sets a parameter in the state-local parameter storage.
+   * @tparam T The parameter type.
+   * @param parameter_name The parameter name.
+   * @param value The parameter value.
+   */
+  template <typename T>
+  void set_parameter(const std::string &parameter_name, T value) {
+    this->get_parameters_blackboard()->set<T>(parameter_name, value);
+  }
+
+  /**
+   * @brief Checks whether a parameter was declared in the state metadata.
+   * @param parameter_name The parameter name.
+   * @return True if the parameter was declared, otherwise false.
+   */
+  bool is_parameter_declared(const std::string &parameter_name) const;
+
+  /**
+   * @brief Copies a parameter value from another state.
+   * @param source_state The source state.
+   * @param source_parameter_name The parameter name in the source state.
+   * @param target_parameter_name The parameter name in this state.
+   */
+  void copy_parameter_from(const State &source_state,
+                           const std::string &source_parameter_name,
+                           const std::string &target_parameter_name);
+
+  /**
+   * @brief Gets the declared parameter metadata.
+   * @return A constant reference to the vector of parameter metadata.
+   */
+  const std::vector<BlackboardKeyInfo> &get_parameters() const;
 
   /**
    * @brief Gets the complete state metadata.

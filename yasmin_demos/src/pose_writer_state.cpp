@@ -27,9 +27,21 @@
 #include "yasmin_ros/ros_logs.hpp"
 
 PoseWriterState::PoseWriterState() : yasmin::State({"outcome1"}) {
+  position_x_ = 1.0;
+  position_y_ = 2.0;
+  position_z_ = 3.0;
+  orientation_w_ = 1.0;
   this->set_description(
       "Creates a Pose message, serializes it, and stores the serialized bytes "
       "and type information in the blackboard.");
+  this->declare_parameter<double>("position_x", "Pose position x coordinate.",
+                                  1.0);
+  this->declare_parameter<double>("position_y", "Pose position y coordinate.",
+                                  2.0);
+  this->declare_parameter<double>("position_z", "Pose position z coordinate.",
+                                  3.0);
+  this->declare_parameter<double>("orientation_w",
+                                  "Pose orientation w component.", 1.0);
   this->add_output_key(
       "pose_bytes",
       "Serialized Pose message stored as bytes in the blackboard.");
@@ -37,17 +49,24 @@ PoseWriterState::PoseWriterState() : yasmin::State({"outcome1"}) {
                        "Type information for the serialized Pose message.");
 }
 
+void PoseWriterState::configure() {
+  position_x_ = this->get_parameter<double>("position_x");
+  position_y_ = this->get_parameter<double>("position_y");
+  position_z_ = this->get_parameter<double>("position_z");
+  orientation_w_ = this->get_parameter<double>("orientation_w");
+}
+
 std::string PoseWriterState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   YASMIN_LOG_INFO("Executing state POSE_WRITER");
 
   geometry_msgs::msg::Pose pose;
-  pose.position.x = 1.0;
-  pose.position.y = 2.0;
-  pose.position.z = 3.0;
+  pose.position.x = position_x_;
+  pose.position.y = position_y_;
+  pose.position.z = position_z_;
   pose.orientation.x = 0.0;
   pose.orientation.y = 0.0;
   pose.orientation.z = 0.0;
-  pose.orientation.w = 1.0;
+  pose.orientation.w = orientation_w_;
 
   const std::vector<uint8_t> pose_bytes =
       yasmin_ros::serialize_interface<geometry_msgs::msg::Pose>(pose);

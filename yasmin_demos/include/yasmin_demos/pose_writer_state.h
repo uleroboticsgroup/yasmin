@@ -42,6 +42,11 @@ public:
   ~PoseWriterState();
 
   /**
+   * @brief Configures the state-local parameters.
+   */
+  void configure() override;
+
+  /**
    * @brief Executes the Pose writer state logic.
    *
    * This method creates a Pose message, serializes it, stores the serialized
@@ -52,6 +57,12 @@ public:
    * @return std::string The outcome of the execution: "outcome1".
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard);
+
+private:
+  double position_x_;
+  double position_y_;
+  double position_z_;
+  double orientation_w_;
 };
 
 #endif // YASMIN_DEMOS_POSE_WRITER_STATE_H

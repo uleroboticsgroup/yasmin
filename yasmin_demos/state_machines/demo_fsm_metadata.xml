@@ -1,12 +1,24 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<StateMachine name="DemoFsmMetadata" outcomes="outcome4" start_state="Foo" description="Demo FSM showing description and defaults on state machines">
+<StateMachine name="DemoFsmMetadata" outcomes="outcome4" start_state="Foo" description="Demo FSM showing descriptions, defaults, and hierarchical parameter forwarding across a nested state machine.">
+  <Param name="root_prefix" description="Prefix forwarded directly to Foo and indirectly to the nested Bar state." default_type="str" default_value="NestedDemo"/>
+  <Param name="root_delay_ms" description="Delay in milliseconds forwarded across all demo states." default_type="int" default_value="200"/>
+  <Param name="root_max_count" description="Maximum number of loops executed by the top-level Foo state." default_type="int" default_value="2"/>
   <Key name="foo_str" type="in/out" description="String containing the current counter value produced by FooState."/>
   <State name="Foo" x="917.46" y="19.38" type="cpp" class="yasmin_demos/FooState">
+    <ParamRemap old="counter_prefix" new="root_prefix"/>
+    <ParamRemap old="sleep_ms" new="root_delay_ms"/>
+    <ParamRemap old="max_count" new="root_max_count"/>
     <Transition from="outcome1" to="NestedSM"/>
     <Transition from="outcome2" to="outcome4"/>
   </State>
-  <StateMachine name="NestedSM" x="156.40" y="82.80" outcomes="outcome3" description="Nested FSM that runs Bar state">
+  <StateMachine name="NestedSM" x="156.40" y="82.80" outcomes="outcome3" description="Nested FSM that declares its own parameters and forwards them again to the Bar state.">
+    <Param name="shared_prefix" description="Prefix received from the parent state machine and forwarded to Bar." default_type="str" default_value="NestedBar"/>
+    <Param name="shared_delay_ms" description="Delay received from the parent state machine and forwarded to Bar." default_type="int" default_value="200"/>
+    <ParamRemap old="shared_prefix" new="root_prefix"/>
+    <ParamRemap old="shared_delay_ms" new="root_delay_ms"/>
     <State name="Bar" x="-412.18" y="-290.76" type="py" module="yasmin_demos.bar_state" class="BarState">
+      <ParamRemap old="log_prefix" new="shared_prefix"/>
+      <ParamRemap old="sleep_ms" new="shared_delay_ms"/>
       <Transition from="outcome3" to="outcome3"/>
     </State>
     <FinalOutcome name="outcome3" x="292.95" y="-289.14" description="Final nested outcome"/>

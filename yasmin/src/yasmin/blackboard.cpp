@@ -45,6 +45,27 @@ bool Blackboard::contains(const std::string &key) const {
   return (this->values.find(remapped_key) != this->values.end());
 }
 
+void Blackboard::copy_value_from(const Blackboard &other,
+                                 const std::string &source_key,
+                                 const std::string &target_key) {
+  YASMIN_LOG_DEBUG("Copying '%s' from blackboard into '%s'", source_key.c_str(),
+                   target_key.c_str());
+
+  std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lk(this->mutex,
+                                                                  other.mutex);
+
+  const std::string &remapped_source_key = other.remap(source_key);
+  if (other.values.find(remapped_source_key) == other.values.end()) {
+    throw std::runtime_error("Element '" + source_key +
+                             "' does not exist in the blackboard");
+  }
+
+  const std::string &remapped_target_key = this->remap(target_key);
+  this->values[remapped_target_key] = other.values.at(remapped_source_key);
+  this->type_registry[remapped_target_key] =
+      other.type_registry.at(remapped_source_key);
+}
+
 int Blackboard::size() const {
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
   return this->values.size();

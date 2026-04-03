@@ -107,6 +107,39 @@ TEST_F(TestYasminFactory, TestCreatePythonState) {
   }
 }
 
+TEST_F(TestYasminFactory, TestPythonStateParametersSurviveCppFactoryWrapping) {
+  std::string xml_content = R"(
+    <StateMachine outcomes="end">
+      <Param name="root_sleep_ms" description="Sleep delay" default_type="int" default_value="25"/>
+      <State name="State1" type="py" module="test.test_simple_state" class="TestParameterizedState">
+        <ParamRemap old="sleep_ms" new="root_sleep_ms"/>
+        <Transition from="done" to="end"/>
+      </State>
+    </StateMachine>
+  )";
+
+  tinyxml2::XMLDocument doc;
+  doc.Parse(xml_content.c_str());
+  tinyxml2::XMLElement *root = doc.FirstChildElement("StateMachine");
+
+  ASSERT_NE(root, nullptr);
+
+  auto sm = factory->create_sm(root);
+  ASSERT_NE(sm, nullptr);
+
+  const auto &states = sm->get_states();
+  auto state_it = states.find("State1");
+  ASSERT_NE(state_it, states.end());
+  ASSERT_TRUE(state_it->second->is_parameter_declared("sleep_ms"));
+
+  sm->configure();
+  EXPECT_EQ(state_it->second->get_parameter<int>("sleep_ms"), 25);
+
+  auto blackboard = yasmin::Blackboard::make_shared();
+  EXPECT_EQ((*sm)(blackboard), "end");
+  EXPECT_EQ(blackboard->get<int>("configured_sleep_ms"), 25);
+}
+
 TEST_F(TestYasminFactory, TestCreateStateInvalidType) {
   std::string xml_content = R"(
     <State name="InvalidState" type="invalid" class="SomeClass"/>
@@ -345,6 +378,49 @@ TEST_F(TestYasminFactory, TestFilePathMechanism) {
     EXPECT_EQ(outcome, "final_end");
   } catch (const std::exception &e) {
     GTEST_SKIP() << "XML file not available or plugin missing: " << e.what();
+  }
+}
+
+TEST_F(TestYasminFactory, TestStateAndStateMachineParametersFromXml) {
+  std::string xml_content = R"(
+    <StateMachine outcomes="end">
+      <Param name="root_topic" description="Root topic" default_type="str" default_value="/root"/>
+      <State name="State1" type="cpp" class="yasmin_factory/TestSimpleState">
+        <Param name="topic" description="Leaf topic" default_type="str" default_value="/leaf"/>
+        <ParamRemap old="topic" new="root_topic"/>
+        <Transition from="outcome1" to="State1"/>
+        <Transition from="outcome2" to="end"/>
+      </State>
+    </StateMachine>
+  )";
+
+  tinyxml2::XMLDocument doc;
+  doc.Parse(xml_content.c_str());
+  tinyxml2::XMLElement *root = doc.FirstChildElement("StateMachine");
+
+  ASSERT_NE(root, nullptr);
+
+  try {
+    auto sm = factory->create_sm(root);
+
+    ASSERT_NE(sm, nullptr);
+    EXPECT_TRUE(sm->has_parameter("root_topic"));
+    EXPECT_EQ(sm->get_parameter<std::string>("root_topic"), "/root");
+
+    const auto &mappings = sm->get_parameter_mappings();
+    ASSERT_TRUE(mappings.find("State1") != mappings.end());
+    ASSERT_TRUE(mappings.at("State1").find("topic") !=
+                mappings.at("State1").end());
+    EXPECT_EQ(mappings.at("State1").at("topic"), "root_topic");
+
+    auto child = sm->get_states().at("State1");
+    EXPECT_TRUE(child->has_parameter("topic"));
+    EXPECT_EQ(child->get_parameter<std::string>("topic"), "/leaf");
+
+    sm->configure();
+    EXPECT_EQ(child->get_parameter<std::string>("topic"), "/root");
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "C++ plugin not available: " << e.what();
   }
 }
 

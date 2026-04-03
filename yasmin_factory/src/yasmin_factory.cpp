@@ -34,7 +34,41 @@ bool YasminFactory::py_initialized_ = false;
 PythonStateHolder::PythonStateHolder(yasmin::State::SharedPtr cpp_state,
                                      py::object py_state)
     : yasmin::State(cpp_state->get_outcomes()), cpp_state_(cpp_state),
-      py_state_(py_state) {}
+      py_state_(py_state) {
+  this->set_description(cpp_state->get_description());
+
+  for (const auto &[outcome, description] :
+       cpp_state->get_outcome_descriptions()) {
+    this->set_outcome_description(outcome, description);
+  }
+
+  for (const auto &input_key : cpp_state->get_input_keys()) {
+    this->add_input_key(input_key);
+  }
+
+  for (const auto &output_key : cpp_state->get_output_keys()) {
+    this->add_output_key(output_key);
+  }
+
+  for (const auto &parameter : cpp_state->get_parameters()) {
+    this->declare_parameter(parameter);
+  }
+}
+
+void PythonStateHolder::configure() {
+  for (const auto &parameter : this->get_parameters()) {
+    if (!this->cpp_state_->is_parameter_declared(parameter.name)) {
+      this->cpp_state_->declare_parameter(parameter);
+    }
+
+    if (this->has_parameter(parameter.name)) {
+      this->cpp_state_->copy_parameter_from(*this, parameter.name,
+                                            parameter.name);
+    }
+  }
+
+  this->cpp_state_->configure();
+}
 
 std::string
 PythonStateHolder::execute(yasmin::Blackboard::SharedPtr blackboard) {
@@ -166,6 +200,7 @@ YasminFactory::get_optional_attribute(tinyxml2::XMLElement *element,
 
 void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
                                         tinyxml2::XMLElement *parent) const {
+
   for (tinyxml2::XMLElement *key_elem = parent->FirstChildElement("Key");
        key_elem; key_elem = key_elem->NextSiblingElement("Key")) {
     const std::string key_name = this->get_required_attribute(key_elem, "name");
@@ -238,6 +273,57 @@ void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
   }
 }
 
+void YasminFactory::add_parameters(yasmin::State::SharedPtr owner,
+                                   tinyxml2::XMLElement *parent) const {
+  for (tinyxml2::XMLElement *param_elem = parent->FirstChildElement("Param");
+       param_elem; param_elem = param_elem->NextSiblingElement("Param")) {
+    const std::string parameter_name =
+        this->get_required_attribute(param_elem, "name");
+    const std::string parameter_description =
+        this->get_optional_attribute(param_elem, "description", "");
+    const std::string default_type =
+        this->get_optional_attribute(param_elem, "default_type", "str");
+    const char *default_value_attr = param_elem->Attribute("default_value");
+
+    if (default_value_attr) {
+      if (default_type == "int") {
+        owner->declare_parameter(parameter_name, parameter_description,
+                                 std::stoi(std::string(default_value_attr)));
+      } else if (default_type == "float" || default_type == "double") {
+        owner->declare_parameter(parameter_name, parameter_description,
+                                 std::stod(std::string(default_value_attr)));
+      } else if (default_type == "bool") {
+        const std::string value_str(default_value_attr);
+        owner->declare_parameter(parameter_name, parameter_description,
+                                 value_str == "true" || value_str == "True" ||
+                                     value_str == "1");
+      } else {
+        owner->declare_parameter(parameter_name, parameter_description,
+                                 std::string(default_value_attr));
+      }
+    } else if (!parameter_description.empty()) {
+      owner->declare_parameter(parameter_name, parameter_description);
+    } else {
+      owner->declare_parameter(parameter_name);
+    }
+  }
+}
+
+yasmin::ParameterMappings
+YasminFactory::get_parameter_mappings(tinyxml2::XMLElement *parent) const {
+  yasmin::ParameterMappings parameter_mappings;
+
+  for (tinyxml2::XMLElement *remap_elem =
+           parent->FirstChildElement("ParamRemap");
+       remap_elem; remap_elem = remap_elem->NextSiblingElement("ParamRemap")) {
+    const std::string from = this->get_required_attribute(remap_elem, "old");
+    const std::string to = this->get_required_attribute(remap_elem, "new");
+    parameter_mappings[from] = to;
+  }
+
+  return parameter_mappings;
+}
+
 yasmin::State::SharedPtr
 YasminFactory::create_state(tinyxml2::XMLElement *state_elem) const {
   std::string type = this->get_optional_attribute(state_elem, "type", "py");
@@ -256,6 +342,7 @@ YasminFactory::create_state(tinyxml2::XMLElement *state_elem) const {
   }
 
   this->add_blackboard_keys(state, state_elem);
+  this->add_parameters(state, state_elem);
   return state;
 }
 
@@ -266,6 +353,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
 
   yasmin::StateMap states;
   yasmin::OutcomeMap outcome_map;
+  yasmin::ParameterMappingsMap parameter_mappings;
 
   // Parse the concurrence structure
   for (tinyxml2::XMLElement *child = conc_elem->FirstChildElement(); child;
@@ -276,12 +364,15 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
     if (child_name == "State") {
       std::string name = this->get_required_attribute(child, "name");
       states[name] = this->create_state(child);
+      parameter_mappings[name] = this->get_parameter_mappings(child);
     } else if (child_name == "Concurrence") {
       std::string name = this->get_required_attribute(child, "name");
       states[name] = this->create_concurrence(child);
+      parameter_mappings[name] = this->get_parameter_mappings(child);
     } else if (child_name == "StateMachine") {
       std::string name = this->get_required_attribute(child, "name");
       states[name] = this->create_sm(child);
+      parameter_mappings[name] = this->get_parameter_mappings(child);
     }
   }
 
@@ -289,28 +380,48 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
   for (tinyxml2::XMLElement *child = conc_elem->FirstChildElement(); child;
        child = child->NextSiblingElement()) {
 
-    if (std::string(child->Name()) == "Outcome") {
-      std::string outcome_to = this->get_required_attribute(child, "to");
+    const std::string child_tag = child->Name();
+    if (child_tag == "OutcomeMap") {
+      const std::string outcome_to =
+          this->get_required_attribute(child, "outcome");
+      outcome_map[outcome_to] = {};
+
+      for (tinyxml2::XMLElement *item = child->FirstChildElement("Item"); item;
+           item = item->NextSiblingElement("Item")) {
+        const std::string state_name =
+            this->get_required_attribute(item, "state");
+        const std::string outcome =
+            this->get_required_attribute(item, "outcome");
+
+        if (states.find(state_name) != states.end()) {
+          outcome_map[outcome_to][state_name] = outcome;
+        }
+      }
+    } else if (child_tag == "Outcome") {
+      const std::string outcome_to = this->get_required_attribute(child, "to");
       outcome_map[outcome_to] = {};
 
       for (tinyxml2::XMLElement *transition =
                child->FirstChildElement("Transition");
            transition;
            transition = transition->NextSiblingElement("Transition")) {
-        std::string state_name =
+        const std::string state_name =
             this->get_required_attribute(transition, "state");
-        std::string outcome =
+        const std::string outcome =
             this->get_required_attribute(transition, "outcome");
 
         if (states.find(state_name) != states.end()) {
-          outcome_map[outcome_to][states[state_name]->to_string()] = outcome;
+          outcome_map[outcome_to][state_name] = outcome;
         }
       }
     }
   }
 
-  auto concurrence =
-      yasmin::Concurrence::make_shared(states, default_outcome, outcome_map);
+  auto concurrence = yasmin::Concurrence::make_shared(
+      states, default_outcome, outcome_map, parameter_mappings);
+
+  this->add_blackboard_keys(concurrence, conc_elem);
+  this->add_parameters(concurrence, conc_elem);
 
   for (tinyxml2::XMLElement *outcome_elem =
            conc_elem->FirstChildElement("FinalOutcome");
@@ -408,6 +519,9 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
       remappings[from] = to;
     }
 
+    const yasmin::ParameterMappings parameter_mappings =
+        this->get_parameter_mappings(child);
+
     // Create the state
     yasmin::State::SharedPtr state;
     if (child_name == "State") {
@@ -421,7 +535,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
     }
 
     // Add state to state machine
-    sm->add_state(name, state, transitions, remappings);
+    sm->add_state(name, state, transitions, remappings, parameter_mappings);
   }
 
   // Set initial state if specified
@@ -452,6 +566,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
   }
 
   this->add_blackboard_keys(sm, root);
+  this->add_parameters(sm, root);
   return sm;
 }
 

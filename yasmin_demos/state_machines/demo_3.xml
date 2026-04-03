@@ -1,8 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<StateMachine name="Demo3" outcomes="outcome4" start_state="PoseWriter">
+<StateMachine name="Demo3" outcomes="outcome4" start_state="PoseWriter" description="Demo FSM that configures pose values on the C++ writer state before serializing and reading them.">
+  <Param name="pose_x" description="Pose position x component written by PoseWriterState." default_type="float" default_value="1.5"/>
+  <Param name="pose_y" description="Pose position y component written by PoseWriterState." default_type="float" default_value="-0.5"/>
+  <Param name="pose_z" description="Pose position z component written by PoseWriterState." default_type="float" default_value="0.25"/>
+  <Param name="pose_orientation_w" description="Pose orientation w component written by PoseWriterState." default_type="float" default_value="1.0"/>
   <Key name="pose_bytes" type="in/out" description="Serialized Pose message stored as bytes in the blackboard."/>
   <Key name="pose_bytes__type" type="in/out" description="Type information for the serialized Pose message."/>
   <State name="PoseWriter" x="157.80" y="84.20" type="cpp" class="yasmin_demos/PoseWriterState">
+    <ParamRemap old="position_x" new="pose_x"/>
+    <ParamRemap old="position_y" new="pose_y"/>
+    <ParamRemap old="position_z" new="pose_z"/>
+    <ParamRemap old="orientation_w" new="pose_orientation_w"/>
     <Transition from="outcome1" to="PoseReader"/>
   </State>
   <State name="PoseReader" x="443.37" y="81.80" type="py" module="yasmin_demos.pose_reader_state" class="PoseReaderState">

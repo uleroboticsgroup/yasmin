@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<StateMachine name="RosSerializationCppToPy" outcomes="done type_error error" start_state="SerializeCpp" description="Serializes a C++ ROS interface object into bytes and reconstructs it as a native Python ROS interface object.">
+  <Param name="interface_type" description="Concrete ROS interface type passed to both conversion states." default_type="str" default_value="geometry_msgs/msg/Pose" />
+  <Key name="input" type="in/out" description="C++ ROS interface instance that should be serialized." />
+  <Key name="bytes" type="in/out" description="Serialized byte buffer shared between both conversion states." />
+  <Key name="output" type="in/out" description="Final Python ROS interface instance reconstructed from the byte buffer." />
+  <State name="SerializeCpp" type="cpp" class="yasmin_ros/RosSerializeCppState" x="120.51" y="-182.37">
+    <ParamRemap old="interface_type" new="interface_type" />
+    <Remap old="input" new="input" />
+    <Remap old="output" new="bytes" />
+    <Transition from="succeed" to="DeserializePy" />
+    <Transition from="type_error" to="type_error" />
+    <Transition from="error" to="error" />
+  </State>
+  <State name="DeserializePy" type="py" module="yasmin_ros.ros_deserialize_py_state" class="RosDeserializePyState" x="125.90" y="13.76">
+    <ParamRemap old="interface_type" new="interface_type" />
+    <Remap old="input" new="bytes" />
+    <Remap old="output" new="output" />
+    <Transition from="succeed" to="done" />
+    <Transition from="type_error" to="type_error" />
+    <Transition from="error" to="error" />
+  </State>
+  <FinalOutcome name="done" description="The interface was serialized in C++ and deserialized in Python." x="132.02" y="194.66" />
+  <FinalOutcome name="type_error" description="The configured interface type did not match the runtime blackboard data." x="-198.31" y="-73.54" />
+  <FinalOutcome name="error" description="Serialization or deserialization failed." x="427.81" y="-88.93" />
+</StateMachine>

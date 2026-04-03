@@ -308,6 +308,37 @@ class PluginManager:
 
                 self.load_cpp_plugin(plugin_type)
 
+    def _is_python_state_constructible_without_arguments(self, state_class: type) -> bool:
+        """
+        Check whether a Python state class can be instantiated without arguments.
+
+        Parameters
+        ----------
+        state_class : type
+            State class to inspect.
+
+        Returns
+        -------
+        bool
+            True if ``state_class()`` is expected to work without providing arguments.
+        """
+        try:
+            signature = inspect.signature(state_class)
+        except (TypeError, ValueError):
+            return False
+
+        for parameter in signature.parameters.values():
+            if parameter.kind in (
+                inspect.Parameter.VAR_POSITIONAL,
+                inspect.Parameter.VAR_KEYWORD,
+            ):
+                continue
+
+            if parameter.default is inspect.Parameter.empty:
+                return False
+
+        return True
+
     def load_python_plugins_from_package(
         self,
         package_name: str,
@@ -327,7 +358,6 @@ class PluginManager:
             Optional list that receives the package directory signature.
         """
         skip_packages: set = {
-            "yasmin_ros",
             "rosidl_adapter",
             "rosidl_cli",
             "rosidl_generator_c",
@@ -401,6 +431,7 @@ class PluginManager:
                             obj.__module__ == full_module_name
                             and issubclass(obj, State)
                             and obj is not State
+                            and self._is_python_state_constructible_without_arguments(obj)
                         ):
                             self.load_python_plugin(full_module_name, name)
                 except Exception:

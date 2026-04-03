@@ -46,3 +46,19 @@ class TestRemappingState(State):
             return "success"
         else:
             return "failure"
+
+
+class TestParameterizedState(State):
+    """Python test state that declares parameters and configures local state."""
+
+    def __init__(self):
+        super().__init__(["done"])
+        self.sleep_ms = 0
+        self.declare_parameter("sleep_ms", "Delay before execution", 10)
+
+    def configure(self) -> None:
+        self.sleep_ms = self.get_parameter("sleep_ms")
+
+    def execute(self, blackboard: Blackboard) -> str:
+        blackboard["configured_sleep_ms"] = self.sleep_ms
+        return "done"

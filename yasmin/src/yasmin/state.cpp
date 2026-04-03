@@ -32,23 +32,34 @@
 using namespace yasmin;
 
 // ---------------------------------------------------------------------------
-// External metadata storage — preserves ABI with plugins compiled against the
-// older State class layout that did not include a StateMetadata member.
+// External state storage — preserves ABI with plugins compiled against the
+// older State class layout that did not include metadata or parameter storage.
 // ---------------------------------------------------------------------------
 namespace {
-std::mutex &metadata_mutex() {
+struct StateStorage {
+  StateMetadata metadata;
+  Blackboard::SharedPtr parameters = Blackboard::make_shared();
+};
+
+std::mutex &state_storage_mutex() {
   static std::mutex mtx;
   return mtx;
 }
-std::unordered_map<const State *, StateMetadata> &metadata_map() {
-  static std::unordered_map<const State *, StateMetadata> map;
+
+std::unordered_map<const State *, StateStorage> &state_storage_map() {
+  static std::unordered_map<const State *, StateStorage> map;
   return map;
 }
 } // namespace
 
 StateMetadata &State::get_metadata_ref() const {
-  std::lock_guard<std::mutex> lock(metadata_mutex());
-  return metadata_map()[this];
+  std::lock_guard<std::mutex> lock(state_storage_mutex());
+  return state_storage_map()[this].metadata;
+}
+
+Blackboard::SharedPtr State::get_parameters_blackboard() const {
+  std::lock_guard<std::mutex> lock(state_storage_mutex());
+  return state_storage_map()[this].parameters;
 }
 
 State::State(const Outcomes &outcomes) : outcomes(outcomes) {
@@ -58,8 +69,8 @@ State::State(const Outcomes &outcomes) : outcomes(outcomes) {
 }
 
 State::~State() {
-  std::lock_guard<std::mutex> lock(metadata_mutex());
-  metadata_map().erase(this);
+  std::lock_guard<std::mutex> lock(state_storage_mutex());
+  state_storage_map().erase(this);
 }
 
 void State::set_status(StateStatus new_status) {
@@ -226,6 +237,59 @@ const std::vector<BlackboardKeyInfo> &State::get_input_keys() const {
 
 const std::vector<BlackboardKeyInfo> &State::get_output_keys() const {
   return this->get_metadata_ref().output_keys;
+}
+
+void State::declare_parameter(const BlackboardKeyInfo &parameter_info) {
+  auto &parameters = this->get_metadata_ref().parameters;
+
+  auto it = std::find_if(parameters.begin(), parameters.end(),
+                         [&](const BlackboardKeyInfo &info) {
+                           return info.name == parameter_info.name;
+                         });
+
+  if (it == parameters.end()) {
+    parameters.push_back(parameter_info);
+  } else {
+    *it = parameter_info;
+  }
+
+  if (parameter_info.has_default) {
+    parameter_info.inject_default(*this->get_parameters_blackboard(),
+                                  parameter_info.name);
+  }
+}
+
+void State::declare_parameter(const std::string &parameter_name) {
+  this->declare_parameter(BlackboardKeyInfo(parameter_name));
+}
+
+void State::declare_parameter(const std::string &parameter_name,
+                              const std::string &description) {
+  this->declare_parameter(BlackboardKeyInfo(parameter_name, description));
+}
+
+bool State::has_parameter(const std::string &parameter_name) const {
+  return this->get_parameters_blackboard()->contains(parameter_name);
+}
+
+bool State::is_parameter_declared(const std::string &parameter_name) const {
+  const auto &parameters = this->get_metadata_ref().parameters;
+  return std::any_of(parameters.begin(), parameters.end(),
+                     [&](const BlackboardKeyInfo &info) {
+                       return info.name == parameter_name;
+                     });
+}
+
+void State::copy_parameter_from(const State &source_state,
+                                const std::string &source_parameter_name,
+                                const std::string &target_parameter_name) {
+  this->get_parameters_blackboard()->copy_value_from(
+      *source_state.get_parameters_blackboard(), source_parameter_name,
+      target_parameter_name);
+}
+
+const std::vector<BlackboardKeyInfo> &State::get_parameters() const {
+  return this->get_metadata_ref().parameters;
 }
 
 const StateMetadata &State::get_metadata() const {

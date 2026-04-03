@@ -252,6 +252,46 @@ TEST_F(TestState, TestBlackboardKeyInfoCopy) {
   EXPECT_EQ(bb->get<int>("val"), 42);
 }
 
+TEST_F(TestState, TestConfigureDefaultDoesNothing) {
+  FooState s;
+  EXPECT_NO_THROW(s.configure());
+}
+
+TEST_F(TestState, TestDeclareParameterStoresDefaultValue) {
+  FooState s;
+  s.declare_parameter("topic", "Topic name", std::string("/data"));
+
+  EXPECT_TRUE(s.has_parameter("topic"));
+  EXPECT_EQ(s.get_parameter<std::string>("topic"), "/data");
+
+  const auto &params = s.get_parameters();
+  ASSERT_EQ(params.size(), 1u);
+  EXPECT_EQ(params[0].name, "topic");
+  EXPECT_EQ(params[0].description, "Topic name");
+  EXPECT_TRUE(params[0].has_default);
+  EXPECT_EQ(params[0].get_default_value<std::string>(), "/data");
+}
+
+TEST_F(TestState, TestSetParameterOverridesStoredValue) {
+  FooState s;
+  s.declare_parameter("count", "Counter", 1);
+  s.set_parameter<int>("count", 5);
+
+  EXPECT_TRUE(s.has_parameter("count"));
+  EXPECT_EQ(s.get_parameter<int>("count"), 5);
+}
+
+TEST_F(TestState, TestMetadataIncludesParameters) {
+  FooState s;
+  s.declare_parameter("enabled", "Enable flag", true);
+
+  const auto &meta = s.get_metadata();
+  ASSERT_EQ(meta.parameters.size(), 1u);
+  EXPECT_EQ(meta.parameters[0].name, "enabled");
+  EXPECT_EQ(meta.parameters[0].description, "Enable flag");
+  EXPECT_TRUE(meta.parameters[0].has_default);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

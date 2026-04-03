@@ -215,6 +215,34 @@ class TestYasminFactory(unittest.TestCase):
         # or directly to final_end depending on FirstState's execution
         self.assertIn(outcome, ["final_end"])
 
+    def test_state_and_state_machine_parameters_from_xml(self):
+        """Test that Param and ParamRemap elements are parsed correctly."""
+        sm_xml = """
+        <StateMachine outcomes="end">
+            <Param name="root_topic" description="Root topic" default_type="str" default_value="/root"/>
+            <State name="State1" type="py" module="test.test_simple_state" class="TestSimpleState">
+                <Param name="topic" description="Leaf topic" default_type="str" default_value="/leaf"/>
+                <ParamRemap old="topic" new="root_topic"/>
+                <Transition from="outcome1" to="State1"/>
+                <Transition from="outcome2" to="end"/>
+            </State>
+        </StateMachine>
+        """
+        root = ET.fromstring(sm_xml)
+
+        sm = self.factory.create_sm(root)
+
+        self.assertTrue(sm.has_parameter("root_topic"))
+        self.assertEqual(sm.get_parameter("root_topic"), "/root")
+        self.assertEqual(sm.get_parameter_mappings(), {"State1": {"topic": "root_topic"}})
+
+        child = sm.get_states()["State1"]["state"]
+        self.assertTrue(child.has_parameter("topic"))
+        self.assertEqual(child.get_parameter("topic"), "/leaf")
+
+        sm.configure()
+        self.assertEqual(child.get_parameter("topic"), "/root")
+
     def test_sm_description_from_xml(self):
         """Test that a state machine parses description from XML."""
         sm_xml = """

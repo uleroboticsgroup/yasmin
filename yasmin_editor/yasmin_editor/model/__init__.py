@@ -24,3 +24,5 @@ __all__ = [
     "ValidationResult",
     "validate_model",
 ]
+
+from .parameter import Parameter

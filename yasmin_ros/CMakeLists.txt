@@ -10,13 +10,16 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
+find_package(pluginlib REQUIRED)
 find_package(yasmin REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(example_interfaces REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(example_interfaces REQUIRED)
-  find_package(std_msgs REQUIRED)
 endif()
 
 # C++
@@ -32,16 +35,29 @@ set(SOURCES
   src/yasmin_ros/monitor_state.cpp
   src/yasmin_ros/publisher_state.cpp
   src/yasmin_ros/get_parameters_state.cpp
+  src/yasmin_ros/supported_interface_serialization.cpp
+  src/yasmin_ros/ros_serialize_cpp_state.cpp
+  src/yasmin_ros/ros_deserialize_cpp_state.cpp
 )
 set(DEPENDENCIES
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
+  pluginlib::pluginlib
   yasmin::yasmin
+  ${geometry_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  ${std_srvs_TARGETS}
+  ${example_interfaces_TARGETS}
 )
 set(DEPENDENCIES_PACKAGE
   rclcpp
   rclcpp_action
+  pluginlib
   yasmin
+  geometry_msgs
+  std_msgs
+  std_srvs
+  example_interfaces
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -52,7 +68,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PUBLIC ${DEPENDENCIES})
 
 install(TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -62,10 +78,24 @@ install(DIRECTORY include/
   DESTINATION include/${PROJECT_NAME}
 )
 
+install(DIRECTORY state_machines/
+  DESTINATION share/${PROJECT_NAME}/state_machines
+)
+
+install(FILES plugins.xml
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(EXPORT export_${PROJECT_NAME}
+  DESTINATION share/${PROJECT_NAME}/cmake
+)
+
 ament_export_include_directories("include/${PROJECT_NAME}")
 ament_export_libraries(${PROJECT_NAME})
-ament_export_targets(${PROJECT_NAME})
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${DEPENDENCIES_PACKAGE})
+
+pluginlib_export_plugin_description_file(yasmin plugins.xml)
 
 # Python
 ament_python_install_package(${PROJECT_NAME})
@@ -78,20 +108,50 @@ if(BUILD_TESTING)
     test_service_client_state
     test_monitor_state
     test_publisher_state
+    test_ros_serialize_state
+    test_ros_deserialize_state
   )
-  
+
   foreach(_test_name ${_pytest_tests})
     ament_add_pytest_test(${_test_name} test/${_test_name}.py TIMEOUT 300)
+  endforeach()
+
+  set(_gtest_tests
+    test_action_client_state
+    test_service_client_state
+    test_monitor_state
+    test_publisher_state
+  )
+
+  foreach(_test_name ${_gtest_tests})
     ament_add_gtest(${_test_name}_cpp test/${_test_name}.cpp TIMEOUT 300)
-    target_link_libraries(${_test_name}_cpp
-     ${PROJECT_NAME}
+    if(TARGET ${_test_name}_cpp)
+      target_link_libraries(${_test_name}_cpp
+        ${PROJECT_NAME}
+        yasmin::yasmin
+        rclcpp::rclcpp
+        rclcpp_action::rclcpp_action
+        ${geometry_msgs_TARGETS}
+        ${std_msgs_TARGETS}
+        ${std_srvs_TARGETS}
+        ${example_interfaces_TARGETS}
+      )
+    endif()
+  endforeach()
+
+  ament_add_gtest(test_ros_serialization_states_cpp test/test_ros_serialization_states.cpp TIMEOUT 300)
+  if(TARGET test_ros_serialization_states_cpp)
+    target_link_libraries(test_ros_serialization_states_cpp
+      ${PROJECT_NAME}
       yasmin::yasmin
       rclcpp::rclcpp
       rclcpp_action::rclcpp_action
+      ${geometry_msgs_TARGETS}
       ${std_msgs_TARGETS}
+      ${std_srvs_TARGETS}
       ${example_interfaces_TARGETS}
     )
-  endforeach()
+  endif()
 
 endif()
 

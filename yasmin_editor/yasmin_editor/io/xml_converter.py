@@ -25,6 +25,7 @@ from xml.etree import ElementTree as ET
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.outcome import Outcome
+from yasmin_editor.model.parameter import Parameter
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.text_block import TextBlock
@@ -84,9 +85,13 @@ def _state_machine_to_element(
             element.set("x", f"{position.x:.2f}")
             element.set("y", f"{position.y:.2f}")
 
+    for parameter in model.parameters:
+        element.append(_parameter_to_element(parameter))
+
     for key in model.keys:
         element.append(_key_to_element(key))
 
+    _append_parameter_remaps(element, model.parameter_mappings)
     _append_remaps(element, model.remappings)
 
     for text_block in model.text_blocks:
@@ -126,9 +131,13 @@ def _concurrence_to_element(
             element.set("x", f"{position.x:.2f}")
             element.set("y", f"{position.y:.2f}")
 
+    for parameter in model.parameters:
+        element.append(_parameter_to_element(parameter))
+
     for key in model.keys:
         element.append(_key_to_element(key))
 
+    _append_parameter_remaps(element, model.parameter_mappings)
     _append_remaps(element, model.remappings)
 
     for text_block in model.text_blocks:
@@ -177,6 +186,10 @@ def _state_to_element(state: State, parent: StateMachine | Concurrence) -> ET.El
         element.set("x", f"{position.x:.2f}")
         element.set("y", f"{position.y:.2f}")
 
+    for parameter in state.parameters:
+        element.append(_parameter_to_element(parameter))
+
+    _append_parameter_remaps(element, state.parameter_mappings)
     _append_remaps(element, state.remappings)
     _append_owner_transitions(element, parent, state.name)
     return element
@@ -237,6 +250,34 @@ def _key_to_element(key: Key) -> ET.Element:
     return element
 
 
+def _parameter_to_element(parameter: Parameter) -> ET.Element:
+    element = ET.Element("Param")
+    element.set("name", parameter.name)
+
+    if parameter.description:
+        element.set("description", parameter.description)
+    if parameter.has_default:
+        element.set("default_type", parameter.default_type)
+        element.set(
+            "default_value",
+            "" if parameter.default_value is None else str(parameter.default_value),
+        )
+
+    return element
+
+
+def _append_parameter_remaps(
+    element: ET.Element,
+    parameter_mappings: dict[str, str],
+) -> None:
+    for child_parameter, parent_parameter in parameter_mappings.items():
+        if not child_parameter or not parent_parameter:
+            continue
+        remap = ET.SubElement(element, "ParamRemap")
+        remap.set("old", child_parameter)
+        remap.set("new", parent_parameter)
+
+
 def _append_remaps(element: ET.Element, remappings: dict[str, str]) -> None:
     for old, new in remappings.items():
         if not old or not new:
@@ -292,7 +333,9 @@ def _parse_state_machine_container(element: ET.Element) -> StateMachine:
         start_state=element.get("start_state"),
     )
 
+    model.parameters.extend(_parse_parameters(element.findall("Param")))
     model.keys.extend(_parse_keys(element.findall("Key")))
+    model.parameter_mappings.update(_parse_parameter_remaps(element))
     model.remappings.update(_parse_remaps(element))
     _parse_state_machine_content(model, element)
     return model
@@ -305,7 +348,9 @@ def _parse_concurrence_container(element: ET.Element) -> Concurrence:
         default_outcome=element.get("default_outcome"),
     )
 
+    model.parameters.extend(_parse_parameters(element.findall("Param")))
     model.keys.extend(_parse_keys(element.findall("Key")))
+    model.parameter_mappings.update(_parse_parameter_remaps(element))
     model.remappings.update(_parse_remaps(element))
     _parse_concurrence_content(model, element)
     return model
@@ -320,7 +365,7 @@ def _parse_state_machine_content(
         model.add_outcome(Outcome(name=outcome_name))
 
     for child in element:
-        if child.tag in {"Key", "Remap"}:
+        if child.tag in {"Param", "Key", "ParamRemap", "Remap"}:
             continue
 
         if child.tag == "Text":
@@ -359,7 +404,7 @@ def _parse_concurrence_content(
         model.add_outcome(Outcome(name=outcome_name))
 
     for child in element:
-        if child.tag in {"Key", "Remap"}:
+        if child.tag in {"Param", "Key", "ParamRemap", "Remap"}:
             continue
 
         if child.tag == "Text":
@@ -439,6 +484,8 @@ def _parse_state_like(element: ET.Element) -> State:
         package_name=element.get("package"),
         file_name=element.get("file_name"),
     )
+    state.parameters.extend(_parse_parameters(element.findall("Param")))
+    state.parameter_mappings.update(_parse_parameter_remaps(element))
     state.remappings.update(_parse_remaps(element))
     state.keys.extend(_parse_keys(element.findall("Key")))
     return state
@@ -458,6 +505,30 @@ def _parse_transition(element: ET.Element) -> Transition:
         source_outcome=element.get("from", ""),
         target=element.get("to", ""),
     )
+
+
+def _parse_parameters(elements: Iterable[ET.Element]) -> list[Parameter]:
+    parameters: list[Parameter] = []
+    for element in elements:
+        parameters.append(
+            Parameter(
+                name=element.get("name", ""),
+                description=element.get("description", ""),
+                default_type=element.get("default_type", ""),
+                default_value=element.get("default_value"),
+            )
+        )
+    return parameters
+
+
+def _parse_parameter_remaps(element: ET.Element) -> dict[str, str]:
+    parameter_mappings: dict[str, str] = {}
+    for remap in element.findall("ParamRemap"):
+        old = remap.get("old", "")
+        new = remap.get("new", "")
+        if old and new:
+            parameter_mappings[old] = new
+    return parameter_mappings
 
 
 def _parse_keys(elements: Iterable[ET.Element]) -> list[Key]:

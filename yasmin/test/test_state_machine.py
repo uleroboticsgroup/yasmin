@@ -361,5 +361,63 @@ class TestStateMachine(unittest.TestCase):
         self.assertEqual(end_count[0], 2)
 
 
+class ConfigurableLeafState(State):
+    def __init__(self):
+        super().__init__(["done"])
+        self.declare_parameter("topic", "Leaf topic")
+        self.configure_count = 0
+        self.configured_topic = None
+
+    def configure(self):
+        self.configure_count += 1
+        self.configured_topic = self.get_parameter("topic")
+
+    def execute(self, blackboard):
+        return "done"
+
+
+class TestStateMachineConfigure(unittest.TestCase):
+    def test_configure_only_runs_once_on_repeated_execution(self):
+        leaf = ConfigurableLeafState()
+        sm = StateMachine(outcomes=["done"])
+        sm.declare_parameter("topic", "Parent topic", "/demo")
+        sm.add_state(
+            "LEAF",
+            leaf,
+            transitions={"done": "done"},
+            parameter_mappings={"topic": "topic"},
+        )
+
+        self.assertEqual("done", sm())
+        self.assertEqual("done", sm())
+        self.assertEqual(1, leaf.configure_count)
+        self.assertEqual("/demo", leaf.configured_topic)
+
+    def test_nested_configure_applies_parameter_mappings_recursively(self):
+        leaf = ConfigurableLeafState()
+        nested_sm = StateMachine(outcomes=["done"])
+        nested_sm.declare_parameter("nested_topic", "Nested topic")
+        nested_sm.add_state(
+            "LEAF",
+            leaf,
+            transitions={"done": "done"},
+            parameter_mappings={"topic": "nested_topic"},
+        )
+
+        root_sm = StateMachine(outcomes=["done"])
+        root_sm.declare_parameter("root_topic", "Root topic", "/root")
+        root_sm.add_state(
+            "NESTED",
+            nested_sm,
+            transitions={"done": "done"},
+            parameter_mappings={"nested_topic": "root_topic"},
+        )
+
+        self.assertEqual("done", root_sm())
+        self.assertEqual(1, leaf.configure_count)
+        self.assertEqual("/root", leaf.configured_topic)
+        self.assertEqual("/root", nested_sm.get_parameter("nested_topic"))
+
+
 if __name__ == "__main__":
     unittest.main()

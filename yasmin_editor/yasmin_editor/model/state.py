@@ -16,9 +16,12 @@
 """Base state model."""
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
+
 from .key import Key
 from .outcome import Outcome
+from .parameter import Parameter
 
 
 @dataclass(slots=True, repr=False)
@@ -29,7 +32,9 @@ class State:
     description: str = ""
     keys: list[Key] = field(default_factory=list)
     outcomes: list[Outcome] = field(default_factory=list)
+    parameters: list[Parameter] = field(default_factory=list)
     remappings: dict[str, str] = field(default_factory=dict)
+    parameter_mappings: dict[str, str] = field(default_factory=dict)
     state_type: str | None = None
     module: str | None = None
     class_name: str | None = None
@@ -43,6 +48,10 @@ class State:
     def add_outcome(self, outcome: Outcome) -> None:
         """Add an outcome to the state."""
         self.outcomes.append(outcome)
+
+    def add_parameter(self, parameter: Parameter) -> None:
+        """Add a declared parameter to the state."""
+        self.parameters.append(parameter)
 
     def get_outcome(self, name: str) -> Outcome | None:
         """Return an outcome by name."""
@@ -98,8 +107,20 @@ class State:
             lines.append(
                 f"{prefix}  outcomes: {', '.join(outcome.name for outcome in self.outcomes)}"
             )
+        if self.parameters:
+            lines.append(
+                f"{prefix}  params: {', '.join(parameter.name for parameter in self.parameters)}"
+            )
         if self.keys:
             lines.append(f"{prefix}  keys: {', '.join(key.name for key in self.keys)}")
+        if self.parameter_mappings:
+            lines.append(
+                f"{prefix}  param remap: "
+                + ", ".join(
+                    f"{source}->{target}"
+                    for source, target in self.parameter_mappings.items()
+                )
+            )
         if self.remappings:
             lines.append(
                 f"{prefix}  remap: "

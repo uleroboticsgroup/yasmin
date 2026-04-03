@@ -218,12 +218,23 @@ class EditorUiMixin:
             plugin_info=plugin_info,
             available_plugins=all_plugins,
             parent=self,
+            declared_parent_parameters=self.parameters_to_dicts(
+                self.current_container_model.parameters
+            ),
         )
 
         if dialog.exec_():
             result = dialog.get_state_data()
             if result[0]:
-                name, plugin, outcomes, remappings, description, defaults = result
+                (
+                    name,
+                    plugin,
+                    outcomes,
+                    remappings,
+                    description,
+                    defaults,
+                    parameter_overwrites,
+                ) = result
                 self.create_state_node(
                     name,
                     plugin,
@@ -231,6 +242,7 @@ class EditorUiMixin:
                     remappings=remappings,
                     description=description,
                     defaults=defaults,
+                    parameter_overwrites=parameter_overwrites,
                 )
 
     def on_plugin_double_clicked(self, item: QListWidgetItem) -> None:
@@ -254,11 +266,25 @@ class EditorUiMixin:
             + self.plugin_manager.cpp_plugins
             + self.plugin_manager.xml_files
         )
-        dialog = StatePropertiesDialog(available_plugins=all_plugins, parent=self)
+        dialog = StatePropertiesDialog(
+            available_plugins=all_plugins,
+            parent=self,
+            declared_parent_parameters=self.parameters_to_dicts(
+                self.current_container_model.parameters
+            ),
+        )
         if dialog.exec_():
             result = dialog.get_state_data()
             if result[0]:
-                name, plugin, outcomes, remappings, description, defaults = result
+                (
+                    name,
+                    plugin,
+                    outcomes,
+                    remappings,
+                    description,
+                    defaults,
+                    parameter_overwrites,
+                ) = result
                 self.create_state_node(
                     name,
                     plugin,
@@ -266,6 +292,7 @@ class EditorUiMixin:
                     remappings=remappings,
                     description=description,
                     defaults=defaults,
+                    parameter_overwrites=parameter_overwrites,
                 )
 
     def add_state_machine(self) -> None:
@@ -573,11 +600,22 @@ class EditorUiMixin:
     def edit_current_container(self) -> None:
         model = self.current_container_model
         input_keys, output_keys = self._collect_container_key_lists(model)
+        parent_model = self.current_parent_model
         dialog = StatePropertiesDialog(
             state_name=model.name,
             plugin_info=None,
             available_plugins=[],
             remappings=dict(model.remappings),
+            parameter_overwrites=(
+                self.get_parameter_overwrites_for_child(parent_model, model)
+                if parent_model is not None
+                else []
+            ),
+            declared_parent_parameters=(
+                self.parameters_to_dicts(parent_model.parameters)
+                if parent_model is not None
+                else []
+            ),
             outcomes=[outcome.name for outcome in model.outcomes],
             edit_mode=True,
             parent=self,
@@ -585,10 +623,12 @@ class EditorUiMixin:
             defaults=[],
             fallback_input_keys=input_keys,
             fallback_output_keys=output_keys,
+            fallback_parameters=self.parameters_to_dicts(model.parameters),
             container_kind=(
                 "Concurrence" if isinstance(model, Concurrence) else "State Machine"
             ),
             readonly=self.is_read_only_mode(),
+            enable_parameter_overwrites=parent_model is not None,
         )
         if self.is_read_only_mode():
             dialog.exec_()
@@ -597,8 +637,15 @@ class EditorUiMixin:
         if dialog.exec_():
             result = dialog.get_state_data()
             if result and result[0]:
-                name, plugin, outcomes, remappings, description, defaults = result
-                parent_model = self.current_parent_model
+                (
+                    name,
+                    plugin,
+                    outcomes,
+                    remappings,
+                    description,
+                    defaults,
+                    parameter_overwrites,
+                ) = result
                 old_name = model.name
                 if parent_model is None:
                     model.name = name
@@ -617,8 +664,15 @@ class EditorUiMixin:
                         return
                     if name != old_name:
                         parent_model.rename_state(old_name, name)
+                model.description = description
                 model.remappings.clear()
                 model.remappings.update(remappings)
+                if parent_model is not None:
+                    self.apply_parameter_overwrites(
+                        parent_model,
+                        model,
+                        parameter_overwrites,
+                    )
                 self.update_container_controls()
                 self.refresh_breadcrumbs()
                 self.refresh_blackboard_keys_list()
@@ -645,6 +699,13 @@ class EditorUiMixin:
                 plugin_info=None,
                 available_plugins=[],
                 remappings=state_node.remappings,
+                parameter_overwrites=self.get_parameter_overwrites_for_child(
+                    self.current_container_model,
+                    state_node.model,
+                ),
+                declared_parent_parameters=self.parameters_to_dicts(
+                    self.current_container_model.parameters
+                ),
                 outcomes=[outcome.name for outcome in state_node.model.outcomes],
                 edit_mode=True,
                 parent=self,
@@ -652,6 +713,7 @@ class EditorUiMixin:
                 defaults=getattr(state_node, "defaults", []),
                 fallback_input_keys=input_keys,
                 fallback_output_keys=output_keys,
+                fallback_parameters=self.parameters_to_dicts(state_node.model.parameters),
                 container_kind=(
                     "Concurrence" if state_node.is_concurrence else "State Machine"
                 ),
@@ -663,13 +725,22 @@ class EditorUiMixin:
             if dialog.exec_():
                 result = dialog.get_state_data()
                 if result and result[0]:
-                    name, plugin, outcomes, remappings, description, defaults = result
+                    (
+                        name,
+                        plugin,
+                        outcomes,
+                        remappings,
+                        description,
+                        defaults,
+                        parameter_overwrites,
+                    ) = result
                     if not self.apply_common_state_updates(
                         state_node,
                         name,
                         remappings,
-                        getattr(state_node, "description", ""),
+                        description,
                         defaults,
+                        parameter_overwrites,
                     ):
                         return
                     self.sync_blackboard_keys()
@@ -691,6 +762,13 @@ class EditorUiMixin:
             plugin_info=plugin_info,
             available_plugins=[plugin_info] if plugin_info else [],
             remappings=state_node.remappings,
+            parameter_overwrites=self.get_parameter_overwrites_for_child(
+                self.current_container_model,
+                state_node.model,
+            ),
+            declared_parent_parameters=self.parameters_to_dicts(
+                self.current_container_model.parameters
+            ),
             outcomes=[outcome.name for outcome in state_node.model.outcomes],
             edit_mode=True,
             parent=self,
@@ -705,13 +783,22 @@ class EditorUiMixin:
         if dialog.exec_():
             result = dialog.get_state_data()
             if result[0]:
-                name, plugin, outcomes, remappings, description, defaults = result
+                (
+                    name,
+                    plugin,
+                    outcomes,
+                    remappings,
+                    description,
+                    defaults,
+                    parameter_overwrites,
+                ) = result
                 if not self.apply_common_state_updates(
                     state_node,
                     name,
                     remappings,
                     description,
                     defaults,
+                    parameter_overwrites,
                 ):
                     return
                 state_node.model.outcomes = [Outcome(name=item) for item in outcomes]

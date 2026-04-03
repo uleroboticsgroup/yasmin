@@ -129,6 +129,8 @@ struct StateMetadata {
   std::vector<BlackboardKeyInfo> input_keys;
   /// Information about output keys produced by this state
   std::vector<BlackboardKeyInfo> output_keys;
+  /// Information about parameters declared by this state
+  std::vector<BlackboardKeyInfo> parameters;
 };
 
 } // namespace yasmin

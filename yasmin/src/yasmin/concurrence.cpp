@@ -29,10 +29,11 @@ using namespace yasmin;
 
 Concurrence::Concurrence(const StateMap &states,
                          const std::string &default_outcome,
-                         const OutcomeMap &outcome_map)
+                         const OutcomeMap &outcome_map,
+                         const ParameterMappingsMap &parameter_mappings)
     : State(generate_possible_outcomes(outcome_map, default_outcome)),
       states(states), default_outcome(default_outcome),
-      outcome_map(outcome_map) {
+      outcome_map(outcome_map), parameter_mappings(parameter_mappings) {
 
   // Require at least one state
   if (states.empty()) {
@@ -82,7 +83,74 @@ Concurrence::Concurrence(const StateMap &states,
   }
 }
 
+void Concurrence::set_parameter_mappings(
+    const std::string &state_name,
+    const ParameterMappings &parameter_mappings) {
+  if (this->states.find(state_name) == this->states.end()) {
+    throw std::invalid_argument(
+        "State name '" + state_name +
+        "' is not provided in the concurrent set of states to run");
+  }
+
+  this->parameter_mappings[state_name] = parameter_mappings;
+  this->configured.store(false);
+}
+
+const ParameterMappingsMap &
+Concurrence::get_parameter_mappings() const noexcept {
+  return this->parameter_mappings;
+}
+
+void Concurrence::apply_parameter_mappings(const std::string &state_name,
+                                           const State::SharedPtr &state) {
+  const auto mappings_it = this->parameter_mappings.find(state_name);
+  if (mappings_it == this->parameter_mappings.end()) {
+    return;
+  }
+
+  for (const auto &[child_parameter, parent_parameter] : mappings_it->second) {
+    if (!this->is_parameter_declared(parent_parameter)) {
+      throw std::runtime_error(
+          "Concurrence parameter '" + parent_parameter +
+          "' is not declared while configuring child state '" + state_name +
+          "'");
+    }
+
+    if (!this->has_parameter(parent_parameter)) {
+      throw std::runtime_error(
+          "Concurrence parameter '" + parent_parameter +
+          "' has no value while configuring child state '" + state_name + "'");
+    }
+
+    if (!state->is_parameter_declared(child_parameter)) {
+      throw std::runtime_error("Child state '" + state_name +
+                               "' does not declare parameter '" +
+                               child_parameter + "'");
+    }
+
+    state->copy_parameter_from(*this, parent_parameter, child_parameter);
+  }
+}
+
+void Concurrence::configure() {
+  if (this->configured.load()) {
+    YASMIN_LOG_DEBUG("Concurrence '%s' has already been configured",
+                     this->to_string().c_str());
+    return;
+  }
+
+  YASMIN_LOG_DEBUG("Configuring concurrence '%s'", this->to_string().c_str());
+
+  for (const auto &[state_name, state] : states) {
+    this->apply_parameter_mappings(state_name, state);
+    state->configure();
+  }
+
+  this->configured.store(true);
+}
+
 std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
+  this->configure();
   std::vector<std::thread> state_threads;
 
   // Initialize the parallel execution of all the states

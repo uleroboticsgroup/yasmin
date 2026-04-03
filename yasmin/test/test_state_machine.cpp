@@ -388,3 +388,56 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+class ConfigurableLeafState : public State {
+public:
+  int configure_count{0};
+  std::string configured_topic;
+
+  ConfigurableLeafState() : State({"done"}) {
+    this->declare_parameter("topic", "Leaf topic");
+  }
+
+  void configure() override {
+    configure_count++;
+    configured_topic = this->get_parameter<std::string>("topic");
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    return "done";
+  }
+};
+
+TEST_F(TestStateMachine, TestConfigureOnlyRunsOnceOnRepeatedExecution) {
+  auto configurable = std::make_shared<ConfigurableLeafState>();
+  auto config_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  config_sm->declare_parameter<std::string>("topic", "Parent topic",
+                                            std::string("/demo"));
+  config_sm->add_state("LEAF", configurable, {{"done", "done"}}, {},
+                       {{"topic", "topic"}});
+
+  EXPECT_EQ((*config_sm)(blackboard), "done");
+  EXPECT_EQ((*config_sm)(blackboard), "done");
+  EXPECT_EQ(configurable->configure_count, 1);
+  EXPECT_EQ(configurable->configured_topic, "/demo");
+}
+
+TEST_F(TestStateMachine,
+       TestNestedConfigureAppliesParameterMappingsRecursively) {
+  auto leaf = std::make_shared<ConfigurableLeafState>();
+  auto nested_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  nested_sm->declare_parameter("nested_topic", "Nested topic");
+  nested_sm->add_state("LEAF", leaf, {{"done", "done"}}, {},
+                       {{"topic", "nested_topic"}});
+
+  auto root_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  root_sm->declare_parameter<std::string>("root_topic", "Root topic",
+                                          std::string("/root"));
+  root_sm->add_state("NESTED", nested_sm, {{"done", "done"}}, {},
+                     {{"nested_topic", "root_topic"}});
+
+  EXPECT_EQ((*root_sm)(blackboard), "done");
+  EXPECT_EQ(leaf->configure_count, 1);
+  EXPECT_EQ(leaf->configured_topic, "/root");
+  EXPECT_EQ(nested_sm->get_parameter<std::string>("nested_topic"), "/root");
+}

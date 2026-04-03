@@ -56,6 +56,7 @@ def _print_plugin_details(plugin) -> None:
     print(f"Type:        {plugin.plugin_type}")
     print(f"Description: {plugin.description if plugin.description else '-'}")
     _print_outcome_block(f"Outcomes", plugin.outcomes, plugin.outcome_descriptions)
+    _print_key_block("Parameters", plugin.parameters)
     _print_key_block("Input keys", plugin.input_keys)
     _print_key_block("Output keys", plugin.output_keys)
 

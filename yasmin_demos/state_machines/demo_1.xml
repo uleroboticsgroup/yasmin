@@ -1,11 +1,19 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<StateMachine name="Demo1" outcomes="outcome4" start_state="Foo" description="Demo FSM that alternates between Foo and Bar states">
+<StateMachine name="Demo1" outcomes="outcome4" start_state="Foo" description="Demo FSM that alternates between Foo and Bar states and forwards parameters into both child states.">
+  <Param name="shared_prefix" description="Prefix reused by both Foo and Bar when formatting and printing the counter string." default_type="str" default_value="Demo1"/>
+  <Param name="foo_max_count" description="Maximum number of times Foo should loop before finishing the state machine." default_type="int" default_value="2"/>
+  <Param name="step_delay_ms" description="Delay in milliseconds forwarded to both demo states." default_type="int" default_value="250"/>
   <Key name="foo_str" type="in/out" description="String containing the current counter value produced by FooState."/>
   <State name="Foo" x="789.03" y="84.20" type="cpp" class="yasmin_demos/FooState">
+    <ParamRemap old="counter_prefix" new="shared_prefix"/>
+    <ParamRemap old="max_count" new="foo_max_count"/>
+    <ParamRemap old="sleep_ms" new="step_delay_ms"/>
     <Transition from="outcome1" to="Bar"/>
     <Transition from="outcome2" to="outcome4"/>
   </State>
   <State name="Bar" x="157.80" y="84.20" type="py" module="yasmin_demos.bar_state" class="BarState">
+    <ParamRemap old="log_prefix" new="shared_prefix"/>
+    <ParamRemap old="sleep_ms" new="step_delay_ms"/>
     <Transition from="outcome3" to="Foo"/>
   </State>
   <FinalOutcome name="outcome4" x="1204.20" y="81.80" description="Final outcome"/>
