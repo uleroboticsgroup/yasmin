@@ -456,8 +456,24 @@ public:
       return py::cast(this->blackboard->get<IntVector>(key));
     }
 
+    if (is_exact_cpp_type<std::vector<int>>(type)) {
+      return py::cast(this->blackboard->get<std::vector<int>>(key));
+    }
+
+    if (is_exact_cpp_type<std::vector<long>>(type)) {
+      return py::cast(this->blackboard->get<std::vector<long>>(key));
+    }
+
+    if (is_exact_cpp_type<std::vector<long long>>(type)) {
+      return py::cast(this->blackboard->get<std::vector<long long>>(key));
+    }
+
     if (is_exact_cpp_type<FloatVector>(type)) {
       return py::cast(this->blackboard->get<FloatVector>(key));
+    }
+
+    if (is_exact_cpp_type<std::vector<float>>(type)) {
+      return py::cast(this->blackboard->get<std::vector<float>>(key));
     }
 
     if (is_exact_cpp_type<BoolVector>(type)) {
@@ -472,8 +488,28 @@ public:
       return py::cast(this->blackboard->get<IntDict>(key));
     }
 
+    if (is_exact_cpp_type<std::unordered_map<std::string, int>>(type)) {
+      return py::cast(
+          this->blackboard->get<std::unordered_map<std::string, int>>(key));
+    }
+
+    if (is_exact_cpp_type<std::unordered_map<std::string, long>>(type)) {
+      return py::cast(
+          this->blackboard->get<std::unordered_map<std::string, long>>(key));
+    }
+
+    if (is_exact_cpp_type<std::unordered_map<std::string, long long>>(type)) {
+      return py::cast(this->blackboard->get<
+                      std::unordered_map<std::string, long long>>(key));
+    }
+
     if (is_exact_cpp_type<FloatDict>(type)) {
       return py::cast(this->blackboard->get<FloatDict>(key));
+    }
+
+    if (is_exact_cpp_type<std::unordered_map<std::string, float>>(type)) {
+      return py::cast(
+          this->blackboard->get<std::unordered_map<std::string, float>>(key));
     }
 
     if (is_exact_cpp_type<BoolDict>(type)) {
