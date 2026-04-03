@@ -57,11 +57,13 @@ StateMachine::~StateMachine() {
   this->states.clear();
   this->transitions.clear();
   this->remappings.clear();
+  this->parameter_mappings.clear();
 }
 
 void StateMachine::add_state(const std::string &name, State::SharedPtr state,
                              const Transitions &transitions,
-                             const Remappings &remappings) {
+                             const Remappings &remappings,
+                             const ParameterMappings &parameter_mappings) {
 
   if (this->states.find(name) != this->states.end()) {
     throw std::logic_error("State '" + name +
@@ -116,6 +118,7 @@ void StateMachine::add_state(const std::string &name, State::SharedPtr state,
   this->states.insert({name, state});
   this->transitions.insert({name, transitions});
   this->remappings.insert({name, remappings});
+  this->parameter_mappings.insert({name, parameter_mappings});
 
   if (this->start_state.empty()) {
     this->set_start_state(name);
@@ -123,6 +126,7 @@ void StateMachine::add_state(const std::string &name, State::SharedPtr state,
 
   // Mark state machine as no validated
   this->validated.store(false);
+  this->configured.store(false);
 }
 
 void StateMachine::set_start_state(const std::string &state_name) {
@@ -141,6 +145,73 @@ void StateMachine::set_start_state(const std::string &state_name) {
 
   // Mark state machine as no validated
   this->validated.store(false);
+  this->configured.store(false);
+}
+
+void StateMachine::set_parameter_mappings(
+    const std::string &state_name,
+    const ParameterMappings &parameter_mappings) {
+
+  if (this->states.find(state_name) == this->states.end()) {
+    throw std::invalid_argument("State '" + state_name +
+                                "' is not in the state machine");
+  }
+
+  this->parameter_mappings[state_name] = parameter_mappings;
+  this->configured.store(false);
+}
+
+const ParameterMappingsMap &
+StateMachine::get_parameter_mappings() const noexcept {
+  return this->parameter_mappings;
+}
+
+void StateMachine::apply_parameter_mappings(const std::string &state_name,
+                                            const State::SharedPtr &state) {
+  const auto mappings_it = this->parameter_mappings.find(state_name);
+  if (mappings_it == this->parameter_mappings.end()) {
+    return;
+  }
+
+  for (const auto &[child_parameter, parent_parameter] : mappings_it->second) {
+    if (!this->is_parameter_declared(parent_parameter)) {
+      throw std::runtime_error(
+          "State machine parameter '" + parent_parameter +
+          "' is not declared while configuring child state '" + state_name +
+          "'");
+    }
+
+    if (!this->has_parameter(parent_parameter)) {
+      throw std::runtime_error(
+          "State machine parameter '" + parent_parameter +
+          "' has no value while configuring child state '" + state_name + "'");
+    }
+
+    if (!state->is_parameter_declared(child_parameter)) {
+      throw std::runtime_error("Child state '" + state_name +
+                               "' does not declare parameter '" +
+                               child_parameter + "'");
+    }
+
+    state->copy_parameter_from(*this, parent_parameter, child_parameter);
+  }
+}
+
+void StateMachine::configure() {
+  if (this->configured.load()) {
+    YASMIN_LOG_DEBUG("State machine '%s' has already been configured",
+                     this->to_string().c_str());
+    return;
+  }
+
+  YASMIN_LOG_DEBUG("Configuring state machine '%s'", this->to_string().c_str());
+
+  for (const auto &[state_name, state] : this->states) {
+    this->apply_parameter_mappings(state_name, state);
+    state->configure();
+  }
+
+  this->configured.store(true);
 }
 
 std::string const &StateMachine::get_start_state() const noexcept {
@@ -220,6 +291,23 @@ void StateMachine::call_end_cbs(Blackboard::SharedPtr blackboard,
     YASMIN_LOG_ERROR("Could not execute end callback: %s",
                      std::string(e.what()).c_str());
   }
+}
+
+Remappings
+StateMachine::compose_remappings(const Remappings &parent_remappings,
+                                 const Remappings &state_remappings) {
+  Remappings composed_remappings = parent_remappings;
+
+  for (const auto &[state_key, state_target] : state_remappings) {
+    auto parent_it = parent_remappings.find(state_target);
+    if (parent_it != parent_remappings.end()) {
+      composed_remappings[state_key] = parent_it->second;
+    } else {
+      composed_remappings[state_key] = state_target;
+    }
+  }
+
+  return composed_remappings;
 }
 
 void StateMachine::validate(bool strict_mode) {
@@ -309,6 +397,7 @@ void StateMachine::validate(bool strict_mode) {
 std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
 
   this->validate();
+  this->configure();
 
   YASMIN_LOG_INFO("Executing state machine with initial state '%s'",
                   this->start_state.c_str());
@@ -328,10 +417,19 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
     auto state = this->states.at(current_state);
     transitions = this->transitions.at(current_state);
     remappings = this->remappings.at(current_state);
-    blackboard->set_remappings(remappings);
+
+    // compose remappings
+    auto parent_remappings = blackboard->get_remappings();
+    auto composed_remappings =
+        StateMachine::compose_remappings(parent_remappings, remappings);
+    // apply remappings
+    blackboard->set_remappings(composed_remappings);
 
     outcome = (*state.get())(blackboard);
     old_outcome = std::string(outcome);
+
+    // restore parent remappings
+    blackboard->set_remappings(parent_remappings);
 
     // Check outcome belongs to state
     const auto &state_outcomes = state->get_outcomes();

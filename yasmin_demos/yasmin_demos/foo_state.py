@@ -14,8 +14,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
+
 import yasmin
-from yasmin import State, Blackboard
+from yasmin import Blackboard, State
 
 
 class FooState(State):
@@ -33,6 +34,38 @@ class FooState(State):
         """
         super().__init__(["outcome1", "outcome2"])
         self.counter = 0
+        self.counter_prefix = "Counter"
+        self.max_count = 3
+        self.sleep_ms = 300
+        self.set_description(
+            "Produces a counter string and stores it in the blackboard while the counter is below the threshold."
+        )
+        self.set_outcome_description("outcome1", "Counter is below the threshold")
+        self.set_outcome_description("outcome2", "Counter reached the threshold")
+        self.declare_parameter(
+            "counter_prefix",
+            "Prefix used when formatting the counter string.",
+            "Counter",
+        )
+        self.declare_parameter(
+            "max_count",
+            "Number of successful loops before the state returns outcome2.",
+            3,
+        )
+        self.declare_parameter(
+            "sleep_ms",
+            "Delay in milliseconds before each execution.",
+            300,
+        )
+        self.add_output_key(
+            "foo_str",
+            "String containing the current counter value produced by FooState.",
+        )
+
+    def configure(self) -> None:
+        self.counter_prefix = self.get_parameter("counter_prefix")
+        self.max_count = self.get_parameter("max_count")
+        self.sleep_ms = self.get_parameter("sleep_ms")
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -48,11 +81,11 @@ class FooState(State):
             Exception: May raise exceptions related to state execution.
         """
         yasmin.YASMIN_LOG_INFO("Executing state FOO")
-        time.sleep(3)  # Simulate work by sleeping
+        time.sleep(self.sleep_ms / 1000.0)
 
-        if self.counter < 3:
+        if self.counter < self.max_count:
             self.counter += 1
-            blackboard["foo_str"] = f"Counter: {self.counter}"
+            blackboard["foo_str"] = f"{self.counter_prefix}: {self.counter}"
             return "outcome1"
         else:
             return "outcome2"

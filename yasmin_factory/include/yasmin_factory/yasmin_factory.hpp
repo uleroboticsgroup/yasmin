@@ -54,6 +54,12 @@ public:
   PythonStateHolder(yasmin::State::SharedPtr cpp_state, py::object py_state);
 
   /**
+   * @brief Synchronizes the wrapper parameter view with the Python state and
+   *        delegates configuration to the underlying state.
+   */
+  void configure() override;
+
+  /**
    * @brief Delegates execution to the underlying Python state.
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
@@ -214,6 +220,15 @@ private:
   get_optional_attribute(tinyxml2::XMLElement *element,
                          const std::string &attr_name,
                          const std::string &default_value = "") const;
+
+  void add_blackboard_keys(yasmin::State::SharedPtr owner,
+                           tinyxml2::XMLElement *parent) const;
+
+  void add_parameters(yasmin::State::SharedPtr owner,
+                      tinyxml2::XMLElement *parent) const;
+
+  yasmin::ParameterMappings
+  get_parameter_mappings(tinyxml2::XMLElement *parent) const;
 };
 
 } // namespace yasmin_factory

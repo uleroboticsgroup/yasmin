@@ -17,10 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import time
+
 import rclpy
 
 import yasmin
-from yasmin import State, Concurrence, Blackboard, StateMachine
+from yasmin import Blackboard, Concurrence, State, StateMachine
 from yasmin_ros import set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
@@ -42,6 +43,13 @@ class FooState(State):
         """
         super().__init__(["outcome1", "outcome2", "outcome3"])
         self.counter = 0
+        self.set_description(
+            "Produces a counter string and stores it in the blackboard while cycling through outcomes based on the internal counter."
+        )
+        self.add_output_key(
+            "foo_str",
+            "String containing the current counter value produced by FooState.",
+        )
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -87,6 +95,13 @@ class BarState(State):
             outcome3: This state will always return this outcome
         """
         super().__init__(outcomes=["outcome3"])
+        self.set_description(
+            "Reads and prints the value stored in 'foo_str' from the blackboard."
+        )
+        self.add_input_key(
+            "foo_str",
+            "String produced by FooState containing the counter value.",
+        )
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -124,6 +139,13 @@ def main() -> None:
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Runs FooState and BarState concurrently until the concurrence state no longer matches the configured outcome map."
+    )
+    sm.add_output_key(
+        "foo_str",
+        "String containing the current counter value produced during the concurrent execution.",
+    )
 
     # Create states to run concurrently
     foo_state: State = FooState()
@@ -146,6 +168,17 @@ def main() -> None:
                 "BAR": "outcome3",
             },
         },
+    )
+    concurrence_state.set_description(
+        "Executes FooState and BarState in parallel and maps their combined outcomes to the next transition."
+    )
+    concurrence_state.add_input_key(
+        "foo_str",
+        "String read by BarState during the concurrent execution.",
+    )
+    concurrence_state.add_output_key(
+        "foo_str",
+        "String written by FooState during the concurrent execution.",
     )
 
     # Add concurrent state to the FSM

@@ -60,6 +60,10 @@ public:
             10             // timeout for receiving messages
         ) {
     this->times = 5;
+    this->set_description("Monitors odometry messages from the 'odom' topic "
+                          "and logs the received positions.");
+    this->add_input_key(
+        "odom", "Odometry message received from the monitored ROS topic.");
   };
 
   /**
@@ -107,6 +111,11 @@ int main(int argc, char *argv[]) {
   // Create a state machine with a final outcome
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"outcome4"}, true);
+  sm->set_description(
+      "Continuously monitors the 'odom' topic and logs received odometry "
+      "messages until a fixed number of messages has been processed.");
+  sm->add_input_key("odom",
+                    "Odometry messages received from the monitored ROS topic.");
 
   // Add states to the state machine
   sm->add_state(

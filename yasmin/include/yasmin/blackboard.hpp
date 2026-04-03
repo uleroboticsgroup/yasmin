@@ -170,6 +170,18 @@ public:
   bool contains(const std::string &key) const;
 
   /**
+   * @brief Copy a value from another blackboard.
+   * @param other The source blackboard.
+   * @param source_key The key to read from the source blackboard.
+   * @param target_key The key to write in this blackboard.
+   *
+   * The stored value is forwarded using the existing type-erased storage so the
+   * type does not need to be known at compile time.
+   */
+  void copy_value_from(const Blackboard &other, const std::string &source_key,
+                       const std::string &target_key);
+
+  /**
    * @brief Get the number of key-value pairs in the blackboard.
    * @return The size of the blackboard.
    */

@@ -41,15 +41,24 @@ public:
   ~BarState();
 
   /**
+   * @brief Configures the state-local parameters.
+   */
+  void configure() override;
+
+  /**
    * @brief Executes the Bar state logic.
    *
-   * This method logs the execution, waits for 3 seconds,
+   * This method logs the execution, waits for the configured duration,
    * retrieves a string from the blackboard, and logs it.
    *
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome3".
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard);
+
+private:
+  std::string log_prefix_;
+  int sleep_ms_;
 };
 
 #endif // BAR_STATE_H

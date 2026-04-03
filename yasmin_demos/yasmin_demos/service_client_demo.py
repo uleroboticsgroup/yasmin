@@ -17,12 +17,11 @@
 
 import rclpy
 from example_interfaces.srv import AddTwoInts
+from yasmin_ros.basic_outcomes import ABORT, SUCCEED
 
 import yasmin
-from yasmin import CbState, Blackboard, StateMachine
-from yasmin_ros import ServiceState
-from yasmin_ros import set_ros_loggers
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+from yasmin import Blackboard, CbState, StateMachine
+from yasmin_ros import ServiceState, set_ros_loggers
 from yasmin_viewer import YasminViewerPub
 
 
@@ -49,6 +48,12 @@ class AddTwoIntsState(ServiceState):
             ["outcome1"],  # outcomes. Includes (SUCCEED, ABORT)
             self.response_handler,  # cb to process the response
         )
+        self.set_description(
+            "Calls the AddTwoInts service using the values stored in the blackboard and writes the resulting sum back to the blackboard."
+        )
+        self.add_input_key("a", "First integer used for the service request.")
+        self.add_input_key("b", "Second integer used for the service request.")
+        self.add_output_key("sum", "Sum returned by the AddTwoInts service.")
 
     def create_request_handler(self, blackboard: Blackboard) -> AddTwoInts.Request:
         """
@@ -127,11 +132,39 @@ def main() -> None:
 
     # Create a FSM
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Sets two integers in the blackboard, calls the AddTwoInts service, and prints the resulting sum."
+    )
+    sm.add_output_key("a", "First integer used for the service request.")
+    sm.add_output_key("b", "Second integer used for the service request.")
+    sm.add_output_key("sum", "Sum returned by the AddTwoInts service.")
+
+    setting_ints_state = CbState([SUCCEED], set_ints)
+    setting_ints_state.set_description(
+        "Writes the two input integers for the AddTwoInts service into the blackboard."
+    )
+    setting_ints_state.add_output_key(
+        "a",
+        "First integer used for the service request.",
+    )
+    setting_ints_state.add_output_key(
+        "b",
+        "Second integer used for the service request.",
+    )
+
+    printing_sum_state = CbState([SUCCEED], print_sum)
+    printing_sum_state.set_description(
+        "Reads the computed sum from the blackboard and logs it."
+    )
+    printing_sum_state.add_input_key(
+        "sum",
+        "Sum previously written to the blackboard by the service state.",
+    )
 
     # Add states
     sm.add_state(
         "SETTING_INTS",
-        CbState([SUCCEED], set_ints),
+        setting_ints_state,
         transitions={SUCCEED: "ADD_TWO_INTS"},
     )
     sm.add_state(
@@ -145,7 +178,7 @@ def main() -> None:
     )
     sm.add_state(
         "PRINTING_SUM",
-        CbState([SUCCEED], print_sum),
+        printing_sum_state,
         transitions={
             SUCCEED: "outcome4",
         },

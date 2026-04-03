@@ -42,6 +42,9 @@ int main(int argc, char *argv[]) {
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);
+  sm->set_description(
+      "Loads a state machine from an XML file that demonstrates ROS interface "
+      "serialization and executes it.");
   sm->set_sigint_handler(true);
 
   // Publisher for visualizing the state machine

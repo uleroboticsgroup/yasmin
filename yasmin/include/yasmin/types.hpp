@@ -94,6 +94,10 @@ using TransitionsMap = std::unordered_map<std::string, Transitions>;
 using Remappings = StringMap;
 /** @brief Map of keys to remappings */
 using RemappingsMap = std::unordered_map<std::string, Remappings>;
+/** @brief Map of child parameter names to parent parameter names */
+using ParameterMappings = StringMap;
+/** @brief Map of state names to parameter mappings */
+using ParameterMappingsMap = std::unordered_map<std::string, ParameterMappings>;
 /** @brief Registry for type information */
 using TypeRegistry = StringMap;
 

@@ -17,9 +17,12 @@
 #define YASMIN__STATE_HPP_
 
 #include <atomic>
+#include <functional>
 #include <string>
+#include <unordered_map>
 
 #include "yasmin/blackboard.hpp"
+#include "yasmin/blackboard_key_info.hpp"
 #include "yasmin/logs.hpp"
 
 namespace yasmin {
@@ -50,6 +53,15 @@ protected:
   Outcomes outcomes;
 
 private:
+  /**
+   * @brief Gets a mutable reference to this state's metadata.
+   *
+   * Metadata is stored externally (not as a direct member) to preserve
+   * ABI compatibility with plugins compiled against earlier versions of
+   * the State class.
+   */
+  StateMetadata &get_metadata_ref() const;
+
   /// Current status of the state
   std::atomic<StateStatus> status{StateStatus::IDLE};
 
@@ -78,9 +90,19 @@ public:
   State(const Outcomes &outcomes);
 
   /**
-   * @brief Virtual destructor for proper polymorphic destruction.
+   * @brief Virtual destructor.
+   *
+   * Cleans up externally-stored metadata for this instance.
    */
-  virtual ~State() = default;
+  virtual ~State();
+
+  /**
+   * @brief Gets the private parameter blackboard of this state.
+   *
+   * This is primarily exposed for internal framework use and Python bindings.
+   * @return Shared pointer to the private parameter blackboard.
+   */
+  Blackboard::SharedPtr get_parameters_blackboard() const;
 
   /**
    * @brief Checks if the state is idle.
@@ -134,6 +156,15 @@ public:
   }
 
   /**
+   * @brief Configures the state before execution.
+   *
+   * This method can be overridden by derived classes to allocate resources,
+   * validate configuration, or initialize internal state. The default
+   * implementation does nothing.
+   */
+  virtual void configure() {}
+
+  /**
    * @brief Cancels the current state execution.
    *
    * This method sets the status to CANCELED and logs the action.
@@ -148,6 +179,200 @@ public:
    * @return A constant reference to the set of possible outcomes.
    */
   Outcomes const &get_outcomes() const noexcept;
+
+  /**
+   * @brief Sets the description for this state.
+   * @param description The description of the state.
+   */
+  void set_description(const std::string &description);
+
+  /**
+   * @brief Gets the description of this state.
+   * @return The description of the state.
+   */
+  const std::string &get_description() const;
+
+  /**
+   * @brief Sets a human-readable description for an outcome.
+   * @param outcome The outcome name.
+   * @param description The description of the outcome.
+   * @throws std::invalid_argument If the outcome is not part of this state.
+   */
+  void set_outcome_description(const std::string &outcome,
+                               const std::string &description);
+
+  /**
+   * @brief Gets the human-readable description for an outcome.
+   * @param outcome The outcome name.
+   * @return The description of the outcome, or an empty string if none exists.
+   * @throws std::invalid_argument If the outcome is not part of this state.
+   */
+  const std::string &get_outcome_description(const std::string &outcome) const;
+
+  /**
+   * @brief Gets all outcome descriptions.
+   * @return A constant reference to the outcome description map.
+   */
+  const std::unordered_map<std::string, std::string> &
+  get_outcome_descriptions() const;
+
+  /**
+   * @brief Adds an input key to the state's metadata.
+   * @param key_info Information about the input key.
+   */
+  void add_input_key(const BlackboardKeyInfo &key_info);
+
+  /**
+   * @brief Adds an input key with a name only.
+   * @param key_name The name of the input key.
+   */
+  void add_input_key(const std::string &key_name);
+
+  /**
+   * @brief Adds an input key with a name and description.
+   * @param key_name The name of the input key.
+   * @param description Human-readable description of the input key.
+   */
+  void add_input_key(const std::string &key_name,
+                     const std::string &description);
+
+  /**
+   * @brief Adds an input key with a name, default value and description.
+   * @tparam T The type of the default value.
+   * @param key_name The name of the input key.
+   * @param description Human-readable description of the input key.
+   * @param default_value The default value for the key.
+   */
+  template <typename T>
+  void add_input_key(const std::string &key_name,
+                     const std::string &description, T default_value) {
+    this->add_input_key(
+        BlackboardKeyInfo(key_name, description, default_value));
+  }
+
+  /**
+   * @brief Adds an output key to the state's metadata.
+   * @param key_info Information about the output key.
+   */
+  void add_output_key(const BlackboardKeyInfo &key_info);
+
+  /**
+   * @brief Adds an output key with a name only.
+   * @param key_name The name of the output key.
+   */
+  void add_output_key(const std::string &key_name);
+
+  /**
+   * @brief Adds an output key with a name and description.
+   * @param key_name The name of the output key.
+   * @param description Human-readable description of the output key.
+   */
+  void add_output_key(const std::string &key_name,
+                      const std::string &description);
+
+  /**
+   * @brief Gets the input keys metadata.
+   * @return A constant reference to the vector of input key information.
+   */
+  const std::vector<BlackboardKeyInfo> &get_input_keys() const;
+
+  /**
+   * @brief Gets the output keys metadata.
+   * @return A constant reference to the vector of output key information.
+   */
+  const std::vector<BlackboardKeyInfo> &get_output_keys() const;
+
+  /**
+   * @brief Declares a parameter in the state metadata.
+   * @param parameter_info Information about the parameter.
+   */
+  void declare_parameter(const BlackboardKeyInfo &parameter_info);
+
+  /**
+   * @brief Declares a parameter with a name only.
+   * @param parameter_name The name of the parameter.
+   */
+  void declare_parameter(const std::string &parameter_name);
+
+  /**
+   * @brief Declares a parameter with a name and description.
+   * @param parameter_name The name of the parameter.
+   * @param description Human-readable description of the parameter.
+   */
+  void declare_parameter(const std::string &parameter_name,
+                         const std::string &description);
+
+  /**
+   * @brief Declares a parameter with a name, description, and default value.
+   * @tparam T The type of the default value.
+   * @param parameter_name The name of the parameter.
+   * @param description Human-readable description of the parameter.
+   * @param default_value The default value for the parameter.
+   */
+  template <typename T>
+  void declare_parameter(const std::string &parameter_name,
+                         const std::string &description, T default_value) {
+    this->declare_parameter(
+        BlackboardKeyInfo(parameter_name, description, default_value));
+  }
+
+  /**
+   * @brief Checks if a parameter exists in the state-local parameter storage.
+   * @param parameter_name The parameter name.
+   * @return True if the parameter exists, otherwise false.
+   */
+  bool has_parameter(const std::string &parameter_name) const;
+
+  /**
+   * @brief Gets a parameter from the state-local parameter storage.
+   * @tparam T The parameter type.
+   * @param parameter_name The parameter name.
+   * @return The stored parameter value.
+   */
+  template <typename T>
+  T get_parameter(const std::string &parameter_name) const {
+    return this->get_parameters_blackboard()->get<T>(parameter_name);
+  }
+
+  /**
+   * @brief Sets a parameter in the state-local parameter storage.
+   * @tparam T The parameter type.
+   * @param parameter_name The parameter name.
+   * @param value The parameter value.
+   */
+  template <typename T>
+  void set_parameter(const std::string &parameter_name, T value) {
+    this->get_parameters_blackboard()->set<T>(parameter_name, value);
+  }
+
+  /**
+   * @brief Checks whether a parameter was declared in the state metadata.
+   * @param parameter_name The parameter name.
+   * @return True if the parameter was declared, otherwise false.
+   */
+  bool is_parameter_declared(const std::string &parameter_name) const;
+
+  /**
+   * @brief Copies a parameter value from another state.
+   * @param source_state The source state.
+   * @param source_parameter_name The parameter name in the source state.
+   * @param target_parameter_name The parameter name in this state.
+   */
+  void copy_parameter_from(const State &source_state,
+                           const std::string &source_parameter_name,
+                           const std::string &target_parameter_name);
+
+  /**
+   * @brief Gets the declared parameter metadata.
+   * @return A constant reference to the vector of parameter metadata.
+   */
+  const std::vector<BlackboardKeyInfo> &get_parameters() const;
+
+  /**
+   * @brief Gets the complete state metadata.
+   * @return A constant reference to the state metadata.
+   */
+  const StateMetadata &get_metadata() const;
 
   /**
    * @brief Converts the state to a string representation.

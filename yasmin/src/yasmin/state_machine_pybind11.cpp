@@ -62,14 +62,17 @@ PYBIND11_MODULE(state_machine, m) {
           [](yasmin::StateMachine &self, const std::string &name,
              yasmin::State::SharedPtr state,
              const yasmin::Transitions &transitions,
-             const yasmin::Remappings &remappings) {
+             const yasmin::Remappings &remappings,
+             const yasmin::ParameterMappings &parameter_mappings) {
             // Ensure the Python object is kept alive
             py::object py_state = py::cast(state);
-            self.add_state(name, state, transitions, remappings);
+            self.add_state(name, state, transitions, remappings,
+                           parameter_mappings);
           },
           "Add a state to the state machine", py::arg("name"), py::arg("state"),
           py::arg("transitions") = yasmin::Transitions(),
           py::arg("remappings") = yasmin::Remappings(),
+          py::arg("parameter_mappings") = yasmin::ParameterMappings(),
           py::keep_alive<1, 3>()) // Keep state (arg 3) alive as long as self
                                   // (arg 1) is alive
       // Setters and getters for name and start state
@@ -147,6 +150,17 @@ PYBIND11_MODULE(state_machine, m) {
           },
           "Add a callback to be called when the state machine ends",
           py::arg("cb"))
+
+      .def("set_parameter_mappings",
+           &yasmin::StateMachine::set_parameter_mappings,
+           "Set parameter mappings for a child state", py::arg("state_name"),
+           py::arg("parameter_mappings"))
+      .def("get_parameter_mappings",
+           &yasmin::StateMachine::get_parameter_mappings,
+           "Get parameter mappings for all child states",
+           py::return_value_policy::reference_internal)
+      .def("configure", &yasmin::StateMachine::configure,
+           "Configure the state machine and all child states")
       // Validation and cancellation methods
       .def("validate", &yasmin::StateMachine::validate,
            "Validate the state machine configuration",

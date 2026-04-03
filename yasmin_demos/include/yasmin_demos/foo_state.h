@@ -15,6 +15,10 @@
 
 #include <string>
 
+#include <yasmin/blackboard.hpp>
+#include <yasmin/state.hpp>
+#include <yasmin/types.hpp>
+
 #ifndef YASMIN_DEMOS_FOO_STATE_H
 #define YASMIN_DEMOS_FOO_STATE_H
 
@@ -37,9 +41,14 @@ public:
   ~FooState();
 
   /**
+   * @brief Configures the state-local parameters.
+   */
+  void configure() override;
+
+  /**
    * @brief Executes the Foo state logic.
    *
-   * This method logs the execution, waits for 3 seconds,
+   * This method logs the execution, waits for the configured duration,
    * increments the counter, and sets a string in the blackboard.
    * The state will transition to either "outcome1" or "outcome2"
    * based on the current value of the counter.
@@ -51,6 +60,11 @@ public:
 
   /// Counter to track the number of executions.
   int counter;
+
+private:
+  std::string counter_prefix_;
+  int max_count_;
+  int sleep_ms_;
 };
 
 #endif // YASMIN_DEMOS_FOO_STATE_H
