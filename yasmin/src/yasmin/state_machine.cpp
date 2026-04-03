@@ -222,6 +222,23 @@ void StateMachine::call_end_cbs(Blackboard::SharedPtr blackboard,
   }
 }
 
+Remappings
+StateMachine::compose_remappings(const Remappings &parent_remappings,
+                                 const Remappings &state_remappings) {
+  Remappings composed_remappings = parent_remappings;
+
+  for (const auto &[state_key, state_target] : state_remappings) {
+    auto parent_it = parent_remappings.find(state_target);
+    if (parent_it != parent_remappings.end()) {
+      composed_remappings[state_key] = parent_it->second;
+    } else {
+      composed_remappings[state_key] = state_target;
+    }
+  }
+
+  return composed_remappings;
+}
+
 void StateMachine::validate(bool strict_mode) {
 
   YASMIN_LOG_DEBUG("Validating state machine '%s'", this->to_string().c_str());
@@ -328,10 +345,19 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
     auto state = this->states.at(current_state);
     transitions = this->transitions.at(current_state);
     remappings = this->remappings.at(current_state);
-    blackboard->set_remappings(remappings);
+
+    // compose remappings
+    auto parent_remappings = blackboard->get_remappings();
+    auto composed_remappings =
+        StateMachine::compose_remappings(parent_remappings, remappings);
+    // apply remappings
+    blackboard->set_remappings(composed_remappings);
 
     outcome = (*state.get())(blackboard);
     old_outcome = std::string(outcome);
+
+    // restore parent remappings
+    blackboard->set_remappings(parent_remappings);
 
     // Check outcome belongs to state
     const auto &state_outcomes = state->get_outcomes();

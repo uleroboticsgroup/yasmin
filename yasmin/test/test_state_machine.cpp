@@ -359,6 +359,31 @@ TEST_F(TestStateMachine, TestMultipleCallbacks) {
   EXPECT_EQ(end_count, 2);
 }
 
+TEST_F(TestStateMachine, TestNestedRemappingsComposeAcrossStateMachines) {
+  auto root_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  auto nested_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  auto bb = yasmin::Blackboard::make_shared();
+
+  root_sm->add_state(
+      "FOO", std::make_shared<FooState>(),
+      yasmin::Transitions{{"outcome1", "NESTED"}, {"outcome2", "NESTED"}},
+      yasmin::Remappings{{"foo_str", "foo_toplevel"}});
+
+  nested_sm->add_state(
+      "FOO", std::make_shared<FooState>(),
+      yasmin::Transitions{{"outcome1", "done"}, {"outcome2", "done"}},
+      yasmin::Remappings{{"foo_str", "foo_inner"}});
+
+  root_sm->add_state("NESTED", nested_sm, yasmin::Transitions{{"done", "done"}},
+                     yasmin::Remappings{{"foo_inner", "foo_nested"}});
+
+  EXPECT_EQ((*root_sm)(bb), "done");
+  EXPECT_EQ(bb->get<std::string>("foo_toplevel"), "Counter: 1");
+  EXPECT_EQ(bb->get<std::string>("foo_nested"), "Counter: 1");
+  EXPECT_FALSE(bb->contains("foo_inner"));
+  EXPECT_FALSE(bb->contains("foo_str"));
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
