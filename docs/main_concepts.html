@@ -425,6 +425,72 @@
           execution.
         </p>
 
+        <h3>State Metadata</h3>
+        <p>
+          In YASMIN, a state can expose <strong>metadata</strong> in addition to
+          its execution logic. This metadata describes what the state does, what
+          blackboard keys it expects, what outputs it produces, which
+          parameters it declares, and what its outcomes mean. The metadata is
+          used by tools such as the editor and factory, but it is also useful
+          to make states more self-describing and easier to reuse.
+        </p>
+        <p>
+          A state description can be set with <code>set_description()</code>.
+          This provides a human-readable explanation of the purpose of the
+          state. Outcome descriptions can be set with
+          <code>set_outcome_description()</code>, allowing each outcome to be
+          documented individually. For example, instead of only exposing an
+          outcome name such as <code>succeeded</code> or
+          <code>object_not_found</code>, the state can also provide a clear
+          explanation of what that outcome means.
+        </p>
+        <p>
+          Blackboard interface metadata is declared with
+          <code>add_input_key()</code> and <code>add_output_key()</code>.
+          Parameter metadata is declared with
+          <code>declare_parameter()</code>. These declarations can include a
+          name, a description, and an optional default value. This makes the
+          interface of a state explicit and inspectable instead of only being
+          implied by the implementation.
+        </p>
+        <p>
+          The complete metadata of a state can be retrieved with
+          <code>get_metadata()</code>. In addition, YASMIN also provides helper
+          accessors such as <code>get_description()</code>,
+          <code>get_outcome_description()</code>,
+          <code>get_outcome_descriptions()</code>,
+          <code>get_input_keys()</code>, <code>get_output_keys()</code>, and
+          <code>get_parameters()</code>. This allows tools and users to inspect
+          the interface of a state programmatically.
+        </p>
+        <ul>
+          <li>
+            <strong>State description:</strong> Documents the purpose of the
+            state with <code>set_description()</code>
+          </li>
+          <li>
+            <strong>Outcome descriptions:</strong> Documents the meaning of each
+            outcome with <code>set_outcome_description()</code>
+          </li>
+          <li>
+            <strong>Input and output metadata:</strong> Declares expected
+            blackboard keys with <code>add_input_key()</code> and
+            <code>add_output_key()</code>
+          </li>
+          <li>
+            <strong>Parameter metadata:</strong> Declares state-local
+            configuration with <code>declare_parameter()</code>
+          </li>
+          <li>
+            <strong>Tool support:</strong> Makes state interfaces visible to the
+            editor, factory, and other introspection tools
+          </li>
+        </ul>
+        <p>
+          In practice, metadata makes states easier to understand, safer to
+          connect, and simpler to reuse in larger state machines.
+        </p>
+
         <h2>State Machine Composition</h2>
         <p>
           YASMIN supports building complex behaviors by composing multiple state
