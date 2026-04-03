@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import json
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -28,7 +29,12 @@ from yasmin_cli.completer import (
     plugin_id,
     test_plugin_completer,
 )
-from yasmin_cli.verb.run import run_factory_node
+from yasmin_cli.verb.run import (
+    _convert_value,
+    _format_default_value,
+    _normalize_type,
+    run_factory_node,
+)
 
 
 def _parse_assignments(values: list[str], assignment_kind: str) -> dict[str, str]:
@@ -53,19 +59,48 @@ def _parse_assignments(values: list[str], assignment_kind: str) -> dict[str, str
     return result
 
 
-def _normalize_type(type_name: str) -> str:
-    normalized = (type_name or "str").strip().lower()
-
-    if normalized in ("str", "string"):
-        return "str"
-    if normalized in ("int", "integer"):
-        return "int"
-    if normalized in ("float", "double"):
-        return "float"
-    if normalized in ("bool", "boolean"):
+def _infer_python_value_type(value) -> str | None:
+    """Infer the canonical XML type string from an already parsed Python value."""
+    if isinstance(value, bool):
         return "bool"
-
-    return "str"
+    if isinstance(value, int) and not isinstance(value, bool):
+        return "int"
+    if isinstance(value, float):
+        return "float"
+    if isinstance(value, str):
+        return "str"
+    if isinstance(value, list):
+        if not value:
+            return None
+        if all(isinstance(item, str) for item in value):
+            return "list[str]"
+        if all(isinstance(item, bool) for item in value):
+            return "list[bool]"
+        if all(isinstance(item, int) and not isinstance(item, bool) for item in value):
+            return "list[int]"
+        if all(
+            isinstance(item, (int, float)) and not isinstance(item, bool)
+            for item in value
+        ):
+            return "list[float]"
+        return None
+    if isinstance(value, dict):
+        if not value or not all(isinstance(key, str) for key in value.keys()):
+            return None
+        values = list(value.values())
+        if all(isinstance(item, str) for item in values):
+            return "dict[str,str]"
+        if all(isinstance(item, bool) for item in values):
+            return "dict[str,bool]"
+        if all(isinstance(item, int) and not isinstance(item, bool) for item in values):
+            return "dict[str,int]"
+        if all(
+            isinstance(item, (int, float)) and not isinstance(item, bool)
+            for item in values
+        ):
+            return "dict[str,float]"
+        return None
+    return None
 
 
 def _infer_value_type(raw_value: str) -> str:
@@ -86,7 +121,18 @@ def _infer_value_type(raw_value: str) -> str:
     except ValueError:
         pass
 
-    return "str"
+    try:
+        parsed_json = json.loads(value)
+    except json.JSONDecodeError:
+        return "str"
+
+    inferred_type = _infer_python_value_type(parsed_json)
+    return inferred_type or "str"
+
+
+def _serialize_default_value(value, type_name: str) -> str:
+    """Serialize plugin metadata defaults back into the XML default format."""
+    return _format_default_value(value, type_name)
 
 
 def _get_input_meta(plugin, key_name: str) -> dict | None:
@@ -113,15 +159,26 @@ def _resolve_input_type(plugin, key_name: str, raw_value: str) -> str:
         return _normalize_type(default_type)
 
     if key_meta.get("has_default", False):
-        default_value = key_meta.get("default_value")
-        if isinstance(default_value, bool):
-            return "bool"
-        if isinstance(default_value, int) and not isinstance(default_value, bool):
-            return "int"
-        if isinstance(default_value, float):
-            return "float"
-        if isinstance(default_value, str):
-            return "str"
+        inferred_type = _infer_python_value_type(key_meta.get("default_value"))
+        if inferred_type:
+            return inferred_type
+
+    return _infer_value_type(raw_value)
+
+
+def _resolve_parameter_type(plugin, parameter_name: str, raw_value: str) -> str:
+    parameter_meta = _get_parameter_meta(plugin, parameter_name)
+    if parameter_meta is None:
+        return _infer_value_type(raw_value)
+
+    default_type = parameter_meta.get("default_value_type", "")
+    if default_type:
+        return _normalize_type(default_type)
+
+    if parameter_meta.get("has_default", False):
+        inferred_type = _infer_python_value_type(parameter_meta.get("default_value"))
+        if inferred_type:
+            return inferred_type
 
     return _infer_value_type(raw_value)
 
@@ -225,15 +282,20 @@ def _build_test_xml(
             key_attributes["description"] = description
 
         if key_name in provided_inputs:
-            key_attributes["default_value"] = provided_inputs[key_name]
-            key_attributes["default_type"] = _resolve_input_type(
+            resolved_type = _resolve_input_type(
                 plugin, key_name, provided_inputs[key_name]
             )
-        elif key.get("has_default", False):
-            key_attributes["default_value"] = str(key.get("default_value", ""))
-            key_attributes["default_type"] = _normalize_type(
-                key.get("default_value_type", "str")
+            converted_value = _convert_value(provided_inputs[key_name], resolved_type)
+            key_attributes["default_value"] = _serialize_default_value(
+                converted_value, resolved_type
             )
+            key_attributes["default_type"] = resolved_type
+        elif key.get("has_default", False):
+            resolved_type = _normalize_type(key.get("default_value_type", "str"))
+            key_attributes["default_value"] = _serialize_default_value(
+                key.get("default_value", ""), resolved_type
+            )
+            key_attributes["default_type"] = resolved_type
         elif key.get("default_value_type"):
             key_attributes["default_type"] = _normalize_type(
                 key.get("default_value_type", "str")
@@ -262,15 +324,22 @@ def _build_test_xml(
             parameter_attributes["description"] = description
 
         if parameter_name in provided_parameters:
-            parameter_attributes["default_value"] = provided_parameters[parameter_name]
-            parameter_attributes["default_type"] = _resolve_parameter_type(
+            resolved_type = _resolve_parameter_type(
                 plugin,
                 parameter_name,
                 provided_parameters[parameter_name],
             )
+            converted_value = _convert_value(
+                provided_parameters[parameter_name], resolved_type
+            )
+            parameter_attributes["default_value"] = _serialize_default_value(
+                converted_value, resolved_type
+            )
+            parameter_attributes["default_type"] = resolved_type
         elif parameter.get("has_default", False):
-            parameter_attributes["default_value"] = str(
-                parameter.get("default_value", "")
+            resolved_type = _normalize_type(parameter.get("default_value_type", "str"))
+            parameter_attributes["default_value"] = _serialize_default_value(
+                parameter.get("default_value", ""), resolved_type
             )
 
         ET.SubElement(root, "Param", parameter_attributes)

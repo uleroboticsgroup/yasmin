@@ -31,7 +31,21 @@ class BlackboardKeyDialog(QDialog):
     """Dialog for creating and editing blackboard keys."""
 
     TYPE_OPTIONS = ["in", "out", "in/out"]
-    VALUE_TYPE_OPTIONS = ["", "str", "int", "float", "bool"]
+    VALUE_TYPE_OPTIONS = [
+        "",
+        "str",
+        "int",
+        "float",
+        "bool",
+        "list[str]",
+        "list[int]",
+        "list[float]",
+        "list[bool]",
+        "dict[str,str]",
+        "dict[str,int]",
+        "dict[str,float]",
+        "dict[str,bool]",
+    ]
 
     def __init__(
         self,
@@ -84,7 +98,11 @@ class BlackboardKeyDialog(QDialog):
 
         self.default_value_edit = QLineEdit(str(key_data.get("default_value", "") or ""))
         self.default_value_edit.setPlaceholderText(
-            "Default value. Leave empty for an empty string when type is str"
+            'Default value. Use JSON for list/dict types, e.g. [1, 2] or {"foo": 1}'
+        )
+        self.default_value_edit.setToolTip(
+            "Scalar defaults are entered directly. Container defaults use JSON syntax "
+            'with homogeneous element/value types, e.g. [1, 2, 3] or {"foo": true}.'
         )
         layout.addRow("Default Value:", self.default_value_edit)
 

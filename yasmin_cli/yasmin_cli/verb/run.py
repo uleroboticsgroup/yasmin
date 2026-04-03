@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -58,18 +59,61 @@ def _parse_assignments(values: list[str], assignment_kind: str) -> dict[str, str
 
 
 def _normalize_type(type_name: str) -> str:
-    normalized = (type_name or "").strip().lower()
+    """Normalize XML type aliases to one canonical name shared across tools."""
+    normalized = (type_name or "").strip().lower().replace(" ", "")
 
-    if normalized in ("str", "string"):
-        return "str"
-    if normalized in ("int", "integer"):
-        return "int"
-    if normalized in ("float", "double"):
-        return "float"
-    if normalized in ("bool", "boolean"):
-        return "bool"
+    alias_map = {
+        "string": "str",
+        "integer": "int",
+        "double": "float",
+        "boolean": "bool",
+        "list[string]": "list[str]",
+        "list[double]": "list[float]",
+        "list[boolean]": "list[bool]",
+        "dict[string,str]": "dict[str,str]",
+        "dict[str,string]": "dict[str,str]",
+        "dict[string,string]": "dict[str,str]",
+        "dict[string,int]": "dict[str,int]",
+        "dict[string,integer]": "dict[str,int]",
+        "dict[str,integer]": "dict[str,int]",
+        "dict[string,float]": "dict[str,float]",
+        "dict[string,double]": "dict[str,float]",
+        "dict[str,double]": "dict[str,float]",
+        "dict[string,bool]": "dict[str,bool]",
+        "dict[string,boolean]": "dict[str,bool]",
+        "dict[str,boolean]": "dict[str,bool]",
+    }
+
+    if normalized in alias_map:
+        return alias_map[normalized]
+
+    if normalized in {
+        "str",
+        "int",
+        "float",
+        "bool",
+        "list[str]",
+        "list[int]",
+        "list[float]",
+        "list[bool]",
+        "dict[str,str]",
+        "dict[str,int]",
+        "dict[str,float]",
+        "dict[str,bool]",
+    }:
+        return normalized
 
     raise ValueError(f"Unsupported default_type '{type_name}'")
+
+
+def _load_json_value(raw_value: str, normalized_type: str):
+    """Decode the JSON representation used for list and dict default values."""
+    try:
+        return json.loads(raw_value)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Invalid value '{raw_value}' for type {normalized_type}. Expected JSON syntax."
+        ) from exc
 
 
 def _convert_value(raw_value: str, type_name: str):
@@ -98,6 +142,69 @@ def _convert_value(raw_value: str, type_name: str):
             return False
         raise ValueError(f"Invalid value '{raw_value}' for type bool")
 
+    if normalized_type.startswith("list["):
+        value = _load_json_value(raw_value, normalized_type)
+        if not isinstance(value, list):
+            raise ValueError(f"Invalid value '{raw_value}' for type {normalized_type}")
+
+        if normalized_type == "list[str]":
+            if not all(isinstance(item, str) for item in value):
+                raise ValueError(f"Type {normalized_type} expects only string entries")
+            return value
+
+        if normalized_type == "list[int]":
+            if not all(
+                isinstance(item, int) and not isinstance(item, bool) for item in value
+            ):
+                raise ValueError(f"Type {normalized_type} expects only integer entries")
+            return value
+
+        if normalized_type == "list[float]":
+            if not all(
+                isinstance(item, (int, float)) and not isinstance(item, bool)
+                for item in value
+            ):
+                raise ValueError(f"Type {normalized_type} expects only numeric entries")
+            return [float(item) for item in value]
+
+        if normalized_type == "list[bool]":
+            if not all(isinstance(item, bool) for item in value):
+                raise ValueError(f"Type {normalized_type} expects only boolean entries")
+            return value
+
+    if normalized_type.startswith("dict["):
+        value = _load_json_value(raw_value, normalized_type)
+        if not isinstance(value, dict) or not all(
+            isinstance(key, str) for key in value.keys()
+        ):
+            raise ValueError(f"Invalid value '{raw_value}' for type {normalized_type}")
+
+        if normalized_type == "dict[str,str]":
+            if not all(isinstance(item, str) for item in value.values()):
+                raise ValueError(f"Type {normalized_type} expects only string values")
+            return value
+
+        if normalized_type == "dict[str,int]":
+            if not all(
+                isinstance(item, int) and not isinstance(item, bool)
+                for item in value.values()
+            ):
+                raise ValueError(f"Type {normalized_type} expects only integer values")
+            return value
+
+        if normalized_type == "dict[str,float]":
+            if not all(
+                isinstance(item, (int, float)) and not isinstance(item, bool)
+                for item in value.values()
+            ):
+                raise ValueError(f"Type {normalized_type} expects only numeric values")
+            return {key: float(item) for key, item in value.items()}
+
+        if normalized_type == "dict[str,bool]":
+            if not all(isinstance(item, bool) for item in value.values()):
+                raise ValueError(f"Type {normalized_type} expects only boolean values")
+            return value
+
     raise ValueError(f"Unsupported default_type '{type_name}'")
 
 
@@ -106,6 +213,9 @@ def _format_default_value(value, type_name: str) -> str:
 
     if normalized_type == "bool":
         return "true" if value else "false"
+
+    if normalized_type.startswith("list[") or normalized_type.startswith("dict["):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
     return str(value)
 
