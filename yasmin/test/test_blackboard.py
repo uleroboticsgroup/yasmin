@@ -117,69 +117,218 @@ class TestBlackboard(unittest.TestCase):
         self.blackboard["none_key"] = None
         self.assertIsNone(self.blackboard["none_key"])
 
-    def test_set_get_list(self):
-        """Test setting and getting list values"""
+    def test_set_get_mixed_list(self):
+        """Test setting and getting mixed list values via py::object"""
         test_list = [1, 2, 3, "four", 5.0]
         self.blackboard["list_key"] = test_list
         retrieved_list = self.blackboard["list_key"]
         self.assertIsInstance(retrieved_list, list)
-        self.assertEqual(len(test_list), len(retrieved_list))
-        for i in range(len(test_list)):
-            self.assertEqual(test_list[i], retrieved_list[i])
+        self.assertEqual(test_list, retrieved_list)
 
     def test_set_get_empty_list(self):
         """Test setting and getting empty list"""
         self.blackboard["empty_list"] = []
         retrieved_list = self.blackboard["empty_list"]
         self.assertIsInstance(retrieved_list, list)
-        self.assertEqual(0, len(retrieved_list))
+        self.assertEqual([], retrieved_list)
 
-    def test_set_get_tuple(self):
-        """Test setting and getting tuple values (stored as list)"""
+    def test_set_get_list_of_strings(self):
+        """Test setting and getting homogeneous string lists"""
+        test_list = ["one", "two", "three"]
+        self.blackboard["string_list"] = test_list
+        retrieved_list = self.blackboard["string_list"]
+        self.assertIsInstance(retrieved_list, list)
+        self.assertEqual(test_list, retrieved_list)
+        for value in retrieved_list:
+            self.assertIsInstance(value, str)
+
+    def test_set_get_list_of_ints(self):
+        """Test setting and getting homogeneous integer lists"""
+        test_list = [1, 2, 3, 4]
+        self.blackboard["int_list"] = test_list
+        retrieved_list = self.blackboard["int_list"]
+        self.assertIsInstance(retrieved_list, list)
+        self.assertEqual(test_list, retrieved_list)
+        for value in retrieved_list:
+            self.assertIsInstance(value, int)
+            self.assertNotIsInstance(value, bool)
+
+    def test_set_get_list_of_floats(self):
+        """Test setting and getting homogeneous float lists"""
+        test_list = [1.5, 2.5, 3.5]
+        self.blackboard["float_list"] = test_list
+        retrieved_list = self.blackboard["float_list"]
+        self.assertIsInstance(retrieved_list, list)
+        self.assertEqual(test_list, retrieved_list)
+        for value in retrieved_list:
+            self.assertIsInstance(value, float)
+
+    def test_set_get_list_of_bools(self):
+        """Test setting and getting homogeneous boolean lists"""
+        test_list = [True, False, True]
+        self.blackboard["bool_list"] = test_list
+        retrieved_list = self.blackboard["bool_list"]
+        self.assertIsInstance(retrieved_list, list)
+        self.assertEqual(test_list, retrieved_list)
+        for value in retrieved_list:
+            self.assertIsInstance(value, bool)
+
+    def test_set_get_mixed_numeric_list(self):
+        """Test mixed numeric lists normalized to float values"""
+        test_list = [1, 2.5, 3]
+        self.blackboard["mixed_numeric_list"] = test_list
+        retrieved_list = self.blackboard["mixed_numeric_list"]
+        self.assertIsInstance(retrieved_list, list)
+        self.assertEqual([1.0, 2.5, 3.0], retrieved_list)
+        for value in retrieved_list:
+            self.assertIsInstance(value, float)
+
+    def test_set_get_mixed_tuple(self):
+        """Test setting and getting mixed tuple values via py::object"""
         test_tuple = (1, 2, 3, "four", 5.0)
         self.blackboard["tuple_key"] = test_tuple
         retrieved_value = self.blackboard["tuple_key"]
-        # Tuples are stored as lists internally
         self.assertIsInstance(retrieved_value, tuple)
-        self.assertEqual(len(test_tuple), len(retrieved_value))
-        for i in range(len(test_tuple)):
-            self.assertEqual(test_tuple[i], retrieved_value[i])
+        self.assertEqual(test_tuple, retrieved_value)
 
-    def test_set_get_dict(self):
-        """Test setting and getting dictionary values"""
+    def test_set_get_tuple_of_strings(self):
+        """Test homogeneous string tuples round-trip as lists"""
+        test_tuple = ("one", "two", "three")
+        self.blackboard["string_tuple"] = test_tuple
+        retrieved_value = self.blackboard["string_tuple"]
+        self.assertIsInstance(retrieved_value, list)
+        self.assertEqual(["one", "two", "three"], retrieved_value)
+
+    def test_set_get_tuple_of_ints(self):
+        """Test homogeneous integer tuples round-trip as lists"""
+        test_tuple = (1, 2, 3, 4)
+        self.blackboard["int_tuple"] = test_tuple
+        retrieved_value = self.blackboard["int_tuple"]
+        self.assertIsInstance(retrieved_value, list)
+        self.assertEqual([1, 2, 3, 4], retrieved_value)
+        for value in retrieved_value:
+            self.assertIsInstance(value, int)
+            self.assertNotIsInstance(value, bool)
+
+    def test_set_get_tuple_of_floats(self):
+        """Test homogeneous float tuples round-trip as lists"""
+        test_tuple = (1.5, 2.5, 3.5)
+        self.blackboard["float_tuple"] = test_tuple
+        retrieved_value = self.blackboard["float_tuple"]
+        self.assertIsInstance(retrieved_value, list)
+        self.assertEqual([1.5, 2.5, 3.5], retrieved_value)
+        for value in retrieved_value:
+            self.assertIsInstance(value, float)
+
+    def test_set_get_tuple_of_bools(self):
+        """Test homogeneous boolean tuples round-trip as lists"""
+        test_tuple = (True, False, True)
+        self.blackboard["bool_tuple"] = test_tuple
+        retrieved_value = self.blackboard["bool_tuple"]
+        self.assertIsInstance(retrieved_value, list)
+        self.assertEqual([True, False, True], retrieved_value)
+        for value in retrieved_value:
+            self.assertIsInstance(value, bool)
+
+    def test_set_get_mixed_numeric_tuple(self):
+        """Test mixed numeric tuples round-trip as float lists"""
+        test_tuple = (1, 2.5, 3)
+        self.blackboard["mixed_numeric_tuple"] = test_tuple
+        retrieved_value = self.blackboard["mixed_numeric_tuple"]
+        self.assertIsInstance(retrieved_value, list)
+        self.assertEqual([1.0, 2.5, 3.0], retrieved_value)
+        for value in retrieved_value:
+            self.assertIsInstance(value, float)
+
+    def test_set_get_mixed_dict(self):
+        """Test setting and getting mixed dictionary values via py::object"""
         test_dict = {"a": 1, "b": "two", "c": 3.0, "d": True}
         self.blackboard["dict_key"] = test_dict
         retrieved_dict = self.blackboard["dict_key"]
         self.assertIsInstance(retrieved_dict, dict)
-        self.assertEqual(len(test_dict), len(retrieved_dict))
-        for key in test_dict:
-            self.assertEqual(test_dict[key], retrieved_dict[key])
+        self.assertEqual(test_dict, retrieved_dict)
 
     def test_set_get_empty_dict(self):
         """Test setting and getting empty dictionary"""
         self.blackboard["empty_dict"] = {}
         retrieved_dict = self.blackboard["empty_dict"]
         self.assertIsInstance(retrieved_dict, dict)
-        self.assertEqual(0, len(retrieved_dict))
+        self.assertEqual({}, retrieved_dict)
+
+    def test_set_get_dict_of_strings(self):
+        """Test setting and getting homogeneous string dictionaries"""
+        test_dict = {"a": "one", "b": "two"}
+        self.blackboard["string_dict"] = test_dict
+        retrieved_dict = self.blackboard["string_dict"]
+        self.assertIsInstance(retrieved_dict, dict)
+        self.assertEqual(test_dict, retrieved_dict)
+        for value in retrieved_dict.values():
+            self.assertIsInstance(value, str)
+
+    def test_set_get_dict_of_ints(self):
+        """Test setting and getting homogeneous integer dictionaries"""
+        test_dict = {"a": 1, "b": 2}
+        self.blackboard["int_dict"] = test_dict
+        retrieved_dict = self.blackboard["int_dict"]
+        self.assertIsInstance(retrieved_dict, dict)
+        self.assertEqual(test_dict, retrieved_dict)
+        for value in retrieved_dict.values():
+            self.assertIsInstance(value, int)
+            self.assertNotIsInstance(value, bool)
+
+    def test_set_get_dict_of_floats(self):
+        """Test setting and getting homogeneous float dictionaries"""
+        test_dict = {"a": 1.5, "b": 2.5}
+        self.blackboard["float_dict"] = test_dict
+        retrieved_dict = self.blackboard["float_dict"]
+        self.assertIsInstance(retrieved_dict, dict)
+        self.assertEqual(test_dict, retrieved_dict)
+        for value in retrieved_dict.values():
+            self.assertIsInstance(value, float)
+
+    def test_set_get_dict_of_bools(self):
+        """Test setting and getting homogeneous boolean dictionaries"""
+        test_dict = {"a": True, "b": False}
+        self.blackboard["bool_dict"] = test_dict
+        retrieved_dict = self.blackboard["bool_dict"]
+        self.assertIsInstance(retrieved_dict, dict)
+        self.assertEqual(test_dict, retrieved_dict)
+        for value in retrieved_dict.values():
+            self.assertIsInstance(value, bool)
+
+    def test_set_get_mixed_numeric_dict(self):
+        """Test mixed numeric dictionaries normalized to float values"""
+        test_dict = {"a": 1, "b": 2.5, "c": 3}
+        self.blackboard["mixed_numeric_dict"] = test_dict
+        retrieved_dict = self.blackboard["mixed_numeric_dict"]
+        self.assertIsInstance(retrieved_dict, dict)
+        self.assertEqual({"a": 1.0, "b": 2.5, "c": 3.0}, retrieved_dict)
+        for value in retrieved_dict.values():
+            self.assertIsInstance(value, float)
+
+    def test_set_get_dict_with_non_string_keys(self):
+        """Test dictionaries with non-string keys via py::object"""
+        test_dict = {1: "one", 2: "two"}
+        self.blackboard["non_string_key_dict"] = test_dict
+        retrieved_dict = self.blackboard["non_string_key_dict"]
+        self.assertIsInstance(retrieved_dict, dict)
+        self.assertEqual(test_dict, retrieved_dict)
 
     def test_set_get_nested_list(self):
         """Test setting and getting nested list structures"""
         nested_list = [[1, 2], [3, 4], [5, [6, 7]]]
         self.blackboard["nested_list"] = nested_list
         retrieved_list = self.blackboard["nested_list"]
-        self.assertEqual(len(nested_list), len(retrieved_list))
-        self.assertEqual(nested_list[0], retrieved_list[0])
-        self.assertEqual(nested_list[2][1], retrieved_list[2][1])
+        self.assertIsInstance(retrieved_list, list)
+        self.assertEqual(nested_list, retrieved_list)
 
     def test_set_get_nested_dict(self):
         """Test setting and getting nested dictionary structures"""
         nested_dict = {"outer": {"inner": "value", "number": 42}, "list": [1, 2, 3]}
         self.blackboard["nested_dict"] = nested_dict
         retrieved_dict = self.blackboard["nested_dict"]
-        self.assertEqual(nested_dict["outer"]["inner"], retrieved_dict["outer"]["inner"])
-        self.assertEqual(
-            nested_dict["outer"]["number"], retrieved_dict["outer"]["number"]
-        )
+        self.assertIsInstance(retrieved_dict, dict)
+        self.assertEqual(nested_dict, retrieved_dict)
 
     def test_set_get_custom_object(self):
         """Test setting and getting custom Python objects"""
