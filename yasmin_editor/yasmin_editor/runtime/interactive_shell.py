@@ -21,8 +21,15 @@ from typing import Any, Callable, Optional
 
 _MISSING = object()
 
-from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtWidgets import QDialog, QVBoxLayout
+from PyQt5.QtCore import QObject, Qt, pyqtSignal
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget
+
+from yasmin_editor.editor_gui.theme import PALETTE
+from yasmin_editor.editor_gui.theme.qt_style import (
+    build_qtconsole_palette,
+    build_qtconsole_stylesheet,
+    build_qtconsole_syntax_style,
+)
 
 try:
     from qtconsole.inprocess import QtInProcessKernelManager
@@ -182,15 +189,41 @@ class _RuntimeShellCommand:
 class _ShellDialog(QDialog):
     visibility_changed = pyqtSignal(bool)
 
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent, Qt.Window)
+        self._saved_geometry = None
+        self._saved_show_mode = "normal"
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowCloseButtonHint, True)
+
+    def preferred_show_mode(self) -> str:
+        return str(self._saved_show_mode or "normal")
+
+    def remember_window_state(self) -> None:
+        self._saved_geometry = self.saveGeometry()
+        if self.isFullScreen():
+            self._saved_show_mode = "fullscreen"
+        elif self.isMaximized():
+            self._saved_show_mode = "maximized"
+        else:
+            self._saved_show_mode = "normal"
+
+    def restore_window_state(self) -> None:
+        if self._saved_geometry is not None:
+            self.restoreGeometry(self._saved_geometry)
+
     def showEvent(self, event) -> None:
         super().showEvent(event)
         self.visibility_changed.emit(True)
 
     def hideEvent(self, event) -> None:
+        self.remember_window_state()
         super().hideEvent(event)
         self.visibility_changed.emit(False)
 
     def closeEvent(self, event) -> None:
+        self.remember_window_state()
         event.ignore()
         self.hide()
 
@@ -266,7 +299,14 @@ class InteractiveShellManager(QObject):
         if self._dialog is None:
             return
 
-        self._dialog.show()
+        self._dialog.restore_window_state()
+        show_mode = self._dialog.preferred_show_mode()
+        if show_mode == "fullscreen":
+            self._dialog.showFullScreen()
+        elif show_mode == "maximized":
+            self._dialog.showMaximized()
+        else:
+            self._dialog.show()
         self._dialog.raise_()
         self._dialog.activateWindow()
 
@@ -350,6 +390,49 @@ class InteractiveShellManager(QObject):
         ]:
             _register_magic(command_name)
 
+    def _apply_widget_palette(self, widget: QWidget) -> None:
+        shell_palette = build_qtconsole_palette(PALETTE)
+        widget.setAutoFillBackground(True)
+        widget.setPalette(shell_palette)
+
+    def _apply_shell_theme(self) -> None:
+        if self._widget is None:
+            return
+
+        shell_palette = build_qtconsole_palette(PALETTE)
+        shell_stylesheet = build_qtconsole_stylesheet(PALETTE)
+        syntax_style = build_qtconsole_syntax_style(PALETTE)
+
+        self._widget.setAutoFillBackground(True)
+        self._widget.setPalette(shell_palette)
+
+        try:
+            self._widget.style_sheet = shell_stylesheet
+            if hasattr(self._widget, "_style_sheet_changed"):
+                self._widget._style_sheet_changed()
+        except Exception:
+            pass
+
+        try:
+            self._widget.setStyleSheet(shell_stylesheet)
+        except Exception:
+            pass
+
+        if syntax_style is not None:
+            try:
+                self._widget.syntax_style = syntax_style
+                if hasattr(self._widget, "_syntax_style_changed"):
+                    self._widget._syntax_style_changed()
+            except Exception:
+                pass
+
+        for child in self._widget.findChildren(QWidget):
+            self._apply_widget_palette(child)
+            try:
+                child.setStyleSheet(shell_stylesheet)
+            except Exception:
+                pass
+
     def _ensure_shell(self) -> None:
         if not self.is_supported() or self._dialog is not None:
             return
@@ -365,11 +448,13 @@ class InteractiveShellManager(QObject):
         self._widget.kernel_manager = self._kernel_manager
         self._widget.kernel_client = self._kernel_client
         self._widget.banner = self._banner
+        self._apply_shell_theme()
 
         self._dialog = _ShellDialog(self.parent())
         self._dialog.setWindowTitle("Interactive Shell")
         self._dialog.resize(960, 640)
         self._dialog.visibility_changed.connect(self.visibility_changed.emit)
+        self._apply_widget_palette(self._dialog)
 
         layout = QVBoxLayout(self._dialog)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -401,7 +486,9 @@ class InteractiveShellManager(QObject):
             "where": "Print the current runtime path and last transition.",
         }
         self._commands = {
-            name: _RuntimeShellCommand(name, callback, command_descriptions.get(name, name))
+            name: _RuntimeShellCommand(
+                name, callback, command_descriptions.get(name, name)
+            )
             for name, callback in (commands or {}).items()
         }
         namespace = {

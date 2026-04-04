@@ -45,6 +45,18 @@ class EditorPalette:
     ui_selection_text: QColor
     ui_tooltip_bg: QColor
     ui_tooltip_text: QColor
+    shell_bg: QColor
+    shell_text: QColor
+    shell_border: QColor
+    shell_selection_bg: QColor
+    shell_selection_text: QColor
+    shell_prompt_in: QColor
+    shell_prompt_out: QColor
+    shell_comment: QColor
+    shell_keyword: QColor
+    shell_string: QColor
+    shell_number: QColor
+    shell_error: QColor
     state_python_fill: QColor
     state_cpp_fill: QColor
     state_xml_fill: QColor

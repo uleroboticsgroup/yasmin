@@ -51,6 +51,120 @@ def build_qt_palette(palette: EditorPalette) -> QPalette:
     return qt_palette
 
 
+def build_qtconsole_palette(palette: EditorPalette) -> QPalette:
+    """Build a dedicated Qt palette for the embedded interactive shell."""
+    qt_palette = QPalette()
+    qt_palette.setColor(QPalette.Window, palette.shell_bg)
+    qt_palette.setColor(QPalette.WindowText, palette.shell_text)
+    qt_palette.setColor(QPalette.Base, palette.shell_bg)
+    qt_palette.setColor(QPalette.AlternateBase, palette.shell_bg)
+    qt_palette.setColor(QPalette.Text, palette.shell_text)
+    qt_palette.setColor(QPalette.Button, palette.shell_bg)
+    qt_palette.setColor(QPalette.ButtonText, palette.shell_text)
+    qt_palette.setColor(QPalette.Highlight, palette.shell_selection_bg)
+    qt_palette.setColor(QPalette.HighlightedText, palette.shell_selection_text)
+    qt_palette.setColor(QPalette.ToolTipBase, palette.ui_tooltip_bg)
+    qt_palette.setColor(QPalette.ToolTipText, palette.ui_tooltip_text)
+    qt_palette.setColor(QPalette.PlaceholderText, palette.text_secondary)
+    return qt_palette
+
+
+def build_qtconsole_stylesheet(palette: EditorPalette) -> str:
+    """Build a Qt stylesheet for the embedded interactive shell."""
+    shell_bg = _css(palette.shell_bg)
+    shell_text = _css(palette.shell_text)
+    shell_border = _css(palette.shell_border)
+    selection_bg = _css(palette.shell_selection_bg)
+    selection_text = _css(palette.shell_selection_text)
+
+    return f"""
+QWidget {{
+    background-color: {shell_bg};
+    color: {shell_text};
+    selection-background-color: {selection_bg};
+    selection-color: {selection_text};
+}}
+
+QFrame,
+QPlainTextEdit,
+QTextEdit,
+QScrollBar,
+QScrollBar::add-page,
+QScrollBar::sub-page {{
+    background-color: {shell_bg};
+    color: {shell_text};
+    border-color: {shell_border};
+}}
+
+QPlainTextEdit,
+QTextEdit {{
+    border: 1px solid {shell_border};
+}}
+
+QScrollBar:vertical,
+QScrollBar:horizontal {{
+    border: 1px solid {shell_border};
+}}
+
+QScrollBar::handle:vertical,
+QScrollBar::handle:horizontal {{
+    background-color: {shell_border};
+    min-height: 18px;
+    min-width: 18px;
+}}
+"""
+
+
+def build_qtconsole_syntax_style(palette: EditorPalette):
+    """Build a Pygments syntax style class for the embedded interactive shell."""
+    try:
+        from pygments.style import Style
+        from pygments.token import (
+            Comment,
+            Error,
+            Generic,
+            Keyword,
+            Name,
+            Number,
+            Operator,
+            String,
+            Text,
+        )
+    except Exception:
+        return None
+
+    text = palette.shell_text.name()
+    comment = palette.shell_comment.name()
+    keyword = palette.shell_keyword.name()
+    string = palette.shell_string.name()
+    number = palette.shell_number.name()
+    prompt_in = palette.shell_prompt_in.name()
+    prompt_out = palette.shell_prompt_out.name()
+    error = palette.shell_error.name()
+    background = palette.shell_bg.name()
+    highlight = palette.shell_selection_bg.name()
+
+    class YASMINQtConsoleStyle(Style):
+        background_color = background
+        highlight_color = highlight
+        default_style = ""
+        styles = {
+            Text: text,
+            Comment: f"italic {comment}",
+            Keyword: f"bold {keyword}",
+            Operator: keyword,
+            Name.Builtin: prompt_in,
+            Number: number,
+            String: string,
+            Generic.Prompt: f"bold {prompt_in}",
+            Generic.Output: prompt_out,
+            Generic.Error: f"bold {error}",
+            Error: f"bold {error}",
+        }
+
+    return YASMINQtConsoleStyle
+
+
 def build_stylesheet(palette: EditorPalette) -> str:
     """Build the application stylesheet for the given editor palette."""
     window_bg = _css(palette.ui_window_bg)
@@ -260,21 +374,26 @@ QScrollBar:horizontal {{
 QScrollBar::handle:vertical,
 QScrollBar::handle:horizontal {{
     background-color: {button_bg};
-    min-height: 24px;
-    min-width: 24px;
+    min-height: 20px;
+    min-width: 20px;
 }}
 
-QScrollBar::handle:vertical:hover,
-QScrollBar::handle:horizontal:hover {{
-    background-color: {button_hover_bg};
+QHeaderView::section {{
+    background-color: {panel_alt_bg};
+    color: {text_primary};
+    border: 1px solid {border};
+    padding: 2px 4px;
 }}
 
-QScrollBar::add-line,
-QScrollBar::sub-line,
-QScrollBar::add-page,
-QScrollBar::sub-page {{
-    background: {panel_alt_bg};
-    border: none;
+QGroupBox {{
+    border: 1px solid {border};
+    margin-top: 6px;
+}}
+
+QGroupBox::title {{
+    subcontrol-origin: margin;
+    left: 8px;
+    padding: 0 4px;
 }}
 
 QToolTip {{
@@ -283,62 +402,43 @@ QToolTip {{
     border: 1px solid {border};
 }}
 
-QGraphicsView {{
-    background-color: {_css(palette.background)};
+QTabWidget::pane,
+QDockWidget::title {{
+    background-color: {panel_bg};
     border: 1px solid {border};
 }}
 
-QListWidget::item,
-QTreeWidget::item,
-QTableWidget::item {{
+QTabBar::tab {{
+    background-color: {panel_alt_bg};
     color: {text_primary};
+    border: 1px solid {border};
+    padding: 4px 8px;
 }}
 
-QListWidget::item:selected,
+QTabBar::tab:selected {{
+    background-color: {panel_bg};
+}}
+
+QTreeView::branch:selected,
+QListView::item:selected,
 QTreeWidget::item:selected,
 QTableWidget::item:selected {{
     background-color: {selection_bg};
     color: {selection_text};
 }}
 
-QHeaderView::section {{
-    background-color: {panel_bg};
-    color: {text_primary};
-    border: 1px solid {border};
-    padding: 4px;
-}}
-
-QTabWidget::pane {{
-    border: 1px solid {border};
-}}
-
-QTabBar::tab {{
-    background-color: {panel_bg};
-    color: {text_primary};
-    border: 1px solid {border};
-    padding: 4px 10px;
-}}
-
-QTabBar::tab:selected {{
-    background-color: {button_hover_bg};
-}}
-
-QCheckBox,
-QRadioButton,
-QGroupBox {{
-    color: {text_primary};
-}}
-
-QGroupBox {{
-    border: 1px solid {border};
-    margin-top: 8px;
-    padding-top: 8px;
-}}
-
-QGroupBox::title {{
-    subcontrol-origin: margin;
-    left: 8px;
-    padding: 0 4px;
+QWidget:disabled,
+QLabel:disabled,
+QPushButton:disabled,
+QLineEdit:disabled,
+QTextEdit:disabled,
+QPlainTextEdit:disabled,
+QComboBox:disabled,
+QCheckBox:disabled,
+QRadioButton:disabled,
+QTableWidget:disabled,
+QTreeWidget:disabled,
+QListWidget:disabled {{
     color: {text_secondary};
 }}
-""".strip()
+"""

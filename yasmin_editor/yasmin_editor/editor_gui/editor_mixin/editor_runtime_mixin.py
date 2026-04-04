@@ -293,11 +293,26 @@ class EditorRuntimeMixin:
 
     def _build_runtime_shell_commands(self) -> dict[str, object]:
         return {
-            "next": lambda: (self.on_runtime_step_clicked(), self._runtime_shell_command_result("next"))[1],
-            "step": lambda: (self.on_runtime_step_clicked(), self._runtime_shell_command_result("step"))[1],
-            "cont": lambda: (self.on_runtime_play_clicked(), self._runtime_shell_command_result("cont"))[1],
-            "play": lambda: (self.on_runtime_play_clicked(), self._runtime_shell_command_result("play"))[1],
-            "pause": lambda: (self.on_runtime_pause_clicked(), self._runtime_shell_command_result("pause"))[1],
+            "next": lambda: (
+                self.on_runtime_step_clicked(),
+                self._runtime_shell_command_result("next"),
+            )[1],
+            "step": lambda: (
+                self.on_runtime_step_clicked(),
+                self._runtime_shell_command_result("step"),
+            )[1],
+            "cont": lambda: (
+                self.on_runtime_play_clicked(),
+                self._runtime_shell_command_result("cont"),
+            )[1],
+            "play": lambda: (
+                self.on_runtime_play_clicked(),
+                self._runtime_shell_command_result("play"),
+            )[1],
+            "pause": lambda: (
+                self.on_runtime_pause_clicked(),
+                self._runtime_shell_command_result("pause"),
+            )[1],
             "cancel_state": lambda: (
                 self.on_runtime_cancel_state_clicked(),
                 self._runtime_shell_command_result("cancel_state"),
