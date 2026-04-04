@@ -16,7 +16,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Optional
+import builtins
+from typing import Any, Callable, Optional
 
 _MISSING = object()
 
@@ -152,6 +153,32 @@ class SafeBlackboardProxy:
         )
 
 
+class _RuntimeShellCommand:
+    def __init__(
+        self,
+        name: str,
+        callback: Callable[[], Any],
+        description: str,
+    ) -> None:
+        self._name = str(name)
+        self._callback = callback
+        self.__doc__ = description
+
+    def _execute(self) -> str:
+        result = self._callback()
+        if result is None:
+            return f"{self._name} executed"
+        return str(result)
+
+    def __call__(self) -> str:
+        return self._execute()
+
+    def __repr__(self) -> str:
+        return self._execute()
+
+    __str__ = __repr__
+
+
 class _ShellDialog(QDialog):
     visibility_changed = pyqtSignal(bool)
 
@@ -177,6 +204,7 @@ class InteractiveShellManager(QObject):
         self._widget: Optional[RichJupyterWidget] = None
         self._kernel_manager: Optional[QtInProcessKernelManager] = None
         self._kernel_client = None
+        self._commands: dict[str, _RuntimeShellCommand] = {}
         self._banner = (
             "YASMIN interactive shell\n"
             "\n"
@@ -184,13 +212,19 @@ class InteractiveShellManager(QObject):
             "sm -> root state machine\n"
             "current_state -> currently active state object or None after completion\n"
             "last_state -> previously active state object\n"
+            "active_path -> tuple with the current runtime path\n"
+            "last_transition -> latest observed runtime transition\n"
+            "\n"
+            "Debugger-style commands: next, step, cont, play, pause,\n"
+            "cancel_state, cancel_sm, restart, where\n"
             "\n"
             "Use bb['key'] or bb.get('key').\n"
             "Attribute-style access is disabled to keep IPython introspection stable.\n"
             "Values that cannot be converted from C++ are returned as\n"
             "BlackboardAccessError instead of raising immediately.\n"
             "\n"
-            "Close this shell before resuming execution.\n"
+            "Recommendation: inspect the blackboard during runtime, but avoid\n"
+            "modifying it while execution is running.\n"
         )
 
     @staticmethod
@@ -214,6 +248,9 @@ class InteractiveShellManager(QObject):
         sm: Any,
         current_state: Any = None,
         last_state: Any = None,
+        commands: Optional[dict[str, Callable[[], Any]]] = None,
+        active_path: Any = None,
+        last_transition: Any = None,
     ) -> None:
         self._ensure_shell()
         self._push_context(
@@ -221,6 +258,9 @@ class InteractiveShellManager(QObject):
             sm=sm,
             current_state=current_state,
             last_state=last_state,
+            commands=commands,
+            active_path=active_path,
+            last_transition=last_transition,
         )
 
         if self._dialog is None:
@@ -229,6 +269,27 @@ class InteractiveShellManager(QObject):
         self._dialog.show()
         self._dialog.raise_()
         self._dialog.activateWindow()
+
+    def update_context(
+        self,
+        bb: Any,
+        sm: Any,
+        current_state: Any = None,
+        last_state: Any = None,
+        commands: Optional[dict[str, Callable[[], Any]]] = None,
+        active_path: Any = None,
+        last_transition: Any = None,
+    ) -> None:
+        self._ensure_shell()
+        self._push_context(
+            bb=bb,
+            sm=sm,
+            current_state=current_state,
+            last_state=last_state,
+            commands=commands,
+            active_path=active_path,
+            last_transition=last_transition,
+        )
 
     def close_shell(self) -> None:
         if self._dialog is not None:
@@ -255,6 +316,40 @@ class InteractiveShellManager(QObject):
         self._widget = None
         self._dialog = None
 
+    def _register_command_magics(self) -> None:
+        if self._kernel_manager is None:
+            return
+
+        shell = self._kernel_manager.kernel.shell
+        if shell is None:
+            return
+
+        shell.automagic = True
+
+        def _register_magic(name: str) -> None:
+            def _magic(line: str = "") -> str:
+                command = self._commands.get(name)
+                return command() if command is not None else f"{name} unavailable"
+
+            shell.register_magic_function(
+                _magic,
+                magic_kind="line",
+                magic_name=name,
+            )
+
+        for command_name in [
+            "next",
+            "step",
+            "cont",
+            "play",
+            "pause",
+            "cancel_state",
+            "cancel_sm",
+            "restart",
+            "where",
+        ]:
+            _register_magic(command_name)
+
     def _ensure_shell(self) -> None:
         if not self.is_supported() or self._dialog is not None:
             return
@@ -264,6 +359,7 @@ class InteractiveShellManager(QObject):
         self._kernel_manager.kernel.gui = "qt"
         self._kernel_client = self._kernel_manager.client()
         self._kernel_client.start_channels()
+        self._register_command_magics()
 
         self._widget = RichJupyterWidget()
         self._widget.kernel_manager = self._kernel_manager
@@ -285,17 +381,39 @@ class InteractiveShellManager(QObject):
         sm: Any,
         current_state: Any = None,
         last_state: Any = None,
+        commands: Optional[dict[str, Callable[[], Any]]] = None,
+        active_path: Any = None,
+        last_transition: Any = None,
     ) -> None:
         if self._kernel_manager is None:
             return
 
         proxy = SafeBlackboardProxy(bb)
+        command_descriptions = {
+            "next": "Execute Play Once and pause again.",
+            "step": "Alias for next.",
+            "cont": "Resume or start execution.",
+            "play": "Alias for cont.",
+            "pause": "Request a pause at the next transition.",
+            "cancel_state": "Cancel the currently active state.",
+            "cancel_sm": "Toggle repeated cancellation for the whole state machine.",
+            "restart": "Restart the runtime after completion.",
+            "where": "Print the current runtime path and last transition.",
+        }
+        self._commands = {
+            name: _RuntimeShellCommand(name, callback, command_descriptions.get(name, name))
+            for name, callback in (commands or {}).items()
+        }
         namespace = {
             "bb": proxy,
             "sm": sm,
             "current_state": current_state,
             "last_state": last_state,
+            "active_path": tuple(active_path or tuple()),
+            "last_transition": last_transition,
             "BlackboardAccessError": BlackboardAccessError,
             "SafeBlackboardProxy": SafeBlackboardProxy,
+            "py_next": builtins.next,
+            **self._commands,
         }
         self._kernel_manager.kernel.shell.push(namespace)
