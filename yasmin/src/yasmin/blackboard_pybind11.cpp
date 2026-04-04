@@ -62,6 +62,20 @@ PYBIND11_MODULE(blackboard, m) {
            "Get the number of key-value pairs in the blackboard")
       .def("__len__", &yasmin::BlackboardPyWrapper::size,
            "Get the number of key-value pairs in the blackboard")
+      // Iteration helpers
+      .def("keys", &yasmin::BlackboardPyWrapper::keys,
+           "Get the keys visible in the current remapping scope")
+      .def("values", &yasmin::BlackboardPyWrapper::values,
+           "Get the values visible in the current remapping scope")
+      .def("items", &yasmin::BlackboardPyWrapper::items,
+           "Get the key-value pairs visible in the current remapping scope")
+      .def(
+          "__iter__",
+          [](const yasmin::BlackboardPyWrapper &self) {
+            py::list keys = py::cast(self.keys());
+            return keys.attr("__iter__")();
+          },
+          "Iterate over the keys visible in the current remapping scope")
       // String representation
       .def("to_string", &yasmin::BlackboardPyWrapper::to_string,
            "Convert the blackboard to a string representation")

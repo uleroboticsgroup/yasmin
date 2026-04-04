@@ -24,6 +24,8 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "yasmin/logs.hpp"
 #include "yasmin/types.hpp"
@@ -186,6 +188,16 @@ public:
    * @return The size of the blackboard.
    */
   int size() const;
+
+  /**
+   * @brief Get the keys visible in the current remapping scope.
+   * @return A sorted list of visible key names.
+   *
+   * If one or more remappings point to a stored key, the remapped names are
+   * returned instead of the underlying storage key. Multiple remapped names can
+   * therefore refer to the same stored value.
+   */
+  std::vector<std::string> keys() const;
 
   /**
    * @brief Get the type of a value stored in the blackboard.

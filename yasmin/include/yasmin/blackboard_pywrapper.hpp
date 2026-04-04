@@ -570,6 +570,40 @@ public:
   int size() const { return this->blackboard->size(); }
 
   /**
+   * @brief Get the keys visible in the current remapping scope.
+   * @return Sorted list of visible key names.
+   */
+  std::vector<std::string> keys() const { return this->blackboard->keys(); }
+
+  /**
+   * @brief Get the values visible in the current remapping scope.
+   * @return Python list with the values in key order.
+   */
+  py::list values() const {
+    py::list result;
+
+    for (const auto &key : this->blackboard->keys()) {
+      result.append(this->get(key));
+    }
+
+    return result;
+  }
+
+  /**
+   * @brief Get the key-value pairs visible in the current remapping scope.
+   * @return Python list of ``(key, value)`` tuples.
+   */
+  py::list items() const {
+    py::list result;
+
+    for (const auto &key : this->blackboard->keys()) {
+      result.append(py::make_tuple(key, this->get(key)));
+    }
+
+    return result;
+  }
+
+  /**
    * @brief Get a string representation of the blackboard contents.
    * @return Human-readable description of the stored keys and types.
    */
