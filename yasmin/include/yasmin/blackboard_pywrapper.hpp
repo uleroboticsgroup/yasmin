@@ -545,7 +545,11 @@ public:
       return py::cast(this->blackboard->get<bool>(key));
     }
 
-    return this->blackboard->get<py::object>(key);
+    if (is_exact_cpp_type<py::object>(type)) {
+      return this->blackboard->get<py::object>(key);
+    }
+
+    return py::none();
   }
 
   /**
