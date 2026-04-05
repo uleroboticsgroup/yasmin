@@ -30,10 +30,17 @@ class EditorBlackboardMixin:
     """Mixin for editor functionality split from the main window."""
 
     def filter_blackboard_keys(self, text: str) -> None:
-        """Filter blackboard keys based on search text."""
+        """Filter blackboard keys based on search text and visibility settings."""
+        filter_text = text.lower()
+        show_hidden = getattr(self, "_show_hidden_blackboard_keys", False)
+
         for i in range(self.blackboard_list.count()):
             item = self.blackboard_list.item(i)
-            item.setHidden(text.lower() not in item.text().lower())
+            key_data = item.data(Qt.UserRole) or {}
+            key_name = str(key_data.get("name", "") or "")
+            is_hidden_key = key_name.startswith(".")
+            matches_filter = filter_text in item.text().lower()
+            item.setHidden((not show_hidden and is_hidden_key) or not matches_filter)
 
     def format_blackboard_key_label(self, key_data: Dict[str, str]) -> str:
         label = f"{key_data.get('name', '')} ({key_data.get('key_type', 'in')})"
@@ -183,6 +190,13 @@ class EditorBlackboardMixin:
             "Highlight: On" if enabled else "Highlight: Off"
         )
         self.update_blackboard_usage_highlighting()
+
+    def toggle_hidden_blackboard_keys(self, enabled: bool) -> None:
+        self._show_hidden_blackboard_keys = enabled
+        self.show_hidden_blackboard_btn.setText(
+            "Hidden: On" if enabled else "Hidden: Off"
+        )
+        self.filter_blackboard_keys(self.blackboard_filter.text())
 
     def get_effective_blackboard_key_name(self, state_node, key_name: str) -> str:
         effective_key_name = key_name
