@@ -5,7 +5,7 @@
   <Key name="pose_bytes" type="in/out" description="Serialized Pose message stored as bytes in the blackboard." />
   <Key name="pose_bytes__type" type="in/out" description="Type information for the serialized Pose message." />
   <StateMachine name="Demo3" type="xml" file_name="demo_3.xml" package="yasmin_demos" description="Outcomes:&#10; - outcome4: Final outcome&#10;&#10;Input Keys:&#10; - pose_bytes: Serialized Pose message stored as bytes in the blackboard. (str)&#10; - pose_bytes__type: Type information for the serialized Pose message. (str)&#10;&#10;Output Keys:&#10; - pose_bytes: Serialized Pose message stored as bytes in the blackboard. (str)&#10; - pose_bytes__type: Type information for the serialized Pose message. (str)" x="-789.81" y="119.29">
-    <Transition from="outcome4" to="test" />
+    <Transition from="outcome4" to="Foo" />
   </StateMachine>
   <State name="Bar" type="cpp" class="yasmin_demos/BarState" x="-136.93" y="-115.41">
     <Transition from="outcome3" to="Foo" />

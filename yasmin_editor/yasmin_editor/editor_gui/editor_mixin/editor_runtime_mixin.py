@@ -252,10 +252,86 @@ class EditorRuntimeMixin:
         )
         return self.runtime_shell
 
+    def _runtime_shell_command_result(self, command_name: str) -> str:
+        runtime = self.runtime
+        if runtime is None:
+            return f"{command_name}: runtime unavailable"
+
+        current_state = runtime.get_current_state()
+        last_state_ref = runtime.get_last_state_ref()
+        last_state_name = getattr(last_state_ref, "name", None)
+        if last_state_name is None and last_state_ref is not None:
+            last_state_name = str(last_state_ref)
+
+        current_label = str(current_state) if current_state is not None else "None"
+        last_label = str(last_state_name) if last_state_name is not None else "None"
+        return (
+            f"{command_name}: status={runtime.get_status_label()}, "
+            f"current_state={current_label}, last_state={last_label}"
+        )
+
+    def _runtime_shell_where(self) -> str:
+        runtime = self.runtime
+        if runtime is None:
+            return "runtime unavailable"
+
+        active_path = " / ".join(runtime.get_active_path() or tuple()) or "<none>"
+        last_transition = runtime.get_last_transition()
+        if last_transition is None:
+            transition_label = "<none>"
+        else:
+            from_path, to_path, outcome = last_transition
+            transition_label = (
+                f"{' / '.join(from_path)} --[{outcome}]--> {' / '.join(to_path)}"
+            )
+
+        return (
+            f"status={runtime.get_status_label()}\n"
+            f"active_path={active_path}\n"
+            f"last_transition={transition_label}"
+        )
+
+    def _build_runtime_shell_commands(self) -> dict[str, object]:
+        return {
+            "next": lambda: (
+                self.on_runtime_step_clicked(),
+                self._runtime_shell_command_result("next"),
+            )[1],
+            "step": lambda: (
+                self.on_runtime_step_clicked(),
+                self._runtime_shell_command_result("step"),
+            )[1],
+            "cont": lambda: (
+                self.on_runtime_play_clicked(),
+                self._runtime_shell_command_result("cont"),
+            )[1],
+            "play": lambda: (
+                self.on_runtime_play_clicked(),
+                self._runtime_shell_command_result("play"),
+            )[1],
+            "pause": lambda: (
+                self.on_runtime_pause_clicked(),
+                self._runtime_shell_command_result("pause"),
+            )[1],
+            "cancel_state": lambda: (
+                self.on_runtime_cancel_state_clicked(),
+                self._runtime_shell_command_result("cancel_state"),
+            )[1],
+            "cancel_sm": lambda: (
+                self.on_runtime_cancel_sm_clicked(),
+                self._runtime_shell_command_result("cancel_sm"),
+            )[1],
+            "restart": lambda: (
+                self.restart_runtime_mode(),
+                self._runtime_shell_command_result("restart"),
+            )[1],
+            "where": self._runtime_shell_where,
+        }
+
     def _refresh_runtime_shell_context(self) -> None:
         shell = getattr(self, "runtime_shell", None)
         runtime = self.runtime
-        if shell is None or runtime is None or not shell.is_open():
+        if shell is None or runtime is None:
             return
 
         bb = getattr(runtime, "bb", None)
@@ -263,12 +339,14 @@ class EditorRuntimeMixin:
         if bb is None or sm is None:
             return
 
-        runtime_playing = runtime.is_running() and not runtime.is_blocked()
-        shell.open_shell(
+        shell.update_context(
             bb=bb,
             sm=sm,
-            current_state=(None if runtime_playing else runtime.get_current_state_ref()),
+            current_state=runtime.get_current_state_ref(),
             last_state=runtime.get_last_state_ref(),
+            commands=self._build_runtime_shell_commands(),
+            active_path=runtime.get_active_path(),
+            last_transition=runtime.get_last_transition(),
         )
 
     def _close_runtime_shell(self) -> None:
@@ -287,15 +365,7 @@ class EditorRuntimeMixin:
         return bool(shell is not None and shell.is_open())
 
     def _runtime_shell_execution_blocked(self) -> bool:
-        runtime = self.runtime
-        if runtime is None:
-            return False
-        runtime_playing = runtime.is_running() and not runtime.is_blocked()
-        return (
-            self._is_runtime_shell_open()
-            and not runtime.is_finished()
-            and not runtime_playing
-        )
+        return False
 
     def _runtime_requires_finish_before_leaving(self) -> bool:
         runtime = self.runtime
@@ -347,32 +417,24 @@ class EditorRuntimeMixin:
         return True
 
     def on_runtime_play_clicked(self) -> None:
-        if self._runtime_shell_execution_blocked():
-            self.statusBar().showMessage(
-                "Close the interactive shell before starting or resuming execution.",
-                3000,
-            )
-            return
         if self.runtime is not None:
             self.runtime.play()
+        self._refresh_runtime_shell_context()
 
     def on_runtime_pause_clicked(self) -> None:
         if self.runtime is not None:
             self.runtime.pause()
+        self._refresh_runtime_shell_context()
 
     def on_runtime_step_clicked(self) -> None:
-        if self._runtime_shell_execution_blocked():
-            self.statusBar().showMessage(
-                "Close the interactive shell before starting or resuming execution.",
-                3000,
-            )
-            return
         if self.runtime is not None:
             self.runtime.play_once()
+        self._refresh_runtime_shell_context()
 
     def on_runtime_cancel_state_clicked(self) -> None:
         if self.runtime is not None:
             self.runtime.cancel_state()
+        self._refresh_runtime_shell_context()
 
     def on_runtime_cancel_sm_clicked(self) -> None:
         runtime = self.runtime
@@ -383,6 +445,7 @@ class EditorRuntimeMixin:
             runtime.stop_cancel_state_machine()
         else:
             runtime.start_cancel_state_machine()
+        self._refresh_runtime_shell_context()
         self.update_runtime_actions()
 
     def restart_runtime_mode(self) -> None:
@@ -406,19 +469,15 @@ class EditorRuntimeMixin:
 
     def on_runtime_shell_clicked(self) -> None:
         runtime = self.runtime
-        runtime_playing = bool(
-            runtime is not None and runtime.is_running() and not runtime.is_blocked()
-        )
         shell_allowed = bool(
             runtime is not None
             and runtime.is_ready()
             and runtime.bb is not None
             and runtime.sm is not None
-            and not runtime_playing
         )
         if not shell_allowed:
             self.statusBar().showMessage(
-                "The interactive shell is only available before start, while paused, or after the root state machine finished.",
+                "The interactive shell is available while runtime mode is active and a runtime state machine is loaded.",
                 3000,
             )
             return
@@ -440,12 +499,18 @@ class EditorRuntimeMixin:
             sm=runtime.sm,
             current_state=runtime.get_current_state_ref(),
             last_state=runtime.get_last_state_ref(),
+            commands=self._build_runtime_shell_commands(),
+            active_path=runtime.get_active_path(),
+            last_transition=runtime.get_last_transition(),
         )
         self.update_runtime_actions()
 
     def on_runtime_shell_visibility_changed(self, visible: bool) -> None:
         if visible:
-            self.statusBar().showMessage("Interactive shell opened", 3000)
+            self.statusBar().showMessage(
+                "Interactive shell opened. Recommendation: avoid modifying the blackboard while the runtime is running.",
+                5000,
+            )
         else:
             self.statusBar().showMessage("Interactive shell closed", 3000)
         self.update_runtime_actions()
@@ -674,6 +739,7 @@ class EditorRuntimeMixin:
 
     def on_runtime_active_state_changed(self, state_path: tuple[str, ...]) -> None:
         self.runtime_active_path = tuple(state_path or tuple())
+        self._refresh_runtime_shell_context()
         self._follow_runtime_active_state()
         self._schedule_runtime_highlight_refresh()
         self.update_runtime_actions()
@@ -683,6 +749,7 @@ class EditorRuntimeMixin:
         transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]],
     ) -> None:
         self.runtime_last_transition = transition
+        self._refresh_runtime_shell_context()
         self._schedule_runtime_highlight_refresh()
 
     def on_runtime_outcome_changed(self, outcome: Optional[str]) -> None:
@@ -701,6 +768,7 @@ class EditorRuntimeMixin:
         runtime = self.runtime
         if runtime is not None:
             self._update_runtime_status_badge(runtime.get_status_label())
+        self._refresh_runtime_shell_context()
         self.update_runtime_actions()
 
     def on_runtime_error(self, message: str) -> None:
@@ -772,15 +840,8 @@ class EditorRuntimeMixin:
 
         shell_button = getattr(self, "runtime_shell_button", None)
         if shell_button is not None:
-            shell_visible = (
-                self.runtime_mode_enabled
-                and runtime is not None
-                and runtime.is_ready()
-                and getattr(runtime, "bb", None) is not None
-                and not runtime_playing
-            )
-            shell_button.setVisible(shell_visible)
-            shell_button.setEnabled(shell_visible)
+            shell_button.setVisible(self.runtime_mode_enabled)
+            shell_button.setEnabled(self.runtime_mode_enabled)
 
         for action_name in [
             "new_action",

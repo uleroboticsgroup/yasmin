@@ -16,12 +16,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Optional
+import builtins
+from typing import Any, Callable, Optional
 
 _MISSING = object()
 
-from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtWidgets import QDialog, QVBoxLayout
+from PyQt5.QtCore import QObject, Qt, pyqtSignal
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget
+
+from yasmin_editor.editor_gui.theme import PALETTE
+from yasmin_editor.editor_gui.theme.qt_style import (
+    build_qtconsole_palette,
+    build_qtconsole_stylesheet,
+    build_qtconsole_syntax_style,
+)
 
 try:
     from qtconsole.inprocess import QtInProcessKernelManager
@@ -152,18 +160,70 @@ class SafeBlackboardProxy:
         )
 
 
+class _RuntimeShellCommand:
+    def __init__(
+        self,
+        name: str,
+        callback: Callable[[], Any],
+        description: str,
+    ) -> None:
+        self._name = str(name)
+        self._callback = callback
+        self.__doc__ = description
+
+    def _execute(self) -> str:
+        result = self._callback()
+        if result is None:
+            return f"{self._name} executed"
+        return str(result)
+
+    def __call__(self) -> str:
+        return self._execute()
+
+    def __repr__(self) -> str:
+        return self._execute()
+
+    __str__ = __repr__
+
+
 class _ShellDialog(QDialog):
     visibility_changed = pyqtSignal(bool)
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent, Qt.Window)
+        self._saved_geometry = None
+        self._saved_show_mode = "normal"
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowCloseButtonHint, True)
+
+    def preferred_show_mode(self) -> str:
+        return str(self._saved_show_mode or "normal")
+
+    def remember_window_state(self) -> None:
+        self._saved_geometry = self.saveGeometry()
+        if self.isFullScreen():
+            self._saved_show_mode = "fullscreen"
+        elif self.isMaximized():
+            self._saved_show_mode = "maximized"
+        else:
+            self._saved_show_mode = "normal"
+
+    def restore_window_state(self) -> None:
+        if self._saved_geometry is not None:
+            self.restoreGeometry(self._saved_geometry)
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
         self.visibility_changed.emit(True)
 
     def hideEvent(self, event) -> None:
+        self.remember_window_state()
         super().hideEvent(event)
         self.visibility_changed.emit(False)
 
     def closeEvent(self, event) -> None:
+        self.remember_window_state()
         event.ignore()
         self.hide()
 
@@ -177,6 +237,7 @@ class InteractiveShellManager(QObject):
         self._widget: Optional[RichJupyterWidget] = None
         self._kernel_manager: Optional[QtInProcessKernelManager] = None
         self._kernel_client = None
+        self._commands: dict[str, _RuntimeShellCommand] = {}
         self._banner = (
             "YASMIN interactive shell\n"
             "\n"
@@ -184,13 +245,19 @@ class InteractiveShellManager(QObject):
             "sm -> root state machine\n"
             "current_state -> currently active state object or None after completion\n"
             "last_state -> previously active state object\n"
+            "active_path -> tuple with the current runtime path\n"
+            "last_transition -> latest observed runtime transition\n"
+            "\n"
+            "Debugger-style commands: next, step, cont, play, pause,\n"
+            "cancel_state, cancel_sm, restart, where\n"
             "\n"
             "Use bb['key'] or bb.get('key').\n"
             "Attribute-style access is disabled to keep IPython introspection stable.\n"
             "Values that cannot be converted from C++ are returned as\n"
             "BlackboardAccessError instead of raising immediately.\n"
             "\n"
-            "Close this shell before resuming execution.\n"
+            "Recommendation: inspect the blackboard during runtime, but avoid\n"
+            "modifying it while execution is running.\n"
         )
 
     @staticmethod
@@ -214,6 +281,9 @@ class InteractiveShellManager(QObject):
         sm: Any,
         current_state: Any = None,
         last_state: Any = None,
+        commands: Optional[dict[str, Callable[[], Any]]] = None,
+        active_path: Any = None,
+        last_transition: Any = None,
     ) -> None:
         self._ensure_shell()
         self._push_context(
@@ -221,14 +291,45 @@ class InteractiveShellManager(QObject):
             sm=sm,
             current_state=current_state,
             last_state=last_state,
+            commands=commands,
+            active_path=active_path,
+            last_transition=last_transition,
         )
 
         if self._dialog is None:
             return
 
-        self._dialog.show()
+        self._dialog.restore_window_state()
+        show_mode = self._dialog.preferred_show_mode()
+        if show_mode == "fullscreen":
+            self._dialog.showFullScreen()
+        elif show_mode == "maximized":
+            self._dialog.showMaximized()
+        else:
+            self._dialog.show()
         self._dialog.raise_()
         self._dialog.activateWindow()
+
+    def update_context(
+        self,
+        bb: Any,
+        sm: Any,
+        current_state: Any = None,
+        last_state: Any = None,
+        commands: Optional[dict[str, Callable[[], Any]]] = None,
+        active_path: Any = None,
+        last_transition: Any = None,
+    ) -> None:
+        self._ensure_shell()
+        self._push_context(
+            bb=bb,
+            sm=sm,
+            current_state=current_state,
+            last_state=last_state,
+            commands=commands,
+            active_path=active_path,
+            last_transition=last_transition,
+        )
 
     def close_shell(self) -> None:
         if self._dialog is not None:
@@ -255,6 +356,83 @@ class InteractiveShellManager(QObject):
         self._widget = None
         self._dialog = None
 
+    def _register_command_magics(self) -> None:
+        if self._kernel_manager is None:
+            return
+
+        shell = self._kernel_manager.kernel.shell
+        if shell is None:
+            return
+
+        shell.automagic = True
+
+        def _register_magic(name: str) -> None:
+            def _magic(line: str = "") -> str:
+                command = self._commands.get(name)
+                return command() if command is not None else f"{name} unavailable"
+
+            shell.register_magic_function(
+                _magic,
+                magic_kind="line",
+                magic_name=name,
+            )
+
+        for command_name in [
+            "next",
+            "step",
+            "cont",
+            "play",
+            "pause",
+            "cancel_state",
+            "cancel_sm",
+            "restart",
+            "where",
+        ]:
+            _register_magic(command_name)
+
+    def _apply_widget_palette(self, widget: QWidget) -> None:
+        shell_palette = build_qtconsole_palette(PALETTE)
+        widget.setAutoFillBackground(True)
+        widget.setPalette(shell_palette)
+
+    def _apply_shell_theme(self) -> None:
+        if self._widget is None:
+            return
+
+        shell_palette = build_qtconsole_palette(PALETTE)
+        shell_stylesheet = build_qtconsole_stylesheet(PALETTE)
+        syntax_style = build_qtconsole_syntax_style(PALETTE)
+
+        self._widget.setAutoFillBackground(True)
+        self._widget.setPalette(shell_palette)
+
+        try:
+            self._widget.style_sheet = shell_stylesheet
+            if hasattr(self._widget, "_style_sheet_changed"):
+                self._widget._style_sheet_changed()
+        except Exception:
+            pass
+
+        try:
+            self._widget.setStyleSheet(shell_stylesheet)
+        except Exception:
+            pass
+
+        if syntax_style is not None:
+            try:
+                self._widget.syntax_style = syntax_style
+                if hasattr(self._widget, "_syntax_style_changed"):
+                    self._widget._syntax_style_changed()
+            except Exception:
+                pass
+
+        for child in self._widget.findChildren(QWidget):
+            self._apply_widget_palette(child)
+            try:
+                child.setStyleSheet(shell_stylesheet)
+            except Exception:
+                pass
+
     def _ensure_shell(self) -> None:
         if not self.is_supported() or self._dialog is not None:
             return
@@ -264,16 +442,19 @@ class InteractiveShellManager(QObject):
         self._kernel_manager.kernel.gui = "qt"
         self._kernel_client = self._kernel_manager.client()
         self._kernel_client.start_channels()
+        self._register_command_magics()
 
         self._widget = RichJupyterWidget()
         self._widget.kernel_manager = self._kernel_manager
         self._widget.kernel_client = self._kernel_client
         self._widget.banner = self._banner
+        self._apply_shell_theme()
 
         self._dialog = _ShellDialog(self.parent())
         self._dialog.setWindowTitle("Interactive Shell")
         self._dialog.resize(960, 640)
         self._dialog.visibility_changed.connect(self.visibility_changed.emit)
+        self._apply_widget_palette(self._dialog)
 
         layout = QVBoxLayout(self._dialog)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -285,17 +466,41 @@ class InteractiveShellManager(QObject):
         sm: Any,
         current_state: Any = None,
         last_state: Any = None,
+        commands: Optional[dict[str, Callable[[], Any]]] = None,
+        active_path: Any = None,
+        last_transition: Any = None,
     ) -> None:
         if self._kernel_manager is None:
             return
 
         proxy = SafeBlackboardProxy(bb)
+        command_descriptions = {
+            "next": "Execute Play Once and pause again.",
+            "step": "Alias for next.",
+            "cont": "Resume or start execution.",
+            "play": "Alias for cont.",
+            "pause": "Request a pause at the next transition.",
+            "cancel_state": "Cancel the currently active state.",
+            "cancel_sm": "Toggle repeated cancellation for the whole state machine.",
+            "restart": "Restart the runtime after completion.",
+            "where": "Print the current runtime path and last transition.",
+        }
+        self._commands = {
+            name: _RuntimeShellCommand(
+                name, callback, command_descriptions.get(name, name)
+            )
+            for name, callback in (commands or {}).items()
+        }
         namespace = {
             "bb": proxy,
             "sm": sm,
             "current_state": current_state,
             "last_state": last_state,
+            "active_path": tuple(active_path or tuple()),
+            "last_transition": last_transition,
             "BlackboardAccessError": BlackboardAccessError,
             "SafeBlackboardProxy": SafeBlackboardProxy,
+            "py_next": builtins.next,
+            **self._commands,
         }
         self._kernel_manager.kernel.shell.push(namespace)
