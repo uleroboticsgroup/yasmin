@@ -385,6 +385,53 @@ class TestBlackboard(unittest.TestCase):
         self.assertEqual(0.0, self.blackboard["zero_float"])
         self.assertEqual("", self.blackboard["empty_string"])
 
+    def test_keys(self):
+        self.blackboard["foo"] = "foo"
+        self.blackboard["bar"] = 3
+        self.assertEqual(["bar", "foo"], self.blackboard.keys())
+
+    def test_iter(self):
+        self.blackboard["foo"] = "foo"
+        self.blackboard["bar"] = 3
+        self.assertEqual(["bar", "foo"], list(self.blackboard))
+
+    def test_values(self):
+        self.blackboard["foo"] = "foo"
+        self.blackboard["bar"] = 3
+        self.assertEqual([3, "foo"], self.blackboard.values())
+
+    def test_items(self):
+        self.blackboard["foo"] = "foo"
+        self.blackboard["bar"] = 3
+        self.assertEqual([("bar", 3), ("foo", "foo")], self.blackboard.items())
+
+    def test_keys_with_remappings(self):
+        self.blackboard["shared"] = "value"
+        self.blackboard["plain"] = 3
+        self.blackboard.set_remappings({"first": "shared", "second": "shared"})
+        self.assertEqual(["first", "plain", "second"], self.blackboard.keys())
+
+    def test_iter_with_remappings(self):
+        self.blackboard["shared"] = "value"
+        self.blackboard["plain"] = 3
+        self.blackboard.set_remappings({"first": "shared", "second": "shared"})
+        self.assertEqual(["first", "plain", "second"], list(self.blackboard))
+
+    def test_values_with_remappings(self):
+        self.blackboard["shared"] = "value"
+        self.blackboard["plain"] = 3
+        self.blackboard.set_remappings({"first": "shared", "second": "shared"})
+        self.assertEqual(["value", 3, "value"], self.blackboard.values())
+
+    def test_items_with_remappings(self):
+        self.blackboard["shared"] = "value"
+        self.blackboard["plain"] = 3
+        self.blackboard.set_remappings({"first": "shared", "second": "shared"})
+        self.assertEqual(
+            [("first", "value"), ("plain", 3), ("second", "value")],
+            self.blackboard.items(),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

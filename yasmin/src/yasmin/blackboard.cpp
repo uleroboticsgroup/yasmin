@@ -13,8 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <algorithm>
 #include <map>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
@@ -69,6 +73,46 @@ void Blackboard::copy_value_from(const Blackboard &other,
 int Blackboard::size() const {
   std::lock_guard<std::recursive_mutex> lk(this->mutex);
   return this->values.size();
+}
+
+std::vector<std::string> Blackboard::keys() const {
+  std::lock_guard<std::recursive_mutex> lk(this->mutex);
+
+  std::unordered_map<std::string, std::vector<std::string>>
+      visible_keys_by_target;
+  visible_keys_by_target.reserve(this->remappings.size());
+
+  for (const auto &[visible_key, target_key] : this->remappings) {
+    if (this->values.find(target_key) != this->values.end()) {
+      visible_keys_by_target[target_key].push_back(visible_key);
+    }
+  }
+
+  std::vector<std::string> result;
+  result.reserve(this->values.size() + this->remappings.size());
+
+  std::unordered_set<std::string> inserted_keys;
+  inserted_keys.reserve(this->values.size() + this->remappings.size());
+
+  for (const auto &[stored_key, _] : this->values) {
+    const auto visible_it = visible_keys_by_target.find(stored_key);
+
+    if (visible_it == visible_keys_by_target.end()) {
+      if (inserted_keys.insert(stored_key).second) {
+        result.push_back(stored_key);
+      }
+      continue;
+    }
+
+    for (const auto &visible_key : visible_it->second) {
+      if (inserted_keys.insert(visible_key).second) {
+        result.push_back(visible_key);
+      }
+    }
+  }
+
+  std::sort(result.begin(), result.end());
+  return result;
 }
 
 std::string Blackboard::get_type(const std::string &key) const {

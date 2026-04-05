@@ -59,6 +59,30 @@ TEST_F(TestBlackboard, TestRemappings) {
   EXPECT_EQ(blackboard.get<std::string>("bar"), "foo");
 }
 
+TEST_F(TestBlackboard, TestKeysWithoutRemappings) {
+  blackboard.set<std::string>("foo", "foo");
+  blackboard.set<int>("bar", 1);
+
+  const auto keys = blackboard.keys();
+
+  ASSERT_EQ(keys.size(), 2U);
+  EXPECT_EQ(keys.at(0), "bar");
+  EXPECT_EQ(keys.at(1), "foo");
+}
+
+TEST_F(TestBlackboard, TestKeysWithRemappingsExposeVisibleScope) {
+  blackboard.set<std::string>("shared", "value");
+  blackboard.set<int>("plain", 7);
+  blackboard.set_remappings({{"first", "shared"}, {"second", "shared"}});
+
+  const auto keys = blackboard.keys();
+
+  ASSERT_EQ(keys.size(), 3U);
+  EXPECT_EQ(keys.at(0), "first");
+  EXPECT_EQ(keys.at(1), "plain");
+  EXPECT_EQ(keys.at(2), "second");
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
