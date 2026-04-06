@@ -261,8 +261,14 @@ class EditorModelMixin:
     def _rename_state_node(self, state_node, new_name: str) -> None:
         old_name = state_node.name
         parent_container = getattr(state_node, "parent_container", None)
+        # When editing inside an entered nested container, child nodes do not
+        # have a graphical parent container attached. In that case the rename
+        # must still be applied to the currently visible container model rather
+        # than to the root model.
         parent_model = (
-            self.root_model if parent_container is None else parent_container.model
+            self.current_container_model
+            if parent_container is None
+            else parent_container.model
         )
         old_prefix = self.get_state_node_key(old_name, parent_container)
         new_prefix = self.get_state_node_key(new_name, parent_container)
