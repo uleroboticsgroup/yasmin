@@ -6,20 +6,15 @@
   <description>PCL-based reusable YASMIN states for PointCloud2 conversion, file I/O, and filtering.</description>
   <maintainer email="maik.knof@gmx.de">Maik Knof</maintainer>
   <license>GPL-3.0</license>
-
   <buildtool_depend>ament_cmake</buildtool_depend>
-
   <depend>pluginlib</depend>
   <depend>sensor_msgs</depend>
   <depend>pcl_conversions</depend>
   <depend>yasmin</depend>
-
   <build_depend>libpcl-all-dev</build_depend>
   <build_export_depend>libpcl-all-dev</build_export_depend>
   <exec_depend>libpcl-all-dev</exec_depend>
-
   <test_depend>ament_cmake_gtest</test_depend>
-
   <export>
     <build_type>ament_cmake</build_type>
   </export>

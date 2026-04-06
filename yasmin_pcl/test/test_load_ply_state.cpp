@@ -33,7 +33,7 @@ TEST(LoadPlyState, LoadsCloudAndMetadataFromPlyFile) {
   const Eigen::Quaternionf orientation(1.0F, 0.0F, 0.0F, 0.0F);
 
   ASSERT_EQ(pcl::io::savePLYFile(file_path.string(), *input_cloud, origin,
-                                 orientation, false, false),
+                                 orientation, false, true),
             0);
 
   yasmin_pcl::io::LoadPlyState state;

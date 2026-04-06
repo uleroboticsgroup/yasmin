@@ -86,7 +86,7 @@ colcon build
 Then, you can run the tests as follow:
 
 ```shell
-colcon test --packages-select yasmin yasmin_ros yasmin_factory
+colcon test --packages-select yasmin yasmin_ros yasmin_factory yasmin_pcl
 colcon test-result --verbose
 ```
 
