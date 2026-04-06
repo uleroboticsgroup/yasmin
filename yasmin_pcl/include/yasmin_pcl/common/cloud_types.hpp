@@ -22,8 +22,9 @@
 #include <Eigen/Geometry>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/PCLPointCloud2.h>
-#include <pcl/types.h>
 #include <sensor_msgs/msg/point_cloud2.hpp>
+
+#include "yasmin_pcl/common/pcl_compat.hpp"
 
 namespace yasmin_pcl::common {
 

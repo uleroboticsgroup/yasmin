@@ -122,6 +122,9 @@ if(BUILD_TESTING)
     test/test_simple_sm_2.xml
     test/test_nested_sm.xml
     test/test_remapping.xml
+    test/test_file_path_sm.xml
+    test/test_included_sm.xml
+    test/test_fsm_metadata.xml
     DESTINATION share/${PROJECT_NAME}/test
   )
 

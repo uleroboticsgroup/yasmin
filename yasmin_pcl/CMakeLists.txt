@@ -39,17 +39,15 @@ target_include_directories(${PROJECT_NAME}_states
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     ${PCL_INCLUDE_DIRS}
+    ${pcl_conversions_INCLUDE_DIRS}
 )
 target_link_libraries(${PROJECT_NAME}_states
   PUBLIC
     ${PCL_LIBRARIES}
-)
-ament_target_dependencies(${PROJECT_NAME}_states
-  PUBLIC
-    pluginlib
-    sensor_msgs
-    pcl_conversions
-    yasmin
+    ${pcl_conversions_LIBRARIES}
+    pluginlib::pluginlib
+    ${sensor_msgs_TARGETS}
+    yasmin::yasmin
 )
 
 pluginlib_export_plugin_description_file(yasmin plugins.xml)
@@ -82,16 +80,15 @@ function(add_yasmin_pcl_gtest target_name source_file)
         include
         test
         ${PCL_INCLUDE_DIRS}
+        ${pcl_conversions_INCLUDE_DIRS}
     )
     target_link_libraries(${target_name}
       ${PROJECT_NAME}_states
       ${PCL_LIBRARIES}
-    )
-    ament_target_dependencies(${target_name}
-      pluginlib
-      sensor_msgs
-      pcl_conversions
-      yasmin
+      ${pcl_conversions_LIBRARIES}
+      pluginlib::pluginlib
+      ${sensor_msgs_TARGETS}
+      yasmin::yasmin
     )
   endif()
 endfunction()

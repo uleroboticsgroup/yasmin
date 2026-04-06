@@ -301,6 +301,9 @@ TEST_F(TestYasminFactory, TestFactoryCleanup) {
     auto state = factory->create_state(state_elem);
     ASSERT_NE(state, nullptr);
 
+    // Destroy state before cleanup to avoid use-after-free of class loader
+    state.reset();
+
     // Cleanup should not raise errors
     factory->cleanup();
 
@@ -308,6 +311,9 @@ TEST_F(TestYasminFactory, TestFactoryCleanup) {
     auto new_factory = std::make_unique<YasminFactory>();
     auto new_state = new_factory->create_state(state_elem);
     ASSERT_NE(new_state, nullptr);
+
+    // Destroy state before cleanup
+    new_state.reset();
     new_factory->cleanup();
   } catch (const std::exception &e) {
     GTEST_SKIP() << "C++ plugin not available: " << e.what();
