@@ -47,19 +47,10 @@ YasminNode::YasminNode() : rclcpp::Node("yasmin_" + generateUUID() + "_node") {
   // execution.
   this->executor.add_node(this->get_node_base_interface());
 
-  // Start the executor in a background thread.
-  // The thread is not detached so it can be stopped and joined cleanly during
-  // shutdown.
+  // Initialize and detach the spin thread to run the executor asynchronously.
   this->spin_thread =
       std::make_unique<std::thread>(&rclcpp::Executor::spin, &this->executor);
-}
 
-YasminNode::~YasminNode() {
-  // Stop the executor and wait for the background thread to finish before the
-  // node is destroyed.
-  this->executor.cancel();
-
-  if (this->spin_thread && this->spin_thread->joinable()) {
-    this->spin_thread->join();
-  }
+  this->spin_thread
+      ->detach(); // Detach the spin thread to allow background execution.
 }

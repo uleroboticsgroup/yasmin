@@ -55,7 +55,7 @@ public:
   /**
    * @brief Destructor. Cleans up resources.
    */
-  ~YasminNode() override;
+  ~YasminNode() {}
 
   /**
    * @brief Deleted assignment operator to enforce singleton pattern.
