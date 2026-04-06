@@ -15,11 +15,11 @@
 
 from rclpy.duration import Duration
 from tf2_ros import Buffer, TransformListener
+from yasmin_ros.basic_outcomes import ABORT, SUCCEED
+from yasmin_ros.yasmin_node import YasminNode
 
 import yasmin
 from yasmin import Blackboard, State
-from yasmin_ros.basic_outcomes import ABORT, SUCCEED
-from yasmin_ros.yasmin_node import YasminNode
 
 
 class TfBufferState(State):
@@ -67,9 +67,7 @@ class TfBufferState(State):
 
     def execute(self, blackboard: Blackboard) -> str:
         try:
-            tf_buffer = Buffer(
-                cache_time=Duration(seconds=self._cache_time_sec), node=self._node
-            )
+            tf_buffer = Buffer(cache_time=Duration(seconds=self._cache_time_sec))
             tf_listener = TransformListener(tf_buffer, self._node)
             blackboard["tf_buffer"] = tf_buffer
             blackboard["tf_listener"] = tf_listener

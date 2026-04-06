@@ -71,9 +71,8 @@ void TfBufferState::configure() {
 
 std::string TfBufferState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   try {
-    auto tf_buffer = std::make_shared<tf2_ros::Buffer>(
-        this->node_->get_clock(), to_tf_duration(this->cache_time_sec_),
-        this->node_);
+    auto buffer =
+        std::make_shared<tf2_ros::Buffer>(node->get_clock(), cache_time);
 
     auto tf_listener = std::make_shared<tf2_ros::TransformListener>(
         *tf_buffer, this->node_, false);
