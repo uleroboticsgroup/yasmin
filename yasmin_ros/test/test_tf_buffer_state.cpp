@@ -110,6 +110,9 @@ TEST_F(TestTfBufferState, TestCreatesBufferAndListenerInBlackboard) {
   EXPECT_EQ((*create_buffer_state)(blackboard), std::string(SUCCEED));
   EXPECT_TRUE(blackboard->contains("tf_buffer"));
   EXPECT_TRUE(blackboard->contains("tf_listener"));
+
+  blackboard->remove("tf_listener");
+  blackboard->remove("tf_buffer");
 }
 
 TEST_F(TestTfBufferState, TestLookupFromFollowingState) {
@@ -126,8 +129,12 @@ TEST_F(TestTfBufferState, TestLookupFromFollowingState) {
   EXPECT_EQ((*create_buffer_state)(blackboard), std::string(SUCCEED));
   EXPECT_EQ((*lookup_state)(blackboard), std::string(SUCCEED));
 
+  blackboard->remove("tf_listener");
+  blackboard->remove("tf_buffer");
+
   running.store(false);
   publisher_thread.join();
+  broadcaster_node.reset();
 }
 
 int main(int argc, char **argv) {

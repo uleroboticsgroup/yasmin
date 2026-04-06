@@ -22,10 +22,10 @@ from geometry_msgs.msg import TransformStamped
 from rclpy.node import Node
 from rclpy.time import Time
 from tf2_ros import TransformBroadcaster
+from yasmin_ros.basic_outcomes import ABORT, SUCCEED
 
 from yasmin import Blackboard, State
 from yasmin_ros import TfBufferState
-from yasmin_ros.basic_outcomes import ABORT, SUCCEED
 
 
 class LookupTfState(State):
@@ -85,6 +85,8 @@ class TestTfBufferState(unittest.TestCase):
         self.assertEqual(SUCCEED, state(blackboard))
         self.assertIn("tf_buffer", blackboard)
         self.assertIn("tf_listener", blackboard)
+        del blackboard["tf_buffer"]
+        del blackboard["tf_listener"]
 
     def test_lookup_from_following_state(self):
         broadcaster_node = TestTransformBroadcasterNode()
@@ -106,6 +108,8 @@ class TestTfBufferState(unittest.TestCase):
 
             self.assertEqual(SUCCEED, create_buffer_state(blackboard))
             self.assertEqual(SUCCEED, lookup_state(blackboard))
+            del blackboard["tf_buffer"]
+            del blackboard["tf_listener"]
         finally:
             running = False
             publisher_thread.join()
