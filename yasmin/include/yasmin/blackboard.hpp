@@ -66,13 +66,25 @@ inline std::string demangle_type(const std::string &mangled_name) {
  */
 class Blackboard {
 private:
-  /// Mutex for thread safety.
-  mutable std::recursive_mutex mutex;
-  /// Storage for key-value pairs.
-  std::unordered_map<std::string, std::shared_ptr<void>> values;
-  /// Storage for type information for each key.
-  TypeRegistry type_registry;
-  /// Storage for key remappings.
+  /**
+   * @brief Shared storage used by blackboard copies.
+   *
+   * Values, type information and the synchronization primitive are shared so
+   * copied blackboards can access the same underlying data while keeping their
+   * own remapping scope.
+   */
+  struct SharedStorage {
+    /// Mutex for thread safety of the shared storage.
+    mutable std::recursive_mutex mutex;
+    /// Storage for key-value pairs.
+    std::unordered_map<std::string, std::shared_ptr<void>> values;
+    /// Storage for type information for each key.
+    TypeRegistry type_registry;
+  };
+
+  /// Shared storage for key-value pairs and type information.
+  std::shared_ptr<SharedStorage> storage;
+  /// Storage for key remappings local to this blackboard handle.
   Remappings remappings;
 
   /** @brief Internal method that acquires the maped key. In the case the key is
@@ -95,6 +107,9 @@ public:
   /**
    * @brief Copy constructor for Blackboard.
    * @param other The instance to copy from.
+   *
+   * The copied blackboard shares the underlying storage with @p other while
+   * keeping its own local remapping table.
    */
   Blackboard(const Blackboard &other);
 
@@ -108,20 +123,21 @@ public:
 
     YASMIN_LOG_DEBUG("Setting '%s' in the blackboard", name.c_str());
 
-    std::lock_guard<std::recursive_mutex> lk(this->mutex);
+    std::lock_guard<std::recursive_mutex> lk(this->storage->mutex);
 
     // Apply remapping if exists
     const std::string &key = this->remap(name);
     const std::string type_name = demangle_type(typeid(T).name());
 
-    auto type_it = this->type_registry.find(key);
-    if (type_it != this->type_registry.end() && type_it->second == type_name) {
+    auto type_it = this->storage->type_registry.find(key);
+    if (type_it != this->storage->type_registry.end() &&
+        type_it->second == type_name) {
       // Same type: update existing value in-place (avoids allocation)
-      *(std::static_pointer_cast<T>(this->values.at(key))) = value;
+      *(std::static_pointer_cast<T>(this->storage->values.at(key))) = value;
     } else {
       // New key or different type: (re)create entry
-      this->values[key] = std::make_shared<T>(value);
-      this->type_registry[key] = type_name;
+      this->storage->values[key] = std::make_shared<T>(value);
+      this->storage->type_registry[key] = type_name;
     }
   }
 
@@ -136,7 +152,7 @@ public:
 
     YASMIN_LOG_DEBUG("Getting '%s' from the blackboard", key.c_str());
 
-    std::lock_guard<std::recursive_mutex> lk(this->mutex);
+    std::lock_guard<std::recursive_mutex> lk(this->storage->mutex);
 
     // Check if the key exists
     if (!this->contains(key)) {
@@ -145,7 +161,8 @@ public:
     }
 
     // Return the value casted to the requested type
-    return *(std::static_pointer_cast<T>(this->values.at(this->remap(key))));
+    return *(std::static_pointer_cast<T>(
+        this->storage->values.at(this->remap(key))));
   }
 
   /**

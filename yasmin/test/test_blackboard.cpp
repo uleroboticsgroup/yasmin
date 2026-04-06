@@ -84,6 +84,37 @@ TEST_F(TestBlackboard, TestKeysWithRemappingsExposeVisibleScope) {
   EXPECT_EQ(keys.at(2), "second");
 }
 
+TEST_F(TestBlackboard,
+       TestCopiedBlackboardSharesStorageAndKeepsRemappingsLocal) {
+  blackboard.set<int>("shared", 1);
+  blackboard.set_remappings({{"from_original", "shared"}});
+
+  Blackboard copied_blackboard(blackboard);
+  copied_blackboard.set_remappings({{"from_copy", "shared"}});
+
+  EXPECT_TRUE(blackboard.contains("from_original"));
+  EXPECT_FALSE(blackboard.contains("from_copy"));
+  EXPECT_TRUE(copied_blackboard.contains("from_copy"));
+  EXPECT_FALSE(copied_blackboard.contains("from_original"));
+
+  copied_blackboard.set<int>("from_copy", 42);
+
+  EXPECT_EQ(blackboard.get<int>("from_original"), 42);
+  EXPECT_EQ(blackboard.get<int>("shared"), 42);
+  EXPECT_EQ(copied_blackboard.get<int>("from_copy"), 42);
+}
+
+TEST_F(TestBlackboard, TestCopyValueFromWorksAcrossCopiedBlackboards) {
+  blackboard.set<std::string>("source", "value");
+  Blackboard copied_blackboard(blackboard);
+  copied_blackboard.set_remappings({{"copy_target", "target"}});
+
+  copied_blackboard.copy_value_from(blackboard, "source", "copy_target");
+
+  EXPECT_EQ(blackboard.get<std::string>("target"), "value");
+  EXPECT_EQ(copied_blackboard.get<std::string>("copy_target"), "value");
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
