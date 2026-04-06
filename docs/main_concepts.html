@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -156,6 +156,14 @@
           <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
           <li><a href="yasmin_cli.html">YASMIN CLI</a></li>
           <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
         </ul>
 
         <h3>Resources</h3>
@@ -392,65 +400,68 @@
 
         <h3>Parameters</h3>
         <p>
-          YASMIN states can declare <strong>parameters</strong> in addition to input and
-          output blackboard keys. Parameters are not part of the shared execution
-          blackboard. Instead, each state has its own private parameter blackboard that
-          stores configuration values local to that state.
+          YASMIN states can declare <strong>parameters</strong> in addition to
+          input and output blackboard keys. Parameters are not part of the
+          shared execution blackboard. Instead, each state has its own private
+          parameter blackboard that stores configuration values local to that
+          state.
         </p>
         <p>
-          Parameters are declared through <code>declare_parameter()</code>. Just like
-          blackboard key metadata, a parameter can have a name, a human-readable
-          description, and an optional default value. When a default value is declared,
-          YASMIN automatically injects that value into the state's local parameter
-          storage.
+          Parameters are declared through <code>declare_parameter()</code>. Just
+          like blackboard key metadata, a parameter can have a name, a
+          human-readable description, and an optional default value. When a
+          default value is declared, YASMIN automatically injects that value
+          into the state's local parameter storage.
         </p>
         <p>
           States can access their parameters with <code>has_parameter()</code>,
-          <code>get_parameter()</code>, and <code>set_parameter()</code>. This makes
-          parameters useful for configuration values that belong to the state itself,
-          while the shared blackboard remains the mechanism for exchanging runtime data
-          between different states.
+          <code>get_parameter()</code>, and <code>set_parameter()</code>. This
+          makes parameters useful for configuration values that belong to the
+          state itself, while the shared blackboard remains the mechanism for
+          exchanging runtime data between different states.
         </p>
         <p>
           Parameters also participate in composition. Both
           <code>StateMachine</code> and <code>Concurrence</code> support
-          <strong>parameter mappings</strong> for child states. A parameter mapping is
-          defined as <code>child_parameter -&gt; parent_parameter</code>. During
-          <code>configure()</code>, the container copies the value of the declared
-          parent parameter into the corresponding declared parameter of the child state.
+          <strong>parameter mappings</strong> for child states. A parameter
+          mapping is defined as
+          <code>child_parameter -&gt; parent_parameter</code>. During
+          <code>configure()</code>, the container copies the value of the
+          declared parent parameter into the corresponding declared parameter of
+          the child state.
         </p>
         <ul>
           <li>
-            <strong>State-local storage:</strong> Parameters belong to a state and are
-            stored separately from the shared blackboard
+            <strong>State-local storage:</strong> Parameters belong to a state
+            and are stored separately from the shared blackboard
           </li>
           <li>
-            <strong>Metadata support:</strong> Parameters can include descriptions and
-            optional default values
+            <strong>Metadata support:</strong> Parameters can include
+            descriptions and optional default values
           </li>
           <li>
-            <strong>Safe configuration:</strong> Containers validate that mapped parent
-            and child parameters are declared before copying values
+            <strong>Safe configuration:</strong> Containers validate that mapped
+            parent and child parameters are declared before copying values
           </li>
           <li>
-            <strong>Reusable states:</strong> Child states can be configured from a
-            parent container without changing the state implementation
+            <strong>Reusable states:</strong> Child states can be configured
+            from a parent container without changing the state implementation
           </li>
         </ul>
         <p>
-          This makes parameters the right tool for state-specific configuration, while
-          the blackboard remains the central mechanism for shared data flow during
-          execution.
+          This makes parameters the right tool for state-specific configuration,
+          while the blackboard remains the central mechanism for shared data
+          flow during execution.
         </p>
 
         <h3>State Metadata</h3>
         <p>
           In YASMIN, a state can expose <strong>metadata</strong> in addition to
           its execution logic. This metadata describes what the state does, what
-          blackboard keys it expects, what outputs it produces, which
-          parameters it declares, and what its outcomes mean. The metadata is
-          used by tools such as the editor and factory, but it is also useful
-          to make states more self-describing and easier to reuse.
+          blackboard keys it expects, what outputs it produces, which parameters
+          it declares, and what its outcomes mean. The metadata is used by tools
+          such as the editor and factory, but it is also useful to make states
+          more self-describing and easier to reuse.
         </p>
         <p>
           A state description can be set with <code>set_description()</code>.
@@ -465,11 +476,10 @@
         <p>
           Blackboard interface metadata is declared with
           <code>add_input_key()</code> and <code>add_output_key()</code>.
-          Parameter metadata is declared with
-          <code>declare_parameter()</code>. These declarations can include a
-          name, a description, and an optional default value. This makes the
-          interface of a state explicit and inspectable instead of only being
-          implied by the implementation.
+          Parameter metadata is declared with <code>declare_parameter()</code>.
+          These declarations can include a name, a description, and an optional
+          default value. This makes the interface of a state explicit and
+          inspectable instead of only being implied by the implementation.
         </p>
         <p>
           The complete metadata of a state can be retrieved with

@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YASMIN Plugins Manager Documentation</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="docker.html">Docker Environment</a></li>
+          <li><a href="main_concepts.html">Main Concepts</a></li>
+          <li><a href="xml_factory.html">XML State Machines</a></li>
+          <li><a href="packages.html">Packages Overview</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/cpp/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/cpp/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/python/basic_fsm.html"
+                  >Writing a Simple FSM</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/remap_demo.html"
+                  >Blackboard Remapping</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li>
+                <a href="tutorials/python/publisher_demo.html">Publisher</a>
+              </li>
+              <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/python/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/parameters_demo.html"
+                  >ROS Parameters</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>YASMIN Plugins Manager</h1>
+
+        <div class="overview">
+          <p>
+            <strong>YASMIN Plugins Manager</strong> discovers and caches all
+            YASMIN plugins across the ROS&nbsp;2 workspace. It supports three
+            plugin types&mdash;C++, Python, and XML state machines&mdash;and
+            provides a unified interface used by the
+            <a href="yasmin_cli.html">CLI</a>,
+            <a href="yasmin_editor.html">Editor</a>, and
+            <a href="yasmin_factory.html">Factory</a>.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Plugin Types</h2>
+
+          <h3>C++ Plugins</h3>
+          <p>
+            C++ states are discovered through the ROS&nbsp;2
+            <strong>pluginlib</strong> resource index. Any class registered with
+            <code>base_class_type="yasmin::State"</code> in a
+            <code>plugins.xml</code> file is detected automatically.
+          </p>
+          <pre><code class="language-xml">&lt;library path="lib/libmy_states"&gt;
+  &lt;class name="my_package/MyState"
+         type="my_package::MyState"
+         base_class_type="yasmin::State"&gt;
+    &lt;description&gt;A custom C++ state.&lt;/description&gt;
+  &lt;/class&gt;
+&lt;/library&gt;</code></pre>
+          <p>
+            The plugin identifier for C++ states follows the
+            <code>package_name/ClassName</code> convention.
+          </p>
+
+          <h3>Python Plugins</h3>
+          <p>
+            Python states are found by importing each ROS&nbsp;2 package and
+            inspecting every <code>.py</code> module (up to three directory
+            levels deep). A class is accepted when it:
+          </p>
+          <ul>
+            <li>
+              Is a subclass of <code>yasmin.State</code> (but not
+              <code>State</code> itself)
+            </li>
+            <li>Is defined in the inspected module (not re-imported)</li>
+            <li>Can be instantiated without constructor arguments</li>
+          </ul>
+          <p>
+            The plugin identifier is
+            <code>module.submodule.ClassName</code>.
+          </p>
+
+          <h3>XML State Machines</h3>
+          <p>
+            XML state machines are located by recursively walking each
+            package&rsquo;s share directory for <code>.xml</code> files whose
+            root element is <code>&lt;StateMachine&gt;</code>. The identifier is
+            <code>package_name/file.xml</code>.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Caching</h2>
+          <p>
+            Discovered plugins are cached to
+            <code>~/.cache/yasmin_plugins_manager/plugins_cache.json</code>. The
+            cache location can be overridden with the
+            <code>YASMIN_CACHE</code> environment variable. The cache is
+            invalidated automatically when:
+          </p>
+          <ul>
+            <li>The cache format version changes</li>
+            <li>
+              The ROS environment changes (distro, AMENT_PREFIX_PATH, Python
+              version, or platform)
+            </li>
+            <li>
+              Tracked files or directories have different modification times or
+              sizes
+            </li>
+            <li>The set of installed packages changes</li>
+            <li>
+              The <code>YASMIN_DISCOVERY_IGNORE_PACKAGES</code> ignore list
+              changes &mdash; the list is stored as part of the cache state so
+              results are always consistent with the current env var value
+            </li>
+            <li>
+              The cache age exceeds <code>max_cache_age_sec</code> (when set)
+            </li>
+          </ul>
+          <p>To force a full rescan regardless of cache state:</p>
+          <pre><code class="language-bash">discover_plugins --force-refresh</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Ignoring Packages and Files</h2>
+          <p>There are three ways to exclude plugins from discovery:</p>
+
+          <h3>Package-level Ignore</h3>
+          <p>
+            Add the following export to the package&rsquo;s
+            <code>package.xml</code>:
+          </p>
+          <pre><code class="language-xml">&lt;export&gt;
+  &lt;yasmin_plugins_manager ignore="true"/&gt;
+&lt;/export&gt;</code></pre>
+
+          <h3>File-level Ignore (XML)</h3>
+          <p>
+            Place the following comment as the first non-empty line of the XML
+            file:
+          </p>
+          <pre><code class="language-xml">&lt;!-- YASMIN_IGNORE_DISCOVERY --&gt;</code></pre>
+
+          <h3>Environment Variable</h3>
+          <p>
+            Set <code>YASMIN_DISCOVERY_IGNORE_PACKAGES</code> to a comma-,
+            semicolon-, or colon-separated list of package names. The ignore
+            list is stored as part of the cache state, so changing it
+            automatically invalidates the cache and triggers a full
+            re-discovery:
+          </p>
+          <pre><code class="language-bash">export YASMIN_DISCOVERY_IGNORE_PACKAGES="pkg_a,pkg_b"</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Discovery Node</h2>
+          <p>
+            The package ships a <code>discover_plugins</code> console command
+            that runs a full discovery scan and prints the results:
+          </p>
+          <pre><code class="language-bash"># Default (uses cache)
+ros2 run yasmin_plugins_manager discover_plugins
+
+# Force rescan
+ros2 run yasmin_plugins_manager discover_plugins --force-refresh
+
+# Print full plugin metadata
+ros2 run yasmin_plugins_manager discover_plugins --verbose
+
+# Invalidate cache older than 60 seconds
+ros2 run yasmin_plugins_manager discover_plugins --max-cache-age-sec 60</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Plugin Metadata</h2>
+          <p>
+            Each discovered plugin exposes the following metadata (when
+            available):
+          </p>
+          <ul>
+            <li>
+              <strong>Outcomes</strong> &mdash; The list of possible state
+              outcomes
+            </li>
+            <li>
+              <strong>Description</strong> &mdash; A human-readable summary
+            </li>
+            <li>
+              <strong>Outcome descriptions</strong> &mdash; Per-outcome
+              descriptions
+            </li>
+            <li>
+              <strong>Input keys</strong> &mdash; Blackboard keys the state
+              reads
+            </li>
+            <li>
+              <strong>Output keys</strong> &mdash; Blackboard keys the state
+              writes
+            </li>
+            <li>
+              <strong>Parameters</strong> &mdash; Configurable parameters with
+              names, types, defaults, and descriptions
+            </li>
+          </ul>
+          <p>
+            You can inspect metadata for any individual plugin through the CLI:
+          </p>
+          <pre><code class="language-bash">ros2 yasmin info yasmin_pcl/VoxelGridState</code></pre>
+        </div>
+
+        <div class="page-navigation">
+          <a href="yasmin_pcl.html" class="nav-button prev">YASMIN PCL</a>
+          <div class="nav-button-placeholder"></div>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation
+        generated with <a href="doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

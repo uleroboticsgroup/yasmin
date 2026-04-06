@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -158,6 +158,14 @@
           <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
         </ul>
 
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+        </ul>
+
         <h3>Resources</h3>
         <ul>
           <li><a href="citations.html">Citations</a></li>
@@ -270,6 +278,50 @@
           A graphical editor for designing YASMIN state machines. It allows you
           to visually create states, transitions, and export them to XML for use
           with <code>yasmin_factory</code>.
+        </p>
+
+        <h3>
+          <a
+            href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_cli"
+            target="_blank"
+            >yasmin_cli</a
+          >
+        </h3>
+        <p>
+          A command-line interface for managing YASMIN state machines defined in
+          XML files. Provides commands to list, inspect, validate, run, test,
+          and edit state machines. Integrates with the factory plugin system.
+        </p>
+
+        <h3>
+          <a
+            href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_pcl"
+            target="_blank"
+            >yasmin_pcl</a
+          >
+        </h3>
+        <p>
+          Predefined states for
+          <a href="https://pointclouds.org/" target="_blank"
+            >Point Cloud Library (PCL)</a
+          >
+          operations, including filtering (voxel grid, pass-through, crop box,
+          outlier removal), segmentation, and point cloud I/O (PCD/PLY file
+          read/write, ROS PointCloud2 conversion).
+        </p>
+
+        <h3>
+          <a
+            href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_plugins_manager"
+            target="_blank"
+            >yasmin_plugins_manager</a
+          >
+        </h3>
+        <p>
+          Scans installed ROS 2 packages to discover YASMIN state plugins
+          registered via <code>pluginlib</code>. Collects plugin metadata from
+          <code>plugins.xml</code> manifests for use by the Factory and CLI
+          tools.
         </p>
 
         <h2>Demos</h2>

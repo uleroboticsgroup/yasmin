@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -158,6 +158,14 @@
           <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
         </ul>
 
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+        </ul>
+
         <h3>Resources</h3>
         <ul>
           <li><a href="citations.html">Citations</a></li>
@@ -202,16 +210,12 @@
             <li>
               <strong>edit</strong> - open a state machine in the YASMIN editor
             </li>
-            <li>
-              <strong>run</strong> - run a state machine from an XML file
-            </li>
+            <li><strong>run</strong> - run a state machine from an XML file</li>
             <li>
               <strong>test</strong> - generate a temporary one-state XML and run
               a single plugin in isolation
             </li>
-            <li>
-              <strong>viewer</strong> - start the YASMIN viewer
-            </li>
+            <li><strong>viewer</strong> - start the YASMIN viewer</li>
           </ul>
         </div>
 
@@ -309,13 +313,13 @@ ros2 yasmin edit path/to/state_machine.xml</code></pre>
 ros2 yasmin run path/to/state_machine.xml --input goal_pose=home
 ros2 yasmin run path/to/state_machine.xml --input retries=3 --param mode=demo
 ros2 yasmin run path/to/state_machine.xml --disable-viewer-pub
-ros2 yasmin run path/to/state_machine.xml --python</code></pre>
+ros2 yasmin run path/to/state_machine.xml --py</code></pre>
           <p>
             Input and parameter overrides must be written as
             <code>NAME=VALUE</code>. In the current implementation, typed
             conversion for XML overrides supports the scalar
-            <code>default_type</code> values <code>str</code>,
-            <code>int</code>, <code>float</code>, and <code>bool</code>.
+            <code>default_type</code> values <code>str</code>, <code>int</code>,
+            <code>float</code>, and <code>bool</code>.
           </p>
         </div>
 
@@ -331,9 +335,9 @@ ros2 yasmin run path/to/state_machine.xml --python</code></pre>
 ros2 yasmin test my_package/MyCppState --input goal=home
 ros2 yasmin test my_package/MyCppState --param retries=3
 ros2 yasmin test my_package/MyCppState --print-xml
-ros2 yasmin test my_package/MyCppState --keep-xml
+ros2 yasmin test my_package/MyCppState --keep-temp-file
 ros2 yasmin test my_package/MyCppState --disable-viewer-pub
-ros2 yasmin test my_package/MyCppState --python</code></pre>
+ros2 yasmin test my_package/MyCppState --py</code></pre>
           <p>
             The <code>test</code> verb supports Python and C++ state plugins. It
             does not accept XML state machines as the selected plugin target.
@@ -367,7 +371,9 @@ ros2 yasmin edit path/to/state_machine.xml</code></pre>
         </div>
 
         <div class="page-navigation">
-          <a href="yasmin_factory.html" class="nav-button prev">YASMIN Factory</a>
+          <a href="yasmin_factory.html" class="nav-button prev"
+            >YASMIN Factory</a
+          >
           <a href="yasmin_viewer.html" class="nav-button next">YASMIN Viewer</a>
         </div>
       </main>

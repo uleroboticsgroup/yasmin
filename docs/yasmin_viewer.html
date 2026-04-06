@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -158,6 +158,14 @@
           <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
         </ul>
 
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+        </ul>
+
         <h3>Resources</h3>
         <ul>
           <li><a href="citations.html">Citations</a></li>
@@ -170,9 +178,9 @@
         <div class="overview">
           <p>
             The <strong>YASMIN Viewer</strong> provides a convenient way to
-            monitor YASMIN's Finite State Machines (FSM). It is built using
-            Flask and ReactJS and includes a filter to focus on a single FSM at
-            a time.
+            monitor YASMIN's Finite State Machines (FSM). It is built using a
+            C++ HTTP server (Boost Beast) with a Mermaid.js front-end and
+            includes a filter to focus on a single FSM at a time.
           </p>
         </div>
 
@@ -246,10 +254,8 @@
         </div>
 
         <div class="page-navigation">
-          <a href="yasmin_factory.html" class="nav-button prev"
-            >YASMIN Factory</a
-          >
-          <div class="nav-button-placeholder"></div>
+          <a href="yasmin_cli.html" class="nav-button prev">YASMIN CLI</a>
+          <a href="yasmin_pcl.html" class="nav-button next">YASMIN PCL</a>
         </div>
       </main>
     </div>
