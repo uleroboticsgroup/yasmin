@@ -36,8 +36,6 @@ set(SOURCES
   src/yasmin_ros/publisher_state.cpp
   src/yasmin_ros/get_parameters_state.cpp
   src/yasmin_ros/supported_interface_serialization.cpp
-  src/yasmin_ros/ros_serialize_cpp_state.cpp
-  src/yasmin_ros/ros_deserialize_cpp_state.cpp
 )
 set(DEPENDENCIES
   rclcpp::rclcpp
@@ -67,8 +65,37 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 target_link_libraries(${PROJECT_NAME} PUBLIC ${DEPENDENCIES})
 
+# Separate plugin libraries to avoid namespace collisions
+add_library(ros_serialize_cpp_state SHARED src/yasmin_ros/ros_serialize_cpp_state.cpp)
+target_include_directories(ros_serialize_cpp_state PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(ros_serialize_cpp_state PUBLIC
+  ${PROJECT_NAME}
+  yasmin::yasmin
+  pluginlib::pluginlib
+)
+
+add_library(ros_deserialize_cpp_state SHARED src/yasmin_ros/ros_deserialize_cpp_state.cpp)
+target_include_directories(ros_deserialize_cpp_state PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(ros_deserialize_cpp_state PUBLIC
+  ${PROJECT_NAME}
+  yasmin::yasmin
+  pluginlib::pluginlib
+)
+
 install(TARGETS ${PROJECT_NAME}
   EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+install(TARGETS ros_serialize_cpp_state ros_deserialize_cpp_state
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -143,6 +170,8 @@ if(BUILD_TESTING)
   if(TARGET test_ros_serialization_states_cpp)
     target_link_libraries(test_ros_serialization_states_cpp
       ${PROJECT_NAME}
+      ros_serialize_cpp_state
+      ros_deserialize_cpp_state
       yasmin::yasmin
       rclcpp::rclcpp
       rclcpp_action::rclcpp_action
