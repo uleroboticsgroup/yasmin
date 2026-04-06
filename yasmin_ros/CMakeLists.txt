@@ -16,6 +16,9 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(example_interfaces REQUIRED)
+find_package(tf2_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2 REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
@@ -35,17 +38,21 @@ set(SOURCES
   src/yasmin_ros/monitor_state.cpp
   src/yasmin_ros/publisher_state.cpp
   src/yasmin_ros/get_parameters_state.cpp
+  src/yasmin_ros/tf_buffer_state.cpp
   src/yasmin_ros/supported_interface_serialization.cpp
 )
 set(DEPENDENCIES
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
   pluginlib::pluginlib
+  tf2::tf2
+  tf2_ros::tf2_ros
   yasmin::yasmin
   ${geometry_msgs_TARGETS}
   ${std_msgs_TARGETS}
   ${std_srvs_TARGETS}
   ${example_interfaces_TARGETS}
+  ${tf2_msgs_TARGETS}
 )
 set(DEPENDENCIES_PACKAGE
   rclcpp
@@ -56,6 +63,9 @@ set(DEPENDENCIES_PACKAGE
   std_msgs
   std_srvs
   example_interfaces
+  tf2
+  tf2_ros
+  tf2_msgs
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -75,6 +85,8 @@ target_link_libraries(ros_serialize_cpp_state PUBLIC
   ${PROJECT_NAME}
   yasmin::yasmin
   pluginlib::pluginlib
+  tf2::tf2
+  tf2_ros::tf2_ros
 )
 
 add_library(ros_deserialize_cpp_state SHARED src/yasmin_ros/ros_deserialize_cpp_state.cpp)
@@ -86,6 +98,8 @@ target_link_libraries(ros_deserialize_cpp_state PUBLIC
   ${PROJECT_NAME}
   yasmin::yasmin
   pluginlib::pluginlib
+  tf2::tf2
+  tf2_ros::tf2_ros
 )
 
 install(TARGETS ${PROJECT_NAME}
@@ -137,6 +151,7 @@ if(BUILD_TESTING)
     test_publisher_state
     test_ros_serialize_state
     test_ros_deserialize_state
+    test_tf_buffer_state
   )
 
   foreach(_test_name ${_pytest_tests})
@@ -148,6 +163,7 @@ if(BUILD_TESTING)
     test_service_client_state
     test_monitor_state
     test_publisher_state
+    test_tf_buffer_state
   )
 
   foreach(_test_name ${_gtest_tests})
@@ -158,10 +174,13 @@ if(BUILD_TESTING)
         yasmin::yasmin
         rclcpp::rclcpp
         rclcpp_action::rclcpp_action
+        tf2::tf2
+        tf2_ros::tf2_ros
         ${geometry_msgs_TARGETS}
         ${std_msgs_TARGETS}
         ${std_srvs_TARGETS}
         ${example_interfaces_TARGETS}
+        ${tf2_msgs_TARGETS}
       )
     endif()
   endforeach()
@@ -175,10 +194,13 @@ if(BUILD_TESTING)
       yasmin::yasmin
       rclcpp::rclcpp
       rclcpp_action::rclcpp_action
+      tf2::tf2
+      tf2_ros::tf2_ros
       ${geometry_msgs_TARGETS}
       ${std_msgs_TARGETS}
       ${std_srvs_TARGETS}
       ${example_interfaces_TARGETS}
+      ${tf2_msgs_TARGETS}
     )
   endif()
 

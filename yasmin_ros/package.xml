@@ -17,6 +17,9 @@
   <depend>std_msgs</depend>
   <depend>std_srvs</depend>
   <depend>example_interfaces</depend>
+  <depend>tf2_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2</depend>
   <exec_depend>rosidl_runtime_py</exec_depend>
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>
@@ -24,6 +27,9 @@
   <test_depend>python3-pytest-cov</test_depend>
   <test_depend>example_interfaces</test_depend>
   <test_depend>std_msgs</test_depend>
+  <test_depend>tf2_msgs</test_depend>
+  <test_depend>tf2_ros</test_depend>
+  <test_depend>tf2</test_depend>
   <build_depend>ros_environment</build_depend>
   <export>
     <build_type>ament_cmake</build_type>

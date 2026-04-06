@@ -61,6 +61,16 @@ class YasminNode(Node):
 
             return YasminNode._instance
 
+    @staticmethod
+    def shutdown_instance() -> None:
+        """
+        Stop and destroy the singleton instance if it exists.
+        """
+        with YasminNode._lock:
+            if YasminNode._instance is not None:
+                YasminNode._instance.destroy_node()
+                YasminNode._instance = None
+
     def __init__(self) -> None:
         """
         Default constructor. Initializes the node with a unique name.
@@ -83,6 +93,20 @@ class YasminNode(Node):
         self._executor = Executor()
         self._executor.add_node(self)
 
-        ## Thread to execute the spinning of the node.
+        ## Thread to execute the spinning of the node in the background.
         self._spin_thread: Thread = Thread(target=self._executor.spin)
         self._spin_thread.start()
+
+    def destroy_node(self) -> bool:
+        """
+        Stop the executor thread cleanly before destroying the node.
+        """
+        if hasattr(self, "_executor") and self._executor is not None:
+            self._executor.remove_node(self)
+            self._executor.shutdown()
+
+        if hasattr(self, "_spin_thread") and self._spin_thread is not None:
+            if self._spin_thread.is_alive():
+                self._spin_thread.join()
+
+        return super().destroy_node()
