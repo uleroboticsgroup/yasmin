@@ -94,7 +94,7 @@ void SavePlyState::configure() {
 std::string SavePlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   try {
     if (file_path_.empty()) {
-      YASMIN_LOG_ERROR("Parameter 'file_path' is empty");
+      YASMIN_LOG_WARN("Parameter 'file_path' is empty");
       return "aborted";
     }
 
@@ -102,7 +102,7 @@ std::string SavePlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
         blackboard->get<common::PclPointCloud2Ptr>("input_cloud");
 
     if (!input_cloud) {
-      YASMIN_LOG_ERROR("Input PCL point cloud pointer is null");
+      YASMIN_LOG_WARN("Input PCL point cloud pointer is null");
       return "aborted";
     }
 
@@ -115,7 +115,7 @@ std::string SavePlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
                              binary_mode_, use_camera_);
 
     if (result < 0) {
-      YASMIN_LOG_ERROR("Failed to write PLY file '%s'", file_path_.c_str());
+      YASMIN_LOG_WARN("Failed to write PLY file '%s'", file_path_.c_str());
       return "aborted";
     }
 

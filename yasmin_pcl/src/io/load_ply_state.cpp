@@ -180,7 +180,7 @@ void LoadPlyState::configure() {
 
 std::string LoadPlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   if (file_path_.empty()) {
-    YASMIN_LOG_ERROR("Parameter 'file_path' is empty");
+    YASMIN_LOG_WARN("Parameter 'file_path' is empty");
     return "aborted";
   }
 
@@ -192,7 +192,7 @@ std::string LoadPlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
       pcl::io::loadPLYFile(file_path_, *output_cloud, origin, orientation);
 
   if (result < 0) {
-    YASMIN_LOG_ERROR("Failed to load PLY file '%s'", file_path_.c_str());
+    YASMIN_LOG_WARN("Failed to load PLY file '%s'", file_path_.c_str());
     return "aborted";
   }
 

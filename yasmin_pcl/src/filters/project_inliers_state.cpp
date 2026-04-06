@@ -78,19 +78,19 @@ ProjectInliersState::execute(yasmin::Blackboard::SharedPtr blackboard) {
         blackboard->get<common::PclPointCloud2Ptr>("input_cloud");
 
     if (!input_cloud) {
-      YASMIN_LOG_ERROR("Input PCL point cloud pointer is null");
+      YASMIN_LOG_WARN("Input PCL point cloud pointer is null");
       return "aborted";
     }
 
     if (!blackboard->contains("input_model_coefficients")) {
-      YASMIN_LOG_ERROR("Blackboard key 'input_model_coefficients' is missing");
+      YASMIN_LOG_WARN("Blackboard key 'input_model_coefficients' is missing");
       return "aborted";
     }
 
     const auto coefficients = blackboard->get<common::ModelCoefficientsPtr>(
         "input_model_coefficients");
     if (!coefficients) {
-      YASMIN_LOG_ERROR("Input model coefficients pointer is null");
+      YASMIN_LOG_WARN("Input model coefficients pointer is null");
       return "aborted";
     }
 

@@ -107,7 +107,7 @@ std::string VoxelGridState::execute(yasmin::Blackboard::SharedPtr blackboard) {
         blackboard->get<common::PclPointCloud2Ptr>("input_cloud");
 
     if (!input_cloud) {
-      YASMIN_LOG_ERROR("Input PCL point cloud pointer is null");
+      YASMIN_LOG_WARN("Input PCL point cloud pointer is null");
       return "aborted";
     }
 

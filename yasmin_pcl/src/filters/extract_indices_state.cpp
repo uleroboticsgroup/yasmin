@@ -122,12 +122,12 @@ ExtractIndicesState::execute(yasmin::Blackboard::SharedPtr blackboard) {
         blackboard->get<common::PclPointCloud2Ptr>("input_cloud");
 
     if (!input_cloud) {
-      YASMIN_LOG_ERROR("Input PCL point cloud pointer is null");
+      YASMIN_LOG_WARN("Input PCL point cloud pointer is null");
       return "aborted";
     }
 
     if (!blackboard->contains("input_indices")) {
-      YASMIN_LOG_ERROR("Blackboard key 'input_indices' is missing");
+      YASMIN_LOG_WARN("Blackboard key 'input_indices' is missing");
       return "aborted";
     }
 

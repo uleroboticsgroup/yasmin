@@ -53,7 +53,7 @@ RosToPclPointCloud2State::execute(yasmin::Blackboard::SharedPtr blackboard) {
         blackboard->get<common::RosPointCloud2Ptr>("input_cloud");
 
     if (!input_cloud) {
-      YASMIN_LOG_ERROR("Input ROS point cloud pointer is null");
+      YASMIN_LOG_WARN("Input ROS point cloud pointer is null");
       return "aborted";
     }
 
