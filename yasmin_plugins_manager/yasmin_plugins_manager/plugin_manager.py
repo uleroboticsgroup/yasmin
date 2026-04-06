@@ -29,25 +29,27 @@ from ament_index_python import (
     get_package_share_path,
     get_packages_with_prefixes,
 )
-from ament_index_python.resources import (
-    get_resource,
-    get_resource_types,
-    get_resources,
-    has_resource,
-)
+from ament_index_python.resources import get_resource, get_resource_types, get_resources
 from lxml import etree as ET
 from tqdm import tqdm
 from yasmin import LogLevel, State, set_log_level
 
 from yasmin_plugins_manager.cache import (
     CACHE_VERSION,
+    IGNORE_PACKAGES_ENV_VAR,
     build_environment_fingerprint,
+    get_ignored_packages_from_env,
     is_stat_signature_valid,
     load_cache,
     save_cache,
     stat_signature,
 )
 from yasmin_plugins_manager.plugin_info import PluginInfo
+
+PACKAGE_IGNORE_EXPORT_TAG = "yasmin_plugins_manager"
+PACKAGE_IGNORE_EXPORT_ATTRIBUTE = "ignore"
+XML_DISCOVERY_IGNORE_COMMENT = "<!-- YASMIN_IGNORE_DISCOVERY -->"
+TRUTHY_VALUES = {"1", "true", "yes", "on"}
 
 
 class PluginManager:
@@ -96,17 +98,30 @@ class PluginManager:
 
         tracked_files: List[dict] = []
         tracked_dirs: List[dict] = []
+        ignored_packages_env = set(get_ignored_packages_from_env())
         packages = list(get_packages_with_prefixes().keys())
         cpp_resource_map = self._get_cpp_plugin_resource_map()
 
         for package in tqdm(packages, desc="Loading plugins", disable=hide_progress):
             try:
                 package_share_path = get_package_share_path(package)
-                share_signature = stat_signature(str(package_share_path))
-                if share_signature:
-                    tracked_dirs.append(share_signature)
             except Exception:
-                pass
+                continue
+
+            share_signature = stat_signature(str(package_share_path))
+            if share_signature:
+                tracked_dirs.append(share_signature)
+
+            package_xml_path = package_share_path / "package.xml"
+            package_xml_signature = stat_signature(str(package_xml_path))
+            if package_xml_signature:
+                tracked_files.append(package_xml_signature)
+
+            if package in ignored_packages_env:
+                continue
+
+            if self._package_has_discovery_ignore_export(package_xml_path):
+                continue
 
             self.load_cpp_plugins_from_package(
                 package_name=package,
@@ -141,6 +156,11 @@ class PluginManager:
 
         current_env = build_environment_fingerprint()
         if cache.get("environment_hash") != current_env["hash"]:
+            return False
+
+        if cache.get("ignored_packages_env") != current_env["payload"].get(
+            "ignored_packages_env", []
+        ):
             return False
 
         for signature in cache.get("tracked_files", []):
@@ -182,6 +202,10 @@ class PluginManager:
             "cache_version": CACHE_VERSION,
             "created_at": time.time(),
             "environment_hash": environment["hash"],
+            "ignored_packages_env": environment["payload"].get(
+                "ignored_packages_env", []
+            ),
+            "ignore_packages_env_var": IGNORE_PACKAGES_ENV_VAR,
             "tracked_files": tracked_files,
             "tracked_dirs": tracked_dirs,
             "cpp_plugins": [plugin.to_cache_dict() for plugin in self.cpp_plugins],
@@ -244,6 +268,63 @@ class PluginManager:
                 ]
 
         return resource_map
+
+    def _is_truthy(self, value: Optional[str]) -> bool:
+        """Return whether an XML attribute value should be interpreted as true."""
+        if value is None:
+            return False
+        return value.strip().lower() in TRUTHY_VALUES
+
+    def _package_has_discovery_ignore_export(self, package_xml_path: Path) -> bool:
+        """
+        Check whether a package.xml export block disables discovery for the package.
+
+        A package is ignored when it contains the following export tag:
+
+        <export>
+          <yasmin_plugins_manager ignore="true"/>
+        </export>
+        """
+        if not package_xml_path.is_file():
+            return False
+
+        try:
+            tree = ET.parse(str(package_xml_path))
+        except (ET.ParseError, OSError):
+            return False
+
+        root = tree.getroot()
+        export_elem = root.find("export")
+        if export_elem is None:
+            return False
+
+        for child in export_elem:
+            if child.tag != PACKAGE_IGNORE_EXPORT_TAG:
+                continue
+
+            if self._is_truthy(child.attrib.get(PACKAGE_IGNORE_EXPORT_ATTRIBUTE)):
+                return True
+
+        return False
+
+    def _xml_file_has_discovery_ignore_comment(self, xml_file: str) -> bool:
+        """
+        Check whether the first non-empty line disables XML discovery.
+
+        XML discovery is skipped when the first non-empty line is exactly:
+        <!-- YASMIN_IGNORE_DISCOVERY -->
+        """
+        try:
+            with open(xml_file, "r", encoding="utf-8") as handle:
+                for line in handle:
+                    first_line = line.lstrip("\ufeff").strip()
+                    if not first_line:
+                        continue
+                    return first_line == XML_DISCOVERY_IGNORE_COMMENT
+        except OSError:
+            return False
+
+        return False
 
     def load_cpp_plugins_from_package(
         self,
@@ -460,15 +541,19 @@ class PluginManager:
                     continue
 
                 xml_file: str = os.path.join(root, filename)
+
+                if tracked_files is not None:
+                    signature = stat_signature(xml_file)
+                    if signature:
+                        tracked_files.append(signature)
+
+                if self._xml_file_has_discovery_ignore_comment(xml_file):
+                    continue
+
                 try:
                     tree = ET.parse(xml_file)
                     xml_root = tree.getroot()
                     if xml_root.tag == "StateMachine":
-                        if tracked_files is not None:
-                            signature = stat_signature(xml_file)
-                            if signature:
-                                tracked_files.append(signature)
-
                         relative_path = os.path.relpath(xml_file, package_share_path)
                         self.load_xml_state_machine(
                             filename,

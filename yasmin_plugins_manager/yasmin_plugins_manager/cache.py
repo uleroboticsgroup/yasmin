@@ -19,13 +19,15 @@ import hashlib
 import json
 import os
 import platform
+import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from ament_index_python import get_packages_with_prefixes
 
-CACHE_VERSION = 2
+CACHE_VERSION = 3
+IGNORE_PACKAGES_ENV_VAR = "YASMIN_DISCOVERY_IGNORE_PACKAGES"
 
 
 def get_default_cache_dir() -> Path:
@@ -54,14 +56,32 @@ def get_cache_file(cache_dir: Optional[Path] = None) -> Path:
     return ensure_cache_dir(cache_dir) / "plugins_cache.json"
 
 
+def get_ignored_packages_from_env() -> list[str]:
+    """Return the sorted package ignore list configured through the environment."""
+    raw_value = os.environ.get(IGNORE_PACKAGES_ENV_VAR, "")
+    if not raw_value.strip():
+        return []
+
+    normalized_value = raw_value
+    for separator in [",", ";", os.pathsep]:
+        normalized_value = normalized_value.replace(separator, " ")
+
+    packages = {
+        item.strip() for item in re.split(r"\s+", normalized_value) if item.strip()
+    }
+    return sorted(packages)
+
+
 def build_environment_fingerprint() -> Dict[str, Any]:
     """Build a fingerprint for the active ROS and Python environment."""
     packages = get_packages_with_prefixes()
+    ignored_packages = get_ignored_packages_from_env()
     payload = {
         "ros_distro": os.environ.get("ROS_DISTRO", ""),
         "ament_prefix_path": os.environ.get("AMENT_PREFIX_PATH", ""),
         "python_version": f"{sys.version_info.major}.{sys.version_info.minor}",
         "platform": platform.platform(),
+        "ignored_packages_env": ignored_packages,
         "packages": dict(sorted(packages.items())),
     }
     payload_json = json.dumps(payload, sort_keys=True)
