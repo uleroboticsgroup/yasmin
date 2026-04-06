@@ -32,6 +32,18 @@ GetParametersState::GetParametersState(
     : yasmin::State({basic_outcomes::SUCCEED, basic_outcomes::ABORT}),
       parameters_(parameters) {
 
+  this->set_outcome_description(basic_outcomes::SUCCEED,
+                                "All parameters retrieved successfully");
+  this->set_outcome_description(
+      basic_outcomes::ABORT,
+      "Failed to retrieve parameters due to unsupported type or other error");
+
+  for (const auto &param : parameters) {
+    const std::string &param_name = param.first;
+    const std::any &default_value = param.second;
+    this->add_output_key(param_name, "");
+  }
+
   if (node == nullptr) {
     this->node_ = YasminNode::get_instance();
   } else {
