@@ -82,13 +82,16 @@ public:
       : State({basic_outcomes::SUCCEED}), topic_name(topic_name),
         create_message_handler(create_message_handler) {
 
+    this->set_outcome_description(basic_outcomes::SUCCEED,
+                                  "The message was published successfully");
+
     if (node == nullptr) {
       this->node_ = YasminNode::get_instance();
     } else {
       this->node_ = node;
     }
 
-    // create subscriber
+    // Create publisher
     this->pub = ROSClientsCache::get_or_create_publisher<MsgT>(
         this->node_, topic_name, qos, callback_group);
 

@@ -233,8 +233,18 @@ public:
         wait_timeout(wait_timeout), response_timeout(response_timeout),
         maximum_retry(maximum_retry) {
 
+    this->set_outcome_description(basic_outcomes::SUCCEED,
+                                  "The action succeeded");
+    this->set_outcome_description(basic_outcomes::ABORT,
+                                  "The action was aborted");
+    this->set_outcome_description(basic_outcomes::CANCEL,
+                                  "The action was canceled");
+
     if (this->wait_timeout > 0 || this->response_timeout > 0) {
       this->outcomes.insert(basic_outcomes::TIMEOUT);
+      this->set_outcome_description(
+          basic_outcomes::TIMEOUT,
+          "The action server was not available in time");
     }
 
     if (outcomes.size() > 0) {

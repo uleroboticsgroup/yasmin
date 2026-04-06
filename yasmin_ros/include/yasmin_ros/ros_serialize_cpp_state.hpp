@@ -23,16 +23,39 @@
 
 namespace yasmin_ros {
 
+/**
+ * @brief A state for serializing C++ objects into ROS 2 messages.
+ */
 class RosSerializeCppState : public yasmin::State {
 public:
+  /**
+   * @brief Construct a new RosSerializeCppState.
+   */
   RosSerializeCppState();
+
+  /**
+   * @brief Destroy the RosSerializeCppState.
+   */
   ~RosSerializeCppState() override = default;
 
+  /**
+   * @brief Configure the state before execution.
+   */
   void configure() override;
+
+  /**
+   * @brief Execute the serialization operation.
+   *
+   * @param blackboard A shared pointer to the blackboard for data storage.
+   * @return A string outcome indicating the result of the serialization
+   * operation.
+   */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief The type of the ROS 2 interface to serialize.
   std::string interface_type_;
+  /// @brief The handler for serializing the ROS 2 message.
   const InterfaceSerializationHandler *handler_;
 };
 

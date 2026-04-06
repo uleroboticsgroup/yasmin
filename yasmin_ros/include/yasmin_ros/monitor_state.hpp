@@ -124,8 +124,13 @@ public:
     // Set outcomes
     if (timeout > 0) {
       this->outcomes.insert(basic_outcomes::TIMEOUT);
+      this->set_outcome_description(
+          basic_outcomes::TIMEOUT,
+          "No message received from topic in the specified timeout");
     }
     this->outcomes.insert(basic_outcomes::CANCEL);
+    this->set_outcome_description(basic_outcomes::CANCEL,
+                                  "The monitor was canceled");
 
     if (outcomes.size() > 0) {
       for (const std::string &outcome : outcomes) {

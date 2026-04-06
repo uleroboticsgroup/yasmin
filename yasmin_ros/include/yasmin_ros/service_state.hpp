@@ -202,8 +202,16 @@ public:
         srv_name(srv_name), wait_timeout(wait_timeout),
         response_timeout(response_timeout), maximum_retry(maximum_retry) {
 
+    this->set_outcome_description(basic_outcomes::SUCCEED,
+                                  "The service call was successful");
+    this->set_outcome_description(basic_outcomes::ABORT,
+                                  "The service call failed");
+
     if (this->wait_timeout > 0 || this->response_timeout > 0) {
       this->outcomes.insert(basic_outcomes::TIMEOUT);
+      this->set_outcome_description(
+          basic_outcomes::TIMEOUT,
+          "The service server was not available in time");
     }
 
     if (!outcomes.empty()) {

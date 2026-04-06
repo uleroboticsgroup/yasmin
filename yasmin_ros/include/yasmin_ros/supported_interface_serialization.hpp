@@ -25,6 +25,10 @@
 
 namespace yasmin_ros {
 
+/**
+ * @brief A structure to hold the serialization handlers for a specific
+ * interface type.
+ */
 struct InterfaceSerializationHandler {
   std::function<std::vector<uint8_t>(yasmin::Blackboard::SharedPtr,
                                      const std::string &)>
@@ -35,14 +39,39 @@ struct InterfaceSerializationHandler {
   std::string blackboard_type;
 };
 
+/**
+ * @brief Get the map of supported interface serialization handlers.
+ *
+ * @return A reference to the unordered map containing interface types and their
+ * corresponding serialization handlers.
+ */
 const std::unordered_map<std::string, InterfaceSerializationHandler> &
 get_supported_interface_serialization_handlers();
 
+/**
+ * @brief Check if a given interface type is supported for serialization.
+ *
+ * @param interface_type The type of the interface to check.
+ * @return true if the interface type is supported, false otherwise.
+ */
 bool is_supported_interface_type(const std::string &interface_type);
 
+/**
+ * @brief Get the serialization handler for a specific interface type.
+ *
+ * @param interface_type The type of the interface to get the handler for.
+ * @return A reference to the InterfaceSerializationHandler for the specified
+ * interface type.
+ * @throws std::invalid_argument if the interface type is not supported.
+ */
 const InterfaceSerializationHandler &
 get_interface_serialization_handler(const std::string &interface_type);
 
+/**
+ * @brief Get a list of supported interface types for serialization.
+ *
+ * @return A vector of strings containing the supported interface types.
+ */
 std::vector<std::string> get_supported_interface_types();
 
 } // namespace yasmin_ros
