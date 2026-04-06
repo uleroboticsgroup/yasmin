@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(yasmin REQUIRED)
@@ -25,6 +26,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${Python3_INCLUDE_DIRS}
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC
+  ament_index_cpp::ament_index_cpp
   pluginlib::pluginlib
   yasmin::yasmin
   tinyxml2::tinyxml2
@@ -47,6 +49,7 @@ install(DIRECTORY include/
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(
+  ament_index_cpp
   rclcpp
   pluginlib
   yasmin

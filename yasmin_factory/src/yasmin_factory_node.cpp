@@ -17,7 +17,6 @@
 #include <memory>
 #include <string>
 
-#include "ament_index_cpp/get_package_share_directory.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin_factory/yasmin_factory.hpp"
