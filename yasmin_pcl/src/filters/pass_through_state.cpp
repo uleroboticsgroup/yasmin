@@ -15,11 +15,12 @@
 
 #include "yasmin_pcl/filters/pass_through_state.hpp"
 
+#include <pcl/filters/passthrough.h>
+
 #include <exception>
 #include <limits>
 #include <string>
 
-#include <pcl/filters/passthrough.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

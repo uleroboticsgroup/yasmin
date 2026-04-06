@@ -16,7 +16,7 @@
 #ifndef YASMIN_ROS__LOGS_HPP_
 #define YASMIN_ROS__LOGS_HPP_
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace yasmin_ros {
 

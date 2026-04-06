@@ -15,13 +15,14 @@
 
 #include "yasmin_pcl/io/load_ply_state.hpp"
 
+#include <pcl/io/ply_io.h>
+
+#include <Eigen/Geometry>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <Eigen/Geometry>
-#include <pcl/io/ply_io.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

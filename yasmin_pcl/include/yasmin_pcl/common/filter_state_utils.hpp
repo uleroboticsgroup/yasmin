@@ -18,8 +18,7 @@
 
 #include <string>
 
-#include <yasmin/blackboard.hpp>
-
+#include "yasmin/blackboard.hpp"
 #include "yasmin_pcl/common/cloud_types.hpp"
 #include "yasmin_pcl/common/pcl_compat.hpp"
 

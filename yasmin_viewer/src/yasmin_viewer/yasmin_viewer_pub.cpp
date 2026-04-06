@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 #include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/types.hpp"

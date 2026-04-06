@@ -20,7 +20,7 @@
 #include <memory>
 #include <string>
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"

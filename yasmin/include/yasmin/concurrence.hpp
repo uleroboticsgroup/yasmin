@@ -18,14 +18,9 @@
 #define YASMIN__CONCURRENCE_HPP_
 
 #include <atomic>
-#include <iostream>
 #include <mutex>
 #include <string>
 #include <thread>
-
-#ifdef __GNUG__     // If using GCC/G++
-#include <cxxabi.h> // For abi::__cxa_demangle
-#endif
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"

@@ -19,7 +19,8 @@
 #include <memory>
 #include <string>
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
+
 #include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"

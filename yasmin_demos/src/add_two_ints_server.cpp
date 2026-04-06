@@ -17,8 +17,8 @@
 #include <cinttypes>
 #include <memory>
 
-#include "example_interfaces/srv/add_two_ints.hpp"
-#include "rclcpp/rclcpp.hpp"
+#include <example_interfaces/srv/add_two_ints.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 /**
  * @class ServerNode

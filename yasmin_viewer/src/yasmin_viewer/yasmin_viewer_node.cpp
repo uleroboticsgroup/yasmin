@@ -15,13 +15,6 @@
 
 #include "yasmin_viewer/yasmin_viewer_node.hpp"
 
-#include <boost/asio.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
-
-#include <ament_index_cpp/get_package_share_directory.hpp>
-
 #include <cctype>
 #include <cstdio>
 #include <filesystem>
@@ -29,6 +22,12 @@
 #include <sstream>
 #include <stdexcept>
 #include <utility>
+
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <boost/asio.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/version.hpp>
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;

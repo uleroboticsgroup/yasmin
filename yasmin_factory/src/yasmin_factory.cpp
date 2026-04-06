@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "ament_index_cpp/get_package_share_directory.hpp"
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -22,8 +21,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include <ament_index_cpp/get_package_share_directory.hpp>
+
 #include "yasmin/blackboard_pywrapper.hpp"
 #include "yasmin/types.hpp"
+
 #include "yasmin_factory/yasmin_factory.hpp"
 
 namespace yasmin_factory {

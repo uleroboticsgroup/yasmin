@@ -15,10 +15,11 @@
 
 #include "yasmin_pcl/filters/radius_outlier_removal_state.hpp"
 
+#include <pcl/filters/radius_outlier_removal.h>
+
 #include <exception>
 #include <limits>
 
-#include <pcl/filters/radius_outlier_removal.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

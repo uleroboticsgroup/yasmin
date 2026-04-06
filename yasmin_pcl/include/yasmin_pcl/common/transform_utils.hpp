@@ -17,7 +17,6 @@
 #define YASMIN_PCL__COMMON__TRANSFORM_UTILS_HPP_
 
 #include <cmath>
-
 #include <Eigen/Geometry>
 
 namespace yasmin_pcl::common {

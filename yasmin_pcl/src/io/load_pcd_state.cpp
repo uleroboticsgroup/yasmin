@@ -15,10 +15,11 @@
 
 #include "yasmin_pcl/io/load_pcd_state.hpp"
 
-#include <string>
+#include <pcl/io/pcd_io.h>
 
 #include <Eigen/Geometry>
-#include <pcl/io/pcd_io.h>
+#include <string>
+
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

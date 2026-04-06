@@ -16,10 +16,11 @@
 #ifndef YASMIN__BLACKBOARD_PYWRAPPER_HPP_
 #define YASMIN__BLACKBOARD_PYWRAPPER_HPP_
 
-#include <cstdint>
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <typeinfo>

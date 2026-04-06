@@ -13,17 +13,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "yasmin_demos/foo_state.h"
+
 #include <chrono>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <thread>
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
+
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
-#include "yasmin_demos/foo_state.h"
 #include "yasmin_ros/ros_logs.hpp"
 
 FooState::FooState() : yasmin::State({"outcome1", "outcome2"}) {

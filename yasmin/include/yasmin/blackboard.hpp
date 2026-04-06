@@ -17,6 +17,7 @@
 #define YASMIN__BLACKBOARD_HPP_
 
 #include <cxxabi.h>
+
 #include <exception>
 #include <map>
 #include <memory>
@@ -110,28 +111,17 @@ public:
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
 
     // Apply remapping if exists
-    std::string key = this->remap(name);
+    const std::string &key = this->remap(name);
+    const std::string type_name = demangle_type(typeid(T).name());
 
-    // If the type is changing, remove the old entry first
-    if (this->type_registry.find(key) != this->type_registry.end()) {
-      this->values.erase(key);
-      this->type_registry.erase(key);
-    }
-
-    // Insert value and type information if key does not exist
-    if (!this->contains(key)) {
-      this->values[key] = std::make_shared<T>(value);
-      this->type_registry[key] = demangle_type(typeid(T).name());
-
+    auto type_it = this->type_registry.find(key);
+    if (type_it != this->type_registry.end() && type_it->second == type_name) {
+      // Same type: update existing value in-place (avoids allocation)
+      *(std::static_pointer_cast<T>(this->values.at(key))) = value;
     } else {
-      // Check if the type is the same before updating
-      if (this->type_registry.at(key) != demangle_type(typeid(T).name())) {
-        this->values[key] = std::make_shared<T>(value);
-        this->type_registry[key] = demangle_type(typeid(T).name());
-        // Update the existing value
-      } else {
-        *(std::static_pointer_cast<T>(this->values.at(key))) = value;
-      }
+      // New key or different type: (re)create entry
+      this->values[key] = std::make_shared<T>(value);
+      this->type_registry[key] = type_name;
     }
   }
 

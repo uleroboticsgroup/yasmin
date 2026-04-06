@@ -16,14 +16,15 @@
 #ifndef YASMIN_FACTORY__YASMIN_FACTORY_HPP_
 #define YASMIN_FACTORY__YASMIN_FACTORY_HPP_
 
-#include <string>
-#include <vector>
-
-#include <pluginlib/class_loader.hpp>
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <tinyxml2.h>
+
+#include <string>
+#include <vector>
+
+#include <pluginlib/class_loader.hpp>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/concurrence.hpp"

@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "yasmin_ros/yasmin_node.hpp"
+
 #include <random>
 #include <string>
-
-#include "yasmin_ros/yasmin_node.hpp"
 
 using namespace yasmin_ros;
 

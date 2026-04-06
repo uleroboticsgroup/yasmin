@@ -19,7 +19,8 @@
 #include <string>
 #include <vector>
 
-#include "pluginlib/class_list_macros.hpp"
+#include <pluginlib/class_list_macros.hpp>
+
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 

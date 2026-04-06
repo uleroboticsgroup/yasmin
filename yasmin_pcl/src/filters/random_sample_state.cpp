@@ -15,12 +15,13 @@
 
 #include "yasmin_pcl/filters/random_sample_state.hpp"
 
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/random_sample.h>
+
 #include <exception>
 #include <limits>
 #include <unordered_set>
 
-#include <pcl/filters/extract_indices.h>
-#include <pcl/filters/random_sample.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

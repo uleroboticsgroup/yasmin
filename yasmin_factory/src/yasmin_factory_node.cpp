@@ -17,7 +17,8 @@
 #include <memory>
 #include <string>
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
+
 #include "yasmin/state_machine.hpp"
 #include "yasmin_factory/yasmin_factory.hpp"
 #include "yasmin_ros/ros_logs.hpp"

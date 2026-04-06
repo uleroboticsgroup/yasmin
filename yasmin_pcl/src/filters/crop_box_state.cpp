@@ -15,12 +15,13 @@
 
 #include "yasmin_pcl/filters/crop_box_state.hpp"
 
+#include <pcl/filters/crop_box.h>
+
+#include <Eigen/Geometry>
 #include <exception>
 #include <limits>
 #include <string>
 
-#include <Eigen/Geometry>
-#include <pcl/filters/crop_box.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

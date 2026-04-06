@@ -14,13 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "yasmin/concurrence.hpp"
+
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/types.hpp"
@@ -172,7 +173,7 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
 
   // Handle a cancel
   if (is_canceled()) {
-    return default_outcome; // ? not sure waht else to return here
+    return default_outcome;
   }
 
   // Build final outcome
@@ -195,7 +196,7 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
   }
 
   // Handle different numbers of satisfied outcomes
-  if (satisfied_outcomes.size() == 0) {
+  if (satisfied_outcomes.empty()) {
     return default_outcome;
   } else if (satisfied_outcomes.size() > 1) {
     std::string outcomes_string;
@@ -209,7 +210,7 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
       }
     }
     // Due to how std::set works, this should only throw if the outcome strings
-    // are disaprate
+    // are disparate
     throw std::logic_error(
         "More than one satisfied outcomes (" + outcomes_string +
         ") after concurrent state execution (" + this->to_string());

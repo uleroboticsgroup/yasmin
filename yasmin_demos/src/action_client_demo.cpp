@@ -17,7 +17,7 @@
 #include <memory>
 #include <string>
 
-#include "example_interfaces/action/fibonacci.hpp"
+#include <example_interfaces/action/fibonacci.hpp>
 
 #include "yasmin/cb_state.hpp"
 #include "yasmin/logs.hpp"

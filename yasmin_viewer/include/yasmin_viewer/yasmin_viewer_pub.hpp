@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/concurrence.hpp"
 #include "yasmin/state.hpp"

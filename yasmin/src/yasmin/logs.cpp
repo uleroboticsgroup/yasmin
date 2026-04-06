@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <string>
-
 #include "yasmin/logs.hpp"
+
+#include <string>
 
 namespace yasmin {
 
@@ -37,19 +37,12 @@ const char *log_level_to_name(LogLevel log_level) {
 
   case LogLevel::ERROR:
     return "ERROR";
-    break;
-
   case LogLevel::WARN:
     return "WARN";
-    break;
-
   case LogLevel::INFO:
     return "INFO";
-    break;
-
   case LogLevel::DEBUG:
     return "DEBUG";
-    break;
   }
 
   return "";

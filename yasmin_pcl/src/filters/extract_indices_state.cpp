@@ -15,11 +15,12 @@
 
 #include "yasmin_pcl/filters/extract_indices_state.hpp"
 
+#include <pcl/filters/extract_indices.h>
+
 #include <exception>
 #include <limits>
 #include <unordered_set>
 
-#include <pcl/filters/extract_indices.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

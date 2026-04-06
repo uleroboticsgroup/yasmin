@@ -15,10 +15,11 @@
 
 #include "yasmin_pcl/filters/voxel_grid_state.hpp"
 
+#include <pcl/filters/voxel_grid.h>
+
 #include <exception>
 #include <string>
 
-#include <pcl/filters/voxel_grid.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

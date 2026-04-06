@@ -13,6 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "yasmin/state.hpp"
+
+#include <cxxabi.h> // For abi::__cxa_demangle
+
 #include <algorithm>
 #include <exception>
 #include <mutex>
@@ -21,12 +25,7 @@
 #include <unordered_map>
 #include <vector>
 
-#ifdef __GNUG__     // If using GCC/G++
-#include <cxxabi.h> // For abi::__cxa_demangle
-#endif
-
 #include "yasmin/logs.hpp"
-#include "yasmin/state.hpp"
 #include "yasmin/types.hpp"
 
 using namespace yasmin;

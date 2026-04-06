@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "yasmin/state_machine.hpp"
+
 #include <algorithm>
 #include <csignal>
 #include <exception>
@@ -28,7 +30,6 @@
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
-#include "yasmin/state_machine.hpp"
 #include "yasmin/types.hpp"
 
 using namespace yasmin;

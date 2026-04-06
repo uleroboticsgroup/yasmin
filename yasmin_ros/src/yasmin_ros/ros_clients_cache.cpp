@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "yasmin_ros/ros_clients_cache.hpp"
+
 #include <sstream>
 
 namespace yasmin_ros {

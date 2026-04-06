@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "yasmin/blackboard.hpp"
+
 #include <algorithm>
 #include <map>
 #include <string>
@@ -20,7 +22,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/types.hpp"
 

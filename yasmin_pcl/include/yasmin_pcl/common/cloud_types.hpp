@@ -16,12 +16,13 @@
 #ifndef YASMIN_PCL__COMMON__CLOUD_TYPES_HPP_
 #define YASMIN_PCL__COMMON__CLOUD_TYPES_HPP_
 
-#include <array>
-#include <memory>
-
-#include <Eigen/Geometry>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/PCLPointCloud2.h>
+
+#include <array>
+#include <Eigen/Geometry>
+#include <memory>
+
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include "yasmin_pcl/common/pcl_compat.hpp"

@@ -15,11 +15,12 @@
 
 #include "yasmin_pcl/io/pcl_to_ros_point_cloud2_state.hpp"
 
+#include <pcl_conversions/pcl_conversions.h>
+
 #include <exception>
 #include <memory>
 #include <string>
 
-#include <pcl_conversions/pcl_conversions.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

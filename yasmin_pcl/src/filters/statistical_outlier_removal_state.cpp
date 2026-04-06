@@ -15,10 +15,11 @@
 
 #include "yasmin_pcl/filters/statistical_outlier_removal_state.hpp"
 
+#include <pcl/filters/statistical_outlier_removal.h>
+
 #include <exception>
 #include <limits>
 
-#include <pcl/filters/statistical_outlier_removal.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

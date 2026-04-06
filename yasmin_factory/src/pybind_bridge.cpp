@@ -13,9 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <pluginlib/class_loader.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <pluginlib/class_loader.hpp>
 
 #include "yasmin/state.hpp"
 #include "yasmin/types.hpp"

@@ -15,11 +15,12 @@
 
 #include "yasmin_pcl/io/save_ply_state.hpp"
 
+#include <pcl/io/ply_io.h>
+
+#include <Eigen/Geometry>
 #include <exception>
 #include <string>
 
-#include <Eigen/Geometry>
-#include <pcl/io/ply_io.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"

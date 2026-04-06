@@ -19,7 +19,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
+
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/types.hpp"

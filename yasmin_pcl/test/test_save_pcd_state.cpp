@@ -13,11 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <filesystem>
-
 #include <gtest/gtest.h>
-
 #include <pcl/io/pcd_io.h>
+
+#include <filesystem>
 
 #include "test_utils.hpp"
 #include "yasmin/blackboard.hpp"

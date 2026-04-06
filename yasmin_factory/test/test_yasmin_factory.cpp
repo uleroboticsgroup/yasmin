@@ -13,8 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <fstream>
 #include <gtest/gtest.h>
+
+#include <fstream>
 #include <memory>
 #include <sstream>
 #include <string>

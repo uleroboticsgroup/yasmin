@@ -14,9 +14,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdarg>
-#include <rclcpp/rclcpp.hpp>
 #include <sstream>
 #include <string>
+
+#include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"

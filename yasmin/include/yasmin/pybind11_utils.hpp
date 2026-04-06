@@ -16,8 +16,9 @@
 #ifndef YASMIN_PYBIND11_UTILS_HPP_
 #define YASMIN_PYBIND11_UTILS_HPP_
 
-#include <memory>
 #include <pybind11/pybind11.h>
+
+#include <memory>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/blackboard_pywrapper.hpp"

@@ -15,9 +15,10 @@
 
 #include "yasmin_pcl/filters/project_inliers_state.hpp"
 
+#include <pcl/filters/project_inliers.h>
+
 #include <exception>
 
-#include <pcl/filters/project_inliers.h>
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"
