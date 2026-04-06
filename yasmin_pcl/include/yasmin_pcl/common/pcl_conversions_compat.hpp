@@ -13,19 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_PCL__COMMON__PCL_COMPAT_HPP_
-#define YASMIN_PCL__COMMON__PCL_COMPAT_HPP_
+#ifndef YASMIN_PCL__COMMON__PCL_CONVERSIONS_COMPAT_HPP_
+#define YASMIN_PCL__COMMON__PCL_CONVERSIONS_COMPAT_HPP_
 
-// pcl/types.h (providing pcl::Indices, pcl::IndicesPtr, etc.) was introduced
-// in PCL 1.12.  Older releases that ship with ROS 2 Galactic / Foxy only
-// have PCL 1.10 where these types live in pcl/pcl_base.h instead.
-
-#include <pcl/pcl_config.h>
-
-#if PCL_MAJOR_VERSION > 1 || (PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 12)
-#include <pcl/types.h>
+// pcl_conversions >= 2.7 (ROS 2 Kilted / Rolling) renamed the header to .hpp.
+// Older releases use .h.
+#if __has_include(<pcl_conversions/pcl_conversions.hpp>)
+#include <pcl_conversions/pcl_conversions.hpp>
 #else
-#include <pcl/pcl_base.h>
+#include <pcl_conversions/pcl_conversions.h>
 #endif
 
-#endif // YASMIN_PCL__COMMON__PCL_COMPAT_HPP_
+#endif // YASMIN_PCL__COMMON__PCL_CONVERSIONS_COMPAT_HPP_

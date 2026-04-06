@@ -15,8 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#include <pcl_conversions/pcl_conversions.h>
-
 #include "test_utils.hpp"
 #include "yasmin/blackboard.hpp"
 #include "yasmin_pcl/common/cloud_types.hpp"
