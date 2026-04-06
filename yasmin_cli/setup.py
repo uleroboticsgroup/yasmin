@@ -5,7 +5,7 @@ package_name = "yasmin_cli"
 setup(
     name=package_name,
     version="0.0.1",
-    packages=find_packages(),
+    packages=find_packages(exclude=["test"]),
     data_files=[
         ("share/ament_index/resource_index/packages", [f"resource/{package_name}"]),
         (f"share/{package_name}", ["package.xml"]),
@@ -16,6 +16,11 @@ setup(
     maintainer_email="maik.knof@gmx.de",
     description="ROS 2 CLI extensions for YASMIN.",
     license="GPL-3.0",
+    extras_require={
+        "test": [
+            "pytest",
+        ],
+    },
     entry_points={
         "ros2cli.command": [
             "yasmin = yasmin_cli.command.yasmin:YasminCommand",

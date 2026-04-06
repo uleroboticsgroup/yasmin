@@ -16,6 +16,11 @@ setup(
     maintainer_email="maik.knof@gmx.de",
     description="Plugin discovery and caching for YASMIN states.",
     license="GPL-3.0",
+    extras_require={
+        "test": [
+            "pytest",
+        ],
+    },
     entry_points={
         "console_scripts": [
             "discover_plugins = yasmin_plugins_manager.discovery_node:main",
