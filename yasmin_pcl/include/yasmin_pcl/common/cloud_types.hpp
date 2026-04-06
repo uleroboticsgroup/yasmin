@@ -19,8 +19,8 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/PCLPointCloud2.h>
 
-#include <array>
 #include <Eigen/Geometry>
+#include <array>
 #include <memory>
 
 #include <sensor_msgs/msg/point_cloud2.hpp>

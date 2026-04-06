@@ -16,8 +16,8 @@
 #ifndef YASMIN_PCL__TEST__TEST_UTILS_HPP_
 #define YASMIN_PCL__TEST__TEST_UTILS_HPP_
 
-#include <pcl/conversions.h>
 #include <pcl/PCLPointCloud2.h>
+#include <pcl/conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>

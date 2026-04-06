@@ -14,5 +14,3 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "yasmin_ros/service_state.hpp"
-
-
