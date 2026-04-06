@@ -11,6 +11,7 @@
   <depend>rclpy</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
+  <depend>ament_index_cpp</depend>
   <depend>pluginlib</depend>
   <depend>yasmin</depend>
   <depend>yasmin_ros</depend>

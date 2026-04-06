@@ -7,6 +7,7 @@
   <license>GPL-3.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <depend>ament_index_cpp</depend>
   <depend>python3-dev</depend>
   <depend>pluginlib</depend>
   <depend>pybind11-dev</depend>

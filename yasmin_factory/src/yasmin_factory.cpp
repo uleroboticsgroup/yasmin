@@ -619,7 +619,8 @@ YasminFactory::create_state(tinyxml2::XMLElement *state_elem) const {
         this->get_required_attribute(state_elem, "module");
     state = this->create_python_state(module_name, class_name);
   } else if (type == "cpp") {
-    state = this->state_loader_->createSharedInstance(class_name);
+    state = std::shared_ptr<yasmin::State>(
+        this->state_loader_->createUnmanagedInstance(class_name));
   } else {
     throw std::runtime_error("Unknown state type: " + type);
   }
