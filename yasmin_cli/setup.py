@@ -16,7 +16,6 @@ setup(
     maintainer_email="maik.knof@gmx.de",
     description="ROS 2 CLI extensions for YASMIN.",
     license="GPL-3.0",
-    tests_require=["pytest"],
     entry_points={
         "ros2cli.command": [
             "yasmin = yasmin_cli.command.yasmin:YasminCommand",
