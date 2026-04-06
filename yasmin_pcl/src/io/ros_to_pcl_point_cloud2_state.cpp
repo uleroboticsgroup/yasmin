@@ -19,9 +19,8 @@
 #include <memory>
 #include <string>
 
+#include <pcl_conversions/pcl_conversions.h>
 #include <pluginlib/class_list_macros.hpp>
-
-#include "yasmin_pcl/common/pcl_conversions_compat.hpp"
 
 #include "yasmin/logs.hpp"
 #include "yasmin_pcl/common/cloud_types.hpp"

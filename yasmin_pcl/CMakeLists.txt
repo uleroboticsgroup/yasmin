@@ -15,6 +15,16 @@ find_package(sensor_msgs REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(yasmin REQUIRED)
 
+# pcl_conversions exports a proper CMake target on Kilted/Rolling,
+# but only old-style variables on Humble and older.
+if(TARGET pcl_conversions::pcl_conversions)
+  set(PCL_CONVERSIONS_TARGETS pcl_conversions::pcl_conversions)
+  set(PCL_CONVERSIONS_INCLUDE_DIRS)
+else()
+  set(PCL_CONVERSIONS_TARGETS ${pcl_conversions_LIBRARIES})
+  set(PCL_CONVERSIONS_INCLUDE_DIRS ${pcl_conversions_INCLUDE_DIRS})
+endif()
+
 set(YASMIN_PCL_SOURCES
   src/io/ros_to_pcl_point_cloud2_state.cpp
   src/io/pcl_to_ros_point_cloud2_state.cpp
@@ -38,12 +48,12 @@ target_include_directories(${PROJECT_NAME}_states
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     ${PCL_INCLUDE_DIRS}
-    ${pcl_conversions_INCLUDE_DIRS}
+    ${PCL_CONVERSIONS_INCLUDE_DIRS}
 )
 target_link_libraries(${PROJECT_NAME}_states
   PUBLIC
     ${PCL_LIBRARIES}
-    ${pcl_conversions_LIBRARIES}
+    ${PCL_CONVERSIONS_TARGETS}
     pluginlib::pluginlib
     ${sensor_msgs_TARGETS}
     yasmin::yasmin
@@ -82,12 +92,12 @@ if(BUILD_TESTING)
           include
           test
           ${PCL_INCLUDE_DIRS}
-          ${pcl_conversions_INCLUDE_DIRS}
+          ${PCL_CONVERSIONS_INCLUDE_DIRS}
       )
       target_link_libraries(${target_name}
         ${PROJECT_NAME}_states
         ${PCL_LIBRARIES}
-        ${pcl_conversions_LIBRARIES}
+        ${PCL_CONVERSIONS_TARGETS}
         pluginlib::pluginlib
         ${sensor_msgs_TARGETS}
         yasmin::yasmin

@@ -27,9 +27,8 @@
 #include <pcl/conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/msg/point_cloud2.hpp>
-
-#include "yasmin_pcl/common/pcl_conversions_compat.hpp"
 
 #include "yasmin_pcl/common/cloud_types.hpp"
 
