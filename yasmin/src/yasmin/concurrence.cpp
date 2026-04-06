@@ -154,11 +154,22 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
   this->configure();
   std::vector<std::thread> state_threads;
 
-  // Initialize the parallel execution of all the states
+  // Reset stored intermediate outcomes before starting a new execution.
+  for (auto &[state_name, intermediate_outcome] :
+       this->intermediate_outcome_map) {
+    (void)state_name;
+    intermediate_outcome.clear();
+  }
+
+  // Initialize the parallel execution of all the states.
+  // Each branch receives a blackboard copy that shares the underlying storage
+  // but keeps an isolated remapping scope.
   for (const auto &[state_name, state] : states) {
+    Blackboard::SharedPtr thread_blackboard =
+        std::make_shared<Blackboard>(*blackboard);
     state_threads.push_back(std::thread([this, state_name, state,
-                                         blackboard]() {
-      std::string outcome = (*state.get())(blackboard);
+                                         thread_blackboard]() {
+      std::string outcome = (*state.get())(thread_blackboard);
       const std::lock_guard<std::mutex> lock(this->intermediate_outcome_mutex);
       this->intermediate_outcome_map[state_name] = outcome;
     }));
