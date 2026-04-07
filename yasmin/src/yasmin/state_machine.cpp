@@ -40,7 +40,7 @@ StateMachine *sigint_handler_instance = nullptr;
 
 void sigint_handler(int signum) {
   if (sigint_handler_instance) {
-    sigint_handler_instance->cancel_state();
+    sigint_handler_instance->cancel_state_machine();
   }
 }
 } // namespace
