@@ -1,4 +1,11 @@
 <class_libraries>
+  <library path="yasmin_ros">
+    <class name="yasmin_ros/TfBufferState"
+           type="yasmin_ros::TfBufferState"
+           base_class_type="yasmin::State">
+      <description>Create a tf2 buffer and transform listener and store them in the blackboard.</description>
+    </class>
+  </library>
   <library path="ros_serialize_cpp_state">
     <class name="yasmin_ros/RosSerializeCppState"
            type="yasmin_ros::RosSerializeCppState"
