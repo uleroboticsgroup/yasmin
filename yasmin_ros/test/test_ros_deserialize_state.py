@@ -21,6 +21,8 @@ from rclpy.serialization import serialize_message
 
 from yasmin import Blackboard
 from yasmin_ros import RosDeserializePyState
+from yasmin_ros.yasmin_node import YasminNode
+from yasmin_ros.ros_clients_cache import ROSClientsCache
 
 
 class TestRosDeserializePyState(unittest.TestCase):
@@ -31,6 +33,8 @@ class TestRosDeserializePyState(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        ROSClientsCache.clear_all()
+        YasminNode.destroy_instance()
         rclpy.shutdown()
 
     def test_configure_invalid_interface_raises(self):

@@ -37,7 +37,11 @@ class TestPublisherState : public ::testing::Test {
 protected:
   static void SetUpTestCase() { rclcpp::init(0, nullptr); }
 
-  static void TearDownTestCase() { rclcpp::shutdown(); }
+  static void TearDownTestCase() {
+    yasmin_ros::ROSClientsCache::clear_all();
+    yasmin_ros::YasminNode::destroy_instance();
+    rclcpp::shutdown();
+  }
 };
 
 TEST_F(TestPublisherState, TestPublisher) {

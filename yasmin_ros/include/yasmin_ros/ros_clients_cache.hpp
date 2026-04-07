@@ -84,8 +84,13 @@ public:
     if (it != action_clients.end()) {
       YASMIN_LOG_INFO("Reusing existing action client for '%s' of type '%s'",
                       action_name.c_str(), action_type_name.c_str());
-      return std::static_pointer_cast<rclcpp_action::Client<ActionT>>(
-          it->second);
+      auto action_client = it->second.lock();
+      if (action_client != nullptr) {
+        return std::static_pointer_cast<rclcpp_action::Client<ActionT>>(
+            action_client);
+      }
+
+      action_clients.erase(it);
     }
 
     // Create new action client if not in cache
@@ -133,7 +138,12 @@ public:
     if (it != service_clients.end()) {
       YASMIN_LOG_INFO("Reusing existing service client for '%s' of type '%s'",
                       service_name.c_str(), service_type_name.c_str());
-      return std::static_pointer_cast<rclcpp::Client<ServiceT>>(it->second);
+      auto service_client = it->second.lock();
+      if (service_client != nullptr) {
+        return std::static_pointer_cast<rclcpp::Client<ServiceT>>(service_client);
+      }
+
+      service_clients.erase(it);
     }
 
     // Create new service client if not in cache
@@ -193,7 +203,12 @@ public:
     if (it != publishers.end()) {
       YASMIN_LOG_INFO("Reusing existing publisher for topic '%s' of type '%s'",
                       topic_name.c_str(), msg_type_name.c_str());
-      return std::static_pointer_cast<rclcpp::Publisher<MsgT>>(it->second);
+      auto publisher = it->second.lock();
+      if (publisher != nullptr) {
+        return std::static_pointer_cast<rclcpp::Publisher<MsgT>>(publisher);
+      }
+
+      publishers.erase(it);
     }
 
     // Create new publisher if not in cache
@@ -270,10 +285,10 @@ private:
                                   std::string, std::type_index>;
 
   // Static cache maps
-  static std::map<ActionClientKey, std::shared_ptr<void>> &get_action_clients();
-  static std::map<ServiceClientKey, std::shared_ptr<void>> &
+  static std::map<ActionClientKey, std::weak_ptr<void>> &get_action_clients();
+  static std::map<ServiceClientKey, std::weak_ptr<void>> &
   get_service_clients();
-  static std::map<PublisherKey, std::shared_ptr<void>> &get_publishers();
+  static std::map<PublisherKey, std::weak_ptr<void>> &get_publishers();
 
   // Static lock for thread-safe access
   static std::recursive_mutex &get_lock();

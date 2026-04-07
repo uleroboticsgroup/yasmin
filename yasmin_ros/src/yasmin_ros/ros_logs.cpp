@@ -44,18 +44,21 @@ void ros_log_message(yasmin::LogLevel level, const char *file,
   std::ostringstream oss;
   oss << "[" << file << ":" << function << ":" << line << "] " << text;
 
+  auto logger = logger_node != nullptr ? logger_node->get_logger()
+                                     : rclcpp::get_logger("yasmin_ros");
+
   switch (level) {
   case yasmin::LogLevel::ERROR:
-    RCLCPP_ERROR(logger_node->get_logger(), oss.str().c_str());
+    RCLCPP_ERROR(logger, oss.str().c_str());
     break;
   case yasmin::LogLevel::WARN:
-    RCLCPP_WARN(logger_node->get_logger(), oss.str().c_str());
+    RCLCPP_WARN(logger, oss.str().c_str());
     break;
   case yasmin::LogLevel::INFO:
-    RCLCPP_INFO(logger_node->get_logger(), oss.str().c_str());
+    RCLCPP_INFO(logger, oss.str().c_str());
     break;
   case yasmin::LogLevel::DEBUG:
-    RCLCPP_DEBUG(logger_node->get_logger(), oss.str().c_str());
+    RCLCPP_DEBUG(logger, oss.str().c_str());
     break;
   }
 }

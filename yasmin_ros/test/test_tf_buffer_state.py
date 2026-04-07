@@ -26,6 +26,8 @@ from tf2_ros import TransformBroadcaster
 from yasmin import Blackboard, State
 from yasmin_ros import TfBufferState
 from yasmin_ros.basic_outcomes import ABORT, SUCCEED
+from yasmin_ros.yasmin_node import YasminNode
+from yasmin_ros.ros_clients_cache import ROSClientsCache
 
 
 class LookupTfState(State):
@@ -75,6 +77,8 @@ class TestTfBufferState(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        ROSClientsCache.clear_all()
+        YasminNode.destroy_instance()
         rclpy.shutdown()
 
     def test_creates_buffer_and_listener_in_blackboard(self):

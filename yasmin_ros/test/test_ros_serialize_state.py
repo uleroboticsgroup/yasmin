@@ -20,6 +20,8 @@ from geometry_msgs.msg import Pose
 from std_msgs.msg import String
 from yasmin import Blackboard
 from yasmin_ros import RosSerializePyState
+from yasmin_ros.yasmin_node import YasminNode
+from yasmin_ros.ros_clients_cache import ROSClientsCache
 
 
 class TestRosSerializePyState(unittest.TestCase):
@@ -30,6 +32,8 @@ class TestRosSerializePyState(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        ROSClientsCache.clear_all()
+        YasminNode.destroy_instance()
         rclpy.shutdown()
 
     def test_configure_invalid_interface_raises(self):

@@ -22,6 +22,7 @@ from yasmin import set_py_loggers
 from yasmin_ros import ActionState
 from yasmin_ros.ros_clients_cache import ROSClientsCache
 from yasmin_ros.basic_outcomes import SUCCEED, CANCEL, ABORT, TIMEOUT
+from yasmin_ros.yasmin_node import YasminNode
 
 import rclpy
 from rclpy.node import Node
@@ -91,6 +92,8 @@ class TestActionClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        ROSClientsCache.clear_all()
+        YasminNode.destroy_instance()
         rclpy.shutdown()
 
     def test_action_client_succeed(self):
