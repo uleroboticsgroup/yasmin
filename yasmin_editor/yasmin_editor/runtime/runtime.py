@@ -320,7 +320,9 @@ class Runtime(QObject):
         if reset_disposed:
             self._disposed = True
 
-    def _resolve_state_machine_cancel_exception_types(self) -> tuple[type[BaseException], ...]:
+    def _resolve_state_machine_cancel_exception_types(
+        self,
+    ) -> tuple[type[BaseException], ...]:
         """Return known Python exception types for full state-machine cancelation."""
         exception_types: list[type[BaseException]] = []
 
