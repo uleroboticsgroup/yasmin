@@ -133,8 +133,7 @@ public:
     if (it != service_clients.end()) {
       YASMIN_LOG_INFO("Reusing existing service client for '%s' of type '%s'",
                       service_name.c_str(), service_type_name.c_str());
-      return std::static_pointer_cast<rclcpp::Client<ServiceT>>(
-          it->second);
+      return std::static_pointer_cast<rclcpp::Client<ServiceT>>(it->second);
     }
 
     // Create new service client if not in cache
@@ -194,8 +193,7 @@ public:
     if (it != publishers.end()) {
       YASMIN_LOG_INFO("Reusing existing publisher for topic '%s' of type '%s'",
                       topic_name.c_str(), msg_type_name.c_str());
-      return std::static_pointer_cast<rclcpp::Publisher<MsgT>>(
-          it->second);
+      return std::static_pointer_cast<rclcpp::Publisher<MsgT>>(it->second);
     }
 
     // Create new publisher if not in cache
@@ -273,7 +271,8 @@ private:
 
   // Static cache maps
   static std::map<ActionClientKey, std::shared_ptr<void>> &get_action_clients();
-  static std::map<ServiceClientKey, std::shared_ptr<void>> &get_service_clients();
+  static std::map<ServiceClientKey, std::shared_ptr<void>> &
+  get_service_clients();
   static std::map<PublisherKey, std::shared_ptr<void>> &get_publishers();
 
   // Static lock for thread-safe access
