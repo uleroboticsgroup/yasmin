@@ -22,7 +22,7 @@ namespace yasmin_ros {
 // Static member function definitions for cache access
 std::map<std::tuple<std::string, std::string, std::string, std::string,
                     std::type_index>,
-         std::weak_ptr<void>> &
+         std::shared_ptr<void>> &
 ROSClientsCache::get_action_clients() {
   static std::map<ActionClientKey, std::shared_ptr<void>> action_clients;
   return action_clients;
@@ -30,7 +30,7 @@ ROSClientsCache::get_action_clients() {
 
 std::map<std::tuple<std::string, std::string, std::string, std::string,
                     std::type_index>,
-         std::weak_ptr<void>> &
+         std::shared_ptr<void>> &
 ROSClientsCache::get_service_clients() {
   static std::map<ServiceClientKey, std::shared_ptr<void>> service_clients;
   return service_clients;
@@ -38,7 +38,7 @@ ROSClientsCache::get_service_clients() {
 
 std::map<std::tuple<std::string, std::string, std::string, std::string,
                     std::type_index>,
-         std::weak_ptr<void>> &
+         std::shared_ptr<void>> &
 ROSClientsCache::get_publishers() {
   static std::map<PublisherKey, std::shared_ptr<void>> publishers;
   return publishers;
