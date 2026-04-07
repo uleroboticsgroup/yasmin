@@ -25,8 +25,10 @@
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin_ros/interface_serialization.hpp"
+#include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/ros_deserialize_cpp_state.hpp"
 #include "yasmin_ros/ros_serialize_cpp_state.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 
 class TestRosSerializationStates : public ::testing::Test {
 protected:
