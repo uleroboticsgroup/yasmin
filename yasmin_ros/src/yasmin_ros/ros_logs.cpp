@@ -45,7 +45,7 @@ void ros_log_message(yasmin::LogLevel level, const char *file,
   oss << "[" << file << ":" << function << ":" << line << "] " << text;
 
   auto logger = logger_node != nullptr ? logger_node->get_logger()
-                                     : rclcpp::get_logger("yasmin_ros");
+                                       : rclcpp::get_logger("yasmin_ros");
 
   switch (level) {
   case yasmin::LogLevel::ERROR:

@@ -140,7 +140,8 @@ public:
                       service_name.c_str(), service_type_name.c_str());
       auto service_client = it->second.lock();
       if (service_client != nullptr) {
-        return std::static_pointer_cast<rclcpp::Client<ServiceT>>(service_client);
+        return std::static_pointer_cast<rclcpp::Client<ServiceT>>(
+            service_client);
       }
 
       service_clients.erase(it);
@@ -286,8 +287,7 @@ private:
 
   // Static cache maps
   static std::map<ActionClientKey, std::weak_ptr<void>> &get_action_clients();
-  static std::map<ServiceClientKey, std::weak_ptr<void>> &
-  get_service_clients();
+  static std::map<ServiceClientKey, std::weak_ptr<void>> &get_service_clients();
   static std::map<PublisherKey, std::weak_ptr<void>> &get_publishers();
 
   // Static lock for thread-safe access
