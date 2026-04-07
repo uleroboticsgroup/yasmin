@@ -20,8 +20,8 @@
   <depend>tf2_msgs</depend>
   <depend>tf2_ros</depend>
   <depend>tf2</depend>
-  <depend>tf2_ros-py</depend>
-  <depend>tf2-py</depend>
+  <depend>tf2_ros_py</depend>
+  <depend>tf2_py</depend>
   <exec_depend>rosidl_runtime_py</exec_depend>
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>
@@ -32,8 +32,8 @@
   <test_depend>tf2_msgs</test_depend>
   <test_depend>tf2_ros</test_depend>
   <test_depend>tf2</test_depend>
-  <test_depend>tf2_ros-py</test_depend>
-  <test_depend>tf2-py</test_depend>
+  <test_depend>tf2_ros_py</test_depend>
+  <test_depend>tf2_py</test_depend>
   <build_depend>ros_environment</build_depend>
   <export>
     <build_type>ament_cmake</build_type>
