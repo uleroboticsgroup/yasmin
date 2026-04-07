@@ -21,11 +21,8 @@
 #include <unordered_map>
 #include <vector>
 
-#if __has_include(<ament_index_cpp/get_package_share_path.hpp>)
-#include <ament_index_cpp/get_package_share_path.hpp>
-#else
 #include <ament_index_cpp/get_package_share_directory.hpp>
-#endif
+#include <rclcpp/version.h>
 
 #include "yasmin/blackboard_pywrapper.hpp"
 #include "yasmin/types.hpp"
@@ -742,12 +739,15 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
     if (!file_name.empty() && !package.empty()) {
       std::string package_path;
       try {
-#if __has_include(<ament_index_cpp/get_package_share_path.hpp>)
-        package_path =
-            ament_index_cpp::get_package_share_path(package).string();
+
+#if RCLCPP_VERSION_GTE(31, 0, 0)
+        std::filesystem::path pkg_path;
+        ament_index_cpp::get_package_share_directory(package, pkg_path);
+        package_path = pkg_path.string();
 #else
         package_path = ament_index_cpp::get_package_share_directory(package);
 #endif
+
         file_path = "";
         for (const auto &entry :
              std::filesystem::recursive_directory_iterator(package_path)) {
