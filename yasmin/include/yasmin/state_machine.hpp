@@ -370,12 +370,6 @@ private:
    * @brief Throws if a hard state machine cancel was requested.
    */
   void throw_if_cancel_state_machine_requested();
-
-  /**
-   * @brief Restores this state machine to RUNNING after a lightweight child
-   * cancel if execution continues.
-   */
-  void restore_running_state_if_needed();
 };
 
 } // namespace yasmin

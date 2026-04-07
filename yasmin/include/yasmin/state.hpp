@@ -52,14 +52,6 @@ protected:
   /// The possible outcomes of this state.
   Outcomes outcomes;
 
-  /**
-   * @brief Restores the state status to RUNNING.
-   *
-   * Container states can use this after forwarding a lightweight cancel to one
-   * of their children while they continue executing subsequent states.
-   */
-  void restore_running_state();
-
 private:
   /**
    * @brief Gets a mutable reference to this state's metadata.

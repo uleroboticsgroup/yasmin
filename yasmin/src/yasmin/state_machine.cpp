@@ -235,13 +235,6 @@ void StateMachine::throw_if_cancel_state_machine_requested() {
   throw StateMachineCancelException(this->to_string());
 }
 
-void StateMachine::restore_running_state_if_needed() {
-  if (this->execution_active.load() && this->is_canceled() &&
-      !this->cancel_state_machine_requested.load()) {
-    this->restore_running_state();
-  }
-}
-
 std::string const &StateMachine::get_start_state() const noexcept {
   return this->start_state;
 }
@@ -511,7 +504,6 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
                                   old_outcome);
 
         this->set_current_state(outcome);
-        this->restore_running_state_if_needed();
 
         // Outcome is not in the sm
       } else {
@@ -550,7 +542,6 @@ void StateMachine::cancel_state() {
 
     if (!current_state.empty()) {
       this->states.at(current_state)->cancel_state();
-      State::cancel_state();
     }
   }
 }
