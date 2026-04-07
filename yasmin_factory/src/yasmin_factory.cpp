@@ -22,7 +22,6 @@
 #include <vector>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
-#include <rclcpp/version.h>
 
 #include "yasmin/blackboard_pywrapper.hpp"
 #include "yasmin/types.hpp"
@@ -740,10 +739,15 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
       std::string package_path;
       try {
 
-#if RCLCPP_VERSION_GTE(31, 0, 0)
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
+#if RCLCPP_VERSION_GTE(29, 5, 1)
         std::filesystem::path pkg_path;
         ament_index_cpp::get_package_share_directory(package, pkg_path);
         package_path = pkg_path.string();
+#else
+        package_path = ament_index_cpp::get_package_share_directory(package);
+#endif
 #else
         package_path = ament_index_cpp::get_package_share_directory(package);
 #endif

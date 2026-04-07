@@ -20,7 +20,6 @@
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
 
 #include "yasmin/state_machine.hpp"
 #include "yasmin_factory/yasmin_factory.hpp"
@@ -40,12 +39,18 @@ int main(int argc, char *argv[]) {
 
   // Load state machine from XML file
   std::string xml_file =
-#if RCLCPP_VERSION_GTE(31, 0, 0)
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
+#if RCLCPP_VERSION_GTE(29, 5, 1)
       ([]() {
         std::filesystem::path p;
         ament_index_cpp::get_package_share_directory("yasmin_demos", p);
         return (p / "state_machines/demo_3.xml").string();
       })();
+#else
+      ament_index_cpp::get_package_share_directory("yasmin_demos") +
+      "/state_machines/demo_3.xml";
+#endif
 #else
       ament_index_cpp::get_package_share_directory("yasmin_demos") +
       "/state_machines/demo_3.xml";

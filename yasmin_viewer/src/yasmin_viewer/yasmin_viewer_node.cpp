@@ -28,7 +28,6 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
-#include <rclcpp/version.h>
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -194,12 +193,17 @@ YasminViewerNode::YasminViewerNode()
   max_age_seconds_ = this->get_parameter("max_age_seconds").as_double();
 
   web_root_ =
-#if RCLCPP_VERSION_GTE(31, 0, 0)
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
+#if RCLCPP_VERSION_GTE(29, 5, 1)
       ([]() {
         std::filesystem::path p;
         ament_index_cpp::get_package_share_directory("yasmin_viewer", p);
         return (p / "web").string();
       })();
+#else
+      ament_index_cpp::get_package_share_directory("yasmin_viewer") + "/web";
+#endif
 #else
       ament_index_cpp::get_package_share_directory("yasmin_viewer") + "/web";
 #endif

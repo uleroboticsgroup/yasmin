@@ -3324,8 +3324,22 @@ int main(int argc, char *argv[]) {
 
   // Load state machine from XML file
   std::string xml_file =
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
+#if RCLCPP_VERSION_GTE(29, 5, 1)
+      ([]() {
+        std::filesystem::path p;
+        ament_index_cpp::get_package_share_directory("yasmin_demos", p);
+        return (p / "state_machines/demo_2.xml").string();
+      })();
+#else
       ament_index_cpp::get_package_share_directory("yasmin_demos") +
       "/state_machines/demo_2.xml";
+#endif
+#else
+      ament_index_cpp::get_package_share_directory("yasmin_demos") +
+      "/state_machines/demo_2.xml";
+#endif
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);
@@ -3431,8 +3445,22 @@ int main(int argc, char *argv[]) {
 
   // Load state machine from XML file
   std::string xml_file =
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
+#if RCLCPP_VERSION_GTE(29, 5, 1)
+      ([]() {
+        std::filesystem::path p;
+        ament_index_cpp::get_package_share_directory("yasmin_demos", p);
+        return (p / "state_machines/demo_3.xml").string();
+      })();
+#else
       ament_index_cpp::get_package_share_directory("yasmin_demos") +
       "/state_machines/demo_3.xml";
+#endif
+#else
+      ament_index_cpp::get_package_share_directory("yasmin_demos") +
+      "/state_machines/demo_3.xml";
+#endif
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);
