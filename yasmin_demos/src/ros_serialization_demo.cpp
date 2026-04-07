@@ -17,7 +17,11 @@
 #include <memory>
 #include <string>
 
+#if __has_include(<ament_index_cpp/get_package_share_path.hpp>)
+#include <ament_index_cpp/get_package_share_path.hpp>
+#else
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
 #include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/state_machine.hpp"
@@ -38,8 +42,14 @@ int main(int argc, char *argv[]) {
 
   // Load state machine from XML file
   std::string xml_file =
+#if __has_include(<ament_index_cpp/get_package_share_path.hpp>)
+      (ament_index_cpp::get_package_share_path("yasmin_demos") /
+       "state_machines/demo_3.xml")
+          .string();
+#else
       ament_index_cpp::get_package_share_directory("yasmin_demos") +
       "/state_machines/demo_3.xml";
+#endif
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);

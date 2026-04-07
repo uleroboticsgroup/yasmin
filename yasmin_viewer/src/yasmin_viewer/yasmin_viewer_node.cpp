@@ -23,7 +23,11 @@
 #include <stdexcept>
 #include <utility>
 
+#if __has_include(<ament_index_cpp/get_package_share_path.hpp>)
+#include <ament_index_cpp/get_package_share_path.hpp>
+#else
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -192,7 +196,12 @@ YasminViewerNode::YasminViewerNode()
   port_ = this->get_parameter("port").as_int();
   max_age_seconds_ = this->get_parameter("max_age_seconds").as_double();
   web_root_ =
+#if __has_include(<ament_index_cpp/get_package_share_path.hpp>)
+      (ament_index_cpp::get_package_share_path("yasmin_viewer") / "web")
+          .string();
+#else
       ament_index_cpp::get_package_share_directory("yasmin_viewer") + "/web";
+#endif
 
   fsm_sub_ = this->create_subscription<StateMachineMsg>(
       "/fsm_viewer", 10,
