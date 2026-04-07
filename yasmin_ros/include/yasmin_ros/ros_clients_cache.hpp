@@ -84,7 +84,8 @@ public:
     if (it != action_clients.end()) {
       YASMIN_LOG_INFO("Reusing existing action client for '%s' of type '%s'",
                       action_name.c_str(), action_type_name.c_str());
-      auto action_client = it->second.lock();
+      auto action_client =
+          std::static_pointer_cast<rclcpp_action::Client<ActionT>>(it->second);
       if (action_client != nullptr) {
         return std::static_pointer_cast<rclcpp_action::Client<ActionT>>(
             action_client);
@@ -138,7 +139,8 @@ public:
     if (it != service_clients.end()) {
       YASMIN_LOG_INFO("Reusing existing service client for '%s' of type '%s'",
                       service_name.c_str(), service_type_name.c_str());
-      auto service_client = it->second.lock();
+      auto service_client =
+          std::static_pointer_cast<rclcpp::Client<ServiceT>>(it->second);
       if (service_client != nullptr) {
         return std::static_pointer_cast<rclcpp::Client<ServiceT>>(
             service_client);
@@ -204,7 +206,8 @@ public:
     if (it != publishers.end()) {
       YASMIN_LOG_INFO("Reusing existing publisher for topic '%s' of type '%s'",
                       topic_name.c_str(), msg_type_name.c_str());
-      auto publisher = it->second.lock();
+      auto publisher =
+          std::static_pointer_cast<rclcpp::Publisher<MessageT>>(it->second);
       if (publisher != nullptr) {
         return std::static_pointer_cast<rclcpp::Publisher<MsgT>>(publisher);
       }
@@ -286,9 +289,10 @@ private:
                                   std::string, std::type_index>;
 
   // Static cache maps
-  static std::map<ActionClientKey, std::weak_ptr<void>> &get_action_clients();
-  static std::map<ServiceClientKey, std::weak_ptr<void>> &get_service_clients();
-  static std::map<PublisherKey, std::weak_ptr<void>> &get_publishers();
+  static std::map<ActionClientKey, std::shared_ptr<void>> &get_action_clients();
+  static std::map<ServiceClientKey, std::shared_ptr<void>> &
+  get_service_clients();
+  static std::map<PublisherKey, std::shared_ptr<void>> &get_publishers();
 
   // Static lock for thread-safe access
   static std::recursive_mutex &get_lock();
