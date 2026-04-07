@@ -167,6 +167,8 @@ PYBIND11_MODULE(state_machine, m) {
            py::arg("strict_mode") = false)
       .def("cancel_state", &yasmin::StateMachine::cancel_state,
            "Cancel the current state execution")
+      .def("cancel_state_machine", &yasmin::StateMachine::cancel_state_machine,
+           "Cancel the complete state machine execution")
       .def("set_sigint_handler", &yasmin::StateMachine::set_sigint_handler,
            "Set whether the state machine should handle SIGINT for cancel",
            py::arg("handle") = true)

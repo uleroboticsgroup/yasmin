@@ -14,8 +14,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import threading
+import time
 import unittest
-from yasmin import StateMachine, State
+from yasmin import Blackboard, StateMachine, State
 
 
 class FooState(State):
@@ -417,6 +419,97 @@ class TestStateMachineConfigure(unittest.TestCase):
         self.assertEqual(1, leaf.configure_count)
         self.assertEqual("/root", leaf.configured_topic)
         self.assertEqual("/root", nested_sm.get_parameter("nested_topic"))
+
+
+class BlockingCancelState(State):
+    def __init__(self, enter_event: threading.Event):
+        super().__init__(outcomes=["done"])
+        self.enter_event = enter_event
+
+    def execute(self, blackboard):
+        self.enter_event.set()
+        while not self.is_canceled():
+            time.sleep(0.01)
+        return "done"
+
+
+class TestStateMachineCancelBehavior(unittest.TestCase):
+
+    def test_sequential_cancel_state_can_cancel_following_state(self):
+        first_entered = threading.Event()
+        second_entered = threading.Event()
+        blackboard = Blackboard()
+        result = {}
+
+        sm = StateMachine(outcomes=["done"])
+        sm.add_state(
+            "FIRST",
+            BlockingCancelState(first_entered),
+            transitions={"done": "SECOND"},
+        )
+        sm.add_state(
+            "SECOND",
+            BlockingCancelState(second_entered),
+            transitions={"done": "done"},
+        )
+
+        def run_state_machine():
+            result["outcome"] = sm(blackboard)
+
+        thread = threading.Thread(target=run_state_machine)
+        thread.start()
+
+        self.assertTrue(first_entered.wait(timeout=2.0))
+        self.assertEqual(sm.get_current_state(), "FIRST")
+
+        sm.cancel_state()
+
+        self.assertTrue(second_entered.wait(timeout=2.0))
+        self.assertEqual(sm.get_current_state(), "SECOND")
+
+        sm.cancel_state()
+        thread.join(timeout=2.0)
+
+        self.assertFalse(thread.is_alive())
+        self.assertEqual(result.get("outcome"), "done")
+
+    def test_cancel_state_machine_stops_execution(self):
+        first_entered = threading.Event()
+        second_entered = threading.Event()
+        blackboard = Blackboard()
+        result = {}
+
+        sm = StateMachine(outcomes=["done"])
+        sm.add_state(
+            "FIRST",
+            BlockingCancelState(first_entered),
+            transitions={"done": "SECOND"},
+        )
+        sm.add_state(
+            "SECOND",
+            BlockingCancelState(second_entered),
+            transitions={"done": "done"},
+        )
+
+        def run_state_machine():
+            try:
+                sm(blackboard)
+            except Exception as exc:
+                result["exception"] = exc
+
+        thread = threading.Thread(target=run_state_machine)
+        thread.start()
+
+        self.assertTrue(first_entered.wait(timeout=2.0))
+        self.assertEqual(sm.get_current_state(), "FIRST")
+
+        sm.cancel_state_machine()
+        thread.join(timeout=2.0)
+
+        self.assertFalse(thread.is_alive())
+        self.assertIn("State machine canceled:", str(result.get("exception")))
+        self.assertFalse(second_entered.is_set())
+        self.assertEqual(sm.get_current_state(), "")
 
 
 if __name__ == "__main__":
