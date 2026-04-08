@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -121,6 +122,12 @@
         <h3>Extensions</h3>
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
           <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
@@ -208,6 +215,13 @@
         """
         super().__init__(["outcome1", "outcome2", "outcome3"])
         self.counter = 0
+        self.set_description(
+            "Produces a counter string and stores it in the blackboard while cycling through outcomes based on the internal counter."
+        )
+        self.add_output_key(
+            "foo_str",
+            "String containing the current counter value produced by FooState.",
+        )
 
     def execute(self, blackboard: Blackboard) -&gt; str:
         """
@@ -267,6 +281,13 @@
             outcome3: This state will always return this outcome
         """
         super().__init__(outcomes=["outcome3"])
+        self.set_description(
+            "Reads and prints the value stored in 'foo_str' from the blackboard."
+        )
+        self.add_input_key(
+            "foo_str",
+            "String produced by FooState containing the counter value.",
+        )
 
     def execute(self, blackboard: Blackboard) -&gt; str:
         """
@@ -317,6 +338,13 @@
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Runs FooState and BarState concurrently until the concurrence state no longer matches the configured outcome map."
+    )
+    sm.add_output_key(
+        "foo_str",
+        "String containing the current counter value produced during the concurrent execution.",
+    )
 
     # Create states to run concurrently
     foo_state: State = FooState()
@@ -339,6 +367,17 @@
                 "BAR": "outcome3",
             },
         },
+    )
+    concurrence_state.set_description(
+        "Executes FooState and BarState in parallel and maps their combined outcomes to the next transition."
+    )
+    concurrence_state.add_input_key(
+        "foo_str",
+        "String read by BarState during the concurrent execution.",
+    )
+    concurrence_state.add_output_key(
+        "foo_str",
+        "String written by FooState during the concurrent execution.",
     )</code></pre>
 
         <h2>4. Add Concurrence to State Machine</h2>

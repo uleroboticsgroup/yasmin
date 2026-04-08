@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -127,6 +128,12 @@
         <h3>Extensions</h3>
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
           <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
@@ -220,7 +227,14 @@ public:
             "/add_two_ints",
             std::bind(&amp;AddTwoIntsState::create_request_handler, this, _1),
             {"outcome1"},
-            std::bind(&amp;AddTwoIntsState::response_handler, this, _1, _2)) {};
+            std::bind(&amp;AddTwoIntsState::response_handler, this, _1, _2)) {
+    this-&gt;set_description(
+        "Calls the AddTwoInts service using the values stored in the "
+        "blackboard and writes the resulting sum back to the blackboard.");
+    this-&gt;add_input_key("a", "First integer used for the service request.");
+    this-&gt;add_input_key("b", "Second integer used for the service request.");
+    this-&gt;add_output_key("sum", "Sum returned by the AddTwoInts service.");
+  };
 
   example_interfaces::srv::AddTwoInts::Request::SharedPtr
   create_request_handler(
@@ -269,12 +283,32 @@ public:
   // Create a state machine with a specified outcome.
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
+  sm-&gt;set_description("Sets two integers in the blackboard, calls the "
+                      "AddTwoInts service, and prints the resulting sum.");
+  sm-&gt;add_output_key("a", "First integer used for the service request.");
+  sm-&gt;add_output_key("b", "Second integer used for the service request.");
+  sm-&gt;add_output_key("sum", "Sum returned by the AddTwoInts service.");
 
-  sm-&gt;add_state("SETTING_INTS",
-                yasmin::CbState::make_shared(
-                    std::initializer_list&lt;std::string&gt;{
-                        yasmin_ros::basic_outcomes::SUCCEED},
-                    set_ints),
+  auto setting_ints_state = yasmin::CbState::make_shared(
+      std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
+      set_ints);
+  setting_ints_state-&gt;set_description(
+      "Writes the two input integers for the AddTwoInts service into the "
+      "blackboard.");
+  setting_ints_state-&gt;add_output_key(
+      "a", "First integer used for the service request.");
+  setting_ints_state-&gt;add_output_key(
+      "b", "Second integer used for the service request.");
+
+  auto printing_sum_state = yasmin::CbState::make_shared(
+      std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
+      print_sum);
+  printing_sum_state-&gt;set_description(
+      "Reads the computed sum from the blackboard and prints it.");
+  printing_sum_state-&gt;add_input_key(
+      "sum", "Sum previously written to the blackboard by the service state.");
+
+  sm-&gt;add_state("SETTING_INTS", setting_ints_state,
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "ADD_TWO_INTS"},
                 });
@@ -284,11 +318,7 @@ public:
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
-  sm-&gt;add_state("PRINTING_SUM",
-                yasmin::CbState::make_shared(
-                    std::initializer_list&lt;std::string&gt;{
-                        yasmin_ros::basic_outcomes::SUCCEED},
-                    print_sum),
+  sm-&gt;add_state("PRINTING_SUM", printing_sum_state,
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                 });

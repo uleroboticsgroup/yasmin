@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -128,6 +129,12 @@
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
           <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
             >
@@ -193,7 +200,14 @@ public:
             "/fibonacci",
             std::bind(&FibonacciState::create_goal_handler, this, _1),
             std::bind(&FibonacciState::response_handler, this, _1, _2),
-            std::bind(&FibonacciState::print_feedback, this, _1, _2)) {};
+            std::bind(&FibonacciState::print_feedback, this, _1, _2)) {
+    this-&gt;set_description("Calls the Fibonacci action server and stores the "
+                          "resulting sequence in the blackboard.");
+    this-&gt;add_input_key&lt;int&gt;("n", "Order of the Fibonacci sequence to compute.",
+                             10);
+    this-&gt;add_output_key("fibo_res",
+                         "Computed Fibonacci sequence returned by the action.");
+  };
 
   Fibonacci::Goal create_goal_handler(
       yasmin::Blackboard::SharedPtr blackboard) {
@@ -253,6 +267,21 @@ public:
   // Create the state machine
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
+  sm-&gt;set_description("Calls the Fibonacci action server, stores the resulting "
+                      "sequence, and prints it.");
+  sm-&gt;add_input_key&lt;int&gt;("n", "Order of the Fibonacci sequence to compute.",
+                         10);
+  sm-&gt;add_output_key("fibo_res",
+                     "Computed Fibonacci sequence returned by the action.");
+
+  auto printing_result_state = yasmin::CbState::make_shared(
+      std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
+      print_result);
+  printing_result_state-&gt;set_description(
+      "Reads the computed Fibonacci sequence from the blackboard and prints "
+      "it.");
+  printing_result_state-&gt;add_input_key(
+      "fibo_res", "Computed Fibonacci sequence returned by the action.");
 
   // Add states to the state machine
   sm-&gt;add_state("CALLING_FIBONACCI", std::make_shared&lt;FibonacciState&gt;(),
@@ -261,11 +290,7 @@ public:
                     {yasmin_ros::basic_outcomes::CANCEL, "outcome4"},
                     {yasmin_ros::basic_outcomes::ABORT, "outcome4"},
                 });
-  sm-&gt;add_state("PRINTING_RESULT",
-                yasmin::CbState::make_shared(
-                    std::initializer_list&lt;std::string&gt;{
-                        yasmin_ros::basic_outcomes::SUCCEED},
-                    print_result),
+  sm-&gt;add_state("PRINTING_RESULT", printing_result_state,
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                 });

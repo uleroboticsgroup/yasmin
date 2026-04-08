@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -128,6 +129,12 @@
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
           <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
             >
@@ -187,7 +194,13 @@ public:
   /**
    * @brief Constructs a FooState object, initializing the counter.
    */
-  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0){};
+  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {
+    this-&gt;set_description(
+        "Increments an internal counter, writes the formatted counter string "
+        "to the blackboard, and controls the loop outcome.");
+    this-&gt;add_output_key("foo_str",
+                         "Formatted counter string written by FooState.");
+  };
 
   /**
    * @brief Executes the Foo state logic.
@@ -240,7 +253,12 @@ public:
   /**
    * @brief Constructs a BarState object.
    */
-  BarState() : yasmin::State({"outcome3"}) {}
+  BarState() : yasmin::State({"outcome3"}) {
+    this-&gt;set_description("Reads the counter string from the blackboard, logs "
+                          "it, and transitions back to FooState.");
+    this-&gt;add_input_key("foo_str",
+                        "Formatted counter string produced by FooState.");
+  }
 
   /**
    * @brief Executes the Bar state logic.
@@ -288,6 +306,11 @@ public:
   // Create a state machine
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
+  sm-&gt;set_description("Runs a simple loop between FooState and BarState until "
+                      "FooState reaches its terminal outcome.");
+  sm-&gt;add_output_key(
+      "foo_str",
+      "Formatted counter string produced by FooState and read by BarState.");
 
   // Add states to the state machine
   sm-&gt;add_state("FOO", std::make_shared&lt;FooState&gt;(),

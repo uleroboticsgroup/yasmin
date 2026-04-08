@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -121,6 +122,12 @@
         <h3>Extensions</h3>
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
           <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
@@ -213,6 +220,17 @@
             SUCCEED: Indicates the state should continue to the next state.
         """
         super().__init__(outcomes=[SUCCEED])
+        self.set_description(
+            "Reads input data from the blackboard, logs it, and writes it back as output."
+        )
+        self.add_input_key(
+            "foo_data",
+            "Input data read by the Foo state.",
+        )
+        self.add_output_key(
+            "foo_out_data",
+            "Output data written by the Foo state.",
+        )
 
     def execute(self, blackboard: Blackboard):
         """
@@ -259,6 +277,11 @@
             SUCCEDED: Indicates the state should continue to the next state.
         """
         super().__init__(outcomes=[SUCCEED])
+        self.set_description("Reads remapped input data from the blackboard and logs it.")
+        self.add_input_key(
+            "bar_data",
+            "Input data read by the Bar state.",
+        )
 
     def execute(self, blackboard: Blackboard):
         """
@@ -311,6 +334,21 @@
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=[SUCCEED], handle_sigint=True)
+    sm.set_description(
+        "Demonstrates blackboard remapping by forwarding values through multiple states."
+    )
+    sm.add_input_key(
+        "msg1",
+        "Initial input value remapped to the first Foo state.",
+    )
+    sm.add_input_key(
+        "msg2",
+        "Initial input value remapped to the second Foo state.",
+    )
+    sm.add_output_key(
+        "foo_out_data",
+        "Output data written by Foo and forwarded to Bar through remapping.",
+    )
 
     # Add states to the FSM
     sm.add_state(

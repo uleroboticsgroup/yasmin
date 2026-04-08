@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -128,6 +129,12 @@
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
           <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
             >
@@ -194,7 +201,14 @@ public:
             "count", // topic name
             std::bind(&PublishIntState::create_int_msg, this,
                       _1) // create msg handler callback
-        ) {};
+        ) {
+    this-&gt;set_description("Publishes an incrementing integer to the 'count' "
+                          "topic using values stored in the blackboard.");
+    this-&gt;add_input_key&lt;int&gt;(
+        "counter", "Current counter value stored in the blackboard.", 0);
+    this-&gt;add_output_key("counter",
+                         "Updated counter value after incrementing.");
+  };
 
   std_msgs::msg::Int32
   create_int_msg(yasmin::Blackboard::SharedPtr blackboard) {
@@ -253,17 +267,32 @@ int main(int argc, char *argv[]) {
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
       true);
+  sm-&gt;set_description("Publishes incrementing integers until the configured "
+                      "maximum count is reached.");
+  sm-&gt;add_input_key&lt;int&gt;("counter",
+                         "Current counter value stored in the blackboard.", 0);
+  sm-&gt;add_input_key&lt;int&gt;(
+      "max_count", "Maximum counter threshold used to stop publishing.", 10);
+  sm-&gt;add_output_key("counter",
+                     "Updated counter value after each publish step.");
+
+  auto checking_counts_state = yasmin::CbState::make_shared(
+      std::initializer_list&lt;std::string&gt;{"outcome1", "outcome2"}, check_count);
+  checking_counts_state-&gt;set_description(
+      "Checks whether the counter stored in the blackboard reached the "
+      "configured maximum.");
+  checking_counts_state-&gt;add_input_key&lt;int&gt;("counter", "Current counter value.",
+                                            0);
+  checking_counts_state-&gt;add_input_key&lt;int&gt;(
+      "max_count", "Maximum counter threshold used to stop publishing.", 10);
 
   // Add states to the state machine
   sm-&gt;add_state("PUBLISHING_INT", std::make_shared&lt;PublishIntState&gt;(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
-                     "CHECKINNG_COUNTS"}, // Transition back to itself
+                     "CHECKINNG_COUNTS"},
                 });
-  sm-&gt;add_state("CHECKINNG_COUNTS",
-                yasmin::CbState::make_shared(
-                    std::initializer_list&lt;std::string&gt;{"outcome1", "outcome2"},
-                    check_count),
+  sm-&gt;add_state("CHECKINNG_COUNTS", checking_counts_state,
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
                  {"outcome2", "PUBLISHING_INT"}});
 

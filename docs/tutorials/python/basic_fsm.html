@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -122,6 +123,12 @@
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
           <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
             >
@@ -183,6 +190,13 @@
         """
         super().__init__(["outcome1", "outcome2"])
         self.counter = 0
+        self.set_description(
+            "Increments an internal counter, writes the formatted counter string to the blackboard, and controls the loop outcome."
+        )
+        self.add_output_key(
+            "foo_str",
+            "Formatted counter string written by FooState.",
+        )
 
     def execute(self, blackboard: Blackboard) -&gt; str:
         """
@@ -234,6 +248,13 @@
             outcome3: Indicates the state should transition back to the Foo state.
         """
         super().__init__(outcomes=["outcome3"])
+        self.set_description(
+            "Reads the counter string from the blackboard, logs it, and transitions back to FooState."
+        )
+        self.add_input_key(
+            "foo_str",
+            "Formatted counter string produced by FooState.",
+        )
 
     def execute(self, blackboard: Blackboard) -&gt; str:
         """
@@ -282,6 +303,13 @@
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Runs a simple loop between FooState and BarState until FooState reaches its terminal outcome."
+    )
+    sm.add_output_key(
+        "foo_str",
+        "Formatted counter string produced by FooState and read by BarState.",
+    )
 
     # Add states to the FSM
     sm.add_state(

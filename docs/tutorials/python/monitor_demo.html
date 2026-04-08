@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -121,6 +122,12 @@
         <h3>Extensions</h3>
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
           <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
@@ -211,6 +218,13 @@ class PrintOdometryState(MonitorState):
             timeout=10,  # timeout to wait for messages in seconds
         )
         self.times = 5
+        self.set_description(
+            "Monitors Odometry messages from the 'odom' topic and logs them until a predefined number of messages has been received."
+        )
+        self.add_input_key(
+            "odom",
+            "Odometry message received from the monitored ROS topic.",
+        )
 
     def monitor_handler(self, blackboard: Blackboard, msg: Odometry) -&gt; str:
         """
@@ -264,6 +278,13 @@ class PrintOdometryState(MonitorState):
 
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
+    sm.set_description(
+        "Continuously monitors the 'odom' topic and logs received Odometry messages until a fixed number of messages has been processed."
+    )
+    sm.add_input_key(
+        "odom",
+        "Odometry messages received from the monitored ROS topic.",
+    )
 
     # Add states to the FSM
     sm.add_state(

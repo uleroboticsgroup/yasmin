@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -128,6 +129,12 @@
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
           <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
             >
@@ -174,7 +181,13 @@
 
         <pre><code class="language-cpp">class FooState : public yasmin::State {
 public:
-  FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {};
+  FooState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {
+    this-&gt;set_description("Reads input data from the blackboard, logs it, and "
+                          "writes it back as output.");
+    this-&gt;add_input_key("foo_data", "Input data read by the Foo state.");
+    this-&gt;add_output_key("foo_out_data",
+                         "Output data written by the Foo state.");
+  };
 
   std::string
   execute(yasmin::Blackboard::SharedPtr blackboard) override {
@@ -195,7 +208,11 @@ public:
         </p>
         <pre><code class="language-cpp">class BarState : public yasmin::State {
 public:
-  BarState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {}
+  BarState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {
+    this-&gt;set_description(
+        "Reads remapped input data from the blackboard and logs it.");
+    this-&gt;add_input_key("bar_data", "Input data read by the Bar state.");
+  }
 
   std::string
   execute(yasmin::Blackboard::SharedPtr blackboard) override {
@@ -238,6 +255,15 @@ public:
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{yasmin_ros::basic_outcomes::SUCCEED},
       true);
+  sm-&gt;set_description("Demonstrates blackboard remapping by forwarding values "
+                      "through multiple states.");
+  sm-&gt;add_input_key("msg1",
+                    "Initial input value remapped to the first Foo state.");
+  sm-&gt;add_input_key("msg2",
+                    "Initial input value remapped to the second Foo state.");
+  sm-&gt;add_output_key(
+      "foo_out_data",
+      "Output data written by Foo and forwarded to Bar through remapping.");
 
   // Add states to the state machine
   // STATE1: remap foo_data to msg1

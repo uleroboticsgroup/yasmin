@@ -41,6 +41,7 @@
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
         </ul>
 
         <h3>Tutorials</h3>
@@ -128,6 +129,12 @@
         <ul>
           <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
           <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
             <a href="../../yasmin_plugins_manager.html"
               >YASMIN Plugins Manager</a
             >
@@ -200,7 +207,14 @@ public:
   int counter;
 
   FooState()
-      : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {};
+      : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {
+    this-&gt;set_description(
+        "Produces a counter string and stores it in the blackboard while "
+        "cycling through outcomes based on the internal counter.");
+    this-&gt;add_output_key(
+        "foo_str",
+        "String containing the current counter value produced by FooState.");
+  };
 
   std::string
   execute(yasmin::Blackboard::SharedPtr blackboard) override {
@@ -241,7 +255,12 @@ public:
         </p>
         <pre><code class="language-cpp">class BarState : public yasmin::State {
 public:
-  BarState() : yasmin::State({"outcome3"}) {}
+  BarState() : yasmin::State({"outcome3"}) {
+    this-&gt;set_description(
+        "Reads and prints the value stored in 'foo_str' from the blackboard.");
+    this-&gt;add_input_key(
+        "foo_str", "String produced by FooState containing the counter value.");
+  }
 
   std::string
   execute(yasmin::Blackboard::SharedPtr blackboard) override {
@@ -286,6 +305,12 @@ public:
   // Create a state machine
   auto sm = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
+  sm-&gt;set_description(
+      "Runs FooState and BarState concurrently until the concurrence state no "
+      "longer matches the configured outcome map.");
+  sm-&gt;add_output_key(
+      "foo_str", "String containing the current counter value produced during "
+                 "the concurrent execution.");
 
   // Create states to run concurrently
   auto foo_state = std::make_shared&lt;FooState&gt;();
@@ -301,7 +326,14 @@ public:
       yasmin::OutcomeMap{
           {"outcome1", {{"FOO", "outcome1"}, {"BAR", "outcome3"}}},
           {"outcome2", {{"FOO", "outcome2"}, {"BAR", "outcome3"}}},
-      });</code></pre>
+      });
+  concurrent_state-&gt;set_description(
+      "Executes FooState and BarState in parallel and maps their combined "
+      "outcomes to the next transition.");
+  concurrent_state-&gt;add_input_key(
+      "foo_str", "String read by BarState during the concurrent execution.");
+  concurrent_state-&gt;add_output_key(
+      "foo_str", "String written by FooState during the concurrent execution.");</code></pre>
 
         <h2>4. Add to State Machine</h2>
         <p>
