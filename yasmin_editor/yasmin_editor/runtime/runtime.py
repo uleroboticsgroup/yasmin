@@ -25,7 +25,6 @@ and shutdown.
 from __future__ import annotations
 
 import threading
-import time
 from typing import Any, Iterable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
@@ -85,8 +84,6 @@ class Runtime(QObject):
         )
 
         self._execution_thread: Optional[threading.Thread] = None
-        self._cancel_state_machine_thread: Optional[threading.Thread] = None
-        self._cancel_state_machine_stop_event = threading.Event()
         self._worker_state_lock = threading.Lock()
         self._pause_condition = threading.Condition()
         self._pause_requested = False
@@ -118,14 +115,6 @@ class Runtime(QObject):
     def is_step_mode(self) -> bool:
         """Return whether execution is currently armed for a single step."""
         return self._step_mode
-
-    def is_canceling_state_machine(self) -> bool:
-        """Return whether the repeated state-machine cancel loop is active."""
-        return bool(
-            self._cancel_state_machine_thread is not None
-            and self._cancel_state_machine_thread.is_alive()
-            and not self._cancel_state_machine_stop_event.is_set()
-        )
 
     def get_final_outcome(self) -> Optional[str]:
         """Return the final outcome once execution completed."""
@@ -212,8 +201,6 @@ class Runtime(QObject):
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
-        self._cancel_state_machine_stop_event.clear()
-        self._cancel_state_machine_thread = None
         self.logger.reset_depth()
         self._set_last_transition(None)
         initial_active_path = self._resolve_initial_active_path()
@@ -273,42 +260,21 @@ class Runtime(QObject):
         except Exception as exc:
             self.error_occurred.emit(f"Failed to cancel current state:\n{exc}")
 
-    def start_cancel_state_machine(self) -> None:
-        """Start repeatedly canceling the active state machine."""
+    def cancel_state_machine(self) -> None:
+        """Request cancellation of the complete runtime state machine."""
         if (
             not self.is_ready()
             or not self.is_running()
             or self.is_finished()
             or self._disposed
-            or self.is_canceling_state_machine()
         ):
             return
 
-        self._cancel_state_machine_stop_event.clear()
-        self._cancel_state_machine_thread = threading.Thread(
-            target=self._cancel_state_machine_worker,
-            name="yasmin-runtime-cancel",
-            daemon=True,
-        )
-        self._cancel_state_machine_thread.start()
-        self.status_changed.emit("Canceling runtime state machine")
-
-    def stop_cancel_state_machine(self, emit_status: bool = True) -> None:
-        """Stop the repeated cancel loop for the active state machine."""
-        cancel_thread = self._cancel_state_machine_thread
-        if cancel_thread is None:
-            self._cancel_state_machine_stop_event.clear()
-            return
-
-        self._cancel_state_machine_stop_event.set()
-        if cancel_thread.is_alive() and threading.current_thread() is not cancel_thread:
-            cancel_thread.join(timeout=0.2)
-
-        if not cancel_thread.is_alive():
-            self._cancel_state_machine_thread = None
-
-        if emit_status and self.is_running() and not self.is_finished():
-            self.status_changed.emit("Stopped canceling runtime state machine")
+        try:
+            self.sm.cancel_state_machine()
+            self.status_changed.emit("Canceling runtime state machine")
+        except Exception as exc:
+            self.error_occurred.emit(f"Failed to cancel runtime state machine:\n{exc}")
 
     def shutdown(self, reset_disposed: bool = True) -> None:
         """Tear down the runtime and optionally mark it as disposed."""
@@ -316,7 +282,6 @@ class Runtime(QObject):
             return
 
         self._shutting_down = True
-        self.stop_cancel_state_machine(emit_status=False)
 
         with self._pause_condition:
             self._pause_requested = False
@@ -325,17 +290,18 @@ class Runtime(QObject):
 
         if self.sm is not None:
             try:
-                self.sm.cancel_state()
+                self.sm.cancel_state_machine()
             except Exception:
-                pass
+                try:
+                    self.sm.cancel_state()
+                except Exception:
+                    pass
 
         if self._execution_thread is not None and self._execution_thread.is_alive():
             self._execution_thread.join(timeout=1.0)
 
         self.sm = None
         self._execution_thread = None
-        self._cancel_state_machine_thread = None
-        self._cancel_state_machine_stop_event.clear()
         self._finished = False
         self._final_outcome = None
         self._pause_requested = False
@@ -354,29 +320,67 @@ class Runtime(QObject):
         if reset_disposed:
             self._disposed = True
 
-    def _cancel_state_machine_worker(self) -> None:
-        """Keep requesting cancellation until the runtime stops or is toggled off."""
-        try:
-            while (
-                self.is_ready()
-                and self.is_running()
-                and not self.is_finished()
-                and not self._shutting_down
-                and not self._disposed
-                and not self._cancel_state_machine_stop_event.is_set()
+    def _resolve_state_machine_cancel_exception_types(
+        self,
+    ) -> tuple[type[BaseException], ...]:
+        """Return known Python exception types for full state-machine cancelation."""
+        exception_types: list[type[BaseException]] = []
+
+        for owner in (yasmin, getattr(yasmin, "state_machine", None)):
+            exception_type = getattr(owner, "StateMachineCancelException", None)
+            if isinstance(exception_type, type) and issubclass(
+                exception_type, BaseException
             ):
-                try:
-                    self.sm.cancel_state()
-                except Exception as exc:
-                    self.error_occurred.emit(
-                        f"Failed to cancel runtime state machine:\n{exc}"
-                    )
-                    return
-                time.sleep(0.05)
-        finally:
-            self._cancel_state_machine_stop_event.set()
-            if threading.current_thread() is self._cancel_state_machine_thread:
-                self._cancel_state_machine_thread = None
+                exception_types.append(exception_type)
+
+        return tuple(dict.fromkeys(exception_types))
+
+    def _is_state_machine_cancel_exception(self, exc: BaseException) -> bool:
+        """Return whether *exc* represents the dedicated hard-cancel condition."""
+        known_types = self._resolve_state_machine_cancel_exception_types()
+        if known_types and isinstance(exc, known_types):
+            return True
+
+        if exc.__class__.__name__ == "StateMachineCancelException":
+            return True
+
+        return str(exc).startswith("State machine canceled:")
+
+    def _finalize_runtime_completion(
+        self,
+        final_outcome: str,
+        status_message: str,
+    ) -> None:
+        """Mark the runtime as finished and publish the terminal status."""
+        with self._pause_condition:
+            self._pause_requested = False
+            self._step_mode = False
+            self._pause_condition.notify_all()
+
+        final_active_path = tuple(self._active_path)
+        if final_active_path:
+            self._set_active_path(final_active_path)
+            self._last_state_ref = self._resolve_state_reference(final_active_path)
+
+        self._finished = True
+        self._final_outcome = str(final_outcome)
+        self._set_running(False)
+        self._set_blocked(False)
+        self._set_last_transition(None)
+        self._current_state_ref = None
+        self.outcome_changed.emit(self._final_outcome)
+        self.status_changed.emit(status_message)
+
+    def _handle_state_machine_canceled(self, exc: BaseException) -> None:
+        """Treat a hard state-machine cancel as an expected terminal condition."""
+        if self._disposed:
+            return
+
+        self.logger.append(f"[CANCEL] {exc}", is_end=True)
+        self._finalize_runtime_completion(
+            final_outcome="Canceled",
+            status_message="Runtime canceled",
+        )
 
     def _start_execution_thread(self) -> None:
         """Create the worker thread when execution starts for the first time."""
@@ -389,7 +393,6 @@ class Runtime(QObject):
             self._set_active_path(initial_path)
 
         self._shutting_down = False
-        self._cancel_state_machine_stop_event.clear()
         self._execution_thread = threading.Thread(
             target=self._execute_worker,
             name="yasmin-runtime",
@@ -497,7 +500,9 @@ class Runtime(QObject):
             self.logger.configure()
             sm(self.bb)
         except Exception as exc:
-            if not self._disposed:
+            if self._is_state_machine_cancel_exception(exc):
+                self._handle_state_machine_canceled(exc)
+            elif not self._disposed:
                 self._set_running(False)
                 self._set_blocked(False)
                 self.error_occurred.emit(f"Runtime execution failed:\n{exc}")
@@ -607,24 +612,10 @@ class Runtime(QObject):
             self._pause_if_requested()
             return
 
-        with self._pause_condition:
-            self._pause_requested = False
-            self._step_mode = False
-            self._pause_condition.notify_all()
-
-        self.stop_cancel_state_machine(emit_status=False)
-        final_active_path = tuple(self._active_path)
-        if final_active_path:
-            self._set_active_path(final_active_path)
-            self._last_state_ref = self._resolve_state_reference(final_active_path)
-        self._finished = True
-        self._final_outcome = str(outcome)
-        self._set_running(False)
-        self._set_blocked(False)
-        self._set_last_transition(None)
-        self._current_state_ref = None
-        self.outcome_changed.emit(self._final_outcome)
-        self.status_changed.emit(f"Runtime finished with outcome: {outcome}")
+        self._finalize_runtime_completion(
+            final_outcome=str(outcome),
+            status_message=f"Runtime finished with outcome: {outcome}",
+        )
 
     def transition_cb(
         self,

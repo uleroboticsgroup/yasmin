@@ -25,6 +25,7 @@
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/state_machine_cancel_exception.hpp"
 
 namespace yasmin {
 
@@ -228,9 +229,23 @@ public:
   using State::operator();
 
   /**
-   * @brief Cancels the current state execution.
+   * @brief Cancels the currently active child state.
+   *
+   * This lightweight cancel request is forwarded to the active child state. If
+   * the state machine continues executing afterwards, its running status is
+   * restored inside the execution loop so later cancel requests can still be
+   * propagated.
    */
   void cancel_state() override;
+
+  /**
+   * @brief Cancels the complete state machine execution.
+   *
+   * This requests a hard stop of the current state machine. The request is
+   * propagated recursively to an active child state machine and causes the
+   * execution loop to abort by throwing StateMachineCancelException.
+   */
+  void cancel_state_machine();
 
   /**
    * @brief Sets whether the state machine should handle SIGINT for cancel.
@@ -271,6 +286,10 @@ private:
   std::atomic_bool validated{false};
   /// Flag to indicate if the state machine has been configured
   std::atomic_bool configured{false};
+  /// Flag to indicate whether the execute loop is currently active
+  std::atomic_bool execution_active{false};
+  /// Flag to indicate that a hard state machine cancel was requested
+  std::atomic_bool cancel_state_machine_requested{false};
 
   /// Start callbacks executed before the state machine
   std::vector<StartCallbackType> start_cbs;
@@ -339,6 +358,18 @@ private:
    */
   static Remappings compose_remappings(const Remappings &parent_remappings,
                                        const Remappings &state_remappings);
+
+  /**
+   * @brief Waits until a current state is available while execution is active.
+   * @return The current state name, or an empty string if execution is no
+   * longer active.
+   */
+  std::string wait_for_current_state();
+
+  /**
+   * @brief Throws if a hard state machine cancel was requested.
+   */
+  void throw_if_cancel_state_machine_requested();
 };
 
 } // namespace yasmin

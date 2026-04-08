@@ -481,7 +481,7 @@ class InteractiveShellManager(QObject):
             "play": "Alias for cont.",
             "pause": "Request a pause at the next transition.",
             "cancel_state": "Cancel the currently active state.",
-            "cancel_sm": "Toggle repeated cancellation for the whole state machine.",
+            "cancel_sm": "Cancel the complete state machine.",
             "restart": "Restart the runtime after completion.",
             "where": "Print the current runtime path and last transition.",
         }

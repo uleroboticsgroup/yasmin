@@ -231,12 +231,14 @@ class EditorRuntimeMixin:
         )
 
     def _set_runtime_cancel_sm_button_checked(self, checked: bool) -> None:
-        self._set_runtime_toggle_button_checked(
-            "runtime_cancel_sm_button",
-            checked,
-            "Canceling State Machine",
-            "Cancel State Machine",
-        )
+        button = getattr(self, "runtime_cancel_sm_button", None)
+        if button is None:
+            return
+
+        button.blockSignals(True)
+        button.setChecked(False)
+        button.setText("Cancel State Machine")
+        button.blockSignals(False)
 
     def _ensure_runtime_shell(self) -> Optional[InteractiveShellManager]:
         shell = getattr(self, "runtime_shell", None)
@@ -441,10 +443,7 @@ class EditorRuntimeMixin:
         if runtime is None:
             return
 
-        if runtime.is_canceling_state_machine():
-            runtime.stop_cancel_state_machine()
-        else:
-            runtime.start_cancel_state_machine()
+        runtime.cancel_state_machine()
         self._refresh_runtime_shell_context()
         self.update_runtime_actions()
 
@@ -788,7 +787,6 @@ class EditorRuntimeMixin:
         runtime_playing = runtime_running and not runtime_blocked
         runtime_step_mode = runtime_running and runtime.is_step_mode()
         runtime_finished = runtime_ready and runtime.is_finished()
-        runtime_canceling = runtime_running and runtime.is_canceling_state_machine()
         runtime_shell_open = self._runtime_shell_execution_blocked()
 
         self._set_runtime_mode_button_checked(self.runtime_mode_enabled)
@@ -812,9 +810,7 @@ class EditorRuntimeMixin:
             "runtime_step_button": runtime_ready
             and not runtime_playing
             and not runtime_finished,
-            "runtime_cancel_state_button": runtime_running
-            and not runtime_finished
-            and not runtime_canceling,
+            "runtime_cancel_state_button": runtime_running and not runtime_finished,
             "runtime_cancel_sm_button": runtime_running and not runtime_finished,
             "runtime_restart_button": runtime_finished,
         }
@@ -830,7 +826,7 @@ class EditorRuntimeMixin:
                 button.setVisible(visible)
                 button.setEnabled(enabled)
 
-        self._set_runtime_cancel_sm_button_checked(runtime_canceling)
+        self._set_runtime_cancel_sm_button_checked(False)
 
         auto_follow_button = getattr(self, "runtime_auto_follow_button", None)
         if auto_follow_button is not None:

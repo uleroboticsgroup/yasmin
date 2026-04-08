@@ -58,9 +58,8 @@ def build_runtime_controls_widget(editor) -> QWidget:
     editor.runtime_controls_layout.addWidget(editor.runtime_cancel_state_button)
 
     editor.runtime_cancel_sm_button = QPushButton("Cancel State Machine")
-    editor.runtime_cancel_sm_button.setCheckable(True)
     editor.runtime_cancel_sm_button.setToolTip(
-        "Toggle repeated cancellation requests for the complete runtime state machine."
+        "Request cancellation of the complete runtime state machine."
     )
     editor.runtime_cancel_sm_button.clicked.connect(editor.on_runtime_cancel_sm_clicked)
     editor.runtime_controls_layout.addWidget(editor.runtime_cancel_sm_button)

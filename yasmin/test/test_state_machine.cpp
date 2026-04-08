@@ -15,12 +15,18 @@
 
 #include <gtest/gtest.h>
 
+#include <atomic>
+#include <chrono>
+#include <functional>
+#include <future>
 #include <memory>
 #include <string>
+#include <thread>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin/state_machine_cancel_exception.hpp"
 #include "yasmin/types.hpp"
 
 using namespace yasmin;
@@ -441,4 +447,113 @@ TEST_F(TestStateMachine,
   EXPECT_EQ(leaf->configure_count, 1);
   EXPECT_EQ(leaf->configured_topic, "/root");
   EXPECT_EQ(nested_sm->get_parameter<std::string>("nested_topic"), "/root");
+}
+
+namespace {
+
+bool wait_for_condition(
+    const std::function<bool()> &condition,
+    const std::chrono::milliseconds timeout = std::chrono::milliseconds(2000)) {
+  const auto deadline = std::chrono::steady_clock::now() + timeout;
+  while (std::chrono::steady_clock::now() < deadline) {
+    if (condition()) {
+      return true;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  }
+  return condition();
+}
+
+class BlockingCancelState : public State {
+public:
+  explicit BlockingCancelState(std::shared_ptr<std::atomic_int> entry_counter)
+      : State({"done"}), entry_counter_(std::move(entry_counter)) {}
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    (void)blackboard;
+    ++(*this->entry_counter_);
+
+    while (!this->is_canceled()) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+
+    return "done";
+  }
+
+private:
+  std::shared_ptr<std::atomic_int> entry_counter_;
+};
+
+} // namespace
+
+TEST_F(TestStateMachine, TestSequentialCancelStatePropagatesAfterReset) {
+  auto first_entries = std::make_shared<std::atomic_int>(0);
+  auto second_entries = std::make_shared<std::atomic_int>(0);
+
+  auto cancel_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  cancel_sm->add_state("FIRST",
+                       std::make_shared<BlockingCancelState>(first_entries),
+                       {{"done", "SECOND"}});
+  cancel_sm->add_state("SECOND",
+                       std::make_shared<BlockingCancelState>(second_entries),
+                       {{"done", "done"}});
+
+  auto result_future = std::async(std::launch::async, [cancel_sm, this]() {
+    return (*cancel_sm)(blackboard);
+  });
+
+  ASSERT_TRUE(wait_for_condition([&]() {
+    return first_entries->load() == 1 &&
+           cancel_sm->get_current_state() == "FIRST";
+  }));
+
+  cancel_sm->cancel_state();
+
+  ASSERT_TRUE(wait_for_condition([&]() {
+    return second_entries->load() == 1 &&
+           cancel_sm->get_current_state() == "SECOND";
+  }));
+
+  cancel_sm->cancel_state();
+
+  EXPECT_EQ(result_future.get(), "done");
+  EXPECT_EQ(first_entries->load(), 1);
+  EXPECT_EQ(second_entries->load(), 1);
+}
+
+TEST_F(TestStateMachine, TestCancelStateMachineStopsExecution) {
+  auto first_entries = std::make_shared<std::atomic_int>(0);
+  auto second_entries = std::make_shared<std::atomic_int>(0);
+
+  auto cancel_sm = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  cancel_sm->add_state("FIRST",
+                       std::make_shared<BlockingCancelState>(first_entries),
+                       {{"done", "SECOND"}});
+  cancel_sm->add_state("SECOND",
+                       std::make_shared<BlockingCancelState>(second_entries),
+                       {{"done", "done"}});
+
+  auto result_future = std::async(std::launch::async, [cancel_sm, this]() {
+    return (*cancel_sm)(blackboard);
+  });
+
+  ASSERT_TRUE(wait_for_condition([&]() {
+    return first_entries->load() == 1 &&
+           cancel_sm->get_current_state() == "FIRST";
+  }));
+
+  cancel_sm->cancel_state_machine();
+
+  try {
+    (void)result_future.get();
+    FAIL() << "Expected StateMachineCancelException";
+  } catch (const StateMachineCancelException &e) {
+    const std::string error_message = e.what();
+    EXPECT_NE(error_message.find("State machine canceled: State Machine ["),
+              std::string::npos);
+  }
+
+  EXPECT_EQ(first_entries->load(), 1);
+  EXPECT_EQ(second_entries->load(), 0);
+  EXPECT_EQ(cancel_sm->get_current_state(), "");
 }
