@@ -27,26 +27,56 @@ class PluginInfo:
     """Store metadata of a discovered plugin."""
 
     @staticmethod
+    def _split_cpp_template_args(args: str) -> list[str]:
+        """Split a C++ template argument list at top-level commas."""
+        parts: list[str] = []
+        current: list[str] = []
+        depth = 0
+
+        for char in args:
+            if char == "<":
+                depth += 1
+                current.append(char)
+            elif char == ">":
+                depth = max(0, depth - 1)
+                current.append(char)
+            elif char == "," and depth == 0:
+                part = "".join(current).strip()
+                if part:
+                    parts.append(part)
+                current = []
+            else:
+                current.append(char)
+
+        tail = "".join(current).strip()
+        if tail:
+            parts.append(tail)
+
+        return parts
+
+    @staticmethod
     def _normalize_cpp_metadata_type(type_name: str) -> str:
         """Normalize common C++ metadata type names for user-facing output."""
-        normalized_type = type_name.strip()
+        normalized_type = " ".join(type_name.strip().split())
 
         string_fragment_pattern = re.compile(
-            r"std::(?:__cxx11::)?basic_string<char(?:,\s*std::char_traits<char>)?(?:,\s*std::allocator<char>\s*)?>"
-        )
-        string_type_pattern = re.compile(
-            r"^std::(?:__cxx11::)?basic_string<char(?:,\s*std::char_traits<char>)?(?:,\s*std::allocator<char>\s*)?>$"
+            r"std::(?:__cxx11::)?basic_string<char(?:,\s*std::char_traits<char>)?(?:,\s*std::allocator<char>)?\s*>"
         )
         integer_type_pattern = re.compile(
             r"^(unsigned\s+)?(short|int|long|long\s+long)(\s+int)?$"
         )
-        vector_pattern = re.compile(r"^std::vector<(.+?)>$")
-        map_pattern = re.compile(r"^std::unordered_map<\s*(.+?)\s*,\s*(.+?)\s*>$")
 
-        if normalized_type == "std::string" or string_type_pattern.match(normalized_type):
+        normalized_type = re.sub(r"\s*<\s*", "<", normalized_type)
+        normalized_type = re.sub(r"\s*>\s*", ">", normalized_type)
+        normalized_type = re.sub(r"\s*,\s*", ", ", normalized_type)
+
+        if normalized_type == "std::string":
             return "str"
 
         canonical_type = string_fragment_pattern.sub("std::string", normalized_type)
+
+        if canonical_type == "std::string":
+            return "str"
 
         if canonical_type == "bool":
             return "bool"
@@ -57,24 +87,52 @@ class PluginInfo:
         if integer_type_pattern.match(canonical_type):
             return "int"
 
-        vector_match = vector_pattern.match(canonical_type)
-        if vector_match:
-            element_type = PluginInfo._normalize_cpp_metadata_type(vector_match.group(1))
-            if element_type in {"str", "int", "float", "bool"}:
-                return f"list[{element_type}]"
+        if canonical_type.startswith("const "):
+            return PluginInfo._normalize_cpp_metadata_type(canonical_type[6:])
 
-        map_match = map_pattern.match(canonical_type)
-        if map_match:
-            key_type = PluginInfo._normalize_cpp_metadata_type(map_match.group(1))
-            value_type = PluginInfo._normalize_cpp_metadata_type(map_match.group(2))
-            if key_type == "str" and value_type in {"str", "int", "float", "bool"}:
-                return f"dict[str, {value_type}]"
+        if canonical_type.endswith("&"):
+            return PluginInfo._normalize_cpp_metadata_type(canonical_type[:-1].strip())
+
+        if canonical_type.endswith("*"):
+            pointee_type = PluginInfo._normalize_cpp_metadata_type(
+                canonical_type[:-1].strip()
+            )
+            return f"{pointee_type}*"
+
+        template_match = re.match(r"^([a-zA-Z0-9_:]+)<(.+)>$", canonical_type)
+        if not template_match:
+            return canonical_type
+
+        template_name = template_match.group(1)
+        template_args = PluginInfo._split_cpp_template_args(template_match.group(2))
+
+        if template_name == "std::vector" and len(template_args) >= 1:
+            element_type = PluginInfo._normalize_cpp_metadata_type(template_args[0])
+            return f"list[{element_type}]"
+
+        if (
+            template_name in {"std::unordered_map", "std::map"}
+            and len(template_args) >= 2
+        ):
+            key_type = PluginInfo._normalize_cpp_metadata_type(template_args[0])
+            value_type = PluginInfo._normalize_cpp_metadata_type(template_args[1])
+            return f"dict[{key_type}, {value_type}]"
+
+        if (
+            template_name in {"std::shared_ptr", "std::unique_ptr"}
+            and len(template_args) >= 1
+        ):
+            return PluginInfo._normalize_cpp_metadata_type(template_args[0])
+
+        if template_name == "std::optional" and len(template_args) >= 1:
+            value_type = PluginInfo._normalize_cpp_metadata_type(template_args[0])
+            return f"optional[{value_type}]"
 
         return canonical_type
 
     @classmethod
     def _normalize_cpp_metadata_entries(cls, metadata_entries: List[dict]) -> List[dict]:
-        """Normalize display types inside metadata dictionaries produced by C++ states."""
+        """Normalize display types inside metadata dictionaries for user-facing output."""
         normalized_entries: List[dict] = []
 
         for metadata_entry in metadata_entries:
@@ -249,22 +307,19 @@ class PluginInfo:
 
         try:
             self.input_keys = list(instance.get_input_keys())
-            if self.plugin_type == "cpp":
-                self.input_keys = self._normalize_cpp_metadata_entries(self.input_keys)
+            self.input_keys = self._normalize_cpp_metadata_entries(self.input_keys)
         except Exception:
             self.input_keys = []
 
         try:
             self.output_keys = list(instance.get_output_keys())
-            if self.plugin_type == "cpp":
-                self.output_keys = self._normalize_cpp_metadata_entries(self.output_keys)
+            self.output_keys = self._normalize_cpp_metadata_entries(self.output_keys)
         except Exception:
             self.output_keys = []
 
         try:
             self.parameters = list(instance.get_parameters())
-            if self.plugin_type == "cpp":
-                self.parameters = self._normalize_cpp_metadata_entries(self.parameters)
+            self.parameters = self._normalize_cpp_metadata_entries(self.parameters)
         except Exception:
             self.parameters = []
 
