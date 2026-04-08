@@ -164,6 +164,10 @@
           <li>
             <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
           </li>
+          <li>
+            <a href="yasmin_ros_serialization.html">ROS Serialization States</a>
+          </li>
+          <li><a href="yasmin_ros_tf.html">TF States</a></li>
         </ul>
 
         <h3>Resources</h3>
@@ -220,6 +224,36 @@
           <li>
             <strong>MonitorState:</strong> For subscribing and monitoring ROS 2
             Topics.
+          </li>
+          <li>
+            <strong>GetParametersState:</strong> For reading ROS 2 parameters
+            into the blackboard at runtime.
+          </li>
+          <li>
+            <strong><a href="yasmin_ros_tf.html">TfBufferState</a>:</strong>
+            Creates a shared tf2 buffer and transform listener and stores them
+            in the blackboard so that subsequent states can perform transform
+            lookups without duplicating listener infrastructure.
+          </li>
+          <li>
+            <strong
+              ><a href="yasmin_ros_serialization.html"
+                >RosSerializeCppState / RosDeserializeCppState</a
+              >:</strong
+            >
+            C++ states that serialize and deserialize ROS 2 interface instances
+            to and from raw byte arrays, enabling cross-language data exchange
+            through the blackboard.
+          </li>
+          <li>
+            <strong
+              ><a href="yasmin_ros_serialization.html"
+                >RosSerializePyState / RosDeserializePyState</a
+              >:</strong
+            >
+            Python equivalents of the serialization states, using
+            <code>rclpy.serialization</code> and supporting any installed ROS 2
+            interface type.
           </li>
         </ul>
 

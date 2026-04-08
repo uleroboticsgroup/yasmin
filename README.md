@@ -44,16 +44,17 @@
    - [Python](#python)
    - [Cpp](#cpp)
 4. [Cross-Language ROS Interface Communication](#crosslanguage-ros-interface-communication)
-5. [YASMIN Editor](#yasmin-editor)
-6. [YASMIN Viewer](#yasmin-viewer)
+5. [TF States](#tf-states)
+6. [YASMIN Editor](#yasmin-editor)
+7. [YASMIN Viewer](#yasmin-viewer)
    - [Custom Host and Port](#custom-host-and-port)
-7. [YASMIN CLI](#yasmin-cli)
+8. [YASMIN CLI](#yasmin-cli)
    - [Available Commands](#available-commands)
    - [Usage Examples](#usage-examples)
-8. [YASMIN Factory](#yasmin-factory)
-9. [YASMIN PCL](#yasmin-pcl)
-10. [YASMIN Plugins Manager](#yasmin-plugins-manager)
-11. [Citations](#citations)
+9. [YASMIN Factory](#yasmin-factory)
+10. [YASMIN PCL](#yasmin-pcl)
+11. [YASMIN Plugins Manager](#yasmin-plugins-manager)
+12. [Citations](#citations)
 
 ## Key Features
 
@@ -72,6 +73,7 @@
 - **Plugin Architecture**: Extensible plugin system for registering custom states usable across C++ and Python.
 - **State Metadata**: States and state machines support descriptions and typed input/output blackboard key annotations.
 - **Cross-Language Serialization**: Share ROS interfaces between Python and C++ states via binary serialization.
+- **TF Integration**: `TfBufferState` creates and shares a tf2 buffer and transform listener through the blackboard so all states in the machine can perform coordinate frame lookups.
 
 ## Installation
 
@@ -3757,12 +3759,39 @@ The following types are guaranteed to work between Python and C++:
 ROS messages cannot be directly stored in the blackboard when
 communicating between Python and C++ states. Instead, they should be **serialized into raw bytes**.
 
-YASMIN provides helper utilities in:
+#### Option A — Serialization States
+
+YASMIN provides dedicated states for this in `yasmin_ros`:
+
+| State                    | Language | Direction                              |
+| ------------------------ | -------- | -------------------------------------- |
+| `RosSerializeCppState`   | C++      | ROS interface → `std::vector<uint8_t>` |
+| `RosDeserializeCppState` | C++      | `std::vector<uint8_t>` → ROS interface |
+| `RosSerializePyState`    | Python   | ROS interface → `bytes`                |
+| `RosDeserializePyState`  | Python   | `bytes` → ROS interface                |
+
+All four states read from the blackboard key `input` and write their result to `output`.
+The target interface type is configured through the `interface_type` parameter
+(e.g. `geometry_msgs/msg/Pose`).
+
+```python
+from yasmin_ros import RosSerializePyState, RosDeserializePyState
+
+serialize_state = RosSerializePyState()
+serialize_state.set_parameter("interface_type", "geometry_msgs/msg/Pose")
+serialize_state.configure()
+```
+
+The C++ states are registered as pluginlib plugins (`yasmin_ros/RosSerializeCppState`,
+`yasmin_ros/RosDeserializeCppState`) and can be used directly from XML state machine files.
+
+#### Option B — Low-level helper utilities
+
+YASMIN also exposes low-level serialization utilities in:
 
     yasmin_ros/interface_serialization.hpp
 
-These utilities allow converting ROS interfaces to binary data and
-restoring them later.
+These allow converting ROS interfaces to binary data inline inside a custom state.
 
 ### Example (C++)
 
@@ -3788,6 +3817,106 @@ from geometry_msgs.msg import Pose
 
 pose_bytes = blackboard["pose_bytes"]
 pose = rclpy.serialization.deserialize_message(pose_bytes, Pose)
+```
+
+## TF States
+
+The `TfBufferState` (available in both C++ and Python through `yasmin_ros`) creates a shared
+[tf2](https://wiki.ros.org/tf2) buffer and transform listener and stores them in the YASMIN
+blackboard under the keys `tf_buffer` and `tf_listener`. Subsequent states retrieve these objects
+from the blackboard to perform transform lookups without duplicating listener infrastructure.
+
+### TfBufferState
+
+|                 |                                   |
+| --------------- | --------------------------------- |
+| **Outcomes**    | `succeeded`, `aborted`            |
+| **Output keys** | `tf_buffer`, `tf_listener`        |
+| **Parameters**  | `cache_time_sec` (default `10.0`) |
+| **Plugin name** | `yasmin_ros/TfBufferState`        |
+
+#### Python Example
+
+```python
+import rclpy
+from tf2_ros import Buffer, TransformListener
+
+import yasmin
+from yasmin import Blackboard, State, StateMachine
+from yasmin_ros import TfBufferState, set_ros_loggers
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+
+
+class LookupTransformState(State):
+    def __init__(self):
+        super().__init__([SUCCEED, ABORT])
+
+    def execute(self, blackboard: Blackboard) -> str:
+        tf_buffer: Buffer = blackboard["tf_buffer"]
+        try:
+            t = tf_buffer.lookup_transform("map", "base_link", rclpy.time.Time())
+            yasmin.YASMIN_LOG_INFO(
+                f"x={t.transform.translation.x:.3f} "
+                f"y={t.transform.translation.y:.3f}"
+            )
+            return SUCCEED
+        except Exception as exc:
+            yasmin.YASMIN_LOG_WARN(f"Lookup failed: {exc}")
+            return ABORT
+
+
+def main():
+    rclpy.init()
+    set_ros_loggers()
+
+    tf_state = TfBufferState()
+    tf_state.set_parameter("cache_time_sec", 10.0)
+    tf_state.configure()
+
+    sm = StateMachine(outcomes=["done", "failed"])
+    sm.add_state("INIT_TF", tf_state, {SUCCEED: "LOOKUP", ABORT: "failed"})
+    sm.add_state("LOOKUP", LookupTransformState(), {SUCCEED: "done", ABORT: "failed"})
+
+    outcome = sm()
+    yasmin.YASMIN_LOG_INFO(outcome)
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+#### C++ Example
+
+```cpp
+#include "yasmin_ros/tf_buffer_state.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin/state_machine.hpp"
+#include <tf2_ros/buffer.hpp>
+
+// ... (define your transform-using state)
+
+int main(int argc, char *argv[]) {
+  rclcpp::init(argc, argv);
+
+  auto sm = std::make_shared<yasmin::StateMachine>(
+      std::vector<std::string>{"done", "failed"});
+
+  sm->add_state("INIT_TF",
+                std::make_shared<yasmin_ros::TfBufferState>(),
+                {{yasmin_ros::basic_outcomes::SUCCEED, "LOOKUP"},
+                 {yasmin_ros::basic_outcomes::ABORT, "failed"}});
+
+  // Subsequent states read tf_buffer from the blackboard:
+  //   auto tf_buffer =
+  //       blackboard->get<std::shared_ptr<tf2_ros::Buffer>>("tf_buffer");
+  //   auto transform = tf_buffer->lookupTransform("map", "base_link",
+  //                                               tf2::TimePointZero);
+
+  std::string outcome = (*sm)();
+  rclcpp::shutdown();
+  return 0;
+}
 ```
 
 ## YASMIN Editor
