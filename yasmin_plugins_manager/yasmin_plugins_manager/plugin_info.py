@@ -362,12 +362,9 @@ class PluginInfo:
         instance.output_keys = list(data.get("output_keys", []))
         instance.parameters = list(data.get("parameters", []))
 
-        if instance.plugin_type == "cpp":
-            instance.input_keys = cls._normalize_cpp_metadata_entries(instance.input_keys)
-            instance.output_keys = cls._normalize_cpp_metadata_entries(
-                instance.output_keys
-            )
-            instance.parameters = cls._normalize_cpp_metadata_entries(instance.parameters)
+        instance.input_keys = cls._normalize_cpp_metadata_entries(instance.input_keys)
+        instance.output_keys = cls._normalize_cpp_metadata_entries(instance.output_keys)
+        instance.parameters = cls._normalize_cpp_metadata_entries(instance.parameters)
 
         return instance
 
