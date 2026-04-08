@@ -690,16 +690,21 @@ class Runtime(QObject):
             self._set_active_path(from_path)
             self._current_state_ref = self._resolve_state_reference(from_path)
 
-            active_path = self._expand_to_deepest_known_path(to_path)
-            self._update_shell_state_refs(active_path, from_path)
-
             with self._pause_condition:
                 if self._step_mode:
                     self._step_mode = False
                     self._pause_requested = True
 
+            if self._has_breakpoint(to_path):
+                self._update_shell_state_refs(to_path, from_path)
+                self._set_active_path(to_path)
+                self._current_state_ref = self._resolve_state_reference(to_path)
+                self._request_breakpoint_pause(to_path)
+                self._pause_if_requested()
+
+            active_path = self._expand_to_deepest_known_path(to_path)
+            self._update_shell_state_refs(active_path, from_path)
             self._set_active_path(active_path)
-            self._request_breakpoint_pause(active_path)
             self._pause_if_requested()
         finally:
             bb.set_remappings(remappings)
