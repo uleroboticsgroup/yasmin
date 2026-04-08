@@ -26,7 +26,7 @@ from typing import Any, Dict, Optional
 
 from ament_index_python import get_packages_with_prefixes
 
-CACHE_VERSION = 3
+CACHE_VERSION = 4
 IGNORE_PACKAGES_ENV_VAR = "YASMIN_DISCOVERY_IGNORE_PACKAGES"
 
 

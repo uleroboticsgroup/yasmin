@@ -241,15 +241,27 @@ class StatePropertiesDialog(QDialog):
             buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
+    @staticmethod
+    def _normalize_display_type(type_name: str) -> str:
+        """Normalize metadata type strings for user-facing display."""
+        normalized_type = str(type_name or "").strip()
+        if not normalized_type:
+            return ""
+
+        try:
+            return PluginInfo._normalize_cpp_metadata_type(normalized_type)
+        except Exception:
+            return normalized_type
+
     def _format_key_line(self, key_info: Dict[str, str], is_input: bool) -> str:
         key_name = str(key_info.get("name", "")).strip()
         key_desc = str(key_info.get("description", "")).strip()
-        key_type = str(
+        key_type = self._normalize_display_type(
             key_info.get(
                 "type",
                 key_info.get("default_value_type", key_info.get("default_type", "")),
             )
-        ).strip()
+        )
 
         line = key_name if key_name else "(unnamed)"
 
@@ -271,14 +283,14 @@ class StatePropertiesDialog(QDialog):
     def _format_parameter_line(self, parameter_info: Dict[str, str]) -> str:
         param_name = str(parameter_info.get("name", "")).strip()
         param_desc = str(parameter_info.get("description", "")).strip()
-        param_type = str(
+        param_type = self._normalize_display_type(
             parameter_info.get(
                 "type",
                 parameter_info.get(
                     "default_value_type", parameter_info.get("default_type", "")
                 ),
             )
-        ).strip()
+        )
         line = param_name if param_name else "(unnamed)"
         if param_desc:
             line += f": {param_desc}"
