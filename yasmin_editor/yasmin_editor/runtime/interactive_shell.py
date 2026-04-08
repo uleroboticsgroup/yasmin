@@ -105,6 +105,21 @@ class SafeBlackboardProxy:
     def set_remappings(self, remappings: dict[str, str]) -> None:
         self._require_blackboard().set_remappings(remappings)
 
+    def keys(self):
+        return self._require_blackboard().keys()
+
+    def items(self):
+        return self._require_blackboard().items()
+
+    def values(self):
+        return self._require_blackboard().values()
+
+    def __iter__(self):
+        try:
+            return iter(self._require_blackboard())
+        except Exception:
+            return iter(())
+
     def __contains__(self, key: str) -> bool:
         return self.contains(key)
 
@@ -156,6 +171,9 @@ class SafeBlackboardProxy:
                 "set_remappings",
                 "size",
                 "unwrap",
+                "keys",
+                "items",
+                "values",
             }
         )
 
