@@ -270,6 +270,7 @@ class EditorCanvasMixin:
                     except RuntimeError:
                         continue
 
+        self.update_runtime_breakpoint_markers()
         self.apply_runtime_highlighting()
         self.apply_runtime_transition_highlighting()
 

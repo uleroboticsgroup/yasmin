@@ -20,7 +20,7 @@ from typing import Optional
 
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QBrush, QColor, QPen
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMenu, QMessageBox
 
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -378,6 +378,90 @@ class EditorRuntimeMixin:
             and not runtime.is_finished()
         )
 
+    def _normalize_runtime_breakpoint_path(
+        self, path: tuple[str, ...]
+    ) -> tuple[str, ...]:
+        return tuple(str(item) for item in path if str(item))
+
+    def _current_runtime_breakpoint_parent_path(self) -> tuple[str, ...]:
+        if not self.runtime_mode_enabled:
+            return tuple()
+        return self._get_current_runtime_container_path()
+
+    def _state_node_runtime_breakpoint_path(self, state_node) -> tuple[str, ...]:
+        return self._normalize_runtime_breakpoint_path(
+            self._current_runtime_breakpoint_parent_path() + (str(state_node.name),)
+        )
+
+    def _runtime_breakpoint_marker_tooltip(self, state_path: tuple[str, ...]) -> str:
+        if state_path not in self.runtime_breakpoints_before:
+            return ""
+        return "Breakpoint: break before"
+
+    def update_runtime_breakpoint_markers(self) -> None:
+        for state_node in list(self.state_nodes.values()):
+            if self._is_deleted_graphics_item(state_node):
+                continue
+            marker = getattr(state_node, "set_breakpoint_marker", None)
+            if marker is None:
+                continue
+            state_path = self._state_node_runtime_breakpoint_path(state_node)
+            has_breakpoint = state_path in self.runtime_breakpoints_before
+            marker(has_breakpoint, self._runtime_breakpoint_marker_tooltip(state_path))
+
+    def _sync_runtime_breakpoints_to_backend(self) -> None:
+        runtime = self.runtime
+        if runtime is None:
+            return
+        runtime.set_breakpoints(
+            before_paths=sorted(self.runtime_breakpoints_before),
+        )
+
+    def _toggle_runtime_breakpoint(self, state_node) -> None:
+        state_path = self._state_node_runtime_breakpoint_path(state_node)
+        if not state_path:
+            return
+
+        action_label = (
+            "removed" if state_path in self.runtime_breakpoints_before else "added"
+        )
+        if state_path in self.runtime_breakpoints_before:
+            self.runtime_breakpoints_before.remove(state_path)
+        else:
+            self.runtime_breakpoints_before.add(state_path)
+
+        self._sync_runtime_breakpoints_to_backend()
+        self.refresh_visual_highlighting()
+        self.statusBar().showMessage(
+            f"Breakpoint {action_label}: {' / '.join(state_path)}",
+            3000,
+        )
+
+    def show_runtime_breakpoint_menu(
+        self,
+        state_node,
+        global_pos,
+    ) -> bool:
+        if not self.runtime_mode_enabled:
+            return False
+
+        state_path = self._state_node_runtime_breakpoint_path(state_node)
+        if not state_path:
+            return False
+
+        menu = QMenu(self)
+        before_enabled = state_path in self.runtime_breakpoints_before
+
+        toggle_action = menu.addAction(
+            "Remove Breakpoint" if before_enabled else "Add Breakpoint"
+        )
+
+        action = menu.exec_(global_pos)
+        if action == toggle_action:
+            self._toggle_runtime_breakpoint(state_node)
+            return True
+        return False
+
     def _show_runtime_finish_required_popup(self) -> None:
         QMessageBox.information(
             self,
@@ -410,6 +494,7 @@ class EditorRuntimeMixin:
             return False
 
         self.runtime_mode_enabled = True
+        self._sync_runtime_breakpoints_to_backend()
         self._get_live_runtime_active_path()
         self._get_live_runtime_transition()
         self.render_current_container()

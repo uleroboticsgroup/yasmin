@@ -17,8 +17,8 @@ import math
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Set
 
 from PyQt5.QtCore import QPointF
-from PyQt5.QtGui import QPen
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsTextItem
+from PyQt5.QtGui import QBrush, QPen
+from PyQt5.QtWidgets import QGraphicsEllipseItem, QGraphicsItem, QGraphicsTextItem
 
 from yasmin_editor.editor_gui.colors import PALETTE
 
@@ -104,6 +104,35 @@ class BaseNodeMixin:
     def notify_parent_container_resized(self) -> None:
         if self.parent_container:
             self.parent_container.auto_resize_for_children()
+
+    def initialize_breakpoint_marker(self) -> None:
+        bounds = self.boundingRect()
+        marker_size = 14.0
+        marker_x = bounds.right() - marker_size / 2.0
+        marker_y = bounds.center().y() - marker_size / 2.0
+
+        self.breakpoint_marker = QGraphicsEllipseItem(
+            marker_x,
+            marker_y,
+            marker_size,
+            marker_size,
+            self,
+        )
+        self.breakpoint_marker.setBrush(QBrush(PALETTE.runtime_log_error))
+        self.breakpoint_marker.setPen(QPen(PALETTE.final_outcome_pen, 2))
+        self.breakpoint_marker.setZValue(10.0)
+        self.breakpoint_marker.setVisible(False)
+
+    def set_breakpoint_marker(
+        self,
+        visible: bool,
+        tooltip: str = "",
+    ) -> None:
+        marker = getattr(self, "breakpoint_marker", None)
+        if marker is None:
+            return
+        marker.setVisible(bool(visible))
+        marker.setToolTip(str(tooltip or ""))
 
     def update_selection_pen(
         self,

@@ -89,6 +89,9 @@ class Runtime(QObject):
         self._pause_requested = False
 
         self._step_mode = False
+        self._breakpoint_lock = threading.Lock()
+        self._breakpoints_before: set[tuple[str, ...]] = set()
+        self._pause_status_message: Optional[str] = None
 
         self.logger = RuntimeLogger(
             append_callback=self.log_appended.emit,
@@ -250,6 +253,16 @@ class Runtime(QObject):
         self._start_execution_thread()
         self.status_changed.emit("Runtime started")
 
+    def set_breakpoints(
+        self,
+        before_paths: Iterable[Iterable[str]] = tuple(),
+    ) -> None:
+        """Replace the active breakpoint set used by the runtime worker."""
+        with self._breakpoint_lock:
+            self._breakpoints_before = {
+                tuple(str(item) for item in path) for path in before_paths
+            }
+
     def cancel_state(self) -> None:
         """Request cancellation of the currently active state."""
         if not self.is_ready() or self.is_finished() or self._disposed:
@@ -405,6 +418,7 @@ class Runtime(QObject):
         with self._pause_condition:
             self._step_mode = step_once
             self._pause_requested = False
+            self._pause_status_message = None
             self._pause_condition.notify_all()
         if self._blocked:
             self._set_blocked(False)
@@ -483,12 +497,38 @@ class Runtime(QObject):
                 return
 
             self._set_blocked(True)
-            self.status_changed.emit("Runtime paused")
+            pause_message = self._pause_status_message or "Runtime paused"
+            self.status_changed.emit(pause_message)
 
             while self._pause_requested and not self._shutting_down:
                 self._pause_condition.wait()
 
+            self._pause_status_message = None
+
         self._set_blocked(False)
+
+    def _request_pause(self, status_message: Optional[str] = None) -> None:
+        """Request a runtime pause and optionally override the pause status text."""
+        with self._pause_condition:
+            self._pause_requested = True
+            if status_message:
+                self._pause_status_message = str(status_message)
+
+    def _has_breakpoint(self, state_path: tuple[str, ...]) -> bool:
+        """Return whether a breakpoint exists for the given state path."""
+        normalized = tuple(str(item) for item in state_path)
+        with self._breakpoint_lock:
+            return normalized in self._breakpoints_before
+
+    def _request_breakpoint_pause(self, state_path: tuple[str, ...]) -> bool:
+        """Arm a pause request when a matching breakpoint is reached."""
+        normalized = tuple(str(item) for item in state_path)
+        if not normalized or not self._has_breakpoint(normalized):
+            return False
+
+        state_label = " / ".join(normalized)
+        self._request_pause(f"Paused at breakpoint: {state_label}")
+        return True
 
     def _execute_worker(self) -> None:
         """Run the loaded state machine inside the worker thread."""
@@ -589,6 +629,8 @@ class Runtime(QObject):
         active_path = self._expand_to_deepest_known_path(prefix + (str(start_state),))
         self._set_active_path(active_path)
         self._current_state_ref = self._resolve_state_reference(active_path)
+        self._request_breakpoint_pause(active_path)
+        self._pause_if_requested()
 
     def end_cb(
         self,
@@ -645,6 +687,9 @@ class Runtime(QObject):
             )
             self._set_last_transition((from_path, to_path, str(outcome)))
 
+            self._set_active_path(from_path)
+            self._current_state_ref = self._resolve_state_reference(from_path)
+
             active_path = self._expand_to_deepest_known_path(to_path)
             self._update_shell_state_refs(active_path, from_path)
 
@@ -654,6 +699,7 @@ class Runtime(QObject):
                     self._pause_requested = True
 
             self._set_active_path(active_path)
+            self._request_breakpoint_pause(active_path)
             self._pause_if_requested()
         finally:
             bb.set_remappings(remappings)

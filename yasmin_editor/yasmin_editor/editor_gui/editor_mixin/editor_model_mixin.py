@@ -552,6 +552,7 @@ class EditorModelMixin:
         self.current_runtime_container_path = []
         self.runtime_active_path = tuple()
         self.runtime_last_transition = None
+        self.runtime_breakpoints_before = set()
         self._delete_runtime_snapshot()
         self.clear_runtime_log_view()
         self.refresh_blackboard_keys_list()
