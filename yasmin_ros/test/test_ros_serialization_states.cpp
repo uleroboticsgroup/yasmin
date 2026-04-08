@@ -25,14 +25,20 @@
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin_ros/interface_serialization.hpp"
+#include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/ros_deserialize_cpp_state.hpp"
 #include "yasmin_ros/ros_serialize_cpp_state.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 
 class TestRosSerializationStates : public ::testing::Test {
 protected:
   static void SetUpTestCase() { rclcpp::init(0, nullptr); }
 
-  static void TearDownTestCase() { rclcpp::shutdown(); }
+  static void TearDownTestCase() {
+    yasmin_ros::ROSClientsCache::clear_all();
+    yasmin_ros::YasminNode::destroy_instance();
+    rclcpp::shutdown();
+  }
 };
 
 TEST_F(TestRosSerializationStates,

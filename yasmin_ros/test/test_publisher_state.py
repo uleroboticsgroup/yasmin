@@ -19,6 +19,7 @@ import unittest
 from yasmin_ros import PublisherState
 from yasmin_ros.basic_outcomes import SUCCEED
 from yasmin_ros.ros_clients_cache import ROSClientsCache
+from yasmin_ros.yasmin_node import YasminNode
 
 import rclpy
 from std_msgs.msg import String
@@ -32,6 +33,8 @@ class TestYasminRos(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        ROSClientsCache.clear_all()
+        YasminNode.destroy_instance()
         rclpy.shutdown()
 
     def test_publisher(self):

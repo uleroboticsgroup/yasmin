@@ -13,8 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import atexit
 import uuid
 from threading import Thread, RLock
+
+import yasmin_ros
 
 import rclpy
 from rclpy.node import Node
@@ -61,6 +64,18 @@ class YasminNode(Node):
 
             return YasminNode._instance
 
+    @staticmethod
+    def destroy_instance() -> None:
+        """
+        Destroy the singleton instance if it exists.
+        """
+        with YasminNode._lock:
+            if YasminNode._instance is not None:
+                if yasmin_ros.logger_node is YasminNode._instance:
+                    yasmin_ros.logger_node = None
+                YasminNode._instance.shutdown()
+                YasminNode._instance = None
+
     def __init__(self) -> None:
         """
         Default constructor. Initializes the node with a unique name.
@@ -86,3 +101,21 @@ class YasminNode(Node):
         ## Thread to execute the spinning of the node.
         self._spin_thread: Thread = Thread(target=self._executor.spin)
         self._spin_thread.start()
+
+    def shutdown(self) -> None:
+        """
+        Stop the executor thread and destroy the node.
+        """
+        if self._executor is not None:
+            self._executor.remove_node(self)
+            self._executor.shutdown()
+            self._executor = None
+
+        if self._spin_thread is not None:
+            self._spin_thread.join()
+            self._spin_thread = None
+
+        self.destroy_node()
+
+
+atexit.register(YasminNode.destroy_instance)

@@ -36,6 +36,8 @@ namespace yasmin_ros {
  * custom functionalities for executing specific tasks in a ROS 2 environment.
  */
 class YasminNode : public rclcpp::Node {
+public:
+  using SharedPtr = std::shared_ptr<YasminNode>;
 
 protected:
   /**
@@ -55,7 +57,7 @@ public:
   /**
    * @brief Destructor. Cleans up resources.
    */
-  ~YasminNode() {}
+  ~YasminNode();
 
   /**
    * @brief Deleted assignment operator to enforce singleton pattern.
@@ -71,19 +73,19 @@ public:
    *
    * @return A shared pointer to the singleton instance of YasminNode.
    */
-  static YasminNode::SharedPtr get_instance() {
-    // Ensure ROS 2 is initialized
-    if (!rclcpp::ok()) {
-      rclcpp::init(0, nullptr);
-    }
+  static YasminNode::SharedPtr get_instance();
 
-    // Create the singleton instance if it doesn't exist
-    static YasminNode::SharedPtr instance =
-        YasminNode::SharedPtr(new YasminNode());
-    return instance;
-  }
+  /**
+   * @brief Destroy the singleton instance if it exists.
+   */
+  static void destroy_instance();
 
 private:
+  /**
+   * @brief Stop the executor thread and remove the node from the executor.
+   */
+  void stop_executor();
+
   /// Executor for managing multiple threads.
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"

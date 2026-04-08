@@ -39,7 +39,9 @@
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/tf_buffer_state.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 
 using namespace std::chrono_literals;
 using namespace yasmin_ros;
@@ -99,7 +101,11 @@ class TestTfBufferState : public ::testing::Test {
 protected:
   static void SetUpTestCase() { rclcpp::init(0, nullptr); }
 
-  static void TearDownTestCase() { rclcpp::shutdown(); }
+  static void TearDownTestCase() {
+    yasmin_ros::ROSClientsCache::clear_all();
+    yasmin_ros::YasminNode::destroy_instance();
+    rclcpp::shutdown();
+  }
 };
 
 TEST_F(TestTfBufferState, TestCreatesBufferAndListenerInBlackboard) {

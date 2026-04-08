@@ -111,6 +111,8 @@ protected:
     }
     aux_node.reset();
     executor.reset();
+    yasmin_ros::ROSClientsCache::clear_all();
+    yasmin_ros::YasminNode::destroy_instance();
     rclcpp::shutdown();
   }
 };

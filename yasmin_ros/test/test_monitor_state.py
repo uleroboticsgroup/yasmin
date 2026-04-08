@@ -20,6 +20,8 @@ from threading import Thread
 from yasmin import set_py_loggers
 from yasmin_ros import MonitorState
 from yasmin_ros.basic_outcomes import SUCCEED, TIMEOUT
+from yasmin_ros.yasmin_node import YasminNode
+from yasmin_ros.ros_clients_cache import ROSClientsCache
 
 import rclpy
 from rclpy.node import Node
@@ -56,6 +58,8 @@ class TestYasminRos(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        ROSClientsCache.clear_all()
+        YasminNode.destroy_instance()
         rclpy.shutdown()
 
     def test_monitor_timeout(self):

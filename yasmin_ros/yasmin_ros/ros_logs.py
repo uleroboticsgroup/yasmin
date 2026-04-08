@@ -14,6 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import rclpy
 from rclpy.node import Node
 
 import yasmin
@@ -47,17 +48,23 @@ def ros_log_message(
 
     message = f"[{file}:{function}:{line}] {text}"
 
+    logger = (
+        yasmin_ros.logger_node.get_logger()
+        if yasmin_ros.logger_node is not None
+        else rclpy.logging.get_logger("yasmin_ros")
+    )
+
     if level == yasmin.logs.LogLevel.ERROR:
-        yasmin_ros.logger_node.get_logger().error(message)
+        logger.error(message)
 
     elif level == yasmin.logs.LogLevel.WARN:
-        yasmin_ros.logger_node.get_logger().warn(message)
+        logger.warn(message)
 
     elif level == yasmin.logs.LogLevel.INFO:
-        yasmin_ros.logger_node.get_logger().info(message)
+        logger.info(message)
 
     elif level == yasmin.logs.LogLevel.DEBUG:
-        yasmin_ros.logger_node.get_logger().debug(message)
+        logger.debug(message)
 
 
 def set_ros_loggers(node: Node = None) -> None:
