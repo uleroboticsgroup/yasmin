@@ -68,7 +68,7 @@ class PluginInfo:
             key_type = PluginInfo._normalize_cpp_metadata_type(map_match.group(1))
             value_type = PluginInfo._normalize_cpp_metadata_type(map_match.group(2))
             if key_type == "str" and value_type in {"str", "int", "float", "bool"}:
-                return f"dict[str,{value_type}]"
+                return f"dict[str, {value_type}]"
 
         return canonical_type
 
@@ -306,6 +306,14 @@ class PluginInfo:
         instance.input_keys = list(data.get("input_keys", []))
         instance.output_keys = list(data.get("output_keys", []))
         instance.parameters = list(data.get("parameters", []))
+
+        if instance.plugin_type == "cpp":
+            instance.input_keys = cls._normalize_cpp_metadata_entries(instance.input_keys)
+            instance.output_keys = cls._normalize_cpp_metadata_entries(
+                instance.output_keys
+            )
+            instance.parameters = cls._normalize_cpp_metadata_entries(instance.parameters)
+
         return instance
 
     @property
