@@ -22,7 +22,7 @@ from typing import Any, Callable, Optional
 _MISSING = object()
 
 from PyQt5.QtCore import QObject, Qt, pyqtSignal
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QAbstractItemView, QDialog, QVBoxLayout, QWidget
 
 from yasmin_editor.editor_gui.theme import PALETTE
 from yasmin_editor.editor_gui.theme.qt_style import (
@@ -105,6 +105,21 @@ class SafeBlackboardProxy:
     def set_remappings(self, remappings: dict[str, str]) -> None:
         self._require_blackboard().set_remappings(remappings)
 
+    def keys(self):
+        return self._require_blackboard().keys()
+
+    def items(self):
+        return self._require_blackboard().items()
+
+    def values(self):
+        return self._require_blackboard().values()
+
+    def __iter__(self):
+        try:
+            return iter(self._require_blackboard())
+        except Exception:
+            return iter(())
+
     def __contains__(self, key: str) -> bool:
         return self.contains(key)
 
@@ -156,6 +171,9 @@ class SafeBlackboardProxy:
                 "set_remappings",
                 "size",
                 "unwrap",
+                "keys",
+                "items",
+                "values",
             }
         )
 
@@ -299,6 +317,7 @@ class InteractiveShellManager(QObject):
         if self._dialog is None:
             return
 
+        self._apply_shell_theme()
         self._dialog.restore_window_state()
         show_mode = self._dialog.preferred_show_mode()
         if show_mode == "fullscreen":
@@ -330,6 +349,7 @@ class InteractiveShellManager(QObject):
             active_path=active_path,
             last_transition=last_transition,
         )
+        self._apply_shell_theme()
 
     def close_shell(self) -> None:
         if self._dialog is not None:
@@ -395,6 +415,41 @@ class InteractiveShellManager(QObject):
         widget.setAutoFillBackground(True)
         widget.setPalette(shell_palette)
 
+    def _apply_completion_theme(self, shell_palette, shell_stylesheet: str) -> None:
+        if self._widget is None:
+            return
+
+        completion_widget = getattr(self._widget, "_completion_widget", None)
+        if completion_widget is None:
+            return
+
+        try:
+            completion_widget.setObjectName("qtconsoleCompletionWidget")
+        except Exception:
+            pass
+
+        try:
+            completion_widget.setAutoFillBackground(True)
+            completion_widget.setPalette(shell_palette)
+        except Exception:
+            pass
+
+        try:
+            completion_widget.setStyleSheet(shell_stylesheet)
+        except Exception:
+            pass
+
+        if isinstance(completion_widget, QAbstractItemView):
+            try:
+                completion_widget.viewport().setAutoFillBackground(True)
+                completion_widget.viewport().setPalette(shell_palette)
+            except Exception:
+                pass
+            try:
+                completion_widget.viewport().setStyleSheet(shell_stylesheet)
+            except Exception:
+                pass
+
     def _apply_shell_theme(self) -> None:
         if self._widget is None:
             return
@@ -425,6 +480,25 @@ class InteractiveShellManager(QObject):
                     self._widget._syntax_style_changed()
             except Exception:
                 pass
+
+        for attr_name in ("_control", "_page_control"):
+            control = getattr(self._widget, attr_name, None)
+            if control is None:
+                continue
+            self._apply_widget_palette(control)
+            try:
+                control.setStyleSheet(shell_stylesheet)
+            except Exception:
+                pass
+            try:
+                viewport = control.viewport()
+                viewport.setAutoFillBackground(True)
+                viewport.setPalette(shell_palette)
+                viewport.setStyleSheet(shell_stylesheet)
+            except Exception:
+                pass
+
+        self._apply_completion_theme(shell_palette, shell_stylesheet)
 
         for child in self._widget.findChildren(QWidget):
             self._apply_widget_palette(child)

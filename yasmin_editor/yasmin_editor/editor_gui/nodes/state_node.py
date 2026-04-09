@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 
 from PyQt5.QtCore import QPointF
 from PyQt5.QtGui import QBrush, QFont, QPen
-from PyQt5.QtWidgets import QGraphicsEllipseItem, QGraphicsItem, QGraphicsTextItem
+from PyQt5.QtWidgets import QGraphicsEllipseItem, QGraphicsItem, QGraphicsTextItem, QMenu
 from yasmin_plugins_manager.plugin_info import PluginInfo
 
 from yasmin_editor.editor_gui.colors import PALETTE
@@ -77,6 +77,7 @@ class StateNode(QGraphicsEllipseItem, BaseNodeMixin):
             self.center_text_item(self.type_label, 10)
 
         self.connection_port: ConnectionPort = ConnectionPort(self)
+        self.initialize_breakpoint_marker()
 
     @property
     def name(self) -> str:
@@ -125,6 +126,41 @@ class StateNode(QGraphicsEllipseItem, BaseNodeMixin):
                 event.accept()
                 return
         super().mouseDoubleClickEvent(event)
+
+    def contextMenuEvent(self, event: Any) -> None:
+        if self.scene() and self.scene().views():
+            canvas = self.scene().views()[0]
+            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
+                editor = canvas.editor_ref
+                self.setSelected(True)
+
+                if getattr(editor, "runtime_mode_enabled", False):
+                    if editor.show_runtime_breakpoint_menu(self, event.screenPos()):
+                        event.accept()
+                        return
+
+                if editor.is_read_only_mode():
+                    menu = QMenu()
+                    view_action = menu.addAction("View Properties")
+                    action = menu.exec_(event.screenPos())
+                    if action == view_action:
+                        editor.edit_state()
+                        event.accept()
+                        return
+                else:
+                    menu = QMenu()
+                    edit_action = menu.addAction("Edit Properties")
+                    delete_action = menu.addAction("Delete")
+                    action = menu.exec_(event.screenPos())
+                    if action == edit_action:
+                        editor.edit_state()
+                        event.accept()
+                        return
+                    if action == delete_action:
+                        editor.delete_selected()
+                        event.accept()
+                        return
+        super().contextMenuEvent(event)
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):

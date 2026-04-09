@@ -99,6 +99,7 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
         self.type_label.setFont(type_font)
 
         self.connection_port = ConnectionPort(self)
+        self.initialize_breakpoint_marker()
         self.update_label()
         self.update_visual_elements()
 
@@ -223,25 +224,34 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
         if self.scene() and self.scene().views():
             canvas = self.scene().views()[0]
             if hasattr(canvas, "editor_ref") and canvas.editor_ref:
+                editor = canvas.editor_ref
+                self.setSelected(True)
+
+                if getattr(editor, "runtime_mode_enabled", False):
+                    if editor.show_runtime_breakpoint_menu(self, event.screenPos()):
+                        event.accept()
+                        return
+
                 menu = QMenu()
                 enter_action = menu.addAction("Enter")
                 menu.addSeparator()
-                edit_action = menu.addAction("Edit Properties")
-                delete_action = menu.addAction("Delete")
+                edit_action = menu.addAction(
+                    "View Properties" if editor.is_read_only_mode() else "Edit Properties"
+                )
+                delete_action = (
+                    None if editor.is_read_only_mode() else menu.addAction("Delete")
+                )
                 action = menu.exec_(event.screenPos())
                 if action == enter_action:
-                    self.setSelected(True)
-                    canvas.editor_ref.enter_container(self)
+                    editor.enter_container(self)
                     event.accept()
                     return
                 if action == edit_action:
-                    self.setSelected(True)
-                    canvas.editor_ref.edit_state()
+                    editor.edit_state()
                     event.accept()
                     return
                 if action == delete_action:
-                    self.setSelected(True)
-                    canvas.editor_ref.delete_selected()
+                    editor.delete_selected()
                     event.accept()
                     return
         super().contextMenuEvent(event)

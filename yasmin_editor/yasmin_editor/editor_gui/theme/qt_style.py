@@ -25,6 +25,12 @@ def _css(color) -> str:
     return color.name()
 
 
+def _set_group_color(qt_palette: QPalette, role: QPalette.ColorRole, color) -> None:
+    """Apply a color to all relevant palette groups."""
+    for group in (QPalette.Active, QPalette.Inactive, QPalette.Disabled):
+        qt_palette.setColor(group, role, color)
+
+
 def build_qt_palette(palette: EditorPalette) -> QPalette:
     """Build the Qt application palette for the given editor palette."""
     qt_palette = QPalette()
@@ -54,18 +60,26 @@ def build_qt_palette(palette: EditorPalette) -> QPalette:
 def build_qtconsole_palette(palette: EditorPalette) -> QPalette:
     """Build a dedicated Qt palette for the embedded interactive shell."""
     qt_palette = QPalette()
-    qt_palette.setColor(QPalette.Window, palette.shell_bg)
-    qt_palette.setColor(QPalette.WindowText, palette.shell_text)
-    qt_palette.setColor(QPalette.Base, palette.shell_bg)
-    qt_palette.setColor(QPalette.AlternateBase, palette.shell_bg)
-    qt_palette.setColor(QPalette.Text, palette.shell_text)
-    qt_palette.setColor(QPalette.Button, palette.shell_bg)
-    qt_palette.setColor(QPalette.ButtonText, palette.shell_text)
-    qt_palette.setColor(QPalette.Highlight, palette.shell_selection_bg)
-    qt_palette.setColor(QPalette.HighlightedText, palette.shell_selection_text)
-    qt_palette.setColor(QPalette.ToolTipBase, palette.ui_tooltip_bg)
-    qt_palette.setColor(QPalette.ToolTipText, palette.ui_tooltip_text)
-    qt_palette.setColor(QPalette.PlaceholderText, palette.text_secondary)
+
+    _set_group_color(qt_palette, QPalette.Window, palette.shell_bg)
+    _set_group_color(qt_palette, QPalette.WindowText, palette.shell_text)
+    _set_group_color(qt_palette, QPalette.Base, palette.shell_bg)
+    _set_group_color(qt_palette, QPalette.AlternateBase, palette.ui_panel_alt_bg)
+    _set_group_color(qt_palette, QPalette.Text, palette.shell_text)
+    _set_group_color(qt_palette, QPalette.Button, palette.ui_button_bg)
+    _set_group_color(qt_palette, QPalette.ButtonText, palette.text_primary)
+    _set_group_color(qt_palette, QPalette.ToolTipBase, palette.ui_tooltip_bg)
+    _set_group_color(qt_palette, QPalette.ToolTipText, palette.ui_tooltip_text)
+    _set_group_color(qt_palette, QPalette.Highlight, palette.shell_selection_bg)
+    _set_group_color(qt_palette, QPalette.HighlightedText, palette.shell_selection_text)
+    _set_group_color(qt_palette, QPalette.PlaceholderText, palette.text_secondary)
+    _set_group_color(qt_palette, QPalette.Link, palette.shell_prompt_in)
+    _set_group_color(qt_palette, QPalette.LinkVisited, palette.shell_prompt_out)
+    _set_group_color(qt_palette, QPalette.Light, palette.ui_panel_alt_bg)
+    _set_group_color(qt_palette, QPalette.Mid, palette.shell_border)
+    _set_group_color(qt_palette, QPalette.Dark, palette.shell_border.darker(130))
+    _set_group_color(qt_palette, QPalette.Shadow, palette.shell_border.darker(170))
+
     return qt_palette
 
 
@@ -76,6 +90,20 @@ def build_qtconsole_stylesheet(palette: EditorPalette) -> str:
     shell_border = _css(palette.shell_border)
     selection_bg = _css(palette.shell_selection_bg)
     selection_text = _css(palette.shell_selection_text)
+    panel_bg = _css(palette.ui_panel_bg)
+    panel_alt_bg = _css(palette.ui_panel_alt_bg)
+    button_bg = _css(palette.ui_button_bg)
+    button_hover_bg = _css(palette.ui_button_hover_bg)
+    button_pressed_bg = _css(palette.ui_button_pressed_bg)
+    tooltip_bg = _css(palette.ui_tooltip_bg)
+    tooltip_text = _css(palette.ui_tooltip_text)
+    prompt_in = _css(palette.shell_prompt_in)
+    prompt_out = _css(palette.shell_prompt_out)
+    comment = _css(palette.shell_comment)
+    keyword = _css(palette.shell_keyword)
+    string = _css(palette.shell_string)
+    number = _css(palette.shell_number)
+    error = _css(palette.shell_error)
 
     return f"""
 QWidget {{
@@ -88,29 +116,182 @@ QWidget {{
 QFrame,
 QPlainTextEdit,
 QTextEdit,
+ConsoleWidget,
+JupyterWidget,
+RichJupyterWidget {{
+    background-color: {shell_bg};
+    color: {shell_text};
+    selection-background-color: {selection_bg};
+    selection-color: {selection_text};
+    border: 1px solid {shell_border};
+}}
+
+QPlainTextEdit,
+QTextEdit {{
+    background-clip: padding;
+}}
+
+QAbstractScrollArea,
+QAbstractItemView,
+QListWidget,
+QListView,
+QTreeView {{
+    background-color: {panel_bg};
+    color: {shell_text};
+    selection-background-color: {selection_bg};
+    selection-color: {selection_text};
+    border: 1px solid {shell_border};
+    outline: 0;
+    alternate-background-color: {panel_alt_bg};
+    show-decoration-selected: 1;
+}}
+
+QAbstractItemView::item,
+QListWidget::item,
+QListView::item,
+QTreeView::item {{
+    background-color: transparent;
+    color: {shell_text};
+    padding: 2px 6px;
+}}
+
+QAbstractItemView::item:selected,
+QAbstractItemView::item:selected:active,
+QAbstractItemView::item:selected:!active,
+QListWidget::item:selected,
+QListWidget::item:selected:active,
+QListWidget::item:selected:!active,
+QListView::item:selected,
+QListView::item:selected:active,
+QListView::item:selected:!active,
+QTreeView::item:selected,
+QTreeView::item:selected:active,
+QTreeView::item:selected:!active {{
+    background-color: {selection_bg};
+    color: {selection_text};
+}}
+
+QAbstractItemView::item:hover,
+QListWidget::item:hover,
+QListView::item:hover,
+QTreeView::item:hover {{
+    background-color: {button_hover_bg};
+    color: {shell_text};
+}}
+
 QScrollBar,
 QScrollBar::add-page,
 QScrollBar::sub-page {{
     background-color: {shell_bg};
     color: {shell_text};
-    border-color: {shell_border};
-}}
-
-QPlainTextEdit,
-QTextEdit {{
     border: 1px solid {shell_border};
 }}
 
 QScrollBar:vertical,
 QScrollBar:horizontal {{
+    background-color: {shell_bg};
     border: 1px solid {shell_border};
 }}
 
 QScrollBar::handle:vertical,
 QScrollBar::handle:horizontal {{
-    background-color: {shell_border};
+    background-color: {button_bg};
+    border: 1px solid {shell_border};
     min-height: 18px;
     min-width: 18px;
+}}
+
+QScrollBar::handle:vertical:hover,
+QScrollBar::handle:horizontal:hover {{
+    background-color: {button_hover_bg};
+}}
+
+QScrollBar::handle:vertical:pressed,
+QScrollBar::handle:horizontal:pressed {{
+    background-color: {button_pressed_bg};
+}}
+
+QToolTip {{
+    background-color: {tooltip_bg};
+    color: {tooltip_text};
+    border: 1px solid {shell_border};
+}}
+
+.in-prompt,
+.in-prompt-number {{
+    color: {prompt_in};
+    font-weight: bold;
+}}
+
+.out-prompt,
+.out-prompt-number {{
+    color: {prompt_out};
+    font-weight: bold;
+}}
+
+.error,
+.traceback {{
+    color: {error};
+}}
+
+.inverted {{
+    background-color: {shell_text};
+    color: {shell_bg};
+}}
+
+.c,
+.c1,
+.cm {{
+    color: {comment};
+    font-style: italic;
+}}
+
+.k,
+.kc,
+.kd,
+.kn,
+.kp,
+.kr,
+.kt,
+.o {{
+    color: {keyword};
+    font-weight: bold;
+}}
+
+.s,
+.sa,
+.sb,
+.sc,
+.sd,
+.s2,
+.se,
+.sh,
+.si,
+.sr,
+.ss,
+.sx {{
+    color: {string};
+}}
+
+.m,
+.mb,
+.mf,
+.mh,
+.mi,
+.mo,
+.il {{
+    color: {number};
+}}
+
+.nb,
+.bp {{
+    color: {prompt_in};
+}}
+
+.ne,
+.gr {{
+    color: {error};
+    font-weight: bold;
 }}
 """
 
@@ -153,7 +334,11 @@ def build_qtconsole_syntax_style(palette: EditorPalette):
             Comment: f"italic {comment}",
             Keyword: f"bold {keyword}",
             Operator: keyword,
+            Name: text,
             Name.Builtin: prompt_in,
+            Name.Class: text,
+            Name.Function: text,
+            Name.Exception: error,
             Number: number,
             String: string,
             Generic.Prompt: f"bold {prompt_in}",

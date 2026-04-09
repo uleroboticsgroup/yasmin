@@ -86,6 +86,7 @@ class YasminEditor(
         self.runtime_last_transition: Optional[
             tuple[tuple[str, ...], tuple[str, ...], str]
         ] = None
+        self.runtime_breakpoints_before: set[tuple[str, ...]] = set()
 
         self.runtime = None
         self.runtime_shell = None
