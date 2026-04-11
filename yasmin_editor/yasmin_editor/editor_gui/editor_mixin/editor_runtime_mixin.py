@@ -15,16 +15,45 @@
 
 import os
 import tempfile
-from html import escape
 from typing import Optional
 
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QBrush, QColor, QPen
+from PyQt5.QtGui import QBrush, QPen
 from PyQt5.QtWidgets import QMenu, QMessageBox
 
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
+from yasmin_editor.editor_gui.runtime_breakpoints import (
+    breakpoint_parent_path,
+    breakpoint_tooltip,
+    state_breakpoint_path,
+    toggle_breakpoint_before,
+)
+from yasmin_editor.editor_gui.runtime_shell_context import (
+    build_runtime_shell_context_payload,
+    runtime_shell_allowed,
+    runtime_shell_command_result,
+    runtime_shell_where_text,
+)
+from yasmin_editor.editor_gui.runtime_state import (
+    build_runtime_view_state,
+    current_runtime_container_path,
+    local_runtime_transition,
+    normalize_runtime_path,
+    root_final_transition,
+    runtime_button_states,
+    runtime_state_name_for_container,
+)
+from yasmin_editor.editor_gui.runtime_ui import (
+    format_runtime_log_entry,
+    runtime_canvas_frame_style,
+    runtime_log_view_style,
+    runtime_mode_button_style,
+    runtime_status_badge_colors,
+    runtime_status_badge_style,
+    runtime_toggle_button_style,
+)
 from yasmin_editor.runtime import Runtime
 from yasmin_editor.runtime.interactive_shell import InteractiveShellManager
 
@@ -131,25 +160,15 @@ class EditorRuntimeMixin:
         self,
         outcome: Optional[str],
     ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
-        if not outcome:
-            return None
-
-        active_path = tuple(self.runtime_active_path or tuple())
+        active_path = normalize_runtime_path(self.runtime_active_path)
         if not active_path:
             return None
 
-        root_state_name = str(active_path[0])
-        transitions = self.root_model.transitions.get(root_state_name, [])
-
-        for transition in transitions:
-            if str(transition.target) == str(outcome):
-                return (
-                    (root_state_name,),
-                    (str(outcome),),
-                    str(transition.source_outcome),
-                )
-
-        return None
+        return root_final_transition(
+            root_state_name=str(active_path[0]),
+            transitions_by_state=self.root_model.transitions,
+            outcome=outcome,
+        )
 
     def _schedule_runtime_highlight_refresh(self) -> None:
         if not self.runtime_mode_enabled:
@@ -199,26 +218,7 @@ class EditorRuntimeMixin:
         button.setChecked(checked)
         button.setText(checked_text if checked else unchecked_text)
 
-        if checked:
-            button.setStyleSheet(
-                "QPushButton {"
-                f"background-color: {PALETTE.runtime_mode_button_bg.name()}; "
-                f"color: {PALETTE.runtime_mode_button_text.name()}; "
-                f"border: 2px solid {PALETTE.runtime_canvas_border.name()}; "
-                "font-weight: 700;"
-                "padding: 4px 10px;"
-                "}"
-            )
-        else:
-            button.setStyleSheet(
-                "QPushButton {"
-                f"background-color: {PALETTE.ui_button_bg.name()}; "
-                f"color: {PALETTE.text_primary.name()}; "
-                f"border: 2px solid {PALETTE.ui_border.name()}; "
-                "font-weight: 700;"
-                "padding: 4px 10px;"
-                "}"
-            )
+        button.setStyleSheet(runtime_toggle_button_style(checked))
 
         button.blockSignals(False)
 
@@ -255,43 +255,10 @@ class EditorRuntimeMixin:
         return self.runtime_shell
 
     def _runtime_shell_command_result(self, command_name: str) -> str:
-        runtime = self.runtime
-        if runtime is None:
-            return f"{command_name}: runtime unavailable"
-
-        current_state = runtime.get_current_state()
-        last_state_ref = runtime.get_last_state_ref()
-        last_state_name = getattr(last_state_ref, "name", None)
-        if last_state_name is None and last_state_ref is not None:
-            last_state_name = str(last_state_ref)
-
-        current_label = str(current_state) if current_state is not None else "None"
-        last_label = str(last_state_name) if last_state_name is not None else "None"
-        return (
-            f"{command_name}: status={runtime.get_status_label()}, "
-            f"current_state={current_label}, last_state={last_label}"
-        )
+        return runtime_shell_command_result(self.runtime, command_name)
 
     def _runtime_shell_where(self) -> str:
-        runtime = self.runtime
-        if runtime is None:
-            return "runtime unavailable"
-
-        active_path = " / ".join(runtime.get_active_path() or tuple()) or "<none>"
-        last_transition = runtime.get_last_transition()
-        if last_transition is None:
-            transition_label = "<none>"
-        else:
-            from_path, to_path, outcome = last_transition
-            transition_label = (
-                f"{' / '.join(from_path)} --[{outcome}]--> {' / '.join(to_path)}"
-            )
-
-        return (
-            f"status={runtime.get_status_label()}\n"
-            f"active_path={active_path}\n"
-            f"last_transition={transition_label}"
-        )
+        return runtime_shell_where_text(self.runtime)
 
     def _build_runtime_shell_commands(self) -> dict[str, object]:
         return {
@@ -332,24 +299,17 @@ class EditorRuntimeMixin:
 
     def _refresh_runtime_shell_context(self) -> None:
         shell = getattr(self, "runtime_shell", None)
-        runtime = self.runtime
-        if shell is None or runtime is None:
+        if shell is None:
             return
 
-        bb = getattr(runtime, "bb", None)
-        sm = getattr(runtime, "sm", None)
-        if bb is None or sm is None:
-            return
-
-        shell.update_context(
-            bb=bb,
-            sm=sm,
-            current_state=runtime.get_current_state_ref(),
-            last_state=runtime.get_last_state_ref(),
-            commands=self._build_runtime_shell_commands(),
-            active_path=runtime.get_active_path(),
-            last_transition=runtime.get_last_transition(),
+        payload = build_runtime_shell_context_payload(
+            self.runtime,
+            self._build_runtime_shell_commands(),
         )
+        if payload is None:
+            return
+
+        shell.update_context(**payload)
 
     def _close_runtime_shell(self) -> None:
         shell = getattr(self, "runtime_shell", None)
@@ -381,22 +341,23 @@ class EditorRuntimeMixin:
     def _normalize_runtime_breakpoint_path(
         self, path: tuple[str, ...]
     ) -> tuple[str, ...]:
-        return tuple(str(item) for item in path if str(item))
+        return normalize_runtime_path(path)
 
     def _current_runtime_breakpoint_parent_path(self) -> tuple[str, ...]:
-        if not self.runtime_mode_enabled:
-            return tuple()
-        return self._get_current_runtime_container_path()
+        return breakpoint_parent_path(
+            self.runtime_mode_enabled,
+            self._get_current_runtime_container_path(),
+        )
 
     def _state_node_runtime_breakpoint_path(self, state_node) -> tuple[str, ...]:
-        return self._normalize_runtime_breakpoint_path(
-            self._current_runtime_breakpoint_parent_path() + (str(state_node.name),)
+        return state_breakpoint_path(
+            self.runtime_mode_enabled,
+            self._get_current_runtime_container_path(),
+            getattr(state_node, "name", ""),
         )
 
     def _runtime_breakpoint_marker_tooltip(self, state_path: tuple[str, ...]) -> str:
-        if state_path not in self.runtime_breakpoints_before:
-            return ""
-        return "Breakpoint: break before"
+        return breakpoint_tooltip(state_path, self.runtime_breakpoints_before)
 
     def update_runtime_breakpoint_markers(self) -> None:
         for state_node in list(self.state_nodes.values()):
@@ -419,17 +380,14 @@ class EditorRuntimeMixin:
 
     def _toggle_runtime_breakpoint(self, state_node) -> None:
         state_path = self._state_node_runtime_breakpoint_path(state_node)
-        if not state_path:
+        updated_paths, action_label = toggle_breakpoint_before(
+            self.runtime_breakpoints_before,
+            state_path,
+        )
+        if not action_label:
             return
 
-        action_label = (
-            "removed" if state_path in self.runtime_breakpoints_before else "added"
-        )
-        if state_path in self.runtime_breakpoints_before:
-            self.runtime_breakpoints_before.remove(state_path)
-        else:
-            self.runtime_breakpoints_before.add(state_path)
-
+        self.runtime_breakpoints_before = updated_paths
         self._sync_runtime_breakpoints_to_backend()
         self.refresh_visual_highlighting()
         self.statusBar().showMessage(
@@ -553,13 +511,7 @@ class EditorRuntimeMixin:
 
     def on_runtime_shell_clicked(self) -> None:
         runtime = self.runtime
-        shell_allowed = bool(
-            runtime is not None
-            and runtime.is_ready()
-            and runtime.bb is not None
-            and runtime.sm is not None
-        )
-        if not shell_allowed:
+        if not runtime_shell_allowed(runtime):
             self.statusBar().showMessage(
                 "The interactive shell is available while runtime mode is active and a runtime state machine is loaded.",
                 3000,
@@ -578,15 +530,14 @@ class EditorRuntimeMixin:
             )
             return
 
-        shell.open_shell(
-            bb=runtime.bb,
-            sm=runtime.sm,
-            current_state=runtime.get_current_state_ref(),
-            last_state=runtime.get_last_state_ref(),
-            commands=self._build_runtime_shell_commands(),
-            active_path=runtime.get_active_path(),
-            last_transition=runtime.get_last_transition(),
+        payload = build_runtime_shell_context_payload(
+            runtime,
+            self._build_runtime_shell_commands(),
         )
+        if payload is None:
+            return
+
+        shell.open_shell(**payload)
         self.update_runtime_actions()
 
     def on_runtime_shell_visibility_changed(self, visible: bool) -> None:
@@ -637,73 +588,24 @@ class EditorRuntimeMixin:
             else:
                 border_color = PALETTE.ui_border
             self.canvas_frame.setStyleSheet(
-                f"QFrame {{ border: {border_width}px solid {border_color.name()}; }}"
+                runtime_canvas_frame_style(border_width, border_color)
             )
 
         if hasattr(self, "runtime_mode_button"):
             self.runtime_mode_button.setText(
                 "Runtime Mode Active" if self.runtime_mode_enabled else "Runtime Mode"
             )
-            if self.runtime_mode_enabled:
-                self.runtime_mode_button.setStyleSheet(
-                    "QPushButton {"
-                    f"background-color: {PALETTE.runtime_mode_button_bg.name()}; "
-                    f"color: {PALETTE.runtime_mode_button_text.name()}; "
-                    f"border: 1px solid {PALETTE.runtime_canvas_border.name()};"
-                    "}"
-                )
-            else:
-                self.runtime_mode_button.setStyleSheet("")
+            self.runtime_mode_button.setStyleSheet(
+                runtime_mode_button_style(self.runtime_mode_enabled)
+            )
 
-    def _runtime_status_badge_colors(self, status: str) -> tuple[QColor, QColor, QColor]:
+    def _runtime_status_badge_colors(self, status: str):
         """Return background, foreground and border colors for the runtime badge."""
-        normalized = str(status).strip().lower()
-
-        background = QColor(205, 210, 214)
-        foreground = QColor(28, 31, 36)
-        border = QColor(148, 154, 160)
-
-        if normalized == "running":
-            background = QColor(46, 150, 76)
-            foreground = QColor(255, 255, 255)
-            border = QColor(33, 108, 54)
-        elif normalized == "paused":
-            background = QColor(214, 170, 52)
-            foreground = QColor(24, 24, 24)
-            border = QColor(150, 118, 34)
-        elif normalized == "inactive":
-            background = QColor(145, 149, 156)
-            foreground = QColor(255, 255, 255)
-            border = QColor(103, 108, 115)
-        elif normalized == "ready":
-            background = QColor(224, 228, 232)
-            foreground = QColor(30, 34, 40)
-            border = QColor(172, 178, 184)
-        elif normalized in {"succeeded", "success"}:
-            background = QColor(46, 150, 76)
-            foreground = QColor(255, 255, 255)
-            border = QColor(33, 108, 54)
-        elif normalized in {"aborted", "failed", "failure", "error"}:
-            background = QColor(176, 60, 60)
-            foreground = QColor(255, 255, 255)
-            border = QColor(120, 40, 40)
-
-        return background, foreground, border
+        return runtime_status_badge_colors(status)
 
     def _runtime_status_badge_style(self, status: str) -> str:
         """Return the stylesheet for the runtime status badge."""
-        background, foreground, border = self._runtime_status_badge_colors(status)
-
-        return (
-            "QLabel {"
-            f"background-color: {background.name()}; "
-            f"color: {foreground.name()}; "
-            f"border: 1px solid {border.name()}; "
-            "border-radius: 10px; "
-            "padding: 4px 12px; "
-            "font-weight: 600;"
-            "}"
-        )
+        return runtime_status_badge_style(status)
 
     def _update_runtime_status_badge(self, status: str) -> None:
         """Apply runtime status text and styling to the badge widget."""
@@ -717,60 +619,11 @@ class EditorRuntimeMixin:
 
     def _runtime_log_view_style(self) -> str:
         """Return the stylesheet used by the runtime log view."""
-        return (
-            "QTextBrowser {"
-            f"background-color: {PALETTE.ui_input_bg.name()}; "
-            f"color: {PALETTE.text_primary.name()}; "
-            f"border: 1px solid {PALETTE.ui_border.name()}; "
-            f"selection-background-color: {PALETTE.ui_selection_bg.name()}; "
-            f"selection-color: {PALETTE.ui_selection_text.name()}; "
-            "border-radius: 6px;"
-            "}"
-        )
-
-    def _runtime_log_line_color(self, message: str) -> str:
-        """Return the HTML color used for a runtime log line."""
-        # split removes the tree stucture from the log
-        normalized = "[" + str(message).split("[", 1)[-1].lstrip()
-        if normalized.startswith("[WARN]"):
-            return PALETTE.runtime_log_warn.name()
-        if normalized.startswith("[ERROR]"):
-            return PALETTE.runtime_log_error.name()
-        if normalized.startswith("[STATUS]"):
-            return PALETTE.runtime_log_status.name()
-        if normalized.startswith("[INFO]"):
-            return PALETTE.runtime_log_info.name()
-        if normalized.startswith("[DEBUG]"):
-            return PALETTE.runtime_log_debug.name()
-        if normalized.startswith("[TRANSITION]"):
-            return PALETTE.runtime_log_system.name()
-        if normalized.startswith("[START]"):
-            return PALETTE.runtime_log_system.name()
-        if normalized.startswith("[END]"):
-            return PALETTE.runtime_log_system.name()
-        return PALETTE.runtime_log_default.name()
+        return runtime_log_view_style()
 
     def _format_runtime_log_entry(self, message: str) -> str:
         """Convert a runtime log message into a styled HTML block."""
-        raw_message = str(message)
-        color = self._runtime_log_line_color(raw_message)
-
-        prefix = ""
-        content = raw_message
-        first_bracket_index = raw_message.find("[")
-        if first_bracket_index > 0:
-            prefix = raw_message[:first_bracket_index]
-            content = raw_message[first_bracket_index:]
-
-        return (
-            '<div style="'
-            "font-family: 'DejaVu Sans Mono', 'Courier New', monospace; "
-            "white-space: pre; "
-            'margin: 0;">'
-            f'<span style="color: {PALETTE.text_primary.name()};">{escape(prefix)}</span>'
-            f'<span style="color: {color};">{escape(content)}</span>'
-            "</div>"
-        )
+        return format_runtime_log_entry(message)
 
     def _sync_runtime_log_level_combo(self) -> None:
         """Keep the runtime log-level selector aligned with the backend state."""
@@ -864,15 +717,11 @@ class EditorRuntimeMixin:
 
     def update_runtime_actions(self) -> None:
         runtime = self.runtime
-        runtime_ready = (
-            self.runtime_mode_enabled and runtime is not None and runtime.is_ready()
+        runtime_state = build_runtime_view_state(
+            runtime_mode_enabled=self.runtime_mode_enabled,
+            runtime=runtime,
+            shell_execution_blocked=self._runtime_shell_execution_blocked(),
         )
-        runtime_running = runtime_ready and runtime.is_running()
-        runtime_blocked = runtime_running and runtime.is_blocked()
-        runtime_playing = runtime_running and not runtime_blocked
-        runtime_step_mode = runtime_running and runtime.is_step_mode()
-        runtime_finished = runtime_ready and runtime.is_finished()
-        runtime_shell_open = self._runtime_shell_execution_blocked()
 
         self._set_runtime_mode_button_checked(self.runtime_mode_enabled)
         self.set_canvas_runtime_visual_state()
@@ -887,42 +736,15 @@ class EditorRuntimeMixin:
 
         self._sync_runtime_log_level_combo()
 
-        runtime_button_visibility = {
-            "runtime_play_button": runtime_ready
-            and not runtime_playing
-            and not runtime_finished,
-            "runtime_pause_button": runtime_playing and not runtime_step_mode,
-            "runtime_step_button": runtime_ready
-            and not runtime_playing
-            and not runtime_finished,
-            "runtime_cancel_state_button": runtime_running and not runtime_finished,
-            "runtime_cancel_sm_button": runtime_running and not runtime_finished,
-            "runtime_restart_button": runtime_finished,
-        }
-        for button_name, visible in runtime_button_visibility.items():
+        for button_name, button_state in runtime_button_states(runtime_state).items():
             button = getattr(self, button_name, None)
-            if button is not None:
-                enabled = visible
-                if button_name in {
-                    "runtime_play_button",
-                    "runtime_step_button",
-                }:
-                    enabled = visible and not runtime_shell_open
-                button.setVisible(visible)
-                button.setEnabled(enabled)
+            if button is None:
+                continue
+            button.setVisible(button_state.visible)
+            button.setEnabled(button_state.enabled)
 
         self._set_runtime_cancel_sm_button_checked(False)
-
-        auto_follow_button = getattr(self, "runtime_auto_follow_button", None)
-        if auto_follow_button is not None:
-            auto_follow_button.setVisible(self.runtime_mode_enabled)
-            auto_follow_button.setEnabled(runtime_ready)
-            self._set_runtime_auto_follow_button_checked(self.runtime_auto_follow_enabled)
-
-        shell_button = getattr(self, "runtime_shell_button", None)
-        if shell_button is not None:
-            shell_button.setVisible(self.runtime_mode_enabled)
-            shell_button.setEnabled(self.runtime_mode_enabled)
+        self._set_runtime_auto_follow_button_checked(self.runtime_auto_follow_enabled)
 
         for action_name in [
             "new_action",
@@ -931,6 +753,8 @@ class EditorRuntimeMixin:
             action = getattr(self, action_name, None)
             if action is not None:
                 action.setEnabled(not self.runtime_mode_enabled)
+
+        self.update_editor_action_states()
 
     def _follow_runtime_active_state(self) -> None:
         if not self.runtime_mode_enabled or not self.runtime_auto_follow_enabled:
@@ -957,57 +781,40 @@ class EditorRuntimeMixin:
             self.enter_container(container_node, show_status_message=False)
 
     def _get_current_runtime_container_path(self) -> tuple[str, ...]:
-        if self.current_runtime_container_path:
-            return tuple(self.current_runtime_container_path)
-        return tuple(str(container.name) for container in self.current_container_path[1:])
+        return current_runtime_container_path(
+            explicit_path=self.current_runtime_container_path,
+            current_container_path=self.current_container_path,
+        )
 
     def _get_runtime_state_name_for_current_container(self) -> Optional[str]:
         if not self.runtime_mode_enabled:
             return None
 
-        active_path = self._get_live_runtime_active_path()
-        if not active_path:
-            return None
-
-        current_path = self._get_current_runtime_container_path()
-        if len(current_path) >= len(active_path):
-            return None
-
-        if active_path[: len(current_path)] != current_path:
-            return None
-
-        return active_path[len(current_path)]
+        return runtime_state_name_for_container(
+            active_path=self._get_live_runtime_active_path(),
+            current_path=self._get_current_runtime_container_path(),
+        )
 
     def _find_runtime_connection_for_current_container(
         self,
     ) -> Optional[ConnectionLine]:
-        transition = self._get_live_runtime_transition()
-        if not self.runtime_mode_enabled or not transition:
+        if not self.runtime_mode_enabled:
             return None
 
-        from_path, to_path, outcome = transition
-        current_path = self._get_current_runtime_container_path()
-        expected_depth = len(current_path) + 1
-
-        if len(from_path) != expected_depth or len(to_path) != expected_depth:
+        local_transition = local_runtime_transition(
+            transition=self._get_live_runtime_transition(),
+            current_path=self._get_current_runtime_container_path(),
+        )
+        if local_transition is None:
             return None
-
-        if from_path[: len(current_path)] != current_path:
-            return None
-
-        if to_path[: len(current_path)] != current_path:
-            return None
-
-        from_name = from_path[len(current_path)]
-        to_name = to_path[len(current_path)]
 
         for connection in list(self.connections):
             if self._is_deleted_connection_item(connection):
                 continue
             if (
-                getattr(connection.from_node, "name", None) == from_name
-                and getattr(connection.to_node, "name", None) == to_name
-                and connection.outcome == outcome
+                getattr(connection.from_node, "name", None) == local_transition.from_name
+                and getattr(connection.to_node, "name", None) == local_transition.to_name
+                and connection.outcome == local_transition.outcome
             ):
                 return connection
 

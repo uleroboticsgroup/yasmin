@@ -398,32 +398,45 @@ QToolBar#yasminEditorToolbar {{
     color: {text_primary};
     border-color: {border};
     border-bottom: 1px solid {border};
-    spacing: 0px;
-    padding: 0px;
+    spacing: 2px;
+    padding: 4px 6px;
 }}
 
 QToolBar#yasminEditorToolbar::separator {{
     background: transparent;
     width: 1px;
-    margin: 6px 6px;
+    margin: 4px 8px;
     border-left: 1px solid {border};
 }}
 
 QToolBar#yasminEditorToolbar QToolButton {{
     background-color: transparent;
     color: {text_primary};
-    border: none;
-    padding: 4px 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 5px 10px;
     margin: 0px;
 }}
 
 QToolBar#yasminEditorToolbar QToolButton:hover {{
     background-color: {button_hover_bg};
+    border-color: {border};
 }}
 
 QToolBar#yasminEditorToolbar QToolButton:pressed,
 QToolBar#yasminEditorToolbar QToolButton:checked {{
     background-color: {button_pressed_bg};
+    border-color: {border};
+}}
+
+QToolBar#yasminEditorToolbar QToolButton::menu-indicator {{
+    subcontrol-origin: padding;
+    subcontrol-position: right center;
+    width: 10px;
+}}
+
+QToolBar#yasminEditorToolbar QToolButton:disabled {{
+    color: {text_secondary};
 }}
 
 QStatusBar {{

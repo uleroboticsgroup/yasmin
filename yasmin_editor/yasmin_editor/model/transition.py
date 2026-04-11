@@ -27,3 +27,4 @@ class Transition:
 
     source_outcome: str
     target: str
+    target_instance_id: str = ""

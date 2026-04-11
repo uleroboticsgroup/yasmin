@@ -32,6 +32,7 @@ from PyQt5.QtWidgets import (
 def build_left_panel(editor) -> QWidget:
     """Create the complete left panel."""
     left_panel = QWidget()
+    left_panel.setMinimumWidth(0)
     left_layout = QVBoxLayout(left_panel)
 
     editor.blackboard_widget = build_blackboard_widget(editor)

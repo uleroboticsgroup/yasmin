@@ -15,6 +15,8 @@
 
 from __future__ import annotations
 
+"""Adapter that keeps the Qt editor scene and the pure model in sync."""
+
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -22,8 +24,17 @@ from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNo
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
+from yasmin_editor.editor_gui.scene_renderer import (
+    SceneRenderContext,
+    create_final_outcome_view,
+    create_state_view,
+    create_text_block_view,
+    ensure_outcome_placements,
+    render_container_scene,
+)
 from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.layout import OutcomePlacement, Position
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
@@ -42,12 +53,31 @@ class EditorModelAdapter:
     def create_empty_root_model(self) -> StateMachine:
         return StateMachine(name="")
 
-    def load_from_xml(self, file_path: str) -> StateMachine:
-        model = model_from_xml(Path(file_path))
+    def apply_root_model(
+        self,
+        model: StateMachine,
+        *,
+        current_file_path: str | None = None,
+        fit_view: bool = False,
+        reset_history: bool = True,
+    ) -> StateMachine:
+        """Replace the current editor contents with the provided root model."""
+
         self.editor.reset_editor_state(model)
         self.editor.set_blackboard_keys(self.editor.keys_to_dicts(model.keys), sync=False)
-        self.editor.render_current_container()
+        self.editor.current_file_path = current_file_path
+        self.editor.render_current_container(fit_view=fit_view)
+        if reset_history:
+            self.editor.reset_history()
         return model
+
+    def load_from_xml(self, file_path: str) -> StateMachine:
+        model = model_from_xml(Path(file_path))
+        return self.apply_root_model(
+            model,
+            current_file_path=file_path,
+            fit_view=True,
+        )
 
     def save_to_xml(self, file_path: str) -> str:
         self.sync_root_model_from_ui()
@@ -59,46 +89,27 @@ class EditorModelAdapter:
     def sync_root_model_from_ui(self) -> None:
         self.editor.sync_current_container_layout()
 
+    def _build_main_scene_context(self) -> SceneRenderContext:
+        return SceneRenderContext(
+            scene=self.editor.canvas.scene,
+            state_nodes=self.editor.state_nodes,
+            final_outcomes=self.editor.final_outcomes,
+            connections=self.editor.connections,
+            text_blocks=self.editor.text_blocks,
+            clear_scene=self.editor.clear_current_scene,
+            register_state_node=lambda node: self.editor.register_state_node(node),
+            resolve_plugin_info=self.editor.resolve_plugin_info_for_model,
+            resolve_target_view=lambda target_name, instance_id: self.editor.find_target_view(
+                target_name,
+                target_instance_id=instance_id,
+            ),
+            resolve_primary_outcome_view=self.editor.get_primary_final_outcome_view,
+            create_connection_view=self.editor._create_connection_view,
+            ensure_outcome_placements=ensure_outcome_placements,
+        )
+
     def rebuild_scene(self, model: StateMachine | Concurrence) -> None:
-        self.editor.clear_current_scene()
-
-        for text_block in model.text_blocks:
-            self.create_text_block_view(text_block)
-
-        for state in model.states.values():
-            self.create_state_view(state)
-
-        for outcome in model.outcomes:
-            self.create_final_outcome_view(outcome)
-
-        if isinstance(model, StateMachine):
-            for owner_name, transitions in model.transitions.items():
-                if owner_name not in model.states:
-                    continue
-                from_view = self.editor.state_nodes.get(owner_name)
-                if from_view is None:
-                    continue
-                for transition in transitions:
-                    target_view = self.editor.find_target_view(transition.target)
-                    if target_view is None:
-                        continue
-                    self.editor._create_connection_view(
-                        from_view,
-                        target_view,
-                        transition.source_outcome,
-                    )
-        else:
-            for outcome_name, mapping in model.outcome_map.items():
-                to_view = self.editor.final_outcomes.get(outcome_name)
-                if to_view is None:
-                    continue
-                for state_name, source_outcome in mapping.items():
-                    from_view = self.editor.state_nodes.get(state_name)
-                    if from_view is None:
-                        continue
-                    self.editor._create_connection_view(
-                        from_view, to_view, source_outcome
-                    )
+        render_container_scene(model, self._build_main_scene_context())
 
     def create_state_view(
         self,
@@ -113,56 +124,13 @@ class EditorModelAdapter:
         if y is None:
             y = pos.y if pos is not None else self.editor.get_free_position().y()
 
-        if isinstance(state_model, StateMachine):
-            node = ContainerStateNode(
-                state_model.name,
-                x,
-                y,
-                False,
-                description=state_model.description,
-                defaults=[],
-                model=state_model,
-            )
-        elif isinstance(state_model, Concurrence):
-            node = ContainerStateNode(
-                state_model.name,
-                x,
-                y,
-                True,
-                description=state_model.description,
-                defaults=[],
-                model=state_model,
-            )
-        else:
-            plugin_info = self.editor.resolve_plugin_info_for_model(state_model)
-            if not state_model.outcomes:
-                for outcome_name in list(getattr(plugin_info, "outcomes", []) or []):
-                    state_model.add_outcome(Outcome(name=outcome_name))
-            if state_model.state_type == "xml":
-                node = ContainerStateNode(
-                    state_model.name,
-                    x,
-                    y,
-                    False,
-                    description=state_model.description,
-                    defaults=[],
-                    model=state_model,
-                    state_kind_label="XML",
-                    is_xml_reference=True,
-                )
-                node.plugin_info = plugin_info
-            else:
-                node = StateNode(
-                    state_model.name,
-                    plugin_info,
-                    x,
-                    y,
-                    description=state_model.description,
-                    defaults=[],
-                    model=state_model,
-                )
-
-        self.editor.canvas.scene.addItem(node)
+        node = create_state_view(
+            self.editor.canvas.scene,
+            state_model,
+            resolve_plugin_info=self.editor.resolve_plugin_info_for_model,
+            x=x,
+            y=y,
+        )
         self.editor.register_state_node(node)
         return node
 
@@ -172,42 +140,69 @@ class EditorModelAdapter:
         x: float | None = None,
         y: float | None = None,
     ) -> TextBlockNode:
-        if x is None:
-            x = text_block_model.x
-        if y is None:
-            y = text_block_model.y
-
-        node = TextBlockNode(
-            x=float(x),
-            y=float(y),
-            content=text_block_model.content,
-            model=text_block_model,
+        node = create_text_block_view(
+            self.editor.canvas.scene,
+            text_block_model,
+            read_only=False,
+            x=x,
+            y=y,
         )
-        self.editor.canvas.scene.addItem(node)
         self.editor.text_blocks.append(node)
         return node
 
     def create_final_outcome_view(
         self,
         outcome_model: Outcome,
+        x: float,
+        y: float,
+        instance_id: str,
+    ) -> FinalOutcomeNode:
+        placement = OutcomePlacement(
+            instance_id=instance_id,
+            outcome_name=outcome_model.name,
+            position=Position(x, y),
+        )
+        node = create_final_outcome_view(
+            self.editor.canvas.scene, outcome_model, placement
+        )
+        self.editor.final_outcomes[node.instance_id] = node
+        return node
+
+    def create_final_outcome_views(
+        self,
+        outcome_model: Outcome,
         x: float | None = None,
         y: float | None = None,
-    ) -> FinalOutcomeNode:
+    ) -> list[FinalOutcomeNode]:
         container_model = self.editor.current_container_model
-        pos = container_model.layout.get_outcome_position(outcome_model.name)
-        if x is None:
-            x = pos.x if pos is not None else 700.0
-        if y is None:
-            y = pos.y if pos is not None else (len(self.editor.final_outcomes) * 170.0)
+        placements = container_model.layout.get_outcome_placements(outcome_model.name)
+        if not placements:
+            pos = container_model.layout.get_outcome_position(outcome_model.name)
+            if x is None:
+                x = pos.x if pos is not None else 700.0
+            if y is None:
+                y = (
+                    pos.y
+                    if pos is not None
+                    else (len(self.editor.final_outcomes) * 170.0)
+                )
+            instance_id = container_model.layout.create_outcome_alias(
+                outcome_model.name,
+                float(x),
+                float(y),
+            )
+            placement = container_model.layout.get_outcome_placement(instance_id)
+            placements = [placement] if placement is not None else []
 
-        node = FinalOutcomeNode(
-            outcome_model.name,
-            x,
-            y,
-            inside_container=True,
-            description=outcome_model.description,
-            model=outcome_model,
-        )
-        self.editor.canvas.scene.addItem(node)
-        self.editor.final_outcomes[node.name] = node
-        return node
+        created_nodes: list[FinalOutcomeNode] = []
+        for placement in placements:
+            if placement is None or placement.instance_id in self.editor.final_outcomes:
+                continue
+            node = create_final_outcome_view(
+                self.editor.canvas.scene,
+                outcome_model,
+                placement,
+            )
+            self.editor.final_outcomes[node.instance_id] = node
+            created_nodes.append(node)
+        return created_nodes

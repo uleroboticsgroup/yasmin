@@ -13,81 +13,60 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
+"""Builders for the compact runtime control strip shown in runtime mode."""
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
+from yasmin_editor.editor_gui.ui.runtime_specs import (
+    RUNTIME_BUTTON_SPECS,
+    RUNTIME_STATUS_LABEL_MIN_WIDTH,
+    RUNTIME_STATUS_LABEL_TEXT,
+    RuntimeButtonSpec,
+)
+
+
+def _build_runtime_status_label(editor) -> QLabel:
+    """Create the runtime status label shown at the beginning of the bar."""
+
+    editor.runtime_status_label = QLabel(RUNTIME_STATUS_LABEL_TEXT)
+    editor.runtime_status_label.setAlignment(Qt.AlignCenter)
+    editor.runtime_status_label.setMinimumWidth(RUNTIME_STATUS_LABEL_MIN_WIDTH)
+    editor.runtime_status_label.setTextFormat(Qt.PlainText)
+    return editor.runtime_status_label
+
+
+def _build_runtime_button(editor, spec: RuntimeButtonSpec) -> QPushButton:
+    """Create one runtime control button from its declarative specification."""
+
+    button = QPushButton(spec.text)
+    button.setToolTip(spec.tooltip)
+    button.setCheckable(spec.checkable)
+    if spec.checkable:
+        button.setChecked(spec.checked)
+    button.clicked.connect(getattr(editor, spec.callback_name))
+    setattr(editor, spec.attribute_name, button)
+    return button
+
 
 def build_runtime_controls_widget(editor) -> QWidget:
-    """Create the runtime control bar."""
+    """Create the runtime control bar.
+
+    The runtime controls intentionally keep their original order so the runtime
+    workflow stays familiar while the surrounding UI code becomes smaller and
+    easier to maintain.
+    """
+
     widget = QWidget()
     editor.runtime_controls_layout = QHBoxLayout(widget)
     editor.runtime_controls_layout.setContentsMargins(0, 0, 0, 0)
 
-    editor.runtime_status_label = QLabel("Ready")
-    editor.runtime_status_label.setAlignment(Qt.AlignCenter)
-    editor.runtime_status_label.setMinimumWidth(120)
-    editor.runtime_status_label.setTextFormat(Qt.PlainText)
-    editor.runtime_controls_layout.addWidget(editor.runtime_status_label)
+    editor.runtime_controls_layout.addWidget(_build_runtime_status_label(editor))
 
-    editor.runtime_play_button = QPushButton("Play")
-    editor.runtime_play_button.setToolTip(
-        "Start the runtime or resume execution after a pause."
-    )
-    editor.runtime_play_button.clicked.connect(editor.on_runtime_play_clicked)
-    editor.runtime_controls_layout.addWidget(editor.runtime_play_button)
-
-    editor.runtime_pause_button = QPushButton("Request Pause")
-    editor.runtime_pause_button.setToolTip("Pause at next transition.")
-    editor.runtime_pause_button.clicked.connect(editor.on_runtime_pause_clicked)
-    editor.runtime_controls_layout.addWidget(editor.runtime_pause_button)
-
-    editor.runtime_step_button = QPushButton("Play Once")
-    editor.runtime_step_button.setToolTip(
-        "Execute exactly one state and pause before the following state starts."
-    )
-    editor.runtime_step_button.clicked.connect(editor.on_runtime_step_clicked)
-    editor.runtime_controls_layout.addWidget(editor.runtime_step_button)
-
-    editor.runtime_cancel_state_button = QPushButton("Cancel State")
-    editor.runtime_cancel_state_button.setToolTip(
-        "Request cancellation of the currently active state."
-    )
-    editor.runtime_cancel_state_button.clicked.connect(
-        editor.on_runtime_cancel_state_clicked
-    )
-    editor.runtime_controls_layout.addWidget(editor.runtime_cancel_state_button)
-
-    editor.runtime_cancel_sm_button = QPushButton("Cancel State Machine")
-    editor.runtime_cancel_sm_button.setToolTip(
-        "Request cancellation of the complete runtime state machine."
-    )
-    editor.runtime_cancel_sm_button.clicked.connect(editor.on_runtime_cancel_sm_clicked)
-    editor.runtime_controls_layout.addWidget(editor.runtime_cancel_sm_button)
-
-    editor.runtime_restart_button = QPushButton("Restart")
-    editor.runtime_restart_button.setToolTip(
-        "Recreate the runtime state machine from a fresh XML snapshot."
-    )
-    editor.runtime_restart_button.clicked.connect(editor.restart_runtime_mode)
-    editor.runtime_controls_layout.addWidget(editor.runtime_restart_button)
-
-    editor.runtime_auto_follow_button = QPushButton("Auto Follow: ON")
-    editor.runtime_auto_follow_button.setCheckable(True)
-    editor.runtime_auto_follow_button.setChecked(True)
-    editor.runtime_auto_follow_button.setToolTip(
-        "Automatically navigate into nested state machines so the active state remains visible."
-    )
-    editor.runtime_auto_follow_button.clicked.connect(
-        editor.on_runtime_auto_follow_toggled
-    )
-    editor.runtime_controls_layout.addWidget(editor.runtime_auto_follow_button)
-
-    editor.runtime_shell_button = QPushButton("Interactive Shell")
-    editor.runtime_shell_button.setToolTip(
-        "Open an interactive shell with access to bb, sm, current_state, and last_state. The shell stays available during execution. Recommendation: avoid modifying the blackboard while the runtime is running."
-    )
-    editor.runtime_shell_button.clicked.connect(editor.on_runtime_shell_clicked)
-    editor.runtime_controls_layout.addWidget(editor.runtime_shell_button)
+    for spec in RUNTIME_BUTTON_SPECS:
+        editor.runtime_controls_layout.addWidget(_build_runtime_button(editor, spec))
 
     editor.runtime_controls_layout.addStretch()
     return widget

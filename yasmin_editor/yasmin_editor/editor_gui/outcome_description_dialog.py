@@ -13,43 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Optional
+from importlib import import_module
 
-from PyQt5.QtWidgets import (
-    QDialog,
-    QDialogButtonBox,
-    QFormLayout,
-    QLabel,
-    QTextEdit,
-)
+__all__ = ["OutcomeDescriptionDialog"]
 
 
-class OutcomeDescriptionDialog(QDialog):
-    """Dialog for editing a final outcome description."""
-
-    def __init__(
-        self,
-        outcome_name: str,
-        description: str = "",
-        parent: Optional[QDialog] = None,
-    ) -> None:
-        super().__init__(parent)
-        self.setWindowTitle("Edit Outcome Description")
-        self.resize(500, 260)
-
-        layout = QFormLayout(self)
-
-        self.name_label = QLabel(outcome_name)
-        layout.addRow("Outcome:", self.name_label)
-
-        self.description_edit = QTextEdit()
-        self.description_edit.setPlainText(description)
-        layout.addRow("Description:", self.description_edit)
-
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
-
-    def get_description(self) -> str:
-        return self.description_edit.toPlainText().strip()
+def __getattr__(name: str):
+    if name == "OutcomeDescriptionDialog":
+        module = import_module(
+            "yasmin_editor.editor_gui.dialogs.outcome_description_dialog"
+        )
+        return module.OutcomeDescriptionDialog
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

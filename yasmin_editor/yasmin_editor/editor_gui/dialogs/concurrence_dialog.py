@@ -19,9 +19,7 @@ from typing import Dict, List, Optional, Tuple
 
 from PyQt5.QtWidgets import QComboBox, QDialog, QLabel
 
-from yasmin_editor.editor_gui.dialogs.container_dialog_base import (
-    ContainerDialogBase,
-)
+from yasmin_editor.editor_gui.dialogs.container_dialog_base import ContainerDialogBase
 
 
 class ConcurrenceDialog(ContainerDialogBase):

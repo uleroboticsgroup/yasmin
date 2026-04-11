@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 from typing import Dict, List, Optional, Tuple
 
 from PyQt5.QtCore import Qt
@@ -33,11 +32,19 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from yasmin_plugins_manager.plugin_info import PluginInfo
+
 from yasmin_editor.editor_gui.dialogs.parameter_overwrite_dialog import (
     ParameterOverwriteDialog,
 )
-
-from yasmin_plugins_manager.plugin_info import PluginInfo
+from yasmin_editor.editor_gui.state_properties_logic import (
+    build_description_text,
+    collect_parameter_overwrites,
+    collect_remappings,
+    declared_state_parameters,
+    plugin_entries_for_type,
+    resolve_outcomes,
+)
 
 
 class StatePropertiesDialog(QDialog):
@@ -219,7 +226,7 @@ class StatePropertiesDialog(QDialog):
 
         if self._container_kind or not self.plugin_combo.currentData():
             self.description_edit.setPlainText(
-                self._build_description_text(
+                build_description_text(
                     None,
                     fallback_description=self._base_description,
                     fallback_outcomes=self._fallback_outcomes,
@@ -241,141 +248,11 @@ class StatePropertiesDialog(QDialog):
             buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-    @staticmethod
-    def _normalize_display_type(type_name: str) -> str:
-        """Normalize metadata type strings for user-facing display."""
-        normalized_type = str(type_name or "").strip()
-        if not normalized_type:
-            return ""
-
-        try:
-            return PluginInfo._normalize_cpp_metadata_type(normalized_type)
-        except Exception:
-            return normalized_type
-
-    def _format_key_line(self, key_info: Dict[str, str], is_input: bool) -> str:
-        key_name = str(key_info.get("name", "")).strip()
-        key_desc = str(key_info.get("description", "")).strip()
-        key_type = self._normalize_display_type(
-            key_info.get(
-                "type",
-                key_info.get("default_value_type", key_info.get("default_type", "")),
-            )
-        )
-
-        line = key_name if key_name else "(unnamed)"
-
-        if key_desc:
-            line += f": {key_desc}"
-
-        if is_input and key_info.get("has_default"):
-            default_value = str(key_info.get("default_value", "")).strip()
-            line += f" Default: {default_value}"
-        elif is_input and key_info.get("default_value") not in (None, ""):
-            default_value = str(key_info.get("default_value", "")).strip()
-            line += f" Default: {default_value}"
-
-        if key_type:
-            line += f" ({key_type})"
-
-        return line
-
-    def _format_parameter_line(self, parameter_info: Dict[str, str]) -> str:
-        param_name = str(parameter_info.get("name", "")).strip()
-        param_desc = str(parameter_info.get("description", "")).strip()
-        param_type = self._normalize_display_type(
-            parameter_info.get(
-                "type",
-                parameter_info.get(
-                    "default_value_type", parameter_info.get("default_type", "")
-                ),
-            )
-        )
-        line = param_name if param_name else "(unnamed)"
-        if param_desc:
-            line += f": {param_desc}"
-        if parameter_info.get("has_default"):
-            line += f" Default: {str(parameter_info.get('default_value', '')).strip()}"
-        elif parameter_info.get("default_value") not in (None, ""):
-            line += f" Default: {str(parameter_info.get('default_value', '')).strip()}"
-        if param_type:
-            line += f" ({param_type})"
-        return line
-
-    def _build_description_text(
-        self,
-        plugin_info: Optional[PluginInfo],
-        fallback_description: str = "",
-        fallback_outcomes: Optional[List[str]] = None,
-        fallback_parameters: Optional[List[Dict[str, str]]] = None,
-        fallback_input_keys: Optional[List[Dict[str, str]]] = None,
-        fallback_output_keys: Optional[List[Dict[str, str]]] = None,
-    ) -> str:
-        if plugin_info:
-            base_description = str(getattr(plugin_info, "description", "") or "").strip()
-            input_keys = list(getattr(plugin_info, "input_keys", []) or [])
-            output_keys = list(getattr(plugin_info, "output_keys", []) or [])
-            parameters = list(getattr(plugin_info, "parameters", []) or [])
-            outcomes = list(getattr(plugin_info, "outcomes", []) or [])
-            outcome_descriptions = dict(
-                getattr(plugin_info, "outcome_descriptions", {}) or {}
-            )
-        else:
-            base_description = fallback_description.strip()
-            input_keys = list(fallback_input_keys or [])
-            output_keys = list(fallback_output_keys or [])
-            parameters = list(fallback_parameters or [])
-            outcomes = list(fallback_outcomes or [])
-            outcome_descriptions = {}
-
-        sections: List[str] = []
-        if base_description:
-            sections.append(base_description)
-
-        if outcomes:
-            if sections:
-                sections.append("")
-            sections.append("Outcomes:")
-            for outcome in outcomes:
-                line = f" - {outcome}"
-                desc = outcome_descriptions.get(outcome)
-                if desc:
-                    line += f": {desc}"
-                sections.append(line)
-
-        if parameters:
-            if sections:
-                sections.append("")
-            lines = ["Parameters:"]
-            for parameter_info in parameters:
-                lines.append(" - " + self._format_parameter_line(parameter_info))
-            sections.append("\n".join(lines))
-
-        if input_keys:
-            if sections:
-                sections.append("")
-            lines = ["Input Keys:"]
-            for key_info in input_keys:
-                lines.append(" - " + self._format_key_line(key_info, True))
-            sections.append("\n".join(lines))
-
-        if output_keys:
-            if sections:
-                sections.append("")
-            lines = ["Output Keys:"]
-            for key_info in output_keys:
-                lines.append(" - " + self._format_key_line(key_info, False))
-            sections.append("\n".join(lines))
-
-        return "\n".join(sections).strip()
-
     def _declared_state_parameters(self) -> List[Dict[str, str]]:
         plugin_info: Optional[PluginInfo] = (
             None if self._container_kind else self.plugin_combo.currentData()
         )
-        if plugin_info is not None:
-            return list(getattr(plugin_info, "parameters", []) or [])
-        return list(self._fallback_parameters)
+        return declared_state_parameters(plugin_info, self._fallback_parameters)
 
     def add_parameter_overwrite_row(self) -> None:
         dialog = ParameterOverwriteDialog(
@@ -447,12 +324,10 @@ class StatePropertiesDialog(QDialog):
         self._set_parameter_row_data(row, parameter_data)
 
     def get_parameter_overwrites(self) -> List[Dict[str, str]]:
-        overwrites: List[Dict[str, str]] = []
-        for row in range(self.parameter_table.rowCount()):
-            row_data = self._parameter_row_data(row)
-            if row_data["name"] and row_data["child_parameter"]:
-                overwrites.append(row_data)
-        return overwrites
+        return collect_parameter_overwrites(
+            self._parameter_row_data(row)
+            for row in range(self.parameter_table.rowCount())
+        )
 
     def add_remapping_row(self) -> None:
         row = self.remappings_table.rowCount()
@@ -473,7 +348,7 @@ class StatePropertiesDialog(QDialog):
         plugin_info: Optional[PluginInfo] = (
             None if self._container_kind else self.plugin_combo.currentData()
         )
-        description_text = self._build_description_text(
+        description_text = build_description_text(
             plugin_info,
             fallback_description=self._base_description,
             fallback_outcomes=self._fallback_outcomes,
@@ -484,32 +359,20 @@ class StatePropertiesDialog(QDialog):
         self.description_edit.setPlainText(description_text)
 
     def update_plugin_list(self) -> None:
+        """Refresh the plugin combo from the selected state type."""
+
         self.plugin_combo.clear()
         if self._container_kind:
             self.update_description()
             return
 
-        current_type: int = self.type_combo.currentIndex()
-        if current_type == 0:
-            for plugin in self.available_plugins:
-                if plugin.plugin_type == "python":
-                    self.plugin_combo.addItem(
-                        f"{plugin.module}.{plugin.class_name}", plugin
-                    )
-        elif current_type == 1:
-            for plugin in self.available_plugins:
-                if plugin.plugin_type == "cpp":
-                    self.plugin_combo.addItem(plugin.class_name, plugin)
-        elif current_type == 2:
-            for plugin in self.available_plugins:
-                if plugin.plugin_type == "xml":
-                    filename: str = os.path.basename(plugin.file_name)
-                    display_name: str = (
-                        f"{plugin.package_name}::{filename}"
-                        if plugin.package_name
-                        else filename
-                    )
-                    self.plugin_combo.addItem(display_name, plugin)
+        plugin_types = {0: "python", 1: "cpp", 2: "xml"}
+        current_type = plugin_types.get(self.type_combo.currentIndex())
+        if current_type is not None:
+            for display_name, plugin in plugin_entries_for_type(
+                self.available_plugins, current_type
+            ):
+                self.plugin_combo.addItem(display_name, plugin)
 
         self.update_description()
 
@@ -529,19 +392,19 @@ class StatePropertiesDialog(QDialog):
             None if self._container_kind else self.plugin_combo.currentData()
         )
 
-        remappings: Dict[str, str] = {}
+        remapping_rows = []
         for row in range(self.remappings_table.rowCount()):
             old_item = self.remappings_table.item(row, 0)
             new_item = self.remappings_table.item(row, 1)
-            old_key = old_item.text().strip() if old_item else ""
-            new_key = new_item.text().strip() if new_item else ""
-            if old_key and new_key:
-                remappings[old_key] = new_key
+            remapping_rows.append(
+                (
+                    old_item.text() if old_item else "",
+                    new_item.text() if new_item else "",
+                )
+            )
+        remappings = collect_remappings(remapping_rows)
 
-        if plugin and hasattr(plugin, "outcomes"):
-            outcomes_list: List[str] = list(plugin.outcomes)
-        else:
-            outcomes_list = list(self._fallback_outcomes)
+        outcomes_list = resolve_outcomes(plugin, self._fallback_outcomes)
 
         description: str = self.description_edit.toPlainText().strip()
         return (

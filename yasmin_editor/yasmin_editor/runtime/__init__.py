@@ -13,6 +13,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from .runtime import Runtime
+"""Lazy runtime package exports used by the editor and tests.
+
+The runtime backend depends on PyQt, but several pure helper modules live in the
+same package. Keeping the `Runtime` export lazy lets tests import helper modules
+such as `yasmin_editor.runtime.traversal` in headless environments.
+"""
+
+from __future__ import annotations
 
 __all__ = ["Runtime"]
+
+
+def __getattr__(name: str):
+    if name == "Runtime":
+        from .runtime import Runtime
+
+        return Runtime
+    raise AttributeError(name)

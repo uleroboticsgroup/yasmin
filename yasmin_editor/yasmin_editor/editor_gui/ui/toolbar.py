@@ -13,74 +13,82 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from PyQt5.QtWidgets import QAction, QPushButton, QToolBar
+from __future__ import annotations
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMenu, QToolBar, QToolButton
+
+from yasmin_editor.editor_gui.ui.action_specs import (
+    HELP_MENU_ACTIONS,
+    PRIMARY_TOOLBAR_ACTIONS,
+)
+from yasmin_editor.editor_gui.ui.actions import ensure_action_registry
+from yasmin_editor.editor_gui.ui.toolbar_config import (
+    ADD_TOOLBAR_MENU,
+    SELECTION_TOOLBAR_MENU,
+    ToolbarMenuSpec,
+)
 
 
-def build_toolbar(editor) -> None:
-    """Create the main toolbar."""
-    toolbar = QToolBar()
-    toolbar.setObjectName("yasminEditorToolbar")
-    editor.addToolBar(toolbar)
+def _build_menu_button(editor, toolbar: QToolBar, spec: ToolbarMenuSpec) -> None:
+    registry = ensure_action_registry(editor)
 
-    editor.new_action = QAction("New", editor)
-    editor.new_action.setShortcut("Ctrl+N")
-    editor.new_action.triggered.connect(editor.new_state_machine)
-    toolbar.addAction(editor.new_action)
+    button = QToolButton(toolbar)
+    button.setObjectName(spec.object_name)
+    setattr(editor, spec.button_attribute_name, button)
+    button.setText(spec.text)
+    button.setToolTip(spec.tool_tip)
+    button.setPopupMode(QToolButton.InstantPopup)
+    button.setToolButtonStyle(Qt.ToolButtonTextOnly)
 
-    editor.open_action = QAction("Open", editor)
-    editor.open_action.setShortcut("Ctrl+O")
-    editor.open_action.triggered.connect(editor.open_state_machine)
-    toolbar.addAction(editor.open_action)
+    menu = QMenu(button)
+    for attribute_name in spec.action_attributes:
+        menu.addAction(getattr(editor, attribute_name))
+    button.setMenu(menu)
 
-    editor.save_action = QAction("Save", editor)
-    editor.save_action.setShortcut("Ctrl+S")
-    editor.save_action.triggered.connect(editor.save_state_machine)
-    toolbar.addAction(editor.save_action)
+    toolbar.addWidget(button)
 
-    toolbar.addSeparator()
 
-    editor.add_state_action = QAction("Add State", editor)
-    editor.add_state_action.triggered.connect(editor.add_state)
-    toolbar.addAction(editor.add_state_action)
-
-    editor.add_state_machine_action = QAction("Add State Machine", editor)
-    editor.add_state_machine_action.triggered.connect(editor.add_state_machine)
-    toolbar.addAction(editor.add_state_machine_action)
-
-    editor.add_concurrence_action = QAction("Add Concurrence", editor)
-    editor.add_concurrence_action.triggered.connect(editor.add_concurrence)
-    toolbar.addAction(editor.add_concurrence_action)
-
-    editor.add_final_action = QAction("Add Final Outcome", editor)
-    editor.add_final_action.triggered.connect(editor.add_final_outcome)
-    toolbar.addAction(editor.add_final_action)
-
-    editor.add_text_action = QAction("Add Text", editor)
-    editor.add_text_action.triggered.connect(editor.add_text_block)
-    toolbar.addAction(editor.add_text_action)
-
-    toolbar.addSeparator()
-
-    editor.edit_current_action = QAction("Edit Current Container", editor)
-    editor.edit_current_action.triggered.connect(editor.edit_current_container)
-    toolbar.addAction(editor.edit_current_action)
-
-    editor.delete_action = QAction("Delete Selected", editor)
-    editor.delete_action.triggered.connect(editor.delete_selected)
-    toolbar.addAction(editor.delete_action)
-
-    toolbar.addSeparator()
-
-    help_action = QAction("Help", editor)
-    help_action.triggered.connect(editor.show_help)
-    toolbar.addAction(help_action)
-
-    toolbar.addSeparator()
-
-    editor.runtime_mode_button = QPushButton("Runtime Mode")
+def _add_runtime_mode_button(toolbar: QToolBar, editor) -> None:
+    editor.runtime_mode_button = QToolButton(toolbar)
+    editor.runtime_mode_button.setObjectName("runtimeModeButton")
+    editor.runtime_mode_button.setText("Runtime Mode")
     editor.runtime_mode_button.setCheckable(True)
+    editor.runtime_mode_button.setToolButtonStyle(Qt.ToolButtonTextOnly)
     editor.runtime_mode_button.setToolTip(
         "Enter or leave runtime mode using the current state machine XML snapshot."
     )
     editor.runtime_mode_button.clicked.connect(editor.toggle_runtime_mode)
     toolbar.addWidget(editor.runtime_mode_button)
+
+
+def build_toolbar(editor) -> None:
+    """Create the main toolbar.
+
+    The toolbar stays compact and keeps the original primary actions visible,
+    while less frequent add and selection workflows move into dedicated
+    drop-down buttons.
+    """
+
+    toolbar = QToolBar()
+    toolbar.setObjectName("yasminEditorToolbar")
+    toolbar.setMovable(False)
+    toolbar.setFloatable(False)
+    toolbar.setToolButtonStyle(Qt.ToolButtonTextOnly)
+    editor.addToolBar(toolbar)
+
+    registry = ensure_action_registry(editor)
+    for spec in PRIMARY_TOOLBAR_ACTIONS:
+        if spec.separator_before:
+            toolbar.addSeparator()
+        toolbar.addAction(registry.get(spec))
+        if spec.attribute_name == "add_state_action":
+            _build_menu_button(editor, toolbar, ADD_TOOLBAR_MENU)
+        if spec.attribute_name == "delete_action":
+            _build_menu_button(editor, toolbar, SELECTION_TOOLBAR_MENU)
+
+    toolbar.addSeparator()
+    toolbar.addAction(registry.get(HELP_MENU_ACTIONS[0]))
+
+    toolbar.addSeparator()
+    _add_runtime_mode_button(toolbar, editor)

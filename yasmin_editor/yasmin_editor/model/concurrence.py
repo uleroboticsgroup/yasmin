@@ -122,6 +122,8 @@ class Concurrence(State):
         """Rename a final outcome and update all related references."""
         if old_name == new_name:
             return
+        if self.get_outcome(old_name) is None:
+            return
         self._assert_child_name_available(new_name, exclude_outcome=old_name)
         State.rename_outcome(self, old_name, new_name)
         mapping = self.outcome_map.pop(old_name, None)
