@@ -12,6 +12,10 @@ find_package(rclcpp REQUIRED)
 find_package(yasmin REQUIRED)
 find_package(yasmin_factory REQUIRED)
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
+endif()
+
 ament_python_install_package(${PROJECT_NAME})
 
 # Install Python scripts
@@ -20,5 +24,12 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
   RENAME yasmin_editor
 )
+
+if(BUILD_TESTING)
+  ament_add_pytest_test(test_editor_gui_helpers test/test_editor_gui_helpers.py)
+  ament_add_pytest_test(test_free_position_and_recent_files test/test_free_position_and_recent_files.py)
+  ament_add_pytest_test(test_runtime_and_transition_helpers test/test_runtime_and_transition_helpers.py)
+  ament_add_pytest_test(test_model_validation test/test_model_validation.py)
+endif()
 
 ament_package()
