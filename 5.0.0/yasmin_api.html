@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Reference - YASMIN</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="docker.html">Docker Environment</a></li>
+          <li><a href="main_concepts.html">Main Concepts</a></li>
+          <li><a href="xml_factory.html">XML State Machines</a></li>
+          <li><a href="packages.html">Packages Overview</a></li>
+          <li><a href="yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/cpp/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/cpp/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/python/basic_fsm.html"
+                  >Writing a Simple FSM</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/remap_demo.html"
+                  >Blackboard Remapping</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li>
+                <a href="tutorials/python/publisher_demo.html">Publisher</a>
+              </li>
+              <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/python/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/parameters_demo.html"
+                  >ROS Parameters</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_ros_serialization.html">ROS Serialization States</a>
+          </li>
+          <li><a href="yasmin_ros_tf.html">TF States</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>API Reference</h1>
+
+        <p>
+          This page documents the public API of the core
+          <strong>yasmin</strong> package. It covers all classes needed to
+          create states, state machines, and concurrent containers in both C++
+          and Python.
+        </p>
+
+        <nav class="toc" style="margin-bottom: 2em">
+          <strong>On this page:</strong>
+          <ul>
+            <li><a href="#state">State</a></li>
+            <li><a href="#state-machine">StateMachine</a></li>
+            <li><a href="#blackboard">Blackboard</a></li>
+            <li><a href="#cb-state">CbState</a></li>
+            <li><a href="#concurrence">Concurrence</a></li>
+          </ul>
+        </nav>
+
+        <!-- ═══════════════════════════════════════════════════════ STATE -->
+        <h2 id="state">State</h2>
+        <p>
+          The base class for all states. To create a custom state, subclass
+          <code>State</code> and implement the <code>execute()</code> method.
+          The constructor receives the set of valid outcome strings that
+          <code>execute()</code> may return.
+        </p>
+
+        <h3>Constructor</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">State(const std::set&lt;std::string&gt; &amp;outcomes);</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">State(outcomes: list[str])</code></pre>
+
+        <h3>Core Methods</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>C++ Signature</th>
+              <th>Python Signature</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>execute</code></td>
+              <td>
+                <code
+                  >virtual std::string execute(<br />&nbsp;&nbsp;Blackboard::SharedPtr
+                  blackboard)</code
+                >
+              </td>
+              <td>
+                <code>def execute(self, blackboard: Blackboard) -&gt; str</code>
+              </td>
+              <td>
+                Override to implement the state's logic. Must return one of the
+                declared outcomes.
+              </td>
+            </tr>
+            <tr>
+              <td><code>configure</code></td>
+              <td><code>virtual void configure()</code></td>
+              <td><code>def configure(self) -&gt; None</code></td>
+              <td>
+                Called once before the first execution inside a container.
+                Override to allocate resources or validate configuration.
+              </td>
+            </tr>
+            <tr>
+              <td><code>cancel_state</code></td>
+              <td><code>virtual void cancel_state()</code></td>
+              <td><code>def cancel_state(self) -&gt; None</code></td>
+              <td>
+                Signals the state to stop. Sets the internal status to
+                <code>CANCELED</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>operator()</code>&nbsp;/&nbsp;call</td>
+              <td>
+                <code
+                  >std::string operator()(<br />&nbsp;&nbsp;Blackboard::SharedPtr
+                  blackboard)</code
+                >
+              </td>
+              <td><code>state(blackboard: Blackboard) -&gt; str</code></td>
+              <td>
+                Executes the state and returns the outcome. Validates that the
+                returned string belongs to the declared outcomes.
+              </td>
+            </tr>
+            <tr>
+              <td><code>get_outcomes</code></td>
+              <td>
+                <code
+                  >const std::set&lt;std::string&gt; &amp;get_outcomes()
+                  const</code
+                >
+              </td>
+              <td><code>def get_outcomes(self) -&gt; list[str]</code></td>
+              <td>Returns the set of declared outcomes.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Status Methods</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Return type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>is_idle()</code></td>
+              <td><code>bool</code></td>
+              <td>True when the state has not yet started executing.</td>
+            </tr>
+            <tr>
+              <td><code>is_running()</code></td>
+              <td><code>bool</code></td>
+              <td>True while <code>execute()</code> is in progress.</td>
+            </tr>
+            <tr>
+              <td><code>is_canceled()</code></td>
+              <td><code>bool</code></td>
+              <td>True after <code>cancel_state()</code> has been called.</td>
+            </tr>
+            <tr>
+              <td><code>is_completed()</code></td>
+              <td><code>bool</code></td>
+              <td>True after <code>execute()</code> returns successfully.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Metadata Methods</h3>
+        <p>
+          Metadata is declared in the constructor and describes the state's
+          interface to external tools such as the editor and factory.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>C++ Signature</th>
+              <th>Python Signature</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>set_description</code></td>
+              <td>
+                <code
+                  >void set_description(const std::string
+                  &amp;description)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def set_description(self, description: str) -&gt; None</code
+                >
+              </td>
+              <td>Sets a human-readable description of the state's purpose.</td>
+            </tr>
+            <tr>
+              <td><code>get_description</code></td>
+              <td>
+                <code>const std::string &amp;get_description() const</code>
+              </td>
+              <td><code>def get_description(self) -&gt; str</code></td>
+              <td>Returns the state description.</td>
+            </tr>
+            <tr>
+              <td><code>set_outcome_description</code></td>
+              <td>
+                <code
+                  >void set_outcome_description(<br />&nbsp;&nbsp;const
+                  std::string &amp;outcome,<br />&nbsp;&nbsp;const std::string
+                  &amp;description)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def set_outcome_description(<br />&nbsp;&nbsp;self, outcome:
+                  str,<br />&nbsp;&nbsp;description: str) -&gt; None</code
+                >
+              </td>
+              <td>Attaches a description to a specific outcome string.</td>
+            </tr>
+            <tr>
+              <td><code>get_outcome_description</code></td>
+              <td>
+                <code
+                  >const std::string &amp;get_outcome_description(<br />&nbsp;&nbsp;const
+                  std::string &amp;outcome) const</code
+                >
+              </td>
+              <td>
+                <code
+                  >def get_outcome_description(<br />&nbsp;&nbsp;self, outcome:
+                  str) -&gt; str</code
+                >
+              </td>
+              <td>Returns the description for a given outcome.</td>
+            </tr>
+            <tr>
+              <td><code>get_outcome_descriptions</code></td>
+              <td>
+                <code
+                  >const std::unordered_map&lt;std::string, std::string&gt;<br />&nbsp;&nbsp;&amp;get_outcome_descriptions()
+                  const</code
+                >
+              </td>
+              <td>
+                <code
+                  >def get_outcome_descriptions(self) -&gt; dict[str, str]</code
+                >
+              </td>
+              <td>Returns all outcome descriptions as a map.</td>
+            </tr>
+            <tr>
+              <td><code>add_input_key</code></td>
+              <td>
+                <code
+                  >void add_input_key(<br />&nbsp;&nbsp;const std::string
+                  &amp;key_name,<br />&nbsp;&nbsp;const std::string
+                  &amp;description = "",<br />&nbsp;&nbsp;T default_value =
+                  {})</code
+                >
+              </td>
+              <td>
+                <code
+                  >def add_input_key(<br />&nbsp;&nbsp;self, key_name: str,<br />&nbsp;&nbsp;description:
+                  str = "",<br />&nbsp;&nbsp;default_value = None) -&gt;
+                  None</code
+                >
+              </td>
+              <td>
+                Declares a blackboard key the state reads. An optional default
+                value is injected when the key is absent at runtime.
+              </td>
+            </tr>
+            <tr>
+              <td><code>get_input_keys</code></td>
+              <td>
+                <code
+                  >const std::vector&lt;BlackboardKeyInfo&gt;<br />&nbsp;&nbsp;&amp;get_input_keys()
+                  const</code
+                >
+              </td>
+              <td><code>def get_input_keys(self) -&gt; list</code></td>
+              <td>Returns the declared input key metadata list.</td>
+            </tr>
+            <tr>
+              <td><code>add_output_key</code></td>
+              <td>
+                <code
+                  >void add_output_key(<br />&nbsp;&nbsp;const std::string
+                  &amp;key_name,<br />&nbsp;&nbsp;const std::string
+                  &amp;description = "")</code
+                >
+              </td>
+              <td>
+                <code
+                  >def add_output_key(<br />&nbsp;&nbsp;self, key_name: str,<br />&nbsp;&nbsp;description:
+                  str = "") -&gt; None</code
+                >
+              </td>
+              <td>Declares a blackboard key the state writes.</td>
+            </tr>
+            <tr>
+              <td><code>get_output_keys</code></td>
+              <td>
+                <code
+                  >const std::vector&lt;BlackboardKeyInfo&gt;<br />&nbsp;&nbsp;&amp;get_output_keys()
+                  const</code
+                >
+              </td>
+              <td><code>def get_output_keys(self) -&gt; list</code></td>
+              <td>Returns the declared output key metadata list.</td>
+            </tr>
+            <tr>
+              <td><code>declare_parameter</code></td>
+              <td>
+                <code
+                  >void declare_parameter(<br />&nbsp;&nbsp;const std::string
+                  &amp;parameter_name,<br />&nbsp;&nbsp;const std::string
+                  &amp;description = "",<br />&nbsp;&nbsp;T default_value =
+                  {})</code
+                >
+              </td>
+              <td>
+                <code
+                  >def declare_parameter(<br />&nbsp;&nbsp;self, parameter_name:
+                  str,<br />&nbsp;&nbsp;description: str = "",<br />&nbsp;&nbsp;default_value
+                  = None) -&gt; None</code
+                >
+              </td>
+              <td>
+                Declares a state-local configuration parameter with an optional
+                default value.
+              </td>
+            </tr>
+            <tr>
+              <td><code>has_parameter</code></td>
+              <td>
+                <code
+                  >bool has_parameter(const std::string &amp;name) const</code
+                >
+              </td>
+              <td>
+                <code>def has_parameter(self, name: str) -&gt; bool</code>
+              </td>
+              <td>
+                Returns <code>True</code> if the parameter key exists in the
+                state's local storage.
+              </td>
+            </tr>
+            <tr>
+              <td><code>get_parameter</code></td>
+              <td>
+                <code
+                  >T get_parameter&lt;T&gt;(const std::string &amp;name)
+                  const</code
+                >
+              </td>
+              <td><code>def get_parameter(self, name: str) -&gt; Any</code></td>
+              <td>Reads a parameter from the state's local storage.</td>
+            </tr>
+            <tr>
+              <td><code>set_parameter</code></td>
+              <td>
+                <code
+                  >void set_parameter&lt;T&gt;(const std::string &amp;name, T
+                  value)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def set_parameter(self, name: str, value: Any) -&gt;
+                  None</code
+                >
+              </td>
+              <td>Writes a parameter to the state's local storage.</td>
+            </tr>
+            <tr>
+              <td><code>get_parameters</code></td>
+              <td>
+                <code
+                  >const std::vector&lt;BlackboardKeyInfo&gt;<br />&nbsp;&nbsp;&amp;get_parameters()
+                  const</code
+                >
+              </td>
+              <td><code>def get_parameters(self) -&gt; list</code></td>
+              <td>Returns the declared parameter metadata list.</td>
+            </tr>
+            <tr>
+              <td><code>get_metadata</code></td>
+              <td>
+                <code>const StateMetadata &amp;get_metadata() const</code>
+              </td>
+              <td><code>def get_metadata(self) -&gt; StateMetadata</code></td>
+              <td>
+                Returns the complete metadata object (description, outcome
+                descriptions, input keys, output keys, parameters).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Example</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">#include "yasmin/state.hpp"
+#include "yasmin/blackboard.hpp"
+
+class FooState : public yasmin::State {
+public:
+    FooState() : yasmin::State({"outcome1", "outcome2"}) {
+        this-&gt;set_description("Performs the Foo operation.");
+        this-&gt;add_output_key("foo_str", "Result string produced by FooState.");
+    }
+
+    std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+        blackboard-&gt;set&lt;std::string&gt;("foo_str", "Hello from Foo");
+        return "outcome1";
+    }
+};</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">from yasmin import State, Blackboard
+
+class FooState(State):
+    def __init__(self):
+        super().__init__(["outcome1", "outcome2"])
+        self.set_description("Performs the Foo operation.")
+        self.add_output_key("foo_str", "Result string produced by FooState.")
+
+    def execute(self, blackboard: Blackboard) -&gt; str:
+        blackboard["foo_str"] = "Hello from Foo"
+        return "outcome1"</code></pre>
+
+        <!-- ══════════════════════════════════════════════ STATE MACHINE -->
+        <h2 id="state-machine">StateMachine</h2>
+        <p>
+          <code>StateMachine</code> extends <code>State</code>, so it can be
+          nested inside another state machine. It manages a collection of
+          states, their transitions, and optional remappings and parameter
+          mappings.
+        </p>
+
+        <h3>Constructor</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">// Without a name (name defaults to the class type name)
+StateMachine(const std::set&lt;std::string&gt; &amp;outcomes,
+             bool handle_sigint = false);
+
+// With an explicit name
+StateMachine(const std::string &amp;name,
+             const std::set&lt;std::string&gt; &amp;outcomes,
+             bool handle_sigint = false);</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">StateMachine(outcomes: list[str], handle_sigint: bool = False)</code></pre>
+
+        <h3>State Management</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>C++ Signature</th>
+              <th>Python Signature</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>add_state</code></td>
+              <td>
+                <code
+                  >void add_state(<br />&nbsp;&nbsp;const std::string
+                  &amp;name,<br />&nbsp;&nbsp;State::SharedPtr state,<br />&nbsp;&nbsp;const
+                  Transitions &amp;transitions = {},<br />&nbsp;&nbsp;const
+                  Remappings &amp;remappings = {},<br />&nbsp;&nbsp;const
+                  ParameterMappings &amp;parameter_mappings = {})</code
+                >
+              </td>
+              <td>
+                <code
+                  >def add_state(<br />&nbsp;&nbsp;self, name: str,<br />&nbsp;&nbsp;state:
+                  State,<br />&nbsp;&nbsp;transitions: dict[str, str] = {},<br />&nbsp;&nbsp;remappings:
+                  dict[str, str] = {},<br />&nbsp;&nbsp;parameter_mappings:
+                  dict[str, str] = {}) -&gt; None</code
+                >
+              </td>
+              <td>
+                Adds a state with its transitions, optional blackboard
+                remappings, and optional parameter mappings.
+                <code>transitions</code> maps outcome strings to target state
+                names (or terminal outcomes of the machine).
+                <code>remappings</code> maps the state's local key names to
+                blackboard key names. <code>parameter_mappings</code> maps child
+                parameter names to parent parameter names (<code
+                  >child -&gt; parent</code
+                >).
+              </td>
+            </tr>
+            <tr>
+              <td><code>set_start_state</code></td>
+              <td>
+                <code
+                  >void set_start_state(const std::string &amp;state_name)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def set_start_state(self, state_name: str) -&gt; None</code
+                >
+              </td>
+              <td>
+                Sets the initial state. Defaults to the first state added when
+                not called explicitly.
+              </td>
+            </tr>
+            <tr>
+              <td><code>get_start_state</code></td>
+              <td>
+                <code>const std::string &amp;get_start_state() const</code>
+              </td>
+              <td><code>def get_start_state(self) -&gt; str</code></td>
+              <td>Returns the name of the start state.</td>
+            </tr>
+            <tr>
+              <td><code>get_states</code></td>
+              <td>
+                <code>const StateMap &amp;get_states() const</code>
+              </td>
+              <td><code>def get_states(self) -&gt; dict[str, State]</code></td>
+              <td>
+                Returns the map of registered state names to state objects.
+              </td>
+            </tr>
+            <tr>
+              <td><code>get_transitions</code></td>
+              <td>
+                <code>const TransitionsMap &amp;get_transitions() const</code>
+              </td>
+              <td>
+                <code
+                  >def get_transitions(self) -&gt; dict[str, dict[str,
+                  str]]</code
+                >
+              </td>
+              <td>Returns the complete transition table.</td>
+            </tr>
+            <tr>
+              <td><code>get_current_state</code></td>
+              <td>
+                <code>const std::string &amp;get_current_state() const</code>
+              </td>
+              <td><code>def get_current_state(self) -&gt; str</code></td>
+              <td>Returns the name of the currently active state.</td>
+            </tr>
+            <tr>
+              <td><code>validate</code></td>
+              <td><code>void validate(bool strict_mode = false)</code></td>
+              <td>
+                <code
+                  >def validate(self, strict_mode: bool = False) -&gt;
+                  None</code
+                >
+              </td>
+              <td>
+                Validates the state machine configuration. In strict mode, also
+                checks that every declared outcome is reachable and every state
+                outcome has a transition.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Execution</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>C++ Signature</th>
+              <th>Python Signature</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>execute</code></td>
+              <td>
+                <code
+                  >std::string execute(<br />&nbsp;&nbsp;Blackboard::SharedPtr
+                  blackboard)</code
+                >
+              </td>
+              <td>
+                <code>def execute(self, blackboard: Blackboard) -&gt; str</code>
+              </td>
+              <td>Runs the state machine with the provided blackboard.</td>
+            </tr>
+            <tr>
+              <td><code>execute</code> (no-arg)</td>
+              <td><code>std::string execute()</code></td>
+              <td><code>def execute(self) -&gt; str</code></td>
+              <td>
+                Runs the state machine using an internally created empty
+                blackboard.
+              </td>
+            </tr>
+            <tr>
+              <td><code>operator()</code>&nbsp;/&nbsp;call</td>
+              <td><code>std::string operator()()</code></td>
+              <td><code>sm() -&gt; str</code></td>
+              <td>Invokes the state machine with a new empty blackboard.</td>
+            </tr>
+            <tr>
+              <td><code>cancel_state</code></td>
+              <td><code>void cancel_state() override</code></td>
+              <td><code>def cancel_state(self) -&gt; None</code></td>
+              <td>
+                Forwards the cancel request to the currently active child state.
+              </td>
+            </tr>
+            <tr>
+              <td><code>cancel_state_machine</code></td>
+              <td><code>void cancel_state_machine()</code></td>
+              <td><code>def cancel_state_machine(self) -&gt; None</code></td>
+              <td>
+                Hard-stops the entire state machine, propagating the cancel
+                recursively through nested machines.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Naming and Callbacks</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>C++ Signature</th>
+              <th>Python Signature</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>set_name</code></td>
+              <td><code>void set_name(const std::string &amp;name)</code></td>
+              <td><code>def set_name(self, name: str) -&gt; None</code></td>
+              <td>Sets a display name for this state machine.</td>
+            </tr>
+            <tr>
+              <td><code>get_name</code></td>
+              <td><code>const std::string &amp;get_name() const</code></td>
+              <td><code>def get_name(self) -&gt; str</code></td>
+              <td>Returns the display name.</td>
+            </tr>
+            <tr>
+              <td><code>add_start_cb</code></td>
+              <td>
+                <code
+                  >void add_start_cb(<br />&nbsp;&nbsp;function&lt;void(Blackboard::SharedPtr,
+                  const string&amp;)&gt; cb)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def add_start_cb(<br />&nbsp;&nbsp;self, cb:
+                  Callable[[Blackboard, str], None]) -&gt; None</code
+                >
+              </td>
+              <td>
+                Registers a callback invoked when the state machine starts. The
+                callback receives the blackboard and the start state name.
+              </td>
+            </tr>
+            <tr>
+              <td><code>add_transition_cb</code></td>
+              <td>
+                <code
+                  >void add_transition_cb(<br />&nbsp;&nbsp;function&lt;void(Blackboard::SharedPtr,
+                  const string&amp;,<br />&nbsp;&nbsp;&nbsp;&nbsp;const
+                  string&amp;, const string&amp;)&gt; cb)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def add_transition_cb(<br />&nbsp;&nbsp;self, cb:
+                  Callable[[Blackboard, str, str, str], None]) -&gt; None</code
+                >
+              </td>
+              <td>
+                Registers a callback invoked on every state transition. The
+                callback receives the blackboard, the previous state name, the
+                outcome, and the next state name.
+              </td>
+            </tr>
+            <tr>
+              <td><code>add_end_cb</code></td>
+              <td>
+                <code
+                  >void add_end_cb(<br />&nbsp;&nbsp;function&lt;void(Blackboard::SharedPtr,
+                  const string&amp;)&gt; cb)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def add_end_cb(<br />&nbsp;&nbsp;self, cb:
+                  Callable[[Blackboard, str], None]) -&gt; None</code
+                >
+              </td>
+              <td>
+                Registers a callback invoked when the state machine finishes.
+                The callback receives the blackboard and the terminal outcome.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          <code>StateMachine</code> inherits all <a href="#state">State</a>
+          metadata methods (<code>set_description</code>,
+          <code>add_input_key</code>, <code>add_output_key</code>,
+          <code>declare_parameter</code>, etc.).
+        </p>
+
+        <h3>Example</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">#include "yasmin/state_machine.hpp"
+#include "yasmin/blackboard.hpp"
+
+auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+    std::set&lt;std::string&gt;{"outcome1", "outcome2"});
+
+sm-&gt;set_description("A simple state machine.");
+sm-&gt;add_input_key("foo_str", "Input string for FooState.");
+
+sm-&gt;add_state("FOO", std::make_shared&lt;FooState&gt;(),
+              {{"outcome1", "BAR"}, {"outcome2", "outcome2"}});
+sm-&gt;add_state("BAR", std::make_shared&lt;BarState&gt;(),
+              {{"outcome3", "outcome1"}});
+
+auto blackboard = std::make_shared&lt;yasmin::Blackboard&gt;();
+blackboard-&gt;set&lt;std::string&gt;("foo_str", "hello");
+std::string outcome = (*sm)(blackboard);</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">from yasmin import StateMachine, Blackboard
+
+sm = StateMachine(outcomes=["outcome1", "outcome2"])
+sm.set_description("A simple state machine.")
+sm.add_input_key("foo_str", "Input string for FooState.")
+
+sm.add_state("FOO", FooState(),
+             transitions={"outcome1": "BAR", "outcome2": "outcome2"})
+sm.add_state("BAR", BarState(),
+             transitions={"outcome3": "outcome1"})
+
+blackboard = Blackboard()
+blackboard["foo_str"] = "hello"
+outcome = sm(blackboard)</code></pre>
+
+        <!-- ════════════════════════════════════════════════ BLACKBOARD -->
+        <h2 id="blackboard">Blackboard</h2>
+        <p>
+          A thread-safe key-value store that all states in a state machine share
+          during execution. In Python the standard subscript syntax
+          (<code>blackboard["key"]</code>) is supported in addition to the
+          explicit <code>get</code> / <code>set</code> calls.
+        </p>
+
+        <h3>Constructor</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">Blackboard();</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">Blackboard()</code></pre>
+
+        <h3>Methods</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>C++ Signature</th>
+              <th>Python Signature</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>set</code></td>
+              <td>
+                <code
+                  >void set&lt;T&gt;(const std::string &amp;key, T value)</code
+                >
+              </td>
+              <td>
+                <code>blackboard[key] = value</code><br />or<br /><code
+                  >def set(self, key: str, value: Any) -&gt; None</code
+                >
+              </td>
+              <td>Stores a value under the given key.</td>
+            </tr>
+            <tr>
+              <td><code>get</code></td>
+              <td>
+                <code>T get&lt;T&gt;(const std::string &amp;key) const</code>
+              </td>
+              <td>
+                <code>blackboard[key]</code><br />or<br /><code
+                  >def get(self, key: str) -&gt; Any</code
+                >
+              </td>
+              <td>
+                Retrieves the value stored under the given key. Raises
+                <code>std::runtime_error</code> / <code>KeyError</code> if the
+                key does not exist.
+              </td>
+            </tr>
+            <tr>
+              <td><code>contains</code></td>
+              <td>
+                <code>bool contains(const std::string &amp;key) const</code>
+              </td>
+              <td><code>def contains(self, key: str) -&gt; bool</code></td>
+              <td>Returns <code>true</code> if the key is present.</td>
+            </tr>
+            <tr>
+              <td><code>remove</code></td>
+              <td><code>void remove(const std::string &amp;key)</code></td>
+              <td><code>def remove(self, key: str) -&gt; None</code></td>
+              <td>Removes the entry for the given key.</td>
+            </tr>
+            <tr>
+              <td><code>size</code></td>
+              <td><code>int size() const</code></td>
+              <td><code>def size(self) -&gt; int</code></td>
+              <td>Returns the number of stored entries.</td>
+            </tr>
+            <tr>
+              <td><code>keys</code></td>
+              <td>
+                <code>std::vector&lt;std::string&gt; keys() const</code>
+              </td>
+              <td><code>def keys(self) -&gt; list[str]</code></td>
+              <td>
+                Returns the list of keys visible in the current remapping scope.
+              </td>
+            </tr>
+            <tr>
+              <td><code>get_type</code></td>
+              <td>
+                <code
+                  >std::string get_type(const std::string &amp;key) const</code
+                >
+              </td>
+              <td><code>def get_type(self, key: str) -&gt; str</code></td>
+              <td>Returns the stored type name for the given key.</td>
+            </tr>
+            <tr>
+              <td><code>to_string</code></td>
+              <td><code>std::string to_string() const</code></td>
+              <td><code>def to_string(self) -&gt; str</code></td>
+              <td>Returns a human-readable representation of all entries.</td>
+            </tr>
+            <tr>
+              <td><code>set_remappings</code></td>
+              <td>
+                <code
+                  >void set_remappings(const Remappings &amp;remappings)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def set_remappings(self, remappings: dict[str, str]) -&gt;
+                  None</code
+                >
+              </td>
+              <td>
+                Sets the local remapping table. A remapping entry
+                <code>a -&gt; b</code> redirects all accesses to key
+                <code>a</code> to the underlying key <code>b</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>copy_value_from</code></td>
+              <td>
+                <code
+                  >void copy_value_from(<br />&nbsp;&nbsp;const Blackboard
+                  &amp;other,<br />&nbsp;&nbsp;const std::string
+                  &amp;source_key,<br />&nbsp;&nbsp;const std::string
+                  &amp;target_key)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def copy_value_from(<br />&nbsp;&nbsp;self, other:
+                  Blackboard,<br />&nbsp;&nbsp;source_key: str,<br />&nbsp;&nbsp;target_key:
+                  str) -&gt; None</code
+                >
+              </td>
+              <td>
+                Copies a value from another blackboard without knowing the type
+                at compile time.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Example</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">#include "yasmin/blackboard.hpp"
+
+auto bb = std::make_shared&lt;yasmin::Blackboard&gt;();
+bb-&gt;set&lt;int&gt;("counter", 0);
+int v = bb-&gt;get&lt;int&gt;("counter");   // 0
+bb-&gt;remove("counter");
+bool exists = bb-&gt;contains("counter"); // false</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">from yasmin import Blackboard
+
+bb = Blackboard()
+bb["counter"] = 0
+v = bb["counter"]   # 0
+bb.remove("counter")
+exists = bb.contains("counter")  # False</code></pre>
+
+        <!-- ═══════════════════════════════════════════════ CB STATE -->
+        <h2 id="cb-state">CbState</h2>
+        <p>
+          A convenience state that wraps a plain callback function. Use it when
+          the state logic is too simple to justify a dedicated subclass.
+        </p>
+
+        <h3>Constructor</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">CbState(const std::set&lt;std::string&gt; &amp;outcomes,
+        std::function&lt;std::string(Blackboard::SharedPtr)&gt; callback);</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">CbState(outcomes: list[str], callback: Callable[[Blackboard], str])</code></pre>
+
+        <p>
+          The callback receives the shared <code>Blackboard</code> and must
+          return one of the declared outcome strings.
+          <code>CbState</code> inherits all <a href="#state">State</a> metadata
+          methods.
+        </p>
+
+        <h3>Example</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">#include "yasmin/cb_state.hpp"
+
+auto greeting_state = std::make_shared&lt;yasmin::CbState&gt;(
+    std::set&lt;std::string&gt;{"done"},
+    [](yasmin::Blackboard::SharedPtr bb) -&gt; std::string {
+        YASMIN_LOG_INFO("Hello from CbState");
+        return "done";
+    });
+
+greeting_state-&gt;set_description("Prints a greeting message.");
+sm-&gt;add_state("GREET", greeting_state, {{"done", "outcome1"}});</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">from yasmin import CbState, Blackboard
+import yasmin
+
+def greeting_cb(blackboard: Blackboard) -&gt; str:
+    yasmin.YASMIN_LOG_INFO("Hello from CbState")
+    return "done"
+
+greeting_state = CbState(outcomes=["done"], callback=greeting_cb)
+greeting_state.set_description("Prints a greeting message.")
+sm.add_state("GREET", greeting_state, transitions={"done": "outcome1"})</code></pre>
+
+        <!-- ══════════════════════════════════════════════ CONCURRENCE -->
+        <h2 id="concurrence">Concurrence</h2>
+        <p>
+          <code>Concurrence</code> extends <code>State</code> and executes
+          multiple child states in parallel threads. When all threads finish,
+          the combined outcomes are matched against an <em>outcome map</em> to
+          determine the overall outcome. If no rule matches, the
+          <em>default outcome</em> is returned.
+        </p>
+
+        <h3>Constructor</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">Concurrence(
+    const StateMap &amp;states,
+    const std::string &amp;default_outcome,
+    const OutcomeMap &amp;outcome_map,
+    const ParameterMappingsMap &amp;parameter_mappings = {});</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">Concurrence(
+    states: dict[str, State],
+    default_outcome: str,
+    outcome_map: dict[str, dict[str, str]])</code></pre>
+
+        <p>
+          <code>states</code> maps logical names to <code>State</code> objects.
+          <code>outcome_map</code> maps desired overall outcome strings to
+          dictionaries of required per-state outcomes, e.g.:
+        </p>
+        <pre><code class="language-python">outcome_map = {
+    "overall_success": {
+        "STATE_A": "succeeded",
+        "STATE_B": "done",
+    }
+}</code></pre>
+
+        <p>
+          This rule is satisfied when <code>STATE_A</code> returns
+          <code>"succeeded"</code> <em>and</em> <code>STATE_B</code> returns
+          <code>"done"</code>. Rules are evaluated after all child threads
+          finish. The first matching rule in iteration order is used.
+        </p>
+
+        <h3>Methods</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>C++ Signature</th>
+              <th>Python Signature</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>execute</code></td>
+              <td>
+                <code
+                  >std::string execute(<br />&nbsp;&nbsp;Blackboard::SharedPtr
+                  blackboard)</code
+                >
+              </td>
+              <td>
+                <code>def execute(self, blackboard: Blackboard) -&gt; str</code>
+              </td>
+              <td>
+                Runs all child states in parallel and returns the resolved
+                outcome.
+              </td>
+            </tr>
+            <tr>
+              <td><code>cancel_state</code></td>
+              <td><code>void cancel_state() override</code></td>
+              <td><code>def cancel_state(self) -&gt; None</code></td>
+              <td>Cancels all currently running child states.</td>
+            </tr>
+            <tr>
+              <td><code>get_states</code></td>
+              <td><code>const StateMap &amp;get_states() const</code></td>
+              <td>
+                <code>def get_states(self) -&gt; dict[str, State]</code>
+              </td>
+              <td>Returns the child state map.</td>
+            </tr>
+            <tr>
+              <td><code>get_outcome_map</code></td>
+              <td>
+                <code>const OutcomeMap &amp;get_outcome_map() const</code>
+              </td>
+              <td>
+                <code
+                  >def get_outcome_map(self) -&gt; dict[str, dict[str,
+                  str]]</code
+                >
+              </td>
+              <td>Returns the outcome map.</td>
+            </tr>
+            <tr>
+              <td><code>get_default_outcome</code></td>
+              <td>
+                <code>const std::string &amp;get_default_outcome() const</code>
+              </td>
+              <td><code>def get_default_outcome(self) -&gt; str</code></td>
+              <td>Returns the fallback outcome used when no rule matches.</td>
+            </tr>
+            <tr>
+              <td><code>set_parameter_mappings</code></td>
+              <td>
+                <code
+                  >void set_parameter_mappings(<br />&nbsp;&nbsp;const
+                  std::string &amp;state_name,<br />&nbsp;&nbsp;const
+                  ParameterMappings &amp;parameter_mappings)</code
+                >
+              </td>
+              <td>N/A</td>
+              <td>
+                Sets parameter mappings for a child state (<code
+                  >child_param -&gt; parent_param</code
+                >).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          <code>Concurrence</code> inherits all <a href="#state">State</a>
+          metadata methods.
+        </p>
+
+        <h3>Example</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">#include "yasmin/concurrence.hpp"
+
+auto foo_state = std::make_shared&lt;FooState&gt;();
+auto bar_state = std::make_shared&lt;BarState&gt;();
+
+auto concurrence_state = std::make_shared&lt;yasmin::Concurrence&gt;(
+    yasmin::StateMap{{"FOO", foo_state}, {"BAR", bar_state}},
+    "defaulted",
+    yasmin::OutcomeMap{
+        {"outcome1", {{"FOO", "outcome1"}, {"BAR", "outcome3"}}},
+        {"outcome2", {{"FOO", "outcome2"}, {"BAR", "outcome3"}}},
+    });
+
+concurrence_state-&gt;set_description("Runs FOO and BAR in parallel.");
+
+sm-&gt;add_state("CONCURRENT", concurrence_state,
+              {{"outcome1", "outcome1"},
+               {"outcome2", "outcome2"},
+               {"defaulted", "outcome2"}});</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">from yasmin import Concurrence
+
+foo_state = FooState()
+bar_state = BarState()
+
+concurrence_state = Concurrence(
+    states={"FOO": foo_state, "BAR": bar_state},
+    default_outcome="defaulted",
+    outcome_map={
+        "outcome1": {"FOO": "outcome1", "BAR": "outcome3"},
+        "outcome2": {"FOO": "outcome2", "BAR": "outcome3"},
+    },
+)
+concurrence_state.set_description("Runs FOO and BAR in parallel.")
+
+sm.add_state(
+    "CONCURRENT",
+    concurrence_state,
+    transitions={
+        "outcome1": "outcome1",
+        "outcome2": "outcome2",
+        "defaulted": "outcome2",
+    },
+)</code></pre>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation
+        generated with <a href="doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

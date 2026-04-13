@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YASMIN Documentation</title>
+    <style>
+      /* Light theme variables */
+      :root {
+        --bg-color: #f8f8f8;
+        --text-color: #333;
+        --link-color: #004080;
+        --border-color: #cccccc;
+        --card-bg-color: #ffffff;
+        --card-shadow: rgba(0, 0, 0, 0.1);
+      }
+
+      /* Dark theme variables */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #1e1e1e;
+          --text-color: #e0e0e0;
+          --link-color: #5b9bd5;
+          --border-color: #444444;
+          --card-bg-color: #2a2a2a;
+          --card-shadow: rgba(255, 255, 255, 0.1);
+        }
+      }
+
+      /* General styles */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      header,
+      footer {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: var(--card-bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+      }
+
+      header {
+        display: flex; /* Use flexbox for header layout */
+        align-items: center; /* Vertically center items */
+      }
+
+      header img {
+        max-width: 80px; /* Set a maximum width for the logo */
+        height: auto;
+        margin-right: 15px; /* Space between logo and title */
+      }
+
+      header a {
+        text-decoration: none; /* Remove underline from links */
+        color: var(--link-color); /* Link color */
+        display: flex; /* Allow children to flex */
+        align-items: center; /* Center items vertically */
+        width: 100%; /* Allow anchor to take full width */
+      }
+
+      header h1 {
+        font-size: 1.8em;
+        margin: 0; /* Remove default margin */
+        flex-grow: 1; /* Allow title to expand to fill space */
+      }
+
+      /* Documentation links container */
+      .doc-cards {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 20px; /* Increased gap between cards */
+      }
+
+      /* Doxygen-style boxes */
+      .doc-card {
+        display: block;
+        padding: 20px; /* Increased padding for comfort */
+        background-color: var(--card-bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px; /* More rounded corners */
+        box-shadow: 0 2px 4px var(--card-shadow); /* Subtle shadow */
+        transition: box-shadow 0.3s, transform 0.3s; /* Transition effects */
+        color: var(--text-color);
+        text-decoration: none;
+      }
+
+      .doc-card h2 {
+        font-size: 1.3em; /* Slightly larger title */
+        color: var(--link-color);
+        margin: 0 0 10px; /* Spacing below the title */
+      }
+
+      .doc-card p {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 1em; /* Normalized font size */
+      }
+
+      /* Hover effect for the cards */
+      .doc-card:hover {
+        box-shadow: 0 4px 8px var(--card-shadow); /* Deeper shadow on hover */
+        transform: translateY(-2px); /* Lift effect on hover */
+      }
+
+      footer {
+        font-size: 0.8em;
+        text-align: center;
+        color: var(--text-color);
+      }
+
+      footer a {
+        color: var(--link-color);
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank">
+        <img src="logo.png" alt="YASMIN Logo" />
+        <!-- Include the logo -->
+        <h1>YASMIN Documentation</h1>
+      </a>
+    </header>
+    <nav class="doc-cards">
+      <a href="yasmin_cpp/html/index.html" class="doc-card">
+        <h2>YASMIN C++ Documentation</h2>
+        <p>
+          Explore the C++ version of the YASMIN ROS 2 packages. This
+          documentation includes details about classes, function definitions and
+          demos designed to enhance your understanding and usage of the library.
+        </p>
+      </a>
+      <a href="yasmin_python/html/index.html" class="doc-card">
+        <h2>YASMIN Python Documentation</h2>
+        <p>
+          Explore the Python version of the YASMIN ROS 2 packages. This
+          documentation includes details about classes, function definitions and
+          demos designed to enhance your understanding and usage of the library.
+        </p>
+      </a>
+    </nav>
+    <footer>
+      <p>
+        Generated with <a href="https://www.doxygen.nl/index.html">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

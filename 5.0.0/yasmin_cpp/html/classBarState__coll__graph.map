@@ -1,0 +1,16 @@
+<map id="BarState" name="BarState">
+<area shape="rect" id="Node000001" title="Represents the &quot;Bar&quot; state in the state machine." alt="" coords="132,177,204,203"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="42,102,94,128"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,136,139,174,136,179,80,140"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="98,135,153,174,150,179,95,139"/>
+<area shape="poly" id="edge3_Node000001_Node000002" title=" " alt="" coords="110,132,167,174,164,179,107,136"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="118,102,218,128"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="145,142,144,160,150,176,145,178,139,161,139,142"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="162,143,164,177,158,177,157,143"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="179,143,178,177,172,177,174,143"/>
+<area shape="poly" id="edge9_Node000001_Node000003" title=" " alt="" coords="197,142,197,161,191,178,186,176,192,160,191,142"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,5,147,31"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="100,40,134,76,158,100,154,103,130,80,96,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="171,5,346,31"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="239,44,182,103,178,100,235,40"/>
+</map>

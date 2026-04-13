@@ -1,0 +1,15 @@
+<map id="yasmin_ros/include/yasmin_ros/interface_serialization.hpp" name="yasmin_ros/include/yasmin_ros/interface_serialization.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="186,5,331,61"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,109,66,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,64,81,106,79,101,187,59"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="90,109,168,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,64,161,103,158,98,216,59"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="192,109,245,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="248,62,233,96,228,93,243,60"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="270,109,327,135"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="273,60,288,93,284,96,268,62"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="351,109,504,135"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="312,59,392,99,389,104,310,64"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="528,109,727,135"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="332,49,561,102,560,108,331,54"/>
+</map>

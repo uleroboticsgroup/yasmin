@@ -1,0 +1,16 @@
+<map id="yasmin::StateMetadata" name="yasmin::StateMetadata">
+<area shape="rect" id="Node000001" title="Metadata for a state including description and blackboard key information." alt="" coords="1121,147,1274,173"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="216,124,293,150"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="308,136,1121,155,1120,161,308,141"/>
+<area shape="rect" id="Node000006" href="$structyasmin_1_1BlackboardKeyInfo.html" title="Information about a blackboard key including name and optional default value." alt="" coords="494,90,672,115"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="307,129,494,109,494,114,308,134"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,117,129,157"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,134,215,134,215,140,145,140"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="797,197,932,253"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="946,220,1020,213,1096,199,1135,186,1169,171,1172,176,1137,191,1098,204,1021,218,947,225"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="791,82,938,123"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="954,114,1097,138,1126,144,1125,149,1097,144,953,119"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="687,100,790,100,790,105,687,105"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="178,8,330,34"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="346,25,408,33,471,48,519,66,560,87,557,91,517,71,470,53,407,39,345,30"/>
+</map>

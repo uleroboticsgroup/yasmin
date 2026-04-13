@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YASMIN CLI Documentation</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="docker.html">Docker Environment</a></li>
+          <li><a href="main_concepts.html">Main Concepts</a></li>
+          <li><a href="xml_factory.html">XML State Machines</a></li>
+          <li><a href="packages.html">Packages Overview</a></li>
+          <li><a href="yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/cpp/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/cpp/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/python/basic_fsm.html"
+                  >Writing a Simple FSM</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/remap_demo.html"
+                  >Blackboard Remapping</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li>
+                <a href="tutorials/python/publisher_demo.html">Publisher</a>
+              </li>
+              <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/python/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/parameters_demo.html"
+                  >ROS Parameters</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+          <li>
+            <a href="yasmin_ros_serialization.html">ROS Serialization States</a>
+          </li>
+          <li><a href="yasmin_ros_tf.html">TF States</a></li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>YASMIN CLI</h1>
+
+        <div class="overview">
+          <p>
+            <strong>YASMIN CLI</strong> extends the ROS 2 command line with
+            commands for inspecting plugins, printing XML state machines,
+            validating factory files, opening the editor, running XML state
+            machines, testing individual states, and starting the viewer.
+          </p>
+          <p>
+            The CLI is registered as a ROS 2 command extension, so all commands
+            are available under:
+          </p>
+          <pre><code class="language-bash">ros2 yasmin &lt;verb&gt; [options]</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Available Verbs</h2>
+          <ul>
+            <li>
+              <strong>list</strong> - list discovered YASMIN plugins and XML
+              state machines
+            </li>
+            <li>
+              <strong>info</strong> - show detailed metadata for one plugin
+            </li>
+            <li>
+              <strong>print</strong> - print a YASMIN XML state machine in a
+              readable form
+            </li>
+            <li>
+              <strong>validate</strong> - validate one XML state machine or all
+              discovered XML files
+            </li>
+            <li>
+              <strong>edit</strong> - open a state machine in the YASMIN editor
+            </li>
+            <li><strong>run</strong> - run a state machine from an XML file</li>
+            <li>
+              <strong>test</strong> - generate a temporary one-state XML and run
+              a single plugin in isolation
+            </li>
+            <li><strong>viewer</strong> - start the YASMIN viewer</li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <h2>Plugin Identification</h2>
+          <p>
+            Several CLI verbs operate on a plugin identifier. The expected
+            format depends on the plugin type:
+          </p>
+          <ul>
+            <li>
+              <strong>Python plugins:</strong>
+              <code>module.submodule.ClassName</code>
+            </li>
+            <li>
+              <strong>C++ plugins:</strong>
+              <code>package_name/ClassName</code>
+            </li>
+            <li>
+              <strong>XML state machines:</strong>
+              <code>package_name/file.xml</code>
+            </li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <h2>Listing Plugins</h2>
+          <p>
+            The <code>list</code> verb shows all discovered plugins. You can
+            filter by plugin type and search by substring.
+          </p>
+          <pre><code class="language-bash">ros2 yasmin list
+ros2 yasmin list --type cpp
+ros2 yasmin list --type python --search monitor
+ros2 yasmin list --type xml</code></pre>
+          <p>The supported values for <code>--type</code> are:</p>
+          <pre><code class="language-text">all, cpp, python, xml</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Inspecting Plugin Metadata</h2>
+          <p>
+            The <code>info</code> verb prints detailed metadata for one plugin,
+            including its description, outcomes, parameters, input keys, and
+            output keys.
+          </p>
+          <pre><code class="language-bash">ros2 yasmin info yasmin_demo.monitor_state.MonitorState
+ros2 yasmin info my_package/MyCppState</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Printing XML State Machines</h2>
+          <p>
+            The <code>print</code> verb reads an XML state machine, validates
+            the editor model, and prints the structure in a readable tree
+            format. This includes containers, declared parameters, declared
+            keys, remaps, parameter remaps, transitions, and final outcomes.
+          </p>
+          <pre><code class="language-bash">ros2 yasmin print path/to/state_machine.xml
+ros2 yasmin print path/to/state_machine.xml --validate-only</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Validating XML State Machines</h2>
+          <p>
+            The <code>validate</code> verb uses YASMIN Factory to create the
+            state machine from XML and then calls <code>validate()</code>. If no
+            file is given, the CLI validates all XML state machines discovered
+            by the plugin manager.
+          </p>
+          <pre><code class="language-bash">ros2 yasmin validate path/to/state_machine.xml
+ros2 yasmin validate path/to/state_machine.xml --no-strict
+ros2 yasmin validate</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Opening the Editor</h2>
+          <p>
+            The <code>edit</code> verb starts the YASMIN editor. If an XML file
+            is provided, it is validated as a YASMIN state machine XML file and
+            then opened directly.
+          </p>
+          <pre><code class="language-bash">ros2 yasmin edit
+ros2 yasmin edit path/to/state_machine.xml</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Running an XML State Machine</h2>
+          <p>
+            The <code>run</code> verb launches a state machine through the
+            YASMIN Factory node. It can override declared input keys and
+            declared parameters from the root XML file before execution.
+          </p>
+          <pre><code class="language-bash">ros2 yasmin run path/to/state_machine.xml
+ros2 yasmin run path/to/state_machine.xml --input goal_pose=home
+ros2 yasmin run path/to/state_machine.xml --input retries=3 --param mode=demo
+ros2 yasmin run path/to/state_machine.xml --disable-viewer-pub
+ros2 yasmin run path/to/state_machine.xml --py</code></pre>
+          <p>
+            Input and parameter overrides must be written as
+            <code>NAME=VALUE</code>. In the current implementation, typed
+            conversion for XML overrides supports the scalar
+            <code>default_type</code> values <code>str</code>, <code>int</code>,
+            <code>float</code>, and <code>bool</code>.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Testing a Single State</h2>
+          <p>
+            The <code>test</code> verb creates a temporary one-state XML state
+            machine around a selected plugin and runs it through YASMIN Factory.
+            This is useful for quickly testing one state with specific inputs or
+            parameters without writing a full XML file manually.
+          </p>
+          <pre><code class="language-bash">ros2 yasmin test my_package/MyCppState
+ros2 yasmin test my_package/MyCppState --input goal=home
+ros2 yasmin test my_package/MyCppState --param retries=3
+ros2 yasmin test my_package/MyCppState --print-xml
+ros2 yasmin test my_package/MyCppState --keep-temp-file
+ros2 yasmin test my_package/MyCppState --disable-viewer-pub
+ros2 yasmin test my_package/MyCppState --py</code></pre>
+          <p>
+            The <code>test</code> verb supports Python and C++ state plugins. It
+            does not accept XML state machines as the selected plugin target.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Starting the Viewer</h2>
+          <p>
+            The <code>viewer</code> verb starts the YASMIN viewer node through
+            <code>ros2 run yasmin_viewer yasmin_viewer_node</code>.
+          </p>
+          <pre><code class="language-bash">ros2 yasmin viewer
+ros2 yasmin viewer --host 127.0.0.1 --port 5000 --msg-per-second 30</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Typical Workflow</h2>
+          <p>
+            A common workflow is to discover available states, inspect one
+            plugin, test it in isolation, print or validate an XML state
+            machine, and then run or edit it:
+          </p>
+          <pre><code class="language-bash">ros2 yasmin list --search nav
+ros2 yasmin info my_package/MyCppState
+ros2 yasmin test my_package/MyCppState --print-xml
+ros2 yasmin validate path/to/state_machine.xml
+ros2 yasmin print path/to/state_machine.xml
+ros2 yasmin run path/to/state_machine.xml
+ros2 yasmin edit path/to/state_machine.xml</code></pre>
+        </div>
+
+        <div class="page-navigation">
+          <a href="yasmin_factory.html" class="nav-button prev"
+            >YASMIN Factory</a
+          >
+          <a href="yasmin_viewer.html" class="nav-button next">YASMIN Viewer</a>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation
+        generated with <a href="doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+<map id="yasmin_ros::ServiceState&lt; ServiceT &gt;" name="yasmin_ros::ServiceState&lt; ServiceT &gt;">
+<area shape="rect" id="Node000001" title="A state class that interacts with a ROS 2 service." alt="" coords="5,79,174,120"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="40,5,139,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,46,92,79,87,79,87,46"/>
+</map>

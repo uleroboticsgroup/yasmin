@@ -1,0 +1,33 @@
+<map id="DelayedStartStateMachine" name="DelayedStartStateMachine">
+<area shape="rect" id="Node000001" title="Small helper state machine that delays its start." alt="" coords="891,356,1066,382"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1StateMachine.html" title="A class that implements a state machine with a set of states, transitions, and callback mechanisms fo..." alt="" coords="693,356,841,382"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="856,366,890,366,890,372,856,372"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="355,55,454,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="469,51,517,46,570,48,623,59,648,70,671,84,701,114,724,150,741,189,753,229,766,304,769,356,763,356,761,304,748,230,736,191,719,152,697,117,667,88,645,74,621,64,570,53,517,52,470,56"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="22,5,164,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="180,29,355,57,354,62,179,34"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,59,181,84"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="196,69,270,68,355,66,355,71,270,73,196,74"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="366,120,444,146"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="459,138,585,161,640,173,670,184,692,203,710,225,738,274,756,320,766,355,760,356,751,322,733,276,705,228,688,207,668,188,638,178,584,166,458,144"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="31,112,155,153"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="170,130,366,130,366,136,170,136"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="332,170,478,226"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="494,202,582,221,628,236,670,257,700,280,726,306,760,354,756,357,722,310,697,284,668,262,626,241,581,226,493,208"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="320,250,490,290"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="506,279,587,294,670,317,711,334,745,353,743,358,708,339,668,322,586,299,505,285"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="316,315,494,356"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="510,342,693,359,693,365,509,348"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="294,380,516,421"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="531,396,669,385,704,380,705,385,669,390,532,401"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="338,446,472,486"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="487,459,576,448,623,438,668,424,712,403,747,380,750,384,714,408,670,429,624,443,576,453,488,465"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="53,453,133,479"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="149,464,337,464,337,469,149,469"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="320,511,490,552"/>
+<area shape="poly" id="edge13_Node000002_Node000014" title=" " alt="" coords="505,527,588,513,629,500,668,482,698,459,723,431,757,381,761,384,727,434,701,463,670,486,631,505,589,518,506,532"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="305,576,504,617"/>
+<area shape="poly" id="edge14_Node000002_Node000015" title=" " alt="" coords="520,597,558,593,596,584,634,571,667,551,688,533,706,511,733,463,751,417,761,381,766,383,756,418,738,465,710,514,692,537,671,555,636,575,598,589,559,598,520,603"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="323,642,487,682"/>
+<area shape="poly" id="edge15_Node000002_Node000016" title=" " alt="" coords="503,669,545,667,588,661,630,647,667,624,694,598,715,566,732,532,744,496,758,429,763,382,768,382,763,430,749,497,736,534,720,569,698,601,671,629,632,652,590,666,545,673,503,675"/>
+</map>

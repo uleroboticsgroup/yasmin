@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TF States - YASMIN</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="docker.html">Docker Environment</a></li>
+          <li><a href="main_concepts.html">Main Concepts</a></li>
+          <li><a href="xml_factory.html">XML State Machines</a></li>
+          <li><a href="packages.html">Packages Overview</a></li>
+          <li><a href="yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/cpp/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/cpp/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/python/basic_fsm.html"
+                  >Writing a Simple FSM</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/remap_demo.html"
+                  >Blackboard Remapping</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li>
+                <a href="tutorials/python/publisher_demo.html">Publisher</a>
+              </li>
+              <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/python/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/parameters_demo.html"
+                  >ROS Parameters</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+          <li>
+            <a href="yasmin_ros_serialization.html">ROS Serialization States</a>
+          </li>
+          <li><a href="yasmin_ros_tf.html">TF States</a></li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>TF States</h1>
+
+        <div class="overview">
+          <p>
+            The <strong>TF States</strong> are part of the
+            <a
+              href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_ros"
+              target="_blank"
+              >yasmin_ros</a
+            >
+            package and provide YASMIN states that integrate with the
+            <a href="https://wiki.ros.org/tf2" target="_blank">tf2</a> transform
+            library. They enable state machines to set up and share transform
+            listeners through the blackboard so that subsequent states can look
+            up coordinate frame transforms without duplicating listener
+            infrastructure.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>TfBufferState</h2>
+          <p>
+            Creates a <code>tf2_ros::Buffer</code> (C++) or
+            <code>tf2_ros.Buffer</code> (Python) and an associated
+            <code>TransformListener</code>, then stores both objects in the
+            YASMIN blackboard under the keys <code>tf_buffer</code> and
+            <code>tf_listener</code>. Subsequent states retrieve these objects
+            from the blackboard and use them to perform transform lookups
+            without creating redundant listeners.
+          </p>
+
+          <h3>Outcomes</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Outcome</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>succeeded</code></td>
+                <td>
+                  The tf2 buffer and transform listener were created
+                  successfully and written to the blackboard.
+                </td>
+              </tr>
+              <tr>
+                <td><code>aborted</code></td>
+                <td>
+                  Failed to create the tf2 buffer or transform listener (e.g. an
+                  exception was thrown during construction).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Blackboard Keys</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>C++ type</th>
+                <th>Python type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Output</td>
+                <td><code>tf_buffer</code></td>
+                <td>
+                  <code>std::shared_ptr&lt;tf2_ros::Buffer&gt;</code>
+                </td>
+                <td><code>tf2_ros.Buffer</code></td>
+                <td>
+                  The created tf2 buffer. Pass it to
+                  <code>tf2_ros::TransformBroadcaster</code> or use
+                  <code>lookupTransform</code> directly.
+                </td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>tf_listener</code></td>
+                <td>
+                  <code>std::shared_ptr&lt;tf2_ros::TransformListener&gt;</code>
+                </td>
+                <td><code>tf2_ros.TransformListener</code></td>
+                <td>
+                  The transform listener that keeps <code>tf_buffer</code>
+                  up to date. Must be kept alive for as long as transforms are
+                  needed.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Parameters</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>cache_time_sec</code></td>
+                <td>float / double</td>
+                <td><code>10.0</code></td>
+                <td>
+                  How many seconds of transform history the tf2 buffer should
+                  keep. Increase this value if you need to look up transforms
+                  that are older than 10 seconds.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Plugin</h3>
+          <p>
+            <code>TfBufferState</code> is registered as a
+            <a href="https://wiki.ros.org/pluginlib" target="_blank"
+              >pluginlib</a
+            >
+            plugin under the name <code>yasmin_ros/TfBufferState</code>. It can
+            be loaded from XML state machine files via the
+            <a href="yasmin_factory.html">YASMIN Factory</a>.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Usage Examples</h2>
+
+          <h3>Python</h3>
+          <p>
+            Import <code>TfBufferState</code> from <code>yasmin_ros</code> and
+            add it as the first state in your state machine. Subsequent states
+            read <code>tf_buffer</code> from the blackboard to perform lookups.
+          </p>
+          <pre><code class="language-python">
+import rclpy
+from geometry_msgs.msg import TransformStamped
+
+import yasmin
+from yasmin import Blackboard, State, StateMachine
+from yasmin_ros import TfBufferState, set_ros_loggers
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+
+
+class LookupTransformState(State):
+    """Looks up the transform from 'base_link' to 'map' using the shared buffer."""
+
+    def __init__(self):
+        super().__init__([SUCCEED, ABORT])
+
+    def execute(self, blackboard: Blackboard) -> str:
+        tf_buffer = blackboard["tf_buffer"]
+        try:
+            transform: TransformStamped = tf_buffer.lookup_transform(
+                "map", "base_link", rclpy.time.Time()
+            )
+            yasmin.YASMIN_LOG_INFO(
+                f"Transform: x={transform.transform.translation.x:.3f}"
+                f" y={transform.transform.translation.y:.3f}"
+            )
+            return SUCCEED
+        except Exception as exc:
+            yasmin.YASMIN_LOG_WARN(f"Transform lookup failed: {exc}")
+            return ABORT
+
+
+def main():
+    rclpy.init()
+    set_ros_loggers()
+
+    tf_state = TfBufferState()
+    tf_state.set_parameter("cache_time_sec", 10.0)
+    tf_state.configure()
+
+    sm = StateMachine(outcomes=["done", "failed"])
+    sm.add_state("INIT_TF", tf_state,
+                 {SUCCEED: "LOOKUP", ABORT: "failed"})
+    sm.add_state("LOOKUP", LookupTransformState(),
+                 {SUCCEED: "done", ABORT: "failed"})
+
+    outcome = sm()
+    yasmin.YASMIN_LOG_INFO(outcome)
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+
+          <h3>C++</h3>
+          <p>
+            Include <code>yasmin_ros/tf_buffer_state.hpp</code> and add
+            <code>TfBufferState</code> to your state machine. The blackboard
+            stores <code>std::shared_ptr</code> objects so they remain alive for
+            the lifetime of the state machine execution.
+          </p>
+          <pre><code class="language-cpp">
+#include &lt;memory&gt;
+#include &lt;string&gt;
+
+#include &lt;rclcpp/rclcpp.hpp&gt;
+#include &lt;tf2_ros/buffer.hpp&gt;
+#include &lt;tf2_ros/transform_listener.hpp&gt;
+
+#include "yasmin/blackboard.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/tf_buffer_state.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+
+// A state that uses the shared tf buffer to look up a transform.
+class LookupTransformState : public yasmin::State {
+public:
+  LookupTransformState()
+      : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED,
+                       yasmin_ros::basic_outcomes::ABORT}) {}
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    auto tf_buffer =
+        blackboard->get&lt;std::shared_ptr&lt;tf2_ros::Buffer&gt;&gt;("tf_buffer");
+    try {
+      auto transform = tf_buffer->lookupTransform(
+          "map", "base_link", tf2::TimePointZero);
+      YASMIN_LOG_INFO("x=%.3f y=%.3f",
+                      transform.transform.translation.x,
+                      transform.transform.translation.y);
+      return yasmin_ros::basic_outcomes::SUCCEED;
+    } catch (const tf2::TransformException &ex) {
+      YASMIN_LOG_WARN("Transform lookup failed: %s", ex.what());
+      return yasmin_ros::basic_outcomes::ABORT;
+    }
+  }
+};
+
+int main(int argc, char *argv[]) {
+  rclcpp::init(argc, argv);
+  yasmin_ros::set_ros_loggers();
+
+  auto sm = std::make_shared&lt;yasmin::StateMachine&gt;(
+      std::vector&lt;std::string&gt;{"done", "failed"});
+
+  sm->add_state("INIT_TF",
+                std::make_shared&lt;yasmin_ros::TfBufferState&gt;(),
+                {{yasmin_ros::basic_outcomes::SUCCEED, "LOOKUP"},
+                 {yasmin_ros::basic_outcomes::ABORT, "failed"}});
+
+  sm->add_state("LOOKUP",
+                std::make_shared&lt;LookupTransformState&gt;(),
+                {{yasmin_ros::basic_outcomes::SUCCEED, "done"},
+                 {yasmin_ros::basic_outcomes::ABORT, "failed"}});
+
+  try {
+    std::string outcome = (*sm)();
+    YASMIN_LOG_INFO("%s", outcome.c_str());
+  } catch (const std::exception &e) {
+    YASMIN_LOG_WARN("%s", e.what());
+  }
+
+  rclcpp::shutdown();
+  return 0;
+}
+</code></pre>
+
+          <h3>XML (Factory)</h3>
+          <p>
+            <code>TfBufferState</code> is available as a plugin so it can be
+            referenced directly in XML state machine definitions loaded by the
+            <a href="yasmin_factory.html">YASMIN Factory</a>.
+          </p>
+          <pre><code class="language-xml">
+&lt;StateMachine outcomes="done failed"&gt;
+  &lt;State name="InitTF"
+         type="cpp"
+         class="yasmin_ros/TfBufferState"&gt;
+    &lt;Param name="cache_time_sec" value="10.0"/&gt;
+    &lt;Transition from="succeeded" to="Lookup"/&gt;
+    &lt;Transition from="aborted" to="failed"/&gt;
+  &lt;/State&gt;
+
+  &lt;!-- Add your transform-using states here, reading tf_buffer
+       from the blackboard. --&gt;
+&lt;/StateMachine&gt;
+</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Design Notes</h2>
+          <ul>
+            <li>
+              <strong>Single listener per state machine:</strong>
+              <code>TfBufferState</code> is intended to run once at the start of
+              a state machine. All subsequent states share the same
+              <code>tf_buffer</code> and <code>tf_listener</code> objects stored
+              on the blackboard, avoiding the overhead of starting multiple
+              listeners.
+            </li>
+            <li>
+              <strong>Lifetime management:</strong> The
+              <code>tf_listener</code> must remain alive for transforms to
+              continue being populated. Because YASMIN keeps the blackboard
+              alive for the entire execution, the listener is automatically kept
+              alive as long as its entry is not removed from the blackboard.
+            </li>
+            <li>
+              <strong>Cache time:</strong> The default cache time is 10 seconds.
+              For applications that need to look up older transforms (e.g. when
+              processing historical sensor data), increase
+              <code>cache_time_sec</code> accordingly.
+            </li>
+            <li>
+              <strong>Thread safety:</strong>
+              <code>tf2_ros::Buffer</code> is thread-safe. It can be accessed
+              from states running in parallel inside a
+              <a href="main_concepts.html#concurrence">Concurrence</a>
+              container.
+            </li>
+          </ul>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation
+        generated with <a href="doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

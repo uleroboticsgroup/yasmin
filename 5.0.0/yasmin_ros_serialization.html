@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ROS Serialization States - YASMIN</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="docker.html">Docker Environment</a></li>
+          <li><a href="main_concepts.html">Main Concepts</a></li>
+          <li><a href="xml_factory.html">XML State Machines</a></li>
+          <li><a href="packages.html">Packages Overview</a></li>
+          <li><a href="yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/cpp/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/cpp/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/python/basic_fsm.html"
+                  >Writing a Simple FSM</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/remap_demo.html"
+                  >Blackboard Remapping</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li>
+                <a href="tutorials/python/publisher_demo.html">Publisher</a>
+              </li>
+              <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/python/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/parameters_demo.html"
+                  >ROS Parameters</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+          <li>
+            <a href="yasmin_ros_serialization.html">ROS Serialization States</a>
+          </li>
+          <li><a href="yasmin_ros_tf.html">TF States</a></li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>ROS Serialization States</h1>
+
+        <div class="overview">
+          <p>
+            The <strong>ROS Serialization States</strong> are part of the
+            <a
+              href="https://github.com/uleroboticsgroup/yasmin/tree/main/yasmin_ros"
+              target="_blank"
+              >yasmin_ros</a
+            >
+            package and enable converting ROS 2 interface instances (messages,
+            service requests/responses, action goals/results/feedback) to and
+            from raw byte arrays. They are especially useful when Python and C++
+            states need to share complex ROS objects through the YASMIN
+            blackboard, since only primitive types and
+            <code>bytes</code>&nbsp;/&nbsp;<code
+              >std::vector&lt;uint8_t&gt;</code
+            >
+            are safely exchanged across the language boundary.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Overview</h2>
+          <p>
+            There are four serialization states, split by language and
+            direction:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>State</th>
+                <th>Language</th>
+                <th>Direction</th>
+                <th>Plugin name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>RosSerializeCppState</code></td>
+                <td>C++</td>
+                <td>ROS interface &rarr; bytes</td>
+                <td><code>yasmin_ros/RosSerializeCppState</code></td>
+              </tr>
+              <tr>
+                <td><code>RosDeserializeCppState</code></td>
+                <td>C++</td>
+                <td>bytes &rarr; ROS interface</td>
+                <td><code>yasmin_ros/RosDeserializeCppState</code></td>
+              </tr>
+              <tr>
+                <td><code>RosSerializePyState</code></td>
+                <td>Python</td>
+                <td>ROS interface &rarr; bytes</td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><code>RosDeserializePyState</code></td>
+                <td>Python</td>
+                <td>bytes &rarr; ROS interface</td>
+                <td>&mdash;</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            The C++ states are registered as
+            <a href="https://wiki.ros.org/pluginlib" target="_blank"
+              >pluginlib</a
+            >
+            plugins so they can be loaded from XML state machine files via the
+            <a href="yasmin_factory.html">YASMIN Factory</a>. The Python states
+            are imported from <code>yasmin_ros</code>.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Supported Interface Types (C++)</h2>
+          <p>
+            The C++ states operate through a compile-time handler map defined in
+            <code>yasmin_ros/supported_interface_serialization.hpp</code>. The
+            following interface types are built in:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Interface type string</th>
+                <th>C++ type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>geometry_msgs/msg/Pose</code></td>
+                <td><code>geometry_msgs::msg::Pose</code></td>
+              </tr>
+              <tr>
+                <td><code>std_msgs/msg/String</code></td>
+                <td><code>std_msgs::msg::String</code></td>
+              </tr>
+              <tr>
+                <td><code>std_srvs/srv/Trigger_Request</code></td>
+                <td><code>std_srvs::srv::Trigger::Request</code></td>
+              </tr>
+              <tr>
+                <td><code>std_srvs/srv/Trigger_Response</code></td>
+                <td><code>std_srvs::srv::Trigger::Response</code></td>
+              </tr>
+              <tr>
+                <td><code>example_interfaces/action/Fibonacci_Goal</code></td>
+                <td>
+                  <code>example_interfaces::action::Fibonacci::Goal</code>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>example_interfaces/action/Fibonacci_Result</code>
+                </td>
+                <td>
+                  <code>example_interfaces::action::Fibonacci::Result</code>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>example_interfaces/action/Fibonacci_Feedback</code>
+                </td>
+                <td>
+                  <code>example_interfaces::action::Fibonacci::Feedback</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            The Python states resolve the interface class dynamically at runtime
+            using <code>rclpy</code> so any installed ROS 2 interface type is
+            supported.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>RosSerializeCppState</h2>
+          <p>
+            Reads a C++ ROS interface instance from the blackboard key
+            <code>input</code>, serializes it to a
+            <code>std::vector&lt;uint8_t&gt;</code>, and writes the result to
+            the blackboard key <code>output</code>.
+          </p>
+
+          <h3>Outcomes</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Outcome</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>succeed</code></td>
+                <td>Serialization finished successfully.</td>
+              </tr>
+              <tr>
+                <td><code>type_error</code></td>
+                <td>
+                  The value stored in <code>input</code> does not match the
+                  configured interface type.
+                </td>
+              </tr>
+              <tr>
+                <td><code>error</code></td>
+                <td>
+                  Serialization failed because the input could not be processed.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Blackboard Keys</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><code>input</code></td>
+                <td>configured interface type</td>
+                <td>ROS interface instance to serialize.</td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>output</code></td>
+                <td><code>std::vector&lt;uint8_t&gt;</code></td>
+                <td>Serialized byte array.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Parameters</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>interface_type</code></td>
+                <td>string</td>
+                <td><code>geometry_msgs/msg/Pose</code></td>
+                <td>
+                  ROS interface type string, e.g.
+                  <code>geometry_msgs/msg/Pose</code> or
+                  <code>std_srvs/srv/Trigger_Request</code>. Must be one of the
+                  supported types listed above.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2>RosDeserializeCppState</h2>
+          <p>
+            Reads a <code>std::vector&lt;uint8_t&gt;</code> byte array from the
+            blackboard key <code>input</code>, deserializes it into the
+            configured C++ ROS interface type, and writes the result to the
+            blackboard key <code>output</code>.
+          </p>
+
+          <h3>Outcomes</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Outcome</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>succeed</code></td>
+                <td>Deserialization finished successfully.</td>
+              </tr>
+              <tr>
+                <td><code>type_error</code></td>
+                <td>
+                  The value stored in <code>input</code> does not match the
+                  expected byte-array type or the target type does not match.
+                </td>
+              </tr>
+              <tr>
+                <td><code>error</code></td>
+                <td>
+                  Deserialization failed because the data could not be decoded.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Blackboard Keys</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><code>input</code></td>
+                <td><code>std::vector&lt;uint8_t&gt;</code></td>
+                <td>Serialized byte array to deserialize.</td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>output</code></td>
+                <td>configured interface type</td>
+                <td>Deserialized ROS interface instance.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Parameters</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>interface_type</code></td>
+                <td>string</td>
+                <td><code>geometry_msgs/msg/Pose</code></td>
+                <td>
+                  ROS interface type string. Must be one of the supported types
+                  listed above.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2>RosSerializePyState</h2>
+          <p>
+            Python counterpart of <code>RosSerializeCppState</code>. Reads a
+            Python ROS interface instance from the blackboard key
+            <code>input</code>, serializes it using
+            <code>rclpy.serialization.serialize_message</code>, and writes the
+            resulting <code>bytes</code> object to the blackboard key
+            <code>output</code>.
+          </p>
+
+          <h3>Outcomes</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Outcome</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>succeed</code></td>
+                <td>Serialization finished successfully.</td>
+              </tr>
+              <tr>
+                <td><code>type_error</code></td>
+                <td>
+                  The value stored in <code>input</code> does not match the
+                  configured interface type.
+                </td>
+              </tr>
+              <tr>
+                <td><code>error</code></td>
+                <td>
+                  Serialization failed because the input could not be processed.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Blackboard Keys</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><code>input</code></td>
+                <td>configured interface type</td>
+                <td>ROS interface instance to serialize.</td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>output</code></td>
+                <td><code>bytes</code></td>
+                <td>Serialized byte array.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Parameters</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>interface_type</code></td>
+                <td>string</td>
+                <td><code>geometry_msgs/msg/Pose</code></td>
+                <td>
+                  ROS interface type string such as
+                  <code>geometry_msgs/msg/Pose</code> or
+                  <code>std_srvs/srv/Trigger_Request</code>. Any installed ROS 2
+                  interface is accepted.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2>RosDeserializePyState</h2>
+          <p>
+            Python counterpart of <code>RosDeserializeCppState</code>. Reads a
+            <code>bytes</code> (or <code>bytearray</code>) value from the
+            blackboard key <code>input</code>, deserializes it using
+            <code>rclpy.serialization.deserialize_message</code>, and writes the
+            resulting Python ROS interface instance to the blackboard key
+            <code>output</code>.
+          </p>
+
+          <h3>Outcomes</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Outcome</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>succeed</code></td>
+                <td>Deserialization finished successfully.</td>
+              </tr>
+              <tr>
+                <td><code>type_error</code></td>
+                <td>
+                  The value stored in <code>input</code> is not a byte array or
+                  the target type does not match.
+                </td>
+              </tr>
+              <tr>
+                <td><code>error</code></td>
+                <td>
+                  Deserialization failed because the serialized data could not
+                  be decoded.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Blackboard Keys</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><code>input</code></td>
+                <td><code>bytes</code> / <code>bytearray</code></td>
+                <td>Serialized byte array to deserialize.</td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>output</code></td>
+                <td>configured interface type</td>
+                <td>Deserialized Python ROS interface instance.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Parameters</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>interface_type</code></td>
+                <td>string</td>
+                <td><code>geometry_msgs/msg/Pose</code></td>
+                <td>
+                  ROS interface type string such as
+                  <code>geometry_msgs/msg/Pose</code> or
+                  <code>example_interfaces/action/Fibonacci_Result</code>. Any
+                  installed ROS 2 interface is accepted.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2>Usage Examples</h2>
+
+          <h3>Python &mdash; Serialize and Deserialize a Pose</h3>
+          <p>
+            The following snippet shows how to wire the Python serialization
+            states in a state machine so that a
+            <code>geometry_msgs/msg/Pose</code> instance written by one state is
+            serialized to bytes, passed across the blackboard, and then
+            deserialized back.
+          </p>
+          <pre><code class="language-python">
+import rclpy
+from geometry_msgs.msg import Pose
+
+from yasmin import Blackboard, State, StateMachine
+from yasmin_ros import RosSerializePyState, RosDeserializePyState, set_ros_loggers
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+
+
+class WritePoseState(State):
+    """Puts a Pose into the blackboard under key 'input'."""
+
+    def __init__(self):
+        super().__init__([SUCCEED])
+
+    def execute(self, blackboard: Blackboard) -> str:
+        pose = Pose()
+        pose.position.x = 1.0
+        pose.position.y = 2.0
+        pose.position.z = 3.0
+        blackboard["input"] = pose
+        return SUCCEED
+
+
+class ReadPoseState(State):
+    """Reads the deserialized Pose from blackboard key 'output'."""
+
+    def __init__(self):
+        super().__init__([SUCCEED])
+
+    def execute(self, blackboard: Blackboard) -> str:
+        pose: Pose = blackboard["output"]
+        print(f"position: x={pose.position.x} y={pose.position.y} z={pose.position.z}")
+        return SUCCEED
+
+
+def main():
+    rclpy.init()
+    set_ros_loggers()
+
+    serialize_state = RosSerializePyState()
+    serialize_state.set_parameter("interface_type", "geometry_msgs/msg/Pose")
+    serialize_state.configure()
+
+    deserialize_state = RosDeserializePyState()
+    deserialize_state.set_parameter("interface_type", "geometry_msgs/msg/Pose")
+    deserialize_state.configure()
+
+    sm = StateMachine(outcomes=["done"])
+    sm.add_state("WRITE_POSE", WritePoseState(), {"succeed": "SERIALIZE"})
+    sm.add_state("SERIALIZE", serialize_state, {"succeed": "DESERIALIZE",
+                                                "type_error": "done",
+                                                "error": "done"})
+    sm.add_state("DESERIALIZE", deserialize_state, {"succeed": "READ_POSE",
+                                                    "type_error": "done",
+                                                    "error": "done"})
+    sm.add_state("READ_POSE", ReadPoseState(), {"succeed": "done"})
+
+    sm()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+
+          <h3>C++ &mdash; Serialize via XML (Factory)</h3>
+          <p>
+            The C++ serialization states are registered as plugins so they can
+            be used directly from an XML state machine file loaded by the
+            <a href="yasmin_factory.html">YASMIN Factory</a>. See the
+            <code>yasmin_demos</code> package for a complete working example
+            (<code>ros_serialization_demo</code>).
+          </p>
+          <pre><code class="language-xml">
+&lt;StateMachine outcomes="done"&gt;
+  &lt;State name="Serialize"
+         type="cpp"
+         class="yasmin_ros/RosSerializeCppState"&gt;
+    &lt;Param name="interface_type" value="geometry_msgs/msg/Pose"/&gt;
+    &lt;Transition from="succeed" to="Deserialize"/&gt;
+    &lt;Transition from="type_error" to="done"/&gt;
+    &lt;Transition from="error" to="done"/&gt;
+  &lt;/State&gt;
+  &lt;State name="Deserialize"
+         type="cpp"
+         class="yasmin_ros/RosDeserializeCppState"&gt;
+    &lt;Param name="interface_type" value="geometry_msgs/msg/Pose"/&gt;
+    &lt;Transition from="succeed" to="done"/&gt;
+    &lt;Transition from="type_error" to="done"/&gt;
+    &lt;Transition from="error" to="done"/&gt;
+  &lt;/State&gt;
+&lt;/StateMachine&gt;
+</code></pre>
+
+          <h3>Cross-Language Pattern</h3>
+          <p>
+            When a C++ state writes a serialized byte array and a Python state
+            needs to consume the original message (or vice versa), combine the
+            C++ and Python serialize/deserialize states in the same state
+            machine:
+          </p>
+          <ol>
+            <li>
+              A C++ state stores a
+              <code>geometry_msgs::msg::Pose</code> on the blackboard.
+            </li>
+            <li>
+              <code>RosSerializeCppState</code> converts it to
+              <code>std::vector&lt;uint8_t&gt;</code> and writes it to
+              <code>output</code>.
+            </li>
+            <li>
+              A Python state reads <code>output</code> as <code>bytes</code> and
+              uses <code>RosDeserializePyState</code> to recover the
+              <code>geometry_msgs.msg.Pose</code> Python object.
+            </li>
+          </ol>
+          <p>
+            See
+            <a href="packages.html#cross-language"
+              >Cross-Language ROS Interface Communication</a
+            >
+            for background and the primitive types that are safely exchanged
+            without serialization.
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation
+        generated with <a href="doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>
