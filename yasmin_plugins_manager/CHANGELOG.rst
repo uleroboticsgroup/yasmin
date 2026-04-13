@@ -1,35 +1,25 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package yasmin_editor
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package yasmin_plugins_manager
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 5.0.0 (2026-01-14)
 ------------------
-* Interactive shell improvements and runtime breakpoints (`#109 <https://github.com/uleroboticsgroup/yasmin/pull/109>`_)
-  * add keys, items, values and __iter__ to blackboard proxy
-  * fix qtconsole shell theme and completion popup selection
-  * add break points for runtime mode
-  * fix runtime breakpoints for container state machine nodes
-* normalize cpp metadata types in editor and plugin cache path (`#108 <https://github.com/uleroboticsgroup/yasmin/pull/108>`_)
+* normalize cpp metadata types in editor and plugin cache path (`#108 <https://github.com/uleroboticsgroup/yasmin/pull/108>`)
   * normalize cpp metadata types in editor and plugin cache path
   * fix metadata type normalization for python-loaded plugins and nested cpp templates
   * always normalize metadata
-* Fix state machine cancel propagation and add hard cancel API (`#105 <https://github.com/uleroboticsgroup/yasmin/issues/105>`_)
-  * Fix state machine cancel propagation and add hard cancel API
-  * Update editor to use direct state-machine cancel API
-  * formatter
-  * dont cancel state machine in cancel_state
-  * use new cancel_state_machine API in sigint_handler
-  ---------
+* build: update setup.py to exclude test packages and add pytest, remove linter tests
+  Remove placeholder linter test files for copyright, flake8, and pep257
+  in yasmin_cli and yasmin_plugins_manager. Update package configurations
+  to use pytest as a test extra and exclude test directories from packages.
+* test: replace placeholder tests with linter tests for copyright, flake8, and pep257 in yasmin_cli and yasmin_plugins_manager
+  Remove placeholder test files and __init_\_.py from yasmin_cli and yasmin_plugins_manager test directories.
+  Add actual linter test files for copyright, flake8, and pep257 compliance checks.
+* test: add placeholder tests to yasmin_cli and yasmin_plugins_manager
+  Remove tests_require from yasmin_cli setup.py to adjust testing dependencies.
+* feat(discovery): add env, package.xml and XML-file ignore rules with cache invalidation (`#97 <https://github.com/uleroboticsgroup/yasmin/issues/97>`_)
   Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
-* Fix renaming states inside entered nested containers (`#103 <https://github.com/uleroboticsgroup/yasmin/issues/103>`_)
-  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
-* Improve interactive shell in editor (`#99 <https://github.com/uleroboticsgroup/yasmin/issues/99>`_)
-  * Keep runtime shell open and add debugger-like shell commands
-  * Theme embedded shell and enable maximize/fullscreen window state
-  ---------
-  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
-* Hide dot-prefixed blackboard keys and add toggle button (`#98 <https://github.com/uleroboticsgroup/yasmin/issues/98>`_)
-  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Update build configurations and README to include yasmin_pcl package
 * Adding state metadata (`#95 <https://github.com/uleroboticsgroup/yasmin/issues/95>`_)
   * feat(state): add metadata support with default value injection for blackboard keys
   Add StateMetadata and BlackboardKeyInfo structures to enable states to declare
@@ -57,6 +47,10 @@ Changelog for package yasmin_editor
   * add state metadata to all cpp demos
   * guard unsupported metadata default conversion in pybind
   * add cli tool for inspecting states
+  - counter [default=0, type=int]
+  Current counter value stored in the blackboard.
+  Output keys:
+  - counter
   * use keyword description in python demos to avoid pybind overload ambiguity
   * remove defaults for output_keys in python demos
   output_keys shouldn't have default values
@@ -448,90 +442,3 @@ Changelog for package yasmin_editor
   ---------
   Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
 * Contributors: Miguel Ángel González Santamarta
-
-4.2.3 (2026-01-06)
-------------------
-* Setting C++ standard to 17
-* Contributors: Miguel Ángel González Santamarta
-
-4.2.2 (2025-12-28)
-------------------
-* Improving editor C++ plugins filter using the base_class_type to avoid no-yasmin plugins
-* Contributors: Miguel Ángel González Santamarta
-
-4.2.1 (2025-12-19)
-------------------
-
-4.2.0 (2025-12-17)
-------------------
-* adding Exception to logs in plugin_manager
-* fixing self-loops transitions in editor
-* removing wrong condition in plugin manager to check cpp plugins
-* Contributors: Miguel Ángel González Santamarta
-
-4.1.0 (2025-12-07)
-------------------
-
-4.0.2 (2025-12-01)
-------------------
-* fixing python comments
-* Contributors: Miguel Ángel González Santamarta
-
-4.0.1 (2025-11-25)
-------------------
-
-4.0.0 (2025-11-24)
-------------------
-* removing directories "state_mahcines" and "resource" from editor
-* moving demo commands in README inside details
-* removing reapply layout from editor
-* xml_manager to load and save FSM XML files in editor
-* refactoring editor files
-* fixing python format in editor
-* refactoring yasmin_editor
-* removing comments from main functions
-* Merge pull request `#70 <https://github.com/uleroboticsgroup/yasmin/issues/70>`_ from uleroboticsgroup/pybinding
-  [New Great Version] Pybinding + Plugins + Editor
-* new python files for load and save state machines in editor
-* removing transition dialog
-* restoring get_concurrence_data in concurrence dialog for editor
-* removing unused function from editor
-* fixing python format in editor
-* Changed Sugiyama framework to Fruchterman–Reingold in yasmin_editor (`#69 <https://github.com/uleroboticsgroup/yasmin/issues/69>`_)
-  * Updated algorithm
-  * Updated graph generation
-  * Updated documentation
-  * Updated documentation
-  ---------
-  Co-authored-by: luispri2001 <lpriel00@estudiantes.unileon.es>
-* updating editor components when loading xml
-* fixing _preorder_outcomes_in_layers call
-* restoring get_state_machine_data in state_machine_dialog of the editor
-* adding try/except to plugin manager for loading plugins in editor
-* fixing package_name error in editor
-* adding file_name + package to include XML state machines
-* fixing XML load and save in editor
-* fixing typings in canvas of editor
-* fixing placement of nodes in editor
-* fixing editor typing
-* adding typing to yasmin_editor python files
-* Sugiyama Framework for hierarchical graph layout when loading XML in editor
-* fixing new and clean in editor
-* replacing xml with lxml in Python
-* adding shortcuts and fixing node position in editor
-* cleaning code from yasmin_editor
-* improving placement of nodes in editor
-* adding help button to yasmin editor
-* improving placement of components when loading XML files in editor
-* improving outcomes fields in editor dialogs
-* fixing remappings in editor
-* cleaning code from yasmin_editor
-* fixing positioning of components when loading XML files in editor
-* Fixing xml loading and container arrows in editor
-* initial_state -> start_state
-* fixes for the editor
-* fixes for the editor
-* fixing data edition in editor
-* new editor version with separate files for GUI
-* initial files for yasmin_editor
-* Contributors: Miguel Ángel González Santamarta, Sergio

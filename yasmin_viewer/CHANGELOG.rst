@@ -3,8 +3,39 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-4.2.4 (2026-01-14)
+5.0.0 (2026-01-14)
 ------------------
+* refactor: update package share path retrieval for compatibility with rclcpp version checks
+* refactor: replace get_package_share_path with get_package_share_directory for compatibility
+* refactor: update includes to support conditional package share path retrieval
+* refactor: reorganize include directives and refine code structure across packages
+  Reorganize include statements by grouping system and third-party headers at the top with angle brackets, relocate project headers appropriately, and eliminate redundant or unused includes. Additionally, streamline source files by repositioning self-include statements, adjust comment formatting, correct minor typos, and remove superfluous whitespace or blank lines for improved readability and consistency without altering functionality.
+* C++ Viewer (`#82 <https://github.com/uleroboticsgroup/yasmin/issues/82>`_)
+  * replace python web backend with C++ static viewer server and Mermaid FSM frontend
+  - add C++ HTTP server for yasmin_viewer using Boost.Beast
+  - serve static frontend assets from package share directory
+  - keep Python YasminViewerPub support in mixed C++/Python package
+  - restore browser-based FSM visualization with Mermaid state diagrams
+  - add active-state highlighting and outcome node rendering
+  - support FSM selection, nested FSM hiding, and active-only filtering
+  - reduce redraw flicker by rendering only on data/view changes
+  - smooth diagram updates with offscreen render and fade swap
+  - remove Mermaid init pseudo-state artifacts after render
+  - update CMake and package.xml for mixed package installation
+  - replace old list-style fallback viewer with graph-style web UI
+  * replace Mermaid viewer with static Cytoscape-based FSM frontend
+  * Revert "replace Mermaid viewer with static Cytoscape-based FSM frontend"
+  This reverts commit bbf77da46ed5a0fd8c19c28d3bacddf585ec164a.
+  * cache mermaid diagrams and add persistent pan/zoom interaction
+  * vendor offline mermaid
+  * add fit/center/zoom controls and remove edge label backgrounds
+  * add FSM grid layout and improve centered viewport controls
+  * add ament_cmake_target_dependencies for ROS 2 Rolling
+  * replace ament_target_dependencies with direct target linking
+  * add comments to yasmin_viewer_node header
+  ---------
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Contributors: Maik, Miguel Ángel González Santamarta
 
 4.2.3 (2026-01-06)
 ------------------
