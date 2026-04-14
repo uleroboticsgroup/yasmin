@@ -316,38 +316,41 @@ class EditorUiMixin:
         if self.is_read_only_mode():
             self._show_read_only_message()
             return
+
         current_model = self.current_container_model
         outcome_name, ok = QInputDialog.getText(
             self, "Final Outcome", "Enter final outcome name:"
         )
         outcome_name = outcome_name.strip()
-        if ok and outcome_name:
-            if self.has_final_outcome_name_conflict(outcome_name):
-                QMessageBox.warning(
-                    self,
-                    "Error",
-                    f"Final outcome '{outcome_name}' conflicts with an existing state in this container!",
-                )
-                return
+        if not (ok and outcome_name):
+            return
 
-            scene_pos = self.canvas.get_preferred_placement_scene_pos()
-            result = ensure_final_outcome_alias(
-                current_model,
-                outcome_name,
-                float(scene_pos.x()),
-                float(scene_pos.y()),
+        if outcome_name in current_model.states:
+            QMessageBox.warning(
+                self,
+                "Error",
+                f"Final outcome '{outcome_name}' conflicts with an existing state in this container!",
             )
-            nodes = self.model_adapter.create_final_outcome_views(result.outcome)
-            node = next(
-                (item for item in nodes if item.instance_id == result.instance_id), None
-            )
-            if node is None:
-                node = self.get_primary_final_outcome_view(outcome_name)
+            return
 
-            self.update_start_state_combo()
-            self.refresh_connection_port_visibility()
-            if node is not None:
-                self.start_pending_node_placement(node)
+        scene_pos = self.canvas.get_preferred_placement_scene_pos()
+        result = ensure_final_outcome_alias(
+            current_model,
+            outcome_name,
+            float(scene_pos.x()),
+            float(scene_pos.y()),
+        )
+        nodes = self.model_adapter.create_final_outcome_views(result.outcome)
+        node = next(
+            (item for item in nodes if item.instance_id == result.instance_id), None
+        )
+        if node is None:
+            node = self.get_primary_final_outcome_view(outcome_name)
+
+        self.update_start_state_combo()
+        self.refresh_connection_port_visibility()
+        if node is not None:
+            self.start_pending_node_placement(node)
 
     def create_connection_from_drag(
         self, from_node: StateNode, to_node: StateNode
