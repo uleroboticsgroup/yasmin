@@ -26,10 +26,18 @@ install(PROGRAMS
 )
 
 if(BUILD_TESTING)
-  ament_add_pytest_test(test_editor_gui_helpers test/test_editor_gui_helpers.py)
-  ament_add_pytest_test(test_free_position_and_recent_files test/test_free_position_and_recent_files.py)
-  ament_add_pytest_test(test_runtime_and_transition_helpers test/test_runtime_and_transition_helpers.py)
-  ament_add_pytest_test(test_model_validation test/test_model_validation.py)
+  find_package(ament_cmake_pytest REQUIRED)
+
+  file(
+    GLOB TEST_FILES
+    CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_*.py"
+  )
+
+  foreach(TEST_FILE IN LISTS TEST_FILES)
+    get_filename_component(TEST_NAME "${TEST_FILE}" NAME_WE)
+    ament_add_pytest_test(${TEST_NAME} "${TEST_FILE}")
+  endforeach()
 endif()
 
 ament_package()
