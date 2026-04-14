@@ -49,6 +49,7 @@ def build_clipboard_panel(editor) -> QWidget:
     header_layout.addStretch()
 
     editor.clipboard_fit_button = QPushButton("Fit")
+    editor.clipboard_fit_button.setObjectName("clipboardFitButton")
     editor.clipboard_fit_button.setToolTip(
         "Recenter and zoom the shelf view without changing the shelf width."
     )
@@ -56,17 +57,20 @@ def build_clipboard_panel(editor) -> QWidget:
     header_layout.addWidget(editor.clipboard_fit_button)
 
     editor.clear_clipboard_button = QPushButton("Clear")
+    editor.clear_clipboard_button.setObjectName("clearClipboardButton")
     editor.clear_clipboard_button.setToolTip("Remove everything from the shelf.")
     editor.clear_clipboard_button.clicked.connect(editor.clear_clipboard_contents)
     header_layout.addWidget(editor.clear_clipboard_button)
 
     editor.clipboard_panel_toggle_button = QPushButton("Hide")
+    editor.clipboard_panel_toggle_button.setObjectName("clipboardPanelToggleButton")
     editor.clipboard_panel_toggle_button.setToolTip("Hide the shelf dock.")
     editor.clipboard_panel_toggle_button.clicked.connect(editor.toggle_clipboard_panel)
     header_layout.addWidget(editor.clipboard_panel_toggle_button)
     layout.addLayout(header_layout)
 
     hint_label = QLabel(SHELF_HINT_TEXT)
+    hint_label.setObjectName("clipboardHintLabel")
     hint_label.setWordWrap(True)
     hint_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
     layout.addWidget(hint_label)

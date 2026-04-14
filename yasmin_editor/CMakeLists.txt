@@ -33,6 +33,12 @@ if(BUILD_TESTING)
     CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_*.py"
   )
+  file(
+    GLOB GUI_TEST_FILES
+    CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/*/test_*.py"
+  )
+  list(APPEND TEST_FILES ${GUI_TEST_FILES})
 
   foreach(TEST_FILE IN LISTS TEST_FILES)
     get_filename_component(TEST_NAME "${TEST_FILE}" NAME_WE)

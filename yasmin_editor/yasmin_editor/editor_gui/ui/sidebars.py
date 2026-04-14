@@ -32,6 +32,7 @@ from PyQt5.QtWidgets import (
 def build_left_panel(editor) -> QWidget:
     """Create the complete left panel."""
     left_panel = QWidget()
+    left_panel.setObjectName("leftPanel")
     left_panel.setMinimumWidth(0)
     left_layout = QVBoxLayout(left_panel)
 
@@ -50,17 +51,20 @@ def build_left_panel(editor) -> QWidget:
 def build_blackboard_widget(editor) -> QWidget:
     """Create the blackboard panel."""
     widget = QWidget()
+    widget.setObjectName("blackboardPanel")
     layout = QVBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
 
     layout.addWidget(QLabel("<b>Blackboard Keys:</b>"))
 
     editor.blackboard_filter = QLineEdit()
+    editor.blackboard_filter.setObjectName("blackboardFilterEdit")
     editor.blackboard_filter.setPlaceholderText("Filter blackboard keys...")
     editor.blackboard_filter.textChanged.connect(editor.filter_blackboard_keys)
     layout.addWidget(editor.blackboard_filter)
 
     editor.blackboard_list = QListWidget()
+    editor.blackboard_list.setObjectName("blackboardList")
     editor.blackboard_list.setSelectionMode(QAbstractItemView.SingleSelection)
     editor.blackboard_list.itemSelectionChanged.connect(
         editor.on_blackboard_selection_changed
@@ -70,12 +74,14 @@ def build_blackboard_widget(editor) -> QWidget:
 
     button_row = QHBoxLayout()
     editor.highlight_blackboard_btn = QPushButton("Highlight: On")
+    editor.highlight_blackboard_btn.setObjectName("highlightBlackboardButton")
     editor.highlight_blackboard_btn.setCheckable(True)
     editor.highlight_blackboard_btn.setChecked(True)
     editor.highlight_blackboard_btn.toggled.connect(editor.toggle_blackboard_highlighting)
     button_row.addWidget(editor.highlight_blackboard_btn)
 
     editor.show_hidden_blackboard_btn = QPushButton("Hidden: Off")
+    editor.show_hidden_blackboard_btn.setObjectName("showHiddenBlackboardButton")
     editor.show_hidden_blackboard_btn.setCheckable(True)
     editor.show_hidden_blackboard_btn.setChecked(False)
     editor.show_hidden_blackboard_btn.toggled.connect(
@@ -94,6 +100,7 @@ def build_blackboard_widget(editor) -> QWidget:
 def build_editor_sidebar_widget(editor) -> QWidget:
     """Create the editor sidebar with available plugins."""
     widget = QWidget()
+    widget.setObjectName("editorSidebarPanel")
     layout = QVBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
 
@@ -103,6 +110,8 @@ def build_editor_sidebar_widget(editor) -> QWidget:
         "Filter Python states...",
         lambda value: editor.filter_list(editor.python_list, value),
         editor.on_plugin_double_clicked,
+        filter_object_name="pythonPluginFilterEdit",
+        list_object_name="pythonPluginList",
     )
 
     editor.cpp_filter, editor.cpp_list = build_filterable_list_section(
@@ -111,6 +120,8 @@ def build_editor_sidebar_widget(editor) -> QWidget:
         "Filter C++ states...",
         lambda value: editor.filter_list(editor.cpp_list, value),
         editor.on_plugin_double_clicked,
+        filter_object_name="cppPluginFilterEdit",
+        list_object_name="cppPluginList",
     )
 
     editor.xml_filter, editor.xml_list = build_filterable_list_section(
@@ -119,6 +130,8 @@ def build_editor_sidebar_widget(editor) -> QWidget:
         "Filter XML state machines...",
         lambda value: editor.filter_list(editor.xml_list, value),
         editor.on_xml_double_clicked,
+        filter_object_name="xmlPluginFilterEdit",
+        list_object_name="xmlPluginList",
     )
 
     return widget
@@ -130,16 +143,21 @@ def build_filterable_list_section(
     placeholder: str,
     filter_handler: Callable[[str], None],
     double_click_handler,
+    *,
+    filter_object_name: str,
+    list_object_name: str,
 ) -> tuple[QLineEdit, QListWidget]:
     """Create a titled filter + list section."""
     layout.addWidget(QLabel(title))
 
     filter_edit = QLineEdit()
+    filter_edit.setObjectName(filter_object_name)
     filter_edit.setPlaceholderText(placeholder)
     filter_edit.textChanged.connect(filter_handler)
     layout.addWidget(filter_edit)
 
     list_widget = QListWidget()
+    list_widget.setObjectName(list_object_name)
     list_widget.itemDoubleClicked.connect(double_click_handler)
     layout.addWidget(list_widget)
 
@@ -149,6 +167,7 @@ def build_filterable_list_section(
 def build_runtime_sidebar_widget(editor) -> QWidget:
     """Create the runtime log sidebar."""
     widget = QWidget()
+    widget.setObjectName("runtimeSidebarPanel")
     layout = QVBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
 
@@ -157,6 +176,7 @@ def build_runtime_sidebar_widget(editor) -> QWidget:
     header_layout.addStretch()
 
     editor.runtime_log_level_combo = QComboBox()
+    editor.runtime_log_level_combo.setObjectName("runtimeLogLevelCombo")
     editor.runtime_log_level_combo.setProperty("flatInput", True)
     editor.runtime_log_level_combo.addItems(["ERROR", "WARN", "INFO", "DEBUG"])
     editor.runtime_log_level_combo.setCurrentText("INFO")
@@ -167,6 +187,7 @@ def build_runtime_sidebar_widget(editor) -> QWidget:
     layout.addLayout(header_layout)
 
     editor.runtime_log_view = QTextBrowser()
+    editor.runtime_log_view.setObjectName("runtimeLogView")
     editor.runtime_log_view.setReadOnly(True)
     editor.runtime_log_view.setOpenExternalLinks(False)
     editor.runtime_log_view.setOpenLinks(False)

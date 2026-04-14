@@ -43,11 +43,13 @@ def build_metadata_widget(editor) -> QWidget:
     """Create the root container metadata controls."""
 
     widget = QWidget()
+    widget.setObjectName("metadataPanel")
     layout = QVBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
     layout.setSpacing(4)
 
     editor.root_sm_name_edit = QLineEdit()
+    editor.root_sm_name_edit.setObjectName("rootStateMachineNameEdit")
     editor.root_sm_name_edit.setProperty("flatInput", True)
     editor.root_sm_name_edit.setPlaceholderText("Enter container name...")
     editor.root_sm_name_edit.textChanged.connect(editor.on_root_sm_name_changed)
@@ -57,6 +59,7 @@ def build_metadata_widget(editor) -> QWidget:
     )
 
     editor.start_state_combo = QComboBox()
+    editor.start_state_combo.setObjectName("startStateCombo")
     editor.start_state_combo.setProperty("flatInput", True)
     editor.start_state_combo.addItem("(None)")
     editor.start_state_combo.currentTextChanged.connect(editor.on_start_state_changed)
@@ -66,6 +69,7 @@ def build_metadata_widget(editor) -> QWidget:
     )
 
     editor.root_sm_description_edit = QLineEdit()
+    editor.root_sm_description_edit.setObjectName("rootStateMachineDescriptionEdit")
     editor.root_sm_description_edit.setProperty("flatInput", True)
     editor.root_sm_description_edit.setPlaceholderText("Enter container description...")
     editor.root_sm_description_edit.textChanged.connect(

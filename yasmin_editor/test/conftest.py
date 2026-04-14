@@ -13,9 +13,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import sys
 from pathlib import Path
+
+import pytest
+
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+
+
+@pytest.fixture(scope="session")
+def qapp():
+    qtwidgets = pytest.importorskip("PyQt5.QtWidgets")
+    app = qtwidgets.QApplication.instance()
+    if app is None:
+        app = qtwidgets.QApplication(["pytest", "-platform", "offscreen"])
+    app.setQuitOnLastWindowClosed(False)
+    yield app
