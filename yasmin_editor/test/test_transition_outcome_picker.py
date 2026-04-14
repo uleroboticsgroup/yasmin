@@ -13,7 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Tests for connection creation that delegates to the outcome picker dialog."""
+
 from types import SimpleNamespace
+
+import pytest
+
+pytest.importorskip("PyQt5.QtCore")
 
 from yasmin_editor.editor_gui.editor_mixin.editor_ui_mixin import EditorUiMixin
 from yasmin_editor.model.concurrence import Concurrence

@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Regression tests for layout, validation, and runtime edge conditions."""
+
 import importlib
 import json
 import sys

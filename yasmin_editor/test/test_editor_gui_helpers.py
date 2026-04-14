@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Unit tests for child-name conflict checks and dialog result adapters."""
+
 from yasmin_editor.editor_gui.child_name_conflicts import (
     has_final_outcome_name_conflict,
     has_state_name_conflict,

@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Pure helper tests for runtime traversal and transition convenience helpers."""
+
 import pytest
 
 from yasmin_editor.editor_gui.final_outcome_ops import ensure_final_outcome_alias

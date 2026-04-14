@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Round-trip and mutation tests for the editor model and XML conversion."""
+
 import pytest
 
 from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
