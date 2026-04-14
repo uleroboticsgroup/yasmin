@@ -366,10 +366,12 @@ class EditorUiMixin:
                 from_is_final_outcome=isinstance(from_node, FinalOutcomeNode),
                 to_is_final_outcome=isinstance(to_node, FinalOutcomeNode),
             )
-            used_outcomes = {
-                transition.source_outcome
-                for transition in current_model.transitions.get(from_node.name, [])
-            }
+            used_outcomes = set()
+            if isinstance(current_model, StateMachine):
+                used_outcomes = {
+                    transition.source_outcome
+                    for transition in current_model.transitions.get(from_node.name, [])
+                }
             available_outcomes = get_available_transition_outcomes(
                 current_model,
                 [outcome.name for outcome in from_node.model.outcomes],
