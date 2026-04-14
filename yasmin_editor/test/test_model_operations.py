@@ -128,7 +128,9 @@ def test_state_machine_operations_update_transitions_layout_and_text_blocks():
     assert any(item.target == "gamma" for item in root.transitions["alpha"])
 
     root.rename_child_state_outcome("alpha", "retry", "ok")
-    alpha_edges = {(item.source_outcome, item.target) for item in root.transitions["alpha"]}
+    alpha_edges = {
+        (item.source_outcome, item.target) for item in root.transitions["alpha"]
+    }
     assert alpha_edges == {
         ("ok", "gamma"),
         ("ok", "done"),

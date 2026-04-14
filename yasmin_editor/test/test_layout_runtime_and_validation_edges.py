@@ -21,7 +21,10 @@ from pathlib import Path
 
 import pytest
 
-from yasmin_editor.editor_gui.recent_files import RecentFilesStore, prune_recent_file_entries
+from yasmin_editor.editor_gui.recent_files import (
+    RecentFilesStore,
+    prune_recent_file_entries,
+)
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.layout import Layout
@@ -76,7 +79,9 @@ def test_layout_tracks_aliases_primary_positions_and_removals():
     assert layout.get_state_position("helper") is None
 
 
-def test_recent_files_store_handles_invalid_payloads_and_existing_only_filter(tmp_path: Path):
+def test_recent_files_store_handles_invalid_payloads_and_existing_only_filter(
+    tmp_path: Path,
+):
     existing = tmp_path / "existing.xml"
     missing = tmp_path / "missing.xml"
     existing.write_text("<xml />", encoding="utf-8")
@@ -171,19 +176,32 @@ def test_validate_model_reports_additional_leaf_and_container_edge_cases():
         "root: Container transition uses unknown outcome 'unknown_outcome'"
         in warning_messages
     )
-    assert "root/xml_state: XML state usually should define 'package_name'" in warning_messages
+    assert (
+        "root/xml_state: XML state usually should define 'package_name'"
+        in warning_messages
+    )
     assert "root/leaf_without_type: Leaf state has no 'state_type'" in warning_messages
 
 
 def test_validate_model_reports_invalid_final_outcome_transition_targets():
     root = StateMachine(name="root", outcomes=[Outcome("done")], start_state="worker")
-    root.add_state(make_leaf("worker", ["ok"], state_type="py", module="demo.module", class_name="DemoState"))
+    root.add_state(
+        make_leaf(
+            "worker",
+            ["ok"],
+            state_type="py",
+            module="demo.module",
+            class_name="DemoState",
+        )
+    )
     root.transitions["done"] = [Transition("again", "ghost")]
 
     result = validate_model(root)
     error_messages = {f"{item.path}: {item.message}" for item in result.errors}
 
-    assert "root: Final outcome transition target 'ghost' does not exist" in error_messages
+    assert (
+        "root: Final outcome transition target 'ghost' does not exist" in error_messages
+    )
 
 
 def test_validate_model_warns_for_empty_concurrence():
