@@ -100,6 +100,7 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
 
         self.connection_port = ConnectionPort(self)
         self.initialize_breakpoint_marker()
+        self.initialize_start_indicator()
         self.update_label()
         self.update_visual_elements()
 

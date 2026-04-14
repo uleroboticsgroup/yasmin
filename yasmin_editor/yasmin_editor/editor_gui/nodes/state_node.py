@@ -78,6 +78,7 @@ class StateNode(QGraphicsEllipseItem, BaseNodeMixin):
 
         self.connection_port: ConnectionPort = ConnectionPort(self)
         self.initialize_breakpoint_marker()
+        self.initialize_start_indicator()
 
     @property
     def name(self) -> str:

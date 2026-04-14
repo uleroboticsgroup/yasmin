@@ -442,10 +442,26 @@ class EditorModelMixin:
             self.start_state = None if text == "(None)" else text
         else:
             self.default_outcome = None if text == "(None)" else text
+        self.refresh_start_state_indicators()
         self.record_history_checkpoint()
+
+    def refresh_start_state_indicators(self) -> None:
+        start_state_name = None
+        if isinstance(self.current_container_model, StateMachine):
+            start_state_name = self.current_container_model.start_state
+
+        for state_name, node in self.state_nodes.items():
+            if not hasattr(node, "set_start_indicator"):
+                continue
+            is_start_state = bool(start_state_name and state_name == start_state_name)
+            node.set_start_indicator(
+                is_start_state,
+                f"Start state: {start_state_name}" if start_state_name else "",
+            )
 
     def update_start_state_combo(self) -> None:
         self.update_container_controls()
+        self.refresh_start_state_indicators()
 
     def reset_editor_state(self, model: Optional[StateMachine] = None) -> None:
         self.clear_current_scene()
