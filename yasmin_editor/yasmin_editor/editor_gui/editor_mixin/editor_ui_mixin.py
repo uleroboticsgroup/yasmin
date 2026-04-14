@@ -27,26 +27,27 @@ from PyQt5.QtWidgets import (
     QSplitter,
     QWidget,
 )
-from yasmin_plugins_manager.plugin_manager import PluginInfo
-
 from yasmin_editor.editor_gui.clipboard_model import is_container_empty
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.editor_action_state import (
-    build_editor_action_enabled_map,
-    toolbar_menu_enabled,
-)
 from yasmin_editor.editor_gui.dialog_result_adapters import (
     build_concurrence_kwargs,
     build_plugin_state_kwargs,
     build_state_machine_kwargs,
 )
-from yasmin_editor.editor_gui.final_outcome_ops import ensure_final_outcome_alias
 from yasmin_editor.editor_gui.dialogs.concurrence_dialog import ConcurrenceDialog
 from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import (
     OutcomeDescriptionDialog,
 )
 from yasmin_editor.editor_gui.dialogs.state_machine_dialog import StateMachineDialog
 from yasmin_editor.editor_gui.dialogs.state_properties_dialog import StatePropertiesDialog
+from yasmin_editor.editor_gui.dialogs.transition_outcome_picker import (
+    TransitionOutcomePickerDialog,
+)
+from yasmin_editor.editor_gui.editor_action_state import (
+    build_editor_action_enabled_map,
+    toolbar_menu_enabled,
+)
+from yasmin_editor.editor_gui.final_outcome_ops import ensure_final_outcome_alias
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
@@ -62,8 +63,8 @@ from yasmin_editor.editor_gui.ui.help_dialog import show_help_dialog
 from yasmin_editor.editor_gui.ui.layout_contract import apply_splitter_layout
 from yasmin_editor.editor_gui.ui.menus import build_menu_bar
 from yasmin_editor.editor_gui.ui.panels import build_right_panel
+from yasmin_editor.editor_gui.ui.plugin_lists import filter_list_widget
 from yasmin_editor.editor_gui.ui.plugin_lists import (
-    filter_list_widget,
     populate_plugin_lists as populate_plugin_list_widgets,
 )
 from yasmin_editor.editor_gui.ui.sidebars import build_left_panel
@@ -75,6 +76,8 @@ from yasmin_editor.editor_gui.ui.toolbar_config import (
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state_machine import StateMachine
+
+from yasmin_plugins_manager.plugin_manager import PluginInfo
 
 
 class EditorUiMixin:
@@ -381,20 +384,18 @@ class EditorUiMixin:
             QMessageBox.warning(self, getattr(exc, "title", "Error"), str(exc))
             return
 
-        if len(available_outcomes) == 1:
-            outcome = available_outcomes[0]
-            self.create_connection(from_node, to_node, outcome)
-        else:
-            outcome, ok = QInputDialog.getItem(
-                self,
-                "Select Outcome",
-                f"Select outcome for transition from '{from_node.name}':",
-                available_outcomes,
-                0,
-                False,
-            )
-            if ok:
-                self.create_connection(from_node, to_node, outcome)
+        if len(available_outcomes) < 2:
+            self.create_connection(from_node, to_node, available_outcomes[0])
+            return
+
+        picker = TransitionOutcomePickerDialog(
+            parent=self,
+            source_name=from_node.name,
+            available_outcomes=available_outcomes,
+        )
+        if picker.exec_():
+            for outcome_name in picker.selected_outcomes():
+                self.create_connection(from_node, to_node, outcome_name)
 
     def rewire_connection(
         self,
