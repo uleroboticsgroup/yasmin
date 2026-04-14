@@ -72,6 +72,13 @@ class EditorPalette:
     selection_pen: QColor
     blackboard_highlight_pen: QColor
     blackboard_highlight_fill: QColor
+    start_indicator_connector: QColor
+    start_indicator_outer_fill: QColor
+    start_indicator_outer_pen: QColor
+    start_indicator_inner_fill: QColor
+    start_indicator_inner_pen: QColor
+    start_indicator_arrow: QColor
+    start_indicator_label: QColor
     runtime_highlight_pen: QColor
     runtime_highlight_fill: QColor
     runtime_transition_pen: QColor

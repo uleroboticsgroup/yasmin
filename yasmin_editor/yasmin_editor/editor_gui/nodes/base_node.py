@@ -150,7 +150,7 @@ class BaseNodeMixin:
         connector_start_x = marker_center_x + (outer_size / 2.0) - 1.0
         connector_end_x = bounds.right() - 8.0
 
-        connector_pen = QPen(PALETTE.selection_pen, 3)
+        connector_pen = QPen(PALETTE.start_indicator_connector, 3)
         connector_pen.setCapStyle(Qt.RoundCap)
 
         self.start_indicator_connector = QGraphicsLineItem(
@@ -166,9 +166,9 @@ class BaseNodeMixin:
         self.start_indicator_connector.setVisible(False)
         self.start_indicator_connector.setToolTip("Start state")
 
-        outer_fill = QColor(PALETTE.runtime_highlight_fill)
+        outer_fill = QColor(PALETTE.start_indicator_outer_fill)
         outer_fill.setAlpha(220)
-        outer_pen = QColor(PALETTE.selection_pen)
+        outer_pen = QColor(PALETTE.start_indicator_outer_pen)
         outer_pen.setAlpha(240)
 
         self.start_indicator_outer = QGraphicsEllipseItem(
@@ -185,7 +185,7 @@ class BaseNodeMixin:
         self.start_indicator_outer.setVisible(False)
         self.start_indicator_outer.setToolTip("Start state")
 
-        inner_fill = QColor(PALETTE.ui_window_bg)
+        inner_fill = QColor(PALETTE.start_indicator_inner_fill)
         inner_fill.setAlpha(245)
 
         self.start_indicator_inner = QGraphicsEllipseItem(
@@ -196,7 +196,7 @@ class BaseNodeMixin:
             self,
         )
         self.start_indicator_inner.setBrush(QBrush(inner_fill))
-        self.start_indicator_inner.setPen(QPen(PALETTE.runtime_highlight_pen, 1.5))
+        self.start_indicator_inner.setPen(QPen(PALETTE.start_indicator_inner_pen, 1.5))
         self.start_indicator_inner.setZValue(11.0)
         self.start_indicator_inner.setAcceptedMouseButtons(Qt.NoButton)
         self.start_indicator_inner.setVisible(False)
@@ -210,8 +210,8 @@ class BaseNodeMixin:
             ]
         )
         self.start_indicator_arrow = QGraphicsPolygonItem(arrow, self)
-        self.start_indicator_arrow.setBrush(QBrush(PALETTE.runtime_highlight_pen))
-        self.start_indicator_arrow.setPen(QPen(PALETTE.runtime_highlight_pen, 1.2))
+        self.start_indicator_arrow.setBrush(QBrush(PALETTE.start_indicator_arrow))
+        self.start_indicator_arrow.setPen(QPen(PALETTE.start_indicator_arrow, 1.2))
         self.start_indicator_arrow.setZValue(11.0)
         self.start_indicator_arrow.setAcceptedMouseButtons(Qt.NoButton)
         self.start_indicator_arrow.setVisible(False)
@@ -222,7 +222,7 @@ class BaseNodeMixin:
         start_font.setPointSize(8)
         start_font.setBold(True)
         self.start_indicator_label.setFont(start_font)
-        self.start_indicator_label.setDefaultTextColor(PALETTE.selection_pen)
+        self.start_indicator_label.setDefaultTextColor(PALETTE.start_indicator_label)
         label_rect = self.start_indicator_label.boundingRect()
         self.start_indicator_label.setPos(
             marker_center_x - (label_rect.width() / 2.0),
