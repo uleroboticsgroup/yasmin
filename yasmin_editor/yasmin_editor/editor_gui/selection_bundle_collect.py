@@ -26,7 +26,7 @@ from yasmin_editor.editor_gui.selection_models import (
     OutcomeRuleSnapshot,
     SelectionBundle,
 )
-from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.concurrence import Concurrence, iter_outcome_rule_values
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.text_block import TextBlock
 
@@ -143,16 +143,17 @@ def copy_concurrence_rules(
     for outcome_name, mapping in container_model.outcome_map.items():
         if outcome_name not in selected_outcome_names:
             continue
-        for state_name, state_outcome in mapping.items():
+        for state_name, state_outcomes in mapping.items():
             if state_name not in selected_state_names:
                 continue
-            bundle.outcome_rules.append(
-                OutcomeRuleSnapshot(
-                    outcome_name=outcome_name,
-                    state_name=state_name,
-                    state_outcome=state_outcome,
+            for state_outcome in iter_outcome_rule_values(state_outcomes):
+                bundle.outcome_rules.append(
+                    OutcomeRuleSnapshot(
+                        outcome_name=outcome_name,
+                        state_name=state_name,
+                        state_outcome=state_outcome,
+                    )
                 )
-            )
 
 
 def collect_selection_bundle(

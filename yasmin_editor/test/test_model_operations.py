@@ -15,6 +15,7 @@
 
 import pytest
 
+from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.outcome import Outcome
@@ -193,10 +194,10 @@ def test_concurrence_operations_update_outcome_rules_layout_and_defaults():
     cc.rename_state("helper", "assistant")
     assert cc.get_state("assistant") is helper
     assert cc.layout.get_state_position("assistant").y == 4.0
-    assert cc.outcome_map["done"]["assistant"] == "ready"
+    assert cc.outcome_map["done"]["assistant"] == ["ready"]
 
     cc.rename_child_state_outcome("worker", "ok", "success")
-    assert cc.outcome_map["done"]["worker"] == "success"
+    assert cc.outcome_map["done"]["worker"] == ["success"]
 
     cc.rename_outcome("done", "finished")
     assert cc.default_outcome == "finished"
@@ -219,3 +220,54 @@ def test_concurrence_operations_update_outcome_rules_layout_and_defaults():
     assert "description: Parallel block" in rendered
     assert "text blocks:" in rendered
     assert "parallel" in rendered
+
+
+def test_concurrence_outcome_rules_preserve_multiple_state_outcomes():
+    cc = Concurrence(
+        name="cc",
+        outcomes=[Outcome("finished")],
+        default_outcome="finished",
+    )
+    worker = make_leaf("worker", ["ok", "retry", "failed"])
+
+    cc.add_state(worker)
+    cc.set_outcome_rule("finished", "worker", "ok")
+    cc.set_outcome_rule("finished", "worker", "retry")
+    cc.set_outcome_rule("finished", "worker", "ok")
+
+    assert cc.outcome_map["finished"]["worker"] == ["ok", "retry"]
+
+    cc.rename_child_state_outcome("worker", "retry", "ok")
+    assert cc.outcome_map["finished"]["worker"] == ["ok"]
+
+    cc.set_outcome_rule("finished", "worker", "retry")
+    cc.remove_outcome_rule("finished", "worker", "ok")
+    assert cc.outcome_map["finished"]["worker"] == ["retry"]
+
+    cc.remove_outcome_rule("finished", "worker", "retry")
+    assert "finished" not in cc.outcome_map
+
+
+def test_concurrence_xml_roundtrip_preserves_multiple_state_outcomes_per_final_outcome():
+    root = StateMachine(name="root", outcomes=[Outcome("done")], start_state="cc")
+    cc = Concurrence(
+        name="cc",
+        outcomes=[Outcome("finished")],
+        default_outcome="finished",
+    )
+    worker = make_leaf("worker", ["ok", "retry"])
+
+    cc.add_state(worker)
+    cc.set_outcome_rule("finished", "worker", "ok")
+    cc.set_outcome_rule("finished", "worker", "retry")
+    root.add_state(cc)
+    root.add_transition("cc", Transition("finished", "done"))
+
+    xml_text = model_to_xml(root)
+    loaded_root = model_from_xml(xml_text)
+    loaded_cc = loaded_root.get_state("cc")
+
+    assert loaded_cc is not None
+    assert loaded_cc.outcome_map["finished"]["worker"] == ["ok", "retry"]
+    assert xml_text.count('<Item state="worker" outcome="ok" />') == 1
+    assert xml_text.count('<Item state="worker" outcome="retry" />') == 1

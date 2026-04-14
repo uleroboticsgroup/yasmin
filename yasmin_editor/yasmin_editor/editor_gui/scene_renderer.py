@@ -27,7 +27,7 @@ from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNo
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
-from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.concurrence import Concurrence, iter_outcome_rule_values
 from yasmin_editor.model.layout import OutcomePlacement
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
@@ -272,8 +272,9 @@ def render_container_scene(
         to_view = context.resolve_primary_outcome_view(outcome_name)
         if to_view is None:
             continue
-        for state_name, source_outcome in mapping.items():
+        for state_name, source_outcomes in mapping.items():
             from_view = context.state_nodes.get(state_name)
             if from_view is None:
                 continue
-            context.create_connection_view(from_view, to_view, source_outcome)
+            for source_outcome in iter_outcome_rule_values(source_outcomes):
+                context.create_connection_view(from_view, to_view, source_outcome)

@@ -699,7 +699,9 @@ class EditorModelMixin:
         owner_model = self.current_container_model
         if isinstance(owner_model, Concurrence):
             owner_model.remove_outcome_rule(
-                connection.to_node.name, connection.from_node.name
+                connection.to_node.name,
+                connection.from_node.name,
+                connection.outcome,
             )
             return
         owner_model.remove_transition(

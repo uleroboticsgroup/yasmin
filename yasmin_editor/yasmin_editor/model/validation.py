@@ -21,7 +21,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Iterable
 
-from .concurrence import Concurrence
+from .concurrence import Concurrence, iter_outcome_rule_values
 from .state import State
 from .state_machine import StateMachine
 
@@ -360,7 +360,7 @@ def _validate_concurrence(
                 f"Outcome map references unknown outcome '{outcome_name}'",
             )
 
-        for state_name, state_outcome in mapping.items():
+        for state_name, state_outcomes in mapping.items():
             if state_name not in state_names:
                 result.add_error(
                     path,
@@ -370,8 +370,9 @@ def _validate_concurrence(
 
             child_state = concurrence.states[state_name]
             child_outcomes = {outcome.name for outcome in child_state.outcomes}
-            if child_outcomes and state_outcome not in child_outcomes:
-                result.add_warning(
-                    f"{path}/{state_name}",
-                    f"Outcome map references unknown outcome '{state_outcome}'",
-                )
+            for state_outcome in iter_outcome_rule_values(state_outcomes):
+                if child_outcomes and state_outcome not in child_outcomes:
+                    result.add_warning(
+                        f"{path}/{state_name}",
+                        f"Outcome map references unknown outcome '{state_outcome}'",
+                    )

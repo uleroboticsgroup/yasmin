@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Iterable
 from xml.etree import ElementTree as ET
 
-from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.concurrence import Concurrence, iter_outcome_rule_values
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.parameter import Parameter
@@ -362,10 +362,11 @@ def _append_concurrence_outcome_map(
         outcome_map_elem = ET.SubElement(element, "OutcomeMap")
         outcome_map_elem.set("outcome", outcome_name)
 
-        for state_name, state_outcome in requirements.items():
-            item_elem = ET.SubElement(outcome_map_elem, "Item")
-            item_elem.set("state", state_name)
-            item_elem.set("outcome", state_outcome)
+        for state_name, state_outcomes in requirements.items():
+            for state_outcome in iter_outcome_rule_values(state_outcomes):
+                item_elem = ET.SubElement(outcome_map_elem, "Item")
+                item_elem.set("state", state_name)
+                item_elem.set("outcome", state_outcome)
 
 
 def _parse_state_machine_container(element: ET.Element) -> StateMachine:
