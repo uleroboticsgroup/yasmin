@@ -13,12 +13,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Helpers for traversing live YASMIN runtime container objects.
+
+The runtime interacts with Python and C++ backed state containers. These
+helpers normalize that mixed API surface so the runtime code can reason about
+paths and nested containers without scattering compatibility checks.
+"""
+
 from __future__ import annotations
 
 from typing import Any, Optional
 
 
 def container_states(container: Any) -> dict[str, Any]:
+    """Return a normalized mapping of child state names to runtime objects."""
     if container is None:
         return {}
 
@@ -59,10 +67,12 @@ def container_states(container: Any) -> dict[str, Any]:
 
 
 def child_state(container: Any, state_name: str) -> Optional[Any]:
+    """Return one named child state from a container if it exists."""
     return container_states(container).get(str(state_name))
 
 
 def is_concurrence_object(state: Any) -> bool:
+    """Return whether the runtime object behaves like a concurrence."""
     if state is None:
         return False
 
@@ -80,6 +90,7 @@ def is_concurrence_object(state: Any) -> bool:
 
 
 def is_container_object(state: Any) -> bool:
+    """Return whether the runtime object exposes container child-state access."""
     if state is None:
         return False
     return callable(getattr(state, "_get_states_cpp", None)) or callable(
@@ -88,6 +99,7 @@ def is_container_object(state: Any) -> bool:
 
 
 def resolve_container(root_container: Any, path: tuple[str, ...]) -> Optional[Any]:
+    """Resolve a nested container path from the runtime root object."""
     container = root_container
     if container is None:
         return None
@@ -101,6 +113,7 @@ def resolve_container(root_container: Any, path: tuple[str, ...]) -> Optional[An
 
 
 def get_container_entry_state_name(container: Any) -> Optional[str]:
+    """Return the entry state name used when stepping into a container."""
     if container is None:
         return None
 
@@ -133,6 +146,7 @@ def expand_to_deepest_known_path(
     root_container: Any,
     base_path: tuple[str, ...],
 ) -> tuple[str, ...]:
+    """Follow container entry states until the deepest known active path is reached."""
     path = tuple(base_path)
     container = resolve_container(root_container, path)
     visited: set[int] = set()

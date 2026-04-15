@@ -16,10 +16,15 @@
 import math
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Set
 
-from PyQt5.QtCore import QPointF
-from PyQt5.QtGui import QBrush, QPen
-from PyQt5.QtWidgets import QGraphicsEllipseItem, QGraphicsItem, QGraphicsTextItem
-
+from PyQt5.QtCore import QPointF, Qt
+from PyQt5.QtGui import QBrush, QColor, QPen, QPolygonF
+from PyQt5.QtWidgets import (
+    QGraphicsEllipseItem,
+    QGraphicsItem,
+    QGraphicsLineItem,
+    QGraphicsPolygonItem,
+    QGraphicsTextItem,
+)
 from yasmin_editor.editor_gui.colors import PALETTE
 
 if TYPE_CHECKING:
@@ -133,6 +138,118 @@ class BaseNodeMixin:
             return
         marker.setVisible(bool(visible))
         marker.setToolTip(str(tooltip or ""))
+
+    def initialize_start_indicator(self) -> None:
+        bounds = self.boundingRect()
+
+        marker_center_x = bounds.left() - 28.0
+        marker_center_y = bounds.center().y()
+        outer_size = 24.0
+        inner_size = 16.0
+
+        connector_start_x = marker_center_x + (outer_size / 2.0) - 1.0
+        connector_end_x = bounds.right() - 8.0
+
+        connector_pen = QPen(PALETTE.start_indicator_connector, 3)
+        connector_pen.setCapStyle(Qt.RoundCap)
+
+        self.start_indicator_connector = QGraphicsLineItem(
+            connector_start_x,
+            marker_center_y,
+            connector_end_x,
+            marker_center_y,
+            self,
+        )
+        self.start_indicator_connector.setPen(connector_pen)
+        self.start_indicator_connector.setFlag(QGraphicsItem.ItemStacksBehindParent, True)
+        self.start_indicator_connector.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_connector.setVisible(False)
+        self.start_indicator_connector.setToolTip("Start state")
+
+        outer_fill = QColor(PALETTE.start_indicator_outer_fill)
+        outer_fill.setAlpha(220)
+        outer_pen = QColor(PALETTE.start_indicator_outer_pen)
+        outer_pen.setAlpha(240)
+
+        self.start_indicator_outer = QGraphicsEllipseItem(
+            marker_center_x - (outer_size / 2.0),
+            marker_center_y - (outer_size / 2.0),
+            outer_size,
+            outer_size,
+            self,
+        )
+        self.start_indicator_outer.setBrush(QBrush(outer_fill))
+        self.start_indicator_outer.setPen(QPen(outer_pen, 2))
+        self.start_indicator_outer.setZValue(11.0)
+        self.start_indicator_outer.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_outer.setVisible(False)
+        self.start_indicator_outer.setToolTip("Start state")
+
+        inner_fill = QColor(PALETTE.start_indicator_inner_fill)
+        inner_fill.setAlpha(245)
+
+        self.start_indicator_inner = QGraphicsEllipseItem(
+            marker_center_x - (inner_size / 2.0),
+            marker_center_y - (inner_size / 2.0),
+            inner_size,
+            inner_size,
+            self,
+        )
+        self.start_indicator_inner.setBrush(QBrush(inner_fill))
+        self.start_indicator_inner.setPen(QPen(PALETTE.start_indicator_inner_pen, 1.5))
+        self.start_indicator_inner.setZValue(11.0)
+        self.start_indicator_inner.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_inner.setVisible(False)
+        self.start_indicator_inner.setToolTip("Start state")
+
+        arrow = QPolygonF(
+            [
+                QPointF(marker_center_x - 2.5, marker_center_y - 4.5),
+                QPointF(marker_center_x - 2.5, marker_center_y + 4.5),
+                QPointF(marker_center_x + 4.5, marker_center_y),
+            ]
+        )
+        self.start_indicator_arrow = QGraphicsPolygonItem(arrow, self)
+        self.start_indicator_arrow.setBrush(QBrush(PALETTE.start_indicator_arrow))
+        self.start_indicator_arrow.setPen(QPen(PALETTE.start_indicator_arrow, 1.2))
+        self.start_indicator_arrow.setZValue(11.0)
+        self.start_indicator_arrow.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_arrow.setVisible(False)
+        self.start_indicator_arrow.setToolTip("Start state")
+
+        self.start_indicator_label = QGraphicsTextItem("START", self)
+        start_font = self.start_indicator_label.font()
+        start_font.setPointSize(8)
+        start_font.setBold(True)
+        self.start_indicator_label.setFont(start_font)
+        self.start_indicator_label.setDefaultTextColor(PALETTE.start_indicator_label)
+        label_rect = self.start_indicator_label.boundingRect()
+        self.start_indicator_label.setPos(
+            marker_center_x - (label_rect.width() / 2.0),
+            marker_center_y - (outer_size / 2.0) - label_rect.height() - 3.0,
+        )
+        self.start_indicator_label.setZValue(11.0)
+        self.start_indicator_label.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_label.setVisible(False)
+        self.start_indicator_label.setToolTip("Start state")
+
+        self.start_indicator_items = [
+            self.start_indicator_connector,
+            self.start_indicator_outer,
+            self.start_indicator_inner,
+            self.start_indicator_arrow,
+            self.start_indicator_label,
+        ]
+
+        self.start_indicator_badge = self.start_indicator_connector
+
+    def set_start_indicator(self, visible: bool, tooltip: str = "Start state") -> None:
+        indicator_items = getattr(self, "start_indicator_items", None)
+        if not indicator_items:
+            return
+        for item in indicator_items:
+            item.setVisible(bool(visible))
+            item.setToolTip(str(tooltip or ""))
 
     def update_selection_pen(
         self,

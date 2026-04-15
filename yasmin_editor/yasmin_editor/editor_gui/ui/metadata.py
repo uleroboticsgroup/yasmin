@@ -18,49 +18,66 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
 
 
+def _build_metadata_row(label: QLabel, field) -> QWidget:
+    """Create one compact metadata row with a label and one expanding field."""
+
+    row_widget = QWidget()
+    row_layout = QHBoxLayout(row_widget)
+    row_layout.setContentsMargins(0, 0, 0, 0)
+
+    label.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+    row_layout.addWidget(label)
+
+    field.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+    row_layout.addWidget(field)
+    return row_widget
+
+
 def build_metadata_widget(editor) -> QWidget:
     """Create the root container metadata controls."""
+
     widget = QWidget()
+    widget.setObjectName("metadataPanel")
     layout = QVBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
-
-    row1 = QHBoxLayout()
-
-    editor.root_sm_name_label = QLabel("<b>State Machine Name:</b>")
-    row1.addWidget(editor.root_sm_name_label)
+    layout.setSpacing(4)
 
     editor.root_sm_name_edit = QLineEdit()
+    editor.root_sm_name_edit.setObjectName("rootStateMachineNameEdit")
     editor.root_sm_name_edit.setProperty("flatInput", True)
     editor.root_sm_name_edit.setPlaceholderText("Enter container name...")
     editor.root_sm_name_edit.textChanged.connect(editor.on_root_sm_name_changed)
-    row1.addWidget(editor.root_sm_name_edit)
-
-    editor.start_state_label = QLabel("<b>Start State:</b>")
-    row1.addWidget(editor.start_state_label)
+    editor.root_sm_name_label = QLabel("<b>State Machine Name:</b>")
+    layout.addWidget(
+        _build_metadata_row(editor.root_sm_name_label, editor.root_sm_name_edit)
+    )
 
     editor.start_state_combo = QComboBox()
+    editor.start_state_combo.setObjectName("startStateCombo")
     editor.start_state_combo.setProperty("flatInput", True)
     editor.start_state_combo.addItem("(None)")
     editor.start_state_combo.currentTextChanged.connect(editor.on_start_state_changed)
-    row1.addWidget(editor.start_state_combo)
-
-    layout.addLayout(row1)
-
-    row2 = QHBoxLayout()
-    row2.addWidget(QLabel("<b>Description:</b>"))
+    editor.start_state_label = QLabel("<b>Start State:</b>")
+    layout.addWidget(
+        _build_metadata_row(editor.start_state_label, editor.start_state_combo)
+    )
 
     editor.root_sm_description_edit = QLineEdit()
+    editor.root_sm_description_edit.setObjectName("rootStateMachineDescriptionEdit")
     editor.root_sm_description_edit.setProperty("flatInput", True)
     editor.root_sm_description_edit.setPlaceholderText("Enter container description...")
     editor.root_sm_description_edit.textChanged.connect(
         editor.on_root_sm_description_changed
     )
-    row2.addWidget(editor.root_sm_description_edit)
-
-    layout.addLayout(row2)
+    layout.addWidget(
+        _build_metadata_row(
+            QLabel("<b>Description:</b>"), editor.root_sm_description_edit
+        )
+    )
     return widget

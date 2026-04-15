@@ -23,6 +23,21 @@ from .layout import Layout
 from .state import State
 from .text_block import TextBlock
 
+OutcomeRuleValues = str | list[str]
+
+
+def iter_outcome_rule_values(values: OutcomeRuleValues) -> list[str]:
+    """Return one normalized list of unique child outcomes."""
+
+    if isinstance(values, str):
+        return [values] if values else []
+
+    normalized: list[str] = []
+    for outcome_name in values:
+        if outcome_name and outcome_name not in normalized:
+            normalized.append(outcome_name)
+    return normalized
+
 
 @dataclass(slots=True, repr=False)
 class Concurrence(State):
@@ -30,7 +45,7 @@ class Concurrence(State):
 
     default_outcome: str | None = None
     states: dict[str, State] = field(default_factory=dict)
-    outcome_map: dict[str, dict[str, str]] = field(default_factory=dict)
+    outcome_map: dict[str, dict[str, list[str]]] = field(default_factory=dict)
     layout: Layout = field(default_factory=Layout)
     text_blocks: list[TextBlock] = field(default_factory=list)
 
@@ -84,12 +99,29 @@ class Concurrence(State):
         state_outcome: str,
     ) -> None:
         """Set one outcome rule entry for the concurrence."""
-        self.outcome_map.setdefault(outcome, {})[state_name] = state_outcome
+        mapping = self.outcome_map.setdefault(outcome, {})
+        state_outcomes = iter_outcome_rule_values(mapping.get(state_name, []))
+        if state_outcome not in state_outcomes:
+            state_outcomes.append(state_outcome)
+        mapping[state_name] = state_outcomes
 
-    def remove_outcome_rule(self, outcome: str, state_name: str) -> None:
+    def remove_outcome_rule(
+        self,
+        outcome: str,
+        state_name: str,
+        state_outcome: str | None = None,
+    ) -> None:
         """Remove one outcome rule entry from the concurrence."""
         mapping = self.outcome_map.get(outcome, {})
-        mapping.pop(state_name, None)
+        if state_outcome is None:
+            mapping.pop(state_name, None)
+        else:
+            state_outcomes = iter_outcome_rule_values(mapping.get(state_name, []))
+            state_outcomes = [item for item in state_outcomes if item != state_outcome]
+            if state_outcomes:
+                mapping[state_name] = state_outcomes
+            else:
+                mapping.pop(state_name, None)
         if not mapping:
             self.outcome_map.pop(outcome, None)
 
@@ -115,18 +147,23 @@ class Concurrence(State):
         self.states[new_name] = state
         for mapping in self.outcome_map.values():
             if old_name in mapping:
-                mapping[new_name] = mapping.pop(old_name)
+                mapping[new_name] = iter_outcome_rule_values(mapping.pop(old_name))
         self.layout.rename_state_position(old_name, new_name)
 
     def rename_outcome(self, old_name: str, new_name: str) -> None:
         """Rename a final outcome and update all related references."""
         if old_name == new_name:
             return
+        if self.get_outcome(old_name) is None:
+            return
         self._assert_child_name_available(new_name, exclude_outcome=old_name)
         State.rename_outcome(self, old_name, new_name)
         mapping = self.outcome_map.pop(old_name, None)
         if mapping is not None:
-            self.outcome_map[new_name] = mapping
+            self.outcome_map[new_name] = {
+                state_name: iter_outcome_rule_values(state_outcomes)
+                for state_name, state_outcomes in mapping.items()
+            }
         if self.default_outcome == old_name:
             self.default_outcome = new_name
         self.layout.rename_outcome_position(old_name, new_name)
@@ -141,8 +178,18 @@ class Concurrence(State):
         if old_outcome == new_outcome:
             return
         for mapping in self.outcome_map.values():
-            if mapping.get(state_name) == old_outcome:
-                mapping[state_name] = new_outcome
+            state_outcomes = mapping.get(state_name)
+            if state_outcomes is None:
+                continue
+            renamed_outcomes: list[str] = []
+            for outcome_name in iter_outcome_rule_values(state_outcomes):
+                candidate = new_outcome if outcome_name == old_outcome else outcome_name
+                if candidate not in renamed_outcomes:
+                    renamed_outcomes.append(candidate)
+            if renamed_outcomes:
+                mapping[state_name] = renamed_outcomes
+            else:
+                mapping.pop(state_name, None)
 
     def remove_outcome(self, name: str) -> None:
         """Remove a final outcome and its outcome-map rule."""
@@ -191,7 +238,8 @@ class Concurrence(State):
             for outcome_name, mapping in self.outcome_map.items():
                 rules = ", ".join(
                     f"{state_name}={state_outcome}"
-                    for state_name, state_outcome in mapping.items()
+                    for state_name, state_outcomes in mapping.items()
+                    for state_outcome in iter_outcome_rule_values(state_outcomes)
                 )
                 lines.append(f"{prefix}    - {outcome_name}: {rules}")
         return "\n".join(lines)

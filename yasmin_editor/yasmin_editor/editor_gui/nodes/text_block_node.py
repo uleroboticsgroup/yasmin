@@ -210,10 +210,21 @@ class TextBlockNode(QGraphicsRectItem, BaseNodeMixin):
         """Persist inline edits and switch back to preview mode."""
         if not self._is_editing:
             return
+        previous_content = self.model.content
         self.model.content = self.text_item.toPlainText()
         self._is_editing = False
         self.update_content_view()
         self.update_tooltip()
+
+        if (
+            previous_content != self.model.content
+            and self.scene()
+            and self.scene().views()
+        ):
+            canvas = self.scene().views()[0]
+            editor_ref = getattr(canvas, "editor_ref", None)
+            if editor_ref is not None:
+                editor_ref.record_history_checkpoint()
 
     def cancel_editing(self) -> None:
         """Discard the current inline edits and restore the last saved content."""

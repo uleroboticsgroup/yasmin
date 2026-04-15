@@ -35,10 +35,11 @@ class FinalOutcomeNode(QGraphicsRectItem, BaseNodeMixin):
         inside_container: bool = False,
         description: str = "",
         model: Optional[Outcome] = None,
+        instance_id: str = "",
     ) -> None:
-        super().__init__(-60, -30, 120, 60)
+        super().__init__(-60, -25, 120, 50)
         self.model: Outcome = model or Outcome(name=name, description=description)
-        self.inside_container: bool = inside_container
+        self.instance_id = instance_id
 
         self._initialize_base_node_graphics(x, y)
 
@@ -78,7 +79,10 @@ class FinalOutcomeNode(QGraphicsRectItem, BaseNodeMixin):
         self.update_tooltip()
 
     def update_tooltip(self) -> None:
-        self.setToolTip(self.description if self.description else self.name)
+        tooltip = self.description if self.description else self.name
+        if self.instance_id:
+            tooltip += f"\nView: {self.instance_id}"
+        self.setToolTip(tooltip)
 
     def mouseDoubleClickEvent(self, event: Any) -> None:
         """Handle double-click to edit final outcome metadata."""

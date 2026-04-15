@@ -13,20 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-from typing import List, Optional
+from typing import Optional
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QBrush, QPen
 from PyQt5.QtWidgets import QLabel, QMessageBox, QPushButton
 
+from yasmin_editor.editor_gui.canvas_logic import (
+    breadcrumb_label,
+    is_read_only_mode as canvas_is_read_only_mode,
+    resolve_xml_state_file_path,
+    state_has_available_outcomes,
+)
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
-from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
-from yasmin_editor.model.concurrence import Concurrence
 
 
 class EditorCanvasMixin:
@@ -192,20 +195,14 @@ class EditorCanvasMixin:
         self.canvas.centerOn(bounds.center())
 
     def _get_breadcrumb_label(self, index: int, container_model: object) -> str:
-        if index == 0:
-            return "root"
-
         self._ensure_external_xml_state()
-        if (
-            self.extern_xml is not None
-            and self.extern_xml_source_state is not None
-            and self.extern_xml_path_start_index is not None
-            and index == self.extern_xml_path_start_index
-            and container_model is self.extern_xml
-        ):
-            return str(self.extern_xml_source_state.name)
-
-        return str(container_model.name)
+        return breadcrumb_label(
+            index,
+            container_model,
+            extern_xml=self.extern_xml,
+            extern_xml_source_state=self.extern_xml_source_state,
+            extern_xml_path_start_index=self.extern_xml_path_start_index,
+        )
 
     def refresh_breadcrumbs(self) -> None:
         if not hasattr(self, "breadcrumb_layout"):
@@ -284,12 +281,12 @@ class EditorCanvasMixin:
 
     def is_read_only_mode(self) -> bool:
         self._ensure_external_xml_state()
-        external_xml_read_only = (
-            self.extern_xml is not None
-            and self.extern_xml_path_start_index is not None
-            and len(self.current_container_path) > self.extern_xml_path_start_index
+        return canvas_is_read_only_mode(
+            self.runtime_mode_enabled,
+            self.extern_xml,
+            self.extern_xml_path_start_index,
+            len(self.current_container_path),
         )
-        return self.runtime_mode_enabled or external_xml_read_only
 
     def _show_read_only_message(self) -> None:
         if self.runtime_mode_enabled:
@@ -314,74 +311,16 @@ class EditorCanvasMixin:
             except Exception:
                 plugin_info = None
 
-        candidates: List[str] = []
-        for source in [plugin_info, state_model]:
-            if source is None:
-                continue
-            for attr in [
-                "file_path",
-                "xml_file",
-                "path",
-                "full_path",
-                "abs_path",
-                "filepath",
-                "file_name",
-            ]:
-                value = getattr(source, attr, None)
-                if value:
-                    candidates.append(str(value))
-
-        for candidate in candidates:
-            if os.path.isfile(candidate):
-                return candidate
-
-        package_name = None
-        file_name = None
-        for source in [plugin_info, state_model]:
-            if source is None:
-                continue
-            if not package_name:
-                package_name = getattr(source, "package_name", None)
-            if not file_name:
-                file_name = getattr(source, "file_name", None)
-
-        if file_name and package_name:
-            try:
-                from ament_index_python.packages import get_package_share_directory
-
-                share_dir = get_package_share_directory(str(package_name))
-                direct_candidate = os.path.join(share_dir, str(file_name))
-                if os.path.isfile(direct_candidate):
-                    return direct_candidate
-                for root_dir, _dirs, files in os.walk(share_dir):
-                    if os.path.basename(str(file_name)) in files:
-                        return os.path.join(root_dir, os.path.basename(str(file_name)))
-            except Exception:
-                pass
-
-        return None
+        return resolve_xml_state_file_path(plugin_info, state_model)
 
     def _state_has_available_outcomes(
         self,
         state_node: StateNode | ContainerStateNode,
     ) -> bool:
-        if not hasattr(state_node, "model"):
-            return False
-
-        outcomes = list(getattr(state_node.model, "outcomes", []) or [])
-        if not outcomes:
-            return False
-
-        if isinstance(self.current_container_model, Concurrence):
-            return True
-
-        used_outcomes = {
-            transition.source_outcome
-            for transition in self.current_container_model.transitions.get(
-                state_node.name, []
-            )
-        }
-        return any(outcome.name not in used_outcomes for outcome in outcomes)
+        return state_has_available_outcomes(
+            getattr(state_node, "model", None),
+            self.current_container_model,
+        )
 
     def refresh_connection_port_visibility(self) -> None:
         readonly = self.is_read_only_mode()

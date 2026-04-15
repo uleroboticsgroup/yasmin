@@ -19,8 +19,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Iterable
 
-from .concurrence import Concurrence
+from .concurrence import Concurrence, iter_outcome_rule_values
 from .state import State
 from .state_machine import StateMachine
 
@@ -113,6 +114,28 @@ def _validate_state(
         _validate_leaf_state(state, result, path)
 
 
+def _validate_unique_named_items(
+    items: Iterable[object],
+    *,
+    path: str,
+    result: ValidationResult,
+    field_name: str,
+) -> None:
+    """Validate that a sequence of named model items is non-empty and unique."""
+
+    seen_names: set[str] = set()
+
+    for item in items:
+        name = getattr(item, "name", "")
+        if not name:
+            result.add_error(path, f"{field_name} name must not be empty")
+            continue
+
+        if name in seen_names:
+            result.add_error(path, f"Duplicate {field_name.lower()} '{name}'")
+        seen_names.add(name)
+
+
 def _validate_common_state_fields(
     state: State,
     result: ValidationResult,
@@ -123,25 +146,18 @@ def _validate_common_state_fields(
     if not state.name:
         result.add_error(path, "State name must not be empty")
 
-    outcome_names: set[str] = set()
-    for outcome in state.outcomes:
-        if not outcome.name:
-            result.add_error(path, "Outcome name must not be empty")
-            continue
-
-        if outcome.name in outcome_names:
-            result.add_error(path, f"Duplicate outcome '{outcome.name}'")
-        outcome_names.add(outcome.name)
-
-    key_names: set[str] = set()
-    for key in state.keys:
-        if not key.name:
-            result.add_error(path, "Key name must not be empty")
-            continue
-
-        if key.name in key_names:
-            result.add_error(path, f"Duplicate key '{key.name}'")
-        key_names.add(key.name)
+    _validate_unique_named_items(
+        state.outcomes,
+        path=path,
+        result=result,
+        field_name="Outcome",
+    )
+    _validate_unique_named_items(
+        state.keys,
+        path=path,
+        result=result,
+        field_name="Key",
+    )
 
 
 def _validate_leaf_state(state: State, result: ValidationResult, path: str) -> None:
@@ -167,6 +183,45 @@ def _validate_leaf_state(state: State, result: ValidationResult, path: str) -> N
         result.add_warning(path, "Leaf state has no 'state_type'")
 
 
+def _validate_conflicting_container_names(
+    *,
+    path: str,
+    result: ValidationResult,
+    state_names: set[str],
+    outcome_names: set[str],
+) -> None:
+    """Validate that container child states and final outcomes do not collide."""
+
+    conflicting_names = sorted(state_names & outcome_names)
+    for name in conflicting_names:
+        result.add_error(
+            path,
+            f"Name '{name}' is used by both a child state and a final outcome",
+        )
+
+
+def _validate_child_state_binding(
+    *,
+    container_path: str,
+    result: ValidationResult,
+    state_name: str,
+    child_state: State,
+) -> str:
+    """Validate one child-state dictionary binding and return its child path."""
+
+    child_path = f"{container_path}/{state_name}"
+
+    if not child_state.name:
+        result.add_error(child_path, "Child state name must not be empty")
+    elif child_state.name != state_name:
+        result.add_error(
+            child_path,
+            f"Dictionary key '{state_name}' does not match state name '{child_state.name}'",
+        )
+
+    return child_path
+
+
 def _validate_state_machine(
     state_machine: StateMachine,
     result: ValidationResult,
@@ -180,12 +235,12 @@ def _validate_state_machine(
 
     state_names = set(state_machine.states.keys())
     outcome_names = {outcome.name for outcome in state_machine.outcomes}
-    conflicting_names = sorted(state_names & outcome_names)
-    for name in conflicting_names:
-        result.add_error(
-            path,
-            f"Name '{name}' is used by both a child state and a final outcome",
-        )
+    _validate_conflicting_container_names(
+        path=path,
+        result=result,
+        state_names=state_names,
+        outcome_names=outcome_names,
+    )
     local_targets = state_names | outcome_names
     nested_parent_targets = local_targets | (parent_targets or set())
 
@@ -202,15 +257,12 @@ def _validate_state_machine(
         )
 
     for state_name, child_state in state_machine.states.items():
-        child_path = f"{path}/{state_name}"
-
-        if not child_state.name:
-            result.add_error(child_path, "Child state name must not be empty")
-        elif child_state.name != state_name:
-            result.add_error(
-                child_path,
-                f"Dictionary key '{state_name}' does not match state name '{child_state.name}'",
-            )
+        child_path = _validate_child_state_binding(
+            container_path=path,
+            result=result,
+            state_name=state_name,
+            child_state=child_state,
+        )
 
         _validate_state(child_state, result, child_path, nested_parent_targets)
 
@@ -274,12 +326,12 @@ def _validate_concurrence(
 
     state_names = set(concurrence.states.keys())
     outcome_names = {outcome.name for outcome in concurrence.outcomes}
-    conflicting_names = sorted(state_names & outcome_names)
-    for name in conflicting_names:
-        result.add_error(
-            path,
-            f"Name '{name}' is used by both a child state and a final outcome",
-        )
+    _validate_conflicting_container_names(
+        path=path,
+        result=result,
+        state_names=state_names,
+        outcome_names=outcome_names,
+    )
     nested_parent_targets = state_names | outcome_names | (parent_targets or set())
 
     if not outcome_names:
@@ -292,15 +344,12 @@ def _validate_concurrence(
         )
 
     for state_name, child_state in concurrence.states.items():
-        child_path = f"{path}/{state_name}"
-
-        if not child_state.name:
-            result.add_error(child_path, "Child state name must not be empty")
-        elif child_state.name != state_name:
-            result.add_error(
-                child_path,
-                f"Dictionary key '{state_name}' does not match state name '{child_state.name}'",
-            )
+        child_path = _validate_child_state_binding(
+            container_path=path,
+            result=result,
+            state_name=state_name,
+            child_state=child_state,
+        )
 
         _validate_state(child_state, result, child_path, nested_parent_targets)
 
@@ -311,7 +360,7 @@ def _validate_concurrence(
                 f"Outcome map references unknown outcome '{outcome_name}'",
             )
 
-        for state_name, state_outcome in mapping.items():
+        for state_name, state_outcomes in mapping.items():
             if state_name not in state_names:
                 result.add_error(
                     path,
@@ -321,8 +370,9 @@ def _validate_concurrence(
 
             child_state = concurrence.states[state_name]
             child_outcomes = {outcome.name for outcome in child_state.outcomes}
-            if child_outcomes and state_outcome not in child_outcomes:
-                result.add_warning(
-                    f"{path}/{state_name}",
-                    f"Outcome map references unknown outcome '{state_outcome}'",
-                )
+            for state_outcome in iter_outcome_rule_values(state_outcomes):
+                if child_outcomes and state_outcome not in child_outcomes:
+                    result.add_warning(
+                        f"{path}/{state_name}",
+                        f"Outcome map references unknown outcome '{state_outcome}'",
+                    )

@@ -87,6 +87,7 @@ class StateMachine(State):
                 item.source_outcome == transition.source_outcome
                 and item.target == transition.target
             ):
+                item.target_instance_id = transition.target_instance_id
                 return
         transition_list.append(transition)
 
@@ -146,8 +147,6 @@ class StateMachine(State):
             for transition in transitions:
                 if transition.target == old_name:
                     transition.target = new_name
-        if isinstance(state, StateMachine):
-            state.rename_transition_owner(old_name, new_name)
         if self.start_state == old_name:
             self.start_state = new_name
         self.layout.rename_state_position(old_name, new_name)
@@ -156,9 +155,10 @@ class StateMachine(State):
         """Rename a final outcome and update all related references."""
         if old_name == new_name:
             return
+        if self.get_outcome(old_name) is None:
+            return
         self._assert_child_name_available(new_name, exclude_outcome=old_name)
         State.rename_outcome(self, old_name, new_name)
-        self.rename_transition_owner(old_name, new_name)
         for transitions in self.transitions.values():
             for transition in transitions:
                 if transition.target == old_name:

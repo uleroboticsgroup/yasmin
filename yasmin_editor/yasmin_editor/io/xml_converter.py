@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Iterable
 from xml.etree import ElementTree as ET
 
-from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.concurrence import Concurrence, iter_outcome_rule_values
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.parameter import Parameter
@@ -101,7 +101,8 @@ def _state_machine_to_element(
         element.append(_state_to_element(state, model))
 
     for outcome in model.outcomes:
-        element.append(_final_outcome_to_element(outcome, model))
+        for outcome_element in _final_outcome_elements(outcome, model):
+            element.append(outcome_element)
 
     if parent is None:
         _append_container_level_transitions(element, model)
@@ -147,7 +148,8 @@ def _concurrence_to_element(
         element.append(_state_to_element(state, model))
 
     for outcome in model.outcomes:
-        element.append(_final_outcome_to_element(outcome, model))
+        for outcome_element in _final_outcome_elements(outcome, model):
+            element.append(outcome_element)
 
     _append_concurrence_outcome_map(element, model)
 
@@ -204,32 +206,72 @@ def _text_block_to_element(text_block: TextBlock) -> ET.Element:
     return element
 
 
-def _final_outcome_to_element(
+def _final_outcome_elements(
     outcome: Outcome,
     parent: StateMachine | Concurrence,
-) -> ET.Element:
-    element = ET.Element("FinalOutcome")
-    element.set("name", outcome.name)
+) -> list[ET.Element]:
+    """Serialize one logical outcome without mutating the in-memory layout."""
 
-    if outcome.description:
-        element.set("description", outcome.description)
+    serializable_placements = _serializable_outcome_placements(parent, outcome.name)
 
-    position = parent.layout.get_outcome_position(outcome.name)
-    if position is not None:
-        element.set("x", f"{position.x:.2f}")
-        element.set("y", f"{position.y:.2f}")
+    elements: list[ET.Element] = []
+    for index, placement in enumerate(serializable_placements):
+        element = ET.Element("FinalOutcome")
+        element.set("name", outcome.name)
 
-    if isinstance(parent, StateMachine):
-        for transition in parent.transitions.get(outcome.name, []):
-            element.append(_transition_to_element(transition))
+        if outcome.description:
+            element.set("description", outcome.description)
 
-    return element
+        if placement is not None:
+            instance_id, x, y = placement
+            if instance_id:
+                element.set("instance_id", instance_id)
+            element.set("x", f"{x:.2f}")
+            element.set("y", f"{y:.2f}")
+
+        if isinstance(parent, StateMachine) and index == 0:
+            for transition in parent.transitions.get(outcome.name, []):
+                element.append(_transition_to_element(transition))
+
+        elements.append(element)
+    return elements
+
+
+def _serializable_outcome_placements(
+    parent: StateMachine | Concurrence,
+    outcome_name: str,
+) -> list[tuple[str | None, float, float] | None]:
+    """Return outcome placements for XML serialization without changing layout state.
+
+    Legacy layouts may still store only the primary ``outcome_positions`` entry without
+    an explicit alias placement. In that case the serializer emits one placement without
+    an ``instance_id`` instead of materialising a random alias inside the live model.
+    """
+
+    placements = parent.layout.get_outcome_placements(outcome_name)
+    if placements:
+        return [
+            (
+                placement.instance_id,
+                placement.position.x,
+                placement.position.y,
+            )
+            for placement in placements
+        ]
+
+    primary_position = parent.layout.get_outcome_position(outcome_name)
+    if primary_position is None:
+        return [None]
+
+    return [(None, primary_position.x, primary_position.y)]
 
 
 def _transition_to_element(transition: Transition) -> ET.Element:
     element = ET.Element("Transition")
     element.set("from", transition.source_outcome)
     element.set("to", transition.target)
+    if transition.target_instance_id:
+        element.set("to_instance", transition.target_instance_id)
     return element
 
 
@@ -320,10 +362,11 @@ def _append_concurrence_outcome_map(
         outcome_map_elem = ET.SubElement(element, "OutcomeMap")
         outcome_map_elem.set("outcome", outcome_name)
 
-        for state_name, state_outcome in requirements.items():
-            item_elem = ET.SubElement(outcome_map_elem, "Item")
-            item_elem.set("state", state_name)
-            item_elem.set("outcome", state_outcome)
+        for state_name, state_outcomes in requirements.items():
+            for state_outcome in iter_outcome_rule_values(state_outcomes):
+                item_elem = ET.SubElement(outcome_map_elem, "Item")
+                item_elem.set("state", state_name)
+                item_elem.set("outcome", state_outcome)
 
 
 def _parse_state_machine_container(element: ET.Element) -> StateMachine:
@@ -435,6 +478,14 @@ def _merge_final_outcome(
     model: StateMachine | Concurrence,
     element: ET.Element,
 ) -> None:
+    """Merge one serialized final outcome into the in-memory model.
+
+    Legacy XML may omit ``instance_id`` for the primary outcome placement. That
+    representation should remain stable across load/save roundtrips, so the
+    first legacy placement is restored as a plain primary position instead of a
+    generated alias instance.
+    """
+
     outcome_name = element.get("name", "")
     if not outcome_name:
         return
@@ -449,7 +500,29 @@ def _merge_final_outcome(
     x = _parse_float(element.get("x"))
     y = _parse_float(element.get("y"))
     if x is not None and y is not None:
-        model.layout.set_outcome_position(outcome.name, x, y)
+        instance_id = element.get("instance_id")
+        if instance_id:
+            model.layout.set_outcome_position(
+                outcome.name,
+                x,
+                y,
+                instance_id=instance_id,
+            )
+        elif not model.layout.get_outcome_placements(outcome.name) and (
+            outcome.name not in model.layout.outcome_positions
+        ):
+            model.layout.set_primary_outcome_position(
+                outcome.name,
+                x,
+                y,
+            )
+        else:
+            model.layout.materialize_primary_outcome_position(outcome.name)
+            model.layout.create_outcome_alias(
+                outcome.name,
+                x,
+                y,
+            )
 
     if isinstance(model, StateMachine):
         for transition_elem in element.findall("Transition"):
@@ -504,6 +577,7 @@ def _parse_transition(element: ET.Element) -> Transition:
     return Transition(
         source_outcome=element.get("from", ""),
         target=element.get("to", ""),
+        target_instance_id=element.get("to_instance", ""),
     )
 
 
@@ -558,47 +632,16 @@ def _parse_remaps(element: ET.Element) -> dict[str, str]:
 
 def _encode_text_content(value: str) -> str:
     """Persist multiline text safely inside an XML attribute."""
-    return (
-        value.replace("\\", "\\\\")
-        .replace("\n", "\\n")
-        .replace("\r", "\\r")
-        .replace("\t", "\\t")
-    )
+    return value.replace("\r\n", "\n").replace("\r", "\n")
 
 
 def _decode_text_content(value: str) -> str:
-    """Restore escaped multiline text saved inside an XML attribute."""
-    if not value:
-        return ""
-
-    result: list[str] = []
-    index = 0
-    while index < len(value):
-        char = value[index]
-        if char != "\\" or index + 1 >= len(value):
-            result.append(char)
-            index += 1
-            continue
-
-        next_char = value[index + 1]
-        if next_char == "n":
-            result.append("\n")
-        elif next_char == "r":
-            result.append("\r")
-        elif next_char == "t":
-            result.append("\t")
-        elif next_char == "\\":
-            result.append("\\")
-        else:
-            result.append("\\")
-            result.append(next_char)
-        index += 2
-
-    return "".join(result)
+    """Restore multiline text persisted in an XML attribute."""
+    return value.replace("\r\n", "\n").replace("\r", "\n")
 
 
 def _parse_float(value: str | None) -> float | None:
-    if value is None:
+    if value in (None, ""):
         return None
     try:
         return float(value)
@@ -607,18 +650,14 @@ def _parse_float(value: str | None) -> float | None:
 
 
 def _indent(element: ET.Element, level: int = 0) -> None:
-    indent = "  "
-    current = "\n" + level * indent
-    child_indent = "\n" + (level + 1) * indent
-
-    if len(element):
+    indent = "\n" + level * "  "
+    children = list(element)
+    if children:
         if not element.text or not element.text.strip():
-            element.text = child_indent
-        for child in element:
+            element.text = indent + "  "
+        for child in children:
             _indent(child, level + 1)
-            if not child.tail or not child.tail.strip():
-                child.tail = child_indent
-        if not element[-1].tail or not element[-1].tail.strip():
-            element[-1].tail = current
-    elif level > 0 and (not element.tail or not element.tail.strip()):
-        element.tail = current
+        if not children[-1].tail or not children[-1].tail.strip():
+            children[-1].tail = indent
+    elif level and (not element.tail or not element.tail.strip()):
+        element.tail = indent
