@@ -16,11 +16,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import rclpy
-import yasmin
-from yasmin_ros import set_ros_loggers
 from yasmin_ros.yasmin_node import YasminNode
-from yasmin_viewer import YasminViewerPub
+
+import yasmin
 from yasmin_factory import YasminFactory
+from yasmin_ros import set_ros_loggers
+from yasmin_viewer import YasminViewerPub
 
 
 def main() -> None:
@@ -48,8 +49,9 @@ def main() -> None:
     sm.set_sigint_handler(True)
 
     # Publish FSM information for visualization
+    pub = None
     if enable_viewer_pub:
-        YasminViewerPub(sm)
+        pub = YasminViewerPub(sm)
 
     # Execute the FSM
     try:
@@ -57,6 +59,12 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+
+    sm = None
+    if pub:
+        pub._fsm = None
+
+    YasminNode.destroy_instance()
 
     # Shutdown ROS 2 if it's running
     if rclpy.ok():
