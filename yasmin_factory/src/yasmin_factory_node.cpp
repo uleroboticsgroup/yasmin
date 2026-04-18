@@ -67,6 +67,8 @@ int main(int argc, char *argv[]) {
     YASMIN_LOG_WARN(e.what());
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
+
   // Shutdown ROS 2
   rclcpp::shutdown();
   return 0;
