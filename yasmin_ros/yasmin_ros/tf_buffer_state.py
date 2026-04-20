@@ -33,7 +33,7 @@ class TfBufferState(State):
 
     def __init__(self) -> None:
         super().__init__([SUCCEED, ABORT])
-        self._node = YasminNode.get_instance()
+        self._node = None
         self._cache_time_sec = 10.0
 
         self.set_description(
@@ -64,6 +64,9 @@ class TfBufferState(State):
 
     def configure(self) -> None:
         self._cache_time_sec = float(self.get_parameter("cache_time_sec"))
+
+        if self._node is None:
+            self._node = YasminNode.get_instance()
 
     def execute(self, blackboard: Blackboard) -> str:
         try:

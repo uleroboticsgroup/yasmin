@@ -43,7 +43,7 @@ tf2::Duration to_tf_duration(const double seconds) {
 
 TfBufferState::TfBufferState()
     : yasmin::State({basic_outcomes::SUCCEED, basic_outcomes::ABORT}),
-      node_(YasminNode::get_instance()), cache_time_sec_(10.0) {
+      node_(nullptr), cache_time_sec_(10.0) {
   this->set_description(
       "Creates a shared tf2 buffer and transform listener and writes them to "
       "blackboard keys 'tf_buffer' and 'tf_listener'. Following states can "
@@ -67,6 +67,10 @@ TfBufferState::TfBufferState()
 
 void TfBufferState::configure() {
   this->cache_time_sec_ = this->get_parameter<double>("cache_time_sec");
+
+  if (!this->node_) {
+    this->node_ = YasminNode::get_instance();
+  }
 }
 
 std::string TfBufferState::execute(yasmin::Blackboard::SharedPtr blackboard) {
