@@ -133,4 +133,17 @@ def run_editor(argv: list[str] | None = None) -> int:
     editor = YasminEditor(manager)
     editor.show_startup_window()
     open_startup_xml(editor, args.xml_file)
-    return app.exec_()
+    exit_code = app.exec_()
+
+    # Cleanup plugin manager to release ROS 2 nodes and other resources
+    try:
+        # Destroy the singleton YasminNode instance to clean up ROS 2 resources
+        from yasmin_ros.yasmin_node import YasminNode
+
+        YasminNode.destroy_instance()
+    except Exception:
+        pass
+
+    del manager
+
+    return exit_code
