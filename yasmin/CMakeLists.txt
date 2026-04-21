@@ -29,6 +29,7 @@ include_directories(include)
 
 set(SOURCES
   src/yasmin/blackboard.cpp
+  src/yasmin/callback_signal.cpp
   src/yasmin/logs.cpp
   src/yasmin/state.cpp
   src/yasmin/cb_state.cpp
@@ -69,6 +70,19 @@ target_include_directories(blackboard PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 install(TARGETS blackboard
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+)
+
+# Python bindings for CallbackSignal
+pybind11_add_module(callback_signal
+  src/yasmin/callback_signal_pybind11.cpp
+)
+target_link_libraries(callback_signal PRIVATE ${PROJECT_NAME})
+target_include_directories(callback_signal PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+install(TARGETS callback_signal
   DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
 )
 
@@ -145,6 +159,7 @@ if(BUILD_TESTING)
   # Python tests
   set(_pytest_tests
     test_blackboard
+    test_callback_signal
     test_cb_state
     test_state
     test_state_machine
