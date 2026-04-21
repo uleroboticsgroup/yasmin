@@ -44,17 +44,18 @@
    - [Python](#python)
    - [Cpp](#cpp)
 4. [Cross-Language ROS Interface Communication](#crosslanguage-ros-interface-communication)
-5. [TF States](#tf-states)
-6. [YASMIN Editor](#yasmin-editor)
-7. [YASMIN Viewer](#yasmin-viewer)
+5. [CallbackSignal](#callbacksignal)
+6. [TF States](#tf-states)
+7. [YASMIN Editor](#yasmin-editor)
+8. [YASMIN Viewer](#yasmin-viewer)
    - [Custom Host and Port](#custom-host-and-port)
-8. [YASMIN CLI](#yasmin-cli)
+9. [YASMIN CLI](#yasmin-cli)
    - [Available Commands](#available-commands)
    - [Usage Examples](#usage-examples)
-9. [YASMIN Factory](#yasmin-factory)
-10. [YASMIN PCL](#yasmin-pcl)
-11. [YASMIN Plugins Manager](#yasmin-plugins-manager)
-12. [Citations](#citations)
+10. [YASMIN Factory](#yasmin-factory)
+11. [YASMIN PCL](#yasmin-pcl)
+12. [YASMIN Plugins Manager](#yasmin-plugins-manager)
+13. [Citations](#citations)
 
 ## Key Features
 
@@ -73,6 +74,7 @@
 - **Plugin Architecture**: Extensible plugin system for registering custom states usable across C++ and Python.
 - **State Metadata**: States and state machines support descriptions and typed input/output blackboard key annotations.
 - **Cross-Language Serialization**: Share ROS interfaces between Python and C++ states via binary serialization.
+- **Cross-Language Callback Signals**: Coordinate Python and C++ states through shared triggerable callback collections stored in the blackboard.
 - **TF Integration**: `TfBufferState` creates and shares a tf2 buffer and transform listener through the blackboard so all states in the machine can perform coordinate frame lookups.
 
 ## Installation
@@ -1637,7 +1639,7 @@ if __name__ == "__main__":
 <details>
 <summary>Click to expand</summary>
 
-> **Note:** When mixing Python and C++ states in the same state machine, they can communicate through the blackboard, but only with primitive data types: `int`, `float`, `bool`, and `string`. Complex objects or ROS messages cannot be directly shared between Python and C++ states.
+> **Note:** When mixing Python and C++ states in the same state machine, they can communicate through the blackboard with supported cross-language values such as `int`, `float`, `bool`, `string`, binary data (`bytes` / `std::vector<uint8_t>`), and `CallbackSignal`. ROS messages still cannot be directly shared between Python and C++ states and should be serialized first.
 
 ```shell
 ros2 run yasmin_demos factory_demo.py
@@ -3294,7 +3296,7 @@ int main(int argc, char *argv[]) {
 <details>
 <summary>Click to expand</summary>
 
-> **Note:** When mixing Python and C++ states in the same state machine, they can communicate through the blackboard, but only with primitive data types: `int`, `float`, `bool`, and `string`. Complex objects or ROS messages cannot be directly shared between Python and C++ states.
+> **Note:** When mixing Python and C++ states in the same state machine, they can communicate through the blackboard with supported cross-language values such as `int`, `float`, `bool`, `string`, binary data (`bytes` / `std::vector<uint8_t>`), and `CallbackSignal`. ROS messages still cannot be directly shared between Python and C++ states and should be serialized first.
 
 ```shell
 ros2 run yasmin_demos factory_demo
@@ -3817,6 +3819,119 @@ from geometry_msgs.msg import Pose
 
 pose_bytes = blackboard["pose_bytes"]
 pose = rclpy.serialization.deserialize_message(pose_bytes, Pose)
+```
+
+For behavior coordination instead of data exchange, see the [`CallbackSignal`](#callbacksignal) section below.
+
+## CallbackSignal
+
+`CallbackSignal` is a shared blackboard object for cross-language coordination between Python and C++ states. It stores a thread-safe collection of callbacks, where each callback takes no arguments and returns no value. The same signal can contain Python callbacks and C++ callbacks at the same time.
+
+A state can place a `CallbackSignal` into the blackboard, other states can register callbacks on it, and any state can later trigger all registered callbacks. This is useful for cooperative cancellation, cleanup hooks, reset notifications, or other event-style interactions between concurrent states.
+
+The object provides four main operations:
+
+- `add_callback(callback)`: Register a callback and return its callback id.
+- `remove_callback(callback_id)`: Remove a previously registered callback.
+- `trigger()`: Execute all registered callbacks synchronously and block until all of them finish.
+- `trigger_async()`: Execute all registered callbacks asynchronously and return a future-like object with `wait()`, `is_completed()`, `has_exception()`, and `get_exception_message()`.
+
+`CallbackSignal` is thread-safe, including asynchronous triggering. Triggering uses snapshot semantics, so callbacks added or removed while a trigger is already running only affect future triggers and do not modify the callback set that is currently being executed.
+
+### Python Example
+
+```python
+import time
+
+from yasmin import Blackboard, CallbackSignal, State
+
+
+class WorkerState(State):
+    def __init__(self) -> None:
+        super().__init__(["done", "canceled"])
+        self._canceled = False
+
+    def cancel(self) -> None:
+        self._canceled = True
+
+    def execute(self, blackboard: Blackboard) -> str:
+        signal = blackboard["cancel_signal"]
+        callback_id = signal.add_callback(self.cancel)
+
+        try:
+            while not self._canceled:
+                time.sleep(0.1)
+            return "canceled"
+        finally:
+            signal.remove_callback(callback_id)
+
+
+class ControllerState(State):
+    def __init__(self) -> None:
+        super().__init__(["done"])
+
+    def execute(self, blackboard: Blackboard) -> str:
+        blackboard["cancel_signal"].trigger()
+        return "done"
+
+
+blackboard = Blackboard()
+blackboard["cancel_signal"] = CallbackSignal()
+```
+
+### C++ Example
+
+```cpp
+#include <atomic>
+#include <chrono>
+#include <memory>
+#include <string>
+#include <thread>
+
+#include "yasmin/blackboard.hpp"
+#include "yasmin/callback_signal.hpp"
+#include "yasmin/state.hpp"
+
+class WorkerState : public yasmin::State {
+public:
+  WorkerState() : yasmin::State({"done", "canceled"}), canceled_(false) {}
+
+  void cancel() { canceled_.store(true); }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    auto signal =
+        blackboard->get<std::shared_ptr<yasmin::CallbackSignal>>("cancel_signal");
+
+    callback_id_ = signal->add_callback([this]() { this->cancel(); });
+
+    while (!canceled_.load()) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    signal->remove_callback(callback_id_);
+    return "canceled";
+  }
+
+private:
+  std::atomic<bool> canceled_;
+  std::size_t callback_id_{0};
+};
+
+class ControllerState : public yasmin::State {
+public:
+  ControllerState() : yasmin::State({"done"}) {}
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    auto signal =
+        blackboard->get<std::shared_ptr<yasmin::CallbackSignal>>("cancel_signal");
+    signal->trigger();
+    return "done";
+  }
+};
+
+auto blackboard = std::make_shared<yasmin::Blackboard>();
+blackboard->set<std::shared_ptr<yasmin::CallbackSignal>>(
+    "cancel_signal", std::make_shared<yasmin::CallbackSignal>());
 ```
 
 ## TF States
