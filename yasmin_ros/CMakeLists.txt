@@ -38,7 +38,6 @@ set(SOURCES
   src/yasmin_ros/monitor_state.cpp
   src/yasmin_ros/publisher_state.cpp
   src/yasmin_ros/get_parameters_state.cpp
-  src/yasmin_ros/tf_buffer_state.cpp
   src/yasmin_ros/supported_interface_serialization.cpp
 )
 set(DEPENDENCIES
@@ -76,6 +75,19 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PUBLIC ${DEPENDENCIES})
 
 # Separate plugin libraries to avoid namespace collisions
+add_library(tf_buffer_state SHARED src/yasmin_ros/tf_buffer_state.cpp)
+target_include_directories(tf_buffer_state PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_link_libraries(tf_buffer_state PUBLIC
+  ${PROJECT_NAME}
+  yasmin::yasmin
+  pluginlib::pluginlib
+  tf2::tf2
+  tf2_ros::tf2_ros
+)
+
 add_library(ros_serialize_cpp_state SHARED src/yasmin_ros/ros_serialize_cpp_state.cpp)
 target_include_directories(ros_serialize_cpp_state PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -109,7 +121,7 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin
 )
 
-install(TARGETS ros_serialize_cpp_state ros_deserialize_cpp_state
+install(TARGETS tf_buffer_state ros_serialize_cpp_state ros_deserialize_cpp_state
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -182,6 +194,9 @@ if(BUILD_TESTING)
         ${example_interfaces_TARGETS}
         ${tf2_msgs_TARGETS}
       )
+      if(${_test_name}_cpp STREQUAL "test_tf_buffer_state_cpp")
+        target_link_libraries(${_test_name}_cpp tf_buffer_state)
+      endif()
     endif()
   endforeach()
 
@@ -189,6 +204,7 @@ if(BUILD_TESTING)
   if(TARGET test_ros_serialization_states_cpp)
     target_link_libraries(test_ros_serialization_states_cpp
       ${PROJECT_NAME}
+      tf_buffer_state
       ros_serialize_cpp_state
       ros_deserialize_cpp_state
       yasmin::yasmin

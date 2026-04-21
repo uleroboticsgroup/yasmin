@@ -1,5 +1,5 @@
 <class_libraries>
-  <library path="yasmin_ros">
+  <library path="tf_buffer_state">
     <class name="yasmin_ros/TfBufferState"
            type="yasmin_ros::TfBufferState"
            base_class_type="yasmin::State">
