@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "yasmin/blackboard_key_info.hpp"
+#include "yasmin/callback_signal.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/types.hpp"
 
@@ -181,6 +182,11 @@ blackboard_key_info_from_pyobject(const std::string &key_name,
 
   if (py::isinstance<py::str>(value)) {
     return BlackboardKeyInfo(key_name, "", value.cast<std::string>());
+  }
+
+  if (py::isinstance<yasmin::CallbackSignal::SharedPtr>(value)) {
+    return BlackboardKeyInfo(key_name, "",
+                             value.cast<yasmin::CallbackSignal::SharedPtr>());
   }
 
   if (is_python_sequence_like(value)) {
@@ -362,6 +368,11 @@ blackboard_key_info_get_py_default(const BlackboardKeyInfo &info) {
   }
   if (is_exact_cpp_type<BoolDict>(type)) {
     return py::cast(info.get_default_value<BoolDict>());
+  }
+
+  if (is_exact_cpp_type<yasmin::CallbackSignal::SharedPtr>(type)) {
+    return py::cast(
+        info.get_default_value<yasmin::CallbackSignal::SharedPtr>());
   }
 
   if (is_exact_cpp_type<std::string>(type)) {

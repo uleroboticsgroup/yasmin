@@ -18,10 +18,11 @@ import inspect
 import logging
 from typing import List, Union
 
+from yasmin.callback_signal import CallbackSignal, CallbackSignalFuture
+from yasmin.blackboard import Blackboard
 from yasmin.state import State
 from yasmin.concurrence import Concurrence
 from yasmin.cb_state import CbState
-from yasmin.blackboard import Blackboard
 from yasmin.state_machine import StateMachine
 from yasmin.logs import (
     LogLevel,
@@ -158,6 +159,8 @@ __all__ = [
     State,
     Concurrence,
     CbState,
+    CallbackSignal,
+    CallbackSignalFuture,
     Blackboard,
     StateMachine,
     get_log_level,

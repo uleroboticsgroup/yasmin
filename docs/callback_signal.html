@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Callback Signal - YASMIN</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="docker.html">Docker Environment</a></li>
+          <li><a href="main_concepts.html">Main Concepts</a></li>
+          <li><a href="callback_signal.html">Callback Signal</a></li>
+          <li><a href="xml_factory.html">XML State Machines</a></li>
+          <li><a href="packages.html">Packages Overview</a></li>
+          <li><a href="yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/cpp/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/action_client_demo.html">Action Client</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/cpp/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/python/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/python/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li>
+                <a href="tutorials/python/publisher_demo.html">Publisher</a>
+              </li>
+              <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/python/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="tutorials/python/action_client_demo.html">Action Client</a>
+              </li>
+              <li>
+                <a href="tutorials/python/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+          <li>
+            <a href="yasmin_ros_serialization.html">ROS Serialization States</a>
+          </li>
+          <li><a href="yasmin_ros_tf.html">TF States</a></li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>Callback Signal</h1>
+
+        <div class="overview">
+          <p>
+            <strong>CallbackSignal</strong> is a native YASMIN blackboard object for
+            cross-language coordination between Python and C++ states. It allows
+            states to register callbacks and later trigger all registered callbacks
+            from either language.
+          </p>
+          <h3>Key Features:</h3>
+          <ul>
+            <li>
+              <strong>Cross-language callbacks:</strong> Store Python and C++
+              callbacks in the same signal instance
+            </li>
+            <li>
+              <strong>Thread-safe triggering:</strong> Supports synchronous and
+              asynchronous execution
+            </li>
+            <li>
+              <strong>Blackboard integration:</strong> Share a signal through the
+              blackboard like any other supported object
+            </li>
+            <li>
+              <strong>Event-style coordination:</strong> Useful for cancellation,
+              cleanup, reset, and other cooperative control flows
+            </li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <h2>Overview</h2>
+          <p>
+            Before <code>CallbackSignal</code>, the blackboard was mainly used to
+            exchange data. The new signal object extends this model so states can
+            also exchange behavior. A state can create a signal, place it in the
+            blackboard, and other states can register callbacks on it. When the
+            signal is triggered, all currently registered callbacks are executed.
+          </p>
+          <p>
+            This is especially useful when mixing Python and C++ states in the same
+            state machine through the <a href="yasmin_factory.html">YASMIN Factory</a>.
+            It complements primitive blackboard values and can be combined with
+            <a href="yasmin_ros_serialization.html">ROS Serialization States</a>
+            when both event-style coordination and ROS interface exchange are needed.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>API</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Function</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>add_callback(callback)</code></td>
+                <td>Registers a callback and returns its callback id.</td>
+              </tr>
+              <tr>
+                <td><code>remove_callback(callback_id)</code></td>
+                <td>Removes a previously registered callback by id.</td>
+              </tr>
+              <tr>
+                <td><code>trigger()</code></td>
+                <td>Executes all registered callbacks synchronously and blocks until they finish.</td>
+              </tr>
+              <tr>
+                <td><code>trigger_async()</code></td>
+                <td>Executes all registered callbacks asynchronously and returns a future-like handle.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            Callbacks do not take arguments and do not return values. This keeps the
+            interface simple and consistent across Python and C++.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Execution Semantics</h2>
+          <p>
+            <code>CallbackSignal</code> is thread-safe. Triggering uses snapshot
+            semantics, which means the current callback list is copied before
+            execution starts. If another thread adds or removes callbacks while a
+            trigger is already running, the running trigger continues with its own
+            snapshot and the modification only affects future triggers.
+          </p>
+          <p>
+            <code>trigger()</code> propagates callback failures directly. The object
+            returned by <code>trigger_async()</code> allows callers to wait for
+            completion, check whether an exception occurred, and inspect the stored
+            exception message.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Python Example</h2>
+          <p>
+            The following example creates a shared signal in the blackboard and uses
+            it for cooperative cancellation.
+          </p>
+          <pre><code class="language-python">from yasmin import Blackboard, CallbackSignal
+
+blackboard = Blackboard()
+blackboard["cancel_signal"] = CallbackSignal()
+
+
+def cancel_worker() -> None:
+    print("worker got cancel request")
+
+
+def cancel_monitor() -> None:
+    print("monitor got cancel request")
+
+
+signal = blackboard["cancel_signal"]
+worker_cb = signal.add_callback(cancel_worker)
+monitor_cb = signal.add_callback(cancel_monitor)
+
+signal.trigger()
+
+signal.remove_callback(worker_cb)
+future = signal.trigger_async()
+future.wait()
+</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>C++ Example</h2>
+          <p>
+            The same signal can also be created and used from C++. In mixed Python and
+            C++ state machines, both languages can register callbacks on the same object.
+          </p>
+          <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+
+#include "yasmin/blackboard.hpp"
+#include "yasmin/callback_signal.hpp"
+
+int main() {
+  auto blackboard = std::make_shared&lt;yasmin::Blackboard&gt;();
+  auto signal = std::make_shared&lt;yasmin::CallbackSignal&gt;();
+
+  blackboard-&gt;set&lt;std::shared_ptr&lt;yasmin::CallbackSignal&gt;&gt;(
+      "cancel_signal", signal);
+
+  const std::size_t callback_id = signal-&gt;add_callback([]() {
+    std::cout &lt;&lt; "cancel callback from C++" &lt;&lt; std::endl;
+  });
+
+  signal-&gt;trigger();
+
+  signal-&gt;remove_callback(callback_id);
+
+  auto future = signal-&gt;trigger_async();
+  future.wait();
+
+  if (future.has_exception()) {
+    std::cerr &lt;&lt; future.get_exception_message() &lt;&lt; std::endl;
+  }
+
+  return 0;
+}
+</code></pre>
+        </div>
+
+        <div class="section">
+          <h2>Typical Use Cases</h2>
+          <ul>
+            <li>Cancel another state running in a concurrence</li>
+            <li>Trigger cleanup or shutdown hooks</li>
+            <li>Notify multiple states that a branch has finished</li>
+            <li>Broadcast reset or recovery requests</li>
+          </ul>
+          <p>
+            <code>CallbackSignal</code> is designed for simple event-style actions.
+            It is not intended to replace structured blackboard data or message passing.
+          </p>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

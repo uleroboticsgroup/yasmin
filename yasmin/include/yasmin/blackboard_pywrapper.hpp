@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "yasmin/blackboard.hpp"
+#include "yasmin/callback_signal.hpp"
 #include "yasmin/types.hpp"
 
 namespace py = pybind11;
@@ -48,6 +49,7 @@ namespace yasmin {
  * - float                <-> double
  * - str                  <-> std::string
  * - bytes / bytearray    <-> std::vector<uint8_t>
+ * - CallbackSignal       <-> std::shared_ptr<yasmin::CallbackSignal>
  *
  * Supported homogeneous container mappings:
  * - list[str] / tuple[str, ...]     <-> std::vector<std::string>
@@ -327,6 +329,12 @@ public:
       return;
     }
 
+    if (py::isinstance<yasmin::CallbackSignal::SharedPtr>(value)) {
+      this->blackboard->set<yasmin::CallbackSignal::SharedPtr>(
+          key, value.cast<yasmin::CallbackSignal::SharedPtr>());
+      return;
+    }
+
     if (is_python_sequence_like(value)) {
       py::sequence seq = value.cast<py::sequence>();
 
@@ -516,6 +524,11 @@ public:
 
     if (is_exact_cpp_type<BoolDict>(type)) {
       return py::cast(this->blackboard->get<BoolDict>(key));
+    }
+
+    if (is_exact_cpp_type<yasmin::CallbackSignal::SharedPtr>(type)) {
+      return py::cast(
+          this->blackboard->get<yasmin::CallbackSignal::SharedPtr>(key));
     }
 
     if (is_exact_cpp_type<std::string>(type)) {
