@@ -14,6 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import copy
 import unittest
 from yasmin import Blackboard
 
@@ -49,6 +50,41 @@ class TestBlackboard(unittest.TestCase):
         self.blackboard.set("foo", "foo")
         self.blackboard.set_remappings({"bar": "foo"})
         self.assertEqual("foo", self.blackboard.get("bar"))
+
+    def test_copy_constructor_keeps_remappings_local_and_shares_values(self):
+        self.blackboard["foo"] = "foo"
+        self.blackboard["count"] = 1
+
+        blackboard_copy = Blackboard(self.blackboard)
+
+        self.blackboard.set_remappings({"alias": "foo"})
+        self.assertEqual({"alias": "foo"}, self.blackboard.get_remappings())
+        self.assertEqual({}, blackboard_copy.get_remappings())
+        self.assertEqual("foo", self.blackboard["alias"])
+        self.assertFalse("alias" in blackboard_copy)
+
+        blackboard_copy.set_remappings({"copy_alias": "foo"})
+        self.assertEqual({"alias": "foo"}, self.blackboard.get_remappings())
+        self.assertEqual({"copy_alias": "foo"}, blackboard_copy.get_remappings())
+        self.assertEqual("foo", blackboard_copy["copy_alias"])
+        self.assertFalse("copy_alias" in self.blackboard)
+
+        self.blackboard["count"] = 2
+        self.assertEqual(2, self.blackboard["count"])
+        self.assertEqual(2, blackboard_copy["count"])
+
+    def test_copy_module_uses_blackboard_copy_constructor(self):
+        self.blackboard["foo"] = "foo"
+        self.blackboard.set_remappings({"alias": "foo"})
+
+        blackboard_copy = copy.copy(self.blackboard)
+
+        self.assertEqual({"alias": "foo"}, blackboard_copy.get_remappings())
+
+        self.blackboard.set_remappings({"other_alias": "foo"})
+        self.assertEqual({"alias": "foo"}, blackboard_copy.get_remappings())
+        self.assertEqual({"other_alias": "foo"}, self.blackboard.get_remappings())
+        self.assertEqual("foo", blackboard_copy["alias"])
 
     def test_set_get_string(self):
         """Test setting and getting string values"""

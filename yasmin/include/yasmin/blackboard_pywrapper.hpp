@@ -295,6 +295,29 @@ public:
       : blackboard(std::move(bb_ptr)) {}
 
   /**
+   * @brief Copy constructor following native Blackboard copy semantics.
+   * @param other Wrapper to copy from.
+   *
+   * The copied wrapper receives its own Blackboard handle created through the
+   * native Blackboard copy constructor. This preserves shared value storage
+   * while isolating remappings between the two Python objects.
+   */
+  BlackboardPyWrapper(const BlackboardPyWrapper &other)
+      : blackboard(Blackboard::make_shared(*other.blackboard)) {}
+
+  /**
+   * @brief Copy assignment following native Blackboard copy semantics.
+   * @param other Wrapper to copy from.
+   * @return Reference to this wrapper.
+   */
+  BlackboardPyWrapper &operator=(const BlackboardPyWrapper &other) {
+    if (this != &other) {
+      this->blackboard = Blackboard::make_shared(*other.blackboard);
+    }
+    return *this;
+  }
+
+  /**
    * @brief Store a Python object in the blackboard.
    * @param key Blackboard key.
    * @param value Python object to store.
