@@ -61,9 +61,13 @@ def install_external_dependency_stubs(monkeypatch) -> None:
     )
 
     class Blackboard:
-        def __init__(self) -> None:
-            self._data = {}
-            self._remappings = {}
+        def __init__(self, other=None) -> None:
+            if other is None:
+                self._data = {}
+                self._remappings = {}
+            else:
+                self._data = other._data
+                self._remappings = dict(other._remappings)
 
         def get(self, key):
             return self._data[key]
