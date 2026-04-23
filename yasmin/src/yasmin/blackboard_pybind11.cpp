@@ -23,6 +23,13 @@ namespace py = pybind11;
 PYBIND11_MODULE(blackboard, m) {
   m.doc() = "Python bindings for yasmin::Blackboard";
 
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
+  py::module_::import("yasmin.callback_signal");
+#else
+  py::module::import("yasmin.callback_signal");
+#endif
+
   py::class_<yasmin::BlackboardPyWrapper>(m, "Blackboard")
       .def(py::init<>())
       // Setters using set method and __setitem__/__setattr__

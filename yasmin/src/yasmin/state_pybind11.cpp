@@ -135,6 +135,12 @@ PYBIND11_MODULE(state, m) {
   // This allows us to use it without re-registering the type
 #if PYBIND11_VERSION_MAJOR > 2 ||                                              \
     (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
+  py::module_::import("yasmin.callback_signal");
+#else
+  py::module::import("yasmin.callback_signal");
+#endif
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
   py::module_ blackboard_module = py::module_::import("yasmin.blackboard");
 #else
   py::module blackboard_module = py::module::import("yasmin.blackboard");
