@@ -27,8 +27,8 @@
 #include <vector>
 
 #include "yasmin/blackboard_key_info.hpp"
-#include "yasmin/callback_signal_pyutils.hpp"
 #include "yasmin/callback_signal.hpp"
+#include "yasmin/callback_signal_pyutils.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/types.hpp"
 
