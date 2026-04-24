@@ -130,19 +130,42 @@ class PluginInfo:
 
         return canonical_type
 
+    @staticmethod
+    def _is_primitive_metadata_value(value) -> bool:
+        """Return whether a metadata default value can be cached directly."""
+        return value is None or isinstance(value, (str, int, float, bool))
+
+    @staticmethod
+    def _describe_metadata_value_type(value) -> str:
+        """Return a stable type name for non-primitive metadata defaults."""
+        return type(value).__name__
+
     @classmethod
     def _normalize_cpp_metadata_entries(cls, metadata_entries: List[dict]) -> List[dict]:
-        """Normalize display types inside metadata dictionaries for user-facing output."""
+        """Normalize metadata dictionaries and sanitize non-serializable defaults."""
         normalized_entries: List[dict] = []
 
         for metadata_entry in metadata_entries:
             normalized_entry = dict(metadata_entry)
 
+            default_value = normalized_entry.get("default_value")
             default_value_type = normalized_entry.get("default_value_type")
+
             if isinstance(default_value_type, str):
                 normalized_entry["default_value_type"] = cls._normalize_cpp_metadata_type(
                     default_value_type
                 )
+            elif default_value is not None:
+                normalized_entry["default_value_type"] = (
+                    cls._describe_metadata_value_type(default_value)
+                )
+
+            if not cls._is_primitive_metadata_value(default_value):
+                if not normalized_entry.get("default_value_type"):
+                    normalized_entry["default_value_type"] = (
+                        cls._describe_metadata_value_type(default_value)
+                    )
+                normalized_entry["default_value"] = ""
 
             normalized_entries.append(normalized_entry)
 
