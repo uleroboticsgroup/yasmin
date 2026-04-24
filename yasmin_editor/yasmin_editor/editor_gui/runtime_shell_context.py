@@ -33,7 +33,10 @@ def runtime_shell_allowed(runtime) -> bool:
     return bool(
         runtime is not None
         and runtime.is_ready()
-        and getattr(runtime, "bb", None) is not None
+        and (
+            getattr(runtime, "shell_bb", None) is not None
+            or getattr(runtime, "bb", None) is not None
+        )
         and getattr(runtime, "sm", None) is not None
     )
 
@@ -92,7 +95,7 @@ def build_runtime_shell_context_payload(
         return None
 
     return {
-        "bb": runtime.bb,
+        "bb": getattr(runtime, "shell_bb", None) or runtime.bb,
         "sm": runtime.sm,
         "current_state": runtime.get_current_state_ref(),
         "last_state": runtime.get_last_state_ref(),

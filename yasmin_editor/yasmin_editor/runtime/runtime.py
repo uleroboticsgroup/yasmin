@@ -68,6 +68,7 @@ class Runtime(QObject):
         self.factory = YasminFactory()
         self.sm: Optional[StateMachine] = None
         self.bb: Blackboard = Blackboard()
+        self.shell_bb: Blackboard = Blackboard(self.bb)
 
         self._running = False
         self._blocked = False
@@ -190,6 +191,7 @@ class Runtime(QObject):
             self.logger.configure()
             self.sm = self.factory.create_sm_from_file(path)
             self.bb = Blackboard()
+            self.shell_bb = Blackboard(self.bb)
             self._register_callbacks()
         except Exception as exc:
             self.sm = None
@@ -667,44 +669,35 @@ class Runtime(QObject):
         outcome: str,
         prefix: tuple[str, ...] = tuple(),
     ) -> None:
-        """Handle transitions and expose the current blackboard safely."""
+        """Handle transitions while keeping shell remappings isolated."""
         if self._disposed:
             return
 
-        # Store blackboard remappings temporarily so the editor can inspect the
-        # raw key space without mutating the runtime-visible mapping.
-        remappings = dict(bb.get_remappings())
+        from_path = prefix + (str(from_state),)
+        to_path = prefix + (str(to_state),)
 
-        try:
-            bb.set_remappings({})
+        self.logger.append(
+            f"[TRANSITION] {' / '.join(from_path)} "
+            f"--[{outcome}]--> {' / '.join(to_path)}"
+        )
+        self._set_last_transition((from_path, to_path, str(outcome)))
 
-            from_path = prefix + (str(from_state),)
-            to_path = prefix + (str(to_state),)
+        self._set_active_path(from_path)
+        self._current_state_ref = self._resolve_state_reference(from_path)
 
-            self.logger.append(
-                f"[TRANSITION] {' / '.join(from_path)} "
-                f"--[{outcome}]--> {' / '.join(to_path)}"
-            )
-            self._set_last_transition((from_path, to_path, str(outcome)))
+        with self._pause_condition:
+            if self._step_mode:
+                self._step_mode = False
+                self._pause_requested = True
 
-            self._set_active_path(from_path)
-            self._current_state_ref = self._resolve_state_reference(from_path)
-
-            with self._pause_condition:
-                if self._step_mode:
-                    self._step_mode = False
-                    self._pause_requested = True
-
-            if self._has_breakpoint(to_path):
-                self._update_shell_state_refs(to_path, from_path)
-                self._set_active_path(to_path)
-                self._current_state_ref = self._resolve_state_reference(to_path)
-                self._request_breakpoint_pause(to_path)
-                self._pause_if_requested()
-
-            active_path = self._expand_to_deepest_known_path(to_path)
-            self._update_shell_state_refs(active_path, from_path)
-            self._set_active_path(active_path)
+        if self._has_breakpoint(to_path):
+            self._update_shell_state_refs(to_path, from_path)
+            self._set_active_path(to_path)
+            self._current_state_ref = self._resolve_state_reference(to_path)
+            self._request_breakpoint_pause(to_path)
             self._pause_if_requested()
-        finally:
-            bb.set_remappings(remappings)
+
+        active_path = self._expand_to_deepest_known_path(to_path)
+        self._update_shell_state_refs(active_path, from_path)
+        self._set_active_path(active_path)
+        self._pause_if_requested()

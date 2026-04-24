@@ -25,6 +25,29 @@ PYBIND11_MODULE(blackboard, m) {
 
   py::class_<yasmin::BlackboardPyWrapper>(m, "Blackboard")
       .def(py::init<>())
+      .def(py::init<const yasmin::BlackboardPyWrapper &>(), py::arg("other"))
+      .def(
+          "copy",
+          [](const yasmin::BlackboardPyWrapper &self) {
+            return yasmin::BlackboardPyWrapper(self);
+          },
+          "Create a blackboard copy that shares values but keeps its own "
+          "remappings")
+      .def(
+          "__copy__",
+          [](const yasmin::BlackboardPyWrapper &self) {
+            return yasmin::BlackboardPyWrapper(self);
+          },
+          "Create a blackboard copy that shares values but keeps its own "
+          "remappings")
+      .def(
+          "__deepcopy__",
+          [](const yasmin::BlackboardPyWrapper &self, py::object) {
+            return yasmin::BlackboardPyWrapper(self);
+          },
+          "Create a blackboard copy that shares values but keeps its own "
+          "remappings",
+          py::arg("memo"))
       // Setters using set method and __setitem__/__setattr__
       .def("set", &yasmin::BlackboardPyWrapper::set,
            "Set a value in the blackboard", py::arg("key"), py::arg("value"))

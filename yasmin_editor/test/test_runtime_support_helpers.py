@@ -63,6 +63,7 @@ class FakeRuntime:
         last_state_ref=None,
         last_transition=(("root",), ("done",), "success"),
         bb=None,
+        shell_bb=None,
         sm=None,
     ) -> None:
         self._ready = ready
@@ -85,6 +86,7 @@ class FakeRuntime:
         )
         self._last_transition = last_transition
         self.bb = {} if bb is None else bb
+        self.shell_bb = self.bb if shell_bb is None else shell_bb
         self.sm = object() if sm is None else sm
 
     def is_ready(self):
@@ -240,12 +242,14 @@ def test_runtime_shell_helpers_build_status_text_and_context_payload():
         last_state_ref=SimpleNamespace(name="last_worker"),
         last_transition=(("root", "worker"), ("root", "done"), "success"),
         bb={"count": 1},
+        shell_bb={"count": 1, "view": "shell"},
         sm="state_machine_ref",
     )
 
     assert runtime_shell_allowed(runtime) is True
     missing_bb_runtime = FakeRuntime(sm="state_machine_ref")
     missing_bb_runtime.bb = None
+    missing_bb_runtime.shell_bb = None
     missing_sm_runtime = FakeRuntime(bb={"count": 1})
     missing_sm_runtime.sm = None
     assert runtime_shell_allowed(missing_bb_runtime) is False
@@ -268,7 +272,7 @@ def test_runtime_shell_helpers_build_status_text_and_context_payload():
     commands = {"where": object()}
     payload = build_runtime_shell_context_payload(runtime, commands)
     assert payload == {
-        "bb": {"count": 1},
+        "bb": {"count": 1, "view": "shell"},
         "sm": "state_machine_ref",
         "current_state": runtime.get_current_state_ref(),
         "last_state": runtime.get_last_state_ref(),
@@ -278,4 +282,5 @@ def test_runtime_shell_helpers_build_status_text_and_context_payload():
     }
     missing_payload_runtime = FakeRuntime(sm="state_machine_ref")
     missing_payload_runtime.bb = None
+    missing_payload_runtime.shell_bb = None
     assert build_runtime_shell_context_payload(missing_payload_runtime, {}) is None
