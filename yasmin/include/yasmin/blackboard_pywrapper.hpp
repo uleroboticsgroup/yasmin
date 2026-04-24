@@ -29,6 +29,7 @@
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/callback_signal.hpp"
+#include "yasmin/callback_signal_pyutils.hpp"
 #include "yasmin/types.hpp"
 
 namespace py = pybind11;
@@ -352,9 +353,11 @@ public:
       return;
     }
 
-    if (py::isinstance<yasmin::CallbackSignal::SharedPtr>(value)) {
+    if (yasmin::callback_signal_pyutils::is_python_callback_signal_like(
+            value)) {
       this->blackboard->set<yasmin::CallbackSignal::SharedPtr>(
-          key, value.cast<yasmin::CallbackSignal::SharedPtr>());
+          key,
+          yasmin::callback_signal_pyutils::cast_python_callback_signal(value));
       return;
     }
 
