@@ -369,7 +369,11 @@ def _append_concurrence_outcome_map(
                 item_elem.set("outcome", state_outcome)
 
 
-def _parse_state_machine_container(element: ET.Element) -> StateMachine:
+def _parse_state_machine_container(
+    element: ET.Element,
+    *,
+    include_container_level_transitions: bool = True,
+) -> StateMachine:
     model = StateMachine(
         name=element.get("name", ""),
         description=element.get("description", ""),
@@ -380,7 +384,11 @@ def _parse_state_machine_container(element: ET.Element) -> StateMachine:
     model.keys.extend(_parse_keys(element.findall("Key")))
     model.parameter_mappings.update(_parse_parameter_remaps(element))
     model.remappings.update(_parse_remaps(element))
-    _parse_state_machine_content(model, element)
+    _parse_state_machine_content(
+        model,
+        element,
+        include_container_level_transitions=include_container_level_transitions,
+    )
     return model
 
 
@@ -402,10 +410,14 @@ def _parse_concurrence_container(element: ET.Element) -> Concurrence:
 def _parse_state_machine_content(
     model: StateMachine,
     element: ET.Element,
+    *,
+    include_container_level_transitions: bool,
 ) -> None:
     outcome_names = element.get("outcomes", "").split()
     for outcome_name in outcome_names:
         model.add_outcome(Outcome(name=outcome_name))
+
+    local_targets = _local_state_machine_targets(element)
 
     for child in element:
         if child.tag in {"Param", "Key", "ParamRemap", "Remap"}:
@@ -420,7 +432,8 @@ def _parse_state_machine_content(
             continue
 
         if child.tag == "Transition":
-            model.add_transition(model.name, _parse_transition(child))
+            if include_container_level_transitions:
+                model.add_transition(model.name, _parse_transition(child))
             continue
 
         if child.tag == "OutcomeMap":
@@ -435,7 +448,44 @@ def _parse_state_machine_content(
             model.layout.set_state_position(state.name, x, y)
 
         for transition_elem in child.findall("Transition"):
-            model.add_transition(state.name, _parse_transition(transition_elem))
+            transition = _parse_transition(transition_elem)
+            if _is_leaked_same_name_container_transition(
+                model,
+                state.name,
+                transition,
+                local_targets,
+            ):
+                continue
+            model.add_transition(state.name, transition)
+
+
+def _local_state_machine_targets(element: ET.Element) -> set[str]:
+    targets = set(element.get("outcomes", "").split())
+
+    for child in element:
+        if child.tag in {"State", "StateMachine", "Concurrence"}:
+            name = child.get("name", "")
+            if name:
+                targets.add(name)
+        elif child.tag == "FinalOutcome":
+            name = child.get("name", "")
+            if name:
+                targets.add(name)
+
+    return targets
+
+
+def _is_leaked_same_name_container_transition(
+    model: StateMachine,
+    state_name: str,
+    transition: Transition,
+    local_targets: set[str],
+) -> bool:
+    return (
+        state_name == model.name
+        and transition.target not in local_targets
+        and bool(transition.target)
+    )
 
 
 def _parse_concurrence_content(
@@ -546,7 +596,10 @@ def _parse_state_like(element: ET.Element) -> State:
         return _parse_concurrence_container(element)
 
     if element.tag == "StateMachine" and not element.get("file_name"):
-        return _parse_state_machine_container(element)
+        return _parse_state_machine_container(
+            element,
+            include_container_level_transitions=False,
+        )
 
     state = State(
         name=element.get("name", ""),
