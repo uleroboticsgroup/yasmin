@@ -273,3 +273,73 @@ def test_concurrence_xml_roundtrip_preserves_multiple_state_outcomes_per_final_o
     assert loaded_cc.outcome_map["finished"]["worker"] == ["ok", "retry"]
     assert xml_text.count('<Item state="worker" outcome="ok" />') == 1
     assert xml_text.count('<Item state="worker" outcome="retry" />') == 1
+
+
+def test_nested_state_machine_external_transitions_do_not_leak_into_same_named_child():
+    xml_text = """
+    <StateMachine name="root" outcomes="done" start_state="init">
+      <StateMachine name="init" outcomes="done" start_state="init">
+        <State name="init" type="py" module="demo.module" class="DemoState">
+          <Transition from="done" to="done" />
+        </State>
+        <FinalOutcome name="done" />
+        <Transition from="done" to="next" />
+      </StateMachine>
+      <State name="next" type="py" module="demo.module" class="DemoState">
+        <Transition from="done" to="done" />
+      </State>
+      <FinalOutcome name="done" />
+    </StateMachine>
+    """
+
+    root = model_from_xml(xml_text)
+    nested = root.get_state("init")
+
+    assert isinstance(nested, StateMachine)
+    assert [(item.source_outcome, item.target) for item in root.transitions["init"]] == [
+        ("done", "next")
+    ]
+    assert [
+        (item.source_outcome, item.target) for item in nested.transitions["init"]
+    ] == [("done", "done")]
+
+    serialized = model_to_xml(root)
+    nested_state_xml = serialized.split('<State name="init"', 1)[1].split("</State>", 1)[
+        0
+    ]
+    assert 'to="next"' not in nested_state_xml
+    assert '<Transition from="done" to="next" />' in serialized
+
+
+def test_corrupted_same_named_child_transition_to_parent_scope_is_removed_on_roundtrip():
+    xml_text = """
+    <StateMachine name="root" outcomes="done" start_state="init">
+      <StateMachine name="init" outcomes="done" start_state="init">
+        <State name="init" type="py" module="demo.module" class="DemoState">
+          <Transition from="done" to="done" />
+          <Transition from="done" to="next" />
+        </State>
+        <FinalOutcome name="done" />
+        <Transition from="done" to="next" />
+      </StateMachine>
+      <State name="next" type="py" module="demo.module" class="DemoState">
+        <Transition from="done" to="done" />
+      </State>
+      <FinalOutcome name="done" />
+    </StateMachine>
+    """
+
+    root = model_from_xml(xml_text)
+    nested = root.get_state("init")
+
+    assert isinstance(nested, StateMachine)
+    assert [
+        (item.source_outcome, item.target) for item in nested.transitions["init"]
+    ] == [("done", "done")]
+
+    serialized = model_to_xml(root)
+    nested_state_xml = serialized.split('<State name="init"', 1)[1].split("</State>", 1)[
+        0
+    ]
+    assert 'to="next"' not in nested_state_xml
+    assert serialized.count('<Transition from="done" to="next" />') == 1
