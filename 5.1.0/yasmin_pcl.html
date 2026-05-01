@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YASMIN PCL Documentation</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="docker.html">Docker Environment</a></li>
+          <li><a href="main_concepts.html">Main Concepts</a></li>
+          <li><a href="callback_signal.html">Callback Signal</a></li>
+          <li><a href="xml_factory.html">XML State Machines</a></li>
+          <li><a href="packages.html">Packages Overview</a></li>
+          <li><a href="yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/cpp/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/cpp/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/python/basic_fsm.html"
+                  >Writing a Simple FSM</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/remap_demo.html"
+                  >Blackboard Remapping</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li>
+                <a href="tutorials/python/publisher_demo.html">Publisher</a>
+              </li>
+              <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/python/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/parameters_demo.html"
+                  >ROS Parameters</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+          <li>
+            <a href="yasmin_ros_serialization.html">ROS Serialization States</a>
+          </li>
+          <li><a href="yasmin_ros_tf.html">TF States</a></li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>YASMIN PCL</h1>
+
+        <div class="overview">
+          <p>
+            <strong>YASMIN PCL</strong> provides reusable YASMIN states for
+            point cloud processing. It integrates the
+            <a href="https://pointclouds.org/" target="_blank"
+              >Point Cloud Library (PCL)</a
+            >
+            with YASMIN&rsquo;s state machine framework, enabling declarative
+            point cloud pipelines using blackboard-based data exchange. The
+            package includes 14 states covering format conversion, file I/O, and
+            filtering.
+          </p>
+        </div>
+
+        <div class="section">
+          <h2>Point Cloud Types</h2>
+          <p>
+            All states exchange data through the YASMIN blackboard using the
+            following type aliases defined in
+            <code>yasmin_pcl/common/cloud_types.hpp</code>:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Alias</th>
+                <th>Underlying Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>RosPointCloud2Ptr</code></td>
+                <td>
+                  <code
+                    >std::shared_ptr&lt;sensor_msgs::msg::PointCloud2&gt;</code
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><code>PclPointCloud2Ptr</code></td>
+                <td><code>pcl::PCLPointCloud2::Ptr</code></td>
+              </tr>
+              <tr>
+                <td><code>PclPointCloud2ConstPtr</code></td>
+                <td><code>pcl::PCLPointCloud2::ConstPtr</code></td>
+              </tr>
+              <tr>
+                <td><code>Indices</code></td>
+                <td><code>pcl::Indices</code></td>
+              </tr>
+              <tr>
+                <td><code>ModelCoefficients</code></td>
+                <td><code>pcl::ModelCoefficients</code></td>
+              </tr>
+              <tr>
+                <td><code>Vector4fArray</code></td>
+                <td><code>std::array&lt;float, 4&gt;</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2>I/O States</h2>
+          <p>
+            Six states handle point cloud format conversion and file I/O. All
+            states produce an outcome of <code>succeeded</code> or
+            <code>aborted</code>.
+          </p>
+
+          <h3>RosToPclPointCloud2State</h3>
+          <p>
+            Converts a ROS
+            <code>sensor_msgs::msg::PointCloud2</code> message to a PCL
+            <code>PCLPointCloud2</code>.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><code>input_cloud</code></td>
+                <td><code>RosPointCloud2Ptr</code></td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>output_cloud</code></td>
+                <td><code>PclPointCloud2Ptr</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>PclToRosPointCloud2State</h3>
+          <p>
+            Converts a PCL <code>PCLPointCloud2</code> to a ROS
+            <code>sensor_msgs::msg::PointCloud2</code> message.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><code>input_cloud</code></td>
+                <td><code>PclPointCloud2Ptr</code></td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>output_cloud</code></td>
+                <td><code>RosPointCloud2Ptr</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>LoadPcdState</h3>
+          <p>Loads a PCD (Point Cloud Data) file into memory.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Output</td>
+                <td><code>output_cloud</code></td>
+                <td><code>PclPointCloud2Ptr</code></td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>sensor_origin</code></td>
+                <td><code>Vector4fArray</code></td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>sensor_orientation</code></td>
+                <td><code>Vector4fArray</code></td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>pcd_version</code></td>
+                <td><code>int</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong>Parameters:</strong></p>
+          <ul>
+            <li>
+              <code>file_path</code> (<em>string</em>, required) &mdash; path to
+              the PCD file
+            </li>
+          </ul>
+
+          <h3>SavePcdState</h3>
+          <p>Saves a point cloud to a PCD file.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><code>input_cloud</code></td>
+                <td><code>PclPointCloud2Ptr</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong>Parameters:</strong></p>
+          <ul>
+            <li>
+              <code>file_path</code> (<em>string</em>, required) &mdash; output
+              file path
+            </li>
+            <li>
+              <code>storage_mode</code> (<em>string</em>, default:
+              <code>"binary"</code>) &mdash; <code>ascii</code>,
+              <code>binary</code>, or <code>binary_compressed</code>
+            </li>
+            <li>
+              <code>origin_x</code>, <code>origin_y</code>,
+              <code>origin_z</code>, <code>origin_w</code> (<em>float</em>,
+              default: 0) &mdash; sensor position
+            </li>
+            <li>
+              <code>orientation_x</code>, <code>orientation_y</code>,
+              <code>orientation_z</code>, <code>orientation_w</code>
+              (<em>float</em>, default: 0,0,0,1) &mdash; sensor orientation
+              quaternion
+            </li>
+          </ul>
+
+          <h3>LoadPlyState</h3>
+          <p>Loads a PLY (Polygon File Format) file into memory.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Output</td>
+                <td><code>output_cloud</code></td>
+                <td><code>PclPointCloud2Ptr</code></td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>sensor_origin</code></td>
+                <td><code>Vector4fArray</code></td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>sensor_orientation</code></td>
+                <td><code>Vector4fArray</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong>Parameters:</strong></p>
+          <ul>
+            <li>
+              <code>file_path</code> (<em>string</em>, required) &mdash; path to
+              the PLY file
+            </li>
+          </ul>
+
+          <h3>SavePlyState</h3>
+          <p>Saves a point cloud to a PLY file.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><code>input_cloud</code></td>
+                <td><code>PclPointCloud2Ptr</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong>Parameters:</strong></p>
+          <ul>
+            <li>
+              <code>file_path</code> (<em>string</em>, required) &mdash; output
+              file path
+            </li>
+            <li>
+              <code>binary_mode</code> (<em>bool</em>, default:
+              <code>true</code>) &mdash; use binary encoding
+            </li>
+            <li>
+              <code>use_camera</code> (<em>bool</em>, default:
+              <code>false</code>) &mdash; add camera info to the file
+            </li>
+            <li>
+              <code>origin_x</code>, <code>origin_y</code>,
+              <code>origin_z</code>, <code>origin_w</code> (<em>float</em>,
+              default: 0) &mdash; sensor position
+            </li>
+            <li>
+              <code>orientation_x</code>, <code>orientation_y</code>,
+              <code>orientation_z</code>, <code>orientation_w</code>
+              (<em>float</em>, default: 0,0,0,1) &mdash; sensor orientation
+              quaternion
+            </li>
+          </ul>
+        </div>
+
+        <div class="section">
+          <h2>Filter States</h2>
+          <p>
+            Eight filter states process point clouds. Every filter reads
+            <code>input_cloud</code> (<code>PclPointCloud2Ptr</code>) and writes
+            <code>output_cloud</code> (<code>PclPointCloud2Ptr</code>). An
+            optional <code>input_indices</code> (<code>Indices</code>) key
+            restricts processing to a subset of points. When
+            <code>extract_removed_indices</code> is enabled, the removed point
+            indices are written to <code>removed_indices</code>
+            (<code>Indices</code>). All filters produce an outcome of
+            <code>succeeded</code> or <code>aborted</code>.
+          </p>
+
+          <h4>Common Filter Parameters</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>negative</code></td>
+                <td>bool</td>
+                <td>false</td>
+                <td>Invert the filter logic</td>
+              </tr>
+              <tr>
+                <td><code>keep_organized</code></td>
+                <td>bool</td>
+                <td>false</td>
+                <td>Preserve cloud structure using NaN values</td>
+              </tr>
+              <tr>
+                <td><code>user_filter_value</code></td>
+                <td>float</td>
+                <td>NaN</td>
+                <td>Replacement value for organized clouds</td>
+              </tr>
+              <tr>
+                <td><code>extract_removed_indices</code></td>
+                <td>bool</td>
+                <td>false</td>
+                <td>Capture removed point indices</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>PassThroughState</h3>
+          <p>
+            Filters points by the value of a single field, keeping only those
+            within the specified range.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>filter_field_name</code></td>
+                <td>string</td>
+                <td><code>"z"</code></td>
+                <td>Point field to filter on</td>
+              </tr>
+              <tr>
+                <td><code>filter_limit_min</code></td>
+                <td>double</td>
+                <td>0.0</td>
+                <td>Lower range bound</td>
+              </tr>
+              <tr>
+                <td><code>filter_limit_max</code></td>
+                <td>double</td>
+                <td>1.0</td>
+                <td>Upper range bound</td>
+              </tr>
+              <tr>
+                <td><code>filter_limit_negative</code></td>
+                <td>bool</td>
+                <td>false</td>
+                <td>Keep points outside the range</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>CropBoxState</h3>
+          <p>Removes points outside an axis-aligned or rotated bounding box.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <code>min_x</code> / <code>min_y</code> / <code>min_z</code>
+                </td>
+                <td>float</td>
+                <td>-1.0</td>
+                <td>Minimum corner</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>max_x</code> / <code>max_y</code> / <code>max_z</code>
+                </td>
+                <td>float</td>
+                <td>1.0</td>
+                <td>Maximum corner</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>translation_x</code> / <code>y</code> / <code>z</code>
+                </td>
+                <td>float</td>
+                <td>0.0</td>
+                <td>Box center offset</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>rotation_roll</code> / <code>pitch</code> /
+                  <code>yaw</code>
+                </td>
+                <td>float</td>
+                <td>0.0</td>
+                <td>Box orientation (radians)</td>
+              </tr>
+              <tr>
+                <td><code>use_transform</code></td>
+                <td>bool</td>
+                <td>false</td>
+                <td>Apply an additional affine transform</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>VoxelGridState</h3>
+          <p>
+            Downsamples the cloud by replacing all points within each voxel with
+            their centroid.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <code>leaf_size_x</code> / <code>y</code> / <code>z</code>
+                </td>
+                <td>float</td>
+                <td>0.1</td>
+                <td>Voxel dimensions</td>
+              </tr>
+              <tr>
+                <td><code>downsample_all_data</code></td>
+                <td>bool</td>
+                <td>true</td>
+                <td>Downsample all fields, not just XYZ</td>
+              </tr>
+              <tr>
+                <td><code>minimum_points_number_per_voxel</code></td>
+                <td>int</td>
+                <td>0</td>
+                <td>Minimum points per voxel to keep</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>ExtractIndicesState</h3>
+          <p>
+            Extracts specific points by an index list. Requires
+            <code>input_indices</code> to be set on the blackboard.
+          </p>
+          <p>
+            This state only uses the
+            <a href="#common-filter-parameters">common filter parameters</a>.
+          </p>
+
+          <h3>StatisticalOutlierRemovalState</h3>
+          <p>
+            Removes outliers by computing the mean distance to
+            <em>k</em>-nearest neighbors and discarding points beyond the
+            threshold.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>mean_k</code></td>
+                <td>int</td>
+                <td>10</td>
+                <td>Number of neighbors for mean distance</td>
+              </tr>
+              <tr>
+                <td><code>stddev_mul_thresh</code></td>
+                <td>double</td>
+                <td>1.0</td>
+                <td>
+                  Standard deviation multiplier &mdash; higher values keep more
+                  points
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>RadiusOutlierRemovalState</h3>
+          <p>
+            Removes isolated points that have fewer than the required number of
+            neighbors within a search radius.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>radius_search</code></td>
+                <td>double</td>
+                <td>1.0</td>
+                <td>Neighborhood search radius</td>
+              </tr>
+              <tr>
+                <td><code>min_neighbors_in_radius</code></td>
+                <td>int</td>
+                <td>1</td>
+                <td>Minimum neighbors to keep the point</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>RandomSampleState</h3>
+          <p>Randomly samples a subset of points from the cloud.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>sample</code></td>
+                <td>int</td>
+                <td>1</td>
+                <td>Target number of samples</td>
+              </tr>
+              <tr>
+                <td><code>seed</code></td>
+                <td>int</td>
+                <td>&mdash;</td>
+                <td>Random seed for reproducibility</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            In addition to <code>output_cloud</code>, this state also writes
+            <code>output_indices</code> (<code>Indices</code>) with the sampled
+            point indices.
+          </p>
+
+          <h3>ProjectInliersState</h3>
+          <p>
+            Projects points onto a geometric model such as a plane, sphere, or
+            cylinder.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Key</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><code>input_cloud</code></td>
+                <td><code>PclPointCloud2Ptr</code></td>
+              </tr>
+              <tr>
+                <td>Input (required)</td>
+                <td><code>input_model_coefficients</code></td>
+                <td><code>ModelCoefficients</code></td>
+              </tr>
+              <tr>
+                <td>Input (optional)</td>
+                <td><code>input_indices</code></td>
+                <td><code>Indices</code></td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td><code>output_cloud</code></td>
+                <td><code>PclPointCloud2Ptr</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>model_type</code></td>
+                <td>int</td>
+                <td>0</td>
+                <td>
+                  PCL model enum (0&nbsp;=&nbsp;SACMODEL_PLANE,
+                  1&nbsp;=&nbsp;SACMODEL_SPHERE,
+                  2&nbsp;=&nbsp;SACMODEL_CYLINDER, &hellip;)
+                </td>
+              </tr>
+              <tr>
+                <td><code>copy_all_fields</code></td>
+                <td>bool</td>
+                <td>&mdash;</td>
+                <td>Copy all point fields to the output</td>
+              </tr>
+              <tr>
+                <td><code>copy_all_data</code></td>
+                <td>bool</td>
+                <td>&mdash;</td>
+                <td>Copy all point data to the output</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2>Plugin Identifiers</h2>
+          <p>
+            All 14 states are exported via pluginlib under the
+            <code>yasmin_pcl_states</code> library. Use the identifiers below
+            with the YASMIN CLI or XML factory:
+          </p>
+          <pre><code class="language-text"># I/O
+yasmin_pcl/RosToPclPointCloud2State
+yasmin_pcl/PclToRosPointCloud2State
+yasmin_pcl/LoadPcdState
+yasmin_pcl/SavePcdState
+yasmin_pcl/LoadPlyState
+yasmin_pcl/SavePlyState
+
+# Filters
+yasmin_pcl/PassThroughState
+yasmin_pcl/CropBoxState
+yasmin_pcl/VoxelGridState
+yasmin_pcl/ExtractIndicesState
+yasmin_pcl/StatisticalOutlierRemovalState
+yasmin_pcl/RadiusOutlierRemovalState
+yasmin_pcl/RandomSampleState
+yasmin_pcl/ProjectInliersState</code></pre>
+          <p>You can list them from the command line with:</p>
+          <pre><code class="language-bash">ros2 yasmin list --type cpp --search pcl</code></pre>
+        </div>
+
+        <div class="page-navigation">
+          <a href="yasmin_viewer.html" class="nav-button prev">YASMIN Viewer</a>
+          <a href="yasmin_plugins_manager.html" class="nav-button next"
+            >YASMIN Plugins Manager</a
+          >
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2025 YASMIN Project. Licensed under GPL v3.0. | Documentation
+        generated with <a href="doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

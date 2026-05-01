@@ -1,0 +1,19 @@
+<map id="yasmin_viewer::YasminViewerNode" name="yasmin_viewer::YasminViewerNode">
+<area shape="rect" id="Node000001" title="ROS 2 node that receives state machine descriptions and exposes them for the web viewer." alt="" coords="978,105,1206,131"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="696,5,789,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="805,23,877,35,955,54,1016,78,1067,102,1065,107,1014,83,953,59,876,40,804,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="702,55,782,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="798,73,999,102,998,107,798,78"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="649,156,836,227"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="851,176,953,157,1052,129,1053,134,955,162,852,181"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="178,165,255,191"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="269,162,279,160,335,150,511,135,686,125,978,116,978,122,686,130,511,140,336,155,280,165,271,167"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="271,177,648,186,648,192,270,182"/>
+<area shape="rect" id="Node000007" href="$structyasmin__viewer_1_1YasminViewerNode_1_1CachedFsm.html" title="Stores a serialized finite state machine and its last update time." alt="" coords="335,226,533,266"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="247,198,280,217,336,233,334,238,278,222,244,203"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,158,129,198"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="144,176,178,176,178,181,144,181"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="548,230,624,217,648,212,649,218,625,222,548,235"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="702,251,783,276"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="797,247,835,237,895,223,953,203,1020,165,1072,129,1075,134,1023,170,955,208,897,228,837,242,799,252"/>
+</map>

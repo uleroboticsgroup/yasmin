@@ -1,0 +1,11 @@
+<map id="yasmin::CallbackSignal" name="yasmin::CallbackSignal">
+<area shape="rect" id="Node000001" title="Thread&#45;safe callback fan&#45;out primitive for cross&#45;state coordination." alt="" coords="597,71,751,96"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="313,5,394,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="409,23,574,53,630,68,628,73,572,58,408,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="269,56,438,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="454,81,596,81,596,86,454,86"/>
+<area shape="rect" id="Node000004" href="$structyasmin_1_1CallbackSignal_1_1CallbackEntry.html" title=" " alt="" coords="5,63,160,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="175,81,268,81,268,86,175,86"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="270,136,437,162"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="452,132,572,109,629,94,630,100,574,114,453,137"/>
+</map>
