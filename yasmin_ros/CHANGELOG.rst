@@ -3,6 +3,14 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+5.1.0 (2026-05-01)
+------------------
+* refactor(build): extract tf_buffer_state into separate plugin library
+  Move tf_buffer_state.cpp from main library sources to a dedicated shared library target to avoid namespace collisions, update plugin configuration accordingly, and adjust test linkages.
+* fix: create TfBufferState node during configure instead of constructor (`#112 <https://github.com/uleroboticsgroup/yasmin/issues/112>`_)
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Contributors: Maik, Miguel Ángel González Santamarta
+
 5.0.0 (2026-01-14)
 ------------------
 * Fix YasminNode shutdown lifecycle and stabilize yasmin_ros teardown (`#107 <https://github.com/uleroboticsgroup/yasmin/issues/107>`_)

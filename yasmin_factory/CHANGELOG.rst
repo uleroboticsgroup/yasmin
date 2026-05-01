@@ -2,6 +2,12 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.1.0 (2026-05-01)
+------------------
+* fix segfault in factory node (`#111 <https://github.com/uleroboticsgroup/yasmin/issues/111>`_)
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Contributors: Maik
+
 5.0.0 (2026-01-14)
 ------------------
 * Creating viewer pub variable for C++ factory node

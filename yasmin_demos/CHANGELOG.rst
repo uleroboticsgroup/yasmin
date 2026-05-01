@@ -3,6 +3,9 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+5.1.0 (2026-05-01)
+------------------
+
 5.0.0 (2026-01-14)
 ------------------
 * refactor: update package share path retrieval for compatibility with rclcpp version checks

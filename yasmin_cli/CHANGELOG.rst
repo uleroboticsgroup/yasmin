@@ -2,6 +2,9 @@
 Changelog for package yasmin_cli
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.1.0 (2026-05-01)
+------------------
+
 5.0.0 (2026-01-14)
 ------------------
 * build: update setup.py to exclude test packages and add pytest, remove linter tests

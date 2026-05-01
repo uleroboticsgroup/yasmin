@@ -3,6 +3,26 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+5.1.0 (2026-05-01)
+------------------
+* fix: store Python CallbackSignal as native shared_ptr across blackboard (`#116 <https://github.com/uleroboticsgroup/yasmin/issues/116>`_)
+  * fix: store Python CallbackSignal as native shared_ptr across blackboard boundary
+  * formatter
+  ---------
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Blackboard python copy constructor (`#115 <https://github.com/uleroboticsgroup/yasmin/issues/115>`_)
+  * add Blackboard copy bindings and remapping isolation tests
+  * use blackboard copy for shell and stop clearing remappings on transitions
+  ---------
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* add callback signal (`#113 <https://github.com/uleroboticsgroup/yasmin/issues/113>`_)
+  * add callback signal
+  * docs(readme): add CallbackSignal chapter with Python and C++ examples
+  * docs(web): add Callback Signal page and sidebar links across docs
+  ---------
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Contributors: Maik
+
 5.0.0 (2026-01-14)
 ------------------
 * Fix state machine cancel propagation and add hard cancel API (`#105 <https://github.com/uleroboticsgroup/yasmin/issues/105>`_)

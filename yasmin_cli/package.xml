@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>yasmin_cli</name>
-  <version>5.0.0</version>
+  <version>5.1.0</version>
   <description>CLI tools for inspecting YASMIN states and metadata.</description>
   <maintainer email="maik.knof@gmx.de">Maik Knof</maintainer>
   <license>GPL-3.0</license>

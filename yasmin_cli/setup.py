@@ -4,7 +4,7 @@ package_name = "yasmin_cli"
 
 setup(
     name=package_name,
-    version="5.0.0",
+    version="5.1.0",
     packages=find_packages(exclude=["test"]),
     data_files=[
         ("share/ament_index/resource_index/packages", [f"resource/{package_name}"]),

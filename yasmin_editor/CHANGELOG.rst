@@ -2,6 +2,36 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.1.0 (2026-05-01)
+------------------
+* fix nested state machine transition scope in editor XML roundtrip (`#117 <https://github.com/uleroboticsgroup/yasmin/issues/117>`_)
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Blackboard python copy constructor (`#115 <https://github.com/uleroboticsgroup/yasmin/issues/115>`_)
+  * add Blackboard copy bindings and remapping isolation tests
+  * use blackboard copy for shell and stop clearing remappings on transitions
+  ---------
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* fix(editor): add resource cleanup on application exit
+  Add cleanup logic to destroy the YasminNode singleton and delete the plugin manager after the editor application exits, preventing potential resource leaks in ROS 2 nodes and improving application shutdown reliability.
+* Editor enhancements (`#110 <https://github.com/uleroboticsgroup/yasmin/issues/110>`_)
+  * minor changes
+  * add pytest-based unit tests and colcon test integration
+  * add model and layout regression coverage
+  * formatter
+  * allow add-final-outcome button to create outcome aliases
+  * rewrite editor help pag
+  * fix editor crash when dragging concurrence transition to final outcome
+  * Add searchable transition outcome picker for drag connections
+  * fix: preserve multiple concurrence outcomes per final outcome
+  * add start_indicator
+  * add start indicator palette colors and improve light mode styling
+  * add gui tests
+  * add more tests
+  * add dialog interaction coverage for overwrite and state properties
+  ---------
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Contributors: Maik, Miguel Ángel González Santamarta
+
 5.0.0 (2026-01-14)
 ------------------
 * Interactive shell improvements and runtime breakpoints (`#109 <https://github.com/uleroboticsgroup/yasmin/pull/109>`_)

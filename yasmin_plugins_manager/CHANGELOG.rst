@@ -2,6 +2,12 @@
 Changelog for package yasmin_plugins_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.1.0 (2026-05-01)
+------------------
+* fix plugin cache serialization for non-primitive defaults (`#114 <https://github.com/uleroboticsgroup/yasmin/issues/114>`_)
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Contributors: Maik
+
 5.0.0 (2026-01-14)
 ------------------
 * normalize cpp metadata types in editor and plugin cache path (`#108 <https://github.com/uleroboticsgroup/yasmin/pull/108>`)

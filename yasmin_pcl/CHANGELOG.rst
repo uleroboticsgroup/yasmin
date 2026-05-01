@@ -2,6 +2,9 @@
 Changelog for package yasmin_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.1.0 (2026-05-01)
+------------------
+
 5.0.0 (2026-01-14)
 ------------------
 * refactor(yasmin_pcl): downgrade log levels from error to warning in point cloud states

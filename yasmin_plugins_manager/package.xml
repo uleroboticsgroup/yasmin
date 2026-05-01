@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>yasmin_plugins_manager</name>
-  <version>5.0.0</version>
+  <version>5.1.0</version>
   <description>Plugin discovery and caching for YASMIN states.</description>
   <maintainer email="maik.knof@gmx.de">Maik Knof</maintainer>
   <license>GPL-3.0</license>
