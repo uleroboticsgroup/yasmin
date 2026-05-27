@@ -1,0 +1,20 @@
+name: Lyrical Build and Test
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
+
+jobs:
+  lyrical_build_and_test:
+    runs-on: ubuntu-latest
+    container:
+      image: ros:lyrical
+    steps:
+      - name: Build and Test
+        uses: ros-tooling/action-ros-ci@v0.4
+        with:
+          package-name: yasmin yasmin_ros yasmin_factory yasmin_pcl
+          target-ros2-distro: lyrical
+          coverage-result: false
