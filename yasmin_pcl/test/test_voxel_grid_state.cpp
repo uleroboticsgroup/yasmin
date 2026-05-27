@@ -85,7 +85,7 @@ TEST(VoxelGridState, DownsamplesOnlyProvidedInputIndices) {
       "input_cloud",
       yasmin_pcl::test::create_pcl_cloud_ptr(
           {{0.0F, 0.0F, 0.0F}, {0.05F, 0.0F, 0.0F}, {10.0F, 0.0F, 0.0F}}));
-  blackboard->set<yasmin_pcl::common::Indices>("input_indices", {0, 1});
+  blackboard->set<yasmin_pcl::common::Indices>("input_indices", {0, 2});
 
   EXPECT_EQ(state(blackboard), "succeeded");
 
