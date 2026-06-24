@@ -12,8 +12,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS__GET_PARAMETER_STATE_HPP_
-#define YASMIN_ROS__GET_PARAMETER_STATE_HPP_
+#ifndef YASMIN_ROS__GET_PARAMETERS_STATE_HPP_
+#define YASMIN_ROS__GET_PARAMETERS_STATE_HPP_
 
 #include <any>
 #include <string>
@@ -74,4 +74,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS__GET_PARAMETER_STATE_HPP_
+#endif // YASMIN_ROS__GET_PARAMETERS_STATE_HPP_

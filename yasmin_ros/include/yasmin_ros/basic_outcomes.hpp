@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS__BASIC_OUTCOME_HPP_
-#define YASMIN_ROS__BASIC_OUTCOME_HPP_
+#ifndef YASMIN_ROS__BASIC_OUTCOMES_HPP_
+#define YASMIN_ROS__BASIC_OUTCOMES_HPP_
 
 #include <string>
 
@@ -79,4 +79,4 @@ constexpr char RETRY[] = "retry";
 } // namespace basic_outcomes
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS__BASIC_OUTCOME_HPP_
+#endif // YASMIN_ROS__BASIC_OUTCOMES_HPP_

@@ -87,13 +87,15 @@ private:
   std::mutex mtx_;
   /// @brief Condition variable for blocking and waking up threads.
   std::condition_variable cv_;
-  /// @brief The number of threads that must call arrive_and_wait() before
+  /// @brief The number of threads that must call arrive_and_wait() before the
+  /// barrier is lifted.
   int party_count_;
   /// @brief Initial party count preserved for reset().
   int initial_count_;
   /// @brief The number of threads that have currently arrived at the barrier.
   int arrived_{0};
   /// @brief The current generation of the barrier, used to distinguish between
+  /// consecutive barrier phases.
   int generation_{0};
   /// @brief Indicates whether the barrier has been canceled.
   bool canceled_{false};

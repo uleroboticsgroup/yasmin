@@ -299,7 +299,7 @@ private:
   std::vector<StartCallbackType> start_cbs;
   /// Transition callbacks executed before changing the state
   std::vector<TransitionCallbackType> transition_cbs;
-  /// End callbacks executed before the state machine
+  /// End callbacks executed after the state machine finishes
   std::vector<EndCallbackType> end_cbs;
 
   /**
