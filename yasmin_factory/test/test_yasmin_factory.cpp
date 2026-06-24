@@ -580,6 +580,22 @@ TEST_F(TestYasminFactory, TestFsmMetadataFromFile) {
   }
 }
 
+TEST_F(TestYasminFactory, TestCreateOrthogonalState) {
+  std::string xml_path = test_dir + "/test_orthogonal_sm.xml";
+  try {
+    auto sm = factory->create_sm_from_file(xml_path);
+    ASSERT_NE(sm, nullptr);
+    EXPECT_TRUE(sm->get_outcomes().find("done") != sm->get_outcomes().end());
+    EXPECT_TRUE(sm->get_outcomes().find("fail") != sm->get_outcomes().end());
+
+    auto bb = yasmin::Blackboard::make_shared();
+    std::string outcome = (*sm)(bb);
+    EXPECT_EQ(outcome, "done");
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "XML file not available or plugin missing: " << e.what();
+  }
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

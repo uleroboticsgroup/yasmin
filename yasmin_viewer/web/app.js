@@ -182,11 +182,23 @@ function cloneNodes(rawStates, fsmName, fsmIndex) {
 }
 
 function computeActiveFlags(nodesById) {
+  const parentsWithAllActive = [];
+
   nodesById.forEach((node) => {
-    if (nodesById.has(node.current_state)) {
+    if (node.current_state === -2) {
+      parentsWithAllActive.push(node.id);
+    } else if (nodesById.has(node.current_state)) {
       nodesById.get(node.current_state).active = true;
     }
   });
+
+  if (parentsWithAllActive.length > 0) {
+    nodesById.forEach((node) => {
+      if (parentsWithAllActive.includes(node.parent)) {
+        node.active = true;
+      }
+    });
+  }
 
   nodesById.forEach((node) => {
     if (!node.active) {

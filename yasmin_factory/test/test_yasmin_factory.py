@@ -419,6 +419,15 @@ class TestYasminFactory(unittest.TestCase):
         self.assertEqual(sm.get_parameter("float_dict"), {"a": 1.0, "b": 2.5})
         self.assertEqual(sm.get_parameter("bool_dict"), {"a": True, "b": False})
 
+    def test_create_orthogonal_state(self):
+        """Test creating and executing an orthogonal state from XML."""
+        xml_path = os.path.join(self.test_dir, "test_orthogonal_sm.xml")
+        sm = self.factory.create_sm_from_file(xml_path)
+        self.assertIsNotNone(sm)
+        bb = Blackboard()
+        outcome = sm(bb)
+        self.assertEqual(outcome, "done")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -24,6 +24,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/concurrence.hpp"
+#include "yasmin/orthogonal_state.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin/types.hpp"

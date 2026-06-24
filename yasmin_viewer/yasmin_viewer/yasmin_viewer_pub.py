@@ -16,7 +16,7 @@
 from typing import Any, Dict, List
 from rclpy.node import Node
 import yasmin
-from yasmin import StateMachine, State, Concurrence
+from yasmin import StateMachine, State, Concurrence, OrthogonalState
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_msgs.msg import (
     State as StateMsg,
@@ -125,9 +125,11 @@ class YasminViewerPub(object):
         state_msg.transitions = self.parse_transitions(state_info["transitions"])
         state_msg.outcomes = state.get_outcomes()
 
-        # Check if the state is a FSM or Concurrence
-        state_msg.is_fsm = isinstance(state, StateMachine) or isinstance(
-            state, Concurrence
+        # Check if the state is a FSM, Concurrence, or OrthogonalState
+        state_msg.is_fsm = (
+            isinstance(state, StateMachine)
+            or isinstance(state, Concurrence)
+            or isinstance(state, OrthogonalState)
         )
 
         # Add state to the list
@@ -180,6 +182,43 @@ class YasminViewerPub(object):
                         msg.outcome = outcome
                         msg.state = concurrence.get_default_outcome()
                         states_list[-1].transitions.append(msg)
+
+        # Parse child states if this state is an OrthogonalState
+        elif isinstance(state, OrthogonalState):
+            ort: OrthogonalState = state
+            regions = ort.get_regions()
+            state_msg.current_state = -2
+
+            for region in regions:
+                region_msg = StateMsg()
+                region_msg.id = len(states_list)
+                region_msg.parent = state_msg.id
+                region_msg.name = region.name
+                region_msg.is_fsm = True
+                region_msg.current_state = -2
+                region_msg.outcomes = list(region.sm.get_outcomes())
+                states_list.append(region_msg)
+
+                region_states = region.sm.get_states()
+
+                for child_state_name in region_states:
+                    child_state_info = region_states[child_state_name]
+                    self.parse_state(
+                        child_state_name,
+                        child_state_info,
+                        states_list,
+                        region_msg.id,
+                    )
+
+                region_current = region.sm.get_current_state()
+                if region_current:
+                    for child_state in states_list:
+                        if (
+                            child_state.name == region_current
+                            and child_state.parent == region_msg.id
+                        ):
+                            region_msg.current_state = child_state.id
+                            break
 
     def parse_concurrence_transitions(
         self, concurrence: Concurrence

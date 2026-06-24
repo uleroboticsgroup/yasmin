@@ -128,6 +128,7 @@ if(BUILD_TESTING)
     test/test_file_path_sm.xml
     test/test_included_sm.xml
     test/test_fsm_metadata.xml
+    test/test_orthogonal_sm.xml
     DESTINATION share/${PROJECT_NAME}/test
   )
 

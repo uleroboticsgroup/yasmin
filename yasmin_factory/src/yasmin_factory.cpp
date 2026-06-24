@@ -412,7 +412,33 @@ void YasminFactory::cleanup() {
   }
 }
 
+namespace {
+PyThreadState *saved_gil_state = nullptr;
+
+void gil_before_fork() {
+  // Acquire the GIL if Python is initialized before saving/releasing it.
+  // This ensures PyEval_SaveThread is called with the GIL held.
+  if (Py_IsInitialized()) {
+    // If GIL is not held, acquire it first
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    saved_gil_state = PyEval_SaveThread();
+    // Note: PyEval_SaveThread releases the GIL, so PyGILState_Release
+    // is not called here.
+  }
+}
+
+void gil_after_join() {
+  if (saved_gil_state) {
+    PyEval_RestoreThread(saved_gil_state);
+    saved_gil_state = nullptr;
+  }
+}
+} // namespace
+
 void YasminFactory::initialize_python() {
+  // Set GIL hooks for OrthogonalState region threads
+  yasmin::OrthogonalState::set_thread_hooks(gil_before_fork, gil_after_join);
+
   if (!py_initialized_) {
     // Check if Python is already initialized (e.g., by ROS or another module)
     if (!Py_IsInitialized()) {
@@ -659,6 +685,10 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
       std::string name = this->get_required_attribute(child, "name");
       states[name] = this->create_sm(child);
       parameter_mappings[name] = this->get_parameter_mappings(child);
+    } else if (child_name == "OrthogonalState") {
+      std::string name = this->get_required_attribute(child, "name");
+      states[name] = this->create_orthogonal_state(child);
+      parameter_mappings[name] = this->get_parameter_mappings(child);
     }
   }
 
@@ -724,6 +754,68 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
   }
 
   return concurrence;
+}
+
+yasmin::OrthogonalState::SharedPtr
+YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem) {
+  std::string default_outcome =
+      this->get_optional_attribute(orth_elem, "default_outcome", "");
+
+  yasmin::OutcomeMap outcome_map;
+
+  // Parse outcome map (same schema as Concurrence)
+  for (tinyxml2::XMLElement *child = orth_elem->FirstChildElement(); child;
+       child = child->NextSiblingElement()) {
+    const std::string child_tag = child->Name();
+    if (child_tag == "OutcomeMap") {
+      const std::string outcome_to =
+          this->get_required_attribute(child, "outcome");
+      outcome_map[outcome_to] = {};
+
+      for (tinyxml2::XMLElement *item = child->FirstChildElement("Item"); item;
+           item = item->NextSiblingElement("Item")) {
+        const std::string state_name =
+            this->get_required_attribute(item, "state");
+        const std::string outcome =
+            this->get_required_attribute(item, "outcome");
+        outcome_map[outcome_to][state_name] = outcome;
+      }
+    } else if (child_tag == "Outcome") {
+      const std::string outcome_to = this->get_required_attribute(child, "to");
+      outcome_map[outcome_to] = {};
+
+      for (tinyxml2::XMLElement *transition =
+               child->FirstChildElement("Transition");
+           transition;
+           transition = transition->NextSiblingElement("Transition")) {
+        const std::string state_name =
+            this->get_required_attribute(transition, "state");
+        const std::string outcome =
+            this->get_required_attribute(transition, "outcome");
+        outcome_map[outcome_to][state_name] = outcome;
+      }
+    }
+  }
+
+  auto ort = yasmin::OrthogonalState::make_shared(default_outcome, outcome_map);
+
+  // Parse regions
+  for (tinyxml2::XMLElement *child = orth_elem->FirstChildElement(); child;
+       child = child->NextSiblingElement()) {
+    if (std::string(child->Name()) != "Region") {
+      continue;
+    }
+
+    std::string region_name = this->get_required_attribute(child, "name");
+    auto region_sm = this->create_sm(child);
+    region_sm->set_name(region_name);
+    ort->add_region(region_name, region_sm);
+  }
+
+  this->add_blackboard_keys(ort, orth_elem);
+  this->add_parameters(ort, orth_elem);
+
+  return ort;
 }
 
 yasmin::StateMachine::SharedPtr
@@ -792,7 +884,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
     std::string child_name = child->Name();
     if (child_name != "State" && child_name != "Concurrence" &&
-        child_name != "StateMachine") {
+        child_name != "StateMachine" && child_name != "OrthogonalState") {
       continue;
     }
 
@@ -829,6 +921,8 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
       state = this->create_concurrence(child);
     } else if (child_name == "StateMachine") {
       state = this->create_sm(child);
+    } else if (child_name == "OrthogonalState") {
+      state = this->create_orthogonal_state(child);
     } else {
       continue;
     }

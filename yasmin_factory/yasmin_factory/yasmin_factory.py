@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Miguel Ángel González Santamarta
+# Copyright (C) 2026 Miguel Ángel González Santamarta
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ from typing import Dict
 
 from ament_index_python import get_package_share_path
 from lxml import etree as ET
-from yasmin import Concurrence, State, StateMachine
+from yasmin import Concurrence, OrthogonalState, State, StateMachine
 from yasmin_pybind_bridge import CppStateFactory
 
 
@@ -130,6 +130,33 @@ class YasminFactory:
 
         return concurrence
 
+    def _create_orthogonal_state(self, orth_elem: ET.Element) -> OrthogonalState:
+        default_outcome = orth_elem.attrib.get("default_outcome", "")
+
+        outcome_map = {}
+        for child in orth_elem:
+            if child.tag == "OutcomeMap":
+                outcome_name = child.attrib["outcome"]
+                outcome_map[outcome_name] = {}
+                for item in child:
+                    if item.tag == "Item":
+                        outcome_map[outcome_name][item.attrib["state"]] = item.attrib[
+                            "outcome"
+                        ]
+
+        ort = OrthogonalState(default_outcome, outcome_map)
+
+        for child in orth_elem:
+            if child.tag == "Region":
+                region_name = child.attrib["name"]
+                region_sm = self.create_sm(child)
+                region_sm.set_name(region_name)
+                ort.add_region(region_name, region_sm)
+
+        self._add_blackboard_keys(ort, orth_elem)
+        self._add_parameters(ort, orth_elem)
+        return ort
+
     def create_sm(self, root: ET.Element) -> StateMachine:
         """
         Recursively creates a state machine from an XML element.
@@ -188,6 +215,9 @@ class YasminFactory:
 
             elif child.tag == "StateMachine":
                 state = self.create_sm(child)
+
+            elif child.tag == "OrthogonalState":
+                state = self._create_orthogonal_state(child)
 
             else:
                 continue
