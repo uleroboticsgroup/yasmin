@@ -46,12 +46,6 @@ protected:
   explicit YasminNode();
 
 public:
-  /**
-   * @brief Deleted copy constructor to prevent copying of the singleton
-   * instance.
-   *
-   * @param other Another instance of YasminNode (unused).
-   */
   YasminNode(YasminNode &other) = delete;
 
   /**
@@ -59,11 +53,6 @@ public:
    */
   ~YasminNode();
 
-  /**
-   * @brief Deleted assignment operator to enforce singleton pattern.
-   *
-   * @param other Another instance of YasminNode (unused).
-   */
   void operator=(const YasminNode &) = delete;
 
   /**

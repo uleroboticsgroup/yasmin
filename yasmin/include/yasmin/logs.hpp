@@ -82,6 +82,7 @@ void set_log_level(LogLevel new_log_level);
  * This function returns the name of a given log level.
  *
  * @param level Log level.
+ * @return The name of the log level as a string.
  */
 const char *log_level_to_name(LogLevel level);
 
@@ -178,16 +179,13 @@ inline const char *extract_filename(const char *path) {
                                     ##__VA_ARGS__)
 
 /**
- * @brief Sets custom logging functions for different log levels.
+ * @brief Sets the logging function.
  *
- * This function allows the user to specify custom logging functions for
- * error, warning, info, and debug logs. If a null function is provided
- * for any log level, the default logging function will be used instead.
+ * This function allows the user to specify a custom logging function
+ * for all log levels. Messages are routed through the provided function
+ * for error, warning, info, and debug levels.
  *
- * @param error Pointer to the custom error logging function.
- * @param warn Pointer to the custom warning logging function.
- * @param info Pointer to the custom info logging function.
- * @param debug Pointer to the custom debug logging function.
+ * @param log_message Pointer to the logging function.
  */
 void set_loggers(LogFunction log_message);
 

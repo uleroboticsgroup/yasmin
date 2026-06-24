@@ -85,9 +85,6 @@ def py_default_log_message(
 def set_py_loggers() -> None:
     """
     Set the Python logging function for YASMIN.
-
-    @param log_function: The logging function to set.
-    @type log_function: callable
     """
     logging.basicConfig(level=logging.NOTSET, format="%(message)s")
     set_loggers(py_default_log_message)

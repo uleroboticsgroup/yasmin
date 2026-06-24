@@ -71,10 +71,9 @@ constexpr char CANCEL[] = "canceled";
 constexpr char TIMEOUT[] = "timeout";
 
 /**
- * @brief Constant representing a timed-out action outcome.
+ * @brief Constant representing a retry action outcome.
  *
- * This string constant is used to indicate that an action did not complete
- * within the allocated time, resulting in a timeout status.
+ * This string constant is used to indicate that a retry should be performed.
  */
 constexpr char RETRY[] = "retry";
 } // namespace basic_outcomes

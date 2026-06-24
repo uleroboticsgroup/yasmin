@@ -87,9 +87,10 @@ private:
   /// Storage for key remappings local to this blackboard handle.
   Remappings remappings;
 
-  /** @brief Internal method that acquires the maped key. In the case the key is
-   * not remaped, retruns the arg key.
-   *  @param other The instance to copy from.
+  /** @brief Internal method that returns the remapped key. If the key is
+   * not remapped, returns the argument key.
+   *  @param key The key to remap.
+   *  @return The (possibly remapped) key.
    */
   const std::string &remap(const std::string &key) const;
 
@@ -144,7 +145,7 @@ public:
   /**
    * @brief Retrieve a value from the blackboard.
    * @tparam T The type of the value to retrieve.
-   * @param name The key associated with the value.
+   * @param key The key associated with the value.
    * @return The value associated with the specified key.
    * @throws std::runtime_error if the key does not exist.
    */

@@ -62,8 +62,8 @@ public:
                   const std::string &fsm_name);
 
   /**
-   * @brief Constructs YasminViewerPub with a given ROS 2 node, state machine
-   * name, and state machine instance.
+   * @brief Constructs YasminViewerPub with a given ROS 2 node and state
+   * machine.
    * @param node Shared pointer to the ROS 2 node.
    * @param fsm Shared pointer to the StateMachine instance to be published.
    */
@@ -71,8 +71,8 @@ public:
                   yasmin::StateMachine::SharedPtr fsm);
 
   /**
-   * @brief Constructs YasminViewerPub with a default ROS 2 node instance, state
-   * machine name, and state machine instance.
+   * @brief Constructs YasminViewerPub with a default ROS 2 node instance and
+   * state machine.
    * @param fsm Shared pointer to the StateMachine instance to be published.
    */
   YasminViewerPub(yasmin::StateMachine::SharedPtr fsm);

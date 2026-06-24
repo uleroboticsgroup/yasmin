@@ -53,12 +53,11 @@ public:
    * specified duration between increments. It demonstrates basic state
    * functionality and interaction with the blackboard.
    *
-   * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome1" or "outcome2".
    */
-  std::string execute(yasmin::Blackboard::SharedPtr /*blackboard*/);
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard);
 
-  //// @brief Resets the internal counter to zero.
+  /// @brief Internal counter tracking execution count.
   int counter;
 
 private:

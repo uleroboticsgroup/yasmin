@@ -33,9 +33,6 @@ public:
    */
   RosDeserializeCppState();
 
-  /**
-   * @brief Destroy the RosDeserializeCppState.
-   */
   ~RosDeserializeCppState() override = default;
 
   /**

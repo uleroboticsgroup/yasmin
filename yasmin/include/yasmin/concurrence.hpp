@@ -89,12 +89,13 @@ public:
   YASMIN_PTR_ALIASES(Concurrence)
 
   /**
-   * @brief Constructs a State with a set of possible outcomes.
+   * @brief Constructs a Concurrence with states running in parallel.
    * @param states A map of state names to states that will run concurrently.
    * @param default_outcome The default outcome to return if no outcome map
    * rules are satisfied.
    * @param outcome_map A map of outcome names to requirements for achieving
    * that outcome.
+   * @param parameter_mappings Per-child parameter mappings.
    */
   Concurrence(const StateMap &states, const std::string &default_outcome,
               const OutcomeMap &outcome_map,

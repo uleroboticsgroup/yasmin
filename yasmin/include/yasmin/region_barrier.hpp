@@ -44,23 +44,10 @@ public:
    */
   explicit RegionBarrier(int party_count);
 
-  /**
-   * @brief Destructor for RegionBarrier.
-   *
-   * Cleans up any resources used by the RegionBarrier.
-   */
   ~RegionBarrier() = default;
 
-  /**
-   * @brief Deleted copy constructor and assignment operator to prevent copying.
-   */
   RegionBarrier(const RegionBarrier &) = delete;
 
-  /**
-   * @brief Deleted copy assignment operator to prevent copying.
-   * @param other The other RegionBarrier to copy from.
-   * @return A reference to this RegionBarrier.
-   */
   RegionBarrier &operator=(const RegionBarrier &) = delete;
 
   /**
@@ -102,7 +89,7 @@ private:
   std::condition_variable cv_;
   /// @brief The number of threads that must call arrive_and_wait() before
   int party_count_;
-  /// @brief The number of threads that have currently arrived at the barrier.
+  /// @brief Initial party count preserved for reset().
   int initial_count_;
   /// @brief The number of threads that have currently arrived at the barrier.
   int arrived_{0};
