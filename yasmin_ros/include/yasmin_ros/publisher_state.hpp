@@ -55,9 +55,10 @@ public:
   /**
    * @brief Construct a new PublisherState with ROS 2 node and specific QoS.
    *
-   * @param topic_name The name of the topic to monitor.
+   * @param topic_name The name of the topic to publish to.
    * @param create_message_handler A callback handler to create messages.
    * @param qos Quality of Service settings for the topic.
+   * @param callback_group The callback group for the publisher.
    */
   PublisherState(const std::string &topic_name,
                  CreateMessageHandler create_message_handler,
@@ -70,9 +71,10 @@ public:
    * @brief Construct a new PublisherState with ROS 2 node and specific QoS.
    *
    * @param node The ROS 2 node.
-   * @param topic_name The name of the topic to monitor.
+   * @param topic_name The name of the topic to publish to.
    * @param create_message_handler A callback handler to create messages.
    * @param qos Quality of Service settings for the topic.
+   * @param callback_group The callback group for the publisher.
    */
   PublisherState(const rclcpp::Node::SharedPtr &node,
                  const std::string &topic_name,
@@ -104,7 +106,7 @@ public:
    * @brief Execute the publishing operation.
    *
    * @param blackboard A shared pointer to the blackboard for data storage.
-   * @return A string outcome indicating the result of the monitoring operation.
+   * @return A string outcome indicating the result of the publishing operation.
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
 
@@ -121,7 +123,7 @@ protected:
 private:
   /// Publisher to the ROS 2 topic.
   std::shared_ptr<rclcpp::Publisher<MsgT>> pub;
-  /// Name of the topic to monitor.
+  /// Name of the topic to publish to.
   std::string topic_name;
   /// Callback handler to create messages.
   CreateMessageHandler create_message_handler;
@@ -129,4 +131,4 @@ private:
 
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS__MONITOR_STATE_HPP_
+#endif // YASMIN_ROS__PUBLISHER_STATE_HPP_

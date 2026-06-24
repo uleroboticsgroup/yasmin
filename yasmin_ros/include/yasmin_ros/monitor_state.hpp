@@ -67,7 +67,7 @@ public:
    * @param qos Quality of Service settings for the topic.
    * @param msg_queue The maximum number of messages to queue.
    * @param timeout The time in seconds to wait for messages before timing out.
-   * @param maximum_retry Maximum retries of the service if it returns timeout.
+   * @param maximum_retry Maximum retries of the monitor if it returns timeout.
    * Default is 3.
    */
   MonitorState(const std::string &topic_name, const yasmin::Outcomes &outcomes,
@@ -87,7 +87,7 @@ public:
    * @param callback_group The callback group for the subscription.
    * @param msg_queue The maximum number of messages to queue.
    * @param timeout The time in seconds to wait for messages before timing out.
-   * @param maximum_retry Maximum retries of the service if it returns timeout.
+   * @param maximum_retry Maximum retries of the monitor if it returns timeout.
    * Default is 3.
    *
    */
@@ -109,7 +109,7 @@ public:
    * @param qos Quality of Service settings for the topic.
    * @param msg_queue The maximum number of messages to queue.
    * @param timeout The time in seconds to wait for messages before timing out.
-   * @param maximum_retry Maximum retries of the service if it returns timeout.
+   * @param maximum_retry Maximum retries of the monitor if it returns timeout.
    * Default is 3.
    */
   MonitorState(const rclcpp::Node::SharedPtr &node,
