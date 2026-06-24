@@ -145,6 +145,22 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# orthogonal demo
+add_executable(orthogonal_demo src/orthogonal_demo.cpp)
+target_link_libraries(orthogonal_demo PUBLIC ${DEPENDENCIES})
+install(TARGETS
+  orthogonal_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# orthogonal sync demo
+add_executable(orthogonal_sync_demo src/orthogonal_sync_demo.cpp)
+target_link_libraries(orthogonal_sync_demo PUBLIC ${DEPENDENCIES})
+install(TARGETS
+  orthogonal_sync_demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # factory demo
 add_executable(factory_demo src/factory_demo.cpp)
 target_link_libraries(factory_demo PUBLIC ${DEPENDENCIES})
@@ -179,6 +195,12 @@ install(TARGETS bar_state
 add_library(pose_writer_state SHARED src/pose_writer_state.cpp)
 target_link_libraries(pose_writer_state PUBLIC ${DEPENDENCIES})
 install(TARGETS pose_writer_state
+  LIBRARY DESTINATION lib
+)
+
+add_library(worker_state SHARED src/worker_state.cpp)
+target_link_libraries(worker_state PUBLIC ${DEPENDENCIES})
+install(TARGETS worker_state
   LIBRARY DESTINATION lib
 )
 
@@ -241,6 +263,16 @@ install(PROGRAMS
 
 install(PROGRAMS
   yasmin_demos/pose_reader_state.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  yasmin_demos/orthogonal_demo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  yasmin_demos/orthogonal_sync_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

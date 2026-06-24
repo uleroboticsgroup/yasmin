@@ -24,6 +24,8 @@ from yasmin.state import State
 from yasmin.concurrence import Concurrence
 from yasmin.cb_state import CbState
 from yasmin.state_machine import StateMachine
+from yasmin.join_state import JoinState
+from yasmin.orthogonal_state import OrthogonalState
 from yasmin.logs import (
     LogLevel,
     get_log_level,
@@ -158,6 +160,8 @@ def YASMIN_LOG_DEBUG(text: str) -> None:
 __all__ = [
     State,
     Concurrence,
+    JoinState,
+    OrthogonalState,
     CbState,
     CallbackSignal,
     CallbackSignalFuture,

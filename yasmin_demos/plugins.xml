@@ -20,4 +20,11 @@
             <description>Pose writer state for YASMIN ROS serialization demo</description>
         </class>
     </library>
+    <library path="worker_state">
+        <class name="yasmin_demos/WorkerState"
+         type="WorkerState"
+         base_class_type="yasmin::State">
+            <description>Worker state for YASMIN orthogonal state demos</description>
+        </class>
+    </library>
 </class_libraries>

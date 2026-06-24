@@ -1,0 +1,117 @@
+// Copyright (C) 2026 Miguel Ángel González Santamarta
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#ifndef YASMIN__REGION_BARRIER_HPP_
+#define YASMIN__REGION_BARRIER_HPP_
+
+#include <condition_variable>
+#include <mutex>
+
+#include "yasmin/types.hpp"
+
+namespace yasmin {
+
+/**
+ * @class RegionBarrier
+ * @brief A synchronization primitive that allows multiple threads to wait for
+ * each other at a barrier point.
+ *
+ * The RegionBarrier class is used to synchronize the execution of multiple
+ * threads. It allows a specified number of threads (parties) to wait until all
+ * have reached a certain point in their execution before proceeding. This is
+ * useful in scenarios where multiple concurrent tasks need to be synchronized.
+ */
+class RegionBarrier {
+public:
+  YASMIN_PTR_ALIASES(RegionBarrier)
+
+  /**
+   * @brief Constructs a RegionBarrier with a specified number of parties.
+   * @param party_count The number of threads that must call arrive_and_wait()
+   * before any of them can proceed.
+   */
+  explicit RegionBarrier(int party_count);
+
+  /**
+   * @brief Destructor for RegionBarrier.
+   *
+   * Cleans up any resources used by the RegionBarrier.
+   */
+  ~RegionBarrier() = default;
+
+  /**
+   * @brief Deleted copy constructor and assignment operator to prevent copying.
+   */
+  RegionBarrier(const RegionBarrier &) = delete;
+
+  /**
+   * @brief Deleted copy assignment operator to prevent copying.
+   * @param other The other RegionBarrier to copy from.
+   * @return A reference to this RegionBarrier.
+   */
+  RegionBarrier &operator=(const RegionBarrier &) = delete;
+
+  /**
+   * @brief Waits for all parties to arrive at the barrier.
+   *
+   * This method blocks the calling thread until the specified number of
+   * threads have called arrive_and_wait(). Once all threads have arrived, they
+   * are released to continue execution.
+   */
+  void arrive_and_wait();
+
+  /**
+   * @brief Cancels the barrier, releasing all waiting threads.
+   *
+   * This method sets the barrier to a canceled state, allowing all waiting
+   * threads to proceed. Subsequent calls to arrive_and_wait() will not block.
+   */
+  void cancel();
+
+  /**
+   * @brief Resets the barrier to its initial state.
+   *
+   * This method resets the barrier, allowing it to be reused for another
+   * synchronization point. It can only be called when no threads are waiting
+   * at the barrier.
+   */
+  void reset();
+
+  /**
+   * @brief Gets the number of parties required to reach the barrier.
+   * @return The number of parties as an integer.
+   */
+  int get_party_count() const;
+
+private:
+  /// @brief Mutex for synchronizing access to the barrier state.
+  std::mutex mtx_;
+  /// @brief Condition variable for blocking and waking up threads.
+  std::condition_variable cv_;
+  /// @brief The number of threads that must call arrive_and_wait() before
+  int party_count_;
+  /// @brief The number of threads that have currently arrived at the barrier.
+  int initial_count_;
+  /// @brief The number of threads that have currently arrived at the barrier.
+  int arrived_{0};
+  /// @brief The current generation of the barrier, used to distinguish between
+  int generation_{0};
+  /// @brief Indicates whether the barrier has been canceled.
+  bool canceled_{false};
+};
+
+} // namespace yasmin
+
+#endif // YASMIN__REGION_BARRIER_HPP_

@@ -1,0 +1,125 @@
+# Copyright (C) 2025 Miguel Ángel González Santamarta
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import time
+import unittest
+
+from yasmin import Blackboard
+from yasmin import State
+from yasmin import StateMachine
+from yasmin import JoinState
+from yasmin import OrthogonalState
+
+
+class StateA(State):
+    def __init__(self):
+        super().__init__(["done"])
+
+    def execute(self, blackboard):
+        time.sleep(0.05)
+        return "done"
+
+
+class StateB(State):
+    def __init__(self):
+        super().__init__(["done"])
+
+    def execute(self, blackboard):
+        time.sleep(0.1)
+        return "done"
+
+
+class TestOrthogonalState(unittest.TestCase):
+    def setUp(self):
+        self.blackboard = Blackboard()
+
+    def _make_region(self, name, state):
+        sm = StateMachine(["done"])
+        sm.set_name(name)
+        sm.add_state("work", state, {"done": "done"})
+        sm.set_start_state("work")
+        return sm
+
+    def _make_synced_region(self, name, sync_id, post_sync_state):
+        sm = StateMachine(["done"])
+        sm.set_name(name)
+        sm.add_state("work", StateA(), {"done": "sync"})
+        sm.add_state("sync", JoinState(sync_id), {"joined": "finish"})
+        sm.add_state("finish", post_sync_state, {"done": "done"})
+        sm.set_start_state("work")
+        return sm
+
+    def test_basic_concurrent_regions(self):
+        ort = OrthogonalState("timeout")
+        ort.add_region("A", self._make_region("A", StateA()))
+        ort.add_region("B", self._make_region("B", StateB()))
+        result = ort(self.blackboard)
+        self.assertEqual(result, "timeout")
+
+    def test_outcome_map(self):
+        ort = OrthogonalState("timeout", {"success": {"A": "done", "B": "done"}})
+        ort.add_region("A", self._make_region("A", StateA()))
+        ort.add_region("B", self._make_region("B", StateB()))
+        result = ort(self.blackboard)
+        self.assertEqual(result, "success")
+
+    def test_sync_barrier(self):
+        ort = OrthogonalState("timeout", {"success": {"A": "done", "B": "done"}})
+        post_sync = StateA()
+        ort.add_region("A", self._make_synced_region("A", "sync1", post_sync))
+        ort.add_region("B", self._make_synced_region("B", "sync1", post_sync))
+        result = ort(self.blackboard)
+        self.assertEqual(result, "success")
+
+    def test_cancel(self):
+        ort = OrthogonalState("timeout", {"success": {"A": "done", "B": "done"}})
+        ort.add_region("A", self._make_region("A", StateA()))
+        ort.add_region("B", self._make_region("B", StateB()))
+        self.assertFalse(ort.is_canceled())
+        ort.cancel_state()
+        self.assertTrue(ort.is_canceled())
+
+    def test_configure_runs_once(self):
+        ort = OrthogonalState("timeout", {"success": {"A": "done", "B": "done"}})
+        ort.add_region("A", self._make_region("A", StateA()))
+        ort.add_region("B", self._make_region("B", StateB()))
+        ort.configure()
+        ort.configure()
+        result = ort(self.blackboard)
+        self.assertEqual(result, "success")
+
+    def test_str(self):
+        ort = OrthogonalState("timeout")
+        ort.add_region("A", self._make_region("A", StateA()))
+        ort.add_region("B", self._make_region("B", StateB()))
+        s = str(ort)
+        self.assertIn("A", s)
+        self.assertIn("B", s)
+
+    def test_join_state_without_barrier(self):
+        js = JoinState("sync_1")
+        bb = Blackboard()
+        result = js(bb)
+        self.assertEqual(result, "joined")
+
+    def test_join_state_custom_outcome(self):
+        js = JoinState("sync_1", "all_arrived")
+        bb = Blackboard()
+        result = js(bb)
+        self.assertEqual(result, "all_arrived")
+
+
+if __name__ == "__main__":
+    unittest.main()

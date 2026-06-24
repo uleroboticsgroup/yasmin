@@ -35,6 +35,9 @@ set(SOURCES
   src/yasmin/cb_state.cpp
   src/yasmin/state_machine.cpp
   src/yasmin/concurrence.cpp
+  src/yasmin/region_barrier.cpp
+  src/yasmin/join_state.cpp
+  src/yasmin/orthogonal_state.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -138,6 +141,32 @@ install(TARGETS cb_state
   DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
 )
 
+# Python bindings for JoinState
+pybind11_add_module(join_state
+  src/yasmin/join_state_pybind11.cpp
+)
+target_link_libraries(join_state PRIVATE ${PROJECT_NAME})
+target_include_directories(join_state PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+install(TARGETS join_state
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+)
+
+# Python bindings for OrthogonalState
+pybind11_add_module(orthogonal_state
+  src/yasmin/orthogonal_state_pybind11.cpp
+)
+target_link_libraries(orthogonal_state PRIVATE ${PROJECT_NAME})
+target_include_directories(orthogonal_state PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+install(TARGETS orthogonal_state
+  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+)
+
 # Python bindings for Logs
 pybind11_add_module(logs
   src/yasmin/logs_pybind11.cpp
@@ -164,6 +193,7 @@ if(BUILD_TESTING)
     test_state
     test_state_machine
     test_concurrence
+  test_orthogonal_state
   )
   
   foreach(_test_name ${_pytest_tests})

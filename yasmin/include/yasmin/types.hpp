@@ -73,6 +73,12 @@ class Blackboard;
 class StateMachine;
 /** @brief Forward declaration for Concurrence class */
 class Concurrence;
+/** @brief Forward declaration for RegionBarrier class */
+class RegionBarrier;
+/** @brief Forward declaration for JoinState class */
+class JoinState;
+/** @brief Forward declaration for OrthogonalState class */
+class OrthogonalState;
 
 /** @brief Set of strings */
 using StringSet = std::set<std::string>;
@@ -109,6 +115,12 @@ using StatePtr = std::shared_ptr<State>;
 using StateMachinePtr = std::shared_ptr<StateMachine>;
 /** @brief Shared pointer to Concurrence */
 using ConcurrencePtr = std::shared_ptr<Concurrence>;
+/** @brief Shared pointer to RegionBarrier */
+using RegionBarrierPtr = std::shared_ptr<RegionBarrier>;
+/** @brief Shared pointer to JoinState */
+using JoinStatePtr = std::shared_ptr<JoinState>;
+/** @brief Shared pointer to OrthogonalState */
+using OrthogonalStatePtr = std::shared_ptr<OrthogonalState>;
 
 /** @brief Map of state names to state pointers */
 using StateMap = std::unordered_map<std::string, std::shared_ptr<State>>;
