@@ -290,7 +290,9 @@ class EditorModelMixin:
         self.start_pending_node_placement(node)
         self.record_history_checkpoint()
 
-    def add_container(self, is_concurrence: bool = False, is_orthogonal: bool = False) -> None:
+    def add_container(
+        self, is_concurrence: bool = False, is_orthogonal: bool = False
+    ) -> None:
         """Add a new container (State Machine, Concurrence, or OrthogonalState)."""
         if is_orthogonal:
             dialog = OrthogonalStateDialog(parent=self)
@@ -321,7 +323,9 @@ class EditorModelMixin:
                     is_orthogonal=is_orthogonal,
                     outcomes=outcomes,
                     remappings=remappings,
-                    start_state=param if not is_concurrence and not is_orthogonal else None,
+                    start_state=(
+                        param if not is_concurrence and not is_orthogonal else None
+                    ),
                     default_outcome=param if is_concurrence or is_orthogonal else None,
                     description=description,
                     defaults=defaults,
@@ -356,7 +360,11 @@ class EditorModelMixin:
     def default_outcome(self) -> Optional[str]:
         """Return the default outcome of the current concurrence/orthogonal container."""
         model = self.current_container_model
-        return model.default_outcome if isinstance(model, (Concurrence, OrthogonalState)) else None
+        return (
+            model.default_outcome
+            if isinstance(model, (Concurrence, OrthogonalState))
+            else None
+        )
 
     @default_outcome.setter
     def default_outcome(self, value: Optional[str]) -> None:
