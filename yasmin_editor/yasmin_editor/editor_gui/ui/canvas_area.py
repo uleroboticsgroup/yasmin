@@ -14,7 +14,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from PyQt5.QtWidgets import QFrame, QVBoxLayout
-
 from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
 
 

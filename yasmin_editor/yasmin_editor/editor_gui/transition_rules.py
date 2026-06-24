@@ -13,13 +13,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Pure transition-validation helpers for the editor canvas."""
 
 from __future__ import annotations
 
 from collections.abc import Collection, Sequence
 
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state_machine import StateMachine
 
 
@@ -39,10 +39,15 @@ def validate_drag_target(
 ) -> None:
     """Validate whether a dragged transition endpoint pair is allowed."""
 
-    if isinstance(container_model, Concurrence):
+    if isinstance(container_model, (Concurrence, OrthogonalState)):
         if from_is_final_outcome or not to_is_final_outcome:
+            kind = (
+                "Concurrence"
+                if isinstance(container_model, Concurrence)
+                else "OrthogonalState"
+            )
             raise TransitionRuleError(
-                "States inside a Concurrence can only connect to final outcomes of the current Concurrence.",
+                f"States inside a {kind} can only connect to final outcomes of the current {kind}.",
                 title="Not Allowed",
             )
         return
@@ -66,7 +71,10 @@ def get_available_transition_outcomes(
             "Cannot create transitions from states without outcomes!"
         )
 
-    if not isinstance(container_model, StateMachine):
+    if not isinstance(container_model, (StateMachine, OrthogonalState)):
+        return list(source_outcomes)
+
+    if isinstance(container_model, OrthogonalState):
         return list(source_outcomes)
 
     used_outcomes = set(used_outcomes or ())

@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Pure helper for selecting a free scene position near the viewport center."""
 
 from __future__ import annotations
 

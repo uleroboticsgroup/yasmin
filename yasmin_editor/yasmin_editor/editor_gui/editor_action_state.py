@@ -12,7 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Qt-free editor action availability helpers."""
 
 from __future__ import annotations
 
@@ -31,6 +30,7 @@ def build_editor_action_enabled_map(
         "add_state_action": editable,
         "add_state_machine_action": editable,
         "add_concurrence_action": editable,
+        "add_orthogonal_state_action": editable,
         "add_final_action": editable,
         "add_text_action": editable,
         "delete_action": editable and has_selection,

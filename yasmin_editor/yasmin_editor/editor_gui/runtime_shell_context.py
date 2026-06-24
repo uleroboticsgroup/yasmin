@@ -13,13 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Pure helpers for the runtime interactive shell integration.
-
-The interactive shell is optional UI, but its context payload and status text
-are plain data derivations from the runtime backend. Keeping those rules here
-lets the test suite cover shell behavior without importing Qt widgets.
-"""
-
 from __future__ import annotations
 
 from typing import Optional

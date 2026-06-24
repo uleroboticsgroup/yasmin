@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Clipboard and extraction data structures."""
 
 from __future__ import annotations
 
@@ -22,13 +21,14 @@ from dataclasses import dataclass, field
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.layout import Position
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.text_block import TextBlock
 from yasmin_editor.model.transition import Transition
 
-ContainerModel = StateMachine | Concurrence
+ContainerModel = StateMachine | Concurrence | OrthogonalState
 
 
 @dataclass(slots=True)

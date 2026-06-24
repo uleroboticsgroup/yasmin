@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Miguel Ángel González Santamarta
+# Copyright (C) 2026 Miguel Ángel González Santamarta
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,31 +20,31 @@ from PyQt5.QtWidgets import QComboBox, QDialog, QLabel
 from yasmin_editor.editor_gui.dialogs.container_dialog_base import ContainerDialogBase
 
 
-class StateMachineDialog(ContainerDialogBase):
-    """Dialog for creating/editing State Machine containers."""
+class OrthogonalStateDialog(ContainerDialogBase):
+    """Dialog for creating/editing OrthogonalState containers."""
 
     def __init__(
         self,
         name: str = "",
         outcomes: Optional[List[str]] = None,
-        start_state: Optional[str] = None,
+        default_outcome: Optional[str] = None,
         remappings: Optional[Dict[str, str]] = None,
-        child_states: Optional[List[str]] = None,
+        final_outcomes: Optional[List[str]] = None,
         edit_mode: bool = False,
         parent: Optional[QDialog] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
     ) -> None:
-        self.start_state_combo: Optional[QComboBox] = None
-        self.start_state_label: Optional[QLabel] = None
-        self._child_states = child_states
-        self._start_state = start_state
+        self.default_outcome_combo: Optional[QComboBox] = None
+        self.default_outcome_label: Optional[QLabel] = None
+        self._final_outcomes = final_outcomes
+        self._default_outcome = default_outcome
         self.defaults = defaults or []
 
         super().__init__(
-            window_title="Edit State Machine" if edit_mode else "Add State Machine",
+            window_title="Edit Orthogonal State" if edit_mode else "Add Orthogonal State",
             name=name,
-            name_placeholder="Enter state machine name (required)",
+            name_placeholder="Enter orthogonal state name (required)",
             outcomes=outcomes,
             remappings=remappings,
             description=description,
@@ -53,29 +53,29 @@ class StateMachineDialog(ContainerDialogBase):
         )
 
     def _create_selector_row(self) -> None:
-        """Create the state machine start-state selector."""
-        self.start_state_label = QLabel("Start State:")
-        self.start_state_combo = self.create_optional_combo(
-            values=self._child_states,
-            current_value=self._start_state,
+        """Create the default-outcome selector for the orthogonal state."""
+        self.default_outcome_label = QLabel("Default Outcome:")
+        self.default_outcome_combo = self.create_optional_combo(
+            values=self._final_outcomes,
+            current_value=self._default_outcome,
             enabled_in_add_mode=False,
         )
-        self.layout.addRow(self.start_state_label, self.start_state_combo)
+        self.layout.addRow(self.default_outcome_label, self.default_outcome_combo)
 
-    def get_state_machine_data(
+    def get_orthogonal_state_data(
         self,
     ) -> Optional[
         Tuple[str, List[str], Optional[str], Dict[str, str], str, List[Dict[str, str]]]
     ]:
-        """Return the normalized dialog content for a state machine."""
-        name = self.validate_name("State machine")
-        if name is None or self.start_state_combo is None:
+        """Return the normalized dialog content for an orthogonal state."""
+        name = self.validate_name("Orthogonal State")
+        if name is None or self.default_outcome_combo is None:
             return None
 
         return (
             name,
             self.parse_outcomes(),
-            self.combo_value_or_none(self.start_state_combo),
+            self.combo_value_or_none(self.default_outcome_combo),
             self.parse_remappings(),
             self.parse_description(),
             list(self.defaults),

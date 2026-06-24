@@ -12,12 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Stable splitter defaults for the original editor layout.
-
-The editor only has one main left/right splitter that strongly influences how
-"normal" the window feels. This module keeps those defaults declarative so UI
-refactors do not quietly drift away from the original proportions.
-"""
 
 from __future__ import annotations
 

@@ -13,12 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Static editor palette definitions.
-
-This module intentionally contains only palette data to keep the theme setup
-separate from stylesheet generation and environment handling.
-"""
-
 from PyQt5.QtGui import QColor
 
 from yasmin_editor.editor_gui.theme.palette import (
@@ -70,6 +64,8 @@ PALETTES = {
         container_xml_pen=_color(168, 104, 10),
         container_concurrence_fill=_color(255, 235, 205),
         container_concurrence_pen=_color(177, 120, 34),
+        container_orthogonal_fill=_color(230, 220, 255),
+        container_orthogonal_pen=_color(110, 70, 180),
         container_state_machine_fill=_color(220, 235, 255),
         container_state_machine_pen=_color(69, 106, 162),
         final_outcome_fill=_color(215, 55, 55),
@@ -143,6 +139,8 @@ PALETTES = {
         container_xml_pen=_color(96, 64, 24),
         container_concurrence_fill=_color(95, 81, 55),
         container_concurrence_pen=_color(62, 53, 36),
+        container_orthogonal_fill=_color(80, 60, 110),
+        container_orthogonal_pen=_color(130, 80, 190),
         container_state_machine_fill=_color(67, 92, 120),
         container_state_machine_pen=_color(38, 56, 76),
         final_outcome_fill=_color(178, 60, 60),

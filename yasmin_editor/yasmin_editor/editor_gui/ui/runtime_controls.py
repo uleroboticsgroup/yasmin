@@ -15,8 +15,6 @@
 
 from __future__ import annotations
 
-"""Builders for the compact runtime control strip shown in runtime mode."""
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 

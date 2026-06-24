@@ -13,14 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Qt-free helpers for the state-properties dialog.
-
-The dialog is one of the editor's most form-heavy widgets and historically
-mixed user-interface code with formatting and normalization rules. These
-helpers keep the display-text, plugin-list, outcome, and remapping rules in a
-single testable module so the dialog itself can stay focused on Qt widgets.
-"""
-
 from __future__ import annotations
 
 import os

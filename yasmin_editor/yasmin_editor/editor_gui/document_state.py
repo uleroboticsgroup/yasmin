@@ -12,7 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Helpers for document title and dirty-state tracking."""
 
 from __future__ import annotations
 

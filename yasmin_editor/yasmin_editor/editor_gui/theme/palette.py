@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Palette model and palette selection helpers for the editor theme."""
-
 import os
 from dataclasses import dataclass
 from typing import Optional
@@ -65,6 +63,8 @@ class EditorPalette:
     container_xml_pen: QColor
     container_concurrence_fill: QColor
     container_concurrence_pen: QColor
+    container_orthogonal_fill: QColor
+    container_orthogonal_pen: QColor
     container_state_machine_fill: QColor
     container_state_machine_pen: QColor
     final_outcome_fill: QColor

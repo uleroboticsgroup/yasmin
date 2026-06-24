@@ -13,13 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Helpers for editor-facing parameter declarations and overwrite mappings.
-
-These helpers keep the parameter editing rules out of the Qt mixins so the
-conversion and update logic can be tested directly. The editor still owns when
-those helpers are called, but this module owns how parameter declarations and
-child overwrite mappings are normalized.
-"""
 
 from __future__ import annotations
 

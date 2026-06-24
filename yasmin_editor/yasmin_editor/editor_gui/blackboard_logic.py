@@ -12,12 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Qt-free helpers for blackboard key filtering, remapping, and aggregation.
-
-These helpers keep the editor blackboard mixin focused on widget orchestration.
-The rules in this module are intentionally pure so they can be covered directly
-with unit tests without requiring a running Qt application.
-"""
 
 from __future__ import annotations
 
@@ -25,6 +19,7 @@ from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 
@@ -282,7 +277,7 @@ def collect_blackboard_key_usage_for_model(
 
     def visit_state(state_model: State, ancestor_remaps: List[Dict[str, str]]) -> None:
         state_remaps = [dict(state_model.remappings)] + ancestor_remaps
-        if isinstance(state_model, (StateMachine, Concurrence)):
+        if isinstance(state_model, (StateMachine, Concurrence, OrthogonalState)):
             for child_state in state_model.states.values():
                 visit_state(child_state, state_remaps)
             return
@@ -389,7 +384,7 @@ def state_uses_blackboard_key(
             ):
                 return True
 
-        if isinstance(state_model, (StateMachine, Concurrence)):
+        if isinstance(state_model, (StateMachine, Concurrence, OrthogonalState)):
             for child_state in state_model.states.values():
                 if model_uses_key(child_state, current_chain):
                     return True

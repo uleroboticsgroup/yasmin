@@ -3,6 +3,7 @@
 from .concurrence import Concurrence
 from .key import Key
 from .layout import Layout, Position
+from .orthogonal_state import OrthogonalState
 from .outcome import Outcome
 from .state import State
 from .text_block import TextBlock
@@ -14,8 +15,9 @@ __all__ = [
     "Concurrence",
     "Key",
     "Layout",
-    "Outcome",
+    "OrthogonalState",
     "Position",
+    "Outcome",
     "State",
     "TextBlock",
     "StateMachine",

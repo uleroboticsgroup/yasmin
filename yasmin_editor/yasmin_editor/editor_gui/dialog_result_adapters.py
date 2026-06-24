@@ -12,12 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Adapters for turning dialog tuples into canonical state-creation kwargs.
-
-The editor still receives tuple-shaped results from several legacy dialogs.
-Keeping the mapping in one place makes the create-state flow easier to read and
-unit test, and avoids repeating container defaults in multiple call sites.
-"""
 
 from __future__ import annotations
 
@@ -41,6 +35,14 @@ StateMachineDialogResult = Tuple[
     list[dict[str, Any]],
 ]
 ConcurrenceDialogResult = Tuple[
+    str,
+    list[str],
+    str | None,
+    dict[str, str],
+    str,
+    list[dict[str, Any]],
+]
+OrthogonalStateDialogResult = Tuple[
     str,
     list[str],
     str | None,
@@ -124,3 +126,20 @@ def build_concurrence_kwargs(result: ConcurrenceDialogResult) -> Dict[str, Any]:
         start_state=None,
         default_outcome=default_outcome,
     )
+
+
+def build_orthogonal_state_kwargs(result: OrthogonalStateDialogResult) -> Dict[str, Any]:
+    """Adapt an orthogonal state dialog result to ``create_state_node`` kwargs."""
+
+    name, outcomes, default_outcome, remappings, description, defaults = result
+    return {
+        "name": name,
+        "plugin_info": None,
+        "is_orthogonal": True,
+        "outcomes": outcomes,
+        "remappings": remappings,
+        "start_state": None,
+        "default_outcome": default_outcome,
+        "description": description,
+        "defaults": defaults,
+    }

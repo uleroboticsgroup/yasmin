@@ -31,10 +31,12 @@ from yasmin_editor.editor_gui.clipboard_model import is_container_empty
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.dialog_result_adapters import (
     build_concurrence_kwargs,
+    build_orthogonal_state_kwargs,
     build_plugin_state_kwargs,
     build_state_machine_kwargs,
 )
 from yasmin_editor.editor_gui.dialogs.concurrence_dialog import ConcurrenceDialog
+from yasmin_editor.editor_gui.dialogs.orthogonal_state_dialog import OrthogonalStateDialog
 from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import (
     OutcomeDescriptionDialog,
 )
@@ -74,6 +76,7 @@ from yasmin_editor.editor_gui.ui.toolbar_config import (
     SELECTION_TOOLBAR_MENU,
 )
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state_machine import StateMachine
 
@@ -305,6 +308,16 @@ class EditorUiMixin:
             result = dialog.get_concurrence_data()
             if result:
                 self.create_state_node(**build_concurrence_kwargs(result))
+
+    def add_orthogonal_state(self) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        dialog = OrthogonalStateDialog(parent=self)
+        if dialog.exec_():
+            result = dialog.get_orthogonal_state_data()
+            if result:
+                self.create_state_node(**build_orthogonal_state_kwargs(result))
 
     def add_text_block(self) -> None:
         """Add a free-form text block to the current container."""
@@ -580,7 +593,9 @@ class EditorUiMixin:
             fallback_output_keys=output_keys,
             fallback_parameters=self.parameters_to_dicts(model.parameters),
             container_kind=(
-                "Concurrence" if isinstance(model, Concurrence) else "State Machine"
+                "Orthogonal State"
+                if isinstance(model, OrthogonalState)
+                else "Concurrence" if isinstance(model, Concurrence) else "State Machine"
             ),
             readonly=self.is_read_only_mode(),
             enable_parameter_overwrites=parent_model is not None,
@@ -637,7 +652,7 @@ class EditorUiMixin:
                 self.refresh_breadcrumbs()
                 self.refresh_blackboard_keys_list()
                 self.statusBar().showMessage(
-                    f"Updated {'concurrence' if isinstance(model, Concurrence) else 'state machine'}: {name}",
+                    f"Updated {'orthogonal state' if isinstance(model, OrthogonalState) else 'concurrence' if isinstance(model, Concurrence) else 'state machine'}: {name}",
                     2000,
                 )
                 self.record_history_checkpoint()
@@ -676,7 +691,9 @@ class EditorUiMixin:
                 fallback_output_keys=output_keys,
                 fallback_parameters=self.parameters_to_dicts(state_node.model.parameters),
                 container_kind=(
-                    "Concurrence" if state_node.is_concurrence else "State Machine"
+                    "Orthogonal State"
+                    if state_node.is_orthogonal
+                    else "Concurrence" if state_node.is_concurrence else "State Machine"
                 ),
                 readonly=readonly,
             )
@@ -706,7 +723,7 @@ class EditorUiMixin:
                         return
                     self.sync_blackboard_keys()
                     self.statusBar().showMessage(
-                        f"Updated {'concurrence' if state_node.is_concurrence else 'state machine'}: {name}",
+                        f"Updated {'orthogonal state' if state_node.is_orthogonal else 'concurrence' if state_node.is_concurrence else 'state machine'}: {name}",
                         2000,
                     )
                     self.record_history_checkpoint()

@@ -12,18 +12,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Pure helpers for building plugin-sidebar entries.
-
-The sidebar lists are part of the original editor surface, so their display names
-should remain stable even while the Qt wiring around them evolves. This module
-keeps the naming rules and ordering outside the Qt widgets so they are easy to
-unit test and reuse.
-"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Iterator, Sequence
+from typing import Iterator, Sequence
 
 
 @dataclass(frozen=True, slots=True)

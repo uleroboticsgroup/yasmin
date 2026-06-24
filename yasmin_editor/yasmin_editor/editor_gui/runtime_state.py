@@ -13,15 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Pure runtime state helpers shared by the editor runtime mixin.
-
-The runtime mixin still owns the Qt-facing orchestration, but several decisions
-inside it are not inherently graphical: button visibility, the currently active
-state inside one container view, and the local transition that should be
-highlighted. Keeping those rules in one Qt-free module makes them easier to
-review, document, and test without a live editor window.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 from PyQt5.QtWidgets import QMenu
-
 from yasmin_editor.editor_gui.ui.action_specs import (
     ADD_MENU_ACTIONS,
     EDIT_MENU_ACTIONS,

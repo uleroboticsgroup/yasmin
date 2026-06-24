@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# Copyright (C) 2026 Maik Knof
+# Copyright (C) 2026 Miguel Ángel González Santamarta
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,17 +20,15 @@ from dataclasses import dataclass, field
 from .layout import Layout
 from .outcome import Outcome
 from .state import State
+from .state_machine import StateMachine
 from .text_block import TextBlock
 
 OutcomeRuleValues = str | list[str]
 
 
 def iter_outcome_rule_values(values: OutcomeRuleValues) -> list[str]:
-    """Return one normalized list of unique child outcomes."""
-
     if isinstance(values, str):
         return [values] if values else []
-
     normalized: list[str] = []
     for outcome_name in values:
         if outcome_name and outcome_name not in normalized:
@@ -39,9 +36,15 @@ def iter_outcome_rule_values(values: OutcomeRuleValues) -> list[str]:
     return normalized
 
 
+def _region_outcomes(state: State) -> set[str]:
+    if isinstance(state, StateMachine):
+        return {o.name for o in state.outcomes}
+    return {o.name for o in state.outcomes}
+
+
 @dataclass(slots=True, repr=False)
-class Concurrence(State):
-    """Represents a YASMIN concurrence container."""
+class OrthogonalState(State):
+    """Represents a YASMIN orthogonal state container."""
 
     default_outcome: str | None = None
     states: dict[str, State] = field(default_factory=dict)
@@ -51,7 +54,6 @@ class Concurrence(State):
 
     @property
     def is_container(self) -> bool:
-        """Return whether this state contains child states."""
         return True
 
     def _assert_child_name_available(
@@ -61,35 +63,30 @@ class Concurrence(State):
         exclude_state: str | None = None,
         exclude_outcome: str | None = None,
     ) -> None:
-        """Validate that a child state or final outcome name is available."""
         if name in self.states and name != exclude_state:
             raise ValueError(
-                f"Name '{name}' is already used by a child state in this concurrence"
+                f"Name '{name}' is already used by a region in this orthogonal state"
             )
         if any(
             outcome.name == name and outcome.name != exclude_outcome
             for outcome in self.outcomes
         ):
             raise ValueError(
-                f"Name '{name}' is already used by a final outcome in this concurrence"
+                f"Name '{name}' is already used by a final outcome in this orthogonal state"
             )
 
     def add_state(self, state: State) -> None:
-        """Add a child state to the concurrence."""
         self._assert_child_name_available(state.name)
         self.states[state.name] = state
 
     def add_outcome(self, outcome) -> None:
-        """Add a final outcome to the concurrence."""
         self._assert_child_name_available(outcome.name)
         State.add_outcome(self, outcome)
 
     def add_text_block(self, text_block: TextBlock) -> None:
-        """Add a free-form text block to the container."""
         self.text_blocks.append(text_block)
 
     def remove_text_block(self, text_block: TextBlock) -> None:
-        """Remove one free-form text block from the container."""
         self.text_blocks = [item for item in self.text_blocks if item is not text_block]
 
     def set_outcome_rule(
@@ -98,7 +95,6 @@ class Concurrence(State):
         state_name: str,
         state_outcome: str,
     ) -> None:
-        """Set one outcome rule entry for the concurrence."""
         if not self.get_outcome(outcome):
             self.add_outcome(Outcome(name=outcome))
         mapping = self.outcome_map.setdefault(outcome, {})
@@ -113,7 +109,6 @@ class Concurrence(State):
         state_name: str,
         state_outcome: str | None = None,
     ) -> None:
-        """Remove one outcome rule entry from the concurrence."""
         mapping = self.outcome_map.get(outcome, {})
         if state_outcome is None:
             mapping.pop(state_name, None)
@@ -128,7 +123,6 @@ class Concurrence(State):
             self.outcome_map.pop(outcome, None)
 
     def remove_state(self, name: str) -> None:
-        """Remove a child state and all related outcome rules."""
         self.states.pop(name, None)
         for mapping in self.outcome_map.values():
             mapping.pop(name, None)
@@ -140,7 +134,6 @@ class Concurrence(State):
         self.layout.remove_state_position(name)
 
     def rename_state(self, old_name: str, new_name: str) -> None:
-        """Rename a child state and update all related outcome rules."""
         if old_name == new_name:
             return
         self._assert_child_name_available(new_name, exclude_state=old_name)
@@ -153,7 +146,6 @@ class Concurrence(State):
         self.layout.rename_state_position(old_name, new_name)
 
     def rename_outcome(self, old_name: str, new_name: str) -> None:
-        """Rename a final outcome and update all related references."""
         if old_name == new_name:
             return
         if self.get_outcome(old_name) is None:
@@ -176,7 +168,6 @@ class Concurrence(State):
         old_outcome: str,
         new_outcome: str,
     ) -> None:
-        """Rename one child-state outcome used by the outcome map."""
         if old_outcome == new_outcome:
             return
         for mapping in self.outcome_map.values():
@@ -194,7 +185,6 @@ class Concurrence(State):
                 mapping.pop(state_name, None)
 
     def remove_outcome(self, name: str) -> None:
-        """Remove a final outcome and its outcome-map rule."""
         self.outcomes = [outcome for outcome in self.outcomes if outcome.name != name]
         self.outcome_map.pop(name, None)
         if self.default_outcome == name:
@@ -202,14 +192,12 @@ class Concurrence(State):
         self.layout.remove_outcome_position(name)
 
     def get_state(self, name: str) -> State | None:
-        """Return a child state by name."""
         return self.states.get(name)
 
     def to_string(self, indent: int = 0) -> str:
-        """Return a human-readable representation of the concurrence."""
         prefix = " " * indent
         lines: list[str] = []
-        header = f"{prefix}Concurrence(name={self.name!r}"
+        header = f"{prefix}OrthogonalState(name={self.name!r}"
         if self.default_outcome:
             header += f", default_outcome={self.default_outcome!r}"
         if self.outcomes:
@@ -221,7 +209,7 @@ class Concurrence(State):
         if self.description:
             lines.append(f"{prefix}  description: {self.description}")
         if self.states:
-            lines.append(f"{prefix}  states:")
+            lines.append(f"{prefix}  regions:")
             for state in self.states.values():
                 if state.is_container:
                     lines.append(f"{prefix}    - {state.name}")
@@ -247,7 +235,6 @@ class Concurrence(State):
         return "\n".join(lines)
 
     def __str__(self) -> str:
-        """Return a compact human-readable representation."""
         return self.to_string()
 
     __repr__ = __str__
