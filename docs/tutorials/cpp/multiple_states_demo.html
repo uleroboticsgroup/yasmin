@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Factory Demo (C++) - YASMIN</title>
+    <title>Multiple States Demo (C++) - YASMIN</title>
     <link rel="stylesheet" href="../../style.css" />
     <script src="../../sidebar.js"></script>
     <link
@@ -28,7 +28,7 @@
           >GitHub</a
         >
         <a href="../../doxygen.html" target="_blank">Doxygen</a>
-        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+        <button id="theme-toggle" title="Toggle Dark Mode">&#127769;</button>
       </div>
     </header>
 
@@ -123,11 +123,6 @@
             Advanced
             <ul>
               <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
-              <li>
-                <a href="../python/multiple_states_demo.html"
-                  >Multiple States</a
-                >
-              </li>
               <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
               <li>
                 <a href="../python/orthogonal_demo.html">Orthogonal Regions</a>
@@ -135,11 +130,6 @@
               <li>
                 <a href="../python/orthogonal_sync_demo.html"
                   >Orthogonal Regions with Sync</a
-                >
-              </li>
-              <li>
-                <a href="../python/ros_serialization_demo.html"
-                  >ROS Serialization</a
                 >
               </li>
             </ul>
@@ -179,113 +169,119 @@
       <main class="main-content content">
         <h1>
           <a
-            href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/factory_demo.cpp"
+            href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/multiple_states_demo.cpp"
             target="_blank"
             style="color: inherit; text-decoration: none"
-            >Factory Demo (C++)</a
+            >Multiple States Demo (C++)</a
           >
         </h1>
         <p>
-          This tutorial demonstrates how to load YASMIN state machines from XML
-          files using the <code>YasminFactory</code> in C++. This approach
-          separates the FSM structure from the code, making it easier to design,
-          share, and modify state machines without recompiling.
+          This tutorial demonstrates how to organize states across separate
+          files for better code structure. Instead of defining all states in a
+          single file, we import them from dedicated header files. This pattern
+          is essential for larger projects where you want to keep your state
+          implementations modular and maintainable.
         </p>
 
-        <h2>Background</h2>
-        <p>The YASMIN Factory provides:</p>
-        <ul>
-          <li>Declarative FSM definition using XML</li>
-          <li>Plugin-based state loading (Python and C++ states)</li>
-          <li>Visual editing with YASMIN Editor</li>
-          <li>Reusable state machine configurations</li>
-        </ul>
-
-        <h2>1. Create an XML State Machine</h2>
+        <h2>1. State Definitions in Separate Headers</h2>
         <p>
-          Define your state machine structure in an XML file (e.g.,
-          <code>demo_1.xml</code>):
+          The <code>FooState</code> and <code>BarState</code> classes are
+          defined in their own header files (<code>foo_state.hpp</code> and
+          <code>bar_state.hpp</code>) within the
+          <code>yasmin_demos</code> package. Each state is a self-contained unit
+          with its own behavior, outcomes, and blackboard interface. This
+          separation allows teams to work on different states independently and
+          reuse states across multiple state machines.
         </p>
-        <pre><code class="language-xml">&lt;StateMachine outcomes="outcome4"&gt;
-    &lt;State name="Foo" type="py" module="yasmin_demos.foo_state" class="FooState"&gt;
-        &lt;Transition from="outcome1" to="Bar"/&gt;
-        &lt;Transition from="outcome2" to="outcome4"/&gt;
-    &lt;/State&gt;
-    &lt;State name="Bar" type="cpp" class="yasmin_demos/BarState"&gt;
-        &lt;Transition from="outcome3" to="Foo"/&gt;
-    &lt;/State&gt;
-&lt;/StateMachine&gt;</code></pre>
 
-        <h2>Running the Demo</h2>
-        <pre><code class="language-bash">ros2 run yasmin_demos factory_demo</code></pre>
-
-        <h2>Source Code</h2>
+        <h2>2. Main Function</h2>
         <p>
-          You can find the full source code in the
-          <a
-            href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/factory_demo.cpp"
-            target="_blank"
-            >yasmin_demos</a
-          >
-          package.
+          The main function includes the state headers and constructs the same
+          FOO/BAR loop as the basic FSM demo, but the states themselves are
+          defined externally. This demonstrates the recommended project
+          structure for real-world applications.
         </p>
 
-        <pre><code class="language-cpp">#include &lt;memory&gt;
-#include &lt;string&gt;
+        <pre><code class="language-cpp">#include &lt;string&gt;
 
 #include &lt;rclcpp/rclcpp.hpp&gt;
+
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
-#include "yasmin_demos/share_directory.hpp"
-#include "yasmin_factory/yasmin_factory.hpp"
+#include "yasmin_demos/bar_state.hpp"
+#include "yasmin_demos/foo_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 int main(int argc, char *argv[]) {
   // Initialize ROS 2
   rclcpp::init(argc, argv);
 
-  // Set up ROS 2 loggers
+  // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
-  YASMIN_LOG_INFO("yasmin_factory_demo");
+  YASMIN_LOG_INFO("yasmin_multiple_states_demo");
 
-  // Create the factory and state machine in a scope to ensure proper cleanup
-  yasmin_factory::YasminFactory factory;
+  // Create a state machine
+  auto sm = yasmin::StateMachine::make_shared(
+      std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
+  sm->set_description(
+      "Runs a simple loop between FooState and BarState demonstrating how "
+      "states can be organized across multiple files.");
+  sm->add_output_key(
+      "foo_str",
+      "Formatted counter string produced by FooState and read by BarState.");
 
-  // Load state machine from XML file
-  std::string xml_file = yasmin_demos::get_share_file_path(
-      "state_machines/demo_2.xml");
+  // Add states to the state machine
+  sm->add_state("FOO", std::make_shared&lt;FooState&gt;(),
+                {
+                    {"outcome1", "BAR"},
+                    {"outcome2", "outcome4"},
+                });
+  sm->add_state("BAR", std::make_shared&lt;BarState&gt;(),
+                {
+                    {"outcome3", "FOO"},
+                });
 
-  // Create the state machine from the XML file
-  auto sm = factory.create_sm_from_file(xml_file);
-  sm-&gt;set_sigint_handler(true);
+  {
+    // Publisher for visualizing the state machine
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm,
+                                              "YASMIN_MULTIPLE_STATES_DEMO");
 
-  // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_FACTORY_DEMO");
-
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &amp;e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
-  // Shutdown ROS 2
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
+
   return 0;
 }</code></pre>
 
+        <h2>3. Build and Run</h2>
+        <p>Compile your ROS 2 package with colcon and run the demo:</p>
+        <pre><code>ros2 run yasmin_demos multiple_states_demo</code></pre>
+
         <div class="page-navigation">
           <a href="nav2_demo.html" class="nav-button prev">C++: Nav2 Demo</a>
+          <a href="ros_serialization_demo.html" class="nav-button next"
+            >C++: ROS Serialization</a
+          >
         </div>
       </main>
-
-      <aside class="toc">
-        <h3>On this page</h3>
-        <ul>
-          <!-- TOC generated by JS -->
-        </ul>
-      </aside>
     </div>
+
+    <footer>
+      <p>
+        &copy; 2026 YASMIN Project. Licensed under GPL v3.0. | Documentation
+        generated with <a href="../../doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
   </body>
 </html>
