@@ -44,6 +44,15 @@ namespace http = beast::http;
 using tcp = asio::ip::tcp;
 
 namespace yasmin_viewer {
+
+struct AcceptorHolder {
+  asio::io_context io_context;
+  tcp::acceptor acceptor;
+
+  AcceptorHolder(const std::string &host, unsigned short port)
+      : io_context(1),
+        acceptor(io_context, {asio::ip::make_address(host), port}) {}
+};
 namespace {
 
 std::string mime_type(const std::string &path) {
@@ -81,10 +90,6 @@ std::string mime_type(const std::string &path) {
   return "application/octet-stream";
 }
 
-bool is_path_safe(const std::string &request_target) {
-  return request_target.find("..") == std::string::npos;
-}
-
 std::string read_file(const std::filesystem::path &path) {
   std::ifstream file(path, std::ios::binary);
   if (!file.is_open()) {
@@ -108,15 +113,27 @@ std::filesystem::path resolve_file_path(const std::string &web_root,
     target = target.substr(0, query_separator);
   }
 
-  if (!is_path_safe(target)) {
-    throw std::runtime_error("Unsafe path requested");
-  }
-
   if (!target.empty() && target.front() == '/') {
     target.erase(target.begin());
   }
 
-  return std::filesystem::path(web_root) / target;
+  std::error_code ec;
+  std::filesystem::path resolved =
+      std::filesystem::canonical(std::filesystem::path(web_root) / target, ec);
+
+  if (ec) {
+    throw std::runtime_error("Invalid path");
+  }
+
+  std::string resolved_str = resolved.string();
+  std::string web_root_canonical =
+      std::filesystem::canonical(web_root, ec).string();
+
+  if (ec || resolved_str.find(web_root_canonical) != 0) {
+    throw std::runtime_error("Path traversal detected");
+  }
+
+  return resolved;
 }
 
 http::response<http::string_body> make_response(http::status status,
@@ -186,6 +203,7 @@ void handle_session(tcp::socket socket, YasminViewerNode *node) {
   }
 
   socket.shutdown(tcp::socket::shutdown_send, error_code);
+  node->on_connection_closed();
 }
 
 } // namespace
@@ -229,7 +247,7 @@ YasminViewerNode::YasminViewerNode()
 
 YasminViewerNode::~YasminViewerNode() { this->stop_server(); }
 
-std::string YasminViewerNode::get_fsms_json() const {
+std::string YasminViewerNode::get_fsms_json() {
   const auto now = std::chrono::steady_clock::now();
   std::lock_guard<std::mutex> lock(this->fsms_mutex_);
   this->prune_expired_locked(now);
@@ -267,6 +285,8 @@ void YasminViewerNode::fsm_viewer_cb(const StateMachineMsg::SharedPtr msg) {
 }
 
 void YasminViewerNode::start_server() {
+  this->acceptor_holder_ = std::make_unique<AcceptorHolder>(
+      resolve_host(this->host_), static_cast<unsigned short>(this->port_));
   this->server_running_.store(true);
   this->server_thread_ = std::thread(&YasminViewerNode::run_server, this);
 }
@@ -274,27 +294,25 @@ void YasminViewerNode::start_server() {
 void YasminViewerNode::stop_server() {
   this->server_running_.store(false);
 
+  if (this->acceptor_holder_) {
+    beast::error_code ec;
+    this->acceptor_holder_->acceptor.cancel(ec);
+  }
+
   if (this->server_thread_.joinable()) {
-    try {
-      asio::io_context io_context;
-      tcp::resolver resolver(io_context);
-      const std::string wake_host = resolve_host(this->host_);
-      auto endpoints = resolver.resolve(wake_host, std::to_string(this->port_));
-      tcp::socket socket(io_context);
-      asio::connect(socket, endpoints);
-      socket.close();
-    } catch (const std::exception &) {
-    }
     this->server_thread_.join();
   }
 }
 
 void YasminViewerNode::run_server() {
   try {
-    asio::io_context io_context(1);
-    const auto address = asio::ip::make_address(resolve_host(this->host_));
-    tcp::acceptor acceptor(io_context,
-                           {address, static_cast<unsigned short>(this->port_)});
+    if (!this->acceptor_holder_) {
+      RCLCPP_ERROR(this->get_logger(), "Acceptor not initialized");
+      return;
+    }
+
+    auto &acceptor = this->acceptor_holder_->acceptor;
+    auto &io_context = this->acceptor_holder_->io_context;
 
     while (rclcpp::ok() && this->server_running_.load()) {
       tcp::socket socket(io_context);
@@ -309,6 +327,16 @@ void YasminViewerNode::run_server() {
         continue;
       }
 
+      uint32_t prev =
+          this->active_connections_.fetch_add(1, std::memory_order_relaxed);
+
+      if (prev >= YasminViewerNode::kMaxConnections) {
+        this->active_connections_.fetch_sub(1, std::memory_order_relaxed);
+        RCLCPP_WARN(this->get_logger(),
+                    "Too many connections, dropping client");
+        continue;
+      }
+
       std::thread(handle_session, std::move(socket), this).detach();
     }
   } catch (const std::exception &exception) {
@@ -318,7 +346,7 @@ void YasminViewerNode::run_server() {
 }
 
 void YasminViewerNode::prune_expired_locked(
-    const std::chrono::steady_clock::time_point &now) const {
+    const std::chrono::steady_clock::time_point &now) {
   const auto max_age = std::chrono::duration<double>(this->max_age_seconds_);
 
   for (auto iterator = this->fsms_.begin(); iterator != this->fsms_.end();) {

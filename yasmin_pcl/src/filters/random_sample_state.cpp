@@ -112,8 +112,6 @@ RandomSampleState::RandomSampleState()
                        "Removed point indices stored as pcl::Indices.");
 }
 
-RandomSampleState::~RandomSampleState() {}
-
 void RandomSampleState::configure() {
   this->sample_ = this->get_parameter<int>("sample");
   this->seed_ = this->get_parameter<int>("seed");

@@ -85,8 +85,6 @@ VoxelGridState::VoxelGridState() : yasmin::State({"succeeded", "aborted"}) {
                        "Filtered cloud stored as pcl::PCLPointCloud2::Ptr.");
 }
 
-VoxelGridState::~VoxelGridState() {}
-
 void VoxelGridState::configure() {
   this->leaf_size_x_ = this->get_parameter<float>("leaf_size_x");
   this->leaf_size_y_ = this->get_parameter<float>("leaf_size_y");

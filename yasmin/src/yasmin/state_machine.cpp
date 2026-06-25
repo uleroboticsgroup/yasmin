@@ -36,12 +36,14 @@
 using namespace yasmin;
 
 namespace {
-StateMachine *sigint_handler_instance = nullptr;
+std::sig_atomic_t sigint_caught = 0;
 
-void sigint_handler(int signum) {
-  if (sigint_handler_instance) {
-    sigint_handler_instance->cancel_state_machine();
-  }
+extern "C" void sigint_handler(int) { sigint_caught = 1; }
+
+bool was_sigint_caught() {
+  auto r = sigint_caught;
+  sigint_caught = 0;
+  return r;
 }
 } // namespace
 
@@ -56,9 +58,6 @@ StateMachine::StateMachine(const std::string &name, const Outcomes &outcomes,
 }
 
 StateMachine::~StateMachine() {
-  if (sigint_handler_instance == this) {
-    sigint_handler_instance = nullptr;
-  }
   this->states.clear();
   this->transitions.clear();
   this->remappings.clear();
@@ -196,9 +195,17 @@ void StateMachine::configure() {
 
 std::string StateMachine::wait_for_current_state() {
   std::unique_lock<std::mutex> lock(*this->current_state_mutex.get());
-  this->current_state_cond.wait(lock, [this]() {
-    return !this->current_state.empty() || !this->execution_active.load();
-  });
+
+  if (!this->current_state_cond.wait_for(
+          lock, std::chrono::seconds(5), [this]() {
+            return !this->current_state.empty() ||
+                   !this->execution_active.load() ||
+                   this->cancel_state_machine_requested.load();
+          })) {
+    YASMIN_LOG_WARN("Timeout waiting for current state in '%s'",
+                    this->to_string().c_str());
+  }
+
   return this->current_state;
 }
 
@@ -225,7 +232,7 @@ TransitionsMap const &StateMachine::get_transitions() const noexcept {
   return this->transitions;
 }
 
-std::string const &StateMachine::get_current_state() const {
+std::string StateMachine::get_current_state() const {
   const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
   return this->current_state;
 }
@@ -406,87 +413,19 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
   this->execution_active.store(true);
   this->set_current_state(this->start_state);
 
-  Transitions transitions;
-  Remappings remappings;
-  std::string outcome;
-  std::string old_outcome;
   bool state_machine_ends = false;
+  std::string outcome;
 
   try {
     while (!state_machine_ends) {
+      if (was_sigint_caught()) {
+        this->cancel_state_machine();
+      }
       this->throw_if_cancel_state_machine_requested();
 
       std::string current_state = this->get_current_state();
-
-      const auto &states = this->states;
-      const auto &local_outcomes = this->outcomes;
-
-      auto state_it = states.find(current_state);
-      if (state_it == states.end()) {
-        throw std::logic_error("Active state '" + current_state +
-                               "' not found in state machine");
-      }
-      const auto &state = state_it->second;
-      const auto &local_transitions = this->transitions.at(current_state);
-      const auto &local_remappings = this->remappings.at(current_state);
-
-      // compose remappings
-      auto parent_remappings = blackboard->get_remappings();
-      auto composed_remappings =
-          StateMachine::compose_remappings(parent_remappings, local_remappings);
-      // apply remappings
-      blackboard->set_remappings(composed_remappings);
-
-      try {
-        outcome = (*state.get())(blackboard);
-      } catch (...) {
-        blackboard->set_remappings(parent_remappings);
-        throw;
-      }
-      old_outcome = outcome;
-
-      // restore parent remappings
-      blackboard->set_remappings(parent_remappings);
-
-      this->throw_if_cancel_state_machine_requested();
-
-      // Check outcome belongs to state
-      const auto &state_outcomes = state->get_outcomes();
-      if (state_outcomes.find(outcome) == state_outcomes.end()) {
-        throw std::logic_error("Outcome '" + outcome +
-                               "' is not registered in state " + current_state);
-      }
-
-      // Translate outcome using transitions
-      if (local_transitions.find(outcome) != local_transitions.end()) {
-        outcome = local_transitions.at(outcome);
-      }
-
-      YASMIN_LOG_INFO("State machine transitioning '%s' : '%s' --> '%s'",
-                      current_state.c_str(), old_outcome.c_str(),
-                      outcome.c_str());
-
-      // Outcome is an outcome of the sm
-      if (local_outcomes.find(outcome) != local_outcomes.end()) {
-
-        this->set_current_state("");
-        YASMIN_LOG_INFO("State machine ends with outcome '%s'",
-                        outcome.c_str());
-        this->call_end_cbs(blackboard, outcome);
-        state_machine_ends = true;
-
-        // Outcome is a state
-      } else if (states.find(outcome) != states.end()) {
-        this->call_transition_cbs(blackboard, current_state, outcome,
-                                  old_outcome);
-
-        this->set_current_state(outcome);
-
-        // Outcome is not in the sm
-      } else {
-        throw std::logic_error("Outcome '" + outcome +
-                               "' is not a state nor a state machine outcome");
-      }
+      outcome =
+          this->execute_step(blackboard, current_state, state_machine_ends);
     }
   } catch (...) {
     this->execution_active.store(false);
@@ -548,21 +487,76 @@ void StateMachine::cancel_state_machine() {
 }
 
 void StateMachine::set_sigint_handler(bool handle) {
-  if (handle) {
-    sigint_handler_instance = this;
-    struct sigaction sigint_action;
-    sigint_action.sa_handler = sigint_handler;
-    sigemptyset(&sigint_action.sa_mask);
-    sigint_action.sa_flags = 0;
-    sigaction(SIGINT, &sigint_action, nullptr);
-  } else if (sigint_handler_instance == this) {
-    sigint_handler_instance = nullptr;
-    struct sigaction sigint_action;
-    sigint_action.sa_handler = SIG_DFL;
-    sigemptyset(&sigint_action.sa_mask);
-    sigint_action.sa_flags = 0;
-    sigaction(SIGINT, &sigint_action, nullptr);
+  struct sigaction sigint_action;
+  sigint_action.sa_handler = handle ? sigint_handler : SIG_DFL;
+  sigemptyset(&sigint_action.sa_mask);
+  sigint_action.sa_flags = 0;
+  sigaction(SIGINT, &sigint_action, nullptr);
+}
+
+std::string StateMachine::execute_step(Blackboard::SharedPtr blackboard,
+                                       const std::string &current_state,
+                                       bool &state_machine_ends) {
+
+  const auto &states = this->states;
+  const auto &local_outcomes = this->outcomes;
+
+  auto state_it = states.find(current_state);
+  if (state_it == states.end()) {
+    throw std::logic_error("Active state '" + current_state +
+                           "' not found in state machine");
   }
+  const auto &state = state_it->second;
+  const auto &local_transitions = this->transitions.at(current_state);
+  const auto &local_remappings = this->remappings.at(current_state);
+
+  auto parent_remappings = blackboard->get_remappings();
+  auto composed_remappings =
+      StateMachine::compose_remappings(parent_remappings, local_remappings);
+  blackboard->set_remappings(composed_remappings);
+
+  std::string outcome;
+  std::string old_outcome;
+
+  try {
+    outcome = (*state.get())(blackboard);
+  } catch (...) {
+    blackboard->set_remappings(parent_remappings);
+    throw;
+  }
+  old_outcome = outcome;
+
+  blackboard->set_remappings(parent_remappings);
+
+  this->throw_if_cancel_state_machine_requested();
+
+  const auto &state_outcomes = state->get_outcomes();
+  if (state_outcomes.find(outcome) == state_outcomes.end()) {
+    throw std::logic_error("Outcome '" + outcome +
+                           "' is not registered in state " + current_state);
+  }
+
+  if (local_transitions.find(outcome) != local_transitions.end()) {
+    outcome = local_transitions.at(outcome);
+  }
+
+  YASMIN_LOG_INFO("State machine transitioning '%s' : '%s' --> '%s'",
+                  current_state.c_str(), old_outcome.c_str(), outcome.c_str());
+
+  if (local_outcomes.find(outcome) != local_outcomes.end()) {
+    this->set_current_state("");
+    YASMIN_LOG_INFO("State machine ends with outcome '%s'", outcome.c_str());
+    this->call_end_cbs(blackboard, outcome);
+    state_machine_ends = true;
+  } else if (states.find(outcome) != states.end()) {
+    this->call_transition_cbs(blackboard, current_state, outcome, old_outcome);
+    this->set_current_state(outcome);
+  } else {
+    throw std::logic_error("Outcome '" + outcome +
+                           "' is not a state nor a state machine outcome");
+  }
+
+  return outcome;
 }
 
 std::string StateMachine::to_string() const {

@@ -32,8 +32,6 @@
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
-using std::placeholders::_1;
-
 namespace yasmin_ros {
 
 /**
@@ -149,7 +147,8 @@ public:
     options.callback_group = callback_group;
     this->sub = this->node_->create_subscription<MsgT>(
         this->topic_name, this->qos,
-        std::bind(&MonitorState::callback, this, _1), options);
+        std::bind(&MonitorState::callback, this, std::placeholders::_1),
+        options);
   }
 
   /**
@@ -167,10 +166,12 @@ public:
     while (this->msg_list.empty()) {
 
       if (this->timeout > 0) {
-        wait_status =
-            this->msg_cond.wait_for(lock, std::chrono::seconds(this->timeout));
+        const auto timeout_dur = std::chrono::seconds(this->timeout);
+        wait_status = this->msg_cond.wait_for(lock, timeout_dur);
       } else {
-        this->msg_cond.wait(lock);
+        this->msg_cond.wait(lock, [this]() {
+          return !this->msg_list.empty() || this->is_canceled();
+        });
       }
 
       if (this->is_canceled()) {
@@ -186,8 +187,8 @@ public:
           YASMIN_LOG_WARN("Retrying to wait for topic '%s' (%d/%d)",
                           this->topic_name.c_str(), retry_count,
                           this->maximum_retry);
-          wait_status = this->msg_cond.wait_for(
-              lock, std::chrono::seconds(this->timeout));
+          const auto timeout_dur = std::chrono::seconds(this->timeout);
+          wait_status = this->msg_cond.wait_for(lock, timeout_dur);
         } else {
           return basic_outcomes::TIMEOUT;
         }
@@ -254,6 +255,7 @@ private:
    * @param msg The message received from the topic.
    */
   void callback(const typename MsgT::SharedPtr msg) {
+    std::lock_guard<std::mutex> lock(this->msg_mutex);
 
     this->msg_list.push_back(msg);
 

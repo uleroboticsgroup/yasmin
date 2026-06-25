@@ -51,8 +51,6 @@ LoadPcdState::LoadPcdState() : yasmin::State({"succeeded", "aborted"}) {
   this->add_output_key("pcd_version", "Detected PCD version stored as int.");
 }
 
-LoadPcdState::~LoadPcdState() {}
-
 void LoadPcdState::configure() {
   file_path_ = this->get_parameter<std::string>("file_path");
 }

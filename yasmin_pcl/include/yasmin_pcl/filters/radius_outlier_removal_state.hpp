@@ -32,7 +32,7 @@ namespace yasmin_pcl::filters {
 class RadiusOutlierRemovalState : public yasmin::State {
 public:
   RadiusOutlierRemovalState();
-  ~RadiusOutlierRemovalState() override;
+  ~RadiusOutlierRemovalState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

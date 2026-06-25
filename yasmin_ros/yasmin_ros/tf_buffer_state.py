@@ -35,6 +35,8 @@ class TfBufferState(State):
         super().__init__([SUCCEED, ABORT])
         self._node = None
         self._cache_time_sec = 10.0
+        self._prev_tf_buffer = None
+        self._prev_tf_listener = None
 
         self.set_description(
             "Creates a shared tf2 buffer and transform listener and writes "
@@ -70,8 +72,16 @@ class TfBufferState(State):
 
     def execute(self, blackboard: Blackboard) -> str:
         try:
+            # Clean up previous instances to avoid resource leaks
+            if self._prev_tf_listener is not None:
+                self._prev_tf_listener.__del__()
+            if self._prev_tf_buffer is not None:
+                self._prev_tf_buffer.__del__()
+
             tf_buffer = Buffer(cache_time=Duration(seconds=self._cache_time_sec))
             tf_listener = TransformListener(tf_buffer, self._node)
+            self._prev_tf_buffer = tf_buffer
+            self._prev_tf_listener = tf_listener
             blackboard["tf_buffer"] = tf_buffer
             blackboard["tf_listener"] = tf_listener
             return SUCCEED

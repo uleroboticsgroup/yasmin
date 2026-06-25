@@ -75,8 +75,6 @@ StatisticalOutlierRemovalState::StatisticalOutlierRemovalState()
                        "Removed point indices stored as pcl::Indices.");
 }
 
-StatisticalOutlierRemovalState::~StatisticalOutlierRemovalState() {}
-
 void StatisticalOutlierRemovalState::configure() {
   this->mean_k_ = this->get_parameter<int>("mean_k");
   this->stddev_mul_thresh_ = this->get_parameter<double>("stddev_mul_thresh");

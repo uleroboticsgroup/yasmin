@@ -99,7 +99,7 @@ class YasminNode(Node):
         self._executor.add_node(self)
 
         ## Thread to execute the spinning of the node.
-        self._spin_thread: Thread = Thread(target=self._executor.spin)
+        self._spin_thread: Thread = Thread(target=self._executor.spin, daemon=True)
         self._spin_thread.start()
 
     def shutdown(self) -> None:

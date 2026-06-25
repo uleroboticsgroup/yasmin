@@ -19,6 +19,7 @@
 #include <cxxabi.h>
 
 #include <cstdlib>
+#include <list>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -26,14 +27,21 @@
 namespace yasmin {
 
 inline std::string demangle_type(const std::string &mangled_name) {
-  static std::unordered_map<std::string, std::string> cache;
+
+  static constexpr size_t kMaxCacheSize = 1024;
+
+  static std::unordered_map<
+      std::string, std::pair<std::string, std::list<std::string>::iterator>>
+      cache;
+  static std::list<std::string> lru;
   static std::mutex cache_mutex;
 
   {
     std::lock_guard<std::mutex> lock(cache_mutex);
     auto it = cache.find(mangled_name);
     if (it != cache.end()) {
-      return it->second;
+      lru.splice(lru.end(), lru, it->second.second);
+      return it->second.first;
     }
   }
 
@@ -54,7 +62,21 @@ inline std::string demangle_type(const std::string &mangled_name) {
 
   {
     std::lock_guard<std::mutex> lock(cache_mutex);
-    cache[mangled_name] = result;
+
+    auto it = cache.find(mangled_name);
+    if (it != cache.end()) {
+      lru.splice(lru.end(), lru, it->second.second);
+      return it->second.first;
+    }
+
+    if (cache.size() >= kMaxCacheSize) {
+      cache.erase(lru.front());
+      lru.pop_front();
+    }
+
+    lru.push_back(mangled_name);
+    auto li = std::prev(lru.end());
+    cache[mangled_name] = {result, li};
   }
 
   return result;

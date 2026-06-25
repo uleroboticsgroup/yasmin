@@ -72,10 +72,11 @@ std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
   return transitions_list;
 }
 
-std::map<std::string, std::vector<yasmin_msgs::msg::Transition>>
+std::unordered_map<std::string, std::vector<yasmin_msgs::msg::Transition>>
 YasminViewerPub::parse_concurrence_transitions(
     yasmin::Concurrence::SharedPtr concurrence) const {
-  std::map<std::string, std::vector<yasmin_msgs::msg::Transition>> transitions;
+  std::unordered_map<std::string, std::vector<yasmin_msgs::msg::Transition>>
+      transitions;
   const auto &outcome_map = concurrence->get_outcome_map();
 
   // Add transitions for each outcome in the outcome map

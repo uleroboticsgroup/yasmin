@@ -81,8 +81,8 @@ public:
                  CreateMessageHandler create_message_handler,
                  rclcpp::QoS qos = 10,
                  rclcpp::CallbackGroup::SharedPtr callback_group = nullptr)
-      : State({basic_outcomes::SUCCEED}), topic_name(topic_name),
-        create_message_handler(create_message_handler) {
+      : State({basic_outcomes::SUCCEED, basic_outcomes::CANCEL}),
+        topic_name(topic_name), create_message_handler(create_message_handler) {
 
     this->set_outcome_description(basic_outcomes::SUCCEED,
                                   "The message was published successfully");
@@ -109,6 +109,10 @@ public:
    * @return A string outcome indicating the result of the publishing operation.
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+
+    if (this->is_canceled()) {
+      return basic_outcomes::CANCEL;
+    }
 
     YASMIN_LOG_DEBUG("Publishing to topic '%s'", this->topic_name.c_str());
     MsgT msg = this->create_message_handler(blackboard);

@@ -38,7 +38,7 @@ public:
   /**
    * @brief Destructs the BarState object.
    */
-  ~BarState();
+  ~BarState() override = default;
 
   /**
    * @brief Configures the state-local parameters.

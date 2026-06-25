@@ -38,54 +38,68 @@ ROSClientsCache::get_publishers() {
   return publishers;
 }
 
-std::recursive_mutex &ROSClientsCache::get_lock() {
+std::recursive_mutex &ROSClientsCache::get_action_lock() {
+  static std::recursive_mutex lock;
+  return lock;
+}
+
+std::recursive_mutex &ROSClientsCache::get_service_lock() {
+  static std::recursive_mutex lock;
+  return lock;
+}
+
+std::recursive_mutex &ROSClientsCache::get_publisher_lock() {
   static std::recursive_mutex lock;
   return lock;
 }
 
 void ROSClientsCache::clear_action_clients() {
-  std::lock_guard<std::recursive_mutex> lock(get_lock());
+  std::lock_guard<std::recursive_mutex> lock(get_action_lock());
   get_action_clients().clear();
-  YASMIN_LOG_INFO("Action clients cache cleared");
+  YASMIN_LOG_DEBUG("Action clients cache cleared");
 }
 
 void ROSClientsCache::clear_service_clients() {
-  std::lock_guard<std::recursive_mutex> lock(get_lock());
+  std::lock_guard<std::recursive_mutex> lock(get_service_lock());
   get_service_clients().clear();
-  YASMIN_LOG_INFO("Service clients cache cleared");
+  YASMIN_LOG_DEBUG("Service clients cache cleared");
 }
 
 void ROSClientsCache::clear_publishers() {
-  std::lock_guard<std::recursive_mutex> lock(get_lock());
+  std::lock_guard<std::recursive_mutex> lock(get_publisher_lock());
   get_publishers().clear();
-  YASMIN_LOG_INFO("Publishers cache cleared");
+  YASMIN_LOG_DEBUG("Publishers cache cleared");
 }
 
 void ROSClientsCache::clear_all() {
-  std::lock_guard<std::recursive_mutex> lock(get_lock());
-  clear_action_clients();
-  clear_service_clients();
-  clear_publishers();
-  YASMIN_LOG_INFO("All ROS clients caches cleared");
+  std::scoped_lock<std::recursive_mutex, std::recursive_mutex,
+                   std::recursive_mutex>
+      lock(get_action_lock(), get_service_lock(), get_publisher_lock());
+  get_action_clients().clear();
+  get_service_clients().clear();
+  get_publishers().clear();
+  YASMIN_LOG_DEBUG("All ROS clients caches cleared");
 }
 
 size_t ROSClientsCache::get_action_clients_count() {
-  std::lock_guard<std::recursive_mutex> lock(get_lock());
+  std::lock_guard<std::recursive_mutex> lock(get_action_lock());
   return get_action_clients().size();
 }
 
 size_t ROSClientsCache::get_service_clients_count() {
-  std::lock_guard<std::recursive_mutex> lock(get_lock());
+  std::lock_guard<std::recursive_mutex> lock(get_service_lock());
   return get_service_clients().size();
 }
 
 size_t ROSClientsCache::get_publishers_count() {
-  std::lock_guard<std::recursive_mutex> lock(get_lock());
+  std::lock_guard<std::recursive_mutex> lock(get_publisher_lock());
   return get_publishers().size();
 }
 
 std::map<std::string, size_t> ROSClientsCache::get_cache_stats() {
-  std::lock_guard<std::recursive_mutex> lock(get_lock());
+  std::scoped_lock<std::recursive_mutex, std::recursive_mutex,
+                   std::recursive_mutex>
+      lock(get_action_lock(), get_service_lock(), get_publisher_lock());
 
   size_t action_count = get_action_clients().size();
   size_t service_count = get_service_clients().size();

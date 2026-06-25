@@ -39,7 +39,7 @@ public:
   /**
    * @brief Destructs the PoseWriterState object.
    */
-  ~PoseWriterState();
+  ~PoseWriterState() override = default;
 
   /**
    * @brief Configures the state-local parameters.

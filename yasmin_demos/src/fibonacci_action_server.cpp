@@ -14,12 +14,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <memory>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 #include <example_interfaces/action/fibonacci.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
-
-using namespace std::placeholders;
 
 /**
  * @class FibonacciActionServer
@@ -45,6 +46,7 @@ public:
    * @param options Node options for initialization.
    */
   explicit FibonacciActionServer() : Node("fibonacci_action_server") {
+    this->threads_.reserve(8);
 
     // Callback to handle goal requests.
     auto handle_goal = [this](const rclcpp_action::GoalUUID &uuid,
@@ -72,7 +74,10 @@ public:
           auto execute_in_thread = [this, goal_handle]() {
             return this->execute(goal_handle);
           };
-          std::thread{execute_in_thread}.detach();
+          {
+            std::lock_guard<std::mutex> lock(this->threads_mutex_);
+            this->threads_.emplace_back(execute_in_thread);
+          }
         };
 
     // Create the Fibonacci action server.
@@ -82,7 +87,24 @@ public:
     RCLCPP_INFO(this->get_logger(), "Fibonacci Server started");
   }
 
+  ~FibonacciActionServer() {
+    for (auto &thread : this->threads_) {
+      if (thread.joinable()) {
+        thread.join();
+      }
+    }
+  }
+
 private:
+  /**
+   * @brief Mutex protecting the threads vector.
+   */
+  std::mutex threads_mutex_;
+  /**
+   * @brief Tracked execution threads, joined on destruction.
+   */
+  std::vector<std::thread> threads_;
+
   /**
    * @brief The action server instance for Fibonacci calculations.
    */

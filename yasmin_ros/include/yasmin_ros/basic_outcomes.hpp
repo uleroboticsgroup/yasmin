@@ -36,7 +36,7 @@ namespace basic_outcomes {
  * This string constant is used to indicate that an action has successfully
  * completed without any issues.
  */
-constexpr char SUCCEED[] = "succeeded";
+inline constexpr char SUCCEED[] = "succeeded";
 
 /**
  * @brief Constant representing an aborted action outcome.
@@ -44,7 +44,7 @@ constexpr char SUCCEED[] = "succeeded";
  * This string constant signifies that an action was aborted, likely due to an
  * error or unexpected condition that prevented its completion.
  */
-constexpr char ABORT[] = "aborted";
+inline constexpr char ABORT[] = "aborted";
 
 /**
  * @brief Constant representing a failed action outcome.
@@ -52,7 +52,7 @@ constexpr char ABORT[] = "aborted";
  * This string constant is used to indicate that an action has completed
  * but resulted in failure, meaning it did not achieve its intended result.
  */
-constexpr char FAIL[] = "failed";
+inline constexpr char FAIL[] = "failed";
 
 /**
  * @brief Constant representing a canceled action outcome.
@@ -60,7 +60,7 @@ constexpr char FAIL[] = "failed";
  * This string constant is used when an action is manually canceled by a user
  * or system before it could complete.
  */
-constexpr char CANCEL[] = "canceled";
+inline constexpr char CANCEL[] = "canceled";
 
 /**
  * @brief Constant representing a timed-out action outcome.
@@ -68,14 +68,14 @@ constexpr char CANCEL[] = "canceled";
  * This string constant is used to indicate that an action did not complete
  * within the allocated time, resulting in a timeout status.
  */
-constexpr char TIMEOUT[] = "timeout";
+inline constexpr char TIMEOUT[] = "timeout";
 
 /**
  * @brief Constant representing a retry action outcome.
  *
  * This string constant is used to indicate that a retry should be performed.
  */
-constexpr char RETRY[] = "retry";
+inline constexpr char RETRY[] = "retry";
 } // namespace basic_outcomes
 } // namespace yasmin_ros
 

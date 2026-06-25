@@ -74,7 +74,7 @@ GetParametersState::execute(yasmin::Blackboard::SharedPtr blackboard) {
       } else if (default_value.type() == typeid(std::vector<bool>)) {
         this->node_->declare_parameter(
             param_name, std::any_cast<std::vector<bool>>(default_value));
-      } else if (default_value.type() == typeid(std::vector<int>)) {
+      } else if (default_value.type() == typeid(std::vector<int64_t>)) {
         this->node_->declare_parameter(
             param_name, std::any_cast<std::vector<int64_t>>(default_value));
       } else if (default_value.type() == typeid(std::vector<double>)) {

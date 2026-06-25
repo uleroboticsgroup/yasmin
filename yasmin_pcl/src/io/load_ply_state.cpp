@@ -130,10 +130,10 @@ static bool read_ply_camera_ascii(const std::string &file_path,
         }
       }
 
-      origin = Eigen::Vector4f(view_px, view_py, view_pz, 0.0f);
+      origin = Eigen::Vector4f(view_px, view_py, view_pz, 1.0f);
       Eigen::Matrix3f R;
-      R << x_axisx, x_axisy, x_axisz, y_axisx, y_axisy, y_axisz, z_axisx,
-          z_axisy, z_axisz;
+      R << x_axisx, y_axisx, z_axisx, x_axisy, y_axisy, z_axisy, x_axisz,
+          y_axisz, z_axisz;
       orientation = Eigen::Quaternionf(R);
       return true;
     }
@@ -171,8 +171,6 @@ LoadPlyState::LoadPlyState() : yasmin::State({"succeeded", "aborted"}) {
                        "Sensor acquisition orientation quaternion stored as "
                        "std::array<float, 4>.");
 }
-
-LoadPlyState::~LoadPlyState() {}
 
 void LoadPlyState::configure() {
   file_path_ = this->get_parameter<std::string>("file_path");

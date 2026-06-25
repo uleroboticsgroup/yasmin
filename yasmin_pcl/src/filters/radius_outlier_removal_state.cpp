@@ -75,8 +75,6 @@ RadiusOutlierRemovalState::RadiusOutlierRemovalState()
                        "Removed point indices stored as pcl::Indices.");
 }
 
-RadiusOutlierRemovalState::~RadiusOutlierRemovalState() {}
-
 void RadiusOutlierRemovalState::configure() {
   this->radius_search_ = this->get_parameter<double>("radius_search");
   this->min_neighbors_in_radius_ =

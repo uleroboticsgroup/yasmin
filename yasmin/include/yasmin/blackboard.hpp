@@ -95,6 +95,7 @@ public:
    * @param value The value to store.
    */
   template <class T> void set(const std::string &name, T value) {
+    using DecayT = std::decay_t<T>;
 
     YASMIN_LOG_DEBUG("Setting '%s' in the blackboard", name.c_str());
 
@@ -102,17 +103,17 @@ public:
 
     // Apply remapping if exists
     const std::string &key = this->remap(name);
-    const std::string type_name = demangle_type(typeid(T).name());
+    const std::string type_name = demangle_type(typeid(DecayT).name());
 
     auto type_it = this->storage->type_registry.find(key);
     if (type_it != this->storage->type_registry.end() &&
         type_it->second == type_name) {
       // Same type: update existing value in-place (avoids allocation)
-      *(std::static_pointer_cast<T>(this->storage->values.at(key))) =
+      *(std::static_pointer_cast<DecayT>(this->storage->values.at(key))) =
           std::move(value);
     } else {
       // New key or different type: (re)create entry
-      this->storage->values[key] = std::make_shared<T>(std::move(value));
+      this->storage->values[key] = std::make_shared<DecayT>(std::move(value));
       this->storage->type_registry[key] = type_name;
     }
   }

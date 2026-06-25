@@ -86,7 +86,7 @@ public:
    * @brief Constructs a State with a set of possible outcomes.
    * @param outcomes A set of possible outcomes for this state.
    */
-  State(const Outcomes &outcomes);
+  State(Outcomes outcomes);
 
   /**
    * @brief Virtual destructor.

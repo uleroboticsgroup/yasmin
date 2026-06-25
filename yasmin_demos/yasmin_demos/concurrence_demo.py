@@ -23,6 +23,7 @@ import rclpy
 import yasmin
 from yasmin import Blackboard, Concurrence, State, StateMachine
 from yasmin_ros import set_ros_loggers
+from yasmin_ros.yasmin_node import YasminNode
 from yasmin_viewer import YasminViewerPub
 
 
@@ -203,6 +204,7 @@ def main() -> None:
         yasmin.YASMIN_LOG_WARN(e)
 
     # Shutdown ROS 2 if it's running
+    YasminNode.destroy_instance()
     if rclpy.ok():
         rclpy.shutdown()
 

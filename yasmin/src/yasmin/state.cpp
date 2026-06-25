@@ -39,8 +39,8 @@ struct StateStorage {
   Blackboard::SharedPtr parameters = Blackboard::make_shared();
 };
 
-std::mutex &state_storage_mutex() {
-  static std::mutex mtx;
+std::recursive_mutex &state_storage_mutex() {
+  static std::recursive_mutex mtx;
   return mtx;
 }
 
@@ -51,23 +51,24 @@ std::unordered_map<const State *, StateStorage> &state_storage_map() {
 } // namespace
 
 StateMetadata &State::get_metadata_ref() const {
-  std::lock_guard<std::mutex> lock(state_storage_mutex());
+  std::lock_guard<std::recursive_mutex> lock(state_storage_mutex());
   return state_storage_map()[this].metadata;
 }
 
 Blackboard::SharedPtr State::get_parameters_blackboard() const {
-  std::lock_guard<std::mutex> lock(state_storage_mutex());
+  std::lock_guard<std::recursive_mutex> lock(state_storage_mutex());
   return state_storage_map()[this].parameters;
 }
 
-State::State(const Outcomes &outcomes) : outcomes(outcomes) {
+State::State(Outcomes outcomes) {
   if (outcomes.empty()) {
     throw std::logic_error("A state must have at least one possible outcome.");
   }
+  this->outcomes = std::move(outcomes);
 }
 
 State::~State() {
-  std::lock_guard<std::mutex> lock(state_storage_mutex());
+  std::lock_guard<std::recursive_mutex> lock(state_storage_mutex());
   state_storage_map().erase(this);
 }
 
@@ -116,6 +117,15 @@ std::string State::operator()(Blackboard::SharedPtr blackboard) {
   const auto &outcomes = this->get_outcomes();
   if (outcomes.find(outcome) == outcomes.end()) {
 
+    // Mark as idle before throwing exception
+    this->set_status(StateStatus::IDLE);
+
+    if (outcome.empty()) {
+      throw std::logic_error("State '" + this->to_string() +
+                             "' returned an empty outcome. "
+                             "Did you forget to override execute()?");
+    }
+
     // Construct a string representation of the possible outcomes
     std::string outcomes_string = "[";
 
@@ -130,9 +140,6 @@ std::string State::operator()(Blackboard::SharedPtr blackboard) {
     }
 
     outcomes_string += "]";
-
-    // Mark as idle before throwing exception
-    this->set_status(StateStatus::IDLE);
 
     // Throw an exception if the outcome is not valid
     throw std::logic_error("Outcome '" + outcome +

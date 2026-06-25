@@ -79,8 +79,6 @@ PassThroughState::PassThroughState() : yasmin::State({"succeeded", "aborted"}) {
                        "Removed point indices stored as pcl::Indices.");
 }
 
-PassThroughState::~PassThroughState() {}
-
 void PassThroughState::configure() {
   this->filter_field_name_ =
       this->get_parameter<std::string>("filter_field_name");

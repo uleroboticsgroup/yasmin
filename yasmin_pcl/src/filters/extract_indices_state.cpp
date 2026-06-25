@@ -105,8 +105,6 @@ ExtractIndicesState::ExtractIndicesState()
                        "Removed point indices stored as pcl::Indices.");
 }
 
-ExtractIndicesState::~ExtractIndicesState() {}
-
 void ExtractIndicesState::configure() {
   this->negative_ = this->get_parameter<bool>("negative");
   this->keep_organized_ = this->get_parameter<bool>("keep_organized");

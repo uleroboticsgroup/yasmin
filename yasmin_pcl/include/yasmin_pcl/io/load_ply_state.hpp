@@ -33,7 +33,7 @@ namespace yasmin_pcl::io {
 class LoadPlyState : public yasmin::State {
 public:
   LoadPlyState();
-  ~LoadPlyState() override;
+  ~LoadPlyState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

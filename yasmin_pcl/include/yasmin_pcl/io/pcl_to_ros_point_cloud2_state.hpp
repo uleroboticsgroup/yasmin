@@ -32,7 +32,7 @@ namespace yasmin_pcl::io {
 class PclToRosPointCloud2State : public yasmin::State {
 public:
   PclToRosPointCloud2State();
-  ~PclToRosPointCloud2State() override;
+  ~PclToRosPointCloud2State() override = default;
 
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 };

@@ -23,7 +23,7 @@ from rclpy.callback_groups import CallbackGroup
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL, TIMEOUT
 from yasmin_ros.ros_clients_cache import ROSClientsCache
 from yasmin_ros.ros_state_utils import resolve_node, wait_with_retry
 
@@ -137,9 +137,13 @@ class ServiceState(State):
             lambda: self._service_client.wait_for_service(timeout_sec=self._wait_timeout),
             self._maximum_retry,
             f"Timeout reached, service '{self._srv_name}' is not available",
+            cancel_check=self.is_canceled,
         )
         if outcome is not None:
             return outcome
+
+        if self.is_canceled():
+            return CANCEL
 
         try:
             yasmin.YASMIN_LOG_INFO(f"Sending request to service '{self._srv_name}'")
@@ -154,9 +158,13 @@ class ServiceState(State):
                 self._maximum_retry,
                 f"Timeout reached while waiting for response from "
                 f"service '{self._srv_name}'",
+                cancel_check=self.is_canceled,
             )
             if outcome is not None:
                 return outcome
+
+            if self.is_canceled():
+                return CANCEL
 
         except Exception as e:
             yasmin.YASMIN_LOG_WARN(f"Service call failed: {e}")

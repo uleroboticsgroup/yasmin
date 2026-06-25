@@ -44,8 +44,6 @@ RosToPclPointCloud2State::RosToPclPointCloud2State()
                        "Converted cloud stored as pcl::PCLPointCloud2::Ptr.");
 }
 
-RosToPclPointCloud2State::~RosToPclPointCloud2State() {}
-
 std::string
 RosToPclPointCloud2State::execute(yasmin::Blackboard::SharedPtr blackboard) {
   try {

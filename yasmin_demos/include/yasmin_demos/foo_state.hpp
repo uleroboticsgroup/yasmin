@@ -38,7 +38,7 @@ public:
   /**
    * @brief Destructs the FooState object.
    */
-  ~FooState();
+  ~FooState() override = default;
 
   /**
    * @brief Configures the state-local parameters.

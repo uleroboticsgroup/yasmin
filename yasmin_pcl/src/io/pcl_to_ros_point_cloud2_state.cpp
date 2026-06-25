@@ -44,8 +44,6 @@ PclToRosPointCloud2State::PclToRosPointCloud2State()
                        "std::shared_ptr<sensor_msgs::msg::PointCloud2>.");
 }
 
-PclToRosPointCloud2State::~PclToRosPointCloud2State() {}
-
 std::string
 PclToRosPointCloud2State::execute(yasmin::Blackboard::SharedPtr blackboard) {
   try {

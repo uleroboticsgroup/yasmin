@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -31,6 +32,8 @@
 #include "yasmin_msgs/msg/transition.hpp"
 
 namespace yasmin_viewer {
+
+struct AcceptorHolder;
 
 /**
  * @class YasminViewerNode
@@ -57,13 +60,17 @@ public:
    * @brief Returns the cached finite state machines as a JSON string.
    * @return JSON representation of all cached finite state machines.
    */
-  std::string get_fsms_json() const;
+  std::string get_fsms_json();
 
   /**
    * @brief Returns the configured web root directory.
    * @return Path to the web root directory.
    */
   std::string get_web_root() const;
+
+  void on_connection_closed() {
+    this->active_connections_.fetch_sub(1, std::memory_order_relaxed);
+  }
 
 private:
   /**
@@ -104,8 +111,7 @@ private:
    * @brief Removes expired finite state machines from the cache.
    * @param now Current time used for age comparison.
    */
-  void
-  prune_expired_locked(const std::chrono::steady_clock::time_point &now) const;
+  void prune_expired_locked(const std::chrono::steady_clock::time_point &now);
 
   /**
    * @brief Escapes a string for safe JSON serialization.
@@ -139,7 +145,7 @@ private:
   /// Mutex protecting access to the finite state machine cache.
   mutable std::mutex fsms_mutex_;
   /// Cache of serialized finite state machines indexed by name.
-  mutable std::unordered_map<std::string, CachedFsm> fsms_;
+  std::unordered_map<std::string, CachedFsm> fsms_;
 
   /// Subscription for incoming state machine descriptions.
   rclcpp::Subscription<StateMachineMsg>::SharedPtr fsm_sub_;
@@ -157,6 +163,14 @@ private:
   std::atomic_bool server_running_;
   /// Background thread executing the embedded web server.
   std::thread server_thread_;
+  /// Maximum number of concurrent HTTP connections.
+  static constexpr uint32_t kMaxConnections = 64;
+  /// Number of currently active HTTP connections.
+  std::atomic<uint32_t> active_connections_{0};
+
+  /// Asio acceptor holder (created in start_server, used by
+  /// run_server/stop_server).
+  std::unique_ptr<AcceptorHolder> acceptor_holder_;
 };
 
 } // namespace yasmin_viewer

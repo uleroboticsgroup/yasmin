@@ -32,7 +32,7 @@ namespace yasmin_pcl::filters {
 class ExtractIndicesState : public yasmin::State {
 public:
   ExtractIndicesState();
-  ~ExtractIndicesState() override;
+  ~ExtractIndicesState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

@@ -68,7 +68,5 @@ std::string FooState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   }
 };
 
-FooState::~FooState() {};
-
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(FooState, yasmin::State)

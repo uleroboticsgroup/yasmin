@@ -20,7 +20,7 @@ from rclpy.node import Node
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
 from yasmin_ros.ros_state_utils import resolve_node
 
 
@@ -61,6 +61,9 @@ class GetParametersState(State):
         """
 
         for param_name, param_value in self._parameters.items():
+            if self.is_canceled():
+                return CANCEL
+
             if not self._node.has_parameter(param_name):
                 self._node.declare_parameter(param_name, param_value)
 

@@ -32,7 +32,7 @@ namespace yasmin_pcl::io {
 class SavePcdState : public yasmin::State {
 public:
   SavePcdState();
-  ~SavePcdState() override;
+  ~SavePcdState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

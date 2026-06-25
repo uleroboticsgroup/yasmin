@@ -16,9 +16,9 @@
 #ifndef YASMIN_VIEWER__YASMIN_VIEWER_PUB_HPP_
 #define YASMIN_VIEWER__YASMIN_VIEWER_PUB_HPP_
 
-#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
@@ -93,7 +93,7 @@ public:
    * @param concurrence Shared pointer to the Concurrence state.
    * @return Map of state names to their transition vectors.
    */
-  std::map<std::string, std::vector<yasmin_msgs::msg::Transition>>
+  std::unordered_map<std::string, std::vector<yasmin_msgs::msg::Transition>>
   parse_concurrence_transitions(
       yasmin::Concurrence::SharedPtr concurrence) const;
 

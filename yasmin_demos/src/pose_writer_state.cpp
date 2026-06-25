@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "yasmin_demos/pose_writer_state.hpp"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -25,8 +27,6 @@
 #include "yasmin/state_machine.hpp"
 #include "yasmin_ros/interface_serialization.hpp"
 #include "yasmin_ros/ros_logs.hpp"
-
-#include "yasmin_demos/pose_writer_state.hpp"
 
 PoseWriterState::PoseWriterState() : yasmin::State({"outcome1"}) {
   this->position_x_ = 1.0;
@@ -80,8 +80,6 @@ std::string PoseWriterState::execute(yasmin::Blackboard::SharedPtr blackboard) {
 
   return "outcome1";
 }
-
-PoseWriterState::~PoseWriterState() {}
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(PoseWriterState, yasmin::State)

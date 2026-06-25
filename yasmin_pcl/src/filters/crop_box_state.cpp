@@ -131,8 +131,6 @@ CropBoxState::CropBoxState() : yasmin::State({"succeeded", "aborted"}) {
                        "Removed point indices stored as pcl::Indices.");
 }
 
-CropBoxState::~CropBoxState() {}
-
 void CropBoxState::configure() {
   this->min_x_ = this->get_parameter<float>("min_x");
   this->min_y_ = this->get_parameter<float>("min_y");

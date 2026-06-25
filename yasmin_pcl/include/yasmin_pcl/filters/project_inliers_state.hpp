@@ -32,7 +32,7 @@ namespace yasmin_pcl::filters {
 class ProjectInliersState : public yasmin::State {
 public:
   ProjectInliersState();
-  ~ProjectInliersState() override;
+  ~ProjectInliersState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

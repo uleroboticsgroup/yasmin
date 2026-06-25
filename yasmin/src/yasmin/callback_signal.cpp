@@ -24,6 +24,12 @@ using namespace yasmin;
 CallbackSignalFuture::CallbackSignalFuture(std::shared_ptr<SharedState> state)
     : state_(std::move(state)) {}
 
+CallbackSignalFuture::~CallbackSignalFuture() {
+  if (this->thread_.joinable()) {
+    this->thread_.join();
+  }
+}
+
 void CallbackSignalFuture::set_completed(std::exception_ptr exception) {
   {
     std::lock_guard<std::mutex> lock(this->state_->mutex);
@@ -160,18 +166,20 @@ void CallbackSignal::trigger() const {
 }
 
 CallbackSignalFuture::SharedPtr CallbackSignal::trigger_async() const {
-  auto future = CallbackSignalFuture::SharedPtr(new CallbackSignalFuture(
-      std::make_shared<CallbackSignalFuture::SharedState>()));
+  auto state = std::make_shared<CallbackSignalFuture::SharedState>();
+  auto future = CallbackSignalFuture::SharedPtr(
+      new CallbackSignalFuture(std::move(state)));
   const auto callbacks = this->snapshot_callbacks();
 
-  std::thread([future, callbacks]() {
+  std::thread worker([future, callbacks]() {
     try {
       CallbackSignal::execute_snapshot(callbacks);
       future->set_completed();
     } catch (...) {
       future->set_completed(std::current_exception());
     }
-  }).detach();
+  });
 
+  future->thread_ = std::move(worker);
   return future;
 }

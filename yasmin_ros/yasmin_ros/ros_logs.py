@@ -14,6 +14,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from threading import Lock
+
 import rclpy
 from rclpy.node import Node
 
@@ -28,6 +30,8 @@ __all__ = [
 
 ## Node used in the YASMIN ROS 2 logs
 logger_node: Node = None
+## Lock protecting logger_node access
+_logger_node_lock: Lock = Lock()
 
 
 def ros_log_message(
@@ -47,9 +51,12 @@ def ros_log_message(
 
     message = f"[{file}:{function}:{line}] {text}"
 
+    with _logger_node_lock:
+        current_logger_node = yasmin_ros.logger_node
+
     logger = (
-        yasmin_ros.logger_node.get_logger()
-        if yasmin_ros.logger_node is not None
+        current_logger_node.get_logger()
+        if current_logger_node is not None
         else rclpy.logging.get_logger("yasmin_ros")
     )
 
@@ -77,9 +84,10 @@ def set_ros_loggers(node: Node = None) -> None:
     @type node: Node
     """
 
-    if node is None:
-        yasmin_ros.logger_node = YasminNode.get_instance()
-    else:
-        yasmin_ros.logger_node = node
+    with _logger_node_lock:
+        if node is None:
+            yasmin_ros.logger_node = YasminNode.get_instance()
+        else:
+            yasmin_ros.logger_node = node
 
     yasmin.set_loggers(ros_log_message)

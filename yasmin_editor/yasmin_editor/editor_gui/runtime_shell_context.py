@@ -41,8 +41,8 @@ def runtime_shell_command_result(runtime, command_name: str) -> str:
     if runtime is None:
         return f"{normalized_name}: runtime unavailable"
 
-    current_state = runtime.get_current_state()
-    last_state_ref = runtime.get_last_state_ref()
+    current_state = getattr(runtime, "get_current_state", lambda: None)()
+    last_state_ref = getattr(runtime, "get_last_state_ref", lambda: None)()
     last_state_name = getattr(last_state_ref, "name", None)
     if last_state_name is None and last_state_ref is not None:
         last_state_name = str(last_state_ref)

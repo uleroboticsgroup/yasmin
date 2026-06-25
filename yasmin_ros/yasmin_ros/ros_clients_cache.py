@@ -351,28 +351,4 @@ class ROSClientsCache:
 
         return str(id(callback_group))
 
-    @staticmethod
-    def _get_callback_name(callback: callable) -> str:
-        """
-        Get a string representation of a callback function.
 
-        Args:
-            callback: The callback function to get the name from.
-
-        Returns:
-            str: A string representation of the callback.
-        """
-        # Try to get the qualified name or regular name
-        if hasattr(callback, "__qualname__"):
-            return callback.__qualname__
-        elif hasattr(callback, "__name__"):
-            return callback.__name__
-
-        # For bound methods, try to get method name with class
-        if hasattr(callback, "__self__") and hasattr(callback, "__func__"):
-            class_name = callback.__self__.__class__.__name__
-            func_name = callback.__func__.__name__
-            return f"{class_name}.{func_name}"
-
-        # Fallback to string representation with ID for uniqueness
-        return f"{str(callback)}_{id(callback)}"

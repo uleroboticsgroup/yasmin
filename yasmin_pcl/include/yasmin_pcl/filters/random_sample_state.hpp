@@ -32,7 +32,7 @@ namespace yasmin_pcl::filters {
 class RandomSampleState : public yasmin::State {
 public:
   RandomSampleState();
-  ~RandomSampleState() override;
+  ~RandomSampleState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

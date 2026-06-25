@@ -34,7 +34,7 @@ namespace yasmin_pcl::filters {
 class PassThroughState : public yasmin::State {
 public:
   PassThroughState();
-  ~PassThroughState() override;
+  ~PassThroughState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

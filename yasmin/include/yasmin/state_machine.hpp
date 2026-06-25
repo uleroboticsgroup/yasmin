@@ -43,14 +43,14 @@ class StateMachine : public State {
 public:
   /// Alias for a callback function executed before running the state machine.
   using StartCallbackType =
-      std::function<void(Blackboard::SharedPtr, const std::string &)>;
+      std::function<void(const Blackboard::SharedPtr &, const std::string &)>;
   /// Alias for a callback function executed before changing the state.
   using TransitionCallbackType =
-      std::function<void(Blackboard::SharedPtr, const std::string &,
+      std::function<void(const Blackboard::SharedPtr &, const std::string &,
                          const std::string &, const std::string &)>;
   /// Alias for a callback function executed after running the state machine.
   using EndCallbackType =
-      std::function<void(Blackboard::SharedPtr, const std::string &)>;
+      std::function<void(const Blackboard::SharedPtr &, const std::string &)>;
 
   /**
    * @brief Shared pointer type for StateMachine.
@@ -114,7 +114,7 @@ public:
    *
    * @return The name of the state machine.
    */
-  const std::string &get_name() const noexcept { return this->name; }
+  std::string get_name() const noexcept { return this->name; }
 
   /**
    * @brief Sets the start state for the state machine.
@@ -150,7 +150,7 @@ public:
    *
    * @return The name of the current state.
    */
-  std::string const &get_current_state() const;
+  std::string get_current_state() const;
 
   /**
    * @brief Adds a callback function to be called when the state machine starts.
@@ -374,6 +374,22 @@ private:
    * @brief Throws if a hard state machine cancel was requested.
    */
   void throw_if_cancel_state_machine_requested();
+
+  /**
+   * @brief Executes a single state transition step.
+   *
+   * Runs the child state specified by @p current_state, applies remappings,
+   * and resolves the resulting outcome (either a child state name or a
+   * state-machine-level terminal outcome).
+   *
+   * @param blackboard The shared blackboard.
+   * @param current_state The name of the state to execute.
+   * @param state_machine_ends Set to true if the outcome is terminal.
+   * @return The translated outcome following this transition.
+   */
+  std::string execute_step(Blackboard::SharedPtr blackboard,
+                           const std::string &current_state,
+                           bool &state_machine_ends);
 };
 
 } // namespace yasmin

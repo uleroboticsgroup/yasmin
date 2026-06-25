@@ -19,6 +19,7 @@ import os
 import rclpy
 import yasmin
 from yasmin_ros import set_ros_loggers
+from yasmin_ros.yasmin_node import YasminNode
 from yasmin_viewer import YasminViewerPub
 from yasmin_factory import YasminFactory
 from ament_index_python import get_package_share_directory
@@ -42,7 +43,7 @@ def main() -> None:
     sm.set_sigint_handler(True)
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "plugin_demo")
+    pub = YasminViewerPub(sm, "plugin_demo")
 
     # Execute the FSM
     try:
@@ -50,8 +51,11 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
+    YasminNode.destroy_instance()
     if rclpy.ok():
         rclpy.shutdown()
 

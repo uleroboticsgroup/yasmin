@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     std::string outcome = (*sm.get())();
     YASMIN_LOG_INFO(outcome.c_str());
   } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    YASMIN_LOG_WARN("State machine execution failed: %s", e.what());
   }
 
   yasmin_ros::YasminNode::destroy_instance();

@@ -34,7 +34,7 @@ namespace yasmin_pcl::filters {
 class CropBoxState : public yasmin::State {
 public:
   CropBoxState();
-  ~CropBoxState() override;
+  ~CropBoxState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

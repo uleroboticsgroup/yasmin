@@ -39,7 +39,7 @@ public:
   /**
    * @brief Destructs the WorkerState object.
    */
-  ~WorkerState();
+  ~WorkerState() override = default;
 
   /**
    * @brief Configures the state-local parameters.

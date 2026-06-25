@@ -73,8 +73,6 @@ SavePcdState::SavePcdState() : yasmin::State({"succeeded", "aborted"}) {
                       "Input cloud stored as pcl::PCLPointCloud2::Ptr.");
 }
 
-SavePcdState::~SavePcdState() {}
-
 void SavePcdState::configure() {
   this->file_path_ = this->get_parameter<std::string>("file_path");
   this->storage_mode_ = this->get_parameter<std::string>("storage_mode");
@@ -90,6 +88,10 @@ void SavePcdState::configure() {
 
 std::string SavePcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   try {
+    if (this->is_canceled()) {
+      return "aborted";
+    }
+
     if (this->file_path_.empty()) {
       YASMIN_LOG_WARN("Parameter 'file_path' is empty");
       return "aborted";
@@ -100,6 +102,10 @@ std::string SavePcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
 
     if (!input_cloud) {
       YASMIN_LOG_WARN("Input PCL point cloud pointer is null");
+      return "aborted";
+    }
+
+    if (this->is_canceled()) {
       return "aborted";
     }
 

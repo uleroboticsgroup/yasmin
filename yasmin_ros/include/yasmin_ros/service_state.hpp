@@ -32,8 +32,6 @@
 #include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
-using namespace std::placeholders;
-
 namespace yasmin_ros {
 
 /**
@@ -259,8 +257,14 @@ public:
     // Wait for the service to become available
     YASMIN_LOG_INFO("Waiting for service '%s'", this->srv_name.c_str());
 
-    while (!this->service_client->wait_for_service(
-        std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout))) {
+    const auto wait_duration =
+        std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout);
+    while (!this->service_client->wait_for_service(wait_duration)) {
+
+      if (this->is_canceled()) {
+        return basic_outcomes::CANCEL;
+      }
+
       YASMIN_LOG_WARN("Timeout reached, service '%s' is not available",
                       this->srv_name.c_str());
       if (retry_count < this->maximum_retry) {
@@ -279,12 +283,14 @@ public:
 
     // Send request with callback
     this->service_client->async_send_request(
-        request, std::bind(&ServiceState::response_callback, this, _1));
+        request, std::bind(&ServiceState::response_callback, this,
+                           std::placeholders::_1));
 
     // Wait for response with timeout
     if (this->response_timeout > 0) {
-      while (this->response_done_cond.wait_for(
-                 lock, std::chrono::seconds(this->response_timeout)) ==
+      const auto response_timeout_dur =
+          std::chrono::seconds(this->response_timeout);
+      while (this->response_done_cond.wait_for(lock, response_timeout_dur) ==
              std::cv_status::timeout) {
         YASMIN_LOG_WARN(
             "Timeout reached while waiting for response from service '%s'",
@@ -299,7 +305,9 @@ public:
         }
       }
     } else {
-      this->response_done_cond.wait(lock);
+      this->response_done_cond.wait(lock, [this]() {
+        return this->service_response != nullptr || this->is_canceled();
+      });
     }
 
     if (this->is_canceled()) {
@@ -322,6 +330,15 @@ public:
 protected:
   /// Shared pointer to the ROS 2 node
   rclcpp::Node::SharedPtr node_;
+
+public:
+  /**
+   * @brief Cancel the current service state.
+   */
+  void cancel_state() override {
+    this->response_done_cond.notify_all();
+    yasmin::State::cancel_state();
+  }
 
 private:
   /// Shared pointer to the service client.

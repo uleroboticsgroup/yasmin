@@ -59,7 +59,5 @@ std::string WorkerState::execute(yasmin::Blackboard::SharedPtr /*blackboard*/) {
   return "working";
 };
 
-WorkerState::~WorkerState() {};
-
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(WorkerState, yasmin::State)

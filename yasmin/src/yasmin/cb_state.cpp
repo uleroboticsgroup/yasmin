@@ -22,16 +22,7 @@ CbState::CbState(const Outcomes &outcomes, CbStateCallback callback)
     : State(outcomes), callback(callback) {}
 
 std::string CbState::execute(Blackboard::SharedPtr blackboard) {
-
-  try {
-    // Call the callback function and return the result
-    return this->callback(blackboard);
-
-  } catch (const std::exception &e) {
-    // Handle any errors that occur during callback execution
-    throw std::runtime_error("Callback execution failed: " +
-                             std::string(e.what()));
-  }
+  return this->callback(blackboard);
 }
 
 } // namespace yasmin

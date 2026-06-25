@@ -32,7 +32,7 @@ namespace yasmin_pcl::filters {
 class StatisticalOutlierRemovalState : public yasmin::State {
 public:
   StatisticalOutlierRemovalState();
-  ~StatisticalOutlierRemovalState() override;
+  ~StatisticalOutlierRemovalState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

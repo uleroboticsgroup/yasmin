@@ -24,6 +24,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "yasmin/logs.hpp"
@@ -73,7 +74,18 @@ public:
    */
   std::string get_exception_message() const;
 
+  /**
+   * @brief Destructor for CallbackSignalFuture.
+   *
+   * Waits for the background thread to finish and rethrows any captured
+   * exception if one exists.
+   */
+  ~CallbackSignalFuture();
+
 private:
+  /**
+   * @brief Shared state for the asynchronous trigger.
+   */
   struct SharedState {
     mutable std::mutex mutex;
     std::condition_variable condition;
@@ -81,12 +93,24 @@ private:
     std::exception_ptr exception{};
   };
 
+  /**
+   * @brief Construct a CallbackSignalFuture with shared state.
+   * @param state Shared state for the asynchronous trigger.
+   */
   explicit CallbackSignalFuture(std::shared_ptr<SharedState> state);
 
+  /**
+   * @brief Mark the asynchronous trigger as completed.
+   * @param exception Optional exception captured during callback execution.
+   */
   void set_completed(std::exception_ptr exception = nullptr);
 
+  /// @brief Shared state for the asynchronous trigger.
   std::shared_ptr<SharedState> state_;
+  /// @brief Background thread executing the callbacks.
+  std::thread thread_;
 
+  // Allow CallbackSignal to access private members for setting completion.
   friend class CallbackSignal;
 };
 
@@ -171,17 +195,39 @@ public:
   CallbackSignalFuture::SharedPtr trigger_async() const;
 
 private:
+  /**
+   * @brief Internal structure to hold callback entries.
+   */
   struct CallbackEntry {
     CallbackId id;
     Callback callback;
   };
 
+  /**
+   * @brief Execute a snapshot of callbacks.
+   * @param callbacks Vector of callback entries to execute.
+   *
+   * This function executes all callbacks in the provided snapshot. If any
+   * callback throws an exception, the first exception is captured and
+   * rethrown after all callbacks have been executed.
+   */
   static void execute_snapshot(const std::vector<CallbackEntry> &callbacks);
 
+  /**
+   * @brief Capture a snapshot of the currently registered callbacks.
+   * @return Vector of callback entries representing the snapshot.
+   *
+   * This function locks the internal mutex to safely copy the current
+   * callbacks into a new vector, which is then returned for execution.
+   */
   std::vector<CallbackEntry> snapshot_callbacks() const;
 
+  /// @brief Mutex to protect access to the callbacks vector and
+  /// next_callback_id_.
   mutable std::mutex mutex_;
+  /// @brief Vector of registered callback entries.
   std::vector<CallbackEntry> callbacks_;
+  /// @brief Atomic counter for generating unique callback identifiers.
   std::atomic<CallbackId> next_callback_id_{1};
 };
 

@@ -75,7 +75,7 @@ public:
         std::make_tuple(node_name, action_type_name, action_name,
                         callback_group_name, std::type_index(typeid(ActionT)));
 
-    std::lock_guard<std::recursive_mutex> lock(get_lock());
+    std::lock_guard<std::recursive_mutex> lock(get_action_lock());
 
     // Check if action client already exists in cache
     auto &action_clients = get_action_clients();
@@ -124,7 +124,7 @@ public:
         std::make_tuple(node_name, service_type_name, service_name,
                         callback_group_name, std::type_index(typeid(ServiceT)));
 
-    std::lock_guard<std::recursive_mutex> lock(get_lock());
+    std::lock_guard<std::recursive_mutex> lock(get_service_lock());
 
     // Check if service client already exists in cache
     auto &service_clients = get_service_clients();
@@ -184,7 +184,7 @@ public:
     auto cache_key = std::make_tuple(node_name, msg_type_name, topic_name,
                                      qos_hash, std::type_index(typeid(MsgT)));
 
-    std::lock_guard<std::recursive_mutex> lock(get_lock());
+    std::lock_guard<std::recursive_mutex> lock(get_publisher_lock());
 
     // Check if publisher already exists in cache
     auto &publishers = get_publishers();
@@ -275,8 +275,10 @@ private:
   get_service_clients();
   static std::map<PublisherKey, std::shared_ptr<void>> &get_publishers();
 
-  // Static lock for thread-safe access
-  static std::recursive_mutex &get_lock();
+  // Per-map locks for thread-safe access
+  static std::recursive_mutex &get_action_lock();
+  static std::recursive_mutex &get_service_lock();
+  static std::recursive_mutex &get_publisher_lock();
 
   /**
    * @brief Get a string representation of a type.
@@ -296,22 +298,6 @@ private:
    */
   static std::string
   get_callback_group_name(rclcpp::CallbackGroup::SharedPtr callback_group);
-
-  /**
-   * @brief Get a string representation of a callback function.
-   *
-   * @tparam CallbackT The type of the callback function.
-   * @param callback The callback function to get the name from.
-   * @return A string representation of the callback.
-   */
-  template <typename CallbackT>
-  static std::string get_callback_name(const CallbackT &callback) {
-    // Use the address of the callback for uniqueness
-    std::ostringstream oss;
-    oss << typeid(CallbackT).name() << "_"
-        << reinterpret_cast<const void *>(&callback);
-    return oss.str();
-  }
 
   /**
    * @brief Create a hash for a QoS profile.

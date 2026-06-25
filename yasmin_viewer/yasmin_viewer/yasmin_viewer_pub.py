@@ -13,8 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Set
 from rclpy.node import Node
+import rclpy
 import yasmin
 from yasmin import StateMachine, State, Concurrence, OrthogonalState
 from yasmin_ros.yasmin_node import YasminNode
@@ -78,6 +79,10 @@ class YasminViewerPub(object):
             self._timer.cancel()
             self._node.destroy_timer(self._timer)
             self._timer = None
+
+        if self._pub is not None:
+            self._node.destroy_publisher(self._pub)
+            self._pub = None
 
     def parse_transitions(self, transitions: Dict[str, str]) -> List[TransitionMsg]:
         """
@@ -175,8 +180,11 @@ class YasminViewerPub(object):
                 states_list[-1].transitions = transitions[child_state_name]
 
                 # Check if the child_state outcomes are in the transitions
+                existing_outcomes: Set[str] = {
+                    t.outcome for t in states_list[-1].transitions
+                }
                 for outcome in child_state.get_outcomes():
-                    if outcome not in [t.outcome for t in states_list[-1].transitions]:
+                    if outcome not in existing_outcomes:
                         # If not, add a transition to the default outcome of the concurrence
                         msg = TransitionMsg()
                         msg.outcome = outcome
@@ -264,6 +272,9 @@ class YasminViewerPub(object):
         Raises:
             Exception: If the FSM validation fails, an error is logged and the function exits without publishing.
         """
+        if not rclpy.ok():
+            return
+
         try:
             self._fsm.validate()
 
@@ -282,7 +293,7 @@ class YasminViewerPub(object):
             )
             self._pub.publish(state_machine_msg)
 
-        except Exception as e:
+        except ValueError as e:
             yasmin.YASMIN_LOG_ERROR(
                 f"Not publishing state machine '{self._fsm_name}' due to validation failure: {e}"
             )

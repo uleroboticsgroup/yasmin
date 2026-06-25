@@ -32,8 +32,6 @@
 #include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 
-using namespace std::placeholders;
-
 namespace yasmin_ros {
 
 /**
@@ -294,6 +292,7 @@ public:
     }
 
     // Wake up the execute() method if it's waiting
+    this->action_done_cond.notify_all();
     yasmin::State::cancel_state();
   }
 
@@ -331,8 +330,9 @@ public:
     // Wait for the action server to be available
     YASMIN_LOG_INFO("Waiting for action '%s'", this->action_name.c_str());
 
-    while (!this->action_client->wait_for_action_server(
-        std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout))) {
+    const auto action_wait_timeout =
+        std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout);
+    while (!this->action_client->wait_for_action_server(action_wait_timeout)) {
 
       if (this->is_canceled()) {
         return basic_outcomes::CANCEL;
@@ -357,10 +357,10 @@ public:
 
     // Prepare options for sending the goal
     SendGoalOptions send_goal_options;
-    send_goal_options.goal_response_callback =
-        std::bind(&ActionState::goal_response_callback, this, _1);
+    send_goal_options.goal_response_callback = std::bind(
+        &ActionState::goal_response_callback, this, std::placeholders::_1);
     send_goal_options.result_callback =
-        std::bind(&ActionState::result_callback, this, _1);
+        std::bind(&ActionState::result_callback, this, std::placeholders::_1);
 
     if (this->feedback_handler) {
       send_goal_options.feedback_callback =
@@ -375,8 +375,9 @@ public:
     this->action_client->async_send_goal(goal, send_goal_options);
 
     if (this->response_timeout > 0) {
-      while (this->action_done_cond.wait_for(
-                 lock, std::chrono::seconds(this->response_timeout)) ==
+      const auto response_timeout_dur =
+          std::chrono::seconds(this->response_timeout);
+      while (this->action_done_cond.wait_for(lock, response_timeout_dur) ==
              std::cv_status::timeout) {
 
         if (this->is_canceled()) {
@@ -397,7 +398,8 @@ public:
       }
 
     } else {
-      this->action_done_cond.wait(lock);
+      this->action_done_cond.wait(
+          lock, [this]() { return this->action_done_ || this->is_canceled(); });
     }
 
     if (this->is_canceled()) {
@@ -441,10 +443,12 @@ private:
   /// Mutex for protecting action cancellation.
   std::mutex action_cancel_mutex;
 
+  /// Flag set when result is received.
+  bool action_done_{false};
   /// Shared pointer to the action result.
   Result action_result;
   /// Status of the action execution.
-  rclcpp_action::ResultCode action_status;
+  rclcpp_action::ResultCode action_status{};
 
   /// Handle for the current goal.
   std::shared_ptr<GoalHandle> goal_handle;
@@ -519,6 +523,7 @@ private:
   void result_callback(const typename GoalHandle::WrappedResult &result) {
     this->action_result = result.result;
     this->action_status = result.code;
+    this->action_done_ = true;
     this->action_done_cond.notify_one();
   }
 };

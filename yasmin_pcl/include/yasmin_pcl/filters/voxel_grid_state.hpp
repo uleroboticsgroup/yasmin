@@ -33,7 +33,7 @@ namespace yasmin_pcl::filters {
 class VoxelGridState : public yasmin::State {
 public:
   VoxelGridState();
-  ~VoxelGridState() override;
+  ~VoxelGridState() override = default;
 
   void configure() override;
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;

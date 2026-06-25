@@ -20,6 +20,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -29,18 +30,19 @@ namespace yasmin {
 #define YASMIN_SHARED_PTR_ALIAS(...)                                           \
   using SharedPtr = std::shared_ptr<__VA_ARGS__>;                              \
   using ConstSharedPtr = std::shared_ptr<const __VA_ARGS__>;                   \
-  template <typename... Args>                                                  \
-  static std::shared_ptr<__VA_ARGS__> make_shared(Args &&...args) {            \
-    return std::make_shared<__VA_ARGS__>(std::forward<Args>(args)...);         \
+  template <typename T = __VA_ARGS__,                                          \
+            typename = std::enable_if_t<std::is_class_v<T>>, typename... Args> \
+  static std::shared_ptr<T> make_shared(Args &&...args) {                      \
+    return std::make_shared<T>(std::forward<Args>(args)...);                   \
   }
 
 /** @brief Macro to define a UniquePtr alias for a class */
 #define YASMIN_UNIQUE_PTR_ALIAS(...)                                           \
   using UniquePtr = std::unique_ptr<__VA_ARGS__>;                              \
-  template <typename... Args>                                                  \
-  static std::unique_ptr<__VA_ARGS__> make_unique(Args &&...args) {            \
-    return std::unique_ptr<__VA_ARGS__>(                                       \
-        new __VA_ARGS__(std::forward<Args>(args)...));                         \
+  template <typename T = __VA_ARGS__,                                          \
+            typename = std::enable_if_t<std::is_class_v<T>>, typename... Args> \
+  static std::unique_ptr<T> make_unique(Args &&...args) {                      \
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));             \
   }
 
 /** @brief Macro to define a WeakPtr alias for a class */

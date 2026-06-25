@@ -63,8 +63,6 @@ ProjectInliersState::ProjectInliersState()
                        "Projected cloud stored as pcl::PCLPointCloud2::Ptr.");
 }
 
-ProjectInliersState::~ProjectInliersState() {}
-
 void ProjectInliersState::configure() {
   this->model_type_ = this->get_parameter<int>("model_type");
   this->copy_all_fields_ = this->get_parameter<bool>("copy_all_fields");
