@@ -12,6 +12,10 @@ jobs:
     container:
       image: ros:rolling
     steps:
+      - name: Install missing dependencies
+        run: |
+          apt-get update
+          apt-get install -y ros-rolling-example-interfaces
       - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.4
         with:
