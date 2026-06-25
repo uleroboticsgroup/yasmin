@@ -167,16 +167,25 @@ void CallbackSignal::trigger() const {
 
 CallbackSignalFuture::SharedPtr CallbackSignal::trigger_async() const {
   auto state = std::make_shared<CallbackSignalFuture::SharedState>();
-  auto future = CallbackSignalFuture::SharedPtr(
-      new CallbackSignalFuture(std::move(state)));
+  auto future =
+      CallbackSignalFuture::SharedPtr(new CallbackSignalFuture(state));
   const auto callbacks = this->snapshot_callbacks();
 
-  std::thread worker([future, callbacks]() {
+  std::thread worker([state, callbacks]() {
     try {
       CallbackSignal::execute_snapshot(callbacks);
-      future->set_completed();
+      {
+        std::lock_guard<std::mutex> lock(state->mutex);
+        state->completed = true;
+      }
+      state->condition.notify_all();
     } catch (...) {
-      future->set_completed(std::current_exception());
+      {
+        std::lock_guard<std::mutex> lock(state->mutex);
+        state->exception = std::current_exception();
+        state->completed = true;
+      }
+      state->condition.notify_all();
     }
   });
 
