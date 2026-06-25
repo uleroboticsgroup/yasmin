@@ -33,6 +33,7 @@ public:
    */
   RosSerializeCppState();
 
+  /** @brief Default destructor. */
   ~RosSerializeCppState() override = default;
 
   /**

@@ -26,8 +26,21 @@
 
 namespace yasmin {
 
+/**
+ * @brief Demangles a C++ type name.
+ *
+ * This function takes a mangled C++ type name and returns its demangled
+ * representation. It uses an LRU cache to store previously demangled names
+ * for improved performance.
+ *
+ * @param mangled_name The mangled C++ type name to be demangled.
+ * @return The demangled C++ type name, or the original mangled name if
+ *         demangling fails.
+ */
 inline std::string demangle_type(const std::string &mangled_name) {
 
+  // LRU cache size limit; 1024 entries balances memory usage against type
+  // diversity in typical apps
   static constexpr size_t kMaxCacheSize = 1024;
 
   static std::unordered_map<

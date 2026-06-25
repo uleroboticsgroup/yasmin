@@ -32,22 +32,38 @@ namespace yasmin_pcl::filters {
  */
 class VoxelGridState : public yasmin::State {
 public:
+  /** @brief Construct a VoxelGridState. */
   VoxelGridState();
+  /** @brief Default destructor. */
   ~VoxelGridState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /** @brief Execute the voxel grid filter.
+   *  @param blackboard The shared blackboard.
+   *  @return Outcome string. */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief Voxel leaf size in X.
   float leaf_size_x_;
+  /// @brief Voxel leaf size in Y.
   float leaf_size_y_;
+  /// @brief Voxel leaf size in Z.
   float leaf_size_z_;
+  /// @brief Downsample all data fields (vs. only XYZ).
   bool downsample_all_data_;
+  /// @brief Minimum number of points per voxel to keep.
   int minimum_points_number_per_voxel_;
+  /// @brief Save the leaf layout information.
   bool save_leaf_layout_;
+  /// @brief Name of the field to filter on.
   std::string filter_field_name_;
+  /// @brief Minimum filter limit value.
   double filter_limit_min_;
+  /// @brief Maximum filter limit value.
   double filter_limit_max_;
+  /// @brief If true, invert the filter condition.
   bool filter_limit_negative_;
 };
 

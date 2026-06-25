@@ -32,13 +32,22 @@ namespace yasmin_pcl::io {
  */
 class LoadPcdState : public yasmin::State {
 public:
+  /** @brief Construct a LoadPcdState. */
   LoadPcdState();
+  /** @brief Default destructor. */
   ~LoadPcdState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /**
+   * @brief Load a PCD file and store the point cloud.
+   * @param blackboard The shared blackboard.
+   * @return Outcome string.
+   */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief Path to the PCD file to load
   std::string file_path_;
 };
 

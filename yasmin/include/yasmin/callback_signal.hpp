@@ -53,6 +53,7 @@ public:
    *
    * If one or more callbacks threw an exception, the first captured exception
    * is rethrown after all callbacks have completed.
+   * @throws std::runtime_error if a callback raised an exception.
    */
   void wait() const;
 
@@ -87,9 +88,13 @@ private:
    * @brief Shared state for the asynchronous trigger.
    */
   struct SharedState {
+    /// @brief Mutex protecting the shared state.
     mutable std::mutex mutex;
+    /// @brief Condition variable to signal completion.
     std::condition_variable condition;
+    /// @brief Whether the async trigger has finished.
     bool completed{false};
+    /// @brief Captured exception from callback execution, if any.
     std::exception_ptr exception{};
   };
 
@@ -185,6 +190,7 @@ public:
    * All callbacks from the captured snapshot are executed before this function
    * returns. If one or more callbacks throw an exception, the first exception
    * is rethrown after the snapshot has been processed completely.
+   * @throws Rethrows the first exception thrown by any callback.
    */
   void trigger() const;
 
@@ -199,7 +205,9 @@ private:
    * @brief Internal structure to hold callback entries.
    */
   struct CallbackEntry {
+    /// @brief Unique identifier for this callback entry.
     CallbackId id;
+    /// @brief The callback function to execute.
     Callback callback;
   };
 

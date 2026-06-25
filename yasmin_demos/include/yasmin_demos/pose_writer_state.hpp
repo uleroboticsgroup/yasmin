@@ -59,9 +59,13 @@ public:
   std::string execute(yasmin::Blackboard::SharedPtr blackboard);
 
 private:
+  /// @brief X coordinate of the pose
   double position_x_;
+  /// @brief Y coordinate of the pose
   double position_y_;
+  /// @brief Z coordinate of the pose
   double position_z_;
+  /// @brief W component of the orientation quaternion
   double orientation_w_;
 };
 

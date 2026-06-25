@@ -33,6 +33,7 @@
 
 namespace yasmin_viewer {
 
+/** @brief Forward declaration for the HTTP server acceptor. */
 struct AcceptorHolder;
 
 /**
@@ -53,7 +54,9 @@ public:
    */
   ~YasminViewerNode() override;
 
+  /** @brief Deleted copy constructor (non-copyable). */
   YasminViewerNode(const YasminViewerNode &) = delete;
+  /** @brief Deleted copy assignment (non-copyable). */
   YasminViewerNode &operator=(const YasminViewerNode &) = delete;
 
   /**
@@ -68,6 +71,7 @@ public:
    */
   std::string get_web_root() const;
 
+  /** @brief Callback invoked when an HTTP connection is closed. */
   void on_connection_closed() {
     this->active_connections_.fetch_sub(1, std::memory_order_relaxed);
   }
@@ -78,12 +82,17 @@ private:
    * @brief Stores a serialized finite state machine and its last update time.
    */
   struct CachedFsm {
+    /// @brief Cached JSON representation of the FSM
     std::string json;
+    /// @brief Timestamp when this cache entry was created
     std::chrono::steady_clock::time_point timestamp;
   };
 
+  /// @brief Alias for the StateMachine ROS2 message type
   using StateMachineMsg = yasmin_msgs::msg::StateMachine;
+  /// @brief Alias for the State ROS2 message type
   using StateMsg = yasmin_msgs::msg::State;
+  /// @brief Alias for the Transition ROS2 message type
   using TransitionMsg = yasmin_msgs::msg::Transition;
 
   /**

@@ -31,18 +31,30 @@ namespace yasmin_pcl::filters {
  */
 class RandomSampleState : public yasmin::State {
 public:
+  /** @brief Construct a RandomSampleState. */
   RandomSampleState();
+  /** @brief Default destructor. */
   ~RandomSampleState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /** @brief Execute the random sample filter.
+   *  @param blackboard The shared blackboard.
+   *  @return Outcome string. */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief Number of points to sample.
   int sample_;
+  /// @brief Random seed value.
   int seed_;
+  /// @brief If true, keep the complement of the sample.
   bool negative_;
+  /// @brief Keep the cloud organized after sampling.
   bool keep_organized_;
+  /// @brief Value to assign to filtered-out points.
   float user_filter_value_;
+  /// @brief Whether to extract and publish removed indices.
   bool extract_removed_indices_;
 };
 

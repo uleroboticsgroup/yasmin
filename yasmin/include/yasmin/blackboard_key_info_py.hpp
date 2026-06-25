@@ -38,16 +38,30 @@ namespace yasmin {
 
 namespace detail {
 
+/// @brief Alias for a vector of strings.
 using StringVector = std::vector<std::string>;
+/// @brief Alias for a vector of 64-bit integers.
 using IntVector = std::vector<std::int64_t>;
+/// @brief Alias for a vector of doubles.
 using FloatVector = std::vector<double>;
+/// @brief Alias for a vector of booleans.
 using BoolVector = std::vector<bool>;
 
+/// @brief Alias for a dictionary mapping strings to strings.
 using StringDict = std::unordered_map<std::string, std::string>;
+/// @brief Alias for a dictionary mapping strings to 64-bit integers.
 using IntDict = std::unordered_map<std::string, std::int64_t>;
+/// @brief Alias for a dictionary mapping strings to doubles.
 using FloatDict = std::unordered_map<std::string, double>;
+/// @brief Alias for a dictionary mapping strings to booleans.
 using BoolDict = std::unordered_map<std::string, bool>;
 
+/**
+ * @brief Convert a Python bytes or bytearray object to a vector of uint8_t.
+ * @param value The Python handle to convert.
+ * @param size Internal usage for PyBytes_AsStringAndSize.
+ * @return A vector of uint8_t containing the buffer data.
+ */
 inline std::vector<uint8_t> py_buffer_to_vector(const py::handle &value) {
   char *data = nullptr;
   py::ssize_t size = 0;
@@ -67,32 +81,70 @@ inline std::vector<uint8_t> py_buffer_to_vector(const py::handle &value) {
                               reinterpret_cast<uint8_t *>(data) + size);
 }
 
+/**
+ * @brief Convert a vector of byte-like data to a Python bytes object.
+ * @tparam T The element type of the vector.
+ * @param vec The vector to convert.
+ * @return A py::bytes object containing the vector data.
+ */
 template <typename ByteT>
-inline py::bytes byte_vector_to_py_bytes(const std::vector<ByteT> &value) {
-  return py::bytes(reinterpret_cast<const char *>(value.data()),
-                   static_cast<py::ssize_t>(value.size()));
+inline py::bytes byte_vector_to_py_bytes(const std::vector<ByteT> &vec) {
+  return py::bytes(reinterpret_cast<const char *>(vec.data()),
+                   static_cast<py::ssize_t>(vec.size()));
 }
 
+/**
+ * @brief Check if a Python object is bytes-like (bytes or bytearray).
+ * @param value The Python handle to check.
+ * @return True if the object is a bytes or bytearray instance.
+ */
 inline bool is_python_bytes_like(const py::handle &value) {
   return PyBytes_Check(value.ptr()) != 0 || PyByteArray_Check(value.ptr()) != 0;
 }
 
+/**
+ * @brief Check if a Python object is an integer (but not a bool).
+ * @param value The Python handle to check.
+ * @return True if the object is an int instance excluding bool.
+ */
 inline bool is_python_int_like(const py::handle &value) {
   return py::isinstance<py::int_>(value) && !py::isinstance<py::bool_>(value);
 }
 
+/**
+ * @brief Check if a Python object is a float.
+ * @param value The Python handle to check.
+ * @return True if the object is a float instance.
+ */
 inline bool is_python_float_like(const py::handle &value) {
   return py::isinstance<py::float_>(value);
 }
 
+/**
+ * @brief Check if a Python object is a number (int or float).
+ * @param value The Python handle to check.
+ * @return True if the object is an int or float instance.
+ */
 inline bool is_python_number_like(const py::handle &value) {
   return is_python_int_like(value) || is_python_float_like(value);
 }
 
+/**
+ * @brief Check if a Python object is a sequence (list or tuple).
+ * @param value The Python handle to check.
+ * @return True if the object is a list or tuple instance.
+ */
 inline bool is_python_sequence_like(const py::handle &value) {
   return py::isinstance<py::list>(value) || py::isinstance<py::tuple>(value);
 }
 
+/**
+ * @brief Check if every element of a sequence satisfies a predicate.
+ * @tparam Predicate The callable type used to check elements.
+ * @param seq The Python sequence to check.
+ * @param pred The predicate applied to each element.
+ * @return True if all elements pass the predicate.
+ */
 template <typename Predicate>
 inline bool sequence_matches(const py::sequence &seq, Predicate pred) {
   for (auto item : seq) {
@@ -103,6 +155,12 @@ inline bool sequence_matches(const py::sequence &seq, Predicate pred) {
   return true;
 }
 
+/**
+ * @brief Convert a Python sequence to a vector of the specified type.
+ * @tparam T The element type of the resulting vector.
+ * @param seq The Python sequence to convert.
+ * @return A vector containing the cast elements.
+ */
 template <typename T>
 inline std::vector<T> sequence_to_vector(const py::sequence &seq) {
   std::vector<T> result;
@@ -115,6 +173,11 @@ inline std::vector<T> sequence_to_vector(const py::sequence &seq) {
   return result;
 }
 
+/**
+ * @brief Check if a Python dictionary has only string keys.
+ * @param dict The Python dictionary to check.
+ * @return True if all keys are strings.
+ */
 inline bool dict_has_only_string_keys(const py::dict &dict) {
   for (auto item : dict) {
     if (!py::isinstance<py::str>(item.first)) {
@@ -124,6 +187,13 @@ inline bool dict_has_only_string_keys(const py::dict &dict) {
   return true;
 }
 
+/**
+ * @brief Check if every value in a Python dictionary satisfies a predicate.
+ * @tparam Predicate The callable type used to check values.
+ * @param dict The Python dictionary to check.
+ * @param pred The predicate applied to each value.
+ * @return True if all values pass the predicate.
+ */
 template <typename Predicate>
 inline bool dict_values_match(const py::dict &dict, Predicate pred) {
   for (auto item : dict) {
@@ -134,6 +204,12 @@ inline bool dict_values_match(const py::dict &dict, Predicate pred) {
   return true;
 }
 
+/**
+ * @brief Convert a Python dictionary to an unordered_map with string keys.
+ * @tparam T The value type of the resulting map.
+ * @param dict The Python dictionary to convert.
+ * @return An unordered_map containing the cast key-value pairs.
+ */
 template <typename T>
 inline std::unordered_map<std::string, T>
 dict_to_unordered_map(const py::dict &dict) {
@@ -147,6 +223,12 @@ dict_to_unordered_map(const py::dict &dict) {
   return result;
 }
 
+/**
+ * @brief Check if a demangled type name matches the exact C++ type T.
+ * @tparam T The C++ type to compare against.
+ * @param type The demangled type name string.
+ * @return True if the type matches exactly.
+ */
 template <typename T> inline bool is_exact_cpp_type(const std::string &type) {
   return type == demangle_type(typeid(T).name());
 }
@@ -159,6 +241,9 @@ template <typename T> inline bool is_exact_cpp_type(const std::string &type) {
  * The conversion rules mirror the BlackboardPyWrapper so metadata created from
  * Python states uses the same native storage types as values written to the
  * runtime blackboard.
+ * @param key_name The name of the blackboard key.
+ * @param value The Python object representing the default value.
+ * @return A BlackboardKeyInfo with the detected type and default value.
  */
 inline BlackboardKeyInfo
 blackboard_key_info_from_pyobject(const std::string &key_name,
@@ -287,6 +372,10 @@ blackboard_key_info_from_pyobject(const std::string &key_name,
  *
  * Exact type matching is used so container metadata remains unambiguous when
  * scalar and container types share substrings such as int and std::vector<int>.
+ * @param info The BlackboardKeyInfo whose default value to convert.
+ * @return The default value as a Python object.
+ * @throws std::runtime_error If the stored type is not supported for Python
+ * conversion.
  */
 inline py::object
 blackboard_key_info_get_py_default(const BlackboardKeyInfo &info) {
@@ -419,11 +508,22 @@ namespace yasmin {
  * Added via ADL-friendly free functions used by the pybind code.
  */
 struct BlackboardKeyInfoPy {
+  /**
+   * @brief Create a BlackboardKeyInfo from a key name and Python value.
+   * @param key_name The name of the blackboard key.
+   * @param value The Python object default value.
+   * @return A BlackboardKeyInfo with the detected type and default.
+   */
   static BlackboardKeyInfo from_pyobject(const std::string &key_name,
                                          py::object value) {
     return blackboard_key_info_from_pyobject(key_name, value);
   }
 
+  /**
+   * @brief Extract the Python default value from a BlackboardKeyInfo.
+   * @param info The BlackboardKeyInfo to extract from.
+   * @return The default value as a Python object.
+   */
   static py::object get_py_default_value(const BlackboardKeyInfo &info) {
     return blackboard_key_info_get_py_default(info);
   }

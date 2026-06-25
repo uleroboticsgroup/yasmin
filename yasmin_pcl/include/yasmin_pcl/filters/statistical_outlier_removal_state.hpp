@@ -31,18 +31,30 @@ namespace yasmin_pcl::filters {
  */
 class StatisticalOutlierRemovalState : public yasmin::State {
 public:
+  /** @brief Construct a StatisticalOutlierRemovalState. */
   StatisticalOutlierRemovalState();
+  /** @brief Default destructor. */
   ~StatisticalOutlierRemovalState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /** @brief Execute the statistical outlier removal filter.
+   *  @param blackboard The shared blackboard.
+   *  @return Outcome string. */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief Number of nearest neighbors for mean distance estimation.
   int mean_k_;
+  /// @brief Standard deviation multiplier threshold.
   double stddev_mul_thresh_;
+  /// @brief If true, keep outliers instead of inliers.
   bool negative_;
+  /// @brief Keep the cloud organized after removal.
   bool keep_organized_;
+  /// @brief Value to assign to filtered-out points.
   float user_filter_value_;
+  /// @brief Whether to extract and publish removed indices.
   bool extract_removed_indices_;
 };
 

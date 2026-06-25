@@ -57,7 +57,9 @@ public:
   std::string execute(yasmin::Blackboard::SharedPtr blackboard);
 
 private:
+  /// @brief Prefix for log messages
   std::string log_prefix_;
+  /// @brief Sleep duration in milliseconds for each execution
   int sleep_ms_;
 };
 

@@ -35,6 +35,9 @@
 
 namespace yasmin_pcl::test {
 
+/** @brief Create a PCL XYZ point cloud from a vector of points.
+ *  @param points The input points.
+ *  @return The created point cloud. */
 inline pcl::PointCloud<pcl::PointXYZ>
 create_xyz_cloud(const std::vector<pcl::PointXYZ> &points) {
   pcl::PointCloud<pcl::PointXYZ> cloud;
@@ -45,6 +48,9 @@ create_xyz_cloud(const std::vector<pcl::PointXYZ> &points) {
   return cloud;
 }
 
+/** @brief Create a PCL PointCloud2 shared pointer from points.
+ *  @param points The input points.
+ *  @return Shared pointer to a PCL PointCloud2. */
 inline common::PclPointCloud2Ptr
 create_pcl_cloud_ptr(const std::vector<pcl::PointXYZ> &points) {
   auto cloud = common::make_pcl_point_cloud2();
@@ -53,6 +59,9 @@ create_pcl_cloud_ptr(const std::vector<pcl::PointXYZ> &points) {
   return cloud;
 }
 
+/** @brief Create a ROS PointCloud2 shared pointer from points.
+ *  @param points The input points.
+ *  @return Shared pointer to a ROS PointCloud2. */
 inline common::RosPointCloud2Ptr
 create_ros_cloud_ptr(const std::vector<pcl::PointXYZ> &points) {
   const auto pcl_cloud = create_pcl_cloud_ptr(points);
@@ -61,6 +70,9 @@ create_ros_cloud_ptr(const std::vector<pcl::PointXYZ> &points) {
   return ros_cloud;
 }
 
+/** @brief Convert a PCLPointCloud2 to a PCL XYZ point cloud.
+ *  @param cloud The input PCLPointCloud2.
+ *  @return The converted XYZ point cloud. */
 inline pcl::PointCloud<pcl::PointXYZ>
 to_xyz_cloud(const pcl::PCLPointCloud2 &cloud) {
   pcl::PointCloud<pcl::PointXYZ> xyz_cloud;
@@ -68,12 +80,16 @@ to_xyz_cloud(const pcl::PCLPointCloud2 &cloud) {
   return xyz_cloud;
 }
 
+/** @brief Create a unique temporary file path.
+ *  @param stem The filename stem (prefix).
+ *  @param suffix The file extension (suffix).
+ *  @return A unique temporary file path. */
 inline std::filesystem::path make_temp_path(const std::string &stem,
-                                            const std::string &extension) {
+                                            const std::string &suffix) {
   const auto unique_id =
       std::chrono::steady_clock::now().time_since_epoch().count();
   return std::filesystem::temp_directory_path() /
-         (stem + "_" + std::to_string(unique_id) + extension);
+         (stem + "_" + std::to_string(unique_id) + suffix);
 }
 
 } // namespace yasmin_pcl::test

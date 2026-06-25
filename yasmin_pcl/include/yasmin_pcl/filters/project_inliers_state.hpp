@@ -31,15 +31,24 @@ namespace yasmin_pcl::filters {
  */
 class ProjectInliersState : public yasmin::State {
 public:
+  /** @brief Construct a ProjectInliersState. */
   ProjectInliersState();
+  /** @brief Default destructor. */
   ~ProjectInliersState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /** @brief Execute the project inliers filter.
+   *  @param blackboard The shared blackboard.
+   *  @return Outcome string. */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief PCL model type identifier (e.g., plane, sphere).
   int model_type_;
+  /// @brief Copy all fields from input to output.
   bool copy_all_fields_;
+  /// @brief Copy all data from input to output.
   bool copy_all_data_;
 };
 

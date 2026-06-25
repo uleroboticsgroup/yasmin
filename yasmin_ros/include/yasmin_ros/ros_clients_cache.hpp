@@ -269,15 +269,37 @@ private:
   using PublisherKey = std::tuple<std::string, std::string, std::string,
                                   std::string, std::type_index>;
 
-  // Static cache maps
+  /**
+   * @brief Get the action clients cache map.
+   * @return Reference to the action clients map
+   */
   static std::map<ActionClientKey, std::shared_ptr<void>> &get_action_clients();
+  /**
+   * @brief Get the service clients cache map.
+   * @return Reference to the service clients map
+   */
   static std::map<ServiceClientKey, std::shared_ptr<void>> &
   get_service_clients();
+  /**
+   * @brief Get the publishers cache map.
+   * @return Reference to the publishers map
+   */
   static std::map<PublisherKey, std::shared_ptr<void>> &get_publishers();
 
-  // Per-map locks for thread-safe access
+  /**
+   * @brief Get the mutex for the action clients cache.
+   * @return Reference to the action clients mutex
+   */
   static std::recursive_mutex &get_action_lock();
+  /**
+   * @brief Get the mutex for the service clients cache.
+   * @return Reference to the service clients mutex
+   */
   static std::recursive_mutex &get_service_lock();
+  /**
+   * @brief Get the mutex for the publishers cache.
+   * @return Reference to the publishers mutex
+   */
   static std::recursive_mutex &get_publisher_lock();
 
   /**

@@ -31,9 +31,16 @@ namespace yasmin_pcl::io {
  */
 class RosToPclPointCloud2State : public yasmin::State {
 public:
+  /** @brief Construct a RosToPclPointCloud2State. */
   RosToPclPointCloud2State();
+  /** @brief Default destructor. */
   ~RosToPclPointCloud2State() override = default;
 
+  /**
+   * @brief Convert a ROS PointCloud2 message to a PCL point cloud.
+   * @param blackboard The shared blackboard.
+   * @return Outcome string.
+   */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 };
 

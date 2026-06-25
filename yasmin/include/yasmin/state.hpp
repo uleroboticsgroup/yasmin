@@ -58,6 +58,7 @@ private:
    * Metadata is stored externally (not as a direct member) to preserve
    * ABI compatibility with plugins compiled against earlier versions of
    * the State class.
+   * @return Reference to the internal StateMetadata.
    */
   StateMetadata &get_metadata_ref() const;
 

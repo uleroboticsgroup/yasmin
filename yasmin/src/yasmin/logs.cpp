@@ -25,7 +25,7 @@ void default_log_message(LogLevel level, const char *file, const char *function,
           function, line, text);
 }
 
-// Initialize the log level to INFO
+// Default to INFO so debug/spam messages are hidden unless explicitly enabled
 LogLevel log_level = LogLevel::INFO;
 
 LogFunction log_message = default_log_message;

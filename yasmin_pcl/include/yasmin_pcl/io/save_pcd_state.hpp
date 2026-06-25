@@ -31,22 +31,40 @@ namespace yasmin_pcl::io {
  */
 class SavePcdState : public yasmin::State {
 public:
+  /** @brief Construct a SavePcdState. */
   SavePcdState();
+  /** @brief Default destructor. */
   ~SavePcdState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /**
+   * @brief Save a point cloud to a PCD file.
+   * @param blackboard The shared blackboard.
+   * @return Outcome string.
+   */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief Path to the PCD file to save
   std::string file_path_;
+  /// @brief Storage mode for the PCD writer
   std::string storage_mode_;
+  /// @brief Origin X coordinate
   float origin_x_;
+  /// @brief Origin Y coordinate
   float origin_y_;
+  /// @brief Origin Z coordinate
   float origin_z_;
+  /// @brief Origin W component
   float origin_w_;
+  /// @brief Orientation X component
   float orientation_x_;
+  /// @brief Orientation Y component
   float orientation_y_;
+  /// @brief Orientation Z component
   float orientation_z_;
+  /// @brief Orientation W component
   float orientation_w_;
 };
 

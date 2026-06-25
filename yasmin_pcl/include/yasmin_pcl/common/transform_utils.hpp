@@ -21,6 +21,11 @@
 
 namespace yasmin_pcl::common {
 
+/** @brief Compute a 3x3 rotation matrix from roll, pitch, yaw angles.
+ *  @param roll Rotation around X axis (radians).
+ *  @param pitch Rotation around Y axis (radians).
+ *  @param yaw Rotation around Z axis (radians).
+ *  @return 3x3 rotation matrix. */
 inline Eigen::Matrix3f
 rotation_matrix_from_rpy(const float roll, const float pitch, const float yaw) {
   const Eigen::AngleAxisf roll_angle(roll, Eigen::Vector3f::UnitX());
@@ -29,6 +34,14 @@ rotation_matrix_from_rpy(const float roll, const float pitch, const float yaw) {
   return (yaw_angle * pitch_angle * roll_angle).toRotationMatrix();
 }
 
+/** @brief Create an affine transform from translation and RPY angles.
+ *  @param translation_x Translation along X axis.
+ *  @param translation_y Translation along Y axis.
+ *  @param translation_z Translation along Z axis.
+ *  @param roll Rotation around X axis (radians).
+ *  @param pitch Rotation around Y axis (radians).
+ *  @param yaw Rotation around Z axis (radians).
+ *  @return Affine transform. */
 inline Eigen::Affine3f affine_from_translation_rpy(const float translation_x,
                                                    const float translation_y,
                                                    const float translation_z,

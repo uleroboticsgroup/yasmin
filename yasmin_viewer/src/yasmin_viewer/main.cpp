@@ -18,9 +18,11 @@
 #include "yasmin_viewer/yasmin_viewer_node.hpp"
 
 int main(int argc, char **argv) {
-  rclcpp::init(argc, argv);
-  auto node = std::make_shared<yasmin_viewer::YasminViewerNode>();
-  rclcpp::spin(node);
-  rclcpp::shutdown();
+  rclcpp::init(argc, argv); // Initialize ROS 2 communications
+  auto node =
+      std::make_shared<yasmin_viewer::YasminViewerNode>(); // Create the viewer
+                                                           // node
+  rclcpp::spin(node); // Process callbacks until SIGINT
+  rclcpp::shutdown(); // Tear down ROS 2 resources
   return 0;
 }

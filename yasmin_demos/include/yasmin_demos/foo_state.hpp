@@ -62,8 +62,11 @@ public:
   int counter;
 
 private:
+  /// @brief Prefix for the counter output
   std::string counter_prefix_;
+  /// @brief Maximum count before the state resets
   int max_count_;
+  /// @brief Sleep duration in milliseconds between increments
   int sleep_ms_;
 };
 

@@ -33,19 +33,32 @@ namespace yasmin_pcl::filters {
  */
 class PassThroughState : public yasmin::State {
 public:
+  /** @brief Construct a PassThroughState. */
   PassThroughState();
+  /** @brief Default destructor. */
   ~PassThroughState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /** @brief Execute the pass through filter.
+   *  @param blackboard The shared blackboard.
+   *  @return Outcome string. */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief Name of the field to filter on.
   std::string filter_field_name_;
+  /// @brief Minimum filter limit value.
   double filter_limit_min_;
+  /// @brief Maximum filter limit value.
   double filter_limit_max_;
+  /// @brief If true, invert the filter condition.
   bool filter_limit_negative_;
+  /// @brief Keep the cloud organized after filtering.
   bool keep_organized_;
+  /// @brief Value to assign to filtered-out points.
   float user_filter_value_;
+  /// @brief Whether to extract and publish removed indices.
   bool extract_removed_indices_;
 };
 

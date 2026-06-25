@@ -32,13 +32,22 @@ namespace yasmin_pcl::io {
  */
 class LoadPlyState : public yasmin::State {
 public:
+  /** @brief Construct a LoadPlyState. */
   LoadPlyState();
+  /** @brief Default destructor. */
   ~LoadPlyState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /**
+   * @brief Load a PLY file and store the point cloud.
+   * @param blackboard The shared blackboard.
+   * @return Outcome string.
+   */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief Path to the PLY file to load
   std::string file_path_;
 };
 

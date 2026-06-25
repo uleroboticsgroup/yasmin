@@ -30,12 +30,15 @@ namespace yasmin_ros {
  * interface type.
  */
 struct InterfaceSerializationHandler {
+  /// @brief Callback to serialize a ROS interface from blackboard values
   std::function<std::vector<uint8_t>(yasmin::Blackboard::SharedPtr,
                                      const std::string &)>
       serialize_from_blackboard;
+  /// @brief Callback to deserialize a ROS interface into blackboard values
   std::function<void(yasmin::Blackboard::SharedPtr, const std::string &,
                      const std::vector<uint8_t> &)>
       deserialize_to_blackboard;
+  /// @brief The blackboard type string for this interface
   std::string blackboard_type;
 };
 

@@ -26,6 +26,12 @@
 
 namespace yasmin {
 
+/**
+ * @brief Generate the set of possible outcomes from an outcome map and default.
+ * @param outcome_map The outcome map of conditional outcomes.
+ * @param default_outcome The default outcome string.
+ * @return A set containing the default outcome and all outcome map keys.
+ */
 inline Outcomes generate_possible_outcomes(const OutcomeMap &outcome_map,
                                            const std::string &default_outcome) {
   Outcomes possible_outcomes;
@@ -39,6 +45,12 @@ inline Outcomes generate_possible_outcomes(const OutcomeMap &outcome_map,
   return possible_outcomes;
 }
 
+/**
+ * @brief Join outcome strings into a single string separated by a delimiter.
+ * @param items The set of outcome strings.
+ * @param separator The separator between outcomes (default ", ").
+ * @return The joined string.
+ */
 inline std::string join_outcomes(const Outcomes &items,
                                  const std::string &separator = ", ") {
   std::string result;
@@ -51,6 +63,14 @@ inline std::string join_outcomes(const Outcomes &items,
   return result;
 }
 
+/**
+ * @brief Evaluate which outcomes have all their requirements satisfied.
+ * @tparam T The callable type used to look up actual outcomes.
+ * @param outcome_map The map of outcomes to their requirements.
+ * @param intermediate_outcome_map A callable that returns the actual outcome
+ * for a state name.
+ * @return A set of outcomes whose requirements are all satisfied.
+ */
 template <typename LookupFn>
 Outcomes evaluate_satisfied_outcomes(const OutcomeMap &outcome_map,
                                      LookupFn get_actual) {
@@ -74,6 +94,14 @@ Outcomes evaluate_satisfied_outcomes(const OutcomeMap &outcome_map,
   return satisfied_outcomes;
 }
 
+/**
+ * @brief Resolve the final outcome from a set of satisfied outcomes.
+ * @param outcome The set of satisfied outcomes.
+ * @param transition_map The default outcome if no outcomes are satisfied.
+ * @param current_state A context name used in error messages.
+ * @return The single satisfied outcome, or the default if none are satisfied.
+ * @throws std::logic_error If more than one outcome is satisfied.
+ */
 inline std::string resolve_outcome(const Outcomes &satisfied_outcomes,
                                    const std::string &default_outcome,
                                    const std::string &context_name = "") {
@@ -90,6 +118,12 @@ inline std::string resolve_outcome(const Outcomes &satisfied_outcomes,
   return *satisfied_outcomes.begin();
 }
 
+/**
+ * @brief Apply parameter mappings from a parent state to a child state.
+ * @param blackboard The container type string used in error messages.
+ * @param param_mappings The map of parameter mappings from child to parent.
+ * @param state_name The name of the child state.
+ */
 inline void
 apply_parameter_mappings(const std::string &container_type,
                          const ParameterMappingsMap &parameter_mappings,

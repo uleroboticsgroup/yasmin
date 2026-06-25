@@ -157,21 +157,29 @@ inline const char *extract_filename(const char *path) {
 }
 
 // Macros for logging with automatic file and function information
+/** @brief Log a message at ERROR level. Automatically captures file, function,
+ * and line information. */
 #define YASMIN_LOG_ERROR(text, ...)                                            \
   if (yasmin::log_level >= yasmin::LogLevel::ERROR)                            \
   yasmin::log_helper<yasmin::LogLevel::ERROR>(                                 \
       ::yasmin::extract_filename(__FILE__), __FUNCTION__, __LINE__, text,      \
       ##__VA_ARGS__)
+/** @brief Log a message at WARN level. Automatically captures file, function,
+ * and line information. */
 #define YASMIN_LOG_WARN(text, ...)                                             \
   if (yasmin::log_level >= yasmin::LogLevel::WARN)                             \
   yasmin::log_helper<yasmin::LogLevel::WARN>(                                  \
       ::yasmin::extract_filename(__FILE__), __FUNCTION__, __LINE__, text,      \
       ##__VA_ARGS__)
+/** @brief Log a message at INFO level. Automatically captures file, function,
+ * and line information. */
 #define YASMIN_LOG_INFO(text, ...)                                             \
   if (yasmin::log_level >= yasmin::LogLevel::INFO)                             \
   yasmin::log_helper<yasmin::LogLevel::INFO>(                                  \
       ::yasmin::extract_filename(__FILE__), __FUNCTION__, __LINE__, text,      \
       ##__VA_ARGS__)
+/** @brief Log a message at DEBUG level. Automatically captures file, function,
+ * and line information. */
 #define YASMIN_LOG_DEBUG(text, ...)                                            \
   if (yasmin::log_level >= yasmin::LogLevel::DEBUG)                            \
   yasmin::log_helper<yasmin::LogLevel::DEBUG>(                                 \

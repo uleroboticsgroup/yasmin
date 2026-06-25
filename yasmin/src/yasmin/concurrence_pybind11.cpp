@@ -40,8 +40,10 @@ PYBIND11_MODULE(concurrence, m) {
            py::arg("states"), py::arg("default_outcome"),
            py::arg("outcome_map") = yasmin::OutcomeMap(),
            py::arg("parameter_mappings") = yasmin::ParameterMappingsMap(),
-           py::keep_alive<1, 2>()) // Keep states (arg 2) alive as long as self
+           py::keep_alive<1, 2>(), // Keep states (arg 2) alive as long as self
                                    // (arg 1) is alive
+           "Construct a Concurrence state with states, default outcome, "
+           "outcome map, and parameter mappings")
       // Getters for states, outcome_map, and default_outcome
       .def("get_states", &yasmin::Concurrence::get_states,
            "Get all states in the concurrence",

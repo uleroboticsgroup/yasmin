@@ -36,17 +36,22 @@ PYBIND11_MODULE(state_machine, m) {
              yasmin::StateMachine::SharedPtr /* Shared pointer */>
       sm_class(m, "StateMachine");
 
-  sm_class.def(py::init<yasmin::Outcomes>(), py::arg("outcomes"))
+  sm_class
+      .def(py::init<yasmin::Outcomes>(), py::arg("outcomes"),
+           "Construct a StateMachine with a set of outcomes")
       .def(py::init([](const std::vector<std::string> &outcomes,
                        bool handle_sigint) {
              return new yasmin::StateMachine(
                  yasmin::Outcomes(outcomes.begin(), outcomes.end()),
                  handle_sigint);
            }),
-           py::arg("outcomes"), py::arg("handle_sigint") = false)
+           py::arg("outcomes"), py::arg("handle_sigint") = false,
+           "Construct a StateMachine with outcomes as a list and an optional "
+           "SIGINT handler")
       .def(py::init<const std::string &, const yasmin::Outcomes &, bool>(),
            py::arg("name"), py::arg("outcomes"),
-           py::arg("handle_sigint") = false)
+           py::arg("handle_sigint") = false,
+           "Construct a named StateMachine with a set of outcomes")
       .def(py::init([](const std::string &name,
                        const std::vector<std::string> &outcomes,
                        bool handle_sigint) {
@@ -55,7 +60,9 @@ PYBIND11_MODULE(state_machine, m) {
                  handle_sigint);
            }),
            py::arg("name"), py::arg("outcomes"),
-           py::arg("handle_sigint") = false)
+           py::arg("handle_sigint") = false,
+           "Construct a named StateMachine with outcomes as a list and an "
+           "optional SIGINT handler")
       // Add state method with keep_alive to manage object lifetime
       .def(
           "add_state",

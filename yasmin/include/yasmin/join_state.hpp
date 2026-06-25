@@ -36,6 +36,7 @@ namespace yasmin {
  */
 class JoinState : public State {
 public:
+  /** @brief Shared pointer aliases for JoinState. */
   YASMIN_PTR_ALIASES(JoinState)
 
   /**

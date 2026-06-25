@@ -64,6 +64,9 @@ public:
 
   /**
    * @brief Delegates execution to the underlying Python state.
+   *
+   * @param blackboard Shared pointer to the blackboard for state communication.
+   * @return std::string The outcome returned by the underlying Python state.
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
@@ -74,6 +77,9 @@ public:
 
   /**
    * @brief Delegates string conversion to the underlying Python state.
+   *
+   * @return std::string The string representation from the underlying Python
+   * state.
    */
   std::string to_string() const override;
 
@@ -234,12 +240,30 @@ private:
                          const std::string &attr_name,
                          const std::string &default_value = "") const;
 
+  /**
+   * @brief Adds blackboard key mappings from an XML element to a state.
+   *
+   * @param owner Pointer to the state to which the keys will be added.
+   * @param parent XML element containing the blackboard key definitions.
+   */
   void add_blackboard_keys(yasmin::State::SharedPtr owner,
                            tinyxml2::XMLElement *parent) const;
 
+  /**
+   * @brief Adds parameter mappings from an XML element to a state.
+   *
+   * @param owner Pointer to the state to which the parameters will be added.
+   * @param parent XML element containing the parameter definitions.
+   */
   void add_parameters(yasmin::State::SharedPtr owner,
                       tinyxml2::XMLElement *parent) const;
 
+  /**
+   * @brief Extracts parameter name mappings from an XML element.
+   *
+   * @param parent XML element containing the parameter mapping definitions.
+   * @return yasmin::ParameterMappings A mapping of parameter names.
+   */
   yasmin::ParameterMappings
   get_parameter_mappings(tinyxml2::XMLElement *parent) const;
 };

@@ -23,6 +23,16 @@
 
 namespace yasmin_demos {
 
+/**
+ * @brief Resolves a relative path to an absolute path in the package's share
+ * directory.
+ *
+ * This function uses ament_index_cpp to locate the share directory for the
+ * yasmin_demos package and appends the provided relative path.
+ *
+ * @param relative_path Relative file path within the share directory.
+ * @return std::string The absolute file path.
+ */
 inline std::string get_share_file_path(const std::string &relative_path) {
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"

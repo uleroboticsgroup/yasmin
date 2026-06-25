@@ -31,16 +31,26 @@ namespace yasmin_pcl::filters {
  */
 class ExtractIndicesState : public yasmin::State {
 public:
+  /** @brief Construct an ExtractIndicesState. */
   ExtractIndicesState();
+  /** @brief Default destructor. */
   ~ExtractIndicesState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /** @brief Execute the extract indices filter.
+   *  @param blackboard The shared blackboard.
+   *  @return Outcome string. */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief If true, invert the selection.
   bool negative_;
+  /// @brief Keep the cloud organized after extraction.
   bool keep_organized_;
+  /// @brief Value to assign to filtered-out points.
   float user_filter_value_;
+  /// @brief Whether to extract and publish removed indices.
   bool extract_removed_indices_;
 };
 

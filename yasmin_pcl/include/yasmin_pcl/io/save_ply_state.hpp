@@ -31,23 +31,42 @@ namespace yasmin_pcl::io {
  */
 class SavePlyState : public yasmin::State {
 public:
+  /** @brief Construct a SavePlyState. */
   SavePlyState();
+  /** @brief Default destructor. */
   ~SavePlyState() override = default;
 
+  /** @brief Configure from blackboard parameters. */
   void configure() override;
+  /**
+   * @brief Save a point cloud to a PLY file.
+   * @param blackboard The shared blackboard.
+   * @return Outcome string.
+   */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief Path to the PLY file to save
   std::string file_path_;
+  /// @brief Whether to write in binary mode
   bool binary_mode_;
+  /// @brief Whether to use camera coordinates
   bool use_camera_;
+  /// @brief Origin X coordinate
   float origin_x_;
+  /// @brief Origin Y coordinate
   float origin_y_;
+  /// @brief Origin Z coordinate
   float origin_z_;
+  /// @brief Origin W component
   float origin_w_;
+  /// @brief Orientation X component
   float orientation_x_;
+  /// @brief Orientation Y component
   float orientation_y_;
+  /// @brief Orientation Z component
   float orientation_z_;
+  /// @brief Orientation W component
   float orientation_w_;
 };
 

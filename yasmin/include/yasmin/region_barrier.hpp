@@ -35,6 +35,7 @@ namespace yasmin {
  */
 class RegionBarrier {
 public:
+  /** @brief Shared pointer aliases for RegionBarrier. */
   YASMIN_PTR_ALIASES(RegionBarrier)
 
   /**
@@ -44,10 +45,13 @@ public:
    */
   explicit RegionBarrier(int party_count);
 
+  /** @brief Default destructor. */
   ~RegionBarrier() = default;
 
+  /** @brief Deleted copy constructor (non-copyable). */
   RegionBarrier(const RegionBarrier &) = delete;
 
+  /** @brief Deleted copy assignment (non-copyable). */
   RegionBarrier &operator=(const RegionBarrier &) = delete;
 
   /**

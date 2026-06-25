@@ -37,6 +37,7 @@ namespace yasmin_ros {
  */
 class YasminNode : public rclcpp::Node {
 public:
+  /** @brief Shared pointer type for YasminNode. */
   using SharedPtr = std::shared_ptr<YasminNode>;
 
 protected:
@@ -46,6 +47,7 @@ protected:
   explicit YasminNode();
 
 public:
+  /** @brief Deleted copy constructor (singleton). */
   YasminNode(YasminNode &other) = delete;
 
   /**
@@ -53,6 +55,7 @@ public:
    */
   ~YasminNode();
 
+  /** @brief Deleted copy assignment (singleton). */
   void operator=(const YasminNode &) = delete;
 
   /**

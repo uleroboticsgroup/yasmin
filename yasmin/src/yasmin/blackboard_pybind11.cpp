@@ -20,6 +20,9 @@
 
 namespace py = pybind11;
 
+// No PYBIND11_MAKE_OPAQUE needed here because BlackboardPyWrapper is
+// defined and registered in this module, not just forward-declared
+
 PYBIND11_MODULE(blackboard, m) {
   m.doc() = "Python bindings for yasmin::Blackboard";
 

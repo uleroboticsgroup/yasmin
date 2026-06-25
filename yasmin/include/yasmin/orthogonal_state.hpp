@@ -41,6 +41,7 @@ namespace yasmin {
  */
 class OrthogonalState : public State {
 public:
+  /** @brief Shared pointer aliases for OrthogonalState. */
   YASMIN_PTR_ALIASES(OrthogonalState)
 
   /**
@@ -51,7 +52,9 @@ public:
    * represents the state machine for that region.
    */
   struct RegionDescriptor {
+    /// @brief Name of this region.
     std::string name;
+    /// @brief The state machine running in this region.
     StateMachine::SharedPtr sm;
   };
 
