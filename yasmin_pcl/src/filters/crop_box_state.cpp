@@ -31,31 +31,31 @@
 namespace yasmin_pcl::filters {
 
 CropBoxState::CropBoxState() : yasmin::State({"succeeded", "aborted"}) {
-  min_x_ = -1.0F;
-  min_y_ = -1.0F;
-  min_z_ = -1.0F;
-  min_w_ = 1.0F;
-  max_x_ = 1.0F;
-  max_y_ = 1.0F;
-  max_z_ = 1.0F;
-  max_w_ = 1.0F;
-  translation_x_ = 0.0F;
-  translation_y_ = 0.0F;
-  translation_z_ = 0.0F;
-  rotation_roll_ = 0.0F;
-  rotation_pitch_ = 0.0F;
-  rotation_yaw_ = 0.0F;
-  use_transform_ = false;
-  transform_translation_x_ = 0.0F;
-  transform_translation_y_ = 0.0F;
-  transform_translation_z_ = 0.0F;
-  transform_roll_ = 0.0F;
-  transform_pitch_ = 0.0F;
-  transform_yaw_ = 0.0F;
-  negative_ = false;
-  keep_organized_ = false;
-  user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
-  extract_removed_indices_ = false;
+  this->min_x_ = -1.0F;
+  this->min_y_ = -1.0F;
+  this->min_z_ = -1.0F;
+  this->min_w_ = 1.0F;
+  this->max_x_ = 1.0F;
+  this->max_y_ = 1.0F;
+  this->max_z_ = 1.0F;
+  this->max_w_ = 1.0F;
+  this->translation_x_ = 0.0F;
+  this->translation_y_ = 0.0F;
+  this->translation_z_ = 0.0F;
+  this->rotation_roll_ = 0.0F;
+  this->rotation_pitch_ = 0.0F;
+  this->rotation_yaw_ = 0.0F;
+  this->use_transform_ = false;
+  this->transform_translation_x_ = 0.0F;
+  this->transform_translation_y_ = 0.0F;
+  this->transform_translation_z_ = 0.0F;
+  this->transform_roll_ = 0.0F;
+  this->transform_pitch_ = 0.0F;
+  this->transform_yaw_ = 0.0F;
+  this->negative_ = false;
+  this->keep_organized_ = false;
+  this->user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
+  this->extract_removed_indices_ = false;
 
   this->set_description("Applies pcl::CropBox to a pcl::PCLPointCloud2 stored "
                         "in the blackboard.");

@@ -150,7 +150,7 @@ static bool read_ply_camera_ascii(const std::string &file_path,
 }
 
 LoadPlyState::LoadPlyState() : yasmin::State({"succeeded", "aborted"}) {
-  file_path_.clear();
+  this->file_path_.clear();
 
   this->set_description(
       "Loads a PLY file into pcl::PCLPointCloud2 and stores the cloud and file "
@@ -173,7 +173,7 @@ LoadPlyState::LoadPlyState() : yasmin::State({"succeeded", "aborted"}) {
 }
 
 void LoadPlyState::configure() {
-  file_path_ = this->get_parameter<std::string>("file_path");
+  this->file_path_ = this->get_parameter<std::string>("file_path");
 }
 
 std::string LoadPlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {

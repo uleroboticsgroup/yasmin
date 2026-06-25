@@ -65,12 +65,12 @@ namespace yasmin_pcl::filters {
 
 RandomSampleState::RandomSampleState()
     : yasmin::State({"succeeded", "aborted"}) {
-  sample_ = 1;
-  seed_ = 0;
-  negative_ = false;
-  keep_organized_ = false;
-  user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
-  extract_removed_indices_ = false;
+  this->sample_ = 1;
+  this->seed_ = 0;
+  this->negative_ = false;
+  this->keep_organized_ = false;
+  this->user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
+  this->extract_removed_indices_ = false;
 
   this->set_description(
       "Applies pcl::RandomSample to a pcl::PCLPointCloud2 stored in the "

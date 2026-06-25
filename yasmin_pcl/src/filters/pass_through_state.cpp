@@ -28,13 +28,13 @@
 namespace yasmin_pcl::filters {
 
 PassThroughState::PassThroughState() : yasmin::State({"succeeded", "aborted"}) {
-  filter_field_name_ = "z";
-  filter_limit_min_ = 0.0;
-  filter_limit_max_ = 1.0;
-  filter_limit_negative_ = false;
-  keep_organized_ = false;
-  user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
-  extract_removed_indices_ = false;
+  this->filter_field_name_ = "z";
+  this->filter_limit_min_ = 0.0;
+  this->filter_limit_max_ = 1.0;
+  this->filter_limit_negative_ = false;
+  this->keep_organized_ = false;
+  this->user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
+  this->extract_removed_indices_ = false;
 
   this->set_description(
       "Applies pcl::PassThrough to a pcl::PCLPointCloud2 stored in the "

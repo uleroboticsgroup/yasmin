@@ -29,16 +29,16 @@
 namespace yasmin_pcl::filters {
 
 VoxelGridState::VoxelGridState() : yasmin::State({"succeeded", "aborted"}) {
-  leaf_size_x_ = 0.1F;
-  leaf_size_y_ = 0.1F;
-  leaf_size_z_ = 0.1F;
-  downsample_all_data_ = true;
-  minimum_points_number_per_voxel_ = 0;
-  save_leaf_layout_ = false;
-  filter_field_name_.clear();
-  filter_limit_min_ = 0.0;
-  filter_limit_max_ = 0.0;
-  filter_limit_negative_ = false;
+  this->leaf_size_x_ = 0.1F;
+  this->leaf_size_y_ = 0.1F;
+  this->leaf_size_z_ = 0.1F;
+  this->downsample_all_data_ = true;
+  this->minimum_points_number_per_voxel_ = 0;
+  this->save_leaf_layout_ = false;
+  this->filter_field_name_.clear();
+  this->filter_limit_min_ = 0.0;
+  this->filter_limit_max_ = 0.0;
+  this->filter_limit_negative_ = false;
 
   this->set_description(
       "Applies pcl::VoxelGrid to a pcl::PCLPointCloud2 stored in the "

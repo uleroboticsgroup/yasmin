@@ -29,17 +29,17 @@
 namespace yasmin_pcl::io {
 
 SavePlyState::SavePlyState() : yasmin::State({"succeeded", "aborted"}) {
-  file_path_.clear();
-  binary_mode_ = false;
-  use_camera_ = true;
-  origin_x_ = 0.0F;
-  origin_y_ = 0.0F;
-  origin_z_ = 0.0F;
-  origin_w_ = 0.0F;
-  orientation_x_ = 0.0F;
-  orientation_y_ = 0.0F;
-  orientation_z_ = 0.0F;
-  orientation_w_ = 1.0F;
+  this->file_path_.clear();
+  this->binary_mode_ = false;
+  this->use_camera_ = true;
+  this->origin_x_ = 0.0F;
+  this->origin_y_ = 0.0F;
+  this->origin_z_ = 0.0F;
+  this->origin_w_ = 0.0F;
+  this->orientation_x_ = 0.0F;
+  this->orientation_y_ = 0.0F;
+  this->orientation_z_ = 0.0F;
+  this->orientation_w_ = 1.0F;
 
   this->set_description(
       "Saves a pcl::PCLPointCloud2 cloud from the blackboard to a PLY file.");

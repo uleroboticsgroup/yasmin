@@ -28,7 +28,7 @@
 namespace yasmin_pcl::io {
 
 LoadPcdState::LoadPcdState() : yasmin::State({"succeeded", "aborted"}) {
-  file_path_.clear();
+  this->file_path_.clear();
 
   this->set_description(
       "Loads a PCD file into pcl::PCLPointCloud2 and stores the cloud and file "
@@ -52,7 +52,7 @@ LoadPcdState::LoadPcdState() : yasmin::State({"succeeded", "aborted"}) {
 }
 
 void LoadPcdState::configure() {
-  file_path_ = this->get_parameter<std::string>("file_path");
+  this->file_path_ = this->get_parameter<std::string>("file_path");
 }
 
 std::string LoadPcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {

@@ -82,7 +82,7 @@ struct BlackboardKeyInfo {
         default_value_type(demangle_type(typeid(std::decay_t<T>).name())) {
     using ValueType = std::decay_t<T>;
     auto stored = std::static_pointer_cast<ValueType>(this->default_value);
-    inject_default = [stored](Blackboard &bb, const std::string &key) {
+    this->inject_default = [stored](Blackboard &bb, const std::string &key) {
       bb.set<ValueType>(key, *stored);
     };
   }
@@ -100,7 +100,7 @@ struct BlackboardKeyInfo {
         has_default(true), default_value(std::make_shared<std::string>(value)),
         default_value_type(demangle_type(typeid(std::string).name())) {
     auto stored = std::static_pointer_cast<std::string>(this->default_value);
-    inject_default = [stored](Blackboard &bb, const std::string &key) {
+    this->inject_default = [stored](Blackboard &bb, const std::string &key) {
       bb.set<std::string>(key, *stored);
     };
   }

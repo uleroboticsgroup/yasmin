@@ -64,10 +64,10 @@ namespace yasmin_pcl::filters {
 
 ExtractIndicesState::ExtractIndicesState()
     : yasmin::State({"succeeded", "aborted"}) {
-  negative_ = false;
-  keep_organized_ = false;
-  user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
-  extract_removed_indices_ = false;
+  this->negative_ = false;
+  this->keep_organized_ = false;
+  this->user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
+  this->extract_removed_indices_ = false;
 
   this->set_description(
       "Applies pcl::ExtractIndices to a pcl::PCLPointCloud2 stored in the "

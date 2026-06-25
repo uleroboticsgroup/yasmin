@@ -28,12 +28,12 @@ namespace yasmin_pcl::filters {
 
 RadiusOutlierRemovalState::RadiusOutlierRemovalState()
     : yasmin::State({"succeeded", "aborted"}) {
-  radius_search_ = 0.1;
-  min_neighbors_in_radius_ = 1;
-  negative_ = false;
-  keep_organized_ = false;
-  user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
-  extract_removed_indices_ = false;
+  this->radius_search_ = 0.1;
+  this->min_neighbors_in_radius_ = 1;
+  this->negative_ = false;
+  this->keep_organized_ = false;
+  this->user_filter_value_ = std::numeric_limits<float>::quiet_NaN();
+  this->extract_removed_indices_ = false;
 
   this->set_description(
       "Applies pcl::RadiusOutlierRemoval to a pcl::PCLPointCloud2 stored in "

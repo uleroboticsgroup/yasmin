@@ -29,9 +29,9 @@ namespace yasmin_pcl::filters {
 
 ProjectInliersState::ProjectInliersState()
     : yasmin::State({"succeeded", "aborted"}) {
-  model_type_ = 0;
-  copy_all_fields_ = true;
-  copy_all_data_ = false;
+  this->model_type_ = 0;
+  this->copy_all_fields_ = true;
+  this->copy_all_data_ = false;
 
   this->set_description(
       "Applies pcl::ProjectInliers to a pcl::PCLPointCloud2 stored in the "
