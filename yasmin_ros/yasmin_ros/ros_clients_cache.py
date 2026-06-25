@@ -350,5 +350,3 @@ class ROSClientsCache:
             return f"{callback_group.__class__.__name__}_{id(callback_group)}"
 
         return str(id(callback_group))
-
-
