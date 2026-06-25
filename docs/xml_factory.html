@@ -908,6 +908,42 @@ YASMIN_LOG_INFO(outcome.c_str());</code></pre>
     &lt;/OutcomeMap&gt;
 &lt;/Concurrence&gt;</code></pre>
 
+        <h3>OrthogonalState</h3>
+        <p>
+          <code>OrthogonalState</code> executes multiple independent state
+          machines (<strong>regions</strong>) concurrently. Each region is a
+          complete <code>StateMachine</code> with its own states, transitions,
+          and a private copy of the blackboard. An outcome map defines how
+          region outcomes combine into the container's overall outcome.
+        </p>
+        <p>
+          Within each region, you can use <code>JoinState</code> with a matching
+          <code>sync_id</code> to synchronize regions at specific points during
+          execution.
+        </p>
+        <pre><code class="language-xml">&lt;OrthogonalState name="parallel" outcomes="success timeout" default_outcome="timeout"&gt;
+    &lt;Region name="A" outcomes="done" start_state="work_a"&gt;
+        &lt;State id="work_a" type="py" module="pkg" class="WorkerState"&gt;
+            &lt;Param name="max_count" default_type="int" default_value="3"/&gt;
+            &lt;Transition from="working" to="work_a"/&gt;
+            &lt;Transition from="done" to="done"/&gt;
+        &lt;/State&gt;
+    &lt;/Region&gt;
+    &lt;Region name="B" outcomes="done" start_state="work_b"&gt;
+        &lt;State id="work_b" type="py" module="pkg" class="WorkerState"&gt;
+            &lt;Param name="max_count" default_type="int" default_value="5"/&gt;
+            &lt;Transition from="working" to="work_b"/&gt;
+            &lt;Transition from="done" to="done"/&gt;
+        &lt;/State&gt;
+    &lt;/Region&gt;
+    &lt;OutcomeMap outcome="success"&gt;
+        &lt;Item state="A" outcome="done"/&gt;
+        &lt;Item state="B" outcome="done"/&gt;
+    &lt;/OutcomeMap&gt;
+    &lt;Transition from="success" to="success"/&gt;
+    &lt;Transition from="timeout" to="timeout"/&gt;
+&lt;/OrthogonalState&gt;</code></pre>
+
         <h2>Example: Mixed Language State Machine</h2>
         <p>
           This example demonstrates a state machine using both Python and C++

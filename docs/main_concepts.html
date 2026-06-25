@@ -615,6 +615,86 @@
           conflicts when reading and writing shared data concurrently.
         </p>
 
+        <h2>Orthogonal Regions</h2>
+        <p>
+          YASMIN provides an <code>OrthogonalState</code> container that extends
+          the concurrency model with independent, concurrently executing state
+          machines called <strong>regions</strong>. Unlike
+          <code>Concurrence</code>, where individual states run in parallel
+          sharing a single blackboard, orthogonal regions execute complete,
+          independent state machines — each with its own states, transitions,
+          and a private copy of the blackboard.
+        </p>
+        <p>
+          Each region is a full <code>StateMachine</code> instance. Regions run
+          in separate threads and are completely isolated from one another,
+          making them ideal for truly independent concurrent behaviors such as
+          monitoring multiple sensors, controlling separate subsystems, or
+          running distinct robot behaviors that should not interfere.
+        </p>
+
+        <h3>Outcome Mapping</h3>
+        <p>
+          The orthogonal container resolves its own outcome by combining the
+          final outcomes of all regions. You provide an
+          <strong>outcome map</strong> that specifies which combination of
+          region outcomes produces which container-level outcome. For example,
+          you can define that <code>"success"</code> is produced only when
+          <em>both</em> Region A and Region B finish with <code>"done"</code>.
+          Regions that do not appear in the outcome map are ignored during
+          evaluation. If no entry in the outcome map matches, a configurable
+          <strong>default outcome</strong> is returned.
+        </p>
+
+        <h3>Synchronization</h3>
+        <p>
+          Regions can synchronize at specific points during execution using
+          <code>JoinState</code>. A <code>JoinState</code> acts as a rendezvous
+          point: all regions that share the same synchronization identifier must
+          reach their respective <code>JoinState</code> before any of them
+          proceeds. This is useful when regions need to coordinate — for
+          instance, when one region must wait for another to complete a
+          prerequisite before continuing.
+        </p>
+
+        <h3>Blackboard Isolation</h3>
+        <p>
+          Each region receives its own copy of the blackboard at the start of
+          execution. This means states in different regions cannot accidentally
+          overwrite each other's data. If you need to share data between
+          regions, you can use the blackboard output from the final outcomes or
+          design explicit communication through shared resources external to the
+          state machine.
+        </p>
+
+        <h3>When to Use Orthogonal Regions</h3>
+        <p>
+          Orthogonal regions are the right choice when you need to run several
+          largely independent behaviors that each have complex internal logic.
+          Common use cases include:
+        </p>
+        <ul>
+          <li>
+            Running a navigation state machine alongside a perception pipeline
+          </li>
+          <li>
+            Controlling multiple robot arms or subsystems in parallel, each with
+            its own state machine logic
+          </li>
+          <li>
+            Monitoring safety conditions with a dedicated watchdog state machine
+            while the main task executes
+          </li>
+          <li>
+            Running independent exploration and mapping behaviors concurrently
+          </li>
+        </ul>
+        <p>
+          For simpler parallelism where only individual states (not full state
+          machines) need to run concurrently and data sharing is required, the
+          <code>Concurrence</code> container is a more lightweight alternative.
+        </p>
+
         <h2>Complex FSM Example</h2>
         <p>
           The following diagram shows a complex hierarchical state machine for a

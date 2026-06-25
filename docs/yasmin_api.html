@@ -236,6 +236,7 @@
             <li><a href="#blackboard">Blackboard</a></li>
             <li><a href="#cb-state">CbState</a></li>
             <li><a href="#concurrence">Concurrence</a></li>
+            <li><a href="#orthogonal-state">OrthogonalState</a></li>
           </ul>
         </nav>
 
@@ -1354,6 +1355,161 @@ sm.add_state(
         "defaulted": "outcome2",
     },
 )</code></pre>
+
+        <!-- ═══════════════════════════════════════════ ORTHOGONAL STATE -->
+        <h2 id="orthogonal-state">OrthogonalState</h2>
+        <p>
+          <code>OrthogonalState</code> extends <code>State</code> and executes
+          multiple independent <code>StateMachine</code> instances (called
+          <strong>regions</strong>) concurrently, each in its own thread. Each
+          region receives a private copy of the blackboard, preventing data
+          races between regions. When all regions finish, their outcomes are
+          matched against an <em>outcome map</em> to determine the overall
+          result.
+        </p>
+
+        <h3>Constructor</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">OrthogonalState(
+    const std::string &amp;default_outcome,
+    const OutcomeMap &amp;outcome_map = {});</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">OrthogonalState(default_outcome: str, outcome_map: dict[str, dict[str, str]] = {})</code></pre>
+
+        <h3>Methods</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>C++ Signature</th>
+              <th>Python Signature</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>add_region</code></td>
+              <td>
+                <code
+                  >void add_region(<br />&nbsp;&nbsp;const std::string
+                  &amp;name,<br />&nbsp;&nbsp;StateMachine::SharedPtr sm)</code
+                >
+              </td>
+              <td>
+                <code
+                  >def add_region(self, name: str, sm: StateMachine) -&gt;
+                  None</code
+                >
+              </td>
+              <td>Adds a region with the given name and its state machine.</td>
+            </tr>
+            <tr>
+              <td><code>get_regions</code></td>
+              <td>
+                <code
+                  >const std::vector&lt;RegionDescriptor&gt;<br />&nbsp;&nbsp;&amp;get_regions()
+                  const</code
+                >
+              </td>
+              <td>
+                <code>def get_regions(self) -&gt; list</code>
+              </td>
+              <td>Returns the list of configured regions.</td>
+            </tr>
+            <tr>
+              <td><code>get_outcome_map</code></td>
+              <td>
+                <code>const OutcomeMap &amp;get_outcome_map() const</code>
+              </td>
+              <td>
+                <code>def get_outcome_map(self) -&gt; dict</code>
+              </td>
+              <td>Returns the outcome map.</td>
+            </tr>
+            <tr>
+              <td><code>get_default_outcome</code></td>
+              <td>
+                <code>const std::string &amp;get_default_outcome() const</code>
+              </td>
+              <td><code>def get_default_outcome(self) -&gt; str</code></td>
+              <td>Returns the fallback outcome used when no rule matches.</td>
+            </tr>
+            <tr>
+              <td><code>execute</code></td>
+              <td>
+                <code
+                  >std::string execute(<br />&nbsp;&nbsp;Blackboard::SharedPtr
+                  blackboard)</code
+                >
+              </td>
+              <td>
+                <code>def execute(self, blackboard: Blackboard) -&gt; str</code>
+              </td>
+              <td>
+                Runs all regions in parallel threads and returns the resolved
+                outcome.
+              </td>
+            </tr>
+            <tr>
+              <td><code>cancel_state</code></td>
+              <td><code>void cancel_state() override</code></td>
+              <td><code>def cancel_state(self) -&gt; None</code></td>
+              <td>Cancels all currently running regions.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          <code>OrthogonalState</code> inherits all <a href="#state">State</a>
+          metadata methods.
+        </p>
+
+        <h3>Example</h3>
+
+        <h4>C++</h4>
+        <pre><code class="language-cpp">#include "yasmin/orthogonal_state.hpp"
+#include "yasmin/state_machine.hpp"
+
+auto reg_a = yasmin::StateMachine::make_shared(
+    std::initializer_list&lt;std::string&gt;{"done"});
+reg_a-&gt;add_state("WORK", std::make_shared&lt;WorkerState&gt;("A", 3),
+                  {{"working", "WORK"}});
+reg_a-&gt;set_start_state("WORK");
+
+auto reg_b = yasmin::StateMachine::make_shared(
+    std::initializer_list&lt;std::string&gt;{"done"});
+reg_b-&gt;add_state("WORK", std::make_shared&lt;WorkerState&gt;("B", 5),
+                  {{"working", "WORK"}});
+reg_b-&gt;set_start_state("WORK");
+
+auto ort = yasmin::OrthogonalState::make_shared(
+    "timeout", yasmin::OutcomeMap{
+                   {"success", {{"A", "done"}, {"B", "done"}}},
+               });
+ort-&gt;add_region("A", reg_a);
+ort-&gt;add_region("B", reg_b);</code></pre>
+
+        <h4>Python</h4>
+        <pre><code class="language-python">from yasmin import StateMachine, OrthogonalState
+
+reg_a = StateMachine(outcomes=["done"])
+reg_a.add_state("WORK", WorkerState("A", 3),
+                transitions={"working": "WORK"})
+reg_a.set_start_state("WORK")
+
+reg_b = StateMachine(outcomes=["done"])
+reg_b.add_state("WORK", WorkerState("B", 5),
+                transitions={"working": "WORK"})
+reg_b.set_start_state("WORK")
+
+ort = OrthogonalState(
+    default_outcome="timeout",
+    outcome_map={"success": {"A": "done", "B": "done"}},
+)
+ort.add_region("A", reg_a)
+ort.add_region("B", reg_b)</code></pre>
       </main>
     </div>
 
