@@ -154,6 +154,8 @@ private:
   std::string default_outcome_;
   /// @brief Indicates whether the OrthogonalState has been configured.
   std::atomic_bool configured_{false};
+  /// @brief Precomputed region name -> index map for O(1) outcome lookups.
+  std::unordered_map<std::string, size_t> region_name_to_index_;
 
   /**
    * @brief Evaluates the outcomes of the regions to determine the overall

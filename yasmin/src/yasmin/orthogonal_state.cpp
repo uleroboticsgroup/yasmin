@@ -106,6 +106,13 @@ void OrthogonalState::configure() {
                      sync_id.c_str(), join_states.size());
   }
 
+  // Build region name -> index map for O(1) lookups
+  this->region_name_to_index_.clear();
+  this->region_name_to_index_.reserve(this->regions_.size());
+  for (size_t i = 0; i < this->regions_.size(); i++) {
+    this->region_name_to_index_[this->regions_[i].name] = i;
+  }
+
   // Configure all regions
   for (auto &region : this->regions_) {
     region.sm->configure();
@@ -201,10 +208,9 @@ std::string OrthogonalState::evaluate_outcomes(
   Outcomes satisfied_outcomes = yasmin::evaluate_satisfied_outcomes(
       this->outcome_map_,
       [this, &region_outcomes](const std::string &state_name) -> std::string {
-        for (size_t i = 0; i < this->regions_.size(); i++) {
-          if (this->regions_[i].name == state_name) {
-            return region_outcomes[i];
-          }
+        auto it = this->region_name_to_index_.find(state_name);
+        if (it != this->region_name_to_index_.end()) {
+          return region_outcomes[it->second];
         }
         return "";
       });

@@ -63,122 +63,29 @@ ament_export_targets(${PROJECT_NAME})
 ament_export_dependencies(${DEPENDENCIES_PACKAGE})
 
 
-# Python bindings for Blackboard
-pybind11_add_module(blackboard 
-  src/yasmin/blackboard_pybind11.cpp
-)
-target_link_libraries(blackboard PRIVATE ${PROJECT_NAME})
-target_include_directories(blackboard PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-install(TARGETS blackboard
-  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
-)
+function(add_yasmin_pybind11 MODULE_NAME)
+  pybind11_add_module(${MODULE_NAME}
+    src/yasmin/${MODULE_NAME}_pybind11.cpp
+  )
+  target_link_libraries(${MODULE_NAME} PRIVATE ${PROJECT_NAME})
+  target_include_directories(${MODULE_NAME} PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+    "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+  install(TARGETS ${MODULE_NAME}
+    DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
+  )
+endfunction()
 
-# Python bindings for CallbackSignal
-pybind11_add_module(callback_signal
-  src/yasmin/callback_signal_pybind11.cpp
-)
-target_link_libraries(callback_signal PRIVATE ${PROJECT_NAME})
-target_include_directories(callback_signal PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-install(TARGETS callback_signal
-  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
-)
-
-# Python bindings for State
-pybind11_add_module(state
-  src/yasmin/state_pybind11.cpp
-)
-target_link_libraries(state PRIVATE ${PROJECT_NAME})
-target_include_directories(state PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-install(TARGETS state
-  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
-)
-
-# Python bindings for StateMachine
-pybind11_add_module(state_machine
-  src/yasmin/state_machine_pybind11.cpp
-)
-target_link_libraries(state_machine PRIVATE ${PROJECT_NAME})
-target_include_directories(state_machine PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-install(TARGETS state_machine
-  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
-)
-
-# Python bindings for Concurrence
-pybind11_add_module(concurrence
-  src/yasmin/concurrence_pybind11.cpp
-)
-target_link_libraries(concurrence PRIVATE ${PROJECT_NAME})
-target_include_directories(concurrence PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-install(TARGETS concurrence
-  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
-)
-
-# Python bindings for CbState
-pybind11_add_module(cb_state
-  src/yasmin/cb_state_pybind11.cpp
-)
-target_link_libraries(cb_state PRIVATE ${PROJECT_NAME})
-target_include_directories(cb_state PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-install(TARGETS cb_state
-  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
-)
-
-# Python bindings for JoinState
-pybind11_add_module(join_state
-  src/yasmin/join_state_pybind11.cpp
-)
-target_link_libraries(join_state PRIVATE ${PROJECT_NAME})
-target_include_directories(join_state PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-install(TARGETS join_state
-  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
-)
-
-# Python bindings for OrthogonalState
-pybind11_add_module(orthogonal_state
-  src/yasmin/orthogonal_state_pybind11.cpp
-)
-target_link_libraries(orthogonal_state PRIVATE ${PROJECT_NAME})
-target_include_directories(orthogonal_state PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-install(TARGETS orthogonal_state
-  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
-)
-
-# Python bindings for Logs
-pybind11_add_module(logs
-  src/yasmin/logs_pybind11.cpp
-)
-target_link_libraries(logs PRIVATE ${PROJECT_NAME})
-target_include_directories(logs PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-install(TARGETS logs
-  DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}"
-)
+add_yasmin_pybind11(blackboard)
+add_yasmin_pybind11(callback_signal)
+add_yasmin_pybind11(state)
+add_yasmin_pybind11(state_machine)
+add_yasmin_pybind11(concurrence)
+add_yasmin_pybind11(cb_state)
+add_yasmin_pybind11(join_state)
+add_yasmin_pybind11(orthogonal_state)
+add_yasmin_pybind11(logs)
 
 # Python
 ament_python_install_package(${PROJECT_NAME})

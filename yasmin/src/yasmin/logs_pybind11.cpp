@@ -60,9 +60,9 @@ PYBIND11_MODULE(logs, m) {
       "log_error",
       [](const std::string &file, const std::string &function, int line,
          const std::string &text) {
-        if (yasmin::log_level >= yasmin::ERROR) {
-          yasmin::log_message(yasmin::ERROR, file.c_str(), function.c_str(),
-                              line, text.c_str());
+        if (yasmin::log_level >= yasmin::LogLevel::ERROR) {
+          yasmin::log_message(yasmin::LogLevel::ERROR, file.c_str(),
+                              function.c_str(), line, text.c_str());
         }
       },
       py::arg("file"), py::arg("function"), py::arg("line"), py::arg("text"),
@@ -72,9 +72,9 @@ PYBIND11_MODULE(logs, m) {
       "log_warn",
       [](const std::string &file, const std::string &function, int line,
          const std::string &text) {
-        if (yasmin::log_level >= yasmin::WARN) {
-          yasmin::log_message(yasmin::WARN, file.c_str(), function.c_str(),
-                              line, text.c_str());
+        if (yasmin::log_level >= yasmin::LogLevel::WARN) {
+          yasmin::log_message(yasmin::LogLevel::WARN, file.c_str(),
+                              function.c_str(), line, text.c_str());
         }
       },
       py::arg("file"), py::arg("function"), py::arg("line"), py::arg("text"),
@@ -84,9 +84,9 @@ PYBIND11_MODULE(logs, m) {
       "log_info",
       [](const std::string &file, const std::string &function, int line,
          const std::string &text) {
-        if (yasmin::log_level >= yasmin::INFO) {
-          yasmin::log_message(yasmin::INFO, file.c_str(), function.c_str(),
-                              line, text.c_str());
+        if (yasmin::log_level >= yasmin::LogLevel::INFO) {
+          yasmin::log_message(yasmin::LogLevel::INFO, file.c_str(),
+                              function.c_str(), line, text.c_str());
         }
       },
       py::arg("file"), py::arg("function"), py::arg("line"), py::arg("text"),
@@ -96,9 +96,9 @@ PYBIND11_MODULE(logs, m) {
       "log_debug",
       [](const std::string &file, const std::string &function, int line,
          const std::string &text) {
-        if (yasmin::log_level >= yasmin::DEBUG) {
-          yasmin::log_message(yasmin::DEBUG, file.c_str(), function.c_str(),
-                              line, text.c_str());
+        if (yasmin::log_level >= yasmin::LogLevel::DEBUG) {
+          yasmin::log_message(yasmin::LogLevel::DEBUG, file.c_str(),
+                              function.c_str(), line, text.c_str());
         }
       },
       py::arg("file"), py::arg("function"), py::arg("line"), py::arg("text"),

@@ -368,12 +368,11 @@ void StateMachine::validate(bool strict_mode) {
   }
 
   // Check terminal outcomes for the state machine
-  std::set<std::string> sm_outcomes(this->get_outcomes().begin(),
-                                    this->get_outcomes().end());
+  const auto &sm_outcomes = this->get_outcomes();
 
   if (strict_mode) {
     // Check if all outcomes from the state machine are in the terminal outcomes
-    for (const std::string &o : this->get_outcomes()) {
+    for (const std::string &o : sm_outcomes) {
       if (terminal_outcomes.find(o) == terminal_outcomes.end()) {
         throw std::runtime_error("Target outcome '" + o +
                                  "' not registered in transitions");

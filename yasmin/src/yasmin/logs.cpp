@@ -26,7 +26,7 @@ void default_log_message(LogLevel level, const char *file, const char *function,
 }
 
 // Initialize the log level to INFO
-LogLevel log_level = INFO;
+LogLevel log_level = LogLevel::INFO;
 
 LogFunction log_message = default_log_message;
 
@@ -43,6 +43,9 @@ const char *log_level_to_name(LogLevel log_level) {
     return "INFO";
   case LogLevel::DEBUG:
     return "DEBUG";
+
+  default:
+    return "";
   }
 
   return "";

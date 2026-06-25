@@ -19,11 +19,7 @@
 namespace yasmin {
 
 CbState::CbState(const Outcomes &outcomes, CbStateCallback callback)
-    : State(outcomes), callback(callback) {
-  if (outcomes.empty()) {
-    throw std::invalid_argument("Outcomes set cannot be empty.");
-  }
-}
+    : State(outcomes), callback(callback) {}
 
 std::string CbState::execute(Blackboard::SharedPtr blackboard) {
 

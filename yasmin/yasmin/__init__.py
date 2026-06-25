@@ -50,10 +50,10 @@ def get_caller_info() -> List[Union[str, int]]:
     @return: A tuple containing the file name, function name, and line number.
     @rtype: tuple[str, str, int]
     """
-    frame = inspect.stack()[2]
-    file = os.path.basename(frame.filename)
-    line = frame.lineno
-    function = frame.function
+    frame = inspect.currentframe().f_back.f_back
+    file = os.path.basename(frame.f_code.co_filename)
+    line = frame.f_lineno
+    function = frame.f_code.co_name
     return file, function, line
 
 
