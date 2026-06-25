@@ -118,19 +118,25 @@ std::filesystem::path resolve_file_path(const std::string &web_root,
   }
 
   std::error_code ec;
-  std::filesystem::path resolved =
-      std::filesystem::canonical(std::filesystem::path(web_root) / target, ec);
+  std::filesystem::path web_root_normalized =
+      std::filesystem::weakly_canonical(web_root, ec);
 
   if (ec) {
-    throw std::runtime_error("Invalid path");
+    throw std::runtime_error("Invalid web root");
   }
 
-  std::string resolved_str = resolved.string();
-  std::string web_root_canonical =
-      std::filesystem::canonical(web_root, ec).string();
+  std::filesystem::path resolved =
+      (web_root_normalized / target).lexically_normal();
 
-  if (ec || resolved_str.find(web_root_canonical) != 0) {
+  std::string resolved_str = resolved.string();
+  std::string web_root_str = web_root_normalized.string();
+
+  if (resolved_str.find(web_root_str) != 0) {
     throw std::runtime_error("Path traversal detected");
+  }
+
+  if (!std::filesystem::exists(resolved, ec) || ec) {
+    throw std::runtime_error("File not found");
   }
 
   return resolved;
