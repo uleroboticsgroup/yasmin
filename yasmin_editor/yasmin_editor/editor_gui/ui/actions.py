@@ -15,10 +15,7 @@
 
 from __future__ import annotations
 
-"""Shared QAction registry used by the toolbar and menu bar."""
-
 from PyQt5.QtWidgets import QAction
-
 from yasmin_editor.editor_gui.ui.action_specs import ALL_ACTION_GROUPS, ActionSpec
 
 

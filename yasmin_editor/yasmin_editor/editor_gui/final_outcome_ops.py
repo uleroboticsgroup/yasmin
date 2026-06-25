@@ -13,13 +13,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Model helpers for logical final outcomes and their visual aliases."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 
 
@@ -52,7 +52,7 @@ def ensure_final_outcome_alias(
     instance_id = container_model.layout.create_outcome_alias(outcome_name, x, y)
 
     if (
-        isinstance(container_model, Concurrence)
+        isinstance(container_model, (Concurrence, OrthogonalState))
         and len(container_model.outcomes) == 1
         and not container_model.default_outcome
     ):

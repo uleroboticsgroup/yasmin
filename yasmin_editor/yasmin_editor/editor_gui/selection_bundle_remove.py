@@ -13,12 +13,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Removal helpers for selection-based editor operations."""
 
 from __future__ import annotations
 
 from yasmin_editor.editor_gui.selection_models import ContainerModel
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.text_block import TextBlock
 
 
@@ -47,6 +47,6 @@ def remove_selection_from_model(
     for text_block in selected_text_blocks:
         container_model.remove_text_block(text_block)
 
-    if isinstance(container_model, Concurrence):
+    if isinstance(container_model, (Concurrence, OrthogonalState)):
         for outcome_name in removed_outcome_names:
             container_model.outcome_map.pop(outcome_name, None)

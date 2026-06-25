@@ -12,7 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Pure toolbar configuration shared by the toolbar builder and tests."""
 
 from __future__ import annotations
 
@@ -38,6 +37,7 @@ ADD_TOOLBAR_MENU = ToolbarMenuSpec(
     action_attributes=(
         "add_state_machine_action",
         "add_concurrence_action",
+        "add_orthogonal_state_action",
         "add_final_action",
         "add_text_action",
     ),

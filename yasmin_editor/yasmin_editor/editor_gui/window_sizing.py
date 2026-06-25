@@ -12,7 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Helpers for sizing the main editor window against screen geometry."""
 
 from __future__ import annotations
 

@@ -15,8 +15,6 @@
 
 from __future__ import annotations
 
-"""Adapter that keeps the Qt editor scene and the pure model in sync."""
-
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -35,6 +33,7 @@ from yasmin_editor.editor_gui.scene_renderer import (
 from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.layout import OutcomePlacement, Position
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
@@ -108,7 +107,7 @@ class EditorModelAdapter:
             ensure_outcome_placements=ensure_outcome_placements,
         )
 
-    def rebuild_scene(self, model: StateMachine | Concurrence) -> None:
+    def rebuild_scene(self, model: StateMachine | Concurrence | OrthogonalState) -> None:
         render_container_scene(model, self._build_main_scene_context())
 
     def create_state_view(

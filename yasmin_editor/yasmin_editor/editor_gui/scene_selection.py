@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Helpers for grouping scene selections without depending on PyQt imports."""
 
 from __future__ import annotations
 

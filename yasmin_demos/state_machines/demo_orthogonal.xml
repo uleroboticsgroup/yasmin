@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<StateMachine name="OrthogonalDemo" outcomes="success fail timeout" start_state="start" description="Demonstrates concurrent orthogonal regions using WorkerState regions with different iteration counts.">
+  <State name="start" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="0.00" y="0.00">
+    <Param name="max_count" default_type="int" default_value="1" />
+    <Transition from="done" to="parallel" />
+  </State><OrthogonalState name="parallel" outcomes="success timeout" default_outcome="timeout" description="Runs two WorkerState regions in parallel and maps their outcomes." x="-2.75" y="321.96">
+    <Region name="A" outcomes="done" start_state="work_a" description="Region A performs 3 units of work." x="71.98" y="-29.52">
+      <State name="work_a" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="172.92" y="-30.16">
+        <Param name="max_count" default_type="int" default_value="3" />
+        <Param name="sleep_ms" default_type="int" default_value="300" />
+        <Transition from="working" to="work_a" />
+        <Transition from="done" to="done" to_instance="done-96410ae2" />
+      </State><FinalOutcome name="done" instance_id="done-96410ae2" x="504.04" y="-11.12" />
+    </Region><Region name="B" outcomes="done" start_state="work_b" description="Region B performs 5 units of work (longer execution)." x="65.11" y="173.48">
+      <State name="work_b" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="0.00" y="0.00">
+        <Param name="max_count" default_type="int" default_value="5" />
+        <Param name="sleep_ms" default_type="int" default_value="300" />
+        <Transition from="working" to="work_b" />
+        <Transition from="done" to="done" to_instance="done-77f2ec93" />
+      </State><FinalOutcome name="done" instance_id="done-77f2ec93" x="375.88" y="18.10" />
+    </Region><FinalOutcome name="success" instance_id="success-3c5f42ee" x="482.03" y="83.71" />
+    <FinalOutcome name="timeout" instance_id="timeout-b379fba7" x="700.00" y="170.00" />
+    <OutcomeMap outcome="success">
+      <Item state="A" outcome="done" />
+      <Item state="B" outcome="done" />
+    </OutcomeMap><Transition from="success" to="success" />
+    <Transition from="timeout" to="timeout" />
+  </OrthogonalState><FinalOutcome name="success" description="Both regions completed successfully" instance_id="success-02122b56" x="700.00" y="0.00" />
+  <FinalOutcome name="fail" description="Unused default fallback" instance_id="fail-55b223a2" x="700.00" y="170.00" />
+  <FinalOutcome name="timeout" description="One or more regions did not complete as expected" instance_id="timeout-fddd8cae" x="700.00" y="340.00" />
+</StateMachine>

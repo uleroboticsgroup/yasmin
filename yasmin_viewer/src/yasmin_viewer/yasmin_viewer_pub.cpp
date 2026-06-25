@@ -107,10 +107,12 @@ void YasminViewerPub::parse_state(
   state_msg.outcomes =
       std::vector<std::string>(outcomes.begin(), outcomes.end());
 
-  // Check if state is a nested FSM or Concurrence
+  // Check if state is a nested FSM, Concurrence, or OrthogonalState
   auto fsm = std::dynamic_pointer_cast<yasmin::StateMachine>(state);
   auto concurrence = std::dynamic_pointer_cast<yasmin::Concurrence>(state);
-  state_msg.is_fsm = (fsm != nullptr) || (concurrence != nullptr);
+  auto orthogonal = std::dynamic_pointer_cast<yasmin::OrthogonalState>(state);
+  state_msg.is_fsm =
+      (fsm != nullptr) || (concurrence != nullptr) || (orthogonal != nullptr);
 
   // Add the state to the list
   states_list.push_back(state_msg);
@@ -171,9 +173,56 @@ void YasminViewerPub::parse_state(
       }
     }
   }
+  // Handle orthogonal states
+  else if (orthogonal != nullptr) {
+    const auto &regions = orthogonal->get_regions();
+    states_list[state_msg.id].current_state = -2;
+
+    for (const auto &region : regions) {
+      // Create a synthetic container node for the region
+      auto region_msg = yasmin_msgs::msg::State();
+      region_msg.id = states_list.size();
+      region_msg.parent = state_msg.id;
+      region_msg.name = region.name;
+      region_msg.is_fsm = true;
+      region_msg.current_state = -2;
+      auto region_outcomes = region.sm->get_outcomes();
+      region_msg.outcomes = std::vector<std::string>(region_outcomes.begin(),
+                                                     region_outcomes.end());
+      states_list.push_back(region_msg);
+
+      auto region_states = region.sm->get_states();
+      auto region_transitions = region.sm->get_transitions();
+
+      for (const auto &nested_state : region_states) {
+        yasmin::Transitions transitions;
+        auto trans_it = region_transitions.find(nested_state.first);
+        if (trans_it != region_transitions.end()) {
+          transitions = trans_it->second;
+        }
+
+        this->parse_state(nested_state.first, nested_state.second, transitions,
+                          states_list, region_msg.id);
+      }
+
+      std::string region_current = region.sm->get_current_state();
+      if (!region_current.empty()) {
+        for (auto &child : states_list) {
+          if (child.name == region_current && child.parent == region_msg.id) {
+            states_list[region_msg.id].current_state = child.id;
+            break;
+          }
+        }
+      }
+    }
+  }
 }
 
 void YasminViewerPub::publish_data() {
+
+  if (!rclcpp::ok()) {
+    return;
+  }
 
   try {
     this->fsm->validate();

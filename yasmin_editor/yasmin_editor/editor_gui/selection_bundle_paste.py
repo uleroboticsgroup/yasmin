@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Paste helpers for clipboard bundles."""
 
 from __future__ import annotations
 
@@ -23,6 +22,7 @@ from yasmin_editor.editor_gui.selection_bundle_geometry import get_bundle_bounds
 from yasmin_editor.editor_gui.selection_models import ContainerModel, SelectionBundle
 from yasmin_editor.editor_gui.selection_names import increment_name
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.transition import Transition
 
@@ -141,7 +141,7 @@ def paste_state_machine_links(
 
 
 def paste_concurrence_rules(
-    target_model: Concurrence,
+    target_model: Concurrence | OrthogonalState,
     bundle: SelectionBundle,
     state_name_map: dict[str, str],
     outcome_name_map: dict[str, str],
@@ -189,7 +189,7 @@ def paste_bundle_into_model(
             outcome_name_map,
             outcome_instance_map,
         )
-    elif isinstance(target_model, Concurrence):
+    elif isinstance(target_model, (Concurrence, OrthogonalState)):
         paste_concurrence_rules(
             target_model,
             bundle,

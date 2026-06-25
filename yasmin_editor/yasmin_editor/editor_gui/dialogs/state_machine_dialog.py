@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Dialog for creating and editing state machine containers."""
-
 from typing import Dict, List, Optional, Tuple
 
 from PyQt5.QtWidgets import QComboBox, QDialog, QLabel

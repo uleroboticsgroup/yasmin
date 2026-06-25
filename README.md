@@ -67,6 +67,7 @@
 - **Data Sharing with Blackboards**: Utilizes blackboards for data sharing between states and state machines.
 - **State Management**: Supports cancellation and stopping of state machines, including halting the current executing state.
 - **Concurrence**: Run multiple states in parallel with configurable join policies.
+- **OrthogonalState**: Run concurrent regions of independent state machines with outcome mapping and synchronization.
 - **XML State Machines**: Define state machines in XML files using the Factory and load them at runtime with plugins.
 - **Graphical Editor**: Visual editor for building state machines with drag-and-drop functionality.
 - **Web Viewer**: Features an integrated web viewer for real-time monitoring of state machine execution.
@@ -682,6 +683,234 @@ def main() -> None:
         yasmin.YASMIN_LOG_WARN(e)
 
     # Shutdown ROS 2 if it's running
+    if rclpy.ok():
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+</details>
+
+#### OrthogonalState Demo
+
+<details>
+<summary>Click to expand</summary>
+
+```shell
+ros2 run yasmin_demos orthogonal_demo.py
+```
+
+```python
+import time
+
+import rclpy
+
+import yasmin
+from yasmin import Blackboard, OrthogonalState, State, StateMachine
+from yasmin_ros import set_ros_loggers
+from yasmin_viewer import YasminViewerPub
+
+
+# Define a WorkerState that loops until max_count is reached
+class WorkerState(State):
+    def __init__(self, name: str, max_count: int, sleep_ms: int = 500) -> None:
+        super().__init__(["working", "done"])
+        self.name = name
+        self.counter = 0
+        self.max_count = max_count
+        self.sleep_ms = sleep_ms
+
+    def execute(self, blackboard: Blackboard) -> str:
+        yasmin.YASMIN_LOG_INFO(
+            f"WorkerState [{self.name}]: iteration {self.counter + 1}/{self.max_count}"
+        )
+        time.sleep(self.sleep_ms / 1000.0)
+
+        self.counter += 1
+        if self.counter >= self.max_count:
+            return "done"
+        return "working"
+
+
+def main() -> None:
+    rclpy.init()
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_orthogonal_demo")
+
+    # Region A: 3 iterations
+    reg_a = StateMachine(outcomes=["done"])
+    reg_a.set_name("Region A")
+    reg_a.add_state(
+        "WORK",
+        WorkerState("A", 3, 300),
+        transitions={"working": "WORK"},
+    )
+    reg_a.set_start_state("WORK")
+
+    # Region B: 5 iterations
+    reg_b = StateMachine(outcomes=["done"])
+    reg_b.set_name("Region B")
+    reg_b.add_state(
+        "WORK",
+        WorkerState("B", 5, 300),
+        transitions={"working": "WORK"},
+    )
+    reg_b.set_start_state("WORK")
+
+    # Orthogonal state runs both regions in parallel
+    ort = OrthogonalState(
+        default_outcome="timeout",
+        outcome_map={"success": {"A": "done", "B": "done"}},
+    )
+    ort.set_description(
+        "Runs Region A and Region B in parallel and maps their combined outcomes."
+    )
+    ort.add_region("A", reg_a)
+    ort.add_region("B", reg_b)
+
+    # Root state machine
+    sm = StateMachine(outcomes=["success", "timeout"], handle_sigint=True)
+    sm.set_description(
+        "Demonstrates orthogonal state execution with two parallel regions."
+    )
+    sm.add_state(
+        "PARALLEL",
+        ort,
+        transitions={"success": "success", "timeout": "timeout"},
+    )
+    sm.set_start_state("PARALLEL")
+
+    YasminViewerPub(sm, "YASMIN_ORTHOGONAL_DEMO")
+
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
+
+    if rclpy.ok():
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+</details>
+
+#### OrthogonalState with Synchronization Demo
+
+<details>
+<summary>Click to expand</summary>
+
+```shell
+ros2 run yasmin_demos orthogonal_sync_demo.py
+```
+
+```python
+import time
+
+import rclpy
+
+import yasmin
+from yasmin import Blackboard, JoinState, OrthogonalState, State, StateMachine
+from yasmin_ros import set_ros_loggers
+from yasmin_viewer import YasminViewerPub
+
+
+class WorkerState(State):
+    def __init__(self, name: str, max_count: int, sleep_ms: int = 300) -> None:
+        super().__init__(["working", "done"])
+        self.name = name
+        self.counter = 0
+        self.max_count = max_count
+        self.sleep_ms = sleep_ms
+
+    def execute(self, blackboard: Blackboard) -> str:
+        yasmin.YASMIN_LOG_INFO(
+            f"WorkerState [{self.name}]: iteration {self.counter + 1}/{self.max_count}"
+        )
+        time.sleep(self.sleep_ms / 1000.0)
+
+        self.counter += 1
+        if self.counter >= self.max_count:
+            return "done"
+        return "working"
+
+
+def main() -> None:
+    rclpy.init()
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_orthogonal_sync_demo")
+
+    SYNC_ID = "mid_sync"
+
+    # Region A: 3 iterations -> JoinState -> 2 more iterations
+    reg_a = StateMachine(outcomes=["done"])
+    reg_a.set_name("Region A")
+    reg_a.add_state(
+        "WORK_1", WorkerState("A.1", 3, 200),
+        transitions={"working": "WORK_1", "done": "SYNC"},
+    )
+    reg_a.add_state(
+        "SYNC", JoinState(SYNC_ID),
+        transitions={"joined": "WORK_2"},
+    )
+    reg_a.add_state(
+        "WORK_2", WorkerState("A.2", 2, 200),
+        transitions={"working": "WORK_2", "done": "done"},
+    )
+    reg_a.set_start_state("WORK_1")
+
+    # Region B: 2 iterations -> JoinState -> 3 more iterations
+    reg_b = StateMachine(outcomes=["done"])
+    reg_b.set_name("Region B")
+    reg_b.add_state(
+        "WORK_1", WorkerState("B.1", 2, 200),
+        transitions={"working": "WORK_1", "done": "SYNC"},
+    )
+    reg_b.add_state(
+        "SYNC", JoinState(SYNC_ID),
+        transitions={"joined": "WORK_2"},
+    )
+    reg_b.add_state(
+        "WORK_2", WorkerState("B.2", 3, 200),
+        transitions={"working": "WORK_2", "done": "done"},
+    )
+    reg_b.set_start_state("WORK_1")
+
+    # Orthogonal state runs both regions in parallel with sync point
+    ort = OrthogonalState(
+        default_outcome="timeout",
+        outcome_map={"success": {"A": "done", "B": "done"}},
+    )
+    ort.set_description(
+        "Runs two regions that sync at a JoinState before continuing."
+    )
+    ort.add_region("A", reg_a)
+    ort.add_region("B", reg_b)
+
+    # Root state machine
+    sm = StateMachine(outcomes=["success", "timeout"], handle_sigint=True)
+    sm.set_description(
+        "Demonstrates orthogonal state with JoinState synchronization."
+    )
+    sm.add_state(
+        "PARALLEL", ort,
+        transitions={"success": "success", "timeout": "timeout"},
+    )
+    sm.set_start_state("PARALLEL")
+
+    YasminViewerPub(sm, "YASMIN_ORTHOGONAL_SYNC_DEMO")
+
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
+
     if rclpy.ok():
         rclpy.shutdown()
 
@@ -2000,6 +2229,20 @@ ros2 run yasmin_demos yasmin_demo
 ```
 
 ```cpp
+#include <chrono>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 /**
  * @brief Represents the "Foo" state in the state machine.
  *
@@ -2114,17 +2357,20 @@ int main(int argc, char *argv[]) {
                     {"outcome3", "FOO"},
                 });
 
-  // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_DEMO");
+  {
+    // Publish state machine updates
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;
@@ -2143,6 +2389,21 @@ ros2 run yasmin_demos remap_demo
 ```
 
 ```cpp
+#include <chrono>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 /**
  * @brief Represents the "Foo" state in the state machine.
  */
@@ -2255,17 +2516,20 @@ int main(int argc, char *argv[]) {
                     {"bar_data", "foo_out_data"},
                 });
 
-  // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_REMAPPING_DEMO");
+  {
+    // Publish state machine updates
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_REMAPPING_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())(blackboard);
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())(blackboard);
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;
@@ -2284,6 +2548,21 @@ ros2 run yasmin_demos concurrence_demo
 ```
 
 ```cpp
+#include <chrono>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/concurrence.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 /**
  * @brief Represents the "Foo" state in the state machine.
  *
@@ -2433,19 +2712,138 @@ int main(int argc, char *argv[]) {
                     {"defaulted", "outcome4"},
                 });
 
-  // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_CONCURRENCE_DEMO");
+  {
+    // Publish state machine updates
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_CONCURRENCE_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
+  return 0;
+}
+```
+
+</details>
+
+#### OrthogonalState Demo
+
+<details>
+<summary>Click to expand</summary>
+
+```shell
+ros2 run yasmin_demos orthogonal_demo
+```
+
+```cpp
+#include <chrono>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/logs.hpp"
+#include "yasmin/orthogonal_state.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+class WorkerState : public yasmin::State {
+public:
+  int counter;
+  int max_count_;
+  int sleep_ms_;
+  std::string name_;
+
+  WorkerState(const std::string &name, int max_count, int sleep_ms = 500)
+      : yasmin::State({"working", "done"}), counter(0), max_count_(max_count),
+        sleep_ms_(sleep_ms), name_(name) {
+    this->set_description(
+        "Counts iterations and returns 'working' until max_count is reached.");
+  };
+
+  std::string execute(yasmin::Blackboard::SharedPtr /*blackboard*/) override {
+    YASMIN_LOG_INFO("WorkerState [%s]: iteration %d/%d", name_.c_str(),
+                    this->counter + 1, max_count_);
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms_));
+
+    this->counter += 1;
+    if (this->counter >= max_count_) {
+      return "done";
+    }
+    return "working";
+  };
+};
+
+int main(int argc, char *argv[]) {
+  rclcpp::init(argc, argv);
+
+  yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_orthogonal_demo");
+
+  // Region A: 3 iterations
+  auto reg_a = yasmin::StateMachine::make_shared(
+      std::initializer_list<std::string>{"done"});
+  reg_a->set_name("Region A");
+  reg_a->add_state(
+      "WORK", std::make_shared<WorkerState>("A", 3, 300),
+      {{"working", "WORK"}});
+  reg_a->set_start_state("WORK");
+
+  // Region B: 5 iterations
+  auto reg_b = yasmin::StateMachine::make_shared(
+      std::initializer_list<std::string>{"done"});
+  reg_b->set_name("Region B");
+  reg_b->add_state(
+      "WORK", std::make_shared<WorkerState>("B", 5, 300),
+      {{"working", "WORK"}});
+  reg_b->set_start_state("WORK");
+
+  // Orthogonal state runs both regions in parallel
+  auto ort = yasmin::OrthogonalState::make_shared(
+      "timeout",
+      yasmin::OutcomeMap{
+          {"success", {{"A", "done"}, {"B", "done"}}},
+      });
+  ort->set_description(
+      "Runs Region A and Region B in parallel and maps their combined outcomes.");
+  ort->add_region("A", reg_a);
+  ort->add_region("B", reg_b);
+
+  // Root state machine
+  auto sm = yasmin::StateMachine::make_shared(
+      std::initializer_list<std::string>{"success", "timeout"}, true);
+  sm->set_description(
+      "Demonstrates orthogonal state execution with two parallel regions.");
+  sm->add_state(
+      "PARALLEL", ort,
+      {{"success", "success"}, {"timeout", "timeout"}});
+  sm->set_start_state("PARALLEL");
+
+  {
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ORTHOGONAL_DEMO");
+
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
+  }
+
+  yasmin_ros::YasminNode::destroy_instance();
+  rclcpp::shutdown();
   return 0;
 }
 ```
@@ -2462,6 +2860,22 @@ ros2 run yasmin_demos publisher_demo
 ```
 
 ```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/int32.hpp>
+
+#include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/publisher_state.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -2579,20 +2993,24 @@ int main(int argc, char *argv[]) {
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
                  {"outcome2", "PUBLISHING_INT"}});
 
-  // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
-
-  // Execute the state machine
   yasmin::Blackboard::SharedPtr blackboard = yasmin::Blackboard::make_shared();
   blackboard->set<int>("counter", 0);
   blackboard->set<int>("max_count", 10);
-  try {
-    std::string outcome = (*sm.get())(blackboard);
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+
+  {
+    // Publisher for visualizing the state machine's status
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
+
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())(blackboard);
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;
@@ -2611,6 +3029,21 @@ ros2 run yasmin_demos monitor_demo
 ```
 
 ```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <nav_msgs/msg/odometry.hpp>
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/monitor_state.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -2713,17 +3146,20 @@ int main(int argc, char *argv[]) {
           {yasmin_ros::basic_outcomes::CANCEL, "outcome4"}, // Cancel transition
       });
 
-  // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MONITOR_DEMO");
+  {
+    // Publisher for visualizing the state machine's status
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MONITOR_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;
@@ -2746,6 +3182,22 @@ ros2 run yasmin_demos service_client_demo
 ```
 
 ```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <example_interfaces/srv/add_two_ints.hpp>
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/service_state.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -2901,17 +3353,20 @@ int main(int argc, char *argv[]) {
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                 });
 
-  // Publish state machine visualization.
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_SERVICE_CLIENT_DEMO");
+  {
+    // Publish state machine visualization.
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_SERVICE_CLIENT_DEMO");
 
-  // Execute the state machine.
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine.
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;
@@ -2934,6 +3389,21 @@ ros2 run yasmin_demos action_client_demo
 ```
 
 ```cpp
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <example_interfaces/action/fibonacci.hpp>
+
+#include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/action_state.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 using Fibonacci = example_interfaces::action::Fibonacci;
@@ -3095,21 +3565,23 @@ int main(int argc, char *argv[]) {
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                 });
 
-  // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
-
-  // Create an initial blackboard and set the Fibonacci order
   yasmin::Blackboard::SharedPtr blackboard = yasmin::Blackboard::make_shared();
   blackboard->set<int>("n", 10);
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())(blackboard);
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+  {
+    // Publisher for visualizing the state machine
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
+
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())(blackboard);
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;
@@ -3128,6 +3600,22 @@ ros2 run yasmin_demos parameters_demo --ros-args -p max_counter:=5
 ```
 
 ```cpp
+#include <chrono>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/get_parameters_state.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 /**
  * @brief Represents the "Foo" state in the state machine.
  *
@@ -3273,17 +3761,20 @@ int main(int argc, char *argv[]) {
                     {"outcome3", "FOO"},
                 });
 
-  // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PARAMETERS_DEMO");
+  {
+    // Publish state machine updates
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PARAMETERS_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;
@@ -3316,6 +3807,20 @@ ros2 run yasmin_demos factory_demo
 ```
 
 ```cpp
+#include <filesystem>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/state_machine.hpp"
+#include "yasmin_factory/yasmin_factory.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 int main(int argc, char *argv[]) {
   // Initialize ROS 2
   rclcpp::init(argc, argv);
@@ -3350,16 +3855,20 @@ int main(int argc, char *argv[]) {
   auto sm = factory.create_sm_from_file(xml_file);
   sm->set_sigint_handler(true);
 
-  // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_FACTORY_DEMO");
+  {
+    // Publisher for visualizing the state machine
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_FACTORY_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
+
+  yasmin_ros::YasminNode::destroy_instance();
 
   // Shutdown ROS 2
   rclcpp::shutdown();
@@ -3379,6 +3888,19 @@ ros2 run yasmin_demos multiple_states_demo
 ```
 
 ```cpp
+#include <string>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_demos/bar_state.h"
+#include "yasmin_demos/foo_state.h"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 int main(int argc, char *argv[]) {
   // Initialize ROS 2
   rclcpp::init(argc, argv);
@@ -3408,17 +3930,20 @@ int main(int argc, char *argv[]) {
                     {"outcome3", "FOO"},
                 });
 
-  // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MULTIPLE_STATES_DEMO");
+  {
+    // Publisher for visualizing the state machine
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MULTIPLE_STATES_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;
@@ -3437,6 +3962,20 @@ ros2 run yasmin_demos ros_serialization_demo
 ```
 
 ```cpp
+#include <filesystem>
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <rclcpp/rclcpp.hpp>
+
+#include "yasmin/state_machine.hpp"
+#include "yasmin_factory/yasmin_factory.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
 int main(int argc, char *argv[]) {
   // Initialize ROS 2
   rclcpp::init(argc, argv);
@@ -3474,17 +4013,21 @@ int main(int argc, char *argv[]) {
       "serialization and executes it.");
   sm->set_sigint_handler(true);
 
-  // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm,
-                                            "YASMIN_ROS_SERIALIZATION_DEMO");
+  {
+    // Publisher for visualizing the state machine
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm,
+                                              "YASMIN_ROS_SERIALIZATION_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
+
+  yasmin_ros::YasminNode::destroy_instance();
 
   // Shutdown ROS 2
   rclcpp::shutdown();
@@ -3518,6 +4061,7 @@ int main(int argc, char *argv[]) {
 #include "yasmin_ros/action_state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 using std::placeholders::_1;
@@ -3715,21 +4259,24 @@ int main(int argc, char *argv[]) {
                                          {yasmin_ros::basic_outcomes::ABORT,
                                           yasmin_ros::basic_outcomes::ABORT}});
 
-  // Publish FSM information for visualization
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_NAV2_DEMO");
-
-  // Execute the state machine
   auto blackboard = yasmin::Blackboard::make_shared();
   blackboard->set<int>("waypoints_num",
                        2); // Set the number of waypoints to navigate
 
-  try {
-    std::string outcome = (*sm.get())(blackboard);
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+  {
+    // Publish FSM information for visualization
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_NAV2_DEMO");
+
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())(blackboard);
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;

@@ -13,27 +13,30 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Helpers for choosing the clipboard container model."""
 
 from __future__ import annotations
 
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state_machine import StateMachine
 
-ContainerModel = StateMachine | Concurrence
+ContainerModel = StateMachine | Concurrence | OrthogonalState
 
 
 def get_container_kind(model: ContainerModel) -> str:
     """Return the logical container kind used by clipboard workflows."""
 
+    if isinstance(model, OrthogonalState):
+        return "orthogonal"
     return "concurrence" if isinstance(model, Concurrence) else "state_machine"
 
 
 def create_clipboard_container(kind: str, *, name: str = "Shelf") -> ContainerModel:
     """Create an empty clipboard container with the requested semantics."""
 
-    if kind == "concurrence":
-        return Concurrence(name=name)
+    if kind in ("concurrence", "orthogonal"):
+        cls = Concurrence if kind == "concurrence" else OrthogonalState
+        return cls(name=name)
     return StateMachine(name=name)
 
 

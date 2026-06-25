@@ -13,17 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Qt-free shelf workflow helpers.
-
-The shelf feature combines several editor concerns: container-kind matching,
-cross-container link preservation, status text, and split-view labelling. This
-module keeps those rules out of the Qt mixin so the behaviour can be covered by
-direct tests.
-"""
-
 from __future__ import annotations
 
-from typing import Iterable, List, Optional
+from typing import List, Optional
 
 PASTE_ACTION = "paste"
 MOVE_ACTION = "move"

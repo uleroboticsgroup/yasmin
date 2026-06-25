@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<StateMachine name="TestOrthogonal" outcomes="done fail" start_state="start">
+  <State name="start" class="TestParameterizedState" module="test.test_simple_state" type="py">
+    <Transition from="done" to="parallel"/>
+  </State>
+  <OrthogonalState name="parallel" default_outcome="timeout">
+    <Transition from="success" to="done"/>
+    <Transition from="timeout" to="fail"/>
+    <OutcomeMap outcome="success">
+      <Item state="A" outcome="done"/>
+      <Item state="B" outcome="done"/>
+    </OutcomeMap>
+    <Region name="A" outcomes="done" start_state="work">
+      <State name="work" class="TestParameterizedState" module="test.test_simple_state" type="py"/>
+    </Region>
+    <Region name="B" outcomes="done" start_state="work">
+      <State name="work" class="TestParameterizedState" module="test.test_simple_state" type="py"/>
+    </Region>
+  </OrthogonalState>
+  <FinalOutcome name="done"/>
+  <FinalOutcome name="fail"/>
+</StateMachine>

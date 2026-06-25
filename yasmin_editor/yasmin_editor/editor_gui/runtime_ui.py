@@ -13,14 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Runtime presentation helpers shared by the editor runtime UI.
-
-The runtime mixin contains the window-orchestration code, but the color and
-formatting rules used by the runtime badge, runtime log, and runtime buttons
-are easier to maintain as small pure helpers. Keeping these rules in one module
-also makes them directly unit-testable without driving a live editor window.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

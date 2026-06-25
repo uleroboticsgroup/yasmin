@@ -65,7 +65,7 @@ public:
   YASMIN_PTR_ALIASES(ServiceState)
 
   /**
-   * @brief Construct a ServiceState with a request handler and outcomes.
+   * @brief Construct a ServiceState with a request handler.
    *
    * @param srv_name The name of the service to call.
    * @param create_request_handler Function to create a service request.

@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Validation helpers for the YASMIN editor model."""
 
 from __future__ import annotations
 
@@ -22,6 +21,7 @@ from dataclasses import dataclass, field
 from typing import Iterable
 
 from .concurrence import Concurrence, iter_outcome_rule_values
+from .orthogonal_state import OrthogonalState
 from .state import State
 from .state_machine import StateMachine
 
@@ -109,6 +109,8 @@ def _validate_state(
     if isinstance(state, StateMachine):
         _validate_state_machine(state, result, path, parent_targets)
     elif isinstance(state, Concurrence):
+        _validate_concurrence(state, result, path, parent_targets)
+    elif isinstance(state, OrthogonalState):
         _validate_concurrence(state, result, path, parent_targets)
     else:
         _validate_leaf_state(state, result, path)
@@ -314,15 +316,18 @@ def _validate_state_machine(
 
 
 def _validate_concurrence(
-    concurrence: Concurrence,
+    concurrence: Concurrence | OrthogonalState,
     result: ValidationResult,
     path: str,
     parent_targets: set[str] | None,
 ) -> None:
-    """Validate a concurrence recursively."""
+    """Validate a concurrence or orthogonal state recursively."""
 
+    kind = (
+        "Orthogonal state" if isinstance(concurrence, OrthogonalState) else "Concurrence"
+    )
     if not concurrence.states:
-        result.add_warning(path, "Concurrence has no child states")
+        result.add_warning(path, f"{kind} has no child states")
 
     state_names = set(concurrence.states.keys())
     outcome_names = {outcome.name for outcome in concurrence.outcomes}
@@ -335,7 +340,7 @@ def _validate_concurrence(
     nested_parent_targets = state_names | outcome_names | (parent_targets or set())
 
     if not outcome_names:
-        result.add_error(path, "Concurrence requires at least one outcome")
+        result.add_error(path, f"{kind} requires at least one outcome")
 
     if concurrence.default_outcome and concurrence.default_outcome not in outcome_names:
         result.add_error(

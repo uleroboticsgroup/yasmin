@@ -28,6 +28,8 @@
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/concurrence.hpp"
+#include "yasmin/join_state.hpp"
+#include "yasmin/orthogonal_state.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin/types.hpp"
@@ -121,6 +123,16 @@ public:
    */
   yasmin::Concurrence::SharedPtr
   create_concurrence(tinyxml2::XMLElement *conc_elem);
+
+  /**
+   * @brief Creates an orthogonal state from an XML element.
+   *
+   * @param orth_elem Pointer to the XML element defining the orthogonal state.
+   * @return A shared pointer to the created OrthogonalState.
+   * @throws std::runtime_error If the XML structure is invalid.
+   */
+  yasmin::OrthogonalState::SharedPtr
+  create_orthogonal_state(tinyxml2::XMLElement *orth_elem);
 
   /**
    * @brief Recursively creates a state machine from an XML element.

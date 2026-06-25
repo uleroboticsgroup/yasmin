@@ -26,6 +26,7 @@
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/get_parameters_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 /**
@@ -173,17 +174,20 @@ int main(int argc, char *argv[]) {
                     {"outcome3", "FOO"},
                 });
 
-  // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PARAMETERS_DEMO");
+  {
+    // Publish state machine updates
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PARAMETERS_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;

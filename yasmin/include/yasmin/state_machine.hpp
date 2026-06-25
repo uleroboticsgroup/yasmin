@@ -91,6 +91,7 @@ public:
    * @param transitions A map of transitions where the key is the outcome
    *                    and the value is the target state name.
    * @param remappings A map of remappings keys for the blackboard.
+   * @param parameter_mappings Per-child parameter mappings.
    * @throws std::logic_error If the state is already registered or is an
    * outcome.
    * @throws std::invalid_argument If any transition has empty source or target,
@@ -193,11 +194,16 @@ public:
   /**
    * @brief Validates the state machine configuration.
    *
-   * @param strict Whether the validation is strict, which means checking if all
-   * state outcomes are used and all state machine outcomes are reached.
+   * @param strict_mode Whether the validation is strict, which means checking
+   * if all state outcomes are used and all state machine outcomes are reached.
    * @throws std::runtime_error If the state machine is misconfigured.
    */
   void validate(bool strict_mode = false);
+
+  /**
+   * @brief Configures the state machine and all child states.
+   */
+  void configure() override;
 
   /**
    * @brief Executes the state machine.
@@ -207,8 +213,6 @@ public:
    * @throws std::runtime_error If the execution cannot be completed due to
    *                            invalid states or transitions.
    */
-  void configure() override;
-
   std::string execute(Blackboard::SharedPtr blackboard) override;
 
   /**
@@ -295,7 +299,7 @@ private:
   std::vector<StartCallbackType> start_cbs;
   /// Transition callbacks executed before changing the state
   std::vector<TransitionCallbackType> transition_cbs;
-  /// End callbacks executed before the state machine
+  /// End callbacks executed after the state machine finishes
   std::vector<EndCallbackType> end_cbs;
 
   /**

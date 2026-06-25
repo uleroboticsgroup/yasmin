@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Compatibility exports for selection clipboard helpers."""
 
 from yasmin_editor.editor_gui.selection_bundle_ops import (
     collect_selection_bundle,

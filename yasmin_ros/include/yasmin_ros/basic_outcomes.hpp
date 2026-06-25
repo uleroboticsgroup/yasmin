@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef YASMIN_ROS__BASIC_OUTCOME_HPP_
-#define YASMIN_ROS__BASIC_OUTCOME_HPP_
+#ifndef YASMIN_ROS__BASIC_OUTCOMES_HPP_
+#define YASMIN_ROS__BASIC_OUTCOMES_HPP_
 
 #include <string>
 
@@ -71,13 +71,12 @@ constexpr char CANCEL[] = "canceled";
 constexpr char TIMEOUT[] = "timeout";
 
 /**
- * @brief Constant representing a timed-out action outcome.
+ * @brief Constant representing a retry action outcome.
  *
- * This string constant is used to indicate that an action did not complete
- * within the allocated time, resulting in a timeout status.
+ * This string constant is used to indicate that a retry should be performed.
  */
 constexpr char RETRY[] = "retry";
 } // namespace basic_outcomes
 } // namespace yasmin_ros
 
-#endif // YASMIN_ROS__BASIC_OUTCOME_HPP_
+#endif // YASMIN_ROS__BASIC_OUTCOMES_HPP_

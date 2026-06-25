@@ -13,13 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Compatibility layer for editor theme access.
-
-The theme implementation was split into dedicated modules to keep palette data,
-palette selection and Qt stylesheet generation separate. Existing imports keep
-working through this wrapper.
-"""
-
 from yasmin_editor.editor_gui.theme import (
     DARKMODE_PALETTE_NAME,
     DEFAULT_PALETTE_NAME,

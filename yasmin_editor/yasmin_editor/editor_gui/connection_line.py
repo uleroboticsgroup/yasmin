@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Graphical connection item used to render transitions between states."""
-
 import math
 from typing import TYPE_CHECKING, Any, List, Tuple, Union
 

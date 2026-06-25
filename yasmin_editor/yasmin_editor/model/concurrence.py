@@ -13,13 +13,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Concurrence model."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
 from .layout import Layout
+from .outcome import Outcome
 from .state import State
 from .text_block import TextBlock
 
@@ -99,6 +99,8 @@ class Concurrence(State):
         state_outcome: str,
     ) -> None:
         """Set one outcome rule entry for the concurrence."""
+        if not self.get_outcome(outcome):
+            self.add_outcome(Outcome(name=outcome))
         mapping = self.outcome_map.setdefault(outcome, {})
         state_outcomes = iter_outcome_rule_values(mapping.get(state_name, []))
         if state_outcome not in state_outcomes:

@@ -23,6 +23,7 @@ from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
@@ -40,41 +41,56 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
         x: float,
         y: float,
         is_concurrence: bool = False,
+        is_orthogonal: bool = False,
         remappings: Optional[Dict[str, str]] = None,
         outcomes: Optional[List[str]] = None,
         start_state: Optional[str] = None,
         default_outcome: Optional[str] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
-        model: Optional[Union[StateMachine, Concurrence, State]] = None,
+        model: Optional[Union[StateMachine, Concurrence, OrthogonalState, State]] = None,
         state_kind_label: Optional[str] = None,
         is_xml_reference: bool = False,
     ) -> None:
         super().__init__(-65, -40, 130, 80)
-        self.model: Union[StateMachine, Concurrence, State] = model or (
-            Concurrence(
+        if model is not None:
+            pass
+        elif is_orthogonal:
+            model = OrthogonalState(
                 name=name,
                 description=description,
                 default_outcome=default_outcome,
                 remappings=dict(remappings or {}),
                 outcomes=[Outcome(name=item) for item in outcomes or []],
             )
-            if is_concurrence
-            else StateMachine(
+        elif is_concurrence:
+            model = Concurrence(
+                name=name,
+                description=description,
+                default_outcome=default_outcome,
+                remappings=dict(remappings or {}),
+                outcomes=[Outcome(name=item) for item in outcomes or []],
+            )
+        else:
+            model = StateMachine(
                 name=name,
                 description=description,
                 start_state=start_state,
                 remappings=dict(remappings or {}),
                 outcomes=[Outcome(name=item) for item in outcomes or []],
             )
-        )
+        self.model: Union[StateMachine, Concurrence, OrthogonalState, State] = model
         self.plugin_info: Optional["PluginInfo"] = None
         self.is_state_machine = isinstance(self.model, StateMachine)
         self.is_concurrence = isinstance(self.model, Concurrence)
+        self.is_orthogonal = isinstance(self.model, OrthogonalState)
         self.is_xml_reference = bool(is_xml_reference)
-        self.state_kind_label = state_kind_label or (
-            "XML" if self.is_xml_reference else None
-        )
+        type_label = None
+        if self.is_orthogonal:
+            type_label = "ORTHOGONAL"
+        elif self.is_xml_reference:
+            type_label = "XML"
+        self.state_kind_label = state_kind_label or type_label
         self.child_states = {}
         self.final_outcomes = {}
         self.defaults: List[Dict[str, str]] = defaults or []
@@ -143,11 +159,15 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
 
     @property
     def default_outcome(self) -> Optional[str]:
-        return self.model.default_outcome if isinstance(self.model, Concurrence) else None
+        return (
+            self.model.default_outcome
+            if isinstance(self.model, (Concurrence, OrthogonalState))
+            else None
+        )
 
     @default_outcome.setter
     def default_outcome(self, value: Optional[str]) -> None:
-        if isinstance(self.model, Concurrence):
+        if isinstance(self.model, (Concurrence, OrthogonalState)):
             self.model.default_outcome = value
             self.update_label()
 
@@ -158,6 +178,9 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
         elif self.is_concurrence:
             self.setBrush(QBrush(PALETTE.container_concurrence_fill))
             self.setPen(QPen(PALETTE.container_concurrence_pen, 3))
+        elif self.is_orthogonal:
+            self.setBrush(QBrush(PALETTE.container_orthogonal_fill))
+            self.setPen(QPen(PALETTE.container_orthogonal_pen, 3))
         else:
             self.setBrush(QBrush(PALETTE.container_state_machine_fill))
             self.setPen(QPen(PALETTE.container_state_machine_pen, 3))
@@ -170,17 +193,27 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
 
     def update_label(self) -> None:
         self.title.setPlainText(self.name)
-        self.type_label.setPlainText(
-            self.state_kind_label
-            if self.state_kind_label
-            else ("CONCURRENCE" if self.is_concurrence else "STATE MACHINE")
-        )
+        if self.state_kind_label:
+            label_text = self.state_kind_label
+        elif self.is_orthogonal:
+            label_text = "ORTHOGONAL"
+        elif self.is_concurrence:
+            label_text = "CONCURRENCE"
+        else:
+            label_text = "STATE MACHINE"
+        self.type_label.setPlainText(label_text)
         tooltip_lines = [self.name]
         if self.description:
             tooltip_lines.append(self.description)
         if self.is_xml_reference:
             if getattr(self.model, "file_name", None):
                 tooltip_lines.append(f"XML: {self.model.file_name}")
+        elif self.is_orthogonal:
+            tooltip_lines.append(
+                f"Default: {self.default_outcome}"
+                if self.default_outcome
+                else "Default: (none)"
+            )
         elif self.is_concurrence:
             tooltip_lines.append(
                 f"Default: {self.default_outcome}"

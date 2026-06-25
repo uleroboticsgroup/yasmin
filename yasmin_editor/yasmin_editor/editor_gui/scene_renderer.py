@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Shared scene building helpers for the editor canvases."""
 
 from __future__ import annotations
 
@@ -29,6 +28,10 @@ from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence, iter_outcome_rule_values
 from yasmin_editor.model.layout import OutcomePlacement
+from yasmin_editor.model.orthogonal_state import (
+    OrthogonalState,
+    iter_outcome_rule_values as ort_iter_outcome_rule_values,
+)
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
@@ -42,7 +45,7 @@ class _PluginInfoLike(Protocol):
 
 SceneStateNode = StateNode | ContainerStateNode
 SceneTargetView = SceneStateNode | FinalOutcomeNode
-ContainerModel = StateMachine | Concurrence
+ContainerModel = StateMachine | Concurrence | OrthogonalState
 
 
 @dataclass(slots=True)
@@ -134,6 +137,17 @@ def create_state_view(
             x,
             y,
             True,
+            description=state_model.description,
+            defaults=[],
+            model=state_model,
+        )
+    elif isinstance(state_model, OrthogonalState):
+        node = ContainerStateNode(
+            state_model.name,
+            x,
+            y,
+            False,
+            is_orthogonal=True,
             description=state_model.description,
             defaults=[],
             model=state_model,
@@ -266,6 +280,19 @@ def render_container_scene(
                     to_view,
                     transition.source_outcome,
                 )
+        return
+
+    if isinstance(model, OrthogonalState):
+        for outcome_name, mapping in model.outcome_map.items():
+            to_view = context.resolve_primary_outcome_view(outcome_name)
+            if to_view is None:
+                continue
+            for state_name, source_outcomes in mapping.items():
+                from_view = context.state_nodes.get(state_name)
+                if from_view is None:
+                    continue
+                for source_outcome in ort_iter_outcome_rule_values(source_outcomes):
+                    context.create_connection_view(from_view, to_view, source_outcome)
         return
 
     for outcome_name, mapping in model.outcome_map.items():

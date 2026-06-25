@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Selection snapshot builders used by copy, move, and extract actions."""
 
 from __future__ import annotations
 
@@ -27,6 +26,7 @@ from yasmin_editor.editor_gui.selection_models import (
     SelectionBundle,
 )
 from yasmin_editor.model.concurrence import Concurrence, iter_outcome_rule_values
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.text_block import TextBlock
 
@@ -34,11 +34,13 @@ from yasmin_editor.model.text_block import TextBlock
 def create_empty_bundle(container_model: ContainerModel) -> SelectionBundle:
     """Create a bundle with the correct source container kind."""
 
-    return SelectionBundle(
-        source_kind=(
-            "concurrence" if isinstance(container_model, Concurrence) else "state_machine"
-        )
-    )
+    if isinstance(container_model, OrthogonalState):
+        source_kind = "orthogonal"
+    elif isinstance(container_model, Concurrence):
+        source_kind = "concurrence"
+    else:
+        source_kind = "state_machine"
+    return SelectionBundle(source_kind=source_kind)
 
 
 def copy_selected_states(
@@ -134,7 +136,7 @@ def copy_state_machine_links(
 
 def copy_concurrence_rules(
     bundle: SelectionBundle,
-    container_model: Concurrence,
+    container_model: Concurrence | OrthogonalState,
     selected_state_names: set[str],
     selected_outcome_names: set[str],
 ) -> None:

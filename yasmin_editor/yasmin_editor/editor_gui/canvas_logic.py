@@ -13,14 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Qt-free helpers for canvas navigation, read-only state, and XML references."""
-
 from __future__ import annotations
 
 import os
 from typing import Iterable
 
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 
 _XML_PATH_ATTRIBUTES = (
     "file_path",
@@ -174,7 +173,7 @@ def state_has_available_outcomes(
     if not outcomes:
         return False
 
-    if isinstance(current_container_model, Concurrence):
+    if isinstance(current_container_model, (Concurrence, OrthogonalState)):
         return True
 
     transitions = getattr(current_container_model, "transitions", {}) or {}

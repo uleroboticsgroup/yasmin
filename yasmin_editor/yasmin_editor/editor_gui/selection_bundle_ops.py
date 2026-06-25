@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Compatibility exports for selection bundle collection, paste, and removal."""
 
 from yasmin_editor.editor_gui.selection_bundle_collect import collect_selection_bundle
 from yasmin_editor.editor_gui.selection_bundle_geometry import get_bundle_bounds

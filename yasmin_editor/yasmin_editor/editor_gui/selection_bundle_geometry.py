@@ -13,12 +13,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Geometry helpers for clipboard bundles."""
 
 from __future__ import annotations
 
 from typing import Iterable
-
 from yasmin_editor.editor_gui.selection_models import SelectionBundle
 
 

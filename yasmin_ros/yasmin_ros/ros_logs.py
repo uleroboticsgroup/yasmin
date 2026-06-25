@@ -38,12 +38,11 @@ def ros_log_message(
 
     This function logs a message using a ROS 2 logger.
 
-    @param text: The debug message to log.
-    @type text: str
-
-    @raises: None
-
-    @return: None
+    @param level The log level (ERROR, WARN, INFO, DEBUG).
+    @param file The source file where the log function is called.
+    @param function The function where the log function is called.
+    @param line The line number in the source file.
+    @param text The message to log.
     """
 
     message = f"[{file}:{function}:{line}] {text}"
@@ -76,10 +75,6 @@ def set_ros_loggers(node: Node = None) -> None:
 
     @param node: ROS 2 node to use as logger node. If None, use YasminNode.
     @type node: Node
-
-    @raises: None
-
-    @return: None
     """
 
     if node is None:

@@ -50,6 +50,7 @@ from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.parameter import Parameter
 from yasmin_editor.model.state import State
@@ -121,19 +122,21 @@ class EditorModelMixin:
     def create_container_model(
         self,
         name: str,
-        is_concurrence: bool,
+        is_concurrence: bool = False,
+        is_orthogonal: bool = False,
         outcomes: Optional[List[str]] = None,
         remappings: Optional[Dict[str, str]] = None,
         start_state: Optional[str] = None,
         default_outcome: Optional[str] = None,
         description: str = "",
         parameter_mappings: Optional[Dict[str, str]] = None,
-    ) -> StateMachine | Concurrence:
+    ) -> StateMachine | Concurrence | OrthogonalState:
         """Create one editor container model from dialog input."""
 
         return build_container_model(
             name,
             is_concurrence=is_concurrence,
+            is_orthogonal=is_orthogonal,
             outcomes=outcomes,
             remappings=remappings,
             start_state=start_state,
@@ -224,6 +227,7 @@ class EditorModelMixin:
         plugin_info: PluginInfo,
         is_state_machine: bool = False,
         is_concurrence: bool = False,
+        is_orthogonal: bool = False,
         outcomes: List[str] = None,
         remappings: Dict[str, str] = None,
         start_state: str = None,
@@ -245,10 +249,11 @@ class EditorModelMixin:
             )
             return
 
-        if is_state_machine or is_concurrence:
+        if is_state_machine or is_concurrence or is_orthogonal:
             model = self.create_container_model(
                 name=name,
                 is_concurrence=is_concurrence,
+                is_orthogonal=is_orthogonal,
                 outcomes=outcomes,
                 remappings=remappings,
                 start_state=start_state,
@@ -285,30 +290,43 @@ class EditorModelMixin:
         self.start_pending_node_placement(node)
         self.record_history_checkpoint()
 
-    def add_container(self, is_concurrence: bool = False) -> None:
-        """Add a new container (State Machine or Concurrence)."""
-        dialog = (
-            ConcurrenceDialog(parent=self)
-            if is_concurrence
-            else StateMachineDialog(parent=self)
-        )
+    def add_container(
+        self, is_concurrence: bool = False, is_orthogonal: bool = False
+    ) -> None:
+        """Add a new container (State Machine, Concurrence, or OrthogonalState)."""
+        if is_orthogonal:
+            dialog = OrthogonalStateDialog(parent=self)
+            dialog_class = "orthogonal"
+        elif is_concurrence:
+            dialog = ConcurrenceDialog(parent=self)
+            dialog_class = "concurrence"
+        else:
+            dialog = StateMachineDialog(parent=self)
+            dialog_class = "state_machine"
         if dialog.exec_():
-            result = (
-                dialog.get_concurrence_data()
-                if is_concurrence
-                else dialog.get_state_machine_data()
-            )
+            if dialog_class == "orthogonal":
+                result = dialog.get_orthogonal_state_data()
+                param = result[2] if result else None
+            elif dialog_class == "concurrence":
+                result = dialog.get_concurrence_data()
+                param = result[2] if result else None
+            else:
+                result = dialog.get_state_machine_data()
+                param = result[2] if result else None
             if result:
                 name, outcomes, param, remappings, description, defaults = result
                 self.create_state_node(
                     name=name,
                     plugin_info=None,
-                    is_state_machine=not is_concurrence,
+                    is_state_machine=not is_concurrence and not is_orthogonal,
                     is_concurrence=is_concurrence,
+                    is_orthogonal=is_orthogonal,
                     outcomes=outcomes,
                     remappings=remappings,
-                    start_state=param if not is_concurrence else None,
-                    default_outcome=param if is_concurrence else None,
+                    start_state=(
+                        param if not is_concurrence and not is_orthogonal else None
+                    ),
+                    default_outcome=param if is_concurrence or is_orthogonal else None,
                     description=description,
                     defaults=defaults,
                 )
@@ -340,15 +358,19 @@ class EditorModelMixin:
 
     @property
     def default_outcome(self) -> Optional[str]:
-        """Return the default outcome of the current concurrence container."""
+        """Return the default outcome of the current concurrence/orthogonal container."""
         model = self.current_container_model
-        return model.default_outcome if isinstance(model, Concurrence) else None
+        return (
+            model.default_outcome
+            if isinstance(model, (Concurrence, OrthogonalState))
+            else None
+        )
 
     @default_outcome.setter
     def default_outcome(self, value: Optional[str]) -> None:
-        """Update the default outcome of the current concurrence container."""
+        """Update the default outcome of the current concurrence/orthogonal container."""
         model = self.current_container_model
-        if isinstance(model, Concurrence):
+        if isinstance(model, (Concurrence, OrthogonalState)):
             model.default_outcome = value
 
     def clear_current_scene(self) -> None:
@@ -699,7 +721,7 @@ class EditorModelMixin:
 
     def register_connection_in_model(self, from_node, to_node, outcome: str) -> None:
         owner_model = self.current_container_model
-        if isinstance(owner_model, Concurrence):
+        if isinstance(owner_model, (Concurrence, OrthogonalState)):
             owner_model.set_outcome_rule(to_node.name, from_node.name, outcome)
             return
         owner_model.add_transition(
@@ -713,7 +735,7 @@ class EditorModelMixin:
 
     def unregister_connection_in_model(self, connection: ConnectionLine) -> None:
         owner_model = self.current_container_model
-        if isinstance(owner_model, Concurrence):
+        if isinstance(owner_model, (Concurrence, OrthogonalState)):
             owner_model.remove_outcome_rule(
                 connection.to_node.name,
                 connection.from_node.name,

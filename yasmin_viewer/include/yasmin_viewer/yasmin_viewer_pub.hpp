@@ -24,6 +24,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/concurrence.hpp"
+#include "yasmin/orthogonal_state.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin/types.hpp"
@@ -44,8 +45,8 @@ public:
    * @brief Constructs YasminViewerPub with a given ROS 2 node, state machine
    * name, and state machine instance.
    * @param node Shared pointer to the ROS 2 node.
-   * @param fsm_name Name of the finite state machine.
    * @param fsm Shared pointer to the StateMachine instance to be published.
+   * @param fsm_name Name of the finite state machine.
    */
   YasminViewerPub(const rclcpp::Node::SharedPtr &node,
                   yasmin::StateMachine::SharedPtr fsm,
@@ -54,15 +55,15 @@ public:
   /**
    * @brief Constructs YasminViewerPub with a default ROS 2 node instance, state
    * machine name, and state machine instance.
-   * @param fsm_name Name of the finite state machine.
    * @param fsm Shared pointer to the StateMachine instance to be published.
+   * @param fsm_name Name of the finite state machine.
    */
   YasminViewerPub(yasmin::StateMachine::SharedPtr fsm,
                   const std::string &fsm_name);
 
   /**
-   * @brief Constructs YasminViewerPub with a given ROS 2 node, state machine
-   * name, and state machine instance.
+   * @brief Constructs YasminViewerPub with a given ROS 2 node and state
+   * machine.
    * @param node Shared pointer to the ROS 2 node.
    * @param fsm Shared pointer to the StateMachine instance to be published.
    */
@@ -70,8 +71,8 @@ public:
                   yasmin::StateMachine::SharedPtr fsm);
 
   /**
-   * @brief Constructs YasminViewerPub with a default ROS 2 node instance, state
-   * machine name, and state machine instance.
+   * @brief Constructs YasminViewerPub with a default ROS 2 node instance and
+   * state machine.
    * @param fsm Shared pointer to the StateMachine instance to be published.
    */
   YasminViewerPub(yasmin::StateMachine::SharedPtr fsm);

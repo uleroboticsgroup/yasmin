@@ -33,6 +33,7 @@ from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -174,7 +175,7 @@ class StateMachineCanvas(QGraphicsView):
         if self.editor_ref is None:
             return False
         current_model = self.editor_ref.current_container_model
-        if isinstance(current_model, Concurrence):
+        if isinstance(current_model, (Concurrence, OrthogonalState)):
             return not isinstance(source_node, FinalOutcomeNode) and isinstance(
                 target_node, FinalOutcomeNode
             )

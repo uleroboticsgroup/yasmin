@@ -12,7 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Pure helper functions for container metadata panels and rename rules."""
 
 from __future__ import annotations
 
@@ -20,6 +19,7 @@ from dataclasses import dataclass
 from typing import Iterable, Sequence
 
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state_machine import StateMachine
 
 
@@ -33,7 +33,7 @@ class ContainerMetadataView:
     current_selector_value: str | None
 
 
-ContainerModel = StateMachine | Concurrence
+ContainerModel = StateMachine | Concurrence | OrthogonalState
 
 
 def build_container_metadata_view(model: ContainerModel) -> ContainerMetadataView:
@@ -47,8 +47,9 @@ def build_container_metadata_view(model: ContainerModel) -> ContainerMetadataVie
             current_selector_value=model.start_state,
         )
 
+    kind = "Orthogonal State" if isinstance(model, OrthogonalState) else "Concurrence"
     return ContainerMetadataView(
-        name_label_html="<b>Concurrence Name:</b>",
+        name_label_html=f"<b>{kind} Name:</b>",
         selector_label_html="<b>Default Outcome:</b>",
         selector_items=[outcome.name for outcome in model.outcomes],
         current_selector_value=model.default_outcome,

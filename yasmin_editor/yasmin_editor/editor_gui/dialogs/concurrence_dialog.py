@@ -13,12 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Dialog for creating and editing concurrence containers."""
-
 from typing import Dict, List, Optional, Tuple
-
 from PyQt5.QtWidgets import QComboBox, QDialog, QLabel
-
 from yasmin_editor.editor_gui.dialogs.container_dialog_base import ContainerDialogBase
 
 

@@ -52,7 +52,7 @@ public:
    * @param callback A function pointer to the callback function that
    *                 will be executed when this state is activated.
    *
-   * @throw std::invalid_argument If the outcomes set is empty.
+   * @throws std::invalid_argument If the outcomes set is empty.
    */
   CbState(const Outcomes &outcomes, CbStateCallback callback);
 
@@ -67,7 +67,7 @@ public:
    *
    * @return The result of the callback function execution as a string.
    *
-   * @throw std::runtime_error If the callback execution fails.
+   * @throws std::runtime_error If the callback execution fails.
    */
   std::string execute(Blackboard::SharedPtr blackboard) override;
 };

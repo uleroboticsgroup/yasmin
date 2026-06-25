@@ -12,12 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Declarative action definitions for menus and the compact main toolbar.
-
-The toolbar intentionally stays compact. Core actions remain directly visible,
-while denser workflows are exposed through menus, shortcuts, and toolbar
-overflow buttons.
-"""
 
 from __future__ import annotations
 
@@ -163,6 +157,13 @@ ADD_MENU_ACTIONS: tuple[ActionSpec, ...] = (
         "add_concurrence",
         tool_tip="Add a concurrence container.",
         status_tip="Create a new concurrence container.",
+    ),
+    ActionSpec(
+        "add_orthogonal_state_action",
+        "Add Orthogonal State",
+        "add_orthogonal_state",
+        tool_tip="Add an orthogonal state region container.",
+        status_tip="Create a new orthogonal state container.",
     ),
     ActionSpec(
         "add_final_action",

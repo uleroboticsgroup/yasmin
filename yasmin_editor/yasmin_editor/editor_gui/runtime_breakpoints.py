@@ -13,17 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Pure runtime-breakpoint helpers used by the editor runtime mixin.
-
-The editor runtime mixin still owns the Qt menu and status-bar wiring, but the
-breakpoint path rules themselves are independent of Qt. Keeping them here makes
-it easier to validate breakpoint behavior without constructing editor widgets.
-"""
-
 from __future__ import annotations
 
 from typing import Iterable
-
 from yasmin_editor.editor_gui.runtime_state import normalize_runtime_path
 
 BreakpointPath = tuple[str, ...]

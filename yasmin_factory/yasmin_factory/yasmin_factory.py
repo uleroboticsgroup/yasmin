@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Miguel Ángel González Santamarta
+# Copyright (C) 2026 Miguel Ángel González Santamarta
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ from typing import Dict
 
 from ament_index_python import get_package_share_path
 from lxml import etree as ET
-from yasmin import Concurrence, State, StateMachine
+from yasmin import Concurrence, OrthogonalState, State, StateMachine
 from yasmin_pybind_bridge import CppStateFactory
 
 
@@ -130,6 +130,33 @@ class YasminFactory:
 
         return concurrence
 
+    def _create_orthogonal_state(self, orth_elem: ET.Element) -> OrthogonalState:
+        default_outcome = orth_elem.attrib.get("default_outcome", "")
+
+        outcome_map = {}
+        for child in orth_elem:
+            if child.tag == "OutcomeMap":
+                outcome_name = child.attrib["outcome"]
+                outcome_map[outcome_name] = {}
+                for item in child:
+                    if item.tag == "Item":
+                        outcome_map[outcome_name][item.attrib["state"]] = item.attrib[
+                            "outcome"
+                        ]
+
+        ort = OrthogonalState(default_outcome, outcome_map)
+
+        for child in orth_elem:
+            if child.tag == "Region":
+                region_name = child.attrib["name"]
+                region_sm = self.create_sm(child)
+                region_sm.set_name(region_name)
+                ort.add_region(region_name, region_sm)
+
+        self._add_blackboard_keys(ort, orth_elem)
+        self._add_parameters(ort, orth_elem)
+        return ort
+
     def create_sm(self, root: ET.Element) -> StateMachine:
         """
         Recursively creates a state machine from an XML element.
@@ -188,6 +215,9 @@ class YasminFactory:
 
             elif child.tag == "StateMachine":
                 state = self.create_sm(child)
+
+            elif child.tag == "OrthogonalState":
+                state = self._create_orthogonal_state(child)
 
             else:
                 continue
@@ -389,28 +419,6 @@ class YasminFactory:
             return value
 
         raise ValueError(f"Unsupported dict default type '{normalized_type}'")
-
-    def _add_parameters(self, owner, parent_elem: ET.Element) -> None:
-        """Parse Param elements into state-local parameters."""
-        for param_elem in parent_elem.findall("Param"):
-            parameter_name = param_elem.attrib["name"]
-            parameter_description = param_elem.attrib.get("description", "")
-            default_type = param_elem.attrib.get("default_type", "str")
-            default_value = param_elem.attrib.get("default_value")
-
-            if default_value is not None:
-                value = self._parse_key_value(default_value, default_type)
-                owner.declare_parameter(parameter_name, parameter_description, value)
-            elif parameter_description:
-                owner.declare_parameter(parameter_name, parameter_description)
-            else:
-                owner.declare_parameter(parameter_name)
-
-    def _get_parameter_mappings(self, parent_elem: ET.Element) -> Dict[str, str]:
-        parameter_mappings = {}
-        for remap_elem in parent_elem.findall("ParamRemap"):
-            parameter_mappings[remap_elem.attrib["old"]] = remap_elem.attrib["new"]
-        return parameter_mappings
 
     def _add_parameters(self, owner, parent_elem: ET.Element) -> None:
         """Parse Param elements into state-local parameters."""

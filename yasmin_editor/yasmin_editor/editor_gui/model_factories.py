@@ -13,19 +13,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""Helpers for resolving plugin metadata and constructing editor models.
-
-The main editor window needs to translate plugin-manager entries into concrete
-state models, but that mapping logic does not need to live inside a Qt mixin.
-Keeping it here makes plugin resolution and model creation easy to test without
-booting the full editor.
-"""
 
 from __future__ import annotations
 
 from typing import Any
 
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
@@ -78,7 +72,7 @@ def resolve_plugin_info_for_model(
             )
 
     if plugin is None:
-        raise ValueError(f"Unable to resolve plugin for state '{model.name}'")
+        return None
     return plugin
 
 
@@ -113,15 +107,16 @@ def create_leaf_model(
 def create_container_model(
     name: str,
     *,
-    is_concurrence: bool,
+    is_concurrence: bool = False,
+    is_orthogonal: bool = False,
     outcomes: list[str] | None = None,
     remappings: dict[str, str] | None = None,
     start_state: str | None = None,
     default_outcome: str | None = None,
     description: str = "",
     parameter_mappings: dict[str, str] | None = None,
-) -> StateMachine | Concurrence:
-    """Create one state-machine or concurrence model for the editor."""
+) -> StateMachine | Concurrence | OrthogonalState:
+    """Create one state-machine, concurrence, or orthogonal model for the editor."""
 
     common_kwargs = dict(
         name=name,
@@ -129,8 +124,13 @@ def create_container_model(
         remappings=dict(remappings or {}),
         parameter_mappings=dict(parameter_mappings or {}),
     )
-    if is_concurrence:
-        model: StateMachine | Concurrence = Concurrence(
+    if is_orthogonal:
+        model: StateMachine | Concurrence | OrthogonalState = OrthogonalState(
+            default_outcome=default_outcome,
+            **common_kwargs,
+        )
+    elif is_concurrence:
+        model = Concurrence(
             default_outcome=default_outcome,
             **common_kwargs,
         )
