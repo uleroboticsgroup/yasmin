@@ -27,34 +27,35 @@ RegionBarrier::RegionBarrier(int party_count)
 }
 
 void RegionBarrier::arrive_and_wait() {
-  std::unique_lock<std::mutex> lock(mtx_);
-  arrived_++;
-  if (arrived_ < party_count_) {
-    int my_gen = generation_;
-    cv_.wait(lock,
-             [this, my_gen] { return generation_ != my_gen || canceled_; });
+  std::unique_lock<std::mutex> lock(this->mtx_);
+  this->arrived_++;
+  if (this->arrived_ < this->party_count_) {
+    int my_gen = this->generation_;
+    this->cv_.wait(lock, [this, my_gen] {
+      return this->generation_ != my_gen || this->canceled_;
+    });
   } else {
-    arrived_ = 0;
-    generation_++;
-    cv_.notify_all();
+    this->arrived_ = 0;
+    this->generation_++;
+    this->cv_.notify_all();
   }
 }
 
 void RegionBarrier::cancel() {
-  std::lock_guard<std::mutex> lock(mtx_);
-  canceled_ = true;
-  cv_.notify_all();
+  std::lock_guard<std::mutex> lock(this->mtx_);
+  this->canceled_ = true;
+  this->cv_.notify_all();
 }
 
 void RegionBarrier::reset() {
-  std::lock_guard<std::mutex> lock(mtx_);
-  party_count_ = initial_count_;
-  arrived_ = 0;
-  canceled_ = false;
-  generation_++;
-  cv_.notify_all();
+  std::lock_guard<std::mutex> lock(this->mtx_);
+  this->party_count_ = this->initial_count_;
+  this->arrived_ = 0;
+  this->canceled_ = false;
+  this->generation_++;
+  this->cv_.notify_all();
 }
 
-int RegionBarrier::get_party_count() const { return initial_count_; }
+int RegionBarrier::get_party_count() const { return this->initial_count_; }
 
 } // namespace yasmin

@@ -86,7 +86,6 @@ from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
-from yasmin_editor.model.text_block import TextBlock
 from yasmin_editor.model.transition import Transition
 
 

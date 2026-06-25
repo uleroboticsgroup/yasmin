@@ -54,7 +54,7 @@ public:
     };
 
     // Create a service that will use the callback function to handle requests.
-    this->srv_ = create_service<example_interfaces::srv::AddTwoInts>(
+    this->srv_ = this->create_service<example_interfaces::srv::AddTwoInts>(
         "add_two_ints", handle_add_two_ints);
 
     RCLCPP_INFO(this->get_logger(), "Add Two Ints Service started");

@@ -336,7 +336,7 @@ def merge_container_keys(
     merged: Dict[str, Dict[str, str]] = {}
 
     for key_name in sorted(
-        set(derived_keys.keys()) | set(metadata_map.keys()),
+        set(derived_keys) | set(metadata_map),
         key=str.lower,
     ):
         metadata = dict(metadata_map.get(key_name, {}))

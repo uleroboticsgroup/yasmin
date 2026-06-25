@@ -20,7 +20,6 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -168,21 +167,6 @@ private:
    */
   std::string
   evaluate_outcomes(const std::vector<std::string> &region_outcomes) const;
-
-  /**
-   * @brief Generates the set of possible outcomes for the OrthogonalState.
-   * @param outcome_map A map of region names to their corresponding outcomes.
-   * @param default_outcome The default outcome to return if no specific outcome
-   * is determined.
-   * @return A set of possible outcomes for the OrthogonalState.
-   *
-   * This method combines the outcomes from the outcome map and the default
-   * outcome to create a comprehensive set of possible outcomes for the
-   * OrthogonalState.
-   */
-  static Outcomes
-  generate_possible_outcomes(const OutcomeMap &outcome_map,
-                             const std::string &default_outcome);
 };
 
 } // namespace yasmin

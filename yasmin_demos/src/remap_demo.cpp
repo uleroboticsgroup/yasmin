@@ -14,7 +14,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <chrono>
-#include <iostream>
 #include <memory>
 #include <string>
 
@@ -83,8 +82,8 @@ public:
    * @return std::string The outcome of the execution: "outcome3".
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    std::string datga = blackboard->get<std::string>("bar_data");
-    YASMIN_LOG_INFO("%s", datga.c_str());
+    const auto &data = blackboard->get<std::string>("bar_data");
+    YASMIN_LOG_INFO("%s", data.c_str());
     return yasmin_ros::basic_outcomes::SUCCEED;
   }
 };

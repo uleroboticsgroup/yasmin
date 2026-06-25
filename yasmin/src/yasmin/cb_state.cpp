@@ -29,7 +29,7 @@ std::string CbState::execute(Blackboard::SharedPtr blackboard) {
 
   try {
     // Call the callback function and return the result
-    return callback(blackboard);
+    return this->callback(blackboard);
 
   } catch (const std::exception &e) {
     // Handle any errors that occur during callback execution

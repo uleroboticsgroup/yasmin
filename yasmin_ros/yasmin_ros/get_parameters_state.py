@@ -20,8 +20,8 @@ from rclpy.node import Node
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+from yasmin_ros.ros_state_utils import resolve_node
 
 
 class GetParametersState(State):
@@ -45,7 +45,7 @@ class GetParametersState(State):
             node (Node, optional): A shared pointer to the ROS 2 node.
         """
         self._parameters = parameters
-        self._node = node if node else YasminNode.get_instance()
+        self._node = resolve_node(node)
 
         super().__init__([SUCCEED, ABORT])
 
@@ -66,29 +66,30 @@ class GetParametersState(State):
 
             yasmin.YASMIN_LOG_INFO(f"Retrieving parameter '{param_name}'")
 
-            parameter = self._node.get_parameter(param_name).get_parameter_value()
+            parameter = self._node.get_parameter(param_name)
             parameter_type = rclpy.Parameter.Type(
                 self._node.get_parameter_type(param_name)
             )
+            parameter_value = parameter.get_parameter_value()
 
             if parameter_type == rclpy.Parameter.Type.BOOL:
-                value = parameter.bool_value
+                value = parameter_value.bool_value
             elif parameter_type == rclpy.Parameter.Type.INTEGER:
-                value = parameter.integer_value
+                value = parameter_value.integer_value
             elif parameter_type == rclpy.Parameter.Type.DOUBLE:
-                value = parameter.double_value
+                value = parameter_value.double_value
             elif parameter_type == rclpy.Parameter.Type.STRING:
-                value = parameter.string_value
+                value = parameter_value.string_value
             elif parameter_type == rclpy.Parameter.Type.BOOL_ARRAY:
-                value = parameter.bool_array_value
+                value = parameter_value.bool_array_value
             elif parameter_type == rclpy.Parameter.Type.INTEGER_ARRAY:
-                value = parameter.integer_array_value
+                value = parameter_value.integer_array_value
             elif parameter_type == rclpy.Parameter.Type.DOUBLE_ARRAY:
-                value = parameter.double_array_value
+                value = parameter_value.double_array_value
             elif parameter_type == rclpy.Parameter.Type.STRING_ARRAY:
-                value = parameter.string_array_value
+                value = parameter_value.string_array_value
             elif parameter_type == rclpy.Parameter.Type.BYTE_ARRAY:
-                value = parameter.byte_array_value
+                value = parameter_value.byte_array_value
             else:
                 yasmin.YASMIN_LOG_ERROR(
                     f"Unsupported parameter type for '{param_name}': {self._node.get_parameter_type(param_name)}"

@@ -17,7 +17,6 @@
 #define YASMIN__STATE_HPP_
 
 #include <atomic>
-#include <functional>
 #include <string>
 #include <unordered_map>
 

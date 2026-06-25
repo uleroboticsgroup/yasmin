@@ -43,7 +43,7 @@ def build_container_metadata_view(model: ContainerModel) -> ContainerMetadataVie
         return ContainerMetadataView(
             name_label_html="<b>State Machine Name:</b>",
             selector_label_html="<b>Start State:</b>",
-            selector_items=sorted(model.states.keys()),
+            selector_items=sorted(model.states),
             current_selector_value=model.start_state,
         )
 

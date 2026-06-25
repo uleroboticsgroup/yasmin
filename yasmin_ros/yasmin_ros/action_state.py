@@ -25,9 +25,9 @@ from action_msgs.msg import GoalStatus
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL, TIMEOUT
 from yasmin_ros.ros_clients_cache import ROSClientsCache
+from yasmin_ros.ros_state_utils import resolve_node, wait_with_retry
 
 
 class ActionState(State):
@@ -109,11 +109,7 @@ class ActionState(State):
         if self._wait_timeout or self._response_timeout:
             outcomes.add(TIMEOUT)
 
-        ## Shared pointer to the ROS 2 node.
-        self._node: Node = node
-
-        if self._node is None:
-            self._node: Node = YasminNode.get_instance()
+        self._node: Node = resolve_node(node)
 
         ## Name of the action to communicate with.
         self._action_name: str = action_name
@@ -164,22 +160,14 @@ class ActionState(State):
 
         yasmin.YASMIN_LOG_INFO(f"Waiting for action '{self._action_name}'")
 
-        while not self._action_client.wait_for_server(self._wait_timeout):
-            if self.is_canceled():
-                return CANCEL
-
-            yasmin.YASMIN_LOG_WARN(
-                f"Timeout reached, action '{self._action_name}' is not available"
-            )
-
-            if self._maximum_retry > 0:
-                if retry_count < self._maximum_retry:
-                    retry_count += 1
-                    yasmin.YASMIN_LOG_WARN(
-                        f"Retrying to connect to action '{self._action_name}' ({retry_count}/{self._maximum_retry})"
-                    )
-                else:
-                    return TIMEOUT
+        outcome = wait_with_retry(
+            lambda: self._action_client.wait_for_server(self._wait_timeout),
+            self._maximum_retry,
+            f"Timeout reached, action '{self._action_name}' is not available",
+            cancel_check=self.is_canceled,
+        )
+        if outcome is not None:
+            return outcome
 
         if self.is_canceled():
             return CANCEL
@@ -197,22 +185,15 @@ class ActionState(State):
         )
         send_goal_future.add_done_callback(self._goal_response_callback)
 
-        # Wait for action to be done
-        while not self._action_done_event.wait(self._response_timeout):
-            if self.is_canceled():
-                return CANCEL
-
-            yasmin.YASMIN_LOG_WARN(
-                f"Timeout reached while waiting for response from action '{self._action_name}'"
-            )
-
-            if retry_count < self._maximum_retry:
-                retry_count += 1
-                yasmin.YASMIN_LOG_WARN(
-                    f"Retrying to wait for action '{self._action_name}' response ({retry_count}/{self._maximum_retry})"
-                )
-            else:
-                return TIMEOUT
+        outcome = wait_with_retry(
+            lambda: self._action_done_event.wait(self._response_timeout),
+            self._maximum_retry,
+            f"Timeout reached while waiting for response from "
+            f"action '{self._action_name}'",
+            cancel_check=self.is_canceled,
+        )
+        if outcome is not None:
+            return outcome
 
         if self.is_canceled():
             return CANCEL

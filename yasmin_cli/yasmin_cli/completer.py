@@ -216,7 +216,7 @@ def get_state_machine_input_keys(state_machine_file: str) -> list[dict[str, str]
         if strip_namespace(child.tag) != "Key":
             continue
 
-        key_type = (child.attrib.get("type") or "").strip().upper()
+        key_type = (child.attrib.get("type") or "").strip().lower()
         if key_type not in INPUT_KEY_TYPES:
             continue
 

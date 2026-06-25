@@ -58,8 +58,6 @@ def _format_plugin_header(plugin) -> str:
     """Format the compact plugin header line."""
     if plugin.plugin_type == "python":
         source = f"module={plugin.module}"
-    elif plugin.plugin_type == "cpp":
-        source = f"package={plugin.package_name}"
     else:
         source = f"package={plugin.package_name}"
 

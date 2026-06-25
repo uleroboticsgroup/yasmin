@@ -58,7 +58,7 @@ void LoadPcdState::configure() {
 }
 
 std::string LoadPcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
-  if (file_path_.empty()) {
+  if (this->file_path_.empty()) {
     YASMIN_LOG_WARN("Parameter 'file_path' is empty");
     return "aborted";
   }
@@ -70,10 +70,10 @@ std::string LoadPcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
 
   pcl::PCDReader reader;
   const int result =
-      reader.read(file_path_, *output_cloud, origin, orientation, pcd_version);
+      reader.read(this->file_path_, *output_cloud, origin, orientation, pcd_version);
 
   if (result < 0) {
-    YASMIN_LOG_WARN("Failed to load PCD file '%s'", file_path_.c_str());
+    YASMIN_LOG_WARN("Failed to load PCD file '%s'", this->file_path_.c_str());
     return "aborted";
   }
 

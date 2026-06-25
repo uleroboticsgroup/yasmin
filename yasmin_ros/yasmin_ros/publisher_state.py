@@ -22,7 +22,7 @@ from rclpy.callback_groups import CallbackGroup
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.yasmin_node import YasminNode
+from yasmin_ros.ros_state_utils import resolve_node
 from yasmin_ros.basic_outcomes import SUCCEED
 from yasmin_ros.ros_clients_cache import ROSClientsCache
 
@@ -59,11 +59,7 @@ class PublisherState(State):
         ## Callback handler to create messages.
         self._create_message_handler: Callable[[Blackboard], Any] = create_message_handler
 
-        ## Shared pointer to the ROS 2 node.
-        self._node: Node = node
-
-        if self._node is None:
-            self._node = YasminNode.get_instance()
+        self._node = resolve_node(node)
 
         ## Name of the topic to publish to.
         self._topic_name: str = topic_name

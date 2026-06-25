@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from threading import RLock
-from typing import Dict, Tuple, Type, Any
+from typing import Any, Dict, Tuple, Type, Union
 
 from rclpy.node import Node
 from rclpy.publisher import Publisher
@@ -88,14 +88,13 @@ class ROSClientsCache:
         cache_key = (node_name, action_type_name, action_name, callback_group_name)
 
         with cls._lock:
-            # Check if action client already exists in cache
-            if cache_key in cls._action_clients:
+            existing = cls._action_clients.get(cache_key)
+            if existing is not None:
                 yasmin.YASMIN_LOG_INFO(
                     f"Reusing existing action client for '{action_name}' of type '{action_type_name}'"
                 )
-                return cls._action_clients[cache_key]
+                return existing
 
-            # Create new action client if not in cache
             yasmin.YASMIN_LOG_INFO(
                 f"Creating new action client for '{action_name}' of type '{action_type_name}'"
             )
@@ -106,7 +105,6 @@ class ROSClientsCache:
                 callback_group=callback_group,
             )
 
-            # Store in cache
             cls._action_clients[cache_key] = action_client
             return action_client
 
@@ -137,14 +135,13 @@ class ROSClientsCache:
         cache_key = (node_name, service_type_name, service_name, callback_group_name)
 
         with cls._lock:
-            # Check if service client already exists in cache
-            if cache_key in cls._service_clients:
+            existing = cls._service_clients.get(cache_key)
+            if existing is not None:
                 yasmin.YASMIN_LOG_INFO(
                     f"Reusing existing service client for '{service_name}' of type '{service_type_name}'"
                 )
-                return cls._service_clients[cache_key]
+                return existing
 
-            # Create new service client if not in cache
             yasmin.YASMIN_LOG_INFO(
                 f"Creating new service client for '{service_name}' of type '{service_type_name}'"
             )
@@ -154,7 +151,6 @@ class ROSClientsCache:
                 callback_group=callback_group,
             )
 
-            # Store in cache
             cls._service_clients[cache_key] = service_client
             return service_client
 
@@ -164,7 +160,7 @@ class ROSClientsCache:
         node: Node,
         msg_type: Type,
         topic_name: str,
-        qos_profile: QoSProfile = 10,
+        qos_profile: Union[QoSProfile, int] = 10,
         callback_group: CallbackGroup = None,
     ) -> Publisher:
         """
@@ -187,14 +183,13 @@ class ROSClientsCache:
         cache_key = (node_name, msg_type_name, topic_name, qos_hash)
 
         with cls._lock:
-            # Check if publisher already exists in cache
-            if cache_key in cls._publishers:
+            existing = cls._publishers.get(cache_key)
+            if existing is not None:
                 yasmin.YASMIN_LOG_INFO(
                     f"Reusing existing publisher for topic '{topic_name}' of type '{msg_type_name}'"
                 )
-                return cls._publishers[cache_key]
+                return existing
 
-            # Create new publisher if not in cache
             yasmin.YASMIN_LOG_INFO(
                 f"Creating new publisher for topic '{topic_name}' of type '{msg_type_name}'"
             )
@@ -205,7 +200,6 @@ class ROSClientsCache:
                 callback_group=callback_group,
             )
 
-            # Store in cache
             cls._publishers[cache_key] = publisher
             return publisher
 

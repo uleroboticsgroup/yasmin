@@ -224,6 +224,29 @@
         </div>
 
         <div class="section">
+          <h2>YasminViewerPub API</h2>
+          <p>
+            The <code>YasminViewerPub</code> class provides the programmatic API
+            for publishing state machine visualization data:
+          </p>
+          <ul>
+            <li>
+              <strong>Constructor:</strong>
+              <code>YasminViewerPub(fsm, name)</code> or
+              <code>YasminViewerPub(node, fsm, name)</code> — Creates a
+              publisher that subscribes to state machine status and serves it
+              via the viewer HTTP endpoint.
+            </li>
+            <li>
+              <strong>shutdown():</strong> Stops the internal update timer and
+              releases resources. Call this when the state machine is no longer
+              active to clean up without waiting for the node to go out of
+              scope.
+            </li>
+          </ul>
+        </div>
+
+        <div class="section">
           <h2>Custom Host and Port</h2>
           <p>
             You may need to customize the host and port in several scenarios:

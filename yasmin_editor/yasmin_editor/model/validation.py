@@ -235,7 +235,7 @@ def _validate_state_machine(
     if not state_machine.states:
         result.add_warning(path, "State machine has no child states")
 
-    state_names = set(state_machine.states.keys())
+    state_names = set(state_machine.states)
     outcome_names = {outcome.name for outcome in state_machine.outcomes}
     _validate_conflicting_container_names(
         path=path,
@@ -329,7 +329,7 @@ def _validate_concurrence(
     if not concurrence.states:
         result.add_warning(path, f"{kind} has no child states")
 
-    state_names = set(concurrence.states.keys())
+    state_names = set(concurrence.states)
     outcome_names = {outcome.name for outcome in concurrence.outcomes}
     _validate_conflicting_container_names(
         path=path,

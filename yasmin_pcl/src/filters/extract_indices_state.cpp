@@ -108,10 +108,10 @@ ExtractIndicesState::ExtractIndicesState()
 ExtractIndicesState::~ExtractIndicesState() {}
 
 void ExtractIndicesState::configure() {
-  negative_ = this->get_parameter<bool>("negative");
-  keep_organized_ = this->get_parameter<bool>("keep_organized");
-  user_filter_value_ = this->get_parameter<float>("user_filter_value");
-  extract_removed_indices_ =
+  this->negative_ = this->get_parameter<bool>("negative");
+  this->keep_organized_ = this->get_parameter<bool>("keep_organized");
+  this->user_filter_value_ = this->get_parameter<float>("user_filter_value");
+  this->extract_removed_indices_ =
       this->get_parameter<bool>("extract_removed_indices");
 }
 
@@ -133,9 +133,9 @@ ExtractIndicesState::execute(yasmin::Blackboard::SharedPtr blackboard) {
 
     pcl::ExtractIndices<pcl::PCLPointCloud2> filter;
     filter.setInputCloud(input_cloud);
-    filter.setNegative(negative_);
-    filter.setKeepOrganized(keep_organized_);
-    filter.setUserFilterValue(user_filter_value_);
+    filter.setNegative(this->negative_);
+    filter.setKeepOrganized(this->keep_organized_);
+    filter.setUserFilterValue(this->user_filter_value_);
     common::set_optional_input_indices(filter, blackboard);
 
     auto output_cloud = common::make_pcl_point_cloud2();
@@ -146,7 +146,7 @@ ExtractIndicesState::execute(yasmin::Blackboard::SharedPtr blackboard) {
     filter.filter(output_indices);
     blackboard->set<common::Indices>("output_indices", output_indices);
 
-    if (extract_removed_indices_) {
+    if (this->extract_removed_indices_) {
       const auto domain_indices = make_domain_indices(input_cloud);
       blackboard->set<common::Indices>(
           "removed_indices",

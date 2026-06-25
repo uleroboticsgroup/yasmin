@@ -57,7 +57,7 @@ def ros_log_message(
         logger.error(message)
 
     elif level == yasmin.logs.LogLevel.WARN:
-        logger.warn(message)
+        logger.warning(message)
 
     elif level == yasmin.logs.LogLevel.INFO:
         logger.info(message)

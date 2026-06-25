@@ -20,7 +20,6 @@ from dataclasses import dataclass, field
 from .layout import Layout
 from .outcome import Outcome
 from .state import State
-from .state_machine import StateMachine
 from .text_block import TextBlock
 
 OutcomeRuleValues = str | list[str]
@@ -34,12 +33,6 @@ def iter_outcome_rule_values(values: OutcomeRuleValues) -> list[str]:
         if outcome_name and outcome_name not in normalized:
             normalized.append(outcome_name)
     return normalized
-
-
-def _region_outcomes(state: State) -> set[str]:
-    if isinstance(state, StateMachine):
-        return {o.name for o in state.outcomes}
-    return {o.name for o in state.outcomes}
 
 
 @dataclass(slots=True, repr=False)

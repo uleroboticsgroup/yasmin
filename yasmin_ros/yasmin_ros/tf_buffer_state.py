@@ -16,7 +16,7 @@
 from rclpy.duration import Duration
 from tf2_ros import Buffer, TransformListener
 from yasmin_ros.basic_outcomes import ABORT, SUCCEED
-from yasmin_ros.yasmin_node import YasminNode
+from yasmin_ros.ros_state_utils import resolve_node
 
 import yasmin
 from yasmin import Blackboard, State
@@ -66,7 +66,7 @@ class TfBufferState(State):
         self._cache_time_sec = float(self.get_parameter("cache_time_sec"))
 
         if self._node is None:
-            self._node = YasminNode.get_instance()
+            self._node = resolve_node()
 
     def execute(self, blackboard: Blackboard) -> str:
         try:

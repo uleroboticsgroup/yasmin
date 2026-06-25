@@ -99,7 +99,7 @@ class PluginManager:
         tracked_files: List[dict] = []
         tracked_dirs: List[dict] = []
         ignored_packages_env = set(get_ignored_packages_from_env())
-        packages = list(get_packages_with_prefixes().keys())
+        packages = list(get_packages_with_prefixes())
         cpp_resource_map = self._get_cpp_plugin_resource_map()
 
         for package in tqdm(packages, desc="Loading plugins", disable=hide_progress):
@@ -163,13 +163,10 @@ class PluginManager:
         ):
             return False
 
-        for signature in cache.get("tracked_files", []):
-            if not is_stat_signature_valid(signature):
-                return False
-
-        for signature in cache.get("tracked_dirs", []):
-            if not is_stat_signature_valid(signature):
-                return False
+        for key in ("tracked_files", "tracked_dirs"):
+            for signature in cache.get(key, []):
+                if not is_stat_signature_valid(signature):
+                    return False
 
         self.cpp_plugins = [
             PluginInfo.from_cache_dict(data) for data in cache.get("cpp_plugins", [])
@@ -253,7 +250,7 @@ class PluginManager:
         resource_map: dict[str, list[str]] = {}
 
         for plugin_resource in self._get_registered_plugin_resource_list():
-            for package_name in get_resources(plugin_resource).keys():
+            for package_name in get_resources(plugin_resource):
                 resource_map.setdefault(package_name, [])
 
                 try:

@@ -23,9 +23,9 @@ from rclpy.callback_groups import CallbackGroup
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT, TIMEOUT
 from yasmin_ros.ros_clients_cache import ROSClientsCache
+from yasmin_ros.ros_state_utils import resolve_node, wait_with_retry
 
 
 class ServiceState(State):
@@ -86,11 +86,7 @@ class ServiceState(State):
         if self._wait_timeout or self._response_timeout:
             outcomes.add(TIMEOUT)
 
-        ## The ROS 2 node used to communicate with the service.
-        self._node = node
-
-        if self._node is None:
-            self._node: Node = YasminNode.get_instance()
+        self._node = resolve_node(node)
 
         ## Name of the service.
         self._srv_name: str = srv_name
@@ -137,40 +133,30 @@ class ServiceState(State):
 
         yasmin.YASMIN_LOG_INFO(f"Waiting for service '{self._srv_name}'")
 
-        while not self._service_client.wait_for_service(timeout_sec=self._wait_timeout):
-            yasmin.YASMIN_LOG_WARN(
-                f"Timeout reached, service '{self._srv_name}' is not available"
-            )
-            if retry_count < self._maximum_retry:
-                retry_count += 1
-                yasmin.YASMIN_LOG_WARN(
-                    f"Retrying to connect to service '{self._srv_name}' ({retry_count}/{self._maximum_retry})"
-                )
-            else:
-                return TIMEOUT
+        outcome = wait_with_retry(
+            lambda: self._service_client.wait_for_service(timeout_sec=self._wait_timeout),
+            self._maximum_retry,
+            f"Timeout reached, service '{self._srv_name}' is not available",
+        )
+        if outcome is not None:
+            return outcome
 
         try:
             yasmin.YASMIN_LOG_INFO(f"Sending request to service '{self._srv_name}'")
 
-            # Clear the event for this service call
             self._response_received_event.clear()
 
             future = self._service_client.call_async(request)
             future.add_done_callback(self.response_callback)
 
-            # Wait for the future to complete with optional timeout
-            while not self._response_received_event.wait(self._response_timeout):
-                yasmin.YASMIN_LOG_WARN(
-                    f"Timeout reached while waiting for response from service '{self._srv_name}'"
-                )
-
-                if retry_count < self._maximum_retry:
-                    retry_count += 1
-                    yasmin.YASMIN_LOG_WARN(
-                        f"Retrying to wait for service '{self._srv_name}' response ({retry_count}/{self._maximum_retry})"
-                    )
-                else:
-                    return TIMEOUT
+            outcome = wait_with_retry(
+                lambda: self._response_received_event.wait(self._response_timeout),
+                self._maximum_retry,
+                f"Timeout reached while waiting for response from "
+                f"service '{self._srv_name}'",
+            )
+            if outcome is not None:
+                return outcome
 
         except Exception as e:
             yasmin.YASMIN_LOG_WARN(f"Service call failed: {e}")
@@ -181,6 +167,10 @@ class ServiceState(State):
             return outcome
 
         return SUCCEED
+
+    def cancel_state(self) -> None:
+        self._response_received_event.set()
+        super().cancel_state()
 
     def response_callback(self, future: Future) -> None:
         """

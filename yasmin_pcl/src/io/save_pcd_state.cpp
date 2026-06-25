@@ -76,21 +76,21 @@ SavePcdState::SavePcdState() : yasmin::State({"succeeded", "aborted"}) {
 SavePcdState::~SavePcdState() {}
 
 void SavePcdState::configure() {
-  file_path_ = this->get_parameter<std::string>("file_path");
-  storage_mode_ = this->get_parameter<std::string>("storage_mode");
-  origin_x_ = this->get_parameter<float>("origin_x");
-  origin_y_ = this->get_parameter<float>("origin_y");
-  origin_z_ = this->get_parameter<float>("origin_z");
-  origin_w_ = this->get_parameter<float>("origin_w");
-  orientation_x_ = this->get_parameter<float>("orientation_x");
-  orientation_y_ = this->get_parameter<float>("orientation_y");
-  orientation_z_ = this->get_parameter<float>("orientation_z");
-  orientation_w_ = this->get_parameter<float>("orientation_w");
+  this->file_path_ = this->get_parameter<std::string>("file_path");
+  this->storage_mode_ = this->get_parameter<std::string>("storage_mode");
+  this->origin_x_ = this->get_parameter<float>("origin_x");
+  this->origin_y_ = this->get_parameter<float>("origin_y");
+  this->origin_z_ = this->get_parameter<float>("origin_z");
+  this->origin_w_ = this->get_parameter<float>("origin_w");
+  this->orientation_x_ = this->get_parameter<float>("orientation_x");
+  this->orientation_y_ = this->get_parameter<float>("orientation_y");
+  this->orientation_z_ = this->get_parameter<float>("orientation_z");
+  this->orientation_w_ = this->get_parameter<float>("orientation_w");
 }
 
 std::string SavePcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   try {
-    if (file_path_.empty()) {
+    if (this->file_path_.empty()) {
       YASMIN_LOG_WARN("Parameter 'file_path' is empty");
       return "aborted";
     }
@@ -103,29 +103,29 @@ std::string SavePcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
       return "aborted";
     }
 
-    const Eigen::Vector4f origin(origin_x_, origin_y_, origin_z_, origin_w_);
-    const Eigen::Quaternionf orientation(orientation_w_, orientation_x_,
-                                         orientation_y_, orientation_z_);
+    const Eigen::Vector4f origin(this->origin_x_, this->origin_y_, this->origin_z_, this->origin_w_);
+    const Eigen::Quaternionf orientation(this->orientation_w_, this->orientation_x_,
+                                         this->orientation_y_, this->orientation_z_);
 
     pcl::PCDWriter writer;
     int result = -1;
 
-    if (storage_mode_ == "ascii") {
-      result = writer.writeASCII(file_path_, *input_cloud, origin, orientation);
-    } else if (storage_mode_ == "binary") {
+    if (this->storage_mode_ == "ascii") {
+      result = writer.writeASCII(this->file_path_, *input_cloud, origin, orientation);
+    } else if (this->storage_mode_ == "binary") {
       result =
-          writer.writeBinary(file_path_, *input_cloud, origin, orientation);
-    } else if (storage_mode_ == "binary_compressed") {
-      result = writer.writeBinaryCompressed(file_path_, *input_cloud, origin,
-                                            orientation);
+          writer.writeBinary(this->file_path_, *input_cloud, origin, orientation);
+    } else if (this->storage_mode_ == "binary_compressed") {
+      result = writer.writeBinaryCompressed(this->file_path_, *input_cloud, origin,
+                                             orientation);
     } else {
       YASMIN_LOG_WARN("Unsupported PCD storage_mode '%s'",
-                      storage_mode_.c_str());
+                      this->storage_mode_.c_str());
       return "aborted";
     }
 
     if (result < 0) {
-      YASMIN_LOG_WARN("Failed to write PCD file '%s'", file_path_.c_str());
+      YASMIN_LOG_WARN("Failed to write PCD file '%s'", this->file_path_.c_str());
       return "aborted";
     }
 

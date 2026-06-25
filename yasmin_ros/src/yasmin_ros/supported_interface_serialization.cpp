@@ -16,7 +16,6 @@
 #include "yasmin_ros/supported_interface_serialization.hpp"
 
 #include <stdexcept>
-#include <utility>
 
 #include <example_interfaces/action/fibonacci.hpp>
 #include <geometry_msgs/msg/pose.hpp>

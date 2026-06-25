@@ -161,10 +161,6 @@ class PluginInfo:
                 )
 
             if not cls._is_primitive_metadata_value(default_value):
-                if not normalized_entry.get("default_value_type"):
-                    normalized_entry["default_value_type"] = (
-                        cls._describe_metadata_value_type(default_value)
-                    )
                 normalized_entry["default_value"] = ""
 
             normalized_entries.append(normalized_entry)
@@ -198,7 +194,7 @@ class PluginInfo:
         relative_path : Optional[str]
             Relative path of an XML file inside the package share directory.
         """
-        self._cpp_factory: Optional[CppStateFactory] = CppStateFactory()
+        self._cpp_factory: Optional[CppStateFactory] = None
 
         self.plugin_type: str = plugin_type
         self.class_name: Optional[str] = class_name
@@ -220,6 +216,7 @@ class PluginInfo:
             self._load_instance_metadata(instance)
 
         elif self.plugin_type == "cpp":
+            self._cpp_factory = CppStateFactory()
             instance = self._cpp_factory.create(self.class_name)
             self._load_instance_metadata(instance)
 
@@ -306,6 +303,16 @@ class PluginInfo:
                         }
                     )
 
+    @staticmethod
+    def _safe_get(instance, attr: str, getter: str, transform=None, fallback=None):
+        try:
+            value = getattr(instance, getter)()
+            if transform:
+                value = transform(value)
+            return value
+        except Exception:
+            return fallback
+
     def _load_instance_metadata(self, instance) -> None:
         """
         Load metadata from a Python or C++ state instance.
@@ -313,38 +320,22 @@ class PluginInfo:
         Each metadata field is queried independently so one failing accessor
         does not suppress the remaining metadata.
         """
-        try:
-            self.outcomes = list(instance.get_outcomes())
-        except Exception:
-            self.outcomes = []
+        self.outcomes = self._safe_get(instance, "outcomes", "get_outcomes", list, [])
+        self.description = self._safe_get(
+            instance, "description", "get_description", None, ""
+        )
+        self.outcome_descriptions = self._safe_get(
+            instance, "outcome_descriptions", "get_outcome_descriptions", None, {}
+        )
 
-        try:
-            self.description = instance.get_description()
-        except Exception:
-            self.description = ""
+        raw_input = self._safe_get(instance, "input_keys", "get_input_keys", list, [])
+        self.input_keys = self._normalize_cpp_metadata_entries(raw_input)
 
-        try:
-            self.outcome_descriptions = instance.get_outcome_descriptions()
-        except Exception:
-            self.outcome_descriptions = {}
+        raw_output = self._safe_get(instance, "output_keys", "get_output_keys", list, [])
+        self.output_keys = self._normalize_cpp_metadata_entries(raw_output)
 
-        try:
-            self.input_keys = list(instance.get_input_keys())
-            self.input_keys = self._normalize_cpp_metadata_entries(self.input_keys)
-        except Exception:
-            self.input_keys = []
-
-        try:
-            self.output_keys = list(instance.get_output_keys())
-            self.output_keys = self._normalize_cpp_metadata_entries(self.output_keys)
-        except Exception:
-            self.output_keys = []
-
-        try:
-            self.parameters = list(instance.get_parameters())
-            self.parameters = self._normalize_cpp_metadata_entries(self.parameters)
-        except Exception:
-            self.parameters = []
+        raw_params = self._safe_get(instance, "parameters", "get_parameters", list, [])
+        self.parameters = self._normalize_cpp_metadata_entries(raw_params)
 
     def to_cache_dict(self) -> dict:
         """Serialize the full plugin metadata for caching."""
@@ -394,9 +385,7 @@ class PluginInfo:
     @property
     def display_name(self) -> str:
         """Return the display name of the plugin."""
-        if self.plugin_type == "python":
-            return self.class_name or ""
-        if self.plugin_type == "cpp":
+        if self.plugin_type in ("python", "cpp"):
             return self.class_name or ""
         return self.file_name or ""
 

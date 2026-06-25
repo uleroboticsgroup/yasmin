@@ -321,7 +321,7 @@ def _text_block_to_element(text_block: TextBlock) -> ET.Element:
     element = ET.Element("Text")
     element.set("x", f"{text_block.x:.2f}")
     element.set("y", f"{text_block.y:.2f}")
-    element.set("content", _encode_text_content(text_block.content))
+    element.set("content", _normalize_newlines(text_block.content))
     return element
 
 
@@ -463,7 +463,7 @@ def _append_container_level_transitions(
     element: ET.Element,
     model: StateMachine,
 ) -> None:
-    child_names = set(model.states.keys())
+    child_names = set(model.states)
     child_names.update(outcome.name for outcome in model.outcomes)
 
     for owner_name, transition_list in model.transitions.items():
@@ -873,7 +873,7 @@ def _parse_text_block(element: ET.Element) -> TextBlock:
     return TextBlock(
         x=_parse_float(element.get("x")) or 0.0,
         y=_parse_float(element.get("y")) or 0.0,
-        content=_decode_text_content(element.get("content", "")),
+        content=_normalize_newlines(element.get("content", "")),
     )
 
 
@@ -934,13 +934,7 @@ def _parse_remaps(element: ET.Element) -> dict[str, str]:
     return remappings
 
 
-def _encode_text_content(value: str) -> str:
-    """Persist multiline text safely inside an XML attribute."""
-    return value.replace("\r\n", "\n").replace("\r", "\n")
-
-
-def _decode_text_content(value: str) -> str:
-    """Restore multiline text persisted in an XML attribute."""
+def _normalize_newlines(value: str) -> str:
     return value.replace("\r\n", "\n").replace("\r", "\n")
 
 

@@ -78,22 +78,22 @@ SavePlyState::SavePlyState() : yasmin::State({"succeeded", "aborted"}) {
 SavePlyState::~SavePlyState() {}
 
 void SavePlyState::configure() {
-  file_path_ = this->get_parameter<std::string>("file_path");
-  binary_mode_ = this->get_parameter<bool>("binary_mode");
-  use_camera_ = this->get_parameter<bool>("use_camera");
-  origin_x_ = this->get_parameter<float>("origin_x");
-  origin_y_ = this->get_parameter<float>("origin_y");
-  origin_z_ = this->get_parameter<float>("origin_z");
-  origin_w_ = this->get_parameter<float>("origin_w");
-  orientation_x_ = this->get_parameter<float>("orientation_x");
-  orientation_y_ = this->get_parameter<float>("orientation_y");
-  orientation_z_ = this->get_parameter<float>("orientation_z");
-  orientation_w_ = this->get_parameter<float>("orientation_w");
+  this->file_path_ = this->get_parameter<std::string>("file_path");
+  this->binary_mode_ = this->get_parameter<bool>("binary_mode");
+  this->use_camera_ = this->get_parameter<bool>("use_camera");
+  this->origin_x_ = this->get_parameter<float>("origin_x");
+  this->origin_y_ = this->get_parameter<float>("origin_y");
+  this->origin_z_ = this->get_parameter<float>("origin_z");
+  this->origin_w_ = this->get_parameter<float>("origin_w");
+  this->orientation_x_ = this->get_parameter<float>("orientation_x");
+  this->orientation_y_ = this->get_parameter<float>("orientation_y");
+  this->orientation_z_ = this->get_parameter<float>("orientation_z");
+  this->orientation_w_ = this->get_parameter<float>("orientation_w");
 }
 
 std::string SavePlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   try {
-    if (file_path_.empty()) {
+    if (this->file_path_.empty()) {
       YASMIN_LOG_WARN("Parameter 'file_path' is empty");
       return "aborted";
     }
@@ -106,16 +106,16 @@ std::string SavePlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
       return "aborted";
     }
 
-    const Eigen::Vector4f origin(origin_x_, origin_y_, origin_z_, origin_w_);
-    const Eigen::Quaternionf orientation(orientation_w_, orientation_x_,
-                                         orientation_y_, orientation_z_);
+    const Eigen::Vector4f origin(this->origin_x_, this->origin_y_, this->origin_z_, this->origin_w_);
+    const Eigen::Quaternionf orientation(this->orientation_w_, this->orientation_x_,
+                                         this->orientation_y_, this->orientation_z_);
 
     const int result =
-        pcl::io::savePLYFile(file_path_, *input_cloud, origin, orientation,
-                             binary_mode_, use_camera_);
+        pcl::io::savePLYFile(this->file_path_, *input_cloud, origin, orientation,
+                             this->binary_mode_, this->use_camera_);
 
     if (result < 0) {
-      YASMIN_LOG_WARN("Failed to write PLY file '%s'", file_path_.c_str());
+      YASMIN_LOG_WARN("Failed to write PLY file '%s'", this->file_path_.c_str());
       return "aborted";
     }
 

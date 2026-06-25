@@ -13,14 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#ifndef YASMIN_DEMOS_WORKER_STATE_HPP_
+#define YASMIN_DEMOS_WORKER_STATE_HPP_
+
 #include <string>
 
 #include <yasmin/blackboard.hpp>
 #include <yasmin/state.hpp>
 #include <yasmin/types.hpp>
-
-#ifndef YASMIN_DEMOS_WORKER_STATE_H
-#define YASMIN_DEMOS_WORKER_STATE_H
 
 /**
  * @brief Represents a state that performs a simple counting task.

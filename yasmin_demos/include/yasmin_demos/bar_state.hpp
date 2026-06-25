@@ -13,32 +13,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#ifndef YASMIN_DEMOS_BAR_STATE_HPP_
+#define YASMIN_DEMOS_BAR_STATE_HPP_
+
 #include <string>
 
 #include <yasmin/blackboard.hpp>
 #include <yasmin/state.hpp>
 #include <yasmin/types.hpp>
 
-#ifndef YASMIN_DEMOS_FOO_STATE_H
-#define YASMIN_DEMOS_FOO_STATE_H
-
 /**
- * @brief Represents the "Foo" state in the state machine.
+ * @brief Represents the "Bar" state in the state machine.
  *
- * This state increments a counter each time it is executed and
- * communicates the current count via the blackboard.
+ * This state logs the value from the blackboard and provides
+ * a single outcome to transition.
  */
-class FooState : public yasmin::State {
+class BarState : public yasmin::State {
 public:
   /**
-   * @brief Constructs a FooState object, initializing the counter.
+   * @brief Constructs a BarState object.
    */
-  FooState();
+  BarState();
 
   /**
-   * @brief Destructs the FooState object.
+   * @brief Destructs the BarState object.
    */
-  ~FooState();
+  ~BarState();
 
   /**
    * @brief Configures the state-local parameters.
@@ -46,25 +46,19 @@ public:
   void configure() override;
 
   /**
-   * @brief Executes the Foo state logic.
+   * @brief Executes the Bar state logic.
    *
    * This method logs the execution, waits for the configured duration,
-   * increments the counter, and sets a string in the blackboard.
-   * The state will transition to either "outcome1" or "outcome2"
-   * based on the current value of the counter.
+   * retrieves a string from the blackboard, and logs it.
    *
    * @param blackboard Shared pointer to the blackboard for state communication.
-   * @return std::string The outcome of the execution: "outcome1" or "outcome2".
+   * @return std::string The outcome of the execution: "outcome3".
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard);
 
-  /// Counter to track the number of executions.
-  int counter;
-
 private:
-  std::string counter_prefix_;
-  int max_count_;
+  std::string log_prefix_;
   int sleep_ms_;
 };
 
-#endif // YASMIN_DEMOS_FOO_STATE_H
+#endif // YASMIN_DEMOS_BAR_STATE_HPP_

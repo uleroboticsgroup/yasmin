@@ -16,9 +16,11 @@
 #ifndef YASMIN_PCL__COMMON__FILTER_STATE_UTILS_HPP_
 #define YASMIN_PCL__COMMON__FILTER_STATE_UTILS_HPP_
 
+#include <exception>
 #include <string>
 
 #include "yasmin/blackboard.hpp"
+#include "yasmin/logs.hpp"
 #include "yasmin_pcl/common/cloud_types.hpp"
 #include "yasmin_pcl/common/pcl_compat.hpp"
 
@@ -59,6 +61,38 @@ store_output_indices(FilterT &filter,
   Indices output_indices;
   filter.filter(output_indices);
   blackboard->set<Indices>(key, output_indices);
+}
+
+template <typename FilterT, typename SetupFn>
+inline std::string execute_filter(yasmin::Blackboard::SharedPtr blackboard,
+                                  const std::string &filter_name,
+                                  bool extract_removed_indices,
+                                  SetupFn &&setup) {
+  try {
+    const auto input_cloud = blackboard->get<PclPointCloud2Ptr>("input_cloud");
+    if (!input_cloud) {
+      YASMIN_LOG_WARN("Input PCL point cloud pointer is null");
+      return "aborted";
+    }
+
+    FilterT filter(extract_removed_indices);
+    filter.setInputCloud(input_cloud);
+    setup(filter);
+    set_optional_input_indices(filter, blackboard);
+
+    auto output_cloud = make_pcl_point_cloud2();
+    filter.filter(*output_cloud);
+    blackboard->set<PclPointCloud2Ptr>("output_cloud", output_cloud);
+
+    if (extract_removed_indices) {
+      store_removed_indices(filter, blackboard);
+    }
+
+    return "succeeded";
+  } catch (const std::exception &e) {
+    YASMIN_LOG_ERROR("%s filtering failed: %s", filter_name.c_str(), e.what());
+    return "aborted";
+  }
 }
 
 } // namespace yasmin_pcl::common

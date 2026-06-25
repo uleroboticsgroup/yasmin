@@ -17,14 +17,13 @@ from threading import Event
 from typing import List, Set, Callable, Union, Type, Any
 
 from rclpy.node import Node
-from rclpy.subscription import Subscription
 from rclpy.qos import QoSProfile
 from rclpy.callback_groups import CallbackGroup
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.yasmin_node import YasminNode
 from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
+from yasmin_ros.ros_state_utils import resolve_node
 
 
 class MonitorState(State):
@@ -84,23 +83,16 @@ class MonitorState(State):
         if timeout is not None:
             outcomes.add(TIMEOUT)
 
-        ## Shared pointer to the ROS 2 node.
-        self._node: Node = node
-
-        if self._node is None:
-            self._node = YasminNode.get_instance()
+        self._node = resolve_node(node)
 
         ## Name of the topic to monitor.
         self._topic_name: str = topic_name
 
-        ## Subscription to the ROS 2 topic.
-        self._sub: Subscription = None
         self._msg_type: Type = msg_type
         self._qos: Union[QoSProfile, int] = qos
         self._callback_group: CallbackGroup = callback_group
 
-        ## Subscription to the ROS 2 topic.
-        self._sub: Subscription = self._node.create_subscription(
+        self._sub = self._node.create_subscription(
             msg_type,
             topic_name,
             self.__callback,
@@ -151,17 +143,14 @@ class MonitorState(State):
                 return CANCEL
 
             if self._timeout is not None and not timeout_flag:
-                yasmin.YASMIN_LOG_WARN(
-                    f"Timeout reached, topic '{self._topic_name}' is not available"
-                )
-
-                if retry_count < self._maximum_retry:
-                    retry_count += 1
-                    yasmin.YASMIN_LOG_WARN(
-                        f"Retrying to wait for topic '{self._topic_name}' ({retry_count}/{self._maximum_retry})"
-                    )
-                else:
+                if retry_count >= self._maximum_retry:
                     return TIMEOUT
+
+                retry_count += 1
+                yasmin.YASMIN_LOG_WARN(
+                    f"Timeout reached, topic '{self._topic_name}' is not available "
+                    f"({retry_count}/{self._maximum_retry})"
+                )
 
         yasmin.YASMIN_LOG_INFO(f"Processing msg from topic '{self._topic_name}'")
         outcome = self._monitor_handler(blackboard, self.msg_list.pop(0))

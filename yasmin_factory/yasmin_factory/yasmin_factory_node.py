@@ -60,9 +60,8 @@ def main() -> None:
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
 
-    sm = None
-    if pub:
-        pub._fsm = None
+    if pub is not None:
+        pub.shutdown()
 
     YasminNode.destroy_instance()
 

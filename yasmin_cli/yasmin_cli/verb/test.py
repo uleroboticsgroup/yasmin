@@ -29,12 +29,13 @@ from yasmin_cli.completer import (
     plugin_id,
     test_plugin_completer,
 )
-from yasmin_cli.verb.run import (
-    _convert_value,
-    _format_default_value,
-    _normalize_type,
-    run_factory_node,
+from yasmin_factory.type_utils import (
+    format_default_value,
+    normalize_type,
+    parse_key_value,
 )
+
+from yasmin_cli.verb.run import run_factory_node
 
 
 def _parse_assignments(values: list[str], assignment_kind: str) -> dict[str, str]:
@@ -85,7 +86,7 @@ def _infer_python_value_type(value) -> str | None:
             return "list[float]"
         return None
     if isinstance(value, dict):
-        if not value or not all(isinstance(key, str) for key in value.keys()):
+        if not value or not all(isinstance(key, str) for key in value):
             return None
         values = list(value.values())
         if all(isinstance(item, str) for item in values):
@@ -132,7 +133,7 @@ def _infer_value_type(raw_value: str) -> str:
 
 def _serialize_default_value(value, type_name: str) -> str:
     """Serialize plugin metadata defaults back into the XML default format."""
-    return _format_default_value(value, type_name)
+    return format_default_value(value, type_name)
 
 
 def _get_input_meta(plugin, key_name: str) -> dict | None:
@@ -156,7 +157,7 @@ def _resolve_input_type(plugin, key_name: str, raw_value: str) -> str:
 
     default_type = key_meta.get("default_value_type", "")
     if default_type:
-        return _normalize_type(default_type)
+        return normalize_type(default_type)
 
     if key_meta.get("has_default", False):
         inferred_type = _infer_python_value_type(key_meta.get("default_value"))
@@ -173,7 +174,7 @@ def _resolve_parameter_type(plugin, parameter_name: str, raw_value: str) -> str:
 
     default_type = parameter_meta.get("default_value_type", "")
     if default_type:
-        return _normalize_type(default_type)
+        return normalize_type(default_type)
 
     if parameter_meta.get("has_default", False):
         inferred_type = _infer_python_value_type(parameter_meta.get("default_value"))
@@ -190,7 +191,7 @@ def _resolve_parameter_type(plugin, parameter_name: str, raw_value: str) -> str:
 
     default_type = parameter_meta.get("default_value_type", "")
     if default_type:
-        return _normalize_type(default_type)
+        return normalize_type(default_type)
 
     if parameter_meta.get("has_default", False):
         default_value = parameter_meta.get("default_value")
@@ -285,19 +286,19 @@ def _build_test_xml(
             resolved_type = _resolve_input_type(
                 plugin, key_name, provided_inputs[key_name]
             )
-            converted_value = _convert_value(provided_inputs[key_name], resolved_type)
+            converted_value = parse_key_value(provided_inputs[key_name], resolved_type)
             key_attributes["default_value"] = _serialize_default_value(
                 converted_value, resolved_type
             )
             key_attributes["default_type"] = resolved_type
         elif key.get("has_default", False):
-            resolved_type = _normalize_type(key.get("default_value_type", "str"))
+            resolved_type = normalize_type(key.get("default_value_type", "str"))
             key_attributes["default_value"] = _serialize_default_value(
                 key.get("default_value", ""), resolved_type
             )
             key_attributes["default_type"] = resolved_type
         elif key.get("default_value_type"):
-            key_attributes["default_type"] = _normalize_type(
+            key_attributes["default_type"] = normalize_type(
                 key.get("default_value_type", "str")
             )
 
@@ -316,7 +317,7 @@ def _build_test_xml(
 
         parameter_attributes = {
             "name": parameter_name,
-            "default_type": _normalize_type(parameter.get("default_value_type", "str")),
+            "default_type": normalize_type(parameter.get("default_value_type", "str")),
         }
 
         description = parameter.get("description", "")
@@ -329,7 +330,7 @@ def _build_test_xml(
                 parameter_name,
                 provided_parameters[parameter_name],
             )
-            converted_value = _convert_value(
+            converted_value = parse_key_value(
                 provided_parameters[parameter_name], resolved_type
             )
             parameter_attributes["default_value"] = _serialize_default_value(
@@ -337,7 +338,7 @@ def _build_test_xml(
             )
             parameter_attributes["default_type"] = resolved_type
         elif parameter.get("has_default", False):
-            resolved_type = _normalize_type(parameter.get("default_value_type", "str"))
+            resolved_type = normalize_type(parameter.get("default_value_type", "str"))
             parameter_attributes["default_value"] = _serialize_default_value(
                 parameter.get("default_value", ""), resolved_type
             )

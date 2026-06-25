@@ -15,8 +15,6 @@
 
 #include "yasmin_viewer/yasmin_viewer_node.hpp"
 
-#include <cctype>
-#include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -28,6 +26,17 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
+
+namespace {
+
+std::string resolve_host(const std::string &host) {
+  if (host == "0.0.0.0" || host == "::" || host == "localhost") {
+    return "127.0.0.1";
+  }
+  return host;
+}
+
+} // namespace
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -188,9 +197,9 @@ YasminViewerNode::YasminViewerNode()
   this->declare_parameter<int64_t>("port", 5000);
   this->declare_parameter<double>("max_age_seconds", 3.0);
 
-  host_ = this->get_parameter("host").as_string();
-  port_ = this->get_parameter("port").as_int();
-  max_age_seconds_ = this->get_parameter("max_age_seconds").as_double();
+  this->host_ = this->get_parameter("host").as_string();
+  this->port_ = this->get_parameter("port").as_int();
+  this->max_age_seconds_ = this->get_parameter("max_age_seconds").as_double();
 
   web_root_ =
 #if __has_include("rclcpp/version.h")
@@ -208,28 +217,28 @@ YasminViewerNode::YasminViewerNode()
       ament_index_cpp::get_package_share_directory("yasmin_viewer") + "/web";
 #endif
 
-  fsm_sub_ = this->create_subscription<StateMachineMsg>(
+  this->fsm_sub_ = this->create_subscription<StateMachineMsg>(
       "/fsm_viewer", 10,
       std::bind(&YasminViewerNode::fsm_viewer_cb, this, std::placeholders::_1));
 
   this->start_server();
 
   RCLCPP_INFO(this->get_logger(), "Started YASMIN viewer on http://%s:%ld",
-              host_.c_str(), static_cast<long>(port_));
+              this->host_.c_str(), static_cast<long>(this->port_));
 }
 
 YasminViewerNode::~YasminViewerNode() { this->stop_server(); }
 
 std::string YasminViewerNode::get_fsms_json() const {
   const auto now = std::chrono::steady_clock::now();
-  std::lock_guard<std::mutex> lock(fsms_mutex_);
-  prune_expired_locked(now);
+  std::lock_guard<std::mutex> lock(this->fsms_mutex_);
+  this->prune_expired_locked(now);
 
   std::ostringstream stream;
   stream << "{";
 
   bool first_entry = true;
-  for (const auto &[name, cached_fsm] : fsms_) {
+  for (const auto &[name, cached_fsm] : this->fsms_) {
     if (!first_entry) {
       stream << ",";
     }
@@ -241,7 +250,7 @@ std::string YasminViewerNode::get_fsms_json() const {
   return stream.str();
 }
 
-std::string YasminViewerNode::get_web_root() const { return web_root_; }
+std::string YasminViewerNode::get_web_root() const { return this->web_root_; }
 
 void YasminViewerNode::fsm_viewer_cb(const StateMachineMsg::SharedPtr msg) {
   if (!msg || msg->states.empty()) {
@@ -252,52 +261,48 @@ void YasminViewerNode::fsm_viewer_cb(const StateMachineMsg::SharedPtr msg) {
   const std::string fsm_name = msg->states.front().name;
   const std::string json = state_machine_to_json(*msg);
 
-  std::lock_guard<std::mutex> lock(fsms_mutex_);
-  prune_expired_locked(now);
-  fsms_[fsm_name] = CachedFsm{json, now};
+  std::lock_guard<std::mutex> lock(this->fsms_mutex_);
+  this->prune_expired_locked(now);
+  this->fsms_[fsm_name] = CachedFsm{json, now};
 }
 
 void YasminViewerNode::start_server() {
-  server_running_.store(true);
-  server_thread_ = std::thread(&YasminViewerNode::run_server, this);
+  this->server_running_.store(true);
+  this->server_thread_ = std::thread(&YasminViewerNode::run_server, this);
 }
 
 void YasminViewerNode::stop_server() {
-  server_running_.store(false);
+  this->server_running_.store(false);
 
-  if (server_thread_.joinable()) {
+  if (this->server_thread_.joinable()) {
     try {
       asio::io_context io_context;
       tcp::resolver resolver(io_context);
-      const std::string wake_host = (host_ == "0.0.0.0" || host_ == "::")
-                                        ? "127.0.0.1"
-                                    : host_ == "localhost" ? "127.0.0.1"
-                                                           : host_;
-      auto endpoints = resolver.resolve(wake_host, std::to_string(port_));
+      const std::string wake_host = resolve_host(this->host_);
+      auto endpoints = resolver.resolve(wake_host, std::to_string(this->port_));
       tcp::socket socket(io_context);
       asio::connect(socket, endpoints);
       socket.close();
     } catch (const std::exception &) {
     }
-    server_thread_.join();
+    this->server_thread_.join();
   }
 }
 
 void YasminViewerNode::run_server() {
   try {
     asio::io_context io_context(1);
-    const auto address =
-        asio::ip::make_address(host_ == "localhost" ? "127.0.0.1" : host_);
+    const auto address = asio::ip::make_address(resolve_host(this->host_));
     tcp::acceptor acceptor(io_context,
-                           {address, static_cast<unsigned short>(port_)});
+                           {address, static_cast<unsigned short>(this->port_)});
 
-    while (rclcpp::ok() && server_running_.load()) {
+    while (rclcpp::ok() && this->server_running_.load()) {
       tcp::socket socket(io_context);
       beast::error_code error_code;
       acceptor.accept(socket, error_code);
 
       if (error_code) {
-        if (server_running_.load()) {
+        if (this->server_running_.load()) {
           RCLCPP_WARN(this->get_logger(), "Accept failed: %s",
                       error_code.message().c_str());
         }
@@ -314,11 +319,11 @@ void YasminViewerNode::run_server() {
 
 void YasminViewerNode::prune_expired_locked(
     const std::chrono::steady_clock::time_point &now) const {
-  const auto max_age = std::chrono::duration<double>(max_age_seconds_);
+  const auto max_age = std::chrono::duration<double>(this->max_age_seconds_);
 
-  for (auto iterator = fsms_.begin(); iterator != fsms_.end();) {
+  for (auto iterator = this->fsms_.begin(); iterator != this->fsms_.end();) {
     if ((now - iterator->second.timestamp) > max_age) {
-      iterator = fsms_.erase(iterator);
+      iterator = this->fsms_.erase(iterator);
     } else {
       ++iterator;
     }

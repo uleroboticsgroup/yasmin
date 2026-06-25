@@ -16,10 +16,6 @@
 #ifndef YASMIN__BLACKBOARD_HPP_
 #define YASMIN__BLACKBOARD_HPP_
 
-#include <cxxabi.h>
-
-#include <exception>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -28,33 +24,11 @@
 #include <utility>
 #include <vector>
 
+#include "yasmin/demangle.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/types.hpp"
 
 namespace yasmin {
-
-/**
- * @brief Demangle a C++ type name to a human-readable format.
- * @param mangled_name The mangled type name.
- * @return The demangled type name.
- */
-inline std::string demangle_type(const std::string &mangled_name) {
-
-  std::string name = mangled_name;
-
-#ifdef __GNUG__ // If using GCC/G++
-  int status;
-  // Demangle the name using GCC's demangling function
-  char *demangled =
-      abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
-  if (status == 0) {
-    name = demangled;
-  }
-  free(demangled);
-#endif
-
-  return name; // Return the demangled type name
-}
 
 /**
  * @class Blackboard
@@ -134,10 +108,11 @@ public:
     if (type_it != this->storage->type_registry.end() &&
         type_it->second == type_name) {
       // Same type: update existing value in-place (avoids allocation)
-      *(std::static_pointer_cast<T>(this->storage->values.at(key))) = value;
+      *(std::static_pointer_cast<T>(this->storage->values.at(key))) =
+          std::move(value);
     } else {
       // New key or different type: (re)create entry
-      this->storage->values[key] = std::make_shared<T>(value);
+      this->storage->values[key] = std::make_shared<T>(std::move(value));
       this->storage->type_registry[key] = type_name;
     }
   }
@@ -155,15 +130,15 @@ public:
 
     std::lock_guard<std::recursive_mutex> lk(this->storage->mutex);
 
-    // Check if the key exists
-    if (!this->contains(key)) {
+    const std::string &remapped_key = this->remap(key);
+    auto it = this->storage->values.find(remapped_key);
+    if (it == this->storage->values.end()) {
       throw std::runtime_error("Element '" + key +
                                "' does not exist in the blackboard");
     }
 
     // Return the value casted to the requested type
-    return *(std::static_pointer_cast<T>(
-        this->storage->values.at(this->remap(key))));
+    return *(std::static_pointer_cast<T>(it->second));
   }
 
   /**

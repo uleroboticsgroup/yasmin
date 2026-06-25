@@ -32,23 +32,25 @@ void JoinState::configure() {
 }
 
 void JoinState::set_barrier(RegionBarrier::SharedPtr barrier) {
-  barrier_ = std::move(barrier);
+  this->barrier_ = std::move(barrier);
 }
 
-const std::string &JoinState::get_sync_id() const { return sync_id_; }
+const std::string &JoinState::get_sync_id() const { return this->sync_id_; }
 
-RegionBarrier::SharedPtr JoinState::get_barrier() const { return barrier_; }
+RegionBarrier::SharedPtr JoinState::get_barrier() const {
+  return this->barrier_;
+}
 
 std::string JoinState::execute(Blackboard::SharedPtr blackboard) {
   (void)blackboard;
-  if (barrier_) {
-    barrier_->arrive_and_wait();
+  if (this->barrier_) {
+    this->barrier_->arrive_and_wait();
   }
-  return outcome_;
+  return this->outcome_;
 }
 
 std::string JoinState::to_string() const {
-  return std::string("JoinState [") + sync_id_ + "]";
+  return std::string("JoinState [") + this->sync_id_ + "]";
 }
 
 } // namespace yasmin

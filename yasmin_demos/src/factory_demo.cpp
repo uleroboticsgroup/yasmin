@@ -13,15 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <filesystem>
-#include <iostream>
 #include <memory>
 #include <string>
 
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/state_machine.hpp"
+#include "yasmin_demos/share_directory.hpp"
 #include "yasmin_factory/yasmin_factory.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -40,22 +38,7 @@ int main(int argc, char *argv[]) {
 
   // Load state machine from XML file
   std::string xml_file =
-#if __has_include("rclcpp/version.h")
-#include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(29, 5, 1)
-      ([]() {
-        std::filesystem::path p;
-        ament_index_cpp::get_package_share_directory("yasmin_demos", p);
-        return (p / "state_machines/demo_2.xml").string();
-      })();
-#else
-      ament_index_cpp::get_package_share_directory("yasmin_demos") +
-      "/state_machines/demo_2.xml";
-#endif
-#else
-      ament_index_cpp::get_package_share_directory("yasmin_demos") +
-      "/state_machines/demo_2.xml";
-#endif
+      yasmin_demos::get_share_file_path("state_machines/demo_2.xml");
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);

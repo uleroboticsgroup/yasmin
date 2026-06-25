@@ -179,7 +179,7 @@ void LoadPlyState::configure() {
 }
 
 std::string LoadPlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
-  if (file_path_.empty()) {
+  if (this->file_path_.empty()) {
     YASMIN_LOG_WARN("Parameter 'file_path' is empty");
     return "aborted";
   }
@@ -189,17 +189,17 @@ std::string LoadPlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity();
 
   const int result =
-      pcl::io::loadPLYFile(file_path_, *output_cloud, origin, orientation);
+      pcl::io::loadPLYFile(this->file_path_, *output_cloud, origin, orientation);
 
   if (result < 0) {
-    YASMIN_LOG_WARN("Failed to load PLY file '%s'", file_path_.c_str());
+    YASMIN_LOG_WARN("Failed to load PLY file '%s'", this->file_path_.c_str());
     return "aborted";
   }
 
   // PCL 1.12's loadPLYFile does not populate the origin/orientation output
   // parameters for PCLPointCloud2 due to a bug in PLYReader::read. Parse
   // the camera element directly from the file to work around this.
-  read_ply_camera_ascii(file_path_, origin, orientation);
+  read_ply_camera_ascii(this->file_path_, origin, orientation);
 
   blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
   blackboard->set<common::Vector4fArray>("sensor_origin",

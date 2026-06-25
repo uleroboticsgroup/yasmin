@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <iostream>
 #include <memory>
 #include <string>
 
@@ -30,7 +29,6 @@
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
 using std::placeholders::_1;
-using std::placeholders::_2;
 
 /**
  * @class PublishIntState
@@ -140,9 +138,9 @@ int main(int argc, char *argv[]) {
   sm->add_state("PUBLISHING_INT", std::make_shared<PublishIntState>(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
-                     "CHECKINNG_COUNTS"}, // Transition back to itself
+                     "CHECKING_COUNTS"}, // Transition back to itself
                 });
-  sm->add_state("CHECKINNG_COUNTS", checking_counts_state,
+  sm->add_state("CHECKING_COUNTS", checking_counts_state,
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
                  {"outcome2", "PUBLISHING_INT"}});
 

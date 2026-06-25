@@ -15,8 +15,6 @@
 
 #include "yasmin/state.hpp"
 
-#include <cxxabi.h> // For abi::__cxa_demangle
-
 #include <algorithm>
 #include <exception>
 #include <mutex>
@@ -25,6 +23,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "yasmin/demangle.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/types.hpp"
 
@@ -114,11 +113,11 @@ std::string State::operator()(Blackboard::SharedPtr blackboard) {
   std::string outcome = this->execute(blackboard);
 
   // Check if the outcome is valid
-  if (this->outcomes.find(outcome) == this->outcomes.end()) {
+  const auto &outcomes = this->get_outcomes();
+  if (outcomes.find(outcome) == outcomes.end()) {
 
     // Construct a string representation of the possible outcomes
     std::string outcomes_string = "[";
-    const auto &outcomes = this->get_outcomes();
 
     for (auto it = outcomes.begin(); it != outcomes.end(); ++it) {
       const auto &s = *it;
@@ -296,18 +295,5 @@ const StateMetadata &State::get_metadata() const {
 }
 
 std::string State::to_string() const {
-  std::string name = typeid(*this).name();
-
-#ifdef __GNUG__ // If using GCC/G++
-  int status;
-  // Demangle the name using GCC's demangling function
-  char *demangled =
-      abi::__cxa_demangle(name.c_str(), nullptr, nullptr, &status);
-  if (status == 0) {
-    name = demangled;
-  }
-  free(demangled);
-#endif
-
-  return name; // Return the demangled class name
+  return demangle_type(typeid(*this).name());
 }

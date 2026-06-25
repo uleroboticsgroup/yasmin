@@ -51,7 +51,6 @@ from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
-from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.parameter import Parameter
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
@@ -447,7 +446,7 @@ class EditorModelMixin:
             if has_container_name_conflict(
                 text,
                 current_name=old_name,
-                sibling_state_names=parent_model.states.keys(),
+                sibling_state_names=parent_model.states,
                 sibling_outcome_names=[outcome.name for outcome in parent_model.outcomes],
             ):
                 return
@@ -555,7 +554,7 @@ class EditorModelMixin:
         )
         return has_child_state_name_conflict(
             state_name,
-            sibling_state_names=container_model.states.keys(),
+            sibling_state_names=container_model.states,
             sibling_outcome_names=[outcome.name for outcome in container_model.outcomes],
         )
 
@@ -567,7 +566,7 @@ class EditorModelMixin:
         return has_child_outcome_name_conflict(
             outcome_name,
             current_name=current_name,
-            sibling_state_names=self.current_container_model.states.keys(),
+            sibling_state_names=self.current_container_model.states,
             sibling_outcome_names=[
                 outcome.name for outcome in self.current_container_model.outcomes
             ],

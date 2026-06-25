@@ -248,7 +248,7 @@ public:
           maximum is reached (to exit), or <code>"outcome2"</code> to continue
           publishing. In the main function, we create a state machine with two
           states: <code>PUBLISHING_INT</code> publishes a message and
-          transitions to <code>CHECKINNG_COUNTS</code>, which evaluates the
+          transitions to <code>CHECKING_COUNTS</code>, which evaluates the
           condition. If the maximum hasn't been reached, it loops back to
           <code>PUBLISHING_INT</code>, creating a publish-check cycle. We
           initialize the blackboard with <code>counter = 0</code> and
@@ -305,9 +305,9 @@ int main(int argc, char *argv[]) {
   sm-&gt;add_state("PUBLISHING_INT", std::make_shared&lt;PublishIntState&gt;(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
-                     "CHECKINNG_COUNTS"},
+                     "CHECKING_COUNTS"},
                 });
-  sm-&gt;add_state("CHECKINNG_COUNTS", checking_counts_state,
+  sm-&gt;add_state("CHECKING_COUNTS", checking_counts_state,
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
                  {"outcome2", "PUBLISHING_INT"}});
 

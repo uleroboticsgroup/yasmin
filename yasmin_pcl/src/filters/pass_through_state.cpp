@@ -17,14 +17,13 @@
 
 #include <pcl/filters/passthrough.h>
 
-#include <exception>
 #include <limits>
 #include <string>
 
 #include <pluginlib/class_list_macros.hpp>
 
-#include "yasmin/logs.hpp"
 #include "yasmin_pcl/common/cloud_types.hpp"
+#include "yasmin_pcl/common/filter_state_utils.hpp"
 
 namespace yasmin_pcl::filters {
 
@@ -83,61 +82,30 @@ PassThroughState::PassThroughState() : yasmin::State({"succeeded", "aborted"}) {
 PassThroughState::~PassThroughState() {}
 
 void PassThroughState::configure() {
-  filter_field_name_ = this->get_parameter<std::string>("filter_field_name");
-  filter_limit_min_ = this->get_parameter<double>("filter_limit_min");
-  filter_limit_max_ = this->get_parameter<double>("filter_limit_max");
-  filter_limit_negative_ = this->get_parameter<bool>("filter_limit_negative");
-  keep_organized_ = this->get_parameter<bool>("keep_organized");
-  user_filter_value_ = this->get_parameter<float>("user_filter_value");
-  extract_removed_indices_ =
+  this->filter_field_name_ =
+      this->get_parameter<std::string>("filter_field_name");
+  this->filter_limit_min_ = this->get_parameter<double>("filter_limit_min");
+  this->filter_limit_max_ = this->get_parameter<double>("filter_limit_max");
+  this->filter_limit_negative_ =
+      this->get_parameter<bool>("filter_limit_negative");
+  this->keep_organized_ = this->get_parameter<bool>("keep_organized");
+  this->user_filter_value_ = this->get_parameter<float>("user_filter_value");
+  this->extract_removed_indices_ =
       this->get_parameter<bool>("extract_removed_indices");
 }
 
 std::string
 PassThroughState::execute(yasmin::Blackboard::SharedPtr blackboard) {
-  try {
-    const auto input_cloud =
-        blackboard->get<common::PclPointCloud2Ptr>("input_cloud");
-
-    if (!input_cloud) {
-      YASMIN_LOG_WARN("Input PCL point cloud pointer is null");
-      return "aborted";
-    }
-
-    pcl::PassThrough<pcl::PCLPointCloud2> filter(extract_removed_indices_);
-    filter.setInputCloud(input_cloud);
-    filter.setFilterFieldName(filter_field_name_);
-    filter.setFilterLimits(filter_limit_min_, filter_limit_max_);
-    filter.setNegative(filter_limit_negative_);
-    filter.setKeepOrganized(keep_organized_);
-    filter.setUserFilterValue(user_filter_value_);
-
-    if (blackboard->contains("input_indices")) {
-      const auto input_indices =
-          blackboard->get<common::Indices>("input_indices");
-      pcl::IndicesPtr input_indices_ptr(new pcl::Indices(input_indices));
-      filter.setIndices(input_indices_ptr);
-    }
-
-    auto output_cloud = common::make_pcl_point_cloud2();
-    filter.filter(*output_cloud);
-    blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
-
-    if (extract_removed_indices_) {
-      const auto removed_indices_ptr = filter.getRemovedIndices();
-      if (removed_indices_ptr) {
-        blackboard->set<common::Indices>("removed_indices",
-                                         *removed_indices_ptr);
-      } else {
-        blackboard->set<common::Indices>("removed_indices", common::Indices{});
-      }
-    }
-
-    return "succeeded";
-  } catch (const std::exception &e) {
-    YASMIN_LOG_ERROR("PassThrough filtering failed: %s", e.what());
-    return "aborted";
-  }
+  return common::execute_filter<pcl::PassThrough<pcl::PCLPointCloud2>>(
+      blackboard, "PassThrough", this->extract_removed_indices_,
+      [this](auto &filter) {
+        filter.setFilterFieldName(this->filter_field_name_);
+        filter.setFilterLimits(this->filter_limit_min_,
+                               this->filter_limit_max_);
+        filter.setNegative(this->filter_limit_negative_);
+        filter.setKeepOrganized(this->keep_organized_);
+        filter.setUserFilterValue(this->user_filter_value_);
+      });
 }
 
 } // namespace yasmin_pcl::filters

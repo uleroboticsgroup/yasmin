@@ -20,7 +20,6 @@
 #include <atomic>
 #include <mutex>
 #include <string>
-#include <thread>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
@@ -72,15 +71,6 @@ private:
    */
   void apply_parameter_mappings(const std::string &state_name,
                                 const State::SharedPtr &state);
-
-  /// @brief Helper function to generate a set of possible outcomes from an
-  /// outcome map
-  /// @param outcome_map
-  /// @param default_outcome
-  /// @return The set of possible outcomes
-  static Outcomes
-  generate_possible_outcomes(const OutcomeMap &outcome_map,
-                             const std::string &default_outcome);
 
 public:
   /**

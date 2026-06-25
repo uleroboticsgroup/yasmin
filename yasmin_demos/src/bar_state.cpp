@@ -13,15 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "yasmin_demos/bar_state.h"
+#include "yasmin_demos/bar_state.hpp"
 
 #include <chrono>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <thread>
-
-#include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
@@ -29,8 +26,8 @@
 #include "yasmin_ros/ros_logs.hpp"
 
 BarState::BarState() : yasmin::State({"outcome3"}) {
-  log_prefix_ = "Observed value";
-  sleep_ms_ = 300;
+  this->log_prefix_ = "Observed value";
+  this->sleep_ms_ = 300;
   this->set_description("Prints the value stored in 'foo_str' from the "
                         "blackboard and transitions back to the Foo state.");
   this->set_outcome_description("outcome3", "Final outcome");
@@ -45,16 +42,17 @@ BarState::BarState() : yasmin::State({"outcome3"}) {
 }
 
 void BarState::configure() {
-  log_prefix_ = this->get_parameter<std::string>("log_prefix");
-  sleep_ms_ = this->get_parameter<int>("sleep_ms");
+  this->log_prefix_ = this->get_parameter<std::string>("log_prefix");
+  this->sleep_ms_ = this->get_parameter<int>("sleep_ms");
 }
 
 std::string BarState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   YASMIN_LOG_INFO("Executing state BAR");
-  std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms_));
+  std::this_thread::sleep_for(std::chrono::milliseconds(this->sleep_ms_));
 
   YASMIN_LOG_INFO(
-      (log_prefix_ + ": " + blackboard->get<std::string>("foo_str")).c_str());
+      (this->log_prefix_ + ": " + blackboard->get<std::string>("foo_str"))
+          .c_str());
 
   return "outcome3";
 };

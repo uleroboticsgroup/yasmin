@@ -53,7 +53,6 @@ from yasmin_editor.editor_gui.final_outcome_ops import ensure_final_outcome_alia
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
-from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.editor_gui.scene_selection import collect_scene_selection
 from yasmin_editor.editor_gui.transition_rules import (
     TransitionRuleError,
@@ -626,7 +625,7 @@ class EditorUiMixin:
                     if has_container_name_conflict(
                         name,
                         current_name=old_name,
-                        sibling_state_names=parent_model.states.keys(),
+                        sibling_state_names=parent_model.states,
                         sibling_outcome_names=[
                             outcome.name for outcome in parent_model.outcomes
                         ],

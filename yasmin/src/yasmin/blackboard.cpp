@@ -16,7 +16,6 @@
 #include "yasmin/blackboard.hpp"
 
 #include <algorithm>
-#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -56,9 +55,7 @@ void Blackboard::copy_value_from(const Blackboard &other,
   YASMIN_LOG_DEBUG("Copying '%s' from blackboard into '%s'", source_key.c_str(),
                    target_key.c_str());
 
-  if (this->storage == other.storage) {
-    std::lock_guard<std::recursive_mutex> lk(this->storage->mutex);
-
+  auto copy_impl = [&]() {
     const std::string &remapped_source_key = other.remap(source_key);
     if (other.storage->values.find(remapped_source_key) ==
         other.storage->values.end()) {
@@ -71,24 +68,16 @@ void Blackboard::copy_value_from(const Blackboard &other,
         other.storage->values.at(remapped_source_key);
     this->storage->type_registry[remapped_target_key] =
         other.storage->type_registry.at(remapped_source_key);
-    return;
+  };
+
+  if (this->storage == other.storage) {
+    std::lock_guard<std::recursive_mutex> lk(this->storage->mutex);
+    copy_impl();
+  } else {
+    std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lk(
+        this->storage->mutex, other.storage->mutex);
+    copy_impl();
   }
-
-  std::scoped_lock<std::recursive_mutex, std::recursive_mutex> lk(
-      this->storage->mutex, other.storage->mutex);
-
-  const std::string &remapped_source_key = other.remap(source_key);
-  if (other.storage->values.find(remapped_source_key) ==
-      other.storage->values.end()) {
-    throw std::runtime_error("Element '" + source_key +
-                             "' does not exist in the blackboard");
-  }
-
-  const std::string &remapped_target_key = this->remap(target_key);
-  this->storage->values[remapped_target_key] =
-      other.storage->values.at(remapped_source_key);
-  this->storage->type_registry[remapped_target_key] =
-      other.storage->type_registry.at(remapped_source_key);
 }
 
 int Blackboard::size() const {
@@ -142,13 +131,13 @@ std::string Blackboard::get_type(const std::string &key) const {
   std::lock_guard<std::recursive_mutex> lk(this->storage->mutex);
   auto remapped_key = this->remap(key);
 
-  // Check if the key exists
-  if (!this->contains(key)) {
+  auto it = this->storage->type_registry.find(remapped_key);
+  if (it == this->storage->type_registry.end()) {
     throw std::runtime_error("Element '" + key +
                              "' does not exist in the blackboard");
   }
 
-  return this->storage->type_registry.at(remapped_key);
+  return it->second;
 }
 
 std::string Blackboard::to_string() const {

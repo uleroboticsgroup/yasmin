@@ -66,9 +66,9 @@ ProjectInliersState::ProjectInliersState()
 ProjectInliersState::~ProjectInliersState() {}
 
 void ProjectInliersState::configure() {
-  model_type_ = this->get_parameter<int>("model_type");
-  copy_all_fields_ = this->get_parameter<bool>("copy_all_fields");
-  copy_all_data_ = this->get_parameter<bool>("copy_all_data");
+  this->model_type_ = this->get_parameter<int>("model_type");
+  this->copy_all_fields_ = this->get_parameter<bool>("copy_all_fields");
+  this->copy_all_data_ = this->get_parameter<bool>("copy_all_data");
 }
 
 std::string
@@ -96,10 +96,10 @@ ProjectInliersState::execute(yasmin::Blackboard::SharedPtr blackboard) {
 
     pcl::ProjectInliers<pcl::PCLPointCloud2> filter;
     filter.setInputCloud(input_cloud);
-    filter.setModelType(model_type_);
+    filter.setModelType(this->model_type_);
     filter.setModelCoefficients(coefficients);
-    filter.setCopyAllFields(copy_all_fields_);
-    filter.setCopyAllData(copy_all_data_);
+    filter.setCopyAllFields(this->copy_all_fields_);
+    filter.setCopyAllData(this->copy_all_data_);
     common::set_optional_input_indices(filter, blackboard);
 
     auto output_cloud = common::make_pcl_point_cloud2();

@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Pedro Edom Nunes
+// Copyright (C) 2026 Maik Knof
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef BAR_STATE_H
-#define BAR_STATE_H
+#ifndef YASMIN_DEMOS_POSE_WRITER_STATE_HPP_
+#define YASMIN_DEMOS_POSE_WRITER_STATE_HPP_
 
 #include <string>
 
@@ -23,22 +23,23 @@
 #include <yasmin/types.hpp>
 
 /**
- * @brief Represents the "Bar" state in the state machine.
+ * @brief Represents a state that creates and serializes a Pose message.
  *
- * This state logs the value from the blackboard and provides
- * a single outcome to transition.
+ * This state creates a geometry_msgs::msg::Pose message, serializes it to a
+ * byte array, and stores both the serialized data and the type string in the
+ * blackboard.
  */
-class BarState : public yasmin::State {
+class PoseWriterState : public yasmin::State {
 public:
   /**
-   * @brief Constructs a BarState object.
+   * @brief Constructs a PoseWriterState object.
    */
-  BarState();
+  PoseWriterState();
 
   /**
-   * @brief Destructs the BarState object.
+   * @brief Destructs the PoseWriterState object.
    */
-  ~BarState();
+  ~PoseWriterState();
 
   /**
    * @brief Configures the state-local parameters.
@@ -46,19 +47,22 @@ public:
   void configure() override;
 
   /**
-   * @brief Executes the Bar state logic.
+   * @brief Executes the Pose writer state logic.
    *
-   * This method logs the execution, waits for the configured duration,
-   * retrieves a string from the blackboard, and logs it.
+   * This method creates a Pose message, serializes it, stores the serialized
+   * bytes in the blackboard under "pose_bytes", and stores the type string
+   * under "pose_bytes__type".
    *
    * @param blackboard Shared pointer to the blackboard for state communication.
-   * @return std::string The outcome of the execution: "outcome3".
+   * @return std::string The outcome of the execution: "outcome1".
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard);
 
 private:
-  std::string log_prefix_;
-  int sleep_ms_;
+  double position_x_;
+  double position_y_;
+  double position_z_;
+  double orientation_w_;
 };
 
-#endif // BAR_STATE_H
+#endif // YASMIN_DEMOS_POSE_WRITER_STATE_HPP_

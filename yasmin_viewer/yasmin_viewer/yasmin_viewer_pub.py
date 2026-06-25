@@ -73,7 +73,11 @@ class YasminViewerPub(object):
         ## A timer to periodically publish the FSM state.
         self._timer = self._node.create_timer(1 / rate, self._publish_data)
 
-        ## Register shutdown callback to clean up the viewer.
+    def shutdown(self) -> None:
+        if self._timer is not None:
+            self._timer.cancel()
+            self._node.destroy_timer(self._timer)
+            self._timer = None
 
     def parse_transitions(self, transitions: Dict[str, str]) -> List[TransitionMsg]:
         """
@@ -126,11 +130,7 @@ class YasminViewerPub(object):
         state_msg.outcomes = state.get_outcomes()
 
         # Check if the state is a FSM, Concurrence, or OrthogonalState
-        state_msg.is_fsm = (
-            isinstance(state, StateMachine)
-            or isinstance(state, Concurrence)
-            or isinstance(state, OrthogonalState)
-        )
+        state_msg.is_fsm = isinstance(state, (StateMachine, Concurrence, OrthogonalState))
 
         # Add state to the list
         states_list.append(state_msg)
@@ -222,7 +222,7 @@ class YasminViewerPub(object):
 
     def parse_concurrence_transitions(
         self, concurrence: Concurrence
-    ) -> Dict[str, Dict[str, str]]:
+    ) -> Dict[str, List[TransitionMsg]]:
         """
         Converts a concurrence outcome map into transition-like information for visualization.
 
@@ -233,7 +233,7 @@ class YasminViewerPub(object):
             concurrence (Concurrence): The concurrence state to parse transitions from.
 
         Returns:
-            List[TransitionMsg]: A list of TransitionMsg representing the concurrence outcome mappings.
+            Dict[str, List[TransitionMsg]]: Transition mappings per state name for visualization.
         """
         transitions = {}
         outcome_map = concurrence.get_outcome_map()

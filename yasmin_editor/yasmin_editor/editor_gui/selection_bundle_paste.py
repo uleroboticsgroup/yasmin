@@ -36,7 +36,7 @@ def paste_states(
     """Paste states into the target and return the name remapping."""
 
     state_name_map: dict[str, str] = {}
-    existing_state_names = set(target_model.states.keys())
+    existing_state_names = set(target_model.states)
 
     for original_name, state in bundle.states.items():
         copied_state = copy.deepcopy(state)

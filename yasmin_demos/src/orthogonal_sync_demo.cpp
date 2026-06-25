@@ -14,7 +14,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <chrono>
-#include <iostream>
 #include <memory>
 #include <string>
 
@@ -41,11 +40,11 @@ public:
         sleep_ms_(sleep_ms), name_(name) {}
 
   std::string execute(yasmin::Blackboard::SharedPtr /*blackboard*/) override {
-    YASMIN_LOG_INFO("WorkerState [%s]: iteration %d/%d", name_.c_str(),
-                    this->counter + 1, max_count_);
-    std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms_));
+    YASMIN_LOG_INFO("WorkerState [%s]: iteration %d/%d", this->name_.c_str(),
+                    this->counter + 1, this->max_count_);
+    std::this_thread::sleep_for(std::chrono::milliseconds(this->sleep_ms_));
     this->counter += 1;
-    if (this->counter >= max_count_) {
+    if (this->counter >= this->max_count_) {
       return "done";
     }
     return "working";

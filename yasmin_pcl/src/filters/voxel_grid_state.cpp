@@ -88,17 +88,19 @@ VoxelGridState::VoxelGridState() : yasmin::State({"succeeded", "aborted"}) {
 VoxelGridState::~VoxelGridState() {}
 
 void VoxelGridState::configure() {
-  leaf_size_x_ = this->get_parameter<float>("leaf_size_x");
-  leaf_size_y_ = this->get_parameter<float>("leaf_size_y");
-  leaf_size_z_ = this->get_parameter<float>("leaf_size_z");
-  downsample_all_data_ = this->get_parameter<bool>("downsample_all_data");
-  minimum_points_number_per_voxel_ =
+  this->leaf_size_x_ = this->get_parameter<float>("leaf_size_x");
+  this->leaf_size_y_ = this->get_parameter<float>("leaf_size_y");
+  this->leaf_size_z_ = this->get_parameter<float>("leaf_size_z");
+  this->downsample_all_data_ = this->get_parameter<bool>("downsample_all_data");
+  this->minimum_points_number_per_voxel_ =
       this->get_parameter<int>("minimum_points_number_per_voxel");
-  save_leaf_layout_ = this->get_parameter<bool>("save_leaf_layout");
-  filter_field_name_ = this->get_parameter<std::string>("filter_field_name");
-  filter_limit_min_ = this->get_parameter<double>("filter_limit_min");
-  filter_limit_max_ = this->get_parameter<double>("filter_limit_max");
-  filter_limit_negative_ = this->get_parameter<bool>("filter_limit_negative");
+  this->save_leaf_layout_ = this->get_parameter<bool>("save_leaf_layout");
+  this->filter_field_name_ =
+      this->get_parameter<std::string>("filter_field_name");
+  this->filter_limit_min_ = this->get_parameter<double>("filter_limit_min");
+  this->filter_limit_max_ = this->get_parameter<double>("filter_limit_max");
+  this->filter_limit_negative_ =
+      this->get_parameter<bool>("filter_limit_negative");
 }
 
 std::string VoxelGridState::execute(yasmin::Blackboard::SharedPtr blackboard) {
@@ -113,16 +115,17 @@ std::string VoxelGridState::execute(yasmin::Blackboard::SharedPtr blackboard) {
 
     pcl::VoxelGrid<pcl::PCLPointCloud2> filter;
     filter.setInputCloud(input_cloud);
-    filter.setLeafSize(leaf_size_x_, leaf_size_y_, leaf_size_z_);
-    filter.setDownsampleAllData(downsample_all_data_);
+    filter.setLeafSize(this->leaf_size_x_, this->leaf_size_y_,
+                       this->leaf_size_z_);
+    filter.setDownsampleAllData(this->downsample_all_data_);
     filter.setMinimumPointsNumberPerVoxel(
-        static_cast<unsigned int>(minimum_points_number_per_voxel_));
-    filter.setSaveLeafLayout(save_leaf_layout_);
+        static_cast<unsigned int>(this->minimum_points_number_per_voxel_));
+    filter.setSaveLeafLayout(this->save_leaf_layout_);
 
-    if (!filter_field_name_.empty()) {
-      filter.setFilterFieldName(filter_field_name_);
-      filter.setFilterLimits(filter_limit_min_, filter_limit_max_);
-      filter.setFilterLimitsNegative(filter_limit_negative_);
+    if (!this->filter_field_name_.empty()) {
+      filter.setFilterFieldName(this->filter_field_name_);
+      filter.setFilterLimits(this->filter_limit_min_, this->filter_limit_max_);
+      filter.setFilterLimitsNegative(this->filter_limit_negative_);
     }
 
     common::set_optional_input_indices(filter, blackboard);

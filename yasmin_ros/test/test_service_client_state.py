@@ -135,7 +135,7 @@ class TestServiceClientState(unittest.TestCase):
 
         ## Check that the number of WARNING logs is correct
         self.assertEqual(
-            (retries * 2) + 1,
+            retries,
             len(captured.records),
             msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
             f"Captured messages: {[r.getMessage() for r in captured.records]}",
@@ -163,7 +163,7 @@ class TestServiceClientState(unittest.TestCase):
 
         ## Check that the number of WARNING logs is correct
         self.assertEqual(
-            (retries * 2) + 1,
+            retries,
             len(captured.records),
             msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
             f"Captured messages: {[r.getMessage() for r in captured.records]}",

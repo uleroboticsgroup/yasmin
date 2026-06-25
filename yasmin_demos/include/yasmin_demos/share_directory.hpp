@@ -1,0 +1,45 @@
+// Copyright (C) 2026 YASMIN Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#ifndef YASMIN_DEMOS_SHARE_DIRECTORY_HPP_
+#define YASMIN_DEMOS_SHARE_DIRECTORY_HPP_
+
+#include <filesystem>
+#include <string>
+
+#include <ament_index_cpp/get_package_share_directory.hpp>
+
+namespace yasmin_demos {
+
+inline std::string get_share_file_path(const std::string &relative_path) {
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
+#if RCLCPP_VERSION_GTE(29, 5, 1)
+  std::filesystem::path p;
+  ament_index_cpp::get_package_share_directory("yasmin_demos", p);
+  return (p / relative_path).string();
+#else
+  return ament_index_cpp::get_package_share_directory("yasmin_demos") + "/" +
+         relative_path;
+#endif
+#else
+  return ament_index_cpp::get_package_share_directory("yasmin_demos") + "/" +
+         relative_path;
+#endif
+}
+
+} // namespace yasmin_demos
+
+#endif // YASMIN_DEMOS_SHARE_DIRECTORY_HPP_

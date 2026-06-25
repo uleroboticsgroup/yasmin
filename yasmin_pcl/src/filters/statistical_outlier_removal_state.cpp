@@ -17,12 +17,10 @@
 
 #include <pcl/filters/statistical_outlier_removal.h>
 
-#include <exception>
 #include <limits>
 
 #include <pluginlib/class_list_macros.hpp>
 
-#include "yasmin/logs.hpp"
 #include "yasmin_pcl/common/cloud_types.hpp"
 #include "yasmin_pcl/common/filter_state_utils.hpp"
 
@@ -80,50 +78,27 @@ StatisticalOutlierRemovalState::StatisticalOutlierRemovalState()
 StatisticalOutlierRemovalState::~StatisticalOutlierRemovalState() {}
 
 void StatisticalOutlierRemovalState::configure() {
-  mean_k_ = this->get_parameter<int>("mean_k");
-  stddev_mul_thresh_ = this->get_parameter<double>("stddev_mul_thresh");
-  negative_ = this->get_parameter<bool>("negative");
-  keep_organized_ = this->get_parameter<bool>("keep_organized");
-  user_filter_value_ = this->get_parameter<float>("user_filter_value");
-  extract_removed_indices_ =
+  this->mean_k_ = this->get_parameter<int>("mean_k");
+  this->stddev_mul_thresh_ = this->get_parameter<double>("stddev_mul_thresh");
+  this->negative_ = this->get_parameter<bool>("negative");
+  this->keep_organized_ = this->get_parameter<bool>("keep_organized");
+  this->user_filter_value_ = this->get_parameter<float>("user_filter_value");
+  this->extract_removed_indices_ =
       this->get_parameter<bool>("extract_removed_indices");
 }
 
 std::string StatisticalOutlierRemovalState::execute(
     yasmin::Blackboard::SharedPtr blackboard) {
-  try {
-    const auto input_cloud =
-        blackboard->get<common::PclPointCloud2Ptr>("input_cloud");
-
-    if (!input_cloud) {
-      YASMIN_LOG_WARN("Input PCL point cloud pointer is null");
-      return "aborted";
-    }
-
-    pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> filter(
-        extract_removed_indices_);
-    filter.setInputCloud(input_cloud);
-    filter.setMeanK(mean_k_);
-    filter.setStddevMulThresh(stddev_mul_thresh_);
-    filter.setNegative(negative_);
-    filter.setKeepOrganized(keep_organized_);
-    filter.setUserFilterValue(user_filter_value_);
-    common::set_optional_input_indices(filter, blackboard);
-
-    auto output_cloud = common::make_pcl_point_cloud2();
-    filter.filter(*output_cloud);
-    blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
-
-    if (extract_removed_indices_) {
-      common::store_removed_indices(filter, blackboard);
-    }
-
-    return "succeeded";
-  } catch (const std::exception &e) {
-    YASMIN_LOG_ERROR("StatisticalOutlierRemoval filtering failed: %s",
-                     e.what());
-    return "aborted";
-  }
+  return common::execute_filter<
+      pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2>>(
+      blackboard, "StatisticalOutlierRemoval", this->extract_removed_indices_,
+      [this](auto &filter) {
+        filter.setMeanK(this->mean_k_);
+        filter.setStddevMulThresh(this->stddev_mul_thresh_);
+        filter.setNegative(this->negative_);
+        filter.setKeepOrganized(this->keep_organized_);
+        filter.setUserFilterValue(this->user_filter_value_);
+      });
 }
 
 } // namespace yasmin_pcl::filters

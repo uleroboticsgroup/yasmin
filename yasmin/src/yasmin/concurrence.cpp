@@ -19,11 +19,13 @@
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
+#include <thread>
 #include <string>
 #include <vector>
 
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/state_utils.hpp"
 #include "yasmin/types.hpp"
 
 using namespace yasmin;
@@ -32,7 +34,7 @@ Concurrence::Concurrence(const StateMap &states,
                          const std::string &default_outcome,
                          const OutcomeMap &outcome_map,
                          const ParameterMappingsMap &parameter_mappings)
-    : State(generate_possible_outcomes(outcome_map, default_outcome)),
+    : State(yasmin::generate_possible_outcomes(outcome_map, default_outcome)),
       states(states), default_outcome(default_outcome),
       outcome_map(outcome_map), parameter_mappings(parameter_mappings) {
 
@@ -79,7 +81,7 @@ Concurrence::Concurrence(const StateMap &states,
             state->to_string() + "'");
       }
 
-      intermediate_outcome_map.insert({state_name, ""});
+      this->intermediate_outcome_map.insert({state_name, ""});
     }
   }
 }
@@ -104,33 +106,8 @@ Concurrence::get_parameter_mappings() const noexcept {
 
 void Concurrence::apply_parameter_mappings(const std::string &state_name,
                                            const State::SharedPtr &state) {
-  const auto mappings_it = this->parameter_mappings.find(state_name);
-  if (mappings_it == this->parameter_mappings.end()) {
-    return;
-  }
-
-  for (const auto &[child_parameter, parent_parameter] : mappings_it->second) {
-    if (!this->is_parameter_declared(parent_parameter)) {
-      throw std::runtime_error(
-          "Concurrence parameter '" + parent_parameter +
-          "' is not declared while configuring child state '" + state_name +
-          "'");
-    }
-
-    if (!this->has_parameter(parent_parameter)) {
-      throw std::runtime_error(
-          "Concurrence parameter '" + parent_parameter +
-          "' has no value while configuring child state '" + state_name + "'");
-    }
-
-    if (!state->is_parameter_declared(child_parameter)) {
-      throw std::runtime_error("Child state '" + state_name +
-                               "' does not declare parameter '" +
-                               child_parameter + "'");
-    }
-
-    state->copy_parameter_from(*this, parent_parameter, child_parameter);
-  }
+  yasmin::apply_parameter_mappings("Concurrence", this->parameter_mappings,
+                                   state_name, *this, state);
 }
 
 void Concurrence::configure() {
@@ -142,7 +119,7 @@ void Concurrence::configure() {
 
   YASMIN_LOG_DEBUG("Configuring concurrence '%s'", this->to_string().c_str());
 
-  for (const auto &[state_name, state] : states) {
+  for (const auto &[state_name, state] : this->states) {
     this->apply_parameter_mappings(state_name, state);
     state->configure();
   }
@@ -164,7 +141,7 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
   // Initialize the parallel execution of all the states.
   // Each branch receives a blackboard copy that shares the underlying storage
   // but keeps an isolated remapping scope.
-  for (const auto &[state_name, state] : states) {
+  for (const auto &[state_name, state] : this->states) {
     Blackboard::SharedPtr thread_blackboard =
         std::make_shared<Blackboard>(*blackboard);
     state_threads.push_back(std::thread([this, state_name, state,
@@ -183,55 +160,29 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
   }
 
   // Handle a cancel
-  if (is_canceled()) {
-    return default_outcome;
+  if (this->is_canceled()) {
+    return this->default_outcome;
   }
 
   // Build final outcome
-  Outcomes satisfied_outcomes;
-  for (const auto &[outcome, requirements] : outcome_map) {
-    bool satisfied = true;
-    for (const auto &[state_name, expected_intermediate_outcome] :
-         requirements) {
-      std::string actual_intermediate_outcome =
-          intermediate_outcome_map.find(state_name)->second;
-      if (actual_intermediate_outcome.empty()) {
-        throw std::runtime_error("An intermediate outcome for state '" +
-                                 state_name + "' was not received.");
-      }
-      satisfied &= actual_intermediate_outcome == expected_intermediate_outcome;
-    }
-    if (satisfied) {
-      satisfied_outcomes.insert(outcome);
-    }
-  }
+  Outcomes satisfied_outcomes = yasmin::evaluate_satisfied_outcomes(
+      this->outcome_map,
+      [this](const std::string &state_name) -> const std::string & {
+        auto it = this->intermediate_outcome_map.find(state_name);
+        if (it == this->intermediate_outcome_map.end() || it->second.empty()) {
+          throw std::runtime_error("An intermediate outcome for state '" +
+                                   state_name + "' was not received.");
+        }
+        return it->second;
+      });
 
-  // Handle different numbers of satisfied outcomes
-  if (satisfied_outcomes.empty()) {
-    return default_outcome;
-  } else if (satisfied_outcomes.size() > 1) {
-    std::string outcomes_string;
-    for (auto it = satisfied_outcomes.begin(); it != satisfied_outcomes.end();
-         ++it) {
-      outcomes_string += *it;
-
-      // Add a comma if this is not the last element
-      if (std::next(it) != satisfied_outcomes.end()) {
-        outcomes_string += ", ";
-      }
-    }
-    // Due to how std::set works, this should only throw if the outcome strings
-    // are disparate
-    throw std::logic_error(
-        "More than one satisfied outcomes (" + outcomes_string +
-        ") after concurrent state execution (" + this->to_string());
-  }
-
-  return *satisfied_outcomes.begin();
+  return yasmin::resolve_outcome(satisfied_outcomes, this->default_outcome,
+                                 "concurrent state execution (" +
+                                     this->to_string() + ")");
 }
 
 void Concurrence::cancel_state() {
-  for (const auto &[state_name, state] : states) {
+  for (const auto &[state_name, state] : this->states) {
     state->cancel_state();
   }
   yasmin::State::cancel_state();
@@ -249,28 +200,14 @@ const std::string &Concurrence::get_default_outcome() const noexcept {
   return this->default_outcome;
 }
 
-Outcomes
-Concurrence::generate_possible_outcomes(const OutcomeMap &outcome_map,
-                                        const std::string &default_outcome) {
-  Outcomes possible_outcomes;
-  possible_outcomes.insert(
-      default_outcome); // Always include the default outcome
-
-  for (const auto &[outcome, requirements] : outcome_map) {
-    possible_outcomes.insert(outcome);
-  }
-
-  return possible_outcomes;
-}
-
 std::string Concurrence::to_string() const {
   std::string name = "Concurrence [";
 
-  for (auto it = states.begin(); it != states.end(); ++it) {
+  for (auto it = this->states.begin(); it != this->states.end(); ++it) {
     name += it->first + " (" + it->second->to_string() + ")";
 
     // Add a comma if this is not the last element
-    if (std::next(it) != states.end()) {
+    if (std::next(it) != this->states.end()) {
       name += ", ";
     }
   }

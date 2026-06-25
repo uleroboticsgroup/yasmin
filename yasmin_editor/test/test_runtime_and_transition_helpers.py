@@ -25,7 +25,6 @@ from yasmin_editor.editor_gui.transition_rules import (
 )
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.outcome import Outcome
-from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.runtime.traversal import (
     child_state,

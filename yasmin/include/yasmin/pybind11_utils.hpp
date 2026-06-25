@@ -42,7 +42,7 @@ namespace pybind11_utils {
  * @return yasmin::Blackboard::SharedPtr The C++ blackboard
  */
 inline Blackboard::SharedPtr
-convert_blackboard_from_python(py::object blackboard_obj) {
+convert_blackboard_from_python(const py::object &blackboard_obj) {
   Blackboard::SharedPtr blackboard;
 
   // Case 1: None or not provided - create new Blackboard

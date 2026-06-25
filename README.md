@@ -2987,9 +2987,9 @@ int main(int argc, char *argv[]) {
   sm->add_state("PUBLISHING_INT", std::make_shared<PublishIntState>(),
                 {
                     {yasmin_ros::basic_outcomes::SUCCEED,
-                     "CHECKINNG_COUNTS"}, // Transition back to itself
+                     "CHECKING_COUNTS"}, // Transition back to itself
                 });
-  sm->add_state("CHECKINNG_COUNTS", checking_counts_state,
+  sm->add_state("CHECKING_COUNTS", checking_counts_state,
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
                  {"outcome2", "PUBLISHING_INT"}});
 
@@ -3807,15 +3807,13 @@ ros2 run yasmin_demos factory_demo
 ```
 
 ```cpp
-#include <filesystem>
-#include <iostream>
 #include <memory>
 #include <string>
 
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/state_machine.hpp"
+#include "yasmin_demos/share_directory.hpp"
 #include "yasmin_factory/yasmin_factory.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -3833,23 +3831,8 @@ int main(int argc, char *argv[]) {
   yasmin_factory::YasminFactory factory;
 
   // Load state machine from XML file
-  std::string xml_file =
-#if __has_include("rclcpp/version.h")
-#include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(29, 5, 1)
-      ([]() {
-        std::filesystem::path p;
-        ament_index_cpp::get_package_share_directory("yasmin_demos", p);
-        return (p / "state_machines/demo_2.xml").string();
-      })();
-#else
-      ament_index_cpp::get_package_share_directory("yasmin_demos") +
-      "/state_machines/demo_2.xml";
-#endif
-#else
-      ament_index_cpp::get_package_share_directory("yasmin_demos") +
-      "/state_machines/demo_2.xml";
-#endif
+  std::string xml_file = yasmin_demos::get_share_file_path(
+      "state_machines/demo_2.xml");
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);
@@ -3895,8 +3878,8 @@ ros2 run yasmin_demos multiple_states_demo
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
-#include "yasmin_demos/bar_state.h"
-#include "yasmin_demos/foo_state.h"
+#include "yasmin_demos/bar_state.hpp"
+#include "yasmin_demos/foo_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
@@ -3962,15 +3945,13 @@ ros2 run yasmin_demos ros_serialization_demo
 ```
 
 ```cpp
-#include <filesystem>
-#include <iostream>
 #include <memory>
 #include <string>
 
-#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/state_machine.hpp"
+#include "yasmin_demos/share_directory.hpp"
 #include "yasmin_factory/yasmin_factory.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
@@ -3988,23 +3969,8 @@ int main(int argc, char *argv[]) {
   yasmin_factory::YasminFactory factory;
 
   // Load state machine from XML file
-  std::string xml_file =
-#if __has_include("rclcpp/version.h")
-#include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(29, 5, 1)
-      ([]() {
-        std::filesystem::path p;
-        ament_index_cpp::get_package_share_directory("yasmin_demos", p);
-        return (p / "state_machines/demo_3.xml").string();
-      })();
-#else
-      ament_index_cpp::get_package_share_directory("yasmin_demos") +
-      "/state_machines/demo_3.xml";
-#endif
-#else
-      ament_index_cpp::get_package_share_directory("yasmin_demos") +
-      "/state_machines/demo_3.xml";
-#endif
+  std::string xml_file = yasmin_demos::get_share_file_path(
+      "state_machines/demo_3.xml");
 
   // Create the state machine from the XML file
   auto sm = factory.create_sm_from_file(xml_file);
@@ -4615,6 +4581,13 @@ ros2 run yasmin_viewer yasmin_viewer_node
 ```
 
 Once started, open http://localhost:5000/ in your browser to view your state machines.
+
+### YasminViewerPub API
+
+The `YasminViewerPub` class provides the programmatic API for publishing state machine visualization data:
+
+- **Constructor**: `YasminViewerPub(fsm, name)` or `YasminViewerPub(node, fsm, name)` — Creates a publisher that subscribes to state machine status and serves it via the viewer HTTP endpoint.
+- **`shutdown()`**: Stops the internal update timer and releases resources. Call this when the state machine is no longer active to clean up without waiting for the node to go out of scope.
 
 ### Custom host and port
 
