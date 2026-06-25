@@ -106,16 +106,19 @@ std::string SavePlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
       return "aborted";
     }
 
-    const Eigen::Vector4f origin(this->origin_x_, this->origin_y_, this->origin_z_, this->origin_w_);
-    const Eigen::Quaternionf orientation(this->orientation_w_, this->orientation_x_,
-                                         this->orientation_y_, this->orientation_z_);
+    const Eigen::Vector4f origin(this->origin_x_, this->origin_y_,
+                                 this->origin_z_, this->origin_w_);
+    const Eigen::Quaternionf orientation(
+        this->orientation_w_, this->orientation_x_, this->orientation_y_,
+        this->orientation_z_);
 
-    const int result =
-        pcl::io::savePLYFile(this->file_path_, *input_cloud, origin, orientation,
-                             this->binary_mode_, this->use_camera_);
+    const int result = pcl::io::savePLYFile(
+        this->file_path_, *input_cloud, origin, orientation, this->binary_mode_,
+        this->use_camera_);
 
     if (result < 0) {
-      YASMIN_LOG_WARN("Failed to write PLY file '%s'", this->file_path_.c_str());
+      YASMIN_LOG_WARN("Failed to write PLY file '%s'",
+                      this->file_path_.c_str());
       return "aborted";
     }
 

@@ -188,8 +188,8 @@ std::string LoadPlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   Eigen::Vector4f origin = Eigen::Vector4f::Zero();
   Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity();
 
-  const int result =
-      pcl::io::loadPLYFile(this->file_path_, *output_cloud, origin, orientation);
+  const int result = pcl::io::loadPLYFile(this->file_path_, *output_cloud,
+                                          origin, orientation);
 
   if (result < 0) {
     YASMIN_LOG_WARN("Failed to load PLY file '%s'", this->file_path_.c_str());

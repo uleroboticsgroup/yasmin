@@ -69,8 +69,8 @@ std::string LoadPcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   int pcd_version = 0;
 
   pcl::PCDReader reader;
-  const int result =
-      reader.read(this->file_path_, *output_cloud, origin, orientation, pcd_version);
+  const int result = reader.read(this->file_path_, *output_cloud, origin,
+                                 orientation, pcd_version);
 
   if (result < 0) {
     YASMIN_LOG_WARN("Failed to load PCD file '%s'", this->file_path_.c_str());

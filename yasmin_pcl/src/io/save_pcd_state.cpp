@@ -103,21 +103,24 @@ std::string SavePcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
       return "aborted";
     }
 
-    const Eigen::Vector4f origin(this->origin_x_, this->origin_y_, this->origin_z_, this->origin_w_);
-    const Eigen::Quaternionf orientation(this->orientation_w_, this->orientation_x_,
-                                         this->orientation_y_, this->orientation_z_);
+    const Eigen::Vector4f origin(this->origin_x_, this->origin_y_,
+                                 this->origin_z_, this->origin_w_);
+    const Eigen::Quaternionf orientation(
+        this->orientation_w_, this->orientation_x_, this->orientation_y_,
+        this->orientation_z_);
 
     pcl::PCDWriter writer;
     int result = -1;
 
     if (this->storage_mode_ == "ascii") {
-      result = writer.writeASCII(this->file_path_, *input_cloud, origin, orientation);
+      result = writer.writeASCII(this->file_path_, *input_cloud, origin,
+                                 orientation);
     } else if (this->storage_mode_ == "binary") {
-      result =
-          writer.writeBinary(this->file_path_, *input_cloud, origin, orientation);
+      result = writer.writeBinary(this->file_path_, *input_cloud, origin,
+                                  orientation);
     } else if (this->storage_mode_ == "binary_compressed") {
-      result = writer.writeBinaryCompressed(this->file_path_, *input_cloud, origin,
-                                             orientation);
+      result = writer.writeBinaryCompressed(this->file_path_, *input_cloud,
+                                            origin, orientation);
     } else {
       YASMIN_LOG_WARN("Unsupported PCD storage_mode '%s'",
                       this->storage_mode_.c_str());
@@ -125,7 +128,8 @@ std::string SavePcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
     }
 
     if (result < 0) {
-      YASMIN_LOG_WARN("Failed to write PCD file '%s'", this->file_path_.c_str());
+      YASMIN_LOG_WARN("Failed to write PCD file '%s'",
+                      this->file_path_.c_str());
       return "aborted";
     }
 

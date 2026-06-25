@@ -19,8 +19,8 @@
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
-#include <thread>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "yasmin/logs.hpp"
