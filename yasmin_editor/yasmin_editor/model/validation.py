@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (C) 2026 Maik Knof
 #
 # This program is free software: you can redistribute it and/or modify
@@ -20,8 +18,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Iterable
 
-from .concurrence import Concurrence, iter_outcome_rule_values
-from .orthogonal_state import OrthogonalState
+from .container_state import ContainerState, iter_outcome_rule_values
 from .state import State
 from .state_machine import StateMachine
 
@@ -108,10 +105,8 @@ def _validate_state(
 
     if isinstance(state, StateMachine):
         _validate_state_machine(state, result, path, parent_targets)
-    elif isinstance(state, Concurrence):
-        _validate_concurrence(state, result, path, parent_targets)
-    elif isinstance(state, OrthogonalState):
-        _validate_concurrence(state, result, path, parent_targets)
+    elif isinstance(state, ContainerState):
+        _validate_container_state(state, result, path, parent_targets)
     else:
         _validate_leaf_state(state, result, path)
 
@@ -315,22 +310,24 @@ def _validate_state_machine(
         )
 
 
-def _validate_concurrence(
-    concurrence: Concurrence | OrthogonalState,
+def _validate_container_state(
+    container: ContainerState,
     result: ValidationResult,
     path: str,
     parent_targets: set[str] | None,
 ) -> None:
-    """Validate a concurrence or orthogonal state recursively."""
+    """Validate a container state (Concurrence or OrthogonalState) recursively."""
 
     kind = (
-        "Orthogonal state" if isinstance(concurrence, OrthogonalState) else "Concurrence"
+        "Orthogonal state"
+        if container._container_name == "OrthogonalState"
+        else "Concurrence"
     )
-    if not concurrence.states:
+    if not container.states:
         result.add_warning(path, f"{kind} has no child states")
 
-    state_names = set(concurrence.states)
-    outcome_names = {outcome.name for outcome in concurrence.outcomes}
+    state_names = set(container.states)
+    outcome_names = {outcome.name for outcome in container.outcomes}
     _validate_conflicting_container_names(
         path=path,
         result=result,
@@ -342,13 +339,13 @@ def _validate_concurrence(
     if not outcome_names:
         result.add_error(path, f"{kind} requires at least one outcome")
 
-    if concurrence.default_outcome and concurrence.default_outcome not in outcome_names:
+    if container.default_outcome and container.default_outcome not in outcome_names:
         result.add_error(
             path,
-            f"Default outcome '{concurrence.default_outcome}' does not exist",
+            f"Default outcome '{container.default_outcome}' does not exist",
         )
 
-    for state_name, child_state in concurrence.states.items():
+    for state_name, child_state in container.states.items():
         child_path = _validate_child_state_binding(
             container_path=path,
             result=result,
@@ -358,7 +355,7 @@ def _validate_concurrence(
 
         _validate_state(child_state, result, child_path, nested_parent_targets)
 
-    for outcome_name, mapping in concurrence.outcome_map.items():
+    for outcome_name, mapping in container.outcome_map.items():
         if outcome_name not in outcome_names:
             result.add_error(
                 path,
@@ -373,7 +370,7 @@ def _validate_concurrence(
                 )
                 continue
 
-            child_state = concurrence.states[state_name]
+            child_state = container.states[state_name]
             child_outcomes = {outcome.name for outcome in child_state.outcomes}
             for state_outcome in iter_outcome_rule_values(state_outcomes):
                 if child_outcomes and state_outcome not in child_outcomes:

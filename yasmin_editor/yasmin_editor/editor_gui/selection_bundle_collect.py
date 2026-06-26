@@ -25,7 +25,8 @@ from yasmin_editor.editor_gui.selection_models import (
     OutcomeRuleSnapshot,
     SelectionBundle,
 )
-from yasmin_editor.model.concurrence import Concurrence, iter_outcome_rule_values
+from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.container_state import iter_outcome_rule_values
 from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.text_block import TextBlock

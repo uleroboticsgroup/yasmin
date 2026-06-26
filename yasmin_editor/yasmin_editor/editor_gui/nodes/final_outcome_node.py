@@ -24,7 +24,7 @@ from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
 from yasmin_editor.model.outcome import Outcome
 
 
-class FinalOutcomeNode(QGraphicsRectItem, BaseNodeMixin):
+class FinalOutcomeNode(BaseNodeMixin, QGraphicsRectItem):
     """Graphical representation of a final outcome."""
 
     def __init__(
@@ -57,43 +57,23 @@ class FinalOutcomeNode(QGraphicsRectItem, BaseNodeMixin):
 
         self.update_tooltip()
 
-    @property
-    def name(self) -> str:
-        return self.model.name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self.model.name = value
-        if hasattr(self, "text"):
-            self.text.setPlainText(value)
-            self.center_text_item(self.text, -self.text.boundingRect().height() / 2)
-        self.update_tooltip()
-
-    @property
-    def description(self) -> str:
-        return self.model.description
-
-    @description.setter
-    def description(self, value: str) -> None:
-        self.model.description = value
-        self.update_tooltip()
-
     def update_tooltip(self) -> None:
         tooltip = self.description if self.description else self.name
         if self.instance_id:
             tooltip += f"\nView: {self.instance_id}"
         self.setToolTip(tooltip)
 
-    def mouseDoubleClickEvent(self, event: Any) -> None:
-        """Handle double-click to edit final outcome metadata."""
-        if self.scene() and self.scene().views():
-            canvas = self.scene().views()[0]
-            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
-                self.setSelected(True)
-                canvas.editor_ref.edit_final_outcome(self)
-                event.accept()
-                return
-        super().mouseDoubleClickEvent(event)
+    def _on_name_changed(self, value: str) -> None:
+        if hasattr(self, "text"):
+            self.text.setPlainText(value)
+            self.center_text_item(self.text, -self.text.boundingRect().height() / 2)
+        self.update_tooltip()
+
+    def _on_description_changed(self, value: str) -> None:
+        self.update_tooltip()
+
+    def _on_double_click(self, editor: Any, event: Any) -> None:
+        editor.edit_final_outcome(self)
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):

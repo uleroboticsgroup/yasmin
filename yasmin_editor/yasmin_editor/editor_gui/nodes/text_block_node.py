@@ -79,7 +79,7 @@ class TextBlockEditorItem(QGraphicsTextItem):
         self.node.update_geometry_from_document()
 
 
-class TextBlockNode(QGraphicsRectItem, BaseNodeMixin):
+class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
     """Graphical free-form text block with inline editing and Markdown preview."""
 
     _PADDING_X = 12.0
@@ -248,34 +248,22 @@ class TextBlockNode(QGraphicsRectItem, BaseNodeMixin):
         self.enter_edit_mode()
         event.accept()
 
-    def contextMenuEvent(self, event: Any) -> None:
-        """Show a small context menu for inline editing and deletion."""
-        editor_ref = None
-        if self.scene() and self.scene().views():
-            canvas = self.scene().views()[0]
-            if hasattr(canvas, "editor_ref"):
-                editor_ref = canvas.editor_ref
-
-        readonly = bool(editor_ref and editor_ref.is_read_only_mode())
+    def _on_context_menu(self, editor: Any, event: Any) -> bool:
+        readonly = editor.is_read_only_mode()
         menu = QMenu()
         edit_action = menu.addAction("View Text" if readonly else "Edit Text")
         delete_action = None if readonly else menu.addAction("Delete")
         action = menu.exec_(event.screenPos())
 
         if action == edit_action:
-            self.setSelected(True)
             if not readonly:
                 self.enter_edit_mode()
-            event.accept()
-            return
+            return True
 
-        if action == delete_action and editor_ref is not None:
-            self.setSelected(True)
-            editor_ref.delete_selected()
-            event.accept()
-            return
-
-        super().contextMenuEvent(event)
+        if action == delete_action:
+            editor.delete_selected()
+            return True
+        return False
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):

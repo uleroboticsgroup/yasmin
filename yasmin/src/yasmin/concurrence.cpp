@@ -111,13 +111,9 @@ void Concurrence::apply_parameter_mappings(const std::string &state_name,
 }
 
 void Concurrence::configure() {
-  if (this->configured.load()) {
-    YASMIN_LOG_DEBUG("Concurrence '%s' has already been configured",
-                     this->to_string().c_str());
+  if (yasmin::check_already_configured(this->configured, "Concurrence",
+                                       this->to_string().c_str()))
     return;
-  }
-
-  YASMIN_LOG_DEBUG("Configuring concurrence '%s'", this->to_string().c_str());
 
   for (const auto &[state_name, state] : this->states) {
     this->apply_parameter_mappings(state_name, state);
@@ -201,18 +197,10 @@ const std::string &Concurrence::get_default_outcome() const noexcept {
 }
 
 std::string Concurrence::to_string() const {
-  std::string name = "Concurrence [";
-
-  for (auto it = this->states.begin(); it != this->states.end(); ++it) {
-    name += it->first + " (" + it->second->to_string() + ")";
-
-    // Add a comma if this is not the last element
-    if (std::next(it) != this->states.end()) {
-      name += ", ";
-    }
-  }
-
-  name += "]";
-
-  return name;
+  return "Concurrence [" +
+         yasmin::join(this->states, ", ",
+                      [](const auto &p) {
+                        return p.first + " (" + p.second->to_string() + ")";
+                      }) +
+         "]";
 }

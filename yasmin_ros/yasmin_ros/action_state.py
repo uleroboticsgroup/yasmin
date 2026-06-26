@@ -25,9 +25,9 @@ from action_msgs.msg import GoalStatus
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL, TIMEOUT
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
 from yasmin_ros.ros_clients_cache import ROSClientsCache
-from yasmin_ros.ros_state_utils import resolve_node, wait_with_retry
+from yasmin_ros.ros_state_utils import resolve_node, wait_with_retry, setup_outcomes
 
 
 class ActionState(State):
@@ -103,11 +103,11 @@ class ActionState(State):
         self._maximum_retry: int = maximum_retry
 
         # Set outcomes
-        outcomes = set(outcomes)
-        outcomes.update({SUCCEED, ABORT, CANCEL})
-
-        if self._wait_timeout or self._response_timeout:
-            outcomes.add(TIMEOUT)
+        outcomes = setup_outcomes(
+            outcomes,
+            {SUCCEED, ABORT, CANCEL},
+            add_timeout=bool(self._wait_timeout or self._response_timeout),
+        )
 
         self._node: Node = resolve_node(node)
 

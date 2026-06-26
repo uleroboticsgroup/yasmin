@@ -90,68 +90,19 @@ def set_py_loggers() -> None:
     set_loggers(py_default_log_message)
 
 
-def YASMIN_LOG_ERROR(text: str) -> None:
-    """
-    Log an error message with the caller's information.
+def _make_log_wrapper(log_func, name):
+    def wrapper(text: str) -> None:
+        file, function, line = get_caller_info()
+        log_func(file, function, line, str(text))
 
-    This function formats the log message to include the file name, function
-    name, and line number where the log function was called.
-
-    @param text: The error message to log.
-    @type text: str
-
-    @return: None
-    """
-    file, function, line = get_caller_info()
-    log_error(file, function, line, str(text))
+    wrapper.__name__ = name
+    return wrapper
 
 
-def YASMIN_LOG_WARN(text: str) -> None:
-    """
-    Log a warning message with the caller's information.
-
-    This function formats the log message to include the file name, function
-    name, and line number where the log function was called.
-
-    @param text: The warning message to log.
-    @type text: str
-
-    @return: None
-    """
-    file, function, line = get_caller_info()
-    log_warn(file, function, line, str(text))
-
-
-def YASMIN_LOG_INFO(text: str) -> None:
-    """
-    Log an informational message with the caller's information.
-
-    This function formats the log message to include the file name, function
-    name, and line number where the log function was called.
-
-    @param text: The informational message to log.
-    @type text: str
-
-    @return: None
-    """
-    file, function, line = get_caller_info()
-    log_info(file, function, line, str(text))
-
-
-def YASMIN_LOG_DEBUG(text: str) -> None:
-    """
-    Log a debug message with the caller's information.
-
-    This function formats the log message to include the file name, function
-    name, and line number where the log function was called.
-
-    @param text: The debug message to log.
-    @type text: str
-
-    @return: None
-    """
-    file, function, line = get_caller_info()
-    log_debug(file, function, line, str(text))
+YASMIN_LOG_ERROR = _make_log_wrapper(log_error, "YASMIN_LOG_ERROR")
+YASMIN_LOG_WARN = _make_log_wrapper(log_warn, "YASMIN_LOG_WARN")
+YASMIN_LOG_INFO = _make_log_wrapper(log_info, "YASMIN_LOG_INFO")
+YASMIN_LOG_DEBUG = _make_log_wrapper(log_debug, "YASMIN_LOG_DEBUG")
 
 
 __all__ = [

@@ -62,6 +62,29 @@ class ROSClientsCache:
     _lock: RLock = RLock()
 
     @classmethod
+    def _get_or_create(cls, cache, cache_key, log_label, factory):
+        with cls._lock:
+            existing = cache.get(cache_key)
+            if existing is not None:
+                yasmin.YASMIN_LOG_INFO(f"Reusing existing {log_label}")
+                return existing
+            yasmin.YASMIN_LOG_INFO(f"Creating new {log_label}")
+            obj = factory()
+            cache[cache_key] = obj
+            return obj
+
+    @classmethod
+    def _clear(cls, cache, label):
+        with cls._lock:
+            cache.clear()
+            yasmin.YASMIN_LOG_INFO(f"{label} cache cleared")
+
+    @classmethod
+    def _count(cls, cache):
+        with cls._lock:
+            return len(cache)
+
+    @classmethod
     def get_or_create_action_client(
         cls,
         node: Node,
@@ -81,32 +104,18 @@ class ROSClientsCache:
         Returns:
             ActionClient: The cached or newly created action client.
         """
-        # Create a unique key
         node_name = node.get_name()
         action_type_name = f"{action_type.__module__}.{action_type.__name__}"
         callback_group_name = cls._get_callback_group_name(callback_group)
         cache_key = (node_name, action_type_name, action_name, callback_group_name)
-
-        with cls._lock:
-            existing = cls._action_clients.get(cache_key)
-            if existing is not None:
-                yasmin.YASMIN_LOG_INFO(
-                    f"Reusing existing action client for '{action_name}' of type '{action_type_name}'"
-                )
-                return existing
-
-            yasmin.YASMIN_LOG_INFO(
-                f"Creating new action client for '{action_name}' of type '{action_type_name}'"
-            )
-            action_client = ActionClient(
-                node,
-                action_type,
-                action_name,
-                callback_group=callback_group,
-            )
-
-            cls._action_clients[cache_key] = action_client
-            return action_client
+        return cls._get_or_create(
+            cls._action_clients,
+            cache_key,
+            f"action client for '{action_name}' of type '{action_type_name}'",
+            lambda: ActionClient(
+                node, action_type, action_name, callback_group=callback_group
+            ),
+        )
 
     @classmethod
     def get_or_create_service_client(
@@ -128,31 +137,18 @@ class ROSClientsCache:
         Returns:
             Client: The cached or newly created service client.
         """
-        # Create a unique key
         node_name = node.get_name()
         service_type_name = f"{service_type.__module__}.{service_type.__name__}"
         callback_group_name = cls._get_callback_group_name(callback_group)
         cache_key = (node_name, service_type_name, service_name, callback_group_name)
-
-        with cls._lock:
-            existing = cls._service_clients.get(cache_key)
-            if existing is not None:
-                yasmin.YASMIN_LOG_INFO(
-                    f"Reusing existing service client for '{service_name}' of type '{service_type_name}'"
-                )
-                return existing
-
-            yasmin.YASMIN_LOG_INFO(
-                f"Creating new service client for '{service_name}' of type '{service_type_name}'"
-            )
-            service_client = node.create_client(
-                service_type,
-                service_name,
-                callback_group=callback_group,
-            )
-
-            cls._service_clients[cache_key] = service_client
-            return service_client
+        return cls._get_or_create(
+            cls._service_clients,
+            cache_key,
+            f"service client for '{service_name}' of type '{service_type_name}'",
+            lambda: node.create_client(
+                service_type, service_name, callback_group=callback_group
+            ),
+        )
 
     @classmethod
     def get_or_create_publisher(
@@ -176,59 +172,39 @@ class ROSClientsCache:
         Returns:
             Publisher: The cached or newly created publisher.
         """
-        # Create a unique key
         node_name = node.get_name()
         msg_type_name = f"{msg_type.__module__}.{msg_type.__name__}"
         qos_hash = str(cls._hash_qos_profile(qos_profile))
         cache_key = (node_name, msg_type_name, topic_name, qos_hash)
-
-        with cls._lock:
-            existing = cls._publishers.get(cache_key)
-            if existing is not None:
-                yasmin.YASMIN_LOG_INFO(
-                    f"Reusing existing publisher for topic '{topic_name}' of type '{msg_type_name}'"
-                )
-                return existing
-
-            yasmin.YASMIN_LOG_INFO(
-                f"Creating new publisher for topic '{topic_name}' of type '{msg_type_name}'"
-            )
-            publisher = node.create_publisher(
-                msg_type,
-                topic_name,
-                qos_profile,
-                callback_group=callback_group,
-            )
-
-            cls._publishers[cache_key] = publisher
-            return publisher
+        return cls._get_or_create(
+            cls._publishers,
+            cache_key,
+            f"publisher for topic '{topic_name}' of type '{msg_type_name}'",
+            lambda: node.create_publisher(
+                msg_type, topic_name, qos_profile, callback_group=callback_group
+            ),
+        )
 
     @classmethod
     def clear_action_clients(cls) -> None:
         """
         Clear the action clients cache.
         """
-        with cls._lock:
-            cls._action_clients.clear()
-            yasmin.YASMIN_LOG_INFO("Action clients cache cleared")
+        cls._clear(cls._action_clients, "Action clients")
 
     @classmethod
     def clear_service_clients(cls) -> None:
         """
         Clear the service clients cache.
         """
-        with cls._lock:
-            cls._service_clients.clear()
-            yasmin.YASMIN_LOG_INFO("Service clients cache cleared")
+        cls._clear(cls._service_clients, "Service clients")
 
     @classmethod
     def clear_publishers(cls) -> None:
         """
         Clear the publishers cache.
         """
-        with cls._lock:
-            cls._publishers.clear()
-            yasmin.YASMIN_LOG_INFO("Publishers cache cleared")
+        cls._clear(cls._publishers, "Publishers")
 
     @classmethod
     def clear_all(cls) -> None:
@@ -249,8 +225,7 @@ class ROSClientsCache:
         Returns:
             int: The number of cached action clients.
         """
-        with cls._lock:
-            return len(cls._action_clients)
+        return cls._count(cls._action_clients)
 
     @classmethod
     def get_service_clients_count(cls) -> int:
@@ -260,8 +235,7 @@ class ROSClientsCache:
         Returns:
             int: The number of cached service clients.
         """
-        with cls._lock:
-            return len(cls._service_clients)
+        return cls._count(cls._service_clients)
 
     @classmethod
     def get_publishers_count(cls) -> int:
@@ -271,8 +245,7 @@ class ROSClientsCache:
         Returns:
             int: The number of cached publishers.
         """
-        with cls._lock:
-            return len(cls._publishers)
+        return cls._count(cls._publishers)
 
     @classmethod
     def get_cache_stats(cls) -> Dict[str, int]:

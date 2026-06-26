@@ -23,9 +23,14 @@ from rclpy.callback_groups import CallbackGroup
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL, TIMEOUT
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
 from yasmin_ros.ros_clients_cache import ROSClientsCache
-from yasmin_ros.ros_state_utils import resolve_node, wait_with_retry
+from yasmin_ros.ros_state_utils import (
+    resolve_node,
+    wait_with_retry,
+    setup_outcomes,
+    cancel_with_event,
+)
 
 
 class ServiceState(State):
@@ -80,11 +85,11 @@ class ServiceState(State):
         self._response_timeout: float = response_timeout
 
         # Set outcomes
-        outcomes = set(outcomes)
-        outcomes.update({SUCCEED, ABORT})
-
-        if self._wait_timeout or self._response_timeout:
-            outcomes.add(TIMEOUT)
+        outcomes = setup_outcomes(
+            outcomes,
+            {SUCCEED, ABORT},
+            add_timeout=bool(self._wait_timeout or self._response_timeout),
+        )
 
         self._node = resolve_node(node)
 
@@ -177,7 +182,7 @@ class ServiceState(State):
         return SUCCEED
 
     def cancel_state(self) -> None:
-        self._response_received_event.set()
+        cancel_with_event(self._response_received_event)
         super().cancel_state()
 
     def response_callback(self, future: Future) -> None:

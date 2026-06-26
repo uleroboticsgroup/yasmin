@@ -126,6 +126,20 @@ public:
   }
 };
 
+// Shared helper to convert BlackboardKeyInfo to py::dict
+static py::dict key_info_to_dict(const yasmin::BlackboardKeyInfo &key) {
+  py::dict key_dict;
+  key_dict["name"] = key.name;
+  key_dict["description"] = key.description;
+  key_dict["has_default"] = key.has_default;
+  if (key.has_default) {
+    key_dict["default_value_type"] = key.default_value_type;
+    key_dict["default_value"] =
+        yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
+  }
+  return key_dict;
+}
+
 } // namespace yasmin
 
 PYBIND11_MODULE(state, m) {
@@ -293,24 +307,16 @@ PYBIND11_MODULE(state, m) {
             wrapper.set(parameter_name, value);
           },
           "Set a parameter in the local parameter storage",
-          py::arg("parameter_name"), py::arg("value"))
+          py::arg("parameter_name"), py::arg("value"));
 
+  state_class
       .def(
           "get_parameters",
           [](const yasmin::State &state) {
             const auto &keys = state.get_parameters();
             py::list result;
             for (const auto &key : keys) {
-              py::dict key_dict;
-              key_dict["name"] = key.name;
-              key_dict["description"] = key.description;
-              key_dict["has_default"] = key.has_default;
-              if (key.has_default) {
-                key_dict["default_value_type"] = key.default_value_type;
-                key_dict["default_value"] =
-                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
-              }
-              result.append(key_dict);
+              result.append(key_info_to_dict(key));
             }
             return result;
           },
@@ -322,16 +328,7 @@ PYBIND11_MODULE(state, m) {
             const auto &keys = state.get_input_keys();
             py::list result;
             for (const auto &key : keys) {
-              py::dict key_dict;
-              key_dict["name"] = key.name;
-              key_dict["description"] = key.description;
-              key_dict["has_default"] = key.has_default;
-              if (key.has_default) {
-                key_dict["default_value_type"] = key.default_value_type;
-                key_dict["default_value"] =
-                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
-              }
-              result.append(key_dict);
+              result.append(key_info_to_dict(key));
             }
             return result;
           },
@@ -343,16 +340,7 @@ PYBIND11_MODULE(state, m) {
             const auto &keys = state.get_output_keys();
             py::list result;
             for (const auto &key : keys) {
-              py::dict key_dict;
-              key_dict["name"] = key.name;
-              key_dict["description"] = key.description;
-              key_dict["has_default"] = key.has_default;
-              if (key.has_default) {
-                key_dict["default_value_type"] = key.default_value_type;
-                key_dict["default_value"] =
-                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
-              }
-              result.append(key_dict);
+              result.append(key_info_to_dict(key));
             }
             return result;
           },
@@ -367,48 +355,21 @@ PYBIND11_MODULE(state, m) {
 
             py::list input_keys;
             for (const auto &key : metadata.input_keys) {
-              py::dict key_dict;
-              key_dict["name"] = key.name;
-              key_dict["description"] = key.description;
-              key_dict["has_default"] = key.has_default;
-              if (key.has_default) {
-                key_dict["default_value_type"] = key.default_value_type;
-                key_dict["default_value"] =
-                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
-              }
-              input_keys.append(key_dict);
+              input_keys.append(key_info_to_dict(key));
             }
 
             result["input_keys"] = input_keys;
 
             py::list output_keys;
             for (const auto &key : metadata.output_keys) {
-              py::dict key_dict;
-              key_dict["name"] = key.name;
-              key_dict["description"] = key.description;
-              key_dict["has_default"] = key.has_default;
-              if (key.has_default) {
-                key_dict["default_value_type"] = key.default_value_type;
-                key_dict["default_value"] =
-                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
-              }
-              output_keys.append(key_dict);
+              output_keys.append(key_info_to_dict(key));
             }
 
             result["output_keys"] = output_keys;
 
             py::list parameters;
             for (const auto &key : metadata.parameters) {
-              py::dict key_dict;
-              key_dict["name"] = key.name;
-              key_dict["description"] = key.description;
-              key_dict["has_default"] = key.has_default;
-              if (key.has_default) {
-                key_dict["default_value_type"] = key.default_value_type;
-                key_dict["default_value"] =
-                    yasmin::BlackboardKeyInfoPy::get_py_default_value(key);
-              }
-              parameters.append(key_dict);
+              parameters.append(key_info_to_dict(key));
             }
 
             result["parameters"] = parameters;

@@ -26,7 +26,7 @@ from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
 from yasmin_editor.model.state import State
 
 
-class StateNode(QGraphicsEllipseItem, BaseNodeMixin):
+class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
     """Graphical representation of a regular state (not container)."""
 
     def __init__(
@@ -80,88 +80,38 @@ class StateNode(QGraphicsEllipseItem, BaseNodeMixin):
         self.initialize_breakpoint_marker()
         self.initialize_start_indicator()
 
-    @property
-    def name(self) -> str:
-        return self.model.name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self.model.name = value
+    def _on_name_changed(self, value: str) -> None:
         if hasattr(self, "text"):
             self.text.setPlainText(value)
             self.center_text_item(self.text, -self.text.boundingRect().height() / 2)
 
-    @property
-    def description(self) -> str:
-        return self.model.description
+    def _on_double_click(self, editor: Any, event: Any) -> None:
+        editor.edit_state()
 
-    @description.setter
-    def description(self, value: str) -> None:
-        self.model.description = value
+    def _on_context_menu(self, editor: Any, event: Any) -> bool:
+        if getattr(editor, "runtime_mode_enabled", False):
+            if editor.show_runtime_breakpoint_menu(self, event.screenPos()):
+                return True
 
-    @property
-    def remappings(self) -> Dict[str, str]:
-        return self.model.remappings
-
-    @remappings.setter
-    def remappings(self, value: Dict[str, str]) -> None:
-        self.model.remappings.clear()
-        self.model.remappings.update(value or {})
-
-    @property
-    def parameter_mappings(self) -> Dict[str, str]:
-        return self.model.parameter_mappings
-
-    @parameter_mappings.setter
-    def parameter_mappings(self, value: Dict[str, str]) -> None:
-        self.model.parameter_mappings.clear()
-        self.model.parameter_mappings.update(value or {})
-
-    def mouseDoubleClickEvent(self, event: Any) -> None:
-        """Handle double-click to edit state."""
-        if self.scene() and self.scene().views():
-            canvas = self.scene().views()[0]
-            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
-                self.setSelected(True)
-                canvas.editor_ref.edit_state()
-                event.accept()
-                return
-        super().mouseDoubleClickEvent(event)
-
-    def contextMenuEvent(self, event: Any) -> None:
-        if self.scene() and self.scene().views():
-            canvas = self.scene().views()[0]
-            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
-                editor = canvas.editor_ref
-                self.setSelected(True)
-
-                if getattr(editor, "runtime_mode_enabled", False):
-                    if editor.show_runtime_breakpoint_menu(self, event.screenPos()):
-                        event.accept()
-                        return
-
-                if editor.is_read_only_mode():
-                    menu = QMenu()
-                    view_action = menu.addAction("View Properties")
-                    action = menu.exec_(event.screenPos())
-                    if action == view_action:
-                        editor.edit_state()
-                        event.accept()
-                        return
-                else:
-                    menu = QMenu()
-                    edit_action = menu.addAction("Edit Properties")
-                    delete_action = menu.addAction("Delete")
-                    action = menu.exec_(event.screenPos())
-                    if action == edit_action:
-                        editor.edit_state()
-                        event.accept()
-                        return
-                    if action == delete_action:
-                        editor.delete_selected()
-                        event.accept()
-                        return
-        super().contextMenuEvent(event)
+        if editor.is_read_only_mode():
+            menu = QMenu()
+            view_action = menu.addAction("View Properties")
+            action = menu.exec_(event.screenPos())
+            if action == view_action:
+                editor.edit_state()
+                return True
+        else:
+            menu = QMenu()
+            edit_action = menu.addAction("Edit Properties")
+            delete_action = menu.addAction("Delete")
+            action = menu.exec_(event.screenPos())
+            if action == edit_action:
+                editor.edit_state()
+                return True
+            if action == delete_action:
+                editor.delete_selected()
+                return True
+        return False
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):

@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
-class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
+class ContainerStateNode(BaseNodeMixin, QGraphicsRectItem):
     """Graphical representation of a nested State Machine or Concurrence."""
 
     def __init__(
@@ -121,33 +121,6 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
         self.update_visual_elements()
 
     @property
-    def name(self) -> str:
-        return self.model.name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self.model.name = value
-        self.update_label()
-
-    @property
-    def description(self) -> str:
-        return self.model.description
-
-    @description.setter
-    def description(self, value: str) -> None:
-        self.model.description = value
-        self.update_label()
-
-    @property
-    def remappings(self) -> Dict[str, str]:
-        return self.model.remappings
-
-    @remappings.setter
-    def remappings(self, value: Dict[str, str]) -> None:
-        self.model.remappings.clear()
-        self.model.remappings.update(value or {})
-
-    @property
     def start_state(self) -> Optional[str]:
         return self.model.start_state if isinstance(self.model, StateMachine) else None
 
@@ -232,63 +205,41 @@ class ContainerStateNode(QGraphicsRectItem, BaseNodeMixin):
         self.center_text_item(self.type_label, 6)
         self.connection_port.update_position_for_container()
 
-    @property
-    def parameter_mappings(self) -> Dict[str, str]:
-        return self.model.parameter_mappings
+    def _on_name_changed(self, value: str) -> None:
+        self.update_label()
 
-    @parameter_mappings.setter
-    def parameter_mappings(self, value: Dict[str, str]) -> None:
-        self.model.parameter_mappings.clear()
-        self.model.parameter_mappings.update(value or {})
+    def _on_description_changed(self, value: str) -> None:
+        self.update_label()
 
-    def mouseDoubleClickEvent(self, event: Any) -> None:
-        if self.scene() and self.scene().views():
-            canvas = self.scene().views()[0]
-            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
-                self.setSelected(True)
-                if bool(event.modifiers() & Qt.ControlModifier):
-                    canvas.editor_ref.enter_container(self)
-                else:
-                    canvas.editor_ref.edit_state()
-                event.accept()
-                return
-        super().mouseDoubleClickEvent(event)
+    def _on_double_click(self, editor: Any, event: Any) -> None:
+        if bool(event.modifiers() & Qt.ControlModifier):
+            editor.enter_container(self)
+        else:
+            editor.edit_state()
 
-    def contextMenuEvent(self, event: Any) -> None:
-        if self.scene() and self.scene().views():
-            canvas = self.scene().views()[0]
-            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
-                editor = canvas.editor_ref
-                self.setSelected(True)
+    def _on_context_menu(self, editor: Any, event: Any) -> bool:
+        if getattr(editor, "runtime_mode_enabled", False):
+            if editor.show_runtime_breakpoint_menu(self, event.screenPos()):
+                return True
 
-                if getattr(editor, "runtime_mode_enabled", False):
-                    if editor.show_runtime_breakpoint_menu(self, event.screenPos()):
-                        event.accept()
-                        return
-
-                menu = QMenu()
-                enter_action = menu.addAction("Enter")
-                menu.addSeparator()
-                edit_action = menu.addAction(
-                    "View Properties" if editor.is_read_only_mode() else "Edit Properties"
-                )
-                delete_action = (
-                    None if editor.is_read_only_mode() else menu.addAction("Delete")
-                )
-                action = menu.exec_(event.screenPos())
-                if action == enter_action:
-                    editor.enter_container(self)
-                    event.accept()
-                    return
-                if action == edit_action:
-                    editor.edit_state()
-                    event.accept()
-                    return
-                if action == delete_action:
-                    editor.delete_selected()
-                    event.accept()
-                    return
-        super().contextMenuEvent(event)
+        menu = QMenu()
+        enter_action = menu.addAction("Enter")
+        menu.addSeparator()
+        edit_action = menu.addAction(
+            "View Properties" if editor.is_read_only_mode() else "Edit Properties"
+        )
+        delete_action = None if editor.is_read_only_mode() else menu.addAction("Delete")
+        action = menu.exec_(event.screenPos())
+        if action == enter_action:
+            editor.enter_container(self)
+            return True
+        if action == edit_action:
+            editor.edit_state()
+            return True
+        if action == delete_action:
+            editor.delete_selected()
+            return True
+        return False
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
         if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):

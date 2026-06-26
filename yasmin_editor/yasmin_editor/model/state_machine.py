@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Copyright (C) 2026 Maik Knof
 #
 # This program is free software: you can redistribute it and/or modify
@@ -248,10 +247,7 @@ class StateMachine(State):
         if self.text_blocks:
             lines.append(f"{prefix}  text blocks:")
             for text_block in self.text_blocks:
-                preview = text_block.content.replace("\n", "\\n")
-                lines.append(
-                    f"{prefix}    - ({text_block.x:.2f}, {text_block.y:.2f}): {preview}"
-                )
+                lines.extend(text_block.to_text_block_lines(prefix))
         if self.outcomes:
             lines.append(f"{prefix}  final outcomes:")
             for outcome in self.outcomes:

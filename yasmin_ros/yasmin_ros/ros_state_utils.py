@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Callable, Optional
+from threading import Event
+from typing import Callable, Optional, Set
 
 from rclpy.node import Node
 
@@ -26,6 +27,22 @@ def resolve_node(node: Optional[Node] = None) -> Node:
     if node is not None:
         return node
     return YasminNode.get_instance()
+
+
+def setup_outcomes(
+    outcomes: Set[str],
+    base_outcomes: Set[str],
+    add_timeout: bool = False,
+) -> Set[str]:
+    outcomes = set(outcomes)
+    outcomes.update(base_outcomes)
+    if add_timeout:
+        outcomes.add(TIMEOUT)
+    return outcomes
+
+
+def cancel_with_event(event: Event) -> None:
+    event.set()
 
 
 def wait_with_retry(

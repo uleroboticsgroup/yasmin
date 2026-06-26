@@ -25,6 +25,7 @@
 
 #include "yasmin/demangle.hpp"
 #include "yasmin/logs.hpp"
+#include "yasmin/state_utils.hpp"
 #include "yasmin/types.hpp"
 
 using namespace yasmin;
@@ -127,19 +128,10 @@ std::string State::operator()(Blackboard::SharedPtr blackboard) {
     }
 
     // Construct a string representation of the possible outcomes
-    std::string outcomes_string = "[";
-
-    for (auto it = outcomes.begin(); it != outcomes.end(); ++it) {
-      const auto &s = *it;
-      outcomes_string += s;
-
-      // Add a comma if this is not the last element
-      if (std::next(it) != outcomes.end()) {
-        outcomes_string += ", ";
-      }
-    }
-
-    outcomes_string += "]";
+    std::string outcomes_string =
+        "[" +
+        yasmin::join(outcomes, ", ", [](const std::string &o) { return o; }) +
+        "]";
 
     // Throw an exception if the outcome is not valid
     throw std::logic_error("Outcome '" + outcome +

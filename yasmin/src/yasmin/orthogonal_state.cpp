@@ -67,14 +67,9 @@ const std::string &OrthogonalState::get_default_outcome() const noexcept {
 }
 
 void OrthogonalState::configure() {
-  if (this->configured_.load()) {
-    YASMIN_LOG_DEBUG("OrthogonalState '%s' has already been configured",
-                     this->to_string().c_str());
+  if (yasmin::check_already_configured(this->configured_, "OrthogonalState",
+                                       this->to_string().c_str()))
     return;
-  }
-
-  YASMIN_LOG_DEBUG("Configuring orthogonal state '%s'",
-                   this->to_string().c_str());
 
   // Collect all JoinStates grouped by sync_id
   std::unordered_map<std::string, std::vector<JoinState *>> join_groups;
@@ -221,17 +216,12 @@ std::string OrthogonalState::evaluate_outcomes(
 }
 
 std::string OrthogonalState::to_string() const {
-  std::string name = "OrthogonalState [";
-
-  for (auto it = this->regions_.begin(); it != this->regions_.end(); ++it) {
-    name += it->name + " (" + it->sm->get_name() + ")";
-    if (std::next(it) != this->regions_.end()) {
-      name += ", ";
-    }
-  }
-
-  name += "]";
-  return name;
+  return "OrthogonalState [" +
+         yasmin::join(this->regions_, ", ",
+                      [](const auto &r) {
+                        return r.name + " (" + r.sm->get_name() + ")";
+                      }) +
+         "]";
 }
 
 } // namespace yasmin

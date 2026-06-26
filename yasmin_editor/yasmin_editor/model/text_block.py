@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Copyright (C) 2026 Maik Knof
 #
 # This program is free software: you can redistribute it and/or modify
@@ -26,3 +25,10 @@ class TextBlock:
     x: float = 0.0
     y: float = 0.0
     content: str = ""
+
+    def to_text_block_lines(self, prefix: str = "") -> list[str]:
+        """Return lines for displaying this text block in to_string output."""
+        lines: list[str] = []
+        preview = self.content.replace("\n", "\\n")
+        lines.append(f"{prefix}    - ({self.x:.2f}, {self.y:.2f}): {preview}")
+        return lines

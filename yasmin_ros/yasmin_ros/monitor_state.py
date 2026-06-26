@@ -23,7 +23,7 @@ from rclpy.callback_groups import CallbackGroup
 import yasmin
 from yasmin import State, Blackboard
 from yasmin_ros.basic_outcomes import TIMEOUT, CANCEL
-from yasmin_ros.ros_state_utils import resolve_node
+from yasmin_ros.ros_state_utils import resolve_node, setup_outcomes, cancel_with_event
 
 
 class MonitorState(State):
@@ -77,11 +77,11 @@ class MonitorState(State):
         self._timeout: int = timeout
 
         # Set outcomes
-        outcomes = set(outcomes)
-        outcomes.update({CANCEL})
-
-        if timeout is not None:
-            outcomes.add(TIMEOUT)
+        outcomes = setup_outcomes(
+            outcomes,
+            {CANCEL},
+            add_timeout=timeout is not None,
+        )
 
         self._node = resolve_node(node)
 
@@ -164,5 +164,5 @@ class MonitorState(State):
         This method cancels the monitor if waiting for messages.
         """
 
-        self._msg_event.set()
+        cancel_with_event(self._msg_event)
         super().cancel_state()

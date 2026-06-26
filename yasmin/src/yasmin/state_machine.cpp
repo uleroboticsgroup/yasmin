@@ -177,13 +177,9 @@ void StateMachine::apply_parameter_mappings(const std::string &state_name,
 }
 
 void StateMachine::configure() {
-  if (this->configured.load()) {
-    YASMIN_LOG_DEBUG("State machine '%s' has already been configured",
-                     this->to_string().c_str());
+  if (yasmin::check_already_configured(this->configured, "State machine",
+                                       this->to_string().c_str()))
     return;
-  }
-
-  YASMIN_LOG_DEBUG("Configuring state machine '%s'", this->to_string().c_str());
 
   for (const auto &[state_name, state] : this->states) {
     this->apply_parameter_mappings(state_name, state);
@@ -560,22 +556,10 @@ std::string StateMachine::execute_step(Blackboard::SharedPtr blackboard,
 }
 
 std::string StateMachine::to_string() const {
-
-  std::ostringstream oss;
-  oss << "State Machine [";
-
-  const auto &states = this->get_states();
-
-  for (auto it = states.begin(); it != states.end(); ++it) {
-    const auto &s = *it;
-    oss << s.first << " (" << s.second->to_string() << ")";
-
-    if (std::next(it) != states.end()) {
-      oss << ", ";
-    }
-  }
-
-  oss << "]";
-
-  return oss.str();
+  return "State Machine [" +
+         yasmin::join(this->get_states(), ", ",
+                      [](const auto &p) {
+                        return p.first + " (" + p.second->to_string() + ")";
+                      }) +
+         "]";
 }

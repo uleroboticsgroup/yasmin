@@ -26,12 +26,10 @@ from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNo
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
-from yasmin_editor.model.concurrence import Concurrence, iter_outcome_rule_values
+from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.container_state import iter_outcome_rule_values
 from yasmin_editor.model.layout import OutcomePlacement
-from yasmin_editor.model.orthogonal_state import (
-    OrthogonalState,
-    iter_outcome_rule_values as ort_iter_outcome_rule_values,
-)
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
@@ -291,7 +289,7 @@ def render_container_scene(
                 from_view = context.state_nodes.get(state_name)
                 if from_view is None:
                     continue
-                for source_outcome in ort_iter_outcome_rule_values(source_outcomes):
+                for source_outcome in iter_outcome_rule_values(source_outcomes):
                     context.create_connection_view(from_view, to_view, source_outcome)
         return
 

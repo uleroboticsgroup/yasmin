@@ -18,15 +18,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 from xml.etree import ElementTree as ET
 
-from yasmin_editor.model.concurrence import Concurrence, iter_outcome_rule_values
+from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.container_state import iter_outcome_rule_values
 from yasmin_editor.model.key import Key
-from yasmin_editor.model.orthogonal_state import (
-    OrthogonalState,
-    iter_outcome_rule_values as ort_iter_outcome_rule_values,
-)
+from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.parameter import Parameter
 from yasmin_editor.model.state import State
@@ -68,17 +66,31 @@ def model_from_xml(xml_input: str | Path) -> StateMachine:
     return _parse_state_machine_container(root)
 
 
-def _state_machine_to_element(
-    model: StateMachine,
+# ── Serialization ──────────────────────────────────────────────────────────
+
+
+def _container_to_element(
+    tag: str,
+    model: StateMachine | Concurrence | OrthogonalState,
     parent: StateMachine | Concurrence | OrthogonalState | None,
 ) -> ET.Element:
-    element = ET.Element("StateMachine")
+    element = ET.Element(tag)
     element.set("name", model.name)
 
-    if model.outcomes:
-        element.set("outcomes", " ".join(outcome.name for outcome in model.outcomes))
-    if model.start_state:
-        element.set("start_state", model.start_state)
+    if isinstance(model, StateMachine):
+        if model.outcomes:
+            element.set("outcomes", " ".join(o.name for o in model.outcomes))
+        if model.start_state:
+            element.set("start_state", model.start_state)
+    else:
+        outcome_names = {o.name for o in model.outcomes}
+        if model.default_outcome:
+            outcome_names.add(model.default_outcome)
+        if outcome_names:
+            element.set("outcomes", " ".join(sorted(outcome_names)))
+        if model.default_outcome:
+            element.set("default_outcome", model.default_outcome)
+
     if model.description:
         element.set("description", model.description)
 
@@ -100,125 +112,56 @@ def _state_machine_to_element(
     for text_block in model.text_blocks:
         element.append(_text_block_to_element(text_block))
 
-    for state in model.states.values():
-        element.append(_state_to_element(state, model))
+    if isinstance(model, OrthogonalState):
+        for state in model.states.values():
+            if isinstance(state, StateMachine):
+                region_elem = _region_to_element(state, model)
+            else:
+                region_elem = ET.Element("Region")
+                region_elem.set("name", state.name)
+                _append_owner_transitions(region_elem, model, state.name)
+            element.append(region_elem)
+    else:
+        for state in model.states.values():
+            element.append(_state_to_element(state, model))
 
     for outcome in model.outcomes:
         for outcome_element in _final_outcome_elements(outcome, model):
             element.append(outcome_element)
 
-    if parent is None:
-        _append_container_level_transitions(element, model)
-    else:
+    if isinstance(model, (Concurrence, OrthogonalState)):
+        _append_outcome_map(element, model)
+
+    if isinstance(model, StateMachine):
+        if parent is None:
+            _append_container_level_transitions(element, model)
+        else:
+            _append_owner_transitions(element, parent, model.name)
+    elif parent is not None and isinstance(parent, StateMachine):
         _append_owner_transitions(element, parent, model.name)
 
     return element
+
+
+def _state_machine_to_element(
+    model: StateMachine,
+    parent: StateMachine | Concurrence | OrthogonalState | None,
+) -> ET.Element:
+    return _container_to_element("StateMachine", model, parent)
 
 
 def _concurrence_to_element(
     model: Concurrence,
     parent: StateMachine | Concurrence | OrthogonalState | None,
 ) -> ET.Element:
-    element = ET.Element("Concurrence")
-    element.set("name", model.name)
-
-    outcome_names = {outcome.name for outcome in model.outcomes}
-    if model.default_outcome:
-        outcome_names.add(model.default_outcome)
-    if outcome_names:
-        element.set("outcomes", " ".join(sorted(outcome_names)))
-    if model.default_outcome:
-        element.set("default_outcome", model.default_outcome)
-    if model.description:
-        element.set("description", model.description)
-
-    if parent is not None:
-        position = parent.layout.get_state_position(model.name)
-        if position is not None:
-            element.set("x", f"{position.x:.2f}")
-            element.set("y", f"{position.y:.2f}")
-
-    for parameter in model.parameters:
-        element.append(_parameter_to_element(parameter))
-
-    for key in model.keys:
-        element.append(_key_to_element(key))
-
-    _append_parameter_remaps(element, model.parameter_mappings)
-    _append_remaps(element, model.remappings)
-
-    for text_block in model.text_blocks:
-        element.append(_text_block_to_element(text_block))
-
-    for state in model.states.values():
-        element.append(_state_to_element(state, model))
-
-    for outcome in model.outcomes:
-        for outcome_element in _final_outcome_elements(outcome, model):
-            element.append(outcome_element)
-
-    _append_concurrence_outcome_map(element, model)
-
-    if parent is not None and isinstance(parent, StateMachine):
-        _append_owner_transitions(element, parent, model.name)
-
-    return element
+    return _container_to_element("Concurrence", model, parent)
 
 
 def _orthogonal_state_to_element(
     model: OrthogonalState,
     parent: StateMachine | Concurrence | None,
 ) -> ET.Element:
-    element = ET.Element("OrthogonalState")
-    element.set("name", model.name)
-
-    outcome_names = {outcome.name for outcome in model.outcomes}
-    if model.default_outcome:
-        outcome_names.add(model.default_outcome)
-    if outcome_names:
-        element.set("outcomes", " ".join(sorted(outcome_names)))
-    if model.default_outcome:
-        element.set("default_outcome", model.default_outcome)
-    if model.description:
-        element.set("description", model.description)
-
-    if parent is not None:
-        position = parent.layout.get_state_position(model.name)
-        if position is not None:
-            element.set("x", f"{position.x:.2f}")
-            element.set("y", f"{position.y:.2f}")
-
-    for parameter in model.parameters:
-        element.append(_parameter_to_element(parameter))
-
-    for key in model.keys:
-        element.append(_key_to_element(key))
-
-    _append_parameter_remaps(element, model.parameter_mappings)
-    _append_remaps(element, model.remappings)
-
-    for text_block in model.text_blocks:
-        element.append(_text_block_to_element(text_block))
-
-    for state in model.states.values():
-        if isinstance(state, StateMachine):
-            region_elem = _region_to_element(state, model)
-        else:
-            region_elem = ET.Element("Region")
-            region_elem.set("name", state.name)
-            _append_owner_transitions(region_elem, model, state.name)
-        element.append(region_elem)
-
-    for outcome in model.outcomes:
-        for outcome_element in _final_outcome_elements(outcome, model):
-            element.append(outcome_element)
-
-    _append_orthogonal_outcome_map(element, model)
-
-    if parent is not None and isinstance(parent, StateMachine):
-        _append_owner_transitions(element, parent, model.name)
-
-    return element
+    return _container_to_element("OrthogonalState", model, parent)
 
 
 def _region_to_element(
@@ -257,21 +200,6 @@ def _region_to_element(
             element.append(outcome_element)
 
     return element
-
-
-def _append_orthogonal_outcome_map(
-    element: ET.Element,
-    model: OrthogonalState,
-) -> None:
-    for outcome_name, requirements in model.outcome_map.items():
-        outcome_map_elem = ET.SubElement(element, "OutcomeMap")
-        outcome_map_elem.set("outcome", outcome_name)
-
-        for state_name, state_outcomes in requirements.items():
-            for state_outcome in ort_iter_outcome_rule_values(state_outcomes):
-                item_elem = ET.SubElement(outcome_map_elem, "Item")
-                item_elem.set("state", state_name)
-                item_elem.set("outcome", state_outcome)
 
 
 def _state_to_element(
@@ -394,58 +322,59 @@ def _transition_to_element(transition: Transition) -> ET.Element:
     return element
 
 
-def _key_to_element(key: Key) -> ET.Element:
-    element = ET.Element("Key")
-    element.set("name", key.name)
-    element.set("type", key.key_type)
+def _data_to_element(
+    tag: str,
+    obj: Key | Parameter,
+    type_attr: str | None = None,
+) -> ET.Element:
+    element = ET.Element(tag)
+    element.set("name", obj.name)
 
-    if key.description:
-        element.set("description", key.description)
-    if key.has_default:
-        element.set("default_type", key.default_type)
+    if type_attr is not None:
+        element.set("type", type_attr)
+
+    if obj.description:
+        element.set("description", obj.description)
+    if obj.has_default:
+        element.set("default_type", obj.default_type)
         element.set(
             "default_value",
-            "" if key.default_value is None else str(key.default_value),
+            "" if obj.default_value is None else str(obj.default_value),
         )
 
     return element
+
+
+def _key_to_element(key: Key) -> ET.Element:
+    return _data_to_element("Key", key, type_attr=key.key_type)
 
 
 def _parameter_to_element(parameter: Parameter) -> ET.Element:
-    element = ET.Element("Param")
-    element.set("name", parameter.name)
+    return _data_to_element("Param", parameter)
 
-    if parameter.description:
-        element.set("description", parameter.description)
-    if parameter.has_default:
-        element.set("default_type", parameter.default_type)
-        element.set(
-            "default_value",
-            "" if parameter.default_value is None else str(parameter.default_value),
-        )
 
-    return element
+def _append_remap_elements(
+    element: ET.Element,
+    mappings: dict[str, str],
+    tag: str,
+) -> None:
+    for old, new in mappings.items():
+        if not old or not new:
+            continue
+        remap = ET.SubElement(element, tag)
+        remap.set("old", old)
+        remap.set("new", new)
 
 
 def _append_parameter_remaps(
     element: ET.Element,
     parameter_mappings: dict[str, str],
 ) -> None:
-    for child_parameter, parent_parameter in parameter_mappings.items():
-        if not child_parameter or not parent_parameter:
-            continue
-        remap = ET.SubElement(element, "ParamRemap")
-        remap.set("old", child_parameter)
-        remap.set("new", parent_parameter)
+    _append_remap_elements(element, parameter_mappings, "ParamRemap")
 
 
 def _append_remaps(element: ET.Element, remappings: dict[str, str]) -> None:
-    for old, new in remappings.items():
-        if not old or not new:
-            continue
-        remap = ET.SubElement(element, "Remap")
-        remap.set("old", old)
-        remap.set("new", new)
+    _append_remap_elements(element, remappings, "Remap")
 
 
 def _append_owner_transitions(
@@ -473,9 +402,9 @@ def _append_container_level_transitions(
             element.append(_transition_to_element(transition))
 
 
-def _append_concurrence_outcome_map(
+def _append_outcome_map(
     element: ET.Element,
-    model: Concurrence,
+    model: Concurrence | OrthogonalState,
 ) -> None:
     for outcome_name, requirements in model.outcome_map.items():
         outcome_map_elem = ET.SubElement(element, "OutcomeMap")
@@ -488,61 +417,69 @@ def _append_concurrence_outcome_map(
                 item_elem.set("outcome", state_outcome)
 
 
+# ── Deserialization ────────────────────────────────────────────────────────
+
+
+def _parse_container_element(
+    element: ET.Element,
+    model_class: type,
+    content_parser: Callable,
+    **model_kwargs,
+):
+    model = model_class(
+        name=element.get("name", ""),
+        description=element.get("description", ""),
+        **model_kwargs,
+    )
+
+    model.parameters.extend(_parse_parameters(element.findall("Param")))
+    model.keys.extend(_parse_keys(element.findall("Key")))
+    model.parameter_mappings.update(_parse_parameter_remaps(element))
+    model.remappings.update(_parse_remaps(element))
+    content_parser(model, element)
+    return model
+
+
 def _parse_state_machine_container(
     element: ET.Element,
     *,
     include_container_level_transitions: bool = True,
 ) -> StateMachine:
-    model = StateMachine(
-        name=element.get("name", ""),
-        description=element.get("description", ""),
+    def _parse_content(model, el):
+        _parse_state_machine_content(
+            model,
+            el,
+            include_container_level_transitions=include_container_level_transitions,
+        )
+
+    return _parse_container_element(
+        element,
+        StateMachine,
+        _parse_content,
         start_state=element.get("start_state"),
     )
 
-    model.parameters.extend(_parse_parameters(element.findall("Param")))
-    model.keys.extend(_parse_keys(element.findall("Key")))
-    model.parameter_mappings.update(_parse_parameter_remaps(element))
-    model.remappings.update(_parse_remaps(element))
-    _parse_state_machine_content(
-        model,
-        element,
-        include_container_level_transitions=include_container_level_transitions,
-    )
-    return model
-
 
 def _parse_concurrence_container(element: ET.Element) -> Concurrence:
-    model = Concurrence(
-        name=element.get("name", ""),
-        description=element.get("description", ""),
+    return _parse_container_element(
+        element,
+        Concurrence,
+        _parse_container_content,
         default_outcome=element.get("default_outcome"),
     )
-
-    model.parameters.extend(_parse_parameters(element.findall("Param")))
-    model.keys.extend(_parse_keys(element.findall("Key")))
-    model.parameter_mappings.update(_parse_parameter_remaps(element))
-    model.remappings.update(_parse_remaps(element))
-    _parse_concurrence_content(model, element)
-    return model
 
 
 def _parse_orthogonal_state_container(element: ET.Element) -> OrthogonalState:
-    model = OrthogonalState(
-        name=element.get("name", ""),
-        description=element.get("description", ""),
+    return _parse_container_element(
+        element,
+        OrthogonalState,
+        _parse_container_content,
         default_outcome=element.get("default_outcome"),
     )
 
-    model.parameters.extend(_parse_parameters(element.findall("Param")))
-    model.keys.extend(_parse_keys(element.findall("Key")))
-    model.parameter_mappings.update(_parse_parameter_remaps(element))
-    model.remappings.update(_parse_remaps(element))
-    _parse_orthogonal_state_content(model, element)
-    return model
 
-
-def _parse_orthogonal_state_content(
-    model: OrthogonalState,
+def _parse_container_content(
+    model: Concurrence | OrthogonalState,
     element: ET.Element,
 ) -> None:
     outcome_names = element.get("outcomes", "").split()
@@ -562,19 +499,26 @@ def _parse_orthogonal_state_content(
             continue
 
         if child.tag == "OutcomeMap":
-            _parse_orthogonal_outcome_map(model, child)
+            _parse_outcome_map(model, child)
             continue
 
         if child.tag == "Transition":
             continue
 
-        if child.tag == "Region":
+        if isinstance(model, OrthogonalState):
             region = _parse_region_container(child)
             model.add_state(region)
             x = _parse_float(child.get("x"))
             y = _parse_float(child.get("y"))
             if x is not None and y is not None:
                 model.layout.set_state_position(region.name, x, y)
+        else:
+            state = _parse_state_like(child)
+            model.add_state(state)
+            x = _parse_float(child.get("x"))
+            y = _parse_float(child.get("y"))
+            if x is not None and y is not None:
+                model.layout.set_state_position(state.name, x, y)
 
     if model.default_outcome and not model.get_outcome(model.default_outcome):
         model.add_outcome(Outcome(name=model.default_outcome))
@@ -632,18 +576,6 @@ def _parse_region_container(element: ET.Element) -> StateMachine:
             region.add_transition(state.name, transition)
 
     return region
-
-
-def _parse_orthogonal_outcome_map(model: OrthogonalState, element: ET.Element) -> None:
-    outcome_name = element.get("outcome", "")
-    if not outcome_name:
-        return
-
-    for item in element.findall("Item"):
-        state_name = item.get("state", "")
-        state_outcome = item.get("outcome", "")
-        if state_name and state_outcome:
-            model.set_outcome_rule(outcome_name, state_name, state_outcome)
 
 
 def _parse_state_machine_content(
@@ -733,45 +665,6 @@ def _is_leaked_same_name_container_transition(
     )
 
 
-def _parse_concurrence_content(
-    model: Concurrence,
-    element: ET.Element,
-) -> None:
-    outcome_names = element.get("outcomes", "").split()
-    for outcome_name in outcome_names:
-        model.add_outcome(Outcome(name=outcome_name))
-
-    for child in element:
-        if child.tag in {"Param", "Key", "ParamRemap", "Remap"}:
-            continue
-
-        if child.tag == "Text":
-            model.add_text_block(_parse_text_block(child))
-            continue
-
-        if child.tag == "FinalOutcome":
-            _merge_final_outcome(model, child)
-            continue
-
-        if child.tag == "OutcomeMap":
-            _parse_outcome_map(model, child)
-            continue
-
-        if child.tag == "Transition":
-            continue
-
-        state = _parse_state_like(child)
-        model.add_state(state)
-
-        x = _parse_float(child.get("x"))
-        y = _parse_float(child.get("y"))
-        if x is not None and y is not None:
-            model.layout.set_state_position(state.name, x, y)
-
-    if model.default_outcome and not model.get_outcome(model.default_outcome):
-        model.add_outcome(Outcome(name=model.default_outcome))
-
-
 def _merge_final_outcome(
     model: StateMachine | Concurrence | OrthogonalState,
     element: ET.Element,
@@ -827,7 +720,10 @@ def _merge_final_outcome(
             model.add_transition(outcome.name, _parse_transition(transition_elem))
 
 
-def _parse_outcome_map(model: Concurrence, element: ET.Element) -> None:
+def _parse_outcome_map(
+    model: Concurrence | OrthogonalState,
+    element: ET.Element,
+) -> None:
     outcome_name = element.get("outcome", "")
     if not outcome_name:
         return
@@ -885,53 +781,53 @@ def _parse_transition(element: ET.Element) -> Transition:
     )
 
 
-def _parse_parameters(elements: Iterable[ET.Element]) -> list[Parameter]:
-    parameters: list[Parameter] = []
+def _parse_typed_elements(
+    elements: Iterable[ET.Element],
+    cls: type,
+    field_fn: Callable[[ET.Element], dict] | None = None,
+) -> list:
+    result = []
     for element in elements:
-        parameters.append(
-            Parameter(
-                name=element.get("name", ""),
-                description=element.get("description", ""),
-                default_type=element.get("default_type", ""),
-                default_value=element.get("default_value"),
-            )
-        )
-    return parameters
+        kwargs = {
+            "name": element.get("name", ""),
+            "description": element.get("description", ""),
+            "default_type": element.get("default_type", ""),
+            "default_value": element.get("default_value"),
+        }
+        if field_fn:
+            kwargs.update(field_fn(element))
+        result.append(cls(**kwargs))
+    return result
 
 
-def _parse_parameter_remaps(element: ET.Element) -> dict[str, str]:
-    parameter_mappings: dict[str, str] = {}
-    for remap in element.findall("ParamRemap"):
-        old = remap.get("old", "")
-        new = remap.get("new", "")
-        if old and new:
-            parameter_mappings[old] = new
-    return parameter_mappings
+def _parse_parameters(elements: Iterable[ET.Element]) -> list[Parameter]:
+    return _parse_typed_elements(elements, Parameter)
 
 
 def _parse_keys(elements: Iterable[ET.Element]) -> list[Key]:
-    keys: list[Key] = []
-    for element in elements:
-        keys.append(
-            Key(
-                name=element.get("name", ""),
-                key_type=element.get("type", "in"),
-                description=element.get("description", ""),
-                default_type=element.get("default_type", ""),
-                default_value=element.get("default_value"),
-            )
-        )
-    return keys
+    return _parse_typed_elements(
+        elements,
+        Key,
+        field_fn=lambda e: {"key_type": e.get("type", "in")},
+    )
 
 
-def _parse_remaps(element: ET.Element) -> dict[str, str]:
-    remappings: dict[str, str] = {}
-    for remap in element.findall("Remap"):
+def _parse_remap_dict(element: ET.Element, tag: str) -> dict[str, str]:
+    mappings: dict[str, str] = {}
+    for remap in element.findall(tag):
         old = remap.get("old", "")
         new = remap.get("new", "")
         if old and new:
-            remappings[old] = new
-    return remappings
+            mappings[old] = new
+    return mappings
+
+
+def _parse_parameter_remaps(element: ET.Element) -> dict[str, str]:
+    return _parse_remap_dict(element, "ParamRemap")
+
+
+def _parse_remaps(element: ET.Element) -> dict[str, str]:
+    return _parse_remap_dict(element, "Remap")
 
 
 def _normalize_newlines(value: str) -> str:

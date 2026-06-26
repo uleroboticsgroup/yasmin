@@ -16,7 +16,9 @@
 #ifndef YASMIN__STATE_UTILS_HPP_
 #define YASMIN__STATE_UTILS_HPP_
 
+#include <atomic>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -61,6 +63,48 @@ inline std::string join_outcomes(const Outcomes &items,
     result += *it;
   }
   return result;
+}
+
+/**
+ * @brief Join elements of a container into a string using a delimiter.
+ * @tparam Container The container type.
+ * @tparam StringFn A callable that converts an element to a string.
+ * @param container The container to join.
+ * @param delim The delimiter between elements.
+ * @param fn The function that converts each element to a string.
+ * @return The joined string.
+ */
+template <typename Container, typename StringFn>
+std::string join(const Container &container, const std::string &delim,
+                 StringFn fn) {
+  std::ostringstream oss;
+  for (auto it = container.begin(); it != container.end(); ++it) {
+    if (it != container.begin())
+      oss << delim;
+    oss << fn(*it);
+  }
+  return oss.str();
+}
+
+/**
+ * @brief Check if an object has already been configured, logging as a side
+ * effect.
+ * @param configured The atomic flag to check.
+ * @param type_name The human-readable type name.
+ * @param instance_name The stringified instance name.
+ * @return true if already configured, false otherwise.
+ */
+inline bool check_already_configured(std::atomic<bool> &configured,
+                                     const char *type_name,
+                                     const char *instance_name) {
+  if (configured.load()) {
+    YASMIN_LOG_DEBUG("%s '%s' has already been configured", type_name,
+                     instance_name);
+    return true;
+  }
+
+  YASMIN_LOG_DEBUG("Configuring %s '%s'", type_name, instance_name);
+  return false;
 }
 
 /**

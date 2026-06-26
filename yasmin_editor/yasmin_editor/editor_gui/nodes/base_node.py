@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set
 
 from PyQt5.QtCore import QPointF, Qt
 from PyQt5.QtGui import QBrush, QColor, QPen, QPolygonF
@@ -267,3 +267,71 @@ class BaseNodeMixin:
 
         if default_pen_callback is not None:
             default_pen_callback()
+
+    @property
+    def name(self) -> str:
+        return self.model.name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self.model.name = value
+        self._on_name_changed(value)
+
+    @property
+    def description(self) -> str:
+        return self.model.description
+
+    @description.setter
+    def description(self, value: str) -> None:
+        self.model.description = value
+        self._on_description_changed(value)
+
+    @property
+    def remappings(self) -> Dict[str, str]:
+        return self.model.remappings
+
+    @remappings.setter
+    def remappings(self, value: Dict[str, str]) -> None:
+        self.model.remappings.clear()
+        self.model.remappings.update(value or {})
+
+    @property
+    def parameter_mappings(self) -> Dict[str, str]:
+        return self.model.parameter_mappings
+
+    @parameter_mappings.setter
+    def parameter_mappings(self, value: Dict[str, str]) -> None:
+        self.model.parameter_mappings.clear()
+        self.model.parameter_mappings.update(value or {})
+
+    def _on_name_changed(self, value: str) -> None:
+        pass
+
+    def _on_description_changed(self, value: str) -> None:
+        pass
+
+    def mouseDoubleClickEvent(self, event: Any) -> None:
+        if self.scene() and self.scene().views():
+            canvas = self.scene().views()[0]
+            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
+                self.setSelected(True)
+                self._on_double_click(canvas.editor_ref, event)
+                event.accept()
+                return
+        super().mouseDoubleClickEvent(event)
+
+    def _on_double_click(self, editor: Any, event: Any) -> None:
+        pass
+
+    def contextMenuEvent(self, event: Any) -> None:
+        if self.scene() and self.scene().views():
+            canvas = self.scene().views()[0]
+            if hasattr(canvas, "editor_ref") and canvas.editor_ref:
+                self.setSelected(True)
+                if self._on_context_menu(canvas.editor_ref, event):
+                    event.accept()
+                    return
+        super().contextMenuEvent(event)
+
+    def _on_context_menu(self, editor: Any, event: Any) -> bool:
+        return False
