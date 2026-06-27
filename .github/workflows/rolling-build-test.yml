@@ -8,7 +8,7 @@ on:
 
 jobs:
   rolling_build_and_test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@v0.7
