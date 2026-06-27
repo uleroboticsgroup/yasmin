@@ -42,7 +42,7 @@ namespace yasmin_ros {
  */
 template <typename MsgT> class PublisherState : public yasmin::State {
 
-  /// Function type for creating messages for topic.
+  /// @brief Function type for creating messages for topic.
   using CreateMessageHandler =
       std::function<MsgT(yasmin::Blackboard::SharedPtr)>;
 
@@ -121,15 +121,15 @@ public:
   }
 
 protected:
-  /// Shared pointer to the ROS 2 node.
+  /// @brief Shared pointer to the ROS 2 node.
   rclcpp::Node::SharedPtr node_;
 
 private:
-  /// Publisher to the ROS 2 topic.
+  /// @brief Publisher to the ROS 2 topic.
   std::shared_ptr<rclcpp::Publisher<MsgT>> pub;
-  /// Name of the topic to publish to.
+  /// @brief Name of the topic to publish to.
   std::string topic_name;
-  /// Callback handler to create messages.
+  /// @brief Callback handler to create messages.
   CreateMessageHandler create_message_handler;
 };
 

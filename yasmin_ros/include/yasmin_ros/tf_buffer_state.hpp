@@ -73,9 +73,9 @@ public:
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
-  /// Node used to create the tf2 listener subscriptions.
+  /// @brief Node used to create the tf2 listener subscriptions.
   rclcpp::Node::SharedPtr node_;
-  /// Buffer cache duration in seconds.
+  /// @brief Buffer cache duration in seconds.
   double cache_time_sec_;
 };
 

@@ -45,7 +45,7 @@ namespace yasmin_ros {
  */
 template <typename MsgT> class MonitorState : public yasmin::State {
 
-  /// Function type for handling messages from topic.
+  /// @brief Function type for handling messages from topic.
   using MonitorHandler = std::function<std::string(
       yasmin::Blackboard::SharedPtr, std::shared_ptr<MsgT>)>;
 
@@ -218,32 +218,32 @@ public:
   }
 
 protected:
-  /// Shared pointer to the ROS 2 node.
+  /// @brief Shared pointer to the ROS 2 node.
   rclcpp::Node::SharedPtr node_;
 
 private:
-  /// Subscription to the ROS 2 topic.
+  /// @brief Subscription to the ROS 2 topic.
   std::shared_ptr<rclcpp::Subscription<MsgT>> sub;
 
-  /// Name of the topic to monitor.
+  /// @brief Name of the topic to monitor.
   std::string topic_name;
-  /// Quality of Service settings for the topic.
+  /// @brief Quality of Service settings for the topic.
   rclcpp::QoS qos;
 
-  /// List to store queued messages.
+  /// @brief List to store queued messages.
   std::vector<std::shared_ptr<MsgT>> msg_list;
-  /// Callback function to handle incoming messages.
+  /// @brief Callback function to handle incoming messages.
   MonitorHandler monitor_handler;
-  /// Maximum number of messages to queue.
+  /// @brief Maximum number of messages to queue.
   int msg_queue;
-  /// Timeout in seconds for message reception.
+  /// @brief Timeout in seconds for message reception.
   int timeout;
-  /// Maximum number of retries.
+  /// @brief Maximum number of retries.
   int maximum_retry;
 
-  /// Condition variable for action completion.
+  /// @brief Condition variable for action completion.
   std::condition_variable msg_cond;
-  /// Mutex for protecting action completion.
+  /// @brief Mutex for protecting action completion.
   std::mutex msg_mutex;
 
   /**

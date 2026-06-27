@@ -44,26 +44,26 @@ namespace yasmin_ros {
  * @tparam ActionT The type of the action this state will interface with.
  */
 template <typename ActionT> class ActionState : public yasmin::State {
-  /// Alias for the action goal type.
+  /// @brief Alias for the action goal type.
   using Goal = typename ActionT::Goal;
-  /// Alias for the action result type.
+  /// @brief Alias for the action result type.
   using Result = typename ActionT::Result::SharedPtr;
 
-  /// Alias for the action feedback type.
+  /// @brief Alias for the action feedback type.
   using Feedback = typename ActionT::Feedback;
-  /// Options for sending goals.
+  /// @brief Options for sending goals.
   using SendGoalOptions =
       typename rclcpp_action::Client<ActionT>::SendGoalOptions;
-  /// Shared pointer type for the action client.
+  /// @brief Shared pointer type for the action client.
   using ActionClient = typename rclcpp_action::Client<ActionT>::SharedPtr;
-  /// Handle for the action goal.
+  /// @brief Handle for the action goal.
   using GoalHandle = rclcpp_action::ClientGoalHandle<ActionT>;
-  /// Function type for creating a goal.
+  /// @brief Function type for creating a goal.
   using CreateGoalHandler = std::function<Goal(yasmin::Blackboard::SharedPtr)>;
-  /// Function type for handling results.
+  /// @brief Function type for handling results.
   using ResultHandler =
       std::function<std::string(yasmin::Blackboard::SharedPtr, Result)>;
-  /// Function type for handling feedback.
+  /// @brief Function type for handling feedback.
   using FeedbackHandler = std::function<void(yasmin::Blackboard::SharedPtr,
                                              std::shared_ptr<const Feedback>)>;
 
@@ -372,6 +372,7 @@ public:
 
     // Send the goal to the action server
     YASMIN_LOG_INFO("Sending goal to action '%s'", this->action_name.c_str());
+    this->action_done_ = false;
     this->action_client->async_send_goal(goal, send_goal_options);
 
     if (this->response_timeout > 0) {
@@ -425,48 +426,48 @@ public:
   }
 
 protected:
-  /// Shared pointer to the ROS 2 node.
+  /// @brief Shared pointer to the ROS 2 node.
   rclcpp::Node::SharedPtr node_;
 
 private:
-  /// Name of the action to communicate with.
+  /// @brief Name of the action to communicate with.
   std::string action_name;
-  /// Shared pointer to the action client.
+  /// @brief Shared pointer to the action client.
   ActionClient action_client;
 
-  /// Condition variable for action completion.
+  /// @brief Condition variable for action completion.
   std::condition_variable action_done_cond;
-  /// Mutex for protecting action completion.
+  /// @brief Mutex for protecting action completion.
   std::mutex action_done_mutex;
-  /// Condition variable for action cancellation.
+  /// @brief Condition variable for action cancellation.
   std::condition_variable action_cancel_cond;
-  /// Mutex for protecting action cancellation.
+  /// @brief Mutex for protecting action cancellation.
   std::mutex action_cancel_mutex;
 
-  /// Flag set when result is received.
+  /// @brief Flag set when result is received.
   bool action_done_{false};
-  /// Shared pointer to the action result.
+  /// @brief Shared pointer to the action result.
   Result action_result;
-  /// Status of the action execution.
+  /// @brief Status of the action execution.
   rclcpp_action::ResultCode action_status{};
 
-  /// Handle for the current goal.
+  /// @brief Handle for the current goal.
   std::shared_ptr<GoalHandle> goal_handle;
-  /// Mutex for protecting access to the goal handle.
+  /// @brief Mutex for protecting access to the goal handle.
   std::mutex goal_handle_mutex;
 
-  /// Handler function for creating goals.
+  /// @brief Handler function for creating goals.
   CreateGoalHandler create_goal_handler;
-  /// Handler function for processing results.
+  /// @brief Handler function for processing results.
   ResultHandler result_handler;
-  /// Handler function for processing feedback.
+  /// @brief Handler function for processing feedback.
   FeedbackHandler feedback_handler;
 
-  /// Maximum time to wait for the action server.
+  /// @brief Maximum time to wait for the action server.
   int wait_timeout;
-  /// Timeout for the action response.
+  /// @brief Timeout for the action response.
   int response_timeout;
-  /// Maximum number of retries.
+  /// @brief Maximum number of retries.
   int maximum_retry;
 
 #if __has_include("rclcpp/version.h")

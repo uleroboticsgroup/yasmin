@@ -78,7 +78,7 @@ private:
    */
   void stop_executor();
 
-  /// Executor for managing multiple threads.
+  /// @brief Executor for managing multiple threads.
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
 #if RCLCPP_VERSION_GTE(29, 1, 1) // Jazzy, Kilted and Rolling
@@ -89,7 +89,7 @@ private:
 #else // Foxy and Galactic
   rclcpp::executors::MultiThreadedExecutor executor;
 #endif
-  /// Thread for spinning the node.
+  /// @brief Thread for spinning the node.
   std::unique_ptr<std::thread> spin_thread;
 };
 

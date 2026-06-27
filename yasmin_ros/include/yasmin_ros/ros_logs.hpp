@@ -20,7 +20,7 @@
 
 namespace yasmin_ros {
 
-/// Node used in the YASMIN ROS 2 logs
+/// @brief Node used in the YASMIN ROS 2 logs
 extern rclcpp::Node *logger_node;
 
 /**

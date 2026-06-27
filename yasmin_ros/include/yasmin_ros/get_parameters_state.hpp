@@ -65,10 +65,10 @@ public:
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
-  /// Map of parameters to retrieve, where the key is the parameter name
+  /// @brief Map of parameters to retrieve, where the key is the parameter name
   /// and the value is the default value.
   std::unordered_map<std::string, std::any> parameters_;
-  /// Shared pointer to the ROS 2 node.
+  /// @brief Shared pointer to the ROS 2 node.
   rclcpp::Node::SharedPtr node_;
 };
 

@@ -44,15 +44,15 @@ namespace yasmin_ros {
  * @tparam ServiceT The type of the ROS 2 service this state interacts with.
  */
 template <typename ServiceT> class ServiceState : public yasmin::State {
-  /// Alias for the service request type.
+  /// @brief Alias for the service request type.
   using Request = typename ServiceT::Request::SharedPtr;
-  /// Alias for the service response type.
+  /// @brief Alias for the service response type.
   using Response = typename ServiceT::Response::SharedPtr;
 
-  /// Function type for creating a request.
+  /// @brief Function type for creating a request.
   using CreateRequestHandler =
       std::function<Request(yasmin::Blackboard::SharedPtr)>;
-  /// Function type for handling a response.
+  /// @brief Function type for handling a response.
   using ResponseHandler =
       std::function<std::string(yasmin::Blackboard::SharedPtr, Response)>;
 
@@ -282,6 +282,7 @@ public:
     YASMIN_LOG_INFO("Sending request to service '%s'", this->srv_name.c_str());
 
     // Send request with callback
+    this->service_response = nullptr; // Reset previous response
     this->service_client->async_send_request(
         request, std::bind(&ServiceState::response_callback, this,
                            std::placeholders::_1));
@@ -328,7 +329,7 @@ public:
   }
 
 protected:
-  /// Shared pointer to the ROS 2 node
+  /// @brief Shared pointer to the ROS 2 node
   rclcpp::Node::SharedPtr node_;
 
 public:
@@ -341,26 +342,26 @@ public:
   }
 
 private:
-  /// Shared pointer to the service client.
+  /// @brief Shared pointer to the service client.
   std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
-  /// Function to create service requests.
+  /// @brief Function to create service requests.
   CreateRequestHandler create_request_handler;
-  /// Function to handle service responses.
+  /// @brief Function to handle service responses.
   ResponseHandler response_handler;
-  /// Name of the service.
+  /// @brief Name of the service.
   std::string srv_name;
-  /// Maximum wait time for service availability.
+  /// @brief Maximum wait time for service availability.
   int wait_timeout;
-  /// Timeout for the service response.
+  /// @brief Timeout for the service response.
   int response_timeout;
-  /// Maximum number of retries.
+  /// @brief Maximum number of retries.
   int maximum_retry;
 
-  /// Condition variable for response completion.
+  /// @brief Condition variable for response completion.
   std::condition_variable response_done_cond;
-  /// Mutex for protecting response completion.
+  /// @brief Mutex for protecting response completion.
   std::mutex response_done_mutex;
-  /// Shared pointer to the service response.
+  /// @brief Shared pointer to the service response.
   Response service_response;
 
   /**
