@@ -9,6 +9,8 @@ on:
 jobs:
   rolling_build_and_test:
     runs-on: ubuntu-26.04
+    container:
+      image: ghcr.io/ros-tooling/setup-ros-docker/setup-ros-docker-ubuntu-resolute-ros-rolling-ros-base:master
     steps:
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@v0.7
