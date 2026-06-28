@@ -20,7 +20,7 @@ from typing import Dict
 
 from ament_index_python import get_package_share_path
 from lxml import etree as ET
-from yasmin import Concurrence, OrthogonalState, State, StateMachine
+from yasmin import Concurrence, JoinState, OrthogonalState, State, StateMachine
 from yasmin.orthogonal_state import setup_default_gil_hooks
 from yasmin_pybind_bridge import CppStateFactory
 
@@ -108,6 +108,12 @@ class YasminFactory:
                     child
                 )
 
+            elif child.tag == "JoinState":
+                states[child.attrib["name"]] = self._create_join_state(child)
+                parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
+                    child
+                )
+
             elif child.tag == "OutcomeMap":
                 outcome_name = child.attrib["outcome"]
                 outcome_map[outcome_name] = {}
@@ -163,6 +169,11 @@ class YasminFactory:
         self._add_blackboard_keys(ort, orth_elem)
         self._add_parameters(ort, orth_elem)
         return ort
+
+    def _create_join_state(self, join_elem: ET.Element) -> JoinState:
+        sync_id = join_elem.attrib.get("sync_id", "")
+        outcome = join_elem.attrib.get("outcome", "joined")
+        return JoinState(sync_id, outcome)
 
     def create_sm(self, root: ET.Element) -> StateMachine:
         """
@@ -235,6 +246,9 @@ class YasminFactory:
 
             elif child.tag == "OrthogonalState":
                 state = self._create_orthogonal_state(child)
+
+            elif child.tag == "JoinState":
+                state = self._create_join_state(child)
 
             else:
                 continue

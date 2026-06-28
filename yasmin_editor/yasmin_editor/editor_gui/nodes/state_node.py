@@ -38,6 +38,7 @@ class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
         remappings: Optional[Dict[str, str]] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
+        custom_type_label: str | None = None,
         model: Optional[State] = None,
     ) -> None:
         super().__init__(-60, -40, 120, 80)
@@ -50,6 +51,7 @@ class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
         self.is_state_machine: bool = False
         self.is_concurrence: bool = False
         self.defaults: List[Dict[str, str]] = defaults or []
+        self.custom_type_label: str | None = custom_type_label
 
         self._initialize_base_node_graphics(x, y)
 
@@ -67,8 +69,13 @@ class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
 
         self.center_text_item(self.text, -self.text.boundingRect().height() / 2)
 
+        type_text: str | None = None
         if plugin_info:
-            type_text: str = plugin_info.plugin_type.upper()
+            type_text = plugin_info.plugin_type.upper()
+        elif custom_type_label:
+            type_text = custom_type_label
+
+        if type_text:
             self.type_label: QGraphicsTextItem = QGraphicsTextItem(type_text, self)
             self.type_label.setDefaultTextColor(PALETTE.text_secondary)
             type_font: QFont = QFont()

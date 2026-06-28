@@ -21,6 +21,7 @@ from xml.etree import ElementTree as ET
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.container_state import iter_outcome_rule_values
+from yasmin_editor.model.join_state import JoinState
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
@@ -209,6 +210,23 @@ def _state_to_element(
         return _concurrence_to_element(state, parent=parent)
     if isinstance(state, OrthogonalState):
         return _orthogonal_state_to_element(state, parent=parent)
+
+    if isinstance(state, JoinState):
+        element = ET.Element("JoinState")
+        element.set("name", state.name)
+        if state.sync_id:
+            element.set("sync_id", state.sync_id)
+        element.set("outcome", state.join_outcome)
+        if state.description:
+            element.set("description", state.description)
+        position = parent.layout.get_state_position(state.name)
+        if position is not None:
+            element.set("x", f"{position.x:.2f}")
+            element.set("y", f"{position.y:.2f}")
+        _append_parameter_remaps(element, state.parameter_mappings)
+        _append_remaps(element, state.remappings)
+        _append_owner_transitions(element, parent, state.name)
+        return element
 
     tag = "State" if state.state_type != "xml" else "StateMachine"
     element = ET.Element(tag)
@@ -638,6 +656,7 @@ def _local_state_machine_targets(element: ET.Element) -> set[str]:
             "Concurrence",
             "OrthogonalState",
             "Region",
+            "JoinState",
         }:
             name = child.get("name", "")
             if name:
@@ -745,6 +764,17 @@ def _parse_state_like(element: ET.Element) -> State:
             element,
             include_container_level_transitions=False,
         )
+
+    if element.tag == "JoinState":
+        state = JoinState(
+            name=element.get("name", ""),
+            description=element.get("description", ""),
+            sync_id=element.get("sync_id", ""),
+            join_outcome=element.get("outcome", "joined"),
+        )
+        state.parameter_mappings.update(_parse_parameter_remaps(element))
+        state.remappings.update(_parse_remaps(element))
+        return state
 
     state = State(
         name=element.get("name", ""),

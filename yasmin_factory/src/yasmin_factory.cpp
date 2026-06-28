@@ -693,6 +693,10 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
       std::string name = this->get_required_attribute(child, "name");
       states[name] = this->create_orthogonal_state(child);
       parameter_mappings[name] = this->get_parameter_mappings(child);
+    } else if (child_name == "JoinState") {
+      std::string name = this->get_required_attribute(child, "name");
+      states[name] = this->create_join_state(child);
+      parameter_mappings[name] = this->get_parameter_mappings(child);
     }
   }
 
@@ -822,6 +826,16 @@ YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem) {
   return ort;
 }
 
+yasmin::JoinState::SharedPtr
+YasminFactory::create_join_state(tinyxml2::XMLElement *join_elem) {
+  const std::string sync_id =
+      this->get_optional_attribute(join_elem, "sync_id", "");
+  const std::string outcome =
+      this->get_optional_attribute(join_elem, "outcome", "joined");
+
+  return std::make_shared<yasmin::JoinState>(sync_id, outcome);
+}
+
 yasmin::StateMachine::SharedPtr
 YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
@@ -888,7 +902,8 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
     std::string child_name = child->Name();
     if (child_name != "State" && child_name != "Concurrence" &&
-        child_name != "StateMachine" && child_name != "OrthogonalState") {
+        child_name != "StateMachine" && child_name != "OrthogonalState" &&
+        child_name != "JoinState") {
       continue;
     }
 
@@ -927,6 +942,8 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
       state = this->create_sm(child);
     } else if (child_name == "OrthogonalState") {
       state = this->create_orthogonal_state(child);
+    } else if (child_name == "JoinState") {
+      state = this->create_join_state(child);
     } else {
       continue;
     }

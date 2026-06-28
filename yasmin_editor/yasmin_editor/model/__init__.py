@@ -1,7 +1,6 @@
-"""Pure Python data model for the YASMIN editor."""
-
 from .concurrence import Concurrence
 from .container_state import ContainerState
+from .join_state import JoinState
 from .orthogonal_state import OrthogonalState
 from .parameter import Parameter
 from .key import Key
@@ -16,6 +15,7 @@ from .validation import ValidationMessage, ValidationResult, validate_model
 __all__ = [
     "Concurrence",
     "ContainerState",
+    "JoinState",
     "OrthogonalState",
     "Key",
     "Layout",

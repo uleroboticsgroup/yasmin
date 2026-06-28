@@ -30,11 +30,13 @@ PyThreadState *default_gil_state = nullptr;
 
 void default_gil_before_fork() {
   if (Py_IsInitialized()) {
-    // Acquire GIL if not held, then save and release so child threads can
-    // safely acquire it when calling into Python.
-    PyGILState_STATE gstate = PyGILState_Ensure();
-    (void)gstate;
-    default_gil_state = PyEval_SaveThread();
+    // Only release the GIL if this thread actually holds it.
+    // add_call_operator may have already released it via gil_scoped_release.
+    if (PyGILState_Check()) {
+      default_gil_state = PyEval_SaveThread();
+    } else {
+      default_gil_state = nullptr;
+    }
   }
 }
 

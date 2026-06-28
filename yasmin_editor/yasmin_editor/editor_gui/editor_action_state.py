@@ -31,6 +31,7 @@ def build_editor_action_enabled_map(
         "add_state_machine_action": editable,
         "add_concurrence_action": editable,
         "add_orthogonal_state_action": editable,
+        "add_join_state_action": editable,
         "add_final_action": editable,
         "add_text_action": editable,
         "delete_action": editable and has_selection,

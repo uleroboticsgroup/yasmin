@@ -50,6 +50,12 @@ OrthogonalStateDialogResult = Tuple[
     str,
     list[dict[str, Any]],
 ]
+JoinStateDialogResult = Tuple[
+    str,
+    str,
+    str,
+    str,
+]
 
 
 def _build_container_kwargs(
@@ -142,4 +148,18 @@ def build_orthogonal_state_kwargs(result: OrthogonalStateDialogResult) -> Dict[s
         "default_outcome": default_outcome,
         "description": description,
         "defaults": defaults,
+    }
+
+
+def build_join_state_kwargs(result: JoinStateDialogResult) -> Dict[str, Any]:
+    """Adapt a join-state dialog result to ``create_state_node`` kwargs."""
+
+    name, sync_id, outcome, description = result
+    return {
+        "name": name,
+        "plugin_info": None,
+        "is_join_state": True,
+        "sync_id": sync_id,
+        "join_outcome": outcome,
+        "description": description,
     }

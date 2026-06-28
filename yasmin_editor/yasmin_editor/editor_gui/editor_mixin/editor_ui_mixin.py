@@ -31,11 +31,13 @@ from yasmin_editor.editor_gui.clipboard_model import is_container_empty
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.dialog_result_adapters import (
     build_concurrence_kwargs,
+    build_join_state_kwargs,
     build_orthogonal_state_kwargs,
     build_plugin_state_kwargs,
     build_state_machine_kwargs,
 )
 from yasmin_editor.editor_gui.dialogs.concurrence_dialog import ConcurrenceDialog
+from yasmin_editor.editor_gui.dialogs.join_state_dialog import JoinStateDialog
 from yasmin_editor.editor_gui.dialogs.orthogonal_state_dialog import OrthogonalStateDialog
 from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import (
     OutcomeDescriptionDialog,
@@ -75,6 +77,7 @@ from yasmin_editor.editor_gui.ui.toolbar_config import (
     SELECTION_TOOLBAR_MENU,
 )
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.join_state import JoinState
 from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state_machine import StateMachine
@@ -317,6 +320,16 @@ class EditorUiMixin:
             result = dialog.get_orthogonal_state_data()
             if result:
                 self.create_state_node(**build_orthogonal_state_kwargs(result))
+
+    def add_join_state(self) -> None:
+        if self.is_read_only_mode():
+            self._show_read_only_message()
+            return
+        dialog = JoinStateDialog(parent=self)
+        if dialog.exec_():
+            result = dialog.get_join_state_data()
+            if result:
+                self.create_state_node(**build_join_state_kwargs(result))
 
     def add_text_block(self) -> None:
         """Add a free-form text block to the current container."""
@@ -666,6 +679,7 @@ class EditorUiMixin:
         is_container = isinstance(state_node, ContainerStateNode) and not getattr(
             state_node, "is_xml_reference", False
         )
+        is_join_state = isinstance(state_node.model, JoinState) if hasattr(state_node, "model") and state_node.model else False
 
         if is_container:
             input_keys, output_keys = self._collect_container_key_lists(state_node.model)
@@ -725,6 +739,40 @@ class EditorUiMixin:
                         f"Updated {'orthogonal state' if state_node.is_orthogonal else 'concurrence' if state_node.is_concurrence else 'state machine'}: {name}",
                         2000,
                     )
+                    self.record_history_checkpoint()
+            return
+
+        if is_join_state:
+            dialog = JoinStateDialog(
+                name=state_node.name,
+                sync_id=state_node.model.sync_id,
+                outcome=state_node.model.join_outcome,
+                description=state_node.model.description,
+                edit_mode=True,
+                parent=self,
+            )
+            if readonly:
+                dialog.exec_()
+                return
+            if dialog.exec_():
+                result = dialog.get_join_state_data()
+                if result:
+                    name, sync_id, outcome, description = result
+                    if not self.apply_common_state_updates(
+                        state_node,
+                        name,
+                        getattr(state_node, "remappings", {}),
+                        description,
+                        getattr(state_node, "defaults", []),
+                        [],
+                    ):
+                        return
+                    state_node.model.sync_id = sync_id
+                    state_node.model.join_outcome = outcome
+                    state_node.model.outcomes = [Outcome(name=outcome)]
+                    self.sync_blackboard_keys()
+                    self.refresh_connection_port_visibility()
+                    self.statusBar().showMessage(f"Updated join state: {name}", 2000)
                     self.record_history_checkpoint()
             return
 

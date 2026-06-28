@@ -27,7 +27,7 @@ from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.container_state import iter_outcome_rule_values
-from yasmin_editor.model.layout import OutcomePlacement
+from yasmin_editor.model.join_state import JoinState
 from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
@@ -148,6 +148,17 @@ def create_state_view(
             description=state_model.description,
             defaults=[],
             model=state_model,
+        )
+    elif isinstance(state_model, JoinState):
+        node = StateNode(
+            state_model.name,
+            None,
+            x,
+            y,
+            description=state_model.description,
+            defaults=[],
+            model=state_model,
+            custom_type_label="JOIN",
         )
     else:
         plugin_info = resolve_plugin_info(state_model)

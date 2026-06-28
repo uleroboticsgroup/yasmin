@@ -38,6 +38,7 @@ ADD_TOOLBAR_MENU = ToolbarMenuSpec(
         "add_state_machine_action",
         "add_concurrence_action",
         "add_orthogonal_state_action",
+        "add_join_state_action",
         "add_final_action",
         "add_text_action",
     ),

@@ -452,6 +452,7 @@ class StateMachineCanvas(QGraphicsView):
             add_state_action = menu.addAction("Add State")
             add_sm_action = menu.addAction("Add State Machine")
             add_cc_action = menu.addAction("Add Concurrence")
+            add_js_action = menu.addAction("Add Join State")
             menu.addSeparator()
             add_outcome_action = menu.addAction("Add Final Outcome")
             add_text_action = menu.addAction("Add Text")
@@ -464,6 +465,8 @@ class StateMachineCanvas(QGraphicsView):
                 self.editor_ref.add_state_machine()
             elif action == add_cc_action:
                 self.editor_ref.add_concurrence()
+            elif action == add_js_action:
+                self.editor_ref.add_join_state()
             elif action == add_outcome_action:
                 self.editor_ref.add_final_outcome()
             elif action == add_text_action:

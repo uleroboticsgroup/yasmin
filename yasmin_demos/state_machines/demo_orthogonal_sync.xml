@@ -10,38 +10,45 @@
         <Param name="sleep_ms" default_type="int" default_value="200" />
         <Transition from="working" to="work_a1" />
         <Transition from="done" to="sync_a" />
-      </State><State name="sync_a" type="py" module="yasmin.join_state" class="JoinState" x="174.11" y="188.12">
-        <Param name="sync_id" default_type="str" default_value="mid_sync" />
+      </State>
+      <JoinState name="sync_a" sync_id="mid_sync" outcome="joined" x="174.11" y="188.12">
         <Transition from="joined" to="work_a2" />
-      </State><State name="work_a2" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="373.99" y="-20.11">
+      </JoinState>
+      <State name="work_a2" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="373.99" y="-20.11">
         <Param name="max_count" default_type="int" default_value="2" />
         <Param name="sleep_ms" default_type="int" default_value="200" />
         <Transition from="working" to="work_a2" />
         <Transition from="done" to="done" to_instance="done-75a70cef" />
-      </State><FinalOutcome name="done" instance_id="done-75a70cef" x="566.91" y="190.12" />
+      </State>
+      <FinalOutcome name="done" instance_id="done-75a70cef" x="566.91" y="190.12" />
     </Region><Region name="B" outcomes="done" start_state="work_b1" description="Region B: 2 iterations, sync, 3 more iterations." x="17.79" y="182.38">
       <State name="work_b1" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="0.00" y="0.00">
         <Param name="max_count" default_type="int" default_value="2" />
         <Param name="sleep_ms" default_type="int" default_value="200" />
         <Transition from="working" to="work_b1" />
         <Transition from="done" to="sync_b" />
-      </State><State name="sync_b" type="py" module="yasmin.join_state" class="JoinState" x="131.08" y="165.11">
-        <Param name="sync_id" default_type="str" default_value="mid_sync" />
+      </State>
+      <JoinState name="sync_b" sync_id="mid_sync" outcome="joined" x="131.08" y="165.11">
         <Transition from="joined" to="work_b2" />
-      </State><State name="work_b2" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="300.67" y="7.73">
+      </JoinState>
+      <State name="work_b2" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="300.67" y="7.73">
         <Param name="max_count" default_type="int" default_value="100" />
         <Param name="sleep_ms" default_type="int" default_value="200" />
         <Transition from="working" to="work_b2" />
         <Transition from="done" to="done" to_instance="done-f7803e2d" />
-      </State><FinalOutcome name="done" instance_id="done-f7803e2d" x="455.84" y="171.11" />
-    </Region><FinalOutcome name="success" instance_id="success-36018aba" x="331.60" y="98.67" />
+      </State>
+      <FinalOutcome name="done" instance_id="done-f7803e2d" x="455.84" y="171.11" />
+    </Region>
+    <FinalOutcome name="success" instance_id="success-36018aba" x="331.60" y="98.67" />
     <FinalOutcome name="timeout" instance_id="timeout-fe263242" x="700.00" y="170.00" />
     <OutcomeMap outcome="success">
       <Item state="A" outcome="done" />
       <Item state="B" outcome="done" />
-    </OutcomeMap><Transition from="success" to="success" />
+    </OutcomeMap>
+    <Transition from="success" to="success" />
     <Transition from="timeout" to="timeout" />
-  </OrthogonalState><FinalOutcome name="success" description="Both regions completed successfully" instance_id="success-400b41f0" x="700.00" y="0.00" />
+  </OrthogonalState>
+  <FinalOutcome name="success" description="Both regions completed successfully" instance_id="success-400b41f0" x="700.00" y="0.00" />
   <FinalOutcome name="fail" description="Unused default fallback" instance_id="fail-f5d5ac9a" x="700.00" y="170.00" />
   <FinalOutcome name="timeout" description="One or more regions timed out" instance_id="timeout-7d592242" x="700.00" y="340.00" />
 </StateMachine>

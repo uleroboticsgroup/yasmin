@@ -50,6 +50,7 @@ from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.join_state import JoinState
 from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.parameter import Parameter
 from yasmin_editor.model.state import State
@@ -227,6 +228,9 @@ class EditorModelMixin:
         is_state_machine: bool = False,
         is_concurrence: bool = False,
         is_orthogonal: bool = False,
+        is_join_state: bool = False,
+        sync_id: str = "",
+        join_outcome: str = "joined",
         outcomes: List[str] = None,
         remappings: Dict[str, str] = None,
         start_state: str = None,
@@ -263,6 +267,13 @@ class EditorModelMixin:
                     for item in (parameter_overwrites or [])
                     if item.get("child_parameter") and item.get("name")
                 },
+            )
+        elif is_join_state:
+            model = JoinState(
+                name=name,
+                description=description,
+                sync_id=sync_id,
+                join_outcome=join_outcome,
             )
         else:
             model = self.create_leaf_model(
@@ -850,6 +861,9 @@ class EditorModelMixin:
 
     def add_concurrence_to_container(self) -> None:
         self.add_concurrence()
+
+    def add_join_state_to_container(self) -> None:
+        self.add_join_state()
 
     def _confirm_save_despite_validation_errors(self) -> bool:
         """Ask the user whether the state machine should still be saved."""

@@ -166,6 +166,13 @@ ADD_MENU_ACTIONS: tuple[ActionSpec, ...] = (
         status_tip="Create a new orthogonal state container.",
     ),
     ActionSpec(
+        "add_join_state_action",
+        "Add Join State",
+        "add_join_state",
+        tool_tip="Add a join state for region synchronization.",
+        status_tip="Create a new join state in the current container.",
+    ),
+    ActionSpec(
         "add_final_action",
         "Add Final Outcome",
         "add_final_outcome",

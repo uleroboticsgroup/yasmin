@@ -147,6 +147,16 @@ public:
   create_orthogonal_state(tinyxml2::XMLElement *orth_elem);
 
   /**
+   * @brief Creates a join state from an XML element.
+   *
+   * @param join_elem Pointer to the XML element defining the join state.
+   * @return A shared pointer to the created JoinState.
+   * @throws std::runtime_error If the XML structure is invalid.
+   */
+  yasmin::JoinState::SharedPtr
+  create_join_state(tinyxml2::XMLElement *join_elem);
+
+  /**
    * @brief Recursively creates a state machine from an XML element.
    *
    * @param root Pointer to the XML element defining the state machine.
