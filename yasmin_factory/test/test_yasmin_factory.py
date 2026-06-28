@@ -18,7 +18,7 @@ import os
 import tempfile
 from lxml import etree as ET
 from yasmin import Blackboard, StateMachine
-from yasmin_factory.yasmin_factory import YasminFactory
+from yasmin_factory.factory import YasminFactory
 
 
 class TestYasminFactory(unittest.TestCase):
