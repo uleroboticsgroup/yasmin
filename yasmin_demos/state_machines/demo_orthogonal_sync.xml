@@ -6,7 +6,7 @@
   </State><OrthogonalState name="parallel" outcomes="success timeout" default_outcome="timeout" description="Two regions that sync at a JoinState before their final work phase." x="-0.95" y="334.19">
     <Region name="A" outcomes="done" start_state="work_a1" description="Region A: 3 iterations, sync, 2 more iterations." x="40.84" y="-12.94">
       <State name="work_a1" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="0.00" y="0.00">
-        <Param name="max_count" default_type="int" default_value="3" />
+        <Param name="max_count" default_type="int" default_value="100" />
         <Param name="sleep_ms" default_type="int" default_value="200" />
         <Transition from="working" to="work_a1" />
         <Transition from="done" to="sync_a" />
@@ -29,7 +29,7 @@
         <Param name="sync_id" default_type="str" default_value="mid_sync" />
         <Transition from="joined" to="work_b2" />
       </State><State name="work_b2" type="py" module="yasmin_demos.worker_state" class="WorkerState" x="300.67" y="7.73">
-        <Param name="max_count" default_type="int" default_value="3" />
+        <Param name="max_count" default_type="int" default_value="100" />
         <Param name="sleep_ms" default_type="int" default_value="200" />
         <Transition from="working" to="work_b2" />
         <Transition from="done" to="done" to_instance="done-f7803e2d" />

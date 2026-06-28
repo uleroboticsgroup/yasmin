@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
   auto reg_a = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"done"});
   reg_a->set_name("Region A");
-  reg_a->add_state("WORK_1", std::make_shared<WorkerState>("A.1", 3, 200),
+  reg_a->add_state("WORK_1", std::make_shared<WorkerState>("A.1", 100, 200),
                    {{"working", "WORK_1"}, {"done", "SYNC"}});
   reg_a->add_state("SYNC", std::make_shared<yasmin::JoinState>(SYNC_ID),
                    {{"joined", "WORK_2"}});
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
                    {{"working", "WORK_1"}, {"done", "SYNC"}});
   reg_b->add_state("SYNC", std::make_shared<yasmin::JoinState>(SYNC_ID),
                    {{"joined", "WORK_2"}});
-  reg_b->add_state("WORK_2", std::make_shared<WorkerState>("B.2", 3, 200),
+  reg_b->add_state("WORK_2", std::make_shared<WorkerState>("B.2", 100, 200),
                    {{"working", "WORK_2"}, {"done", "done"}});
   reg_b->set_start_state("WORK_1");
 
