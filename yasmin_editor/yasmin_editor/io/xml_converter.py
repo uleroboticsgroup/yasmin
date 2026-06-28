@@ -36,7 +36,7 @@ def model_to_xml(model: StateMachine, file_path: str | Path | None = None) -> st
     """Serialize a state machine model to XML."""
 
     root = _state_machine_to_element(model, parent=None)
-    _indent(root)
+    ET.indent(root)
     xml_text = ET.tostring(root, encoding="utf-8", xml_declaration=True).decode("utf-8")
 
     if file_path is not None:
@@ -869,17 +869,3 @@ def _parse_float(value: str | None) -> float | None:
         return float(value)
     except ValueError:
         return None
-
-
-def _indent(element: ET.Element, level: int = 0) -> None:
-    indent = "\n" + level * "  "
-    children = list(element)
-    if children:
-        if not element.text or not element.text.strip():
-            element.text = indent + "  "
-        for child in children:
-            _indent(child, level + 1)
-        if not children[-1].tail or not children[-1].tail.strip():
-            children[-1].tail = indent
-    elif level and (not element.tail or not element.tail.strip()):
-        element.tail = indent
