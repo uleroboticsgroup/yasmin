@@ -24,6 +24,8 @@
 #include <thread>
 
 #include "yasmin/blackboard.hpp"
+#include "yasmin/concurrence.hpp"
+#include "yasmin/orthogonal_state.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
 #include "yasmin/state_machine_cancel_exception.hpp"
@@ -556,4 +558,76 @@ TEST_F(TestStateMachine, TestCancelStateMachineStopsExecution) {
   EXPECT_EQ(first_entries->load(), 1);
   EXPECT_EQ(second_entries->load(), 0);
   EXPECT_EQ(cancel_sm->get_current_state(), "");
+}
+
+// ---------------------------------------------------------------------------
+// Validate with nested Concurrence / OrthogonalState
+// ---------------------------------------------------------------------------
+
+// A minimal helper region SM: one state -> done outcome.
+static yasmin::StateMachine::SharedPtr make_valid_region_sm() {
+  auto sm = yasmin::StateMachine::make_shared(yasmin::Outcomes{"done"});
+  sm->add_state(
+      "WORK", std::make_shared<FooState>(),
+      yasmin::Transitions{{"outcome1", "WORK"}, {"outcome2", "done"}});
+  return sm;
+}
+
+// A minimal helper region SM that is invalid in strict mode (outcome2 of
+// FooState has no transition).
+static yasmin::StateMachine::SharedPtr make_strict_invalid_region_sm() {
+  auto sm = yasmin::StateMachine::make_shared(yasmin::Outcomes{"done"});
+  sm->add_state("WORK", std::make_shared<FooState>(),
+                yasmin::Transitions{{"outcome1", "done"}});
+  return sm;
+}
+
+// ---- StateMachine wrapping a Concurrence ----
+TEST_F(TestStateMachine,
+       TestValidateConcurrenceInsideStateMachinePassesForValid) {
+  auto outer = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  auto inner_sm = make_valid_region_sm();
+  auto conc = yasmin::Concurrence::make_shared(
+      yasmin::StateMap{{"INNER", inner_sm}}, "done",
+      yasmin::OutcomeMap{{"done", {{"INNER", "done"}}}});
+  outer->add_state("CONC", conc, yasmin::Transitions{{"done", "done"}});
+
+  EXPECT_NO_THROW(outer->validate());
+}
+
+TEST_F(TestStateMachine,
+       TestValidateConcurrenceInsideStateMachineThrowsForInvalidInner) {
+  auto outer = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  auto bad_sm = make_strict_invalid_region_sm();
+  auto conc = yasmin::Concurrence::make_shared(
+      yasmin::StateMap{{"INNER", bad_sm}}, "done",
+      yasmin::OutcomeMap{{"done", {{"INNER", "done"}}}});
+  outer->add_state("CONC", conc, yasmin::Transitions{{"done", "done"}});
+
+  EXPECT_THROW(outer->validate(true), std::runtime_error);
+}
+
+// ---- StateMachine wrapping an OrthogonalState ----
+TEST_F(TestStateMachine,
+       TestValidateOrthogonalStateInsideStateMachinePassesForValid) {
+  auto outer = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  auto ort = std::make_shared<yasmin::OrthogonalState>(
+      "timeout", yasmin::OutcomeMap{{"done", {{"A", "done"}}}});
+  ort->add_region("A", make_valid_region_sm());
+  outer->add_state("ORT", ort,
+                   yasmin::Transitions{{"done", "done"}, {"timeout", "done"}});
+
+  EXPECT_NO_THROW(outer->validate());
+}
+
+TEST_F(TestStateMachine,
+       TestValidateOrthogonalStateInsideStateMachineThrowsForInvalidRegion) {
+  auto outer = StateMachine::make_shared(yasmin::Outcomes{"done"});
+  auto ort = std::make_shared<yasmin::OrthogonalState>(
+      "timeout", yasmin::OutcomeMap{{"done", {{"A", "done"}}}});
+  ort->add_region("A", make_strict_invalid_region_sm());
+  outer->add_state("ORT", ort,
+                   yasmin::Transitions{{"done", "done"}, {"timeout", "done"}});
+
+  EXPECT_THROW(outer->validate(true), std::runtime_error);
 }

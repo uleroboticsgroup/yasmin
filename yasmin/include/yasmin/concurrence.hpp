@@ -148,6 +148,15 @@ public:
   const std::string &get_default_outcome() const noexcept;
 
   /**
+   * @brief Validates the nested states of this concurrence.
+   * @param strict_mode If true, performs strict validation.
+   *
+   * Recursively validates any StateMachine, Concurrence, or OrthogonalState
+   * instances found in the concurrent states map.
+   */
+  void validate(bool strict_mode = false);
+
+  /**
    * @brief Converts the state to a string representation.
    * @return A string representation of the state.
    */

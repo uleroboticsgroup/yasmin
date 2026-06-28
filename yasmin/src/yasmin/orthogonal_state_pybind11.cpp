@@ -74,6 +74,9 @@ PYBIND11_MODULE(orthogonal_state, m) {
            py::return_value_policy::reference_internal)
       .def("get_default_outcome", &yasmin::OrthogonalState::get_default_outcome)
       .def("configure", &yasmin::OrthogonalState::configure)
+      .def("validate", &yasmin::OrthogonalState::validate,
+           "Recursively validate region state machines",
+           py::arg("strict_mode") = false)
       .def("cancel_state", &yasmin::OrthogonalState::cancel_state)
       .def("to_string", &yasmin::OrthogonalState::to_string)
       .def("__str__", &yasmin::OrthogonalState::to_string);

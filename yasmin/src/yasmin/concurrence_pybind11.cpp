@@ -64,6 +64,9 @@ PYBIND11_MODULE(concurrence, m) {
            py::return_value_policy::reference_internal)
       .def("configure", &yasmin::Concurrence::configure,
            "Configure the concurrence and all child states")
+      .def("validate", &yasmin::Concurrence::validate,
+           "Recursively validate nested state machines inside this concurrence",
+           py::arg("strict_mode") = false)
       // Cancel state method
       .def("cancel_state", &yasmin::Concurrence::cancel_state,
            "Cancel the current state execution")

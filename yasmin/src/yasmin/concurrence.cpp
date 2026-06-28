@@ -24,7 +24,9 @@
 #include <vector>
 
 #include "yasmin/logs.hpp"
+#include "yasmin/orthogonal_state.hpp"
 #include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
 #include "yasmin/state_utils.hpp"
 #include "yasmin/types.hpp"
 
@@ -194,6 +196,22 @@ const OutcomeMap &Concurrence::get_outcome_map() const noexcept {
 
 const std::string &Concurrence::get_default_outcome() const noexcept {
   return this->default_outcome;
+}
+
+void Concurrence::validate(bool strict_mode) {
+  for (const auto &[state_name, state] : this->states) {
+    (void)state_name;
+    // Use get_inner_state() to unwrap proxy wrappers (e.g. PythonStateHolder)
+    // so that Python-loaded states are correctly identified.
+    auto *inner = state->get_inner_state();
+    if (auto *sm = dynamic_cast<StateMachine *>(inner)) {
+      sm->validate(strict_mode);
+    } else if (auto *c = dynamic_cast<Concurrence *>(inner)) {
+      c->validate(strict_mode);
+    } else if (auto *o = dynamic_cast<OrthogonalState *>(inner)) {
+      o->validate(strict_mode);
+    }
+  }
 }
 
 std::string Concurrence::to_string() const {

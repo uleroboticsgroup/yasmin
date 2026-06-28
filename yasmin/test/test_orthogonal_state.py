@@ -121,5 +121,54 @@ class TestOrthogonalState(unittest.TestCase):
         self.assertEqual(result, "all_arrived")
 
 
+# ---------------------------------------------------------------------------
+# Validate: OrthogonalState recursively validates region StateMachines
+# ---------------------------------------------------------------------------
+
+
+class _StateWithExtraOutcome(State):
+    """State with two outcomes so strict mode can detect a missing transition."""
+
+    def __init__(self):
+        super().__init__(["done", "extra"])
+
+    def execute(self, blackboard):
+        return "done"
+
+
+def _make_valid_region_sm():
+    sm = StateMachine(["done"])
+    sm.add_state("WORK", StateA(), {"done": "done"})
+    return sm
+
+
+def _make_strict_invalid_region_sm():
+    """Strict-invalid: "extra" outcome of WORK has no transition."""
+    sm = StateMachine(["done"])
+    sm.add_state("WORK", _StateWithExtraOutcome(), {"done": "done"})
+    return sm
+
+
+class TestOrthogonalStateValidate(unittest.TestCase):
+    def test_validate_passes_for_valid_regions(self):
+        ort = OrthogonalState("timeout", {"done": {"A": "done", "B": "done"}})
+        ort.add_region("A", _make_valid_region_sm())
+        ort.add_region("B", _make_valid_region_sm())
+        # Should not raise
+        ort.validate()
+
+    def test_validate_throws_when_region_is_strict_invalid(self):
+        ort = OrthogonalState("timeout", {"done": {"A": "done"}})
+        ort.add_region("A", _make_strict_invalid_region_sm())
+        with self.assertRaises(RuntimeError):
+            ort.validate(True)
+
+    def test_validate_passes_when_region_only_strict_invalid(self):
+        # Non-strict mode must not raise even if strict would.
+        ort = OrthogonalState("timeout", {"done": {"A": "done"}})
+        ort.add_region("A", _make_strict_invalid_region_sm())
+        ort.validate(False)
+
+
 if __name__ == "__main__":
     unittest.main()

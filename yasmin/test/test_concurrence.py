@@ -17,7 +17,7 @@
 
 import unittest
 import time
-from yasmin import State, Concurrence
+from yasmin import State, Concurrence, StateMachine
 
 
 class FooState(State):
@@ -111,6 +111,54 @@ class TestConcurrenceConfigure(unittest.TestCase):
         self.assertEqual("done", state())
         self.assertEqual(1, child.configure_count)
         self.assertEqual("/concurrent", child.configured_topic)
+
+
+# ---------------------------------------------------------------------------
+# Validate: Concurrence recursively validates nested StateMachines
+# ---------------------------------------------------------------------------
+
+
+def _make_valid_nested_sm():
+    """A valid SM: outcome1 loops, outcome2 -> done."""
+    sm = StateMachine(outcomes=["done"])
+    sm.add_state("WORK", BarState(), {"outcome1": "WORK", "outcome2": "done"})
+    return sm
+
+
+def _make_strict_invalid_nested_sm():
+    """A strict-invalid SM: BarState outcome2 has no transition."""
+    sm = StateMachine(outcomes=["done"])
+    sm.add_state("WORK", BarState(), {"outcome1": "done"})
+    return sm
+
+
+class TestConcurrenceValidate(unittest.TestCase):
+    def test_validate_passes_for_valid_nested_state_machine(self):
+        conc = Concurrence(
+            states={"NESTED": _make_valid_nested_sm()},
+            default_outcome="done",
+            outcome_map={"done": {"NESTED": "done"}},
+        )
+        # Should not raise
+        conc.validate()
+
+    def test_validate_throws_when_nested_state_machine_is_strict_invalid(self):
+        conc = Concurrence(
+            states={"NESTED": _make_strict_invalid_nested_sm()},
+            default_outcome="done",
+            outcome_map={"done": {"NESTED": "done"}},
+        )
+        with self.assertRaises(RuntimeError):
+            conc.validate(True)
+
+    def test_validate_passes_when_nested_sm_only_strict_invalid(self):
+        # Non-strict mode must not raise even if strict would.
+        conc = Concurrence(
+            states={"NESTED": _make_strict_invalid_nested_sm()},
+            default_outcome="done",
+            outcome_map={"done": {"NESTED": "done"}},
+        )
+        conc.validate(False)
 
 
 if __name__ == "__main__":

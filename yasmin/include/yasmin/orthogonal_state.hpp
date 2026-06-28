@@ -132,6 +132,14 @@ public:
   void cancel_state() override;
 
   /**
+   * @brief Validates the region state machines of this orthogonal state.
+   * @param strict_mode If true, performs strict validation.
+   *
+   * Recursively validates each region's StateMachine.
+   */
+  void validate(bool strict_mode = false);
+
+  /**
    * @brief Converts the OrthogonalState to a string representation.
    * @return A string representation of the OrthogonalState.
    *

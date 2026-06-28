@@ -215,6 +215,12 @@ std::string OrthogonalState::evaluate_outcomes(
                                      this->to_string() + ")");
 }
 
+void OrthogonalState::validate(bool strict_mode) {
+  for (auto &region : this->regions_) {
+    region.sm->validate(strict_mode);
+  }
+}
+
 std::string OrthogonalState::to_string() const {
   return "OrthogonalState [" +
          yasmin::join(this->regions_, ", ",

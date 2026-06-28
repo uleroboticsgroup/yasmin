@@ -299,3 +299,56 @@ TEST_F(TestConcurrence,
   // The original source key must also not exist in the final blackboard.
   EXPECT_FALSE(blackboard->contains("foo_str"));
 }
+
+// ---------------------------------------------------------------------------
+// Validate: Concurrence recursively validates nested StateMachines
+// ---------------------------------------------------------------------------
+
+// Helper: a valid nested SM (BarState outcome1 loops back, outcome2 -> done).
+static yasmin::StateMachine::SharedPtr make_valid_nested_sm() {
+  auto sm = yasmin::StateMachine::make_shared(yasmin::Outcomes{"done"});
+  sm->add_state(
+      "WORK", std::make_shared<BarState>(),
+      yasmin::Transitions{{"outcome1", "WORK"}, {"outcome2", "done"}});
+  return sm;
+}
+
+// Helper: a strict-invalid nested SM (outcome2 of BarState has no transition).
+static yasmin::StateMachine::SharedPtr make_strict_invalid_nested_sm() {
+  auto sm = yasmin::StateMachine::make_shared(yasmin::Outcomes{"done"});
+  sm->add_state("WORK", std::make_shared<BarState>(),
+                yasmin::Transitions{{"outcome1", "done"}});
+  return sm;
+}
+
+TEST_F(TestConcurrence, TestValidatePassesForValidNestedStateMachine) {
+  auto nested = make_valid_nested_sm();
+  auto conc = yasmin::Concurrence::make_shared(
+      yasmin::StateMap{{"NESTED", nested}}, "done",
+      yasmin::OutcomeMap{{"done", {{"NESTED", "done"}}}});
+
+  EXPECT_NO_THROW(conc->validate());
+}
+
+TEST_F(TestConcurrence,
+       TestValidateThrowsWhenNestedStateMachineIsStrictInvalid) {
+  auto bad_nested = make_strict_invalid_nested_sm();
+  auto conc = yasmin::Concurrence::make_shared(
+      yasmin::StateMap{{"NESTED", bad_nested}}, "done",
+      yasmin::OutcomeMap{{"done", {{"NESTED", "done"}}}});
+
+  // strict_mode=true: outcome2 of WORK has no transition -> runtime_error
+  EXPECT_THROW(conc->validate(true), std::runtime_error);
+}
+
+TEST_F(TestConcurrence,
+       TestValidatePassesWhenNestedStateMachineIsOnlyNonStrictInvalid) {
+  // In non-strict mode the same SM should pass (missing transition is only
+  // checked in strict mode).
+  auto bad_nested = make_strict_invalid_nested_sm();
+  auto conc = yasmin::Concurrence::make_shared(
+      yasmin::StateMap{{"NESTED", bad_nested}}, "done",
+      yasmin::OutcomeMap{{"done", {{"NESTED", "done"}}}});
+
+  EXPECT_NO_THROW(conc->validate(false));
+}

@@ -249,6 +249,61 @@ TEST_F(TestOrthogonalState, TestStr) {
 }
 
 // ---------------------------------------------------------------------------
+// Validate: OrthogonalState recursively validates region StateMachines
+// ---------------------------------------------------------------------------
+
+// Helper: a valid region SM where state transitions cover all outcomes.
+static StateMachine::SharedPtr make_valid_region_for_validate() {
+  auto sm = std::make_shared<StateMachine>(Outcomes{"done"});
+  sm->add_state("A", std::make_shared<TestStateA>(), {{"done", "done"}});
+  return sm;
+}
+
+// Helper: a strict-invalid region SM – TestStateA's "done" outcome has a
+// transition but a hypothetical extra outcome "extra" does not.
+class TestStateWithExtraOutcome : public State {
+public:
+  TestStateWithExtraOutcome() : State({"done", "extra"}) {}
+  std::string execute(Blackboard::SharedPtr) override { return "done"; }
+};
+
+static StateMachine::SharedPtr make_strict_invalid_region_for_validate() {
+  auto sm = std::make_shared<StateMachine>(Outcomes{"done"});
+  sm->add_state("WORK", std::make_shared<TestStateWithExtraOutcome>(),
+                {{"done", "done"}}); // "extra" outcome has no transition
+  return sm;
+}
+
+TEST_F(TestOrthogonalState, TestValidatePassesForValidRegions) {
+  auto ort = std::make_shared<OrthogonalState>(
+      "timeout", OutcomeMap{{"done", {{"A", "done"}, {"B", "done"}}}});
+  ort->add_region("A", make_valid_region_for_validate());
+  ort->add_region("B", make_valid_region_for_validate());
+
+  EXPECT_NO_THROW(ort->validate());
+}
+
+TEST_F(TestOrthogonalState, TestValidateThrowsWhenRegionIsStrictInvalid) {
+  auto ort = std::make_shared<OrthogonalState>(
+      "timeout", OutcomeMap{{"done", {{"A", "done"}}}});
+  ort->add_region("A", make_strict_invalid_region_for_validate());
+
+  // strict_mode=true: "extra" outcome of WORK has no transition ->
+  // runtime_error
+  EXPECT_THROW(ort->validate(true), std::runtime_error);
+}
+
+TEST_F(TestOrthogonalState,
+       TestValidatePassesWhenRegionIsOnlyNonStrictInvalid) {
+  // Non-strict mode does not check for every outcome having a transition.
+  auto ort = std::make_shared<OrthogonalState>(
+      "timeout", OutcomeMap{{"done", {{"A", "done"}}}});
+  ort->add_region("A", make_strict_invalid_region_for_validate());
+
+  EXPECT_NO_THROW(ort->validate(false));
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 int main(int argc, char **argv) {

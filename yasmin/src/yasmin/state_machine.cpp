@@ -27,7 +27,9 @@
 #include <vector>
 
 #include "yasmin/blackboard.hpp"
+#include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
+#include "yasmin/orthogonal_state.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine_cancel_exception.hpp"
 #include "yasmin/state_utils.hpp"
@@ -358,9 +360,16 @@ void StateMachine::validate(bool strict_mode) {
       }
     }
 
-    // If state is a state machine, validate it
-    if (std::dynamic_pointer_cast<StateMachine>(state)) {
-      std::dynamic_pointer_cast<StateMachine>(state)->validate(strict_mode);
+    // If state is a state machine, concurrence, or orthogonal state, validate
+    // it. Use get_inner_state() to unwrap proxy wrappers (e.g.
+    // PythonStateHolder) so that Python-loaded states are correctly identified.
+    auto *inner = state->get_inner_state();
+    if (auto *sm = dynamic_cast<StateMachine *>(inner)) {
+      sm->validate(strict_mode);
+    } else if (auto *c = dynamic_cast<Concurrence *>(inner)) {
+      c->validate(strict_mode);
+    } else if (auto *o = dynamic_cast<OrthogonalState *>(inner)) {
+      o->validate(strict_mode);
     }
 
     // Add terminal outcomes
