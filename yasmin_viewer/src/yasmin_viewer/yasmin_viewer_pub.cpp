@@ -186,7 +186,7 @@ void YasminViewerPub::parse_state(
       region_msg.parent = state_msg.id;
       region_msg.name = region.name;
       region_msg.is_fsm = true;
-      region_msg.current_state = -2;
+      region_msg.current_state = -1;
       auto region_outcomes = region.sm->get_outcomes();
       region_msg.outcomes = std::vector<std::string>(region_outcomes.begin(),
                                                      region_outcomes.end());

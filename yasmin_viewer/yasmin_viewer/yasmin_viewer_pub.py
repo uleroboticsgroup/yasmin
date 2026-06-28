@@ -203,7 +203,7 @@ class YasminViewerPub(object):
                 region_msg.parent = state_msg.id
                 region_msg.name = region.name
                 region_msg.is_fsm = True
-                region_msg.current_state = -2
+                region_msg.current_state = -1
                 region_msg.outcomes = list(region.sm.get_outcomes())
                 states_list.append(region_msg)
 
