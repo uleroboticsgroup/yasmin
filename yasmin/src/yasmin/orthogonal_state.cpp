@@ -77,7 +77,7 @@ void OrthogonalState::configure() {
   for (auto &region : this->regions_) {
     for (const auto &[state_name, state] : region.sm->get_states()) {
       (void)state_name;
-      JoinState *js = dynamic_cast<JoinState *>(state.get());
+      JoinState *js = dynamic_cast<JoinState *>(state->get_inner_state());
       if (js) {
         join_groups[js->get_sync_id()].push_back(js);
       }

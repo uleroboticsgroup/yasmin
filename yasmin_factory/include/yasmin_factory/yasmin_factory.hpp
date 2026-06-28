@@ -63,6 +63,12 @@ public:
   void configure() override;
 
   /**
+   * @brief Unwraps to the actual C++ state, allowing JoinState detection.
+   * @return Pointer to the inner C++ state object.
+   */
+  yasmin::State *get_inner_state() override;
+
+  /**
    * @brief Delegates execution to the underlying Python state.
    *
    * @param blackboard Shared pointer to the blackboard for state communication.

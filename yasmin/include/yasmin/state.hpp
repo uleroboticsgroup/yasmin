@@ -375,6 +375,18 @@ public:
   const StateMetadata &get_metadata() const;
 
   /**
+   * @brief Returns the actual state object, unwrapping any proxies.
+   *
+   * The default implementation returns `this`. Wrappers such as
+   * PythonStateHolder override this to expose the inner C++ state so
+   * that type-sensitive code (e.g. OrthogonalState discovering
+   * JoinState instances) can find the real state through the wrapper.
+   *
+   * @return Pointer to the effective state object.
+   */
+  virtual State *get_inner_state() { return this; }
+
+  /**
    * @brief Converts the state to a string representation.
    * @return A string representation of the state.
    *
