@@ -679,7 +679,11 @@ class EditorUiMixin:
         is_container = isinstance(state_node, ContainerStateNode) and not getattr(
             state_node, "is_xml_reference", False
         )
-        is_join_state = isinstance(state_node.model, JoinState) if hasattr(state_node, "model") and state_node.model else False
+        is_join_state = (
+            isinstance(state_node.model, JoinState)
+            if hasattr(state_node, "model") and state_node.model
+            else False
+        )
 
         if is_container:
             input_keys, output_keys = self._collect_container_key_lists(state_node.model)
