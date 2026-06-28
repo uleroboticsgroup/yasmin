@@ -1,1 +1,1 @@
-from yasmin_factory.yasmin_factory import YasminFactory
+from yasmin_factory.factory import YasminFactory

@@ -21,6 +21,7 @@ from typing import Dict
 from ament_index_python import get_package_share_path
 from lxml import etree as ET
 from yasmin import Concurrence, OrthogonalState, State, StateMachine
+from yasmin.orthogonal_state import setup_default_gil_hooks
 from yasmin_pybind_bridge import CppStateFactory
 
 from yasmin_factory.type_utils import parse_key_value
@@ -31,10 +32,15 @@ class YasminFactory:
     def __init__(self) -> None:
         """
         Initializes the factory, setting up the C++ state factory
+        and default GIL hooks for OrthogonalState threads.
         """
 
         self._cpp_factory = CppStateFactory()
         self._xml_path: str = ""
+
+        # Set up default GIL hooks for OrthogonalState so that threads
+        # spawned by orthogonal regions can safely call into Python.
+        setup_default_gil_hooks()
 
     def create_state(self, state_elem: ET.Element) -> State:
         """

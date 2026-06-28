@@ -371,6 +371,10 @@ PythonStateHolder::PythonStateHolder(yasmin::State::SharedPtr cpp_state,
   }
 }
 
+yasmin::State *PythonStateHolder::get_inner_state() {
+  return this->cpp_state_.get();
+}
+
 void PythonStateHolder::configure() {
   for (const auto &parameter : this->get_parameters()) {
     if (!this->cpp_state_->is_parameter_declared(parameter.name)) {
