@@ -21,7 +21,17 @@
 #include <stdexcept>
 #include <utility>
 
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
+#if RCLCPP_VERSION_GTE(33, 0, 2)
+#include <ament_index_cpp/get_package_share_path.hpp>
+#else
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
+#else
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
+
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -227,8 +237,10 @@ YasminViewerNode::YasminViewerNode()
 
   web_root_ =
 #if __has_include("rclcpp/version.h")
-#include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(29, 5, 1)
+#if RCLCPP_VERSION_GTE(33, 0, 2)
+      (ament_index_cpp::get_package_share_path("yasmin_viewer") / "web")
+          .string();
+#elif RCLCPP_VERSION_GTE(29, 5, 1)
       ([]() {
         std::filesystem::path p;
         ament_index_cpp::get_package_share_directory("yasmin_viewer", p);
