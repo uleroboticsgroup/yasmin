@@ -21,7 +21,7 @@
 
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(33, 0, 2)
+#if RCLCPP_VERSION_GTE(32, 0, 0)
 #include <ament_index_cpp/get_package_share_path.hpp>
 #else
 #include <ament_index_cpp/get_package_share_directory.hpp>
@@ -44,7 +44,7 @@ namespace yasmin_demos {
  */
 inline std::string get_share_file_path(const std::string &relative_path) {
 #if __has_include("rclcpp/version.h")
-#if RCLCPP_VERSION_GTE(33, 0, 2)
+#if RCLCPP_VERSION_GTE(32, 0, 0)
   return (ament_index_cpp::get_package_share_path("yasmin_demos") /
           relative_path)
       .string();

@@ -23,7 +23,7 @@
 
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
-#if RCLCPP_VERSION_GTE(33, 0, 2)
+#if RCLCPP_VERSION_GTE(32, 0, 0)
 #include <ament_index_cpp/get_package_share_path.hpp>
 #else
 #include <ament_index_cpp/get_package_share_directory.hpp>
@@ -859,7 +859,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
       try {
 
 #if __has_include("rclcpp/version.h")
-#if RCLCPP_VERSION_GTE(33, 0, 2)
+#if RCLCPP_VERSION_GTE(32, 0, 0)
         package_path =
             ament_index_cpp::get_package_share_path(package).string();
 #elif RCLCPP_VERSION_GTE(29, 5, 1)
