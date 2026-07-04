@@ -76,7 +76,7 @@ public:
 
 void publish_tf_loop(const rclcpp::Node::SharedPtr &node,
                      std::atomic<bool> &running) {
-  tf2_ros::TransformBroadcaster broadcaster(node);
+  tf2_ros::TransformBroadcaster broadcaster(*node);
 
   while (running.load()) {
     geometry_msgs::msg::TransformStamped transform;
