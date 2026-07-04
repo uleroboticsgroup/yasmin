@@ -4,7 +4,7 @@
   <version>5.1.0</version>
   <description>Plugin discovery and caching for YASMIN states.</description>
   <maintainer email="maik.knof@gmx.de">Maik Knof</maintainer>
-  <license>GPL-3.0</license>
+  <license>Apache-2.0</license>
   <depend>yasmin</depend>
   <depend>yasmin_factory</depend>
   <exec_depend>python3-lxml</exec_depend>

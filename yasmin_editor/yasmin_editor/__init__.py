@@ -1,1 +1,0 @@
-"""YASMIN editor package."""

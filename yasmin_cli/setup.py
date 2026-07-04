@@ -15,7 +15,7 @@ setup(
     maintainer="Maik Knof",
     maintainer_email="maik.knof@gmx.de",
     description="ROS 2 CLI extensions for YASMIN.",
-    license="GPL-3.0",
+    license="Apache-2.0",
     extras_require={
         "test": [
             "pytest",
