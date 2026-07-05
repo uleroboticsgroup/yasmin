@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Dict, Iterable, List, Set, Tuple
+from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
 from xml.etree import ElementTree as ET
 
 from yasmin_editor.model.concurrence import Concurrence
@@ -31,7 +31,7 @@ from yasmin_editor.model.text_block import TextBlock
 from yasmin_editor.model.transition import Transition
 
 
-def model_to_xml(model: StateMachine, file_path: str | Path | None = None) -> str:
+def model_to_xml(model: StateMachine, file_path: Union[str, Path] = None) -> str:
     """Serialize a state machine model to XML."""
 
     root = _state_machine_to_element(model, parent=None)
@@ -45,7 +45,7 @@ def model_to_xml(model: StateMachine, file_path: str | Path | None = None) -> st
     return xml_text
 
 
-def model_from_xml(xml_input: str | Path) -> StateMachine:
+def model_from_xml(xml_input: Union[str, Path]) -> StateMachine:
     """Deserialize a state machine model from XML text or a file path."""
 
     if isinstance(xml_input, Path):
@@ -65,13 +65,10 @@ def model_from_xml(xml_input: str | Path) -> StateMachine:
     return _parse_state_machine_container(root)
 
 
-# ── Serialization ──────────────────────────────────────────────────────────
-
-
 def _container_to_element(
     tag: str,
-    model: StateMachine | Concurrence | OrthogonalState,
-    parent: StateMachine | Concurrence | OrthogonalState | None,
+    model: Union[StateMachine, Concurrence, OrthogonalState],
+    parent: Union[StateMachine, Concurrence, OrthogonalState, None],
 ) -> ET.Element:
     element = ET.Element(tag)
     element.set("name", model.name)
@@ -144,21 +141,21 @@ def _container_to_element(
 
 def _state_machine_to_element(
     model: StateMachine,
-    parent: StateMachine | Concurrence | OrthogonalState | None,
+    parent: Union[StateMachine, Concurrence, OrthogonalState, None],
 ) -> ET.Element:
     return _container_to_element("StateMachine", model, parent)
 
 
 def _concurrence_to_element(
     model: Concurrence,
-    parent: StateMachine | Concurrence | OrthogonalState | None,
+    parent: Union[StateMachine, Concurrence, OrthogonalState, None],
 ) -> ET.Element:
     return _container_to_element("Concurrence", model, parent)
 
 
 def _orthogonal_state_to_element(
     model: OrthogonalState,
-    parent: StateMachine | Concurrence | None,
+    parent: Union[StateMachine, Concurrence, OrthogonalState, None],
 ) -> ET.Element:
     return _container_to_element("OrthogonalState", model, parent)
 
@@ -202,7 +199,7 @@ def _region_to_element(
 
 
 def _state_to_element(
-    state: State, parent: StateMachine | Concurrence | OrthogonalState | None
+    state: State, parent: Union[StateMachine, Concurrence, OrthogonalState, None]
 ) -> ET.Element:
     if isinstance(state, StateMachine):
         return _state_machine_to_element(state, parent=parent)
@@ -271,7 +268,7 @@ def _text_block_to_element(text_block: TextBlock) -> ET.Element:
 
 def _final_outcome_elements(
     outcome: Outcome,
-    parent: StateMachine | Concurrence | OrthogonalState,
+    parent: Union[StateMachine, Concurrence, OrthogonalState],
 ) -> List[ET.Element]:
     """Serialize one logical outcome without mutating the in-memory layout."""
 
@@ -301,7 +298,7 @@ def _final_outcome_elements(
 
 
 def _serializable_outcome_placements(
-    parent: StateMachine | Concurrence | OrthogonalState,
+    parent: Union[StateMachine, Concurrence, OrthogonalState],
     outcome_name: str,
 ) -> List[Tuple[str | None, float, float] | None]:
     """Return outcome placements for XML serialization without changing layout state.
@@ -395,7 +392,7 @@ def _append_remaps(element: ET.Element, remappings: Dict[str, str]) -> None:
 
 def _append_owner_transitions(
     element: ET.Element,
-    parent: StateMachine | Concurrence | OrthogonalState,
+    parent: Union[StateMachine, Concurrence, OrthogonalState],
     owner_name: str,
 ) -> None:
     if isinstance(parent, (Concurrence, OrthogonalState)):
@@ -420,7 +417,7 @@ def _append_container_level_transitions(
 
 def _append_outcome_map(
     element: ET.Element,
-    model: Concurrence | OrthogonalState,
+    model: Union[Concurrence, OrthogonalState],
 ) -> None:
     for outcome_name, requirements in model.outcome_map.items():
         outcome_map_elem = ET.SubElement(element, "OutcomeMap")
@@ -431,9 +428,6 @@ def _append_outcome_map(
                 item_elem = ET.SubElement(outcome_map_elem, "Item")
                 item_elem.set("state", state_name)
                 item_elem.set("outcome", state_outcome)
-
-
-# ── Deserialization ────────────────────────────────────────────────────────
 
 
 def _parse_container_element(
@@ -683,7 +677,7 @@ def _is_leaked_same_name_container_transition(
 
 
 def _merge_final_outcome(
-    model: StateMachine | Concurrence | OrthogonalState,
+    model: Union[StateMachine, Concurrence, OrthogonalState],
     element: ET.Element,
 ) -> None:
     """Merge one serialized final outcome into the in-memory model.
@@ -738,7 +732,7 @@ def _merge_final_outcome(
 
 
 def _parse_outcome_map(
-    model: Concurrence | OrthogonalState,
+    model: Union[Concurrence, OrthogonalState],
     element: ET.Element,
 ) -> None:
     outcome_name = element.get("outcome", "")
