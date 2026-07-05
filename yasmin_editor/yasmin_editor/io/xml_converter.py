@@ -35,7 +35,8 @@ def model_to_xml(model: StateMachine, file_path: str | Path | None = None) -> st
     """Serialize a state machine model to XML."""
 
     root = _state_machine_to_element(model, parent=None)
-    ET.indent(root)
+    if hasattr(ET, "indent"):
+        ET.indent(root)
     xml_text = ET.tostring(root, encoding="utf-8", xml_declaration=True).decode("utf-8")
 
     if file_path is not None:

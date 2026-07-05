@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Protocol, List, Dict
+from typing import Callable, Protocol, List, Dict, Union
 from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -40,7 +40,7 @@ class _PluginInfoLike(Protocol):
 
 SceneStateNode = StateNode | ContainerStateNode
 SceneTargetView = SceneStateNode | FinalOutcomeNode
-ContainerModel = StateMachine | Concurrence | OrthogonalState
+ContainerModel = Union[StateMachine, Concurrence, OrthogonalState]
 
 
 @dataclass(slots=True)

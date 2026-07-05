@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Sequence, List
+from typing import Iterable, Sequence, List, Union
 
 from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.model.concurrence import Concurrence
@@ -32,7 +32,7 @@ class ContainerMetadataView:
     current_selector_value: str | None
 
 
-ContainerModel = StateMachine | Concurrence | OrthogonalState
+ContainerModel = Union[StateMachine, Concurrence, OrthogonalState]
 
 
 def build_container_metadata_view(model: ContainerModel) -> ContainerMetadataView:

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
+from typing import Optional, Union
 
 from yasmin_editor.qt_compat import Qt, QtGui, QtWidgets
 from yasmin_editor.editor_gui.canvas_logic import (
@@ -65,7 +65,7 @@ class EditorCanvasMixin:
             existing_connection.update_position()
         self.refresh_connection_port_visibility()
 
-    def iter_state_subtree_items(self, state_node: StateNode | ContainerStateNode):
+    def iter_state_subtree_items(self, state_node: Union[StateNode, ContainerStateNode]):
         yield state_node
         if isinstance(state_node, ContainerStateNode):
             for child_state in state_node.child_states.values():
@@ -313,7 +313,7 @@ class EditorCanvasMixin:
 
     def _state_has_available_outcomes(
         self,
-        state_node: StateNode | ContainerStateNode,
+        state_node: Union[StateNode, ContainerStateNode],
     ) -> bool:
         return state_has_available_outcomes(
             getattr(state_node, "model", None),

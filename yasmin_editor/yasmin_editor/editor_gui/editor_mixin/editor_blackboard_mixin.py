@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from yasmin_editor.qt_compat import Qt, QtWidgets, exec_dialog
 from yasmin_editor.editor_gui.blackboard_logic import (
@@ -37,6 +37,9 @@ from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
+from yasmin_editor.model.orthogonal_state import OrthogonalState
+
+ContainerModel = Union[StateMachine, Concurrence, OrthogonalState]
 
 
 class EditorBlackboardMixin:
@@ -119,7 +122,7 @@ class EditorBlackboardMixin:
 
     def _get_container_metadata_map(
         self,
-        container_model: StateMachine | Concurrence,
+        container_model: ContainerModel,
     ) -> Dict[str, Dict[str, str]]:
         """Return persisted key metadata for one container model."""
 
@@ -127,7 +130,7 @@ class EditorBlackboardMixin:
 
     def _set_container_metadata_map(
         self,
-        container_model: StateMachine | Concurrence,
+        container_model: ContainerModel,
         metadata: Dict[str, Dict[str, str]],
     ) -> None:
         """Persist one normalized metadata map back onto the container."""
@@ -136,7 +139,7 @@ class EditorBlackboardMixin:
 
     def _collect_blackboard_key_usage_for_model(
         self,
-        container_model: StateMachine | Concurrence,
+        container_model: ContainerModel,
     ) -> Tuple[Dict[str, Dict[str, str]], Set[str]]:
         """Collect derived key usage for one container model tree."""
 
@@ -155,7 +158,7 @@ class EditorBlackboardMixin:
 
     def _merge_container_keys(
         self,
-        container_model: StateMachine | Concurrence,
+        container_model: ContainerModel,
     ) -> Dict[str, Dict[str, str]]:
         """Return merged live-usage and persistent key metadata."""
 

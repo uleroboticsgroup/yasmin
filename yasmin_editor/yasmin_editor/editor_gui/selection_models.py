@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Dict
+from typing import List, Dict, Union
 from yasmin_editor.dataclass_compat import dataclass, field
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.layout import Position
@@ -26,7 +26,7 @@ from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.text_block import TextBlock
 from yasmin_editor.model.transition import Transition
 
-ContainerModel = StateMachine | Concurrence | OrthogonalState
+ContainerModel = Union[StateMachine, Concurrence, OrthogonalState]
 
 
 @dataclass(slots=True)

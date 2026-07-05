@@ -14,11 +14,12 @@
 
 from __future__ import annotations
 
+from typing import Union
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state_machine import StateMachine
 
-ContainerModel = StateMachine | Concurrence | OrthogonalState
+ContainerModel = Union[StateMachine, Concurrence, OrthogonalState]
 
 
 def get_container_kind(model: ContainerModel) -> str:
