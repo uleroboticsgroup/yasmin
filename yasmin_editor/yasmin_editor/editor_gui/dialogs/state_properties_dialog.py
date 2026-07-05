@@ -147,9 +147,7 @@ class StatePropertiesDialog(QtWidgets.QDialog):
         self.parameter_table.setEnabled(
             self._enable_parameter_overwrites and not self.readonly
         )
-        self.parameter_table.itemDoubleClicked.connect(
-            self.edit_parameter_overwrite_row
-        )
+        self.parameter_table.itemDoubleClicked.connect(self.edit_parameter_overwrite_row)
 
         if self._enable_parameter_overwrites:
             params_label = QtWidgets.QLabel("<b>Params:</b>")

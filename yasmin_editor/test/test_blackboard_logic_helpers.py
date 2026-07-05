@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for pure blackboard metadata and remapping helpers.
-
-These tests cover key normalization, derived key aggregation, remapping through
-nested containers, and the persistence rules used by the blackboard sidebar.
-"""
-
 from types import SimpleNamespace
 
 from yasmin_editor.editor_gui.blackboard_logic import (

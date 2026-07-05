@@ -64,9 +64,7 @@ class EditorRuntimeMixin:
         self.runtime.running_changed.connect(self.update_runtime_actions)
         self.runtime.blocked_changed.connect(self.update_runtime_actions)
         self.runtime.active_state_changed.connect(self.on_runtime_active_state_changed)
-        self.runtime.active_transition_changed.connect(
-            self.on_runtime_transition_changed
-        )
+        self.runtime.active_transition_changed.connect(self.on_runtime_transition_changed)
         self.runtime.outcome_changed.connect(self.on_runtime_outcome_changed)
         self.runtime.status_changed.connect(self.on_runtime_status_changed)
         self.runtime.error_occurred.connect(self.on_runtime_error)
@@ -490,11 +488,7 @@ class EditorRuntimeMixin:
 
     def restart_runtime_mode(self) -> None:
         runtime = self.runtime
-        if (
-            not self.runtime_mode_enabled
-            or runtime is None
-            or not runtime.is_finished()
-        ):
+        if not self.runtime_mode_enabled or runtime is None or not runtime.is_finished():
             return
 
         self.runtime_active_path = tuple()
@@ -814,10 +808,8 @@ class EditorRuntimeMixin:
             if self._is_deleted_connection_item(connection):
                 continue
             if (
-                getattr(connection.from_node, "name", None)
-                == local_transition.from_name
-                and getattr(connection.to_node, "name", None)
-                == local_transition.to_name
+                getattr(connection.from_node, "name", None) == local_transition.from_name
+                and getattr(connection.to_node, "name", None) == local_transition.to_name
                 and connection.outcome == local_transition.outcome
             ):
                 return connection

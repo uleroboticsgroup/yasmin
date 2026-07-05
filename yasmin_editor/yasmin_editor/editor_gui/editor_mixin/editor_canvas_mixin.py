@@ -73,9 +73,7 @@ class EditorCanvasMixin:
             for final_outcome in state_node.final_outcomes.values():
                 yield final_outcome
 
-    def _remove_state_node_entries(
-        self, state_node: StateNode, prefix: str = ""
-    ) -> None:
+    def _remove_state_node_entries(self, state_node: StateNode, prefix: str = "") -> None:
         full_name = f"{prefix}.{state_node.name}" if prefix else state_node.name
         if isinstance(state_node, ContainerStateNode):
             for child_state in list(state_node.child_states.values()):
@@ -260,9 +258,7 @@ class EditorCanvasMixin:
                 if self.state_uses_blackboard_key(state_node, selected_key):
                     self.apply_default_visual_state(state_node)
                     try:
-                        state_node.setPen(
-                            QtGui.QPen(PALETTE.blackboard_highlight_pen, 5)
-                        )
+                        state_node.setPen(QtGui.QPen(PALETTE.blackboard_highlight_pen, 5))
                         state_node.setBrush(
                             QtGui.QBrush(PALETTE.blackboard_highlight_fill)
                         )
@@ -334,9 +330,7 @@ class EditorCanvasMixin:
 
     def _set_scene_read_only_state(self) -> None:
         readonly = self.is_read_only_mode()
-        for item in list(self.state_nodes.values()) + list(
-            self.final_outcomes.values()
-        ):
+        for item in list(self.state_nodes.values()) + list(self.final_outcomes.values()):
             item.setFlag(item.ItemIsMovable, not readonly)
             if hasattr(item, "connection_port") and readonly:
                 item.connection_port.setVisible(False)
@@ -425,9 +419,7 @@ class EditorCanvasMixin:
                 )
                 return
             try:
-                external_model = self.model_adapter.load_external_xml_model(
-                    xml_file_path
-                )
+                external_model = self.model_adapter.load_external_xml_model(xml_file_path)
             except Exception as exc:
                 QtWidgets.QMessageBox.critical(
                     self,

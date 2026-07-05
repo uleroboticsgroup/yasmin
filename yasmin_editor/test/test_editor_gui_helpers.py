@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for child-name conflict checks and dialog result adapters."""
-
 from yasmin_editor.editor_gui.child_name_conflicts import (
     has_final_outcome_name_conflict,
     has_state_name_conflict,

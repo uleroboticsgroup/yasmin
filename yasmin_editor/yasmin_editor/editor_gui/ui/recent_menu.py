@@ -45,9 +45,7 @@ def refresh_recent_file_menu(editor) -> None:
         action.setToolTip(file_path)
         action.setStatusTip(file_path)
         action.triggered.connect(
-            lambda _checked=False, path=file_path: editor.open_recent_state_machine(
-                path
-            )
+            lambda _checked=False, path=file_path: editor.open_recent_state_machine(path)
         )
         menu.addAction(action)
 

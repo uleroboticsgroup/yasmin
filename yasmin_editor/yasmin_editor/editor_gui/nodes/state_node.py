@@ -15,7 +15,7 @@
 from typing import Any, Dict, List, Optional
 
 from yasmin_plugins_manager.plugin_info import PluginInfo
-from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets, exec_menu
+from yasmin_editor.qt_compat import QtCore, QtGui, QtWidgets, exec_menu
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
@@ -132,9 +132,7 @@ class StateNode(BaseNodeMixin, QtWidgets.QGraphicsEllipseItem):
             value = self.constrain_position_to_parent(value)
             self.update_attached_connections()
 
-        elif (
-            change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged
-        ):
+        elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
             self.notify_parent_container_resized()
 
         elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemSelectedChange:

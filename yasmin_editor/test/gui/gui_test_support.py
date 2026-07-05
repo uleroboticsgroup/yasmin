@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Helpers shared by the GUI tests.
-#
-# These fakes keep the tests deterministic and avoid importing the full runtime
-# stack when only editor widgets are under test.
-
 from __future__ import annotations
 
 import sys

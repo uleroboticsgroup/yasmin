@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Shared fixtures for the GUI test suite.
-#
-# The editor fixture stubs optional runtime dependencies so the tests can focus
-# on widget interaction and editor behavior inside a headless test run.
-
 from __future__ import annotations
 
 import importlib

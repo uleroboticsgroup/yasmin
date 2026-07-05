@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from yasmin_editor.qt_compat import Qt, QtWidgets
-
 from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
 from yasmin_editor.editor_gui.ui.clipboard_dock_sizing import MIN_CLIPBOARD_DOCK_WIDTH
 

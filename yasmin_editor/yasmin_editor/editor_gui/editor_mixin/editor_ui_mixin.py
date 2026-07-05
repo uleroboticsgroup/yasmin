@@ -401,9 +401,7 @@ class EditorUiMixin:
                 used_outcomes,
             )
         except TransitionRuleError as exc:
-            QtWidgets.QMessageBox.warning(
-                self, getattr(exc, "title", "Error"), str(exc)
-            )
+            QtWidgets.QMessageBox.warning(self, getattr(exc, "title", "Error"), str(exc))
             return
 
         if len(available_outcomes) < 2:
@@ -519,9 +517,7 @@ class EditorUiMixin:
 
         self.record_history_checkpoint()
 
-    def edit_final_outcome(
-        self, outcome_node: Optional[FinalOutcomeNode] = None
-    ) -> None:
+    def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
         if outcome_node is None:
             outcome_node = self.find_selected_item(FinalOutcomeNode)
 
@@ -675,9 +671,7 @@ class EditorUiMixin:
     def edit_state(self) -> None:
         state_node = self.find_selected_state_node()
         if not state_node:
-            QtWidgets.QMessageBox.warning(
-                self, "Error", "Please select a state to edit!"
-            )
+            QtWidgets.QMessageBox.warning(self, "Error", "Please select a state to edit!")
             return
 
         readonly = self.is_read_only_mode()
@@ -691,9 +685,7 @@ class EditorUiMixin:
         )
 
         if is_container:
-            input_keys, output_keys = self._collect_container_key_lists(
-                state_node.model
-            )
+            input_keys, output_keys = self._collect_container_key_lists(state_node.model)
             dialog = StatePropertiesDialog(
                 state_name=state_node.name,
                 plugin_info=None,
@@ -713,9 +705,7 @@ class EditorUiMixin:
                 defaults=getattr(state_node, "defaults", []),
                 fallback_input_keys=input_keys,
                 fallback_output_keys=output_keys,
-                fallback_parameters=self.parameters_to_dicts(
-                    state_node.model.parameters
-                ),
+                fallback_parameters=self.parameters_to_dicts(state_node.model.parameters),
                 container_kind=(
                     "Orthogonal State"
                     if state_node.is_orthogonal

@@ -108,9 +108,7 @@ class TransitionOutcomePickerDialog(QtWidgets.QDialog):
             available = screen.availableGeometry()
             x = min(cursor_pos.x(), available.right() - self.width())
             y = min(cursor_pos.y(), available.bottom() - self.height())
-            cursor_pos = QtCore.QPoint(
-                max(available.left(), x), max(available.top(), y)
-            )
+            cursor_pos = QtCore.QPoint(max(available.left(), x), max(available.top(), y))
         self.move(cursor_pos)
 
     def _apply_filter(self, text: str) -> None:

@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Grouping helpers for connection lines that share endpoints."""
-
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:

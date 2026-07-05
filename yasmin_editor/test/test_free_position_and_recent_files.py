@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for free-position search and recent-file persistence helpers."""
-
 import json
 from pathlib import Path
 

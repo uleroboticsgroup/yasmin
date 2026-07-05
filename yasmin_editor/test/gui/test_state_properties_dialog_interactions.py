@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# GUI tests for the state-properties dialog.
-#
-# These checks verify that the dialog updates the plugin list when the selected
-# state type changes and that button-driven parameter-overwrite insertion ends
-# up in the dialog result payload.
-
 import pytest
 
 pytest.importorskip("yasmin_editor.qt_compat")
@@ -49,9 +43,7 @@ def _find_button_by_text(dialog, text: str) -> QtWidgets.QPushButton:
 def _make_plugin(plugin_type: str, module: str, class_name: str) -> FakePluginInfo:
     # Build one fake plugin with enough metadata for the description panel and
     # result payload assertions.
-    plugin = FakePluginInfo(
-        plugin_type=plugin_type, module=module, class_name=class_name
-    )
+    plugin = FakePluginInfo(plugin_type=plugin_type, module=module, class_name=class_name)
     plugin.description = f"{class_name} description"
     plugin.parameters = [
         {

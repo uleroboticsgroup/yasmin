@@ -57,12 +57,8 @@ def build_qt_palette(palette: EditorPalette) -> QtGui.QPalette:
     qt_palette.setColor(QtGui.QPalette.ColorRole.Dark, palette.ui_border.darker(130))
     qt_palette.setColor(QtGui.QPalette.ColorRole.Shadow, palette.ui_border.darker(170))
     qt_palette.setColor(QtGui.QPalette.ColorRole.Link, palette.connection_line)
-    qt_palette.setColor(
-        QtGui.QPalette.ColorRole.LinkVisited, palette.connection_selected
-    )
-    qt_palette.setColor(
-        QtGui.QPalette.ColorRole.PlaceholderText, palette.text_secondary
-    )
+    qt_palette.setColor(QtGui.QPalette.ColorRole.LinkVisited, palette.connection_selected)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.PlaceholderText, palette.text_secondary)
     return qt_palette
 
 
@@ -71,9 +67,7 @@ def build_qtconsole_palette(palette: EditorPalette) -> QtGui.QPalette:
     qt_palette = QtGui.QPalette()
 
     _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Window, palette.shell_bg)
-    _set_group_color(
-        qt_palette, QtGui.QPalette.ColorRole.WindowText, palette.shell_text
-    )
+    _set_group_color(qt_palette, QtGui.QPalette.ColorRole.WindowText, palette.shell_text)
     _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Base, palette.shell_bg)
     _set_group_color(
         qt_palette, QtGui.QPalette.ColorRole.AlternateBase, palette.ui_panel_alt_bg
@@ -104,9 +98,7 @@ def build_qtconsole_palette(palette: EditorPalette) -> QtGui.QPalette:
     _set_group_color(
         qt_palette, QtGui.QPalette.ColorRole.LinkVisited, palette.shell_prompt_out
     )
-    _set_group_color(
-        qt_palette, QtGui.QPalette.ColorRole.Light, palette.ui_panel_alt_bg
-    )
+    _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Light, palette.ui_panel_alt_bg)
     _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Mid, palette.shell_border)
     _set_group_color(
         qt_palette, QtGui.QPalette.ColorRole.Dark, palette.shell_border.darker(130)

@@ -319,9 +319,7 @@ class ConnectionLine(QtWidgets.QGraphicsPathItem):
     ) -> Tuple[QtCore.QPointF, QtCore.QPointF]:
         """Compute the tangent directions at the start and end of the path."""
         source_direction = normalize_vector(
-            QtCore.QPointF(
-                from_pos.x() - from_center.x(), from_pos.y() - from_center.y()
-            )
+            QtCore.QPointF(from_pos.x() - from_center.x(), from_pos.y() - from_center.y())
         )
         target_direction = normalize_vector(
             QtCore.QPointF(to_center.x() - to_pos.x(), to_center.y() - to_pos.y())

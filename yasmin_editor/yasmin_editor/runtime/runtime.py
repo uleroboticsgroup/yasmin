@@ -70,9 +70,9 @@ class Runtime(QtCore.QObject):
         self._shutting_down = False
 
         self._active_path: tuple[str, ...] = tuple()
-        self._last_transition: Optional[
-            tuple[tuple[str, ...], tuple[str, ...], str]
-        ] = None
+        self._last_transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]] = (
+            None
+        )
 
         self._execution_thread: Optional[threading.Thread] = None
         self._worker_state_lock = threading.Lock()

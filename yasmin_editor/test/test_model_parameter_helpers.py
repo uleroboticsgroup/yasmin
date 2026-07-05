@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for parameter declaration and overwrite helper functions.
-
-These tests focus on the editor-facing parameter normalization rules and on how
-parent container declarations are updated when child overwrite rows change.
-"""
-
 from yasmin_editor.editor_gui.model_parameters import (
     apply_parameter_overwrites,
     dicts_to_parameters,

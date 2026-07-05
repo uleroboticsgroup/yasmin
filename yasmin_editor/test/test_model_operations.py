@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Round-trip and mutation tests for the editor model and XML conversion."""
-
 import pytest
 
 from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml

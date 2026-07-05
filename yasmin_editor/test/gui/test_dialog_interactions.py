@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# GUI tests for the metadata dialogs used by the editor.
-#
-# Each test opens the real dialog, sends keyboard or mouse input, and checks
-# that the dialog returns the expected structured data.
-
 import pytest
 
 pytest.importorskip("yasmin_editor.qt_compat")

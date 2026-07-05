@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pure helper tests for runtime traversal and transition convenience helpers."""
-
 import pytest
 
 from yasmin_editor.editor_gui.final_outcome_ops import ensure_final_outcome_alias

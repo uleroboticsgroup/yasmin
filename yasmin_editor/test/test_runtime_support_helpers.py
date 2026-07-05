@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for runtime helper modules that stay independent from Qt.
-
-The covered helpers build runtime view state, translate transitions and paths,
-manage breakpoints, and format the context exposed to the interactive shell.
-"""
-
 from types import SimpleNamespace
 
 from yasmin_editor.editor_gui.runtime_breakpoints import (

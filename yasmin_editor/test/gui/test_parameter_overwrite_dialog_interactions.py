@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# GUI tests for the parameter overwrite dialog.
-#
-# These checks drive the real dialog widgets to verify validation, default-value
-# enablement, and readonly presentation in headless Qt test runs.
-
 import pytest
 
 pytest.importorskip("yasmin_editor.qt_compat")
@@ -42,9 +37,7 @@ def _dialog_button(dialog, standard_button):
     return button
 
 
-def test_parameter_overwrite_dialog_validates_and_collects_user_input(
-    qapp, monkeypatch
-):
+def test_parameter_overwrite_dialog_validates_and_collects_user_input(qapp, monkeypatch):
     # The dialog must reject incomplete input, enable the default-value field
     # only when a default type is selected, and return normalized overwrite
     # data after valid user input.

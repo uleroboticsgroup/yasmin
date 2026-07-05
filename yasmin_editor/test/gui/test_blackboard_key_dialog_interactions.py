@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# GUI tests for the blackboard key dialog.
-#
-# These checks verify that user input is written back into the dialog result and
-# that key-mode changes update the default-value widgets accordingly.
-
 import pytest
 
 pytest.importorskip("yasmin_editor.qt_compat")

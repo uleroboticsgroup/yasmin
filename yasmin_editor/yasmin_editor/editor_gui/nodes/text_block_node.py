@@ -242,9 +242,7 @@ class TextBlockNode(BaseNodeMixin, QtWidgets.QGraphicsRectItem):
         """Apply the current read-only mode to the text block."""
         if readonly and self._is_editing:
             self.finish_editing()
-        self.setFlag(
-            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable, not readonly
-        )
+        self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable, not readonly)
         if readonly:
             self.text_item.setTextInteractionFlags(
                 Qt.TextInteractionFlag.NoTextInteraction

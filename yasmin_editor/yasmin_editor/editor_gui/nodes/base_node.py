@@ -208,9 +208,7 @@ class BaseNodeMixin:
         )
         self.start_indicator_arrow = QtWidgets.QGraphicsPolygonItem(arrow, self)
         self.start_indicator_arrow.setBrush(QtGui.QBrush(PALETTE.start_indicator_arrow))
-        self.start_indicator_arrow.setPen(
-            QtGui.QPen(PALETTE.start_indicator_arrow, 1.2)
-        )
+        self.start_indicator_arrow.setPen(QtGui.QPen(PALETTE.start_indicator_arrow, 1.2))
         self.start_indicator_arrow.setZValue(11.0)
         self.start_indicator_arrow.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
         self.start_indicator_arrow.setVisible(False)

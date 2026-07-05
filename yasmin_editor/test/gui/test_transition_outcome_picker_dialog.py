@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# GUI tests for the transition outcome picker dialog.
-#
-# The picker supports filtering and keyboard interaction, so these tests verify
-# both behaviors on the real QListWidget-based dialog.
-
 import pytest
 
 pytest.importorskip("yasmin_editor.qt_compat")

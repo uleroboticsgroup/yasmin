@@ -12,13 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for pure editor helpers that do not require a Qt event loop.
-
-The covered helpers define clipboard rules, container metadata, document state,
-startup argument parsing, plugin catalog formatting, canvas navigation, and
-window geometry decisions.
-"""
-
 from pathlib import Path
 from types import SimpleNamespace
 

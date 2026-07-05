@@ -41,9 +41,7 @@ class JoinStateDialog(QtWidgets.QDialog):
         layout.addRow("Name:*", self.name_edit)
 
         self.sync_id_edit = QtWidgets.QLineEdit(sync_id)
-        self.sync_id_edit.setPlaceholderText(
-            "Optional sync ID (leave empty for default)"
-        )
+        self.sync_id_edit.setPlaceholderText("Optional sync ID (leave empty for default)")
         layout.addRow("Sync ID:", self.sync_id_edit)
 
         self.outcome_edit = QtWidgets.QLineEdit(outcome)

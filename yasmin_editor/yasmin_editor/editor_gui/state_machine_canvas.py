@@ -55,17 +55,13 @@ class StateMachineCanvas(QtWidgets.QGraphicsView):
 
         self.is_dragging_connection: bool = False
         self.drag_start_node: Optional[
-            Union[
-                "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
-            ]
+            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"]
         ] = None
         self.temp_line: Optional[QtWidgets.QGraphicsLineItem] = None
         self.drag_rewire_connection: Optional["ConnectionLine"] = None
         self.editor_ref: Optional["YasminEditor"] = None
         self.pending_placement_item: Optional[
-            Union[
-                "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
-            ]
+            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"]
         ] = None
         self.pending_bundle_preview: Optional[QtWidgets.QGraphicsRectItem] = None
         self.pending_bundle_label: Optional[QtWidgets.QGraphicsSimpleTextItem] = None
@@ -358,9 +354,7 @@ class StateMachineCanvas(QtWidgets.QGraphicsView):
                 target = item
             elif hasattr(item, "parentItem"):
                 parent = item.parentItem()
-                if isinstance(
-                    parent, (StateNode, FinalOutcomeNode, ContainerStateNode)
-                ):
+                if isinstance(parent, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                     target = parent
             if target and self.is_valid_connection(self.drag_start_node, target):
                 target.setOpacity(0.6)

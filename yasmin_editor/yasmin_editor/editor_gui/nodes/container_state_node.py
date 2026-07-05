@@ -44,9 +44,7 @@ class ContainerStateNode(BaseNodeMixin, QtWidgets.QGraphicsRectItem):
         default_outcome: Optional[str] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
-        model: Optional[
-            Union[StateMachine, Concurrence, OrthogonalState, State]
-        ] = None,
+        model: Optional[Union[StateMachine, Concurrence, OrthogonalState, State]] = None,
         state_kind_label: Optional[str] = None,
         is_xml_reference: bool = False,
     ) -> None:

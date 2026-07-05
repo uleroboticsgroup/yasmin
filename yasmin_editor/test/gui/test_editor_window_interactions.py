@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# GUI tests for interactive behavior in the main editor window.
-#
-# The tests in this module use the real widgets, actions, and shortcuts of the
-# editor while keeping runtime dependencies stubbed out.
-
 import pytest
 
 pytest.importorskip("yasmin_editor.qt_compat")
@@ -123,9 +118,7 @@ def test_editor_window_blackboard_filter_and_visibility_controls(editor_window, 
     qapp.processEvents()
     assert editor.highlight_blackboard_btn.text() == "Highlight: Off"
 
-    QtTest.QTest.mouseClick(
-        editor.show_hidden_blackboard_btn, Qt.MouseButton.LeftButton
-    )
+    QtTest.QTest.mouseClick(editor.show_hidden_blackboard_btn, Qt.MouseButton.LeftButton)
     qapp.processEvents()
     assert editor.show_hidden_blackboard_btn.text() == "Hidden: On"
     assert _visible_blackboard_key_names(editor.blackboard_list) == [
@@ -173,8 +166,7 @@ def test_editor_window_adds_text_block_and_cancels_pending_items(
     qapp.processEvents()
 
     assert any(
-        outcome.name == "finished"
-        for outcome in editor.current_container_model.outcomes
+        outcome.name == "finished" for outcome in editor.current_container_model.outcomes
     )
     assert editor.canvas.pending_placement_item is not None
 
@@ -184,8 +176,7 @@ def test_editor_window_adds_text_block_and_cancels_pending_items(
 
     assert editor.canvas.pending_placement_item is None
     assert all(
-        outcome.name != "finished"
-        for outcome in editor.current_container_model.outcomes
+        outcome.name != "finished" for outcome in editor.current_container_model.outcomes
     )
 
 

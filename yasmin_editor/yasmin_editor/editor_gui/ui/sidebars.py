@@ -59,9 +59,7 @@ def build_blackboard_widget(editor) -> QtWidgets.QWidget:
     editor.blackboard_list.itemSelectionChanged.connect(
         editor.on_blackboard_selection_changed
     )
-    editor.blackboard_list.itemDoubleClicked.connect(
-        editor.edit_selected_blackboard_key
-    )
+    editor.blackboard_list.itemDoubleClicked.connect(editor.edit_selected_blackboard_key)
     layout.addWidget(editor.blackboard_list)
 
     button_row = QtWidgets.QHBoxLayout()
@@ -69,9 +67,7 @@ def build_blackboard_widget(editor) -> QtWidgets.QWidget:
     editor.highlight_blackboard_btn.setObjectName("highlightBlackboardButton")
     editor.highlight_blackboard_btn.setCheckable(True)
     editor.highlight_blackboard_btn.setChecked(True)
-    editor.highlight_blackboard_btn.toggled.connect(
-        editor.toggle_blackboard_highlighting
-    )
+    editor.highlight_blackboard_btn.toggled.connect(editor.toggle_blackboard_highlighting)
     button_row.addWidget(editor.highlight_blackboard_btn)
 
     editor.show_hidden_blackboard_btn = QtWidgets.QPushButton("Hidden: Off")

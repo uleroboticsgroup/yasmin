@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for connection creation that delegates to the outcome picker dialog."""
-
 from types import SimpleNamespace
 
 import pytest

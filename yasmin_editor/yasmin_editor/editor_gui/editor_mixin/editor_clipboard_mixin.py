@@ -136,9 +136,7 @@ class EditorClipboardMixin:
 
     def _collect_main_selection_bundle(self):
         selection = self._current_scene_selection()
-        return self._bundle_from_scene_selection(
-            self.current_container_model, selection
-        )
+        return self._bundle_from_scene_selection(self.current_container_model, selection)
 
     def _collect_clipboard_selection_bundle(self, fallback_to_all: bool = False):
         selection = self._clipboard_scene_selection(fallback_to_all=fallback_to_all)
@@ -327,9 +325,7 @@ class EditorClipboardMixin:
         elif panel is not None:
             panel.setVisible(new_visible)
         if hasattr(self, "clipboard_panel_toggle_button"):
-            self.clipboard_panel_toggle_button.setText(
-                "Hide" if new_visible else "Show"
-            )
+            self.clipboard_panel_toggle_button.setText("Hide" if new_visible else "Show")
         if hasattr(self, "canvas_clipboard_toggle_button"):
             self.canvas_clipboard_toggle_button.setText(
                 "Hide Shelf" if new_visible else "Show Shelf"
@@ -354,9 +350,7 @@ class EditorClipboardMixin:
             return False
         return widget.rect().contains(widget.mapFromGlobal(global_pos))
 
-    def _clipboard_anchor_from_global(
-        self, global_pos: QtCore.QPoint
-    ) -> QtCore.QPointF:
+    def _clipboard_anchor_from_global(self, global_pos: QtCore.QPoint) -> QtCore.QPointF:
         viewport = self.clipboard_canvas.viewport()
         if self._widget_contains_global_pos(viewport, global_pos):
             return self.clipboard_canvas.mapToScene(
