@@ -15,7 +15,7 @@ setup(
     maintainer="Maik Knof",
     maintainer_email="maik.knof@gmx.de",
     description="Plugin discovery and caching for YASMIN states.",
-    license="GPL-3.0",
+    license="Apache-2.0",
     extras_require={
         "test": [
             "pytest",

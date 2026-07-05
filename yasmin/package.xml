@@ -5,7 +5,7 @@
   <version>5.1.0</version>
   <description>YASMIN (Yet Another State MachINe) main package</description>
   <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
-  <license>GPL-3.0</license>
+  <license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
   <depend>python3-dev</depend>
