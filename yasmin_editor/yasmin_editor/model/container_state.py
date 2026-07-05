@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from yasmin_editor.dataclass_compat import dataclass, field
 
 from .layout import Layout
 from .outcome import Outcome

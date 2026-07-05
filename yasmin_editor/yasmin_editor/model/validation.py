@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from yasmin_editor.dataclass_compat import dataclass, field
 from typing import Iterable
 
 from .container_state import ContainerState, iter_outcome_rule_values

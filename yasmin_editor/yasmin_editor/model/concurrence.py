@@ -14,9 +14,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from .container_state import ContainerState, iter_outcome_rule_values
+from yasmin_editor.dataclass_compat import dataclass
+from .container_state import ContainerState
 
 
 @dataclass(slots=True, repr=False)

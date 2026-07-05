@@ -14,9 +14,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Callable, Protocol
-
+from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode

@@ -11,15 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Declarative runtime control definitions.
-
-Keeping the runtime control bar data-driven makes it easier to preserve the
-original runtime surface while still refactoring the UI code around it.
-"""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from yasmin_editor.dataclass_compat import dataclass
 
 
 @dataclass(frozen=True, slots=True)

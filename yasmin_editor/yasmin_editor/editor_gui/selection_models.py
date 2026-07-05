@@ -15,8 +15,7 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass, field
-
+from yasmin_editor.dataclass_compat import dataclass, field
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.layout import Position
 from yasmin_editor.model.orthogonal_state import OrthogonalState

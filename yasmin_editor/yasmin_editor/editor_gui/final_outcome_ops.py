@@ -14,8 +14,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
+from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.outcome import Outcome

@@ -14,8 +14,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
+from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.editor_gui.selection_bundle_geometry import get_bundle_bounds
 from yasmin_editor.editor_gui.selection_models import SelectionBundle
 

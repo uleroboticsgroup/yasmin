@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from yasmin_editor.dataclass_compat import dataclass
 from typing import Sequence
 
 

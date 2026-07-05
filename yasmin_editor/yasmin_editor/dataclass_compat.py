@@ -1,4 +1,4 @@
-# Copyright (C) 2026 Maik Knof
+# Copyright (C) 2026 Miguel Ángel González Santamarta
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import annotations
-
-from yasmin_editor.dataclass_compat import dataclass
-from typing import Any
+import sys
+from dataclasses import dataclass as _dataclass, field as _field
 
 
-@dataclass(slots=True)
-class Parameter:
-    """Represents a declared state parameter."""
+def dataclass(_cls=None, /, **kwargs):
+    if "slots" in kwargs and sys.version_info < (3, 10):
+        del kwargs["slots"]
+    if _cls is not None:
+        return _dataclass(_cls, **kwargs)
+    return lambda cls: _dataclass(cls, **kwargs)
 
-    name: str
-    description: str = ""
-    default_type: str = ""
-    default_value: Any = None
 
-    @property
-    def has_default(self) -> bool:
-        """Return whether a default value is defined for this parameter."""
-
-        return self.default_type != ""
+field = _field
