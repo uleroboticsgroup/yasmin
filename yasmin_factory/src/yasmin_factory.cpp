@@ -861,10 +861,6 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 #if RCLCPP_VERSION_GTE(32, 0, 0)
         package_path =
             ament_index_cpp::get_package_share_path(package).string();
-#elif RCLCPP_VERSION_GTE(29, 5, 1)
-        std::filesystem::path pkg_path;
-        ament_index_cpp::get_package_share_directory(package, pkg_path);
-        package_path = pkg_path.string();
 #else
         package_path = ament_index_cpp::get_package_share_directory(package);
 #endif
