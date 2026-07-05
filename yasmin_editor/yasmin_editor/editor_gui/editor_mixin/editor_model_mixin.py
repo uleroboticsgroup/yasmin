@@ -143,9 +143,7 @@ class EditorModelMixin:
             parameter_mappings=parameter_mappings,
         )
 
-    def _create_connection_view(
-        self, from_node, to_node, outcome: str
-    ) -> ConnectionLine:
+    def _create_connection_view(self, from_node, to_node, outcome: str) -> ConnectionLine:
         return create_connection_view(
             self.canvas.scene,
             self.connections,
@@ -434,9 +432,7 @@ class EditorModelMixin:
             self.start_state_combo.addItem(item_name)
 
         if metadata_view.current_selector_value:
-            index = self.start_state_combo.findText(
-                metadata_view.current_selector_value
-            )
+            index = self.start_state_combo.findText(metadata_view.current_selector_value)
             self.start_state_combo.setCurrentIndex(index if index >= 0 else 0)
         else:
             self.start_state_combo.setCurrentIndex(0)
@@ -460,9 +456,7 @@ class EditorModelMixin:
                 text,
                 current_name=old_name,
                 sibling_state_names=parent_model.states,
-                sibling_outcome_names=[
-                    outcome.name for outcome in parent_model.outcomes
-                ],
+                sibling_outcome_names=[outcome.name for outcome in parent_model.outcomes],
             ):
                 return
             parent_model.rename_state(old_name, text)
@@ -570,9 +564,7 @@ class EditorModelMixin:
         return has_child_state_name_conflict(
             state_name,
             sibling_state_names=container_model.states,
-            sibling_outcome_names=[
-                outcome.name for outcome in container_model.outcomes
-            ],
+            sibling_outcome_names=[outcome.name for outcome in container_model.outcomes],
         )
 
     def has_final_outcome_name_conflict(
@@ -805,8 +797,7 @@ class EditorModelMixin:
                         if (
                             transition.source_outcome == connection.outcome
                             and transition.target == outcome_node.name
-                            and transition.target_instance_id
-                            == outcome_node.instance_id
+                            and transition.target_instance_id == outcome_node.instance_id
                         ):
                             transition.target_instance_id = replacement_view.instance_id
                             break
