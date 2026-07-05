@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+from typing import List, Union
+
 from yasmin_editor.dataclass_compat import dataclass, field
 
 from .layout import Layout
@@ -21,7 +23,7 @@ from .outcome import Outcome
 from .state import State
 from .text_block import TextBlock
 
-OutcomeRuleValues = str | list[str]
+OutcomeRuleValues = Union[str, List[str]]
 
 
 def iter_outcome_rule_values(values: OutcomeRuleValues) -> list[str]:

@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+
 import math
 from typing import TYPE_CHECKING, Any, List, Tuple, Union
 
 from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets
-
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection.geometry import (
     ZERO_POINT,

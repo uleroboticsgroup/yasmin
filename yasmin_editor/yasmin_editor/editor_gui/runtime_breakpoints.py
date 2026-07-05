@@ -14,10 +14,10 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Tuple
 from yasmin_editor.editor_gui.runtime_state import normalize_runtime_path
 
-BreakpointPath = tuple[str, ...]
+BreakpointPath = Tuple[str, ...]
 
 
 def breakpoint_parent_path(

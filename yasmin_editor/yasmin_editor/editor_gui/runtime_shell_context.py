@@ -14,9 +14,9 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Dict, Optional
 
-ShellContextPayload = dict[str, object]
+ShellContextPayload = Dict[str, object]
 
 
 def runtime_shell_allowed(runtime) -> bool:

@@ -14,15 +14,15 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict, Union
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.parameter import Parameter
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 
-ParameterDict = dict[str, Any]
-ContainerModel = StateMachine | Concurrence
+ParameterDict = Dict[str, Any]
+ContainerModel = Union[StateMachine, Concurrence]
 
 
 def parameters_to_dicts(parameters: list[Parameter]) -> list[ParameterDict]:

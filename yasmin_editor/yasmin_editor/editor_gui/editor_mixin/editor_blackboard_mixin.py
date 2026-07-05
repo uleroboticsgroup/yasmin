@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+
 from typing import Dict, List, Optional
 
 from yasmin_editor.qt_compat import Qt, QtWidgets, exec_dialog

@@ -14,7 +14,9 @@
 
 from __future__ import annotations
 
-PointTuple = tuple[float, float]
+from typing import Tuple
+
+PointTuple = Tuple[float, float]
 
 
 def find_free_position(
