@@ -96,6 +96,7 @@ def mouse_event_global_pos(event) -> QtCore.QPoint:
     PyQt6 deprecated ``globalPos()`` in favour of ``globalPosition()``
     (which returns a ``QPointF``), so we abstract the difference away.
     """
-    if QT_VERSION == 6:
-        return event.globalPosition().toPoint()
+    fn = getattr(event, "globalPosition", None)
+    if fn is not None:
+        return fn().toPoint()
     return event.globalPos()
