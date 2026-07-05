@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set, Tuple
 
 from yasmin_editor.qt_compat import QtCore, QtGui, QtWidgets
 from yasmin_plugins_manager.plugin_manager import PluginManager
@@ -112,11 +112,11 @@ class YasminEditor(
         self.runtime_snapshot_file_path: Optional[str] = None
         self.runtime_mode_enabled = False
         self.runtime_auto_follow_enabled = False
-        self.runtime_active_path: tuple[str, ...] = tuple()
+        self.runtime_active_path: Tuple[str, ...] = tuple()
         self.runtime_last_transition: Optional[
-            tuple[tuple[str, ...], tuple[str, ...], str]
+            Tuple[Tuple[str, ...], Tuple[str, ...], str]
         ] = None
-        self.runtime_breakpoints_before: set[tuple[str, ...]] = set()
+        self.runtime_breakpoints_before: Set[Tuple[str, ...]] = set()
 
         self.runtime = None
         self.runtime_shell = None

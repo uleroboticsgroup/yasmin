@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from typing import List
 from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.editor_gui.selection_bundle_geometry import get_bundle_bounds
 from yasmin_editor.editor_gui.selection_models import SelectionBundle
@@ -33,7 +34,7 @@ _MIN_PREVIEW_HEIGHT = 72.0
 
 
 def _bundle_item_summary(bundle: SelectionBundle) -> str:
-    parts: list[str] = []
+    parts: List[str] = []
     if bundle.states:
         parts.append(
             f"{len(bundle.states)} state{'s' if len(bundle.states) != 1 else ''}"

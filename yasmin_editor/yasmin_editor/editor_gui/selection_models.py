@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import copy
+from typing import List, Dict
 from yasmin_editor.dataclass_compat import dataclass, field
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.layout import Position
@@ -51,14 +52,14 @@ class SelectionBundle:
     """Portable clipboard payload for selected editor items."""
 
     source_kind: str
-    states: dict[str, State] = field(default_factory=dict)
-    state_positions: dict[str, Position] = field(default_factory=dict)
-    outcomes: dict[str, Outcome] = field(default_factory=dict)
-    outcome_placements: list[OutcomePlacementSnapshot] = field(default_factory=list)
-    text_blocks: list[TextBlock] = field(default_factory=list)
-    transitions: list[Transition] = field(default_factory=list)
-    transition_sources: list[str] = field(default_factory=list)
-    outcome_rules: list[OutcomeRuleSnapshot] = field(default_factory=list)
+    states: Dict[str, State] = field(default_factory=dict)
+    state_positions: Dict[str, Position] = field(default_factory=dict)
+    outcomes: Dict[str, Outcome] = field(default_factory=dict)
+    outcome_placements: List[OutcomePlacementSnapshot] = field(default_factory=list)
+    text_blocks: List[TextBlock] = field(default_factory=list)
+    transitions: List[Transition] = field(default_factory=list)
+    transition_sources: List[str] = field(default_factory=list)
+    outcome_rules: List[OutcomeRuleSnapshot] = field(default_factory=list)
     start_state: str | None = None
 
     @property

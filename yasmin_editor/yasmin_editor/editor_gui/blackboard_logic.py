@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Dict, Iterable, List, Optional, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Tuple, Set
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.key import Key
@@ -247,12 +247,12 @@ def _build_derived_keys(
 def collect_blackboard_key_usage_for_model(
     container_model: StateMachine | Concurrence,
     resolve_plugin_info_for_model: ResolvePluginInfo,
-) -> Tuple[Dict[str, Dict[str, str]], set[str]]:
+) -> Tuple[Dict[str, Dict[str, str]], Set[str]]:
     """Collect derived blackboard usage and hidden remapped names for one container."""
 
     usage_map: Dict[str, Dict[str, object]] = {}
     metadata_map = build_container_metadata_map(container_model)
-    hidden_key_names: set[str] = set()
+    hidden_key_names: Set[str] = set()
 
     def add_usage(key_name: str, usage_kind: str, description: str) -> None:
         entry = usage_map.setdefault(

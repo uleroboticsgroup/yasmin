@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict, List
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
@@ -79,9 +79,9 @@ def create_leaf_model(
     plugin_info: PluginInfoLike,
     *,
     description: str = "",
-    remappings: dict[str, str] | None = None,
-    parameter_mappings: dict[str, str] | None = None,
-    outcomes: list[str] | None = None,
+    remappings: Dict[str, str] | None = None,
+    parameter_mappings: Dict[str, str] | None = None,
+    outcomes: List[str] | None = None,
 ) -> State:
     """Create one leaf-state model from plugin metadata."""
 
@@ -107,12 +107,12 @@ def create_container_model(
     *,
     is_concurrence: bool = False,
     is_orthogonal: bool = False,
-    outcomes: list[str] | None = None,
-    remappings: dict[str, str] | None = None,
+    outcomes: List[str] | None = None,
+    remappings: Dict[str, str] | None = None,
     start_state: str | None = None,
     default_outcome: str | None = None,
     description: str = "",
-    parameter_mappings: dict[str, str] | None = None,
+    parameter_mappings: Dict[str, str] | None = None,
 ) -> StateMachine | Concurrence | OrthogonalState:
     """Create one state-machine, concurrence, or orthogonal model for the editor."""
 
@@ -152,8 +152,8 @@ def plugin_type_to_state_type(plugin_type: str | None) -> str | None:
 
 def iter_leaf_outcome_names(
     plugin_info: PluginInfoLike,
-    overrides: list[str] | None = None,
-) -> list[str]:
+    overrides: List[str] | None = None,
+) -> List[str]:
     """Return the outcome names that should be attached to a leaf model."""
 
     return list(overrides or getattr(plugin_info, "outcomes", []) or [])

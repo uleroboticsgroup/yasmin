@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from typing import Tuple
 from yasmin_editor.dataclass_compat import dataclass
 
 
@@ -33,7 +34,7 @@ RUNTIME_STATUS_LABEL_MIN_WIDTH = 120
 RUNTIME_STATUS_LABEL_TEXT = "Ready"
 RUNTIME_AUTO_FOLLOW_ON_TEXT = "Auto Follow: ON"
 
-RUNTIME_BUTTON_SPECS: tuple[RuntimeButtonSpec, ...] = (
+RUNTIME_BUTTON_SPECS: Tuple[RuntimeButtonSpec, ...] = (
     RuntimeButtonSpec(
         attribute_name="runtime_play_button",
         text="Play",

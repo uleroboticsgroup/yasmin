@@ -14,6 +14,7 @@
 
 from pathlib import Path
 from types import SimpleNamespace
+from typing import List
 
 from yasmin_editor.app import (
     build_qt_argv,
@@ -95,7 +96,7 @@ class FakeViewport:
         return self._height
 
 
-def make_leaf(name: str, outcomes: list[str]) -> State:
+def make_leaf(name: str, outcomes: List[str]) -> State:
     """Create a leaf state with the given outcomes."""
 
     return State(name=name, outcomes=[Outcome(item) for item in outcomes])

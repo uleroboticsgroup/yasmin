@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict, List
 from yasmin_cli.completer import find_plugin, plugin_completer, plugin_id
 
 
 def _print_outcome_block(
-    title: str, outcomes: list[str], outcome_descriptions: dict[str, str]
+    title: str, outcomes: List[str], outcome_descriptions: Dict[str, str]
 ) -> None:
     print(f"{title}:")
     for outcome in outcomes:
@@ -27,7 +28,7 @@ def _print_outcome_block(
         print(line)
 
 
-def _print_key_block(title: str, keys: list[dict]) -> None:
+def _print_key_block(title: str, keys: List[dict]) -> None:
     if not keys:
         return
 

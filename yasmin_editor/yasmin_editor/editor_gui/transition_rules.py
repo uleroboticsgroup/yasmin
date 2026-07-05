@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from collections.abc import Collection, Sequence
-
+from typing import List
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state_machine import StateMachine
@@ -61,7 +61,7 @@ def get_available_transition_outcomes(
     container_model,
     source_outcomes: Sequence[str],
     used_outcomes: Collection[str] | None = None,
-) -> list[str]:
+) -> List[str]:
     """Return the outcomes that may still create a transition from a source state."""
 
     if not source_outcomes:

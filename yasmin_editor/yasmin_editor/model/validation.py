@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from yasmin_editor.dataclass_compat import dataclass, field
-from typing import Iterable
+from typing import Iterable, List, Set
 
 from .container_state import ContainerState, iter_outcome_rule_values
 from .state import State
@@ -34,8 +34,8 @@ class ValidationMessage:
 class ValidationResult:
     """Collects validation errors and warnings."""
 
-    errors: list[ValidationMessage] = field(default_factory=list)
-    warnings: list[ValidationMessage] = field(default_factory=list)
+    errors: List[ValidationMessage] = field(default_factory=list)
+    warnings: List[ValidationMessage] = field(default_factory=list)
 
     @property
     def is_valid(self) -> bool:
@@ -62,7 +62,7 @@ class ValidationResult:
     def __str__(self) -> str:
         """Return a readable validation summary."""
 
-        lines: list[str] = []
+        lines: List[str] = []
 
         if self.errors:
             lines.append("Errors:")
@@ -96,7 +96,7 @@ def _validate_state(
     state: State,
     result: ValidationResult,
     path: str,
-    parent_targets: set[str] | None,
+    parent_targets: Set[str] | None,
 ) -> None:
     """Validate one state recursively."""
 
@@ -119,7 +119,7 @@ def _validate_unique_named_items(
 ) -> None:
     """Validate that a sequence of named model items is non-empty and unique."""
 
-    seen_names: set[str] = set()
+    seen_names: Set[str] = set()
 
     for item in items:
         name = getattr(item, "name", "")
@@ -183,8 +183,8 @@ def _validate_conflicting_container_names(
     *,
     path: str,
     result: ValidationResult,
-    state_names: set[str],
-    outcome_names: set[str],
+    state_names: Set[str],
+    outcome_names: Set[str],
 ) -> None:
     """Validate that container child states and final outcomes do not collide."""
 
@@ -222,7 +222,7 @@ def _validate_state_machine(
     state_machine: StateMachine,
     result: ValidationResult,
     path: str,
-    parent_targets: set[str] | None,
+    parent_targets: Set[str] | None,
 ) -> None:
     """Validate a state machine recursively."""
 
@@ -313,7 +313,7 @@ def _validate_container_state(
     container: ContainerState,
     result: ValidationResult,
     path: str,
-    parent_targets: set[str] | None,
+    parent_targets: Set[str] | None,
 ) -> None:
     """Validate a container state (Concurrence or OrthogonalState) recursively."""
 

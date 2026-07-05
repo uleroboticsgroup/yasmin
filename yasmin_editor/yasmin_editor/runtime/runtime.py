@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import threading
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Optional, List, Set, Tuple
 
 from yasmin_editor.qt_compat import pyqtSignal, QtCore
 from yasmin_editor.runtime.logging import RuntimeLogger
@@ -69,8 +69,8 @@ class Runtime(QtCore.QObject):
         self._last_state_ref: Optional[Any] = None
         self._shutting_down = False
 
-        self._active_path: tuple[str, ...] = tuple()
-        self._last_transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]] = (
+        self._active_path: Tuple[str, ...] = tuple()
+        self._last_transition: Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]] = (
             None
         )
 
@@ -81,7 +81,7 @@ class Runtime(QtCore.QObject):
 
         self._step_mode = False
         self._breakpoint_lock = threading.Lock()
-        self._breakpoints_before: set[tuple[str, ...]] = set()
+        self._breakpoints_before: Set[Tuple[str, ...]] = set()
         self._pause_status_message: Optional[str] = None
 
         self.logger = RuntimeLogger(
@@ -140,17 +140,17 @@ class Runtime(QtCore.QObject):
         """Return the previously active runtime state object."""
         return self._last_state_ref
 
-    def get_active_path(self) -> tuple[str, ...]:
+    def get_active_path(self) -> Tuple[str, ...]:
         """Return the last known active path inside the loaded machine."""
         return self._active_path
 
     def get_last_transition(
         self,
-    ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
+    ) -> Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]]:
         """Return the most recently observed transition."""
         return self._last_transition
 
-    def get_logs(self) -> list[str]:
+    def get_logs(self) -> List[str]:
         """Return a copy of the collected runtime log lines."""
         return self.logger.get_logs()
 
@@ -327,9 +327,9 @@ class Runtime(QtCore.QObject):
 
     def _resolve_state_machine_cancel_exception_types(
         self,
-    ) -> tuple[type[BaseException], ...]:
+    ) -> Tuple[type[BaseException], ...]:
         """Return known Python exception types for full state-machine cancelation."""
-        exception_types: list[type[BaseException]] = []
+        exception_types: List[type[BaseException]] = []
 
         for owner in (yasmin, getattr(yasmin, "state_machine", None)):
             exception_type = getattr(owner, "StateMachineCancelException", None)
@@ -439,7 +439,7 @@ class Runtime(QtCore.QObject):
 
     def _set_last_transition(
         self,
-        transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]],
+        transition: Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]],
     ) -> None:
         """Store the most recent transition and append a readable log line."""
         if self._last_transition == transition:
@@ -447,7 +447,7 @@ class Runtime(QtCore.QObject):
         self._last_transition = transition
         self.active_transition_changed.emit(transition)
 
-    def _resolve_state_reference(self, path: tuple[str, ...]) -> Optional[Any]:
+    def _resolve_state_reference(self, path: Tuple[str, ...]) -> Optional[Any]:
         """Resolve a live state object from a runtime path."""
         if self.sm is None or not path:
             return None
@@ -460,25 +460,25 @@ class Runtime(QtCore.QObject):
 
     def _update_shell_state_refs(
         self,
-        current_path: tuple[str, ...],
-        last_path: Optional[tuple[str, ...]] = None,
+        current_path: Tuple[str, ...],
+        last_path: Optional[Tuple[str, ...]] = None,
     ) -> None:
         """Update the live state references exposed in the shell."""
         if last_path is not None:
             self._last_state_ref = self._resolve_state_reference(last_path)
         self._current_state_ref = self._resolve_state_reference(current_path)
 
-    def _resolve_container(self, path: tuple[str, ...]) -> Optional[Any]:
+    def _resolve_container(self, path: Tuple[str, ...]) -> Optional[Any]:
         """Resolve a container object for the given path inside the live machine."""
         return resolve_container(self.sm, path)
 
     def _expand_to_deepest_known_path(
-        self, base_path: tuple[str, ...]
-    ) -> tuple[str, ...]:
+        self, base_path: Tuple[str, ...]
+    ) -> Tuple[str, ...]:
         """Expand a container path down to the deepest active child path."""
         return expand_to_deepest_known_path(self.sm, base_path)
 
-    def _resolve_initial_active_path(self) -> tuple[str, ...]:
+    def _resolve_initial_active_path(self) -> Tuple[str, ...]:
         """Return the initial path that should be highlighted before execution."""
         return self._expand_to_deepest_known_path(tuple())
 
@@ -506,13 +506,13 @@ class Runtime(QtCore.QObject):
             if status_message:
                 self._pause_status_message = str(status_message)
 
-    def _has_breakpoint(self, state_path: tuple[str, ...]) -> bool:
+    def _has_breakpoint(self, state_path: Tuple[str, ...]) -> bool:
         """Return whether a breakpoint exists for the given state path."""
         normalized = tuple(str(item) for item in state_path)
         with self._breakpoint_lock:
             return normalized in self._breakpoints_before
 
-    def _request_breakpoint_pause(self, state_path: tuple[str, ...]) -> bool:
+    def _request_breakpoint_pause(self, state_path: Tuple[str, ...]) -> bool:
         """Arm a pause request when a matching breakpoint is reached."""
         normalized = tuple(str(item) for item in state_path)
         if not normalized or not self._has_breakpoint(normalized):
@@ -550,9 +550,9 @@ class Runtime(QtCore.QObject):
         if self.sm is None:
             return
 
-        visited: set[int] = set()
+        visited: Set[int] = set()
 
-        def walk(container: Any, prefix: tuple[str, ...]) -> None:
+        def walk(container: Any, prefix: Tuple[str, ...]) -> None:
             if container is None:
                 return
 
@@ -605,7 +605,7 @@ class Runtime(QtCore.QObject):
         self,
         bb: Blackboard,
         start_state: str,
-        prefix: tuple[str, ...] = tuple(),
+        prefix: Tuple[str, ...] = tuple(),
     ) -> None:
         """Handle a state start callback from the live runtime."""
         if self._disposed:
@@ -628,7 +628,7 @@ class Runtime(QtCore.QObject):
         self,
         bb: Blackboard,
         outcome: str,
-        prefix: tuple[str, ...] = tuple(),
+        prefix: Tuple[str, ...] = tuple(),
     ) -> None:
         """Handle the completion of a container or the root machine."""
         if self._disposed:
@@ -657,7 +657,7 @@ class Runtime(QtCore.QObject):
         from_state: str,
         to_state: str,
         outcome: str,
-        prefix: tuple[str, ...] = tuple(),
+        prefix: Tuple[str, ...] = tuple(),
     ) -> None:
         """Handle transitions while keeping shell remappings isolated."""
         if self._disposed:

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
+from typing import Tuple
 
 
 def build_editor_action_enabled_map(
@@ -40,7 +41,7 @@ def build_editor_action_enabled_map(
 
 
 def toolbar_menu_enabled(
-    action_attributes: tuple[str, ...],
+    action_attributes: Tuple[str, ...],
     enabled_map: dict[str, bool],
 ) -> bool:
     """Return whether one toolbar drop-down button should stay enabled."""

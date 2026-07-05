@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import copy
+from typing import Tuple
 
 from yasmin_editor.editor_gui.selection_bundle_geometry import get_bundle_bounds
 from yasmin_editor.editor_gui.selection_models import ContainerModel, SelectionBundle
@@ -60,7 +61,7 @@ def paste_outcomes(
     bundle: SelectionBundle,
     offset_x: float,
     offset_y: float,
-) -> tuple[dict[str, str], dict[str, str]]:
+) -> Tuple[dict[str, str], dict[str, str]]:
     """Paste logical outcomes and their visual aliases into the target."""
 
     outcome_instance_map: dict[str, str] = {}

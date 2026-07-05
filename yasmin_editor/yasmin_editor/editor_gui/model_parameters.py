@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, Tuple, Union, List
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.parameter import Parameter
@@ -25,7 +25,7 @@ ParameterDict = Dict[str, Any]
 ContainerModel = Union[StateMachine, Concurrence]
 
 
-def parameters_to_dicts(parameters: list[Parameter]) -> list[ParameterDict]:
+def parameters_to_dicts(parameters: List[Parameter]) -> List[ParameterDict]:
     """Convert declared parameters into editor-table dictionaries."""
 
     return [
@@ -40,10 +40,10 @@ def parameters_to_dicts(parameters: list[Parameter]) -> list[ParameterDict]:
     ]
 
 
-def dicts_to_parameters(parameters: list[ParameterDict]) -> list[Parameter]:
+def dicts_to_parameters(parameters: List[ParameterDict]) -> List[Parameter]:
     """Normalize editor-table dictionaries back into parameter models."""
 
-    normalized: list[Parameter] = []
+    normalized: List[Parameter] = []
     for item in parameters:
         name = normalize_parameter_name(item.get("name"))
         if not name:
@@ -62,13 +62,13 @@ def dicts_to_parameters(parameters: list[ParameterDict]) -> list[Parameter]:
 def get_parameter_overwrites_for_child(
     container_model: ContainerModel,
     child_model: State,
-) -> list[ParameterDict]:
+) -> List[ParameterDict]:
     """Return child overwrite rows enriched with declared parent metadata."""
 
     declared_by_name = {
         parameter.name: parameter for parameter in container_model.parameters
     }
-    overwrites: list[ParameterDict] = []
+    overwrites: List[ParameterDict] = []
     for child_parameter, parent_parameter in child_model.parameter_mappings.items():
         declared = declared_by_name.get(parent_parameter)
         overwrites.append(
@@ -86,7 +86,7 @@ def get_parameter_overwrites_for_child(
 def apply_parameter_overwrites(
     container_model: ContainerModel,
     child_model: State,
-    overwrites: list[ParameterDict],
+    overwrites: List[ParameterDict],
 ) -> None:
     """Apply one child overwrite table back into the container and child models.
 
@@ -128,11 +128,11 @@ def normalize_parameter_name(value: Any) -> str:
 
 
 def iter_valid_overwrite_pairs(
-    overwrites: list[ParameterDict],
-) -> list[tuple[str, str]]:
+    overwrites: List[ParameterDict],
+) -> List[Tuple[str, str]]:
     """Return valid child-to-parent overwrite pairs from editor rows."""
 
-    pairs: list[tuple[str, str]] = []
+    pairs: List[Tuple[str, str]] = []
     for item in overwrites:
         child_parameter = normalize_parameter_name(item.get("child_parameter"))
         parent_parameter = normalize_parameter_name(item.get("name"))
@@ -141,10 +141,10 @@ def iter_valid_overwrite_pairs(
     return pairs
 
 
-def iter_declared_parameters(overwrites: list[ParameterDict]) -> list[Parameter]:
+def iter_declared_parameters(overwrites: List[ParameterDict]) -> List[Parameter]:
     """Return normalized parent parameter declarations from overwrite rows."""
 
-    declarations: list[Parameter] = []
+    declarations: List[Parameter] = []
     for item in overwrites:
         name = normalize_parameter_name(item.get("name"))
         if not name:

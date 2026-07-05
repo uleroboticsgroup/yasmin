@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import os
 import tempfile
-from typing import Optional
+from typing import Optional, Tuple
 
 from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets, exec_menu
 from yasmin_editor.editor_gui.colors import PALETTE
@@ -127,7 +127,7 @@ class EditorRuntimeMixin:
     def _runtime_ready(self) -> bool:
         return self.runtime is not None
 
-    def _get_live_runtime_active_path(self) -> tuple[str, ...]:
+    def _get_live_runtime_active_path(self) -> Tuple[str, ...]:
         if self.runtime is None or not self.runtime_mode_enabled:
             return tuple()
         try:
@@ -139,7 +139,7 @@ class EditorRuntimeMixin:
 
     def _get_live_runtime_transition(
         self,
-    ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
+    ) -> Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]]:
         if self.runtime is None or not self.runtime_mode_enabled:
             return None
 
@@ -157,7 +157,7 @@ class EditorRuntimeMixin:
     def _build_root_final_transition(
         self,
         outcome: Optional[str],
-    ) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
+    ) -> Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]]:
         active_path = normalize_runtime_path(self.runtime_active_path)
         if not active_path:
             return None
@@ -337,24 +337,24 @@ class EditorRuntimeMixin:
         )
 
     def _normalize_runtime_breakpoint_path(
-        self, path: tuple[str, ...]
-    ) -> tuple[str, ...]:
+        self, path: Tuple[str, ...]
+    ) -> Tuple[str, ...]:
         return normalize_runtime_path(path)
 
-    def _current_runtime_breakpoint_parent_path(self) -> tuple[str, ...]:
+    def _current_runtime_breakpoint_parent_path(self) -> Tuple[str, ...]:
         return breakpoint_parent_path(
             self.runtime_mode_enabled,
             self._get_current_runtime_container_path(),
         )
 
-    def _state_node_runtime_breakpoint_path(self, state_node) -> tuple[str, ...]:
+    def _state_node_runtime_breakpoint_path(self, state_node) -> Tuple[str, ...]:
         return state_breakpoint_path(
             self.runtime_mode_enabled,
             self._get_current_runtime_container_path(),
             getattr(state_node, "name", ""),
         )
 
-    def _runtime_breakpoint_marker_tooltip(self, state_path: tuple[str, ...]) -> str:
+    def _runtime_breakpoint_marker_tooltip(self, state_path: Tuple[str, ...]) -> str:
         return breakpoint_tooltip(state_path, self.runtime_breakpoints_before)
 
     def update_runtime_breakpoint_markers(self) -> None:
@@ -672,7 +672,7 @@ class EditorRuntimeMixin:
         if scrollbar is not None:
             scrollbar.setValue(scrollbar.maximum())
 
-    def on_runtime_active_state_changed(self, state_path: tuple[str, ...]) -> None:
+    def on_runtime_active_state_changed(self, state_path: Tuple[str, ...]) -> None:
         self.runtime_active_path = tuple(state_path or tuple())
         self._refresh_runtime_shell_context()
         self._follow_runtime_active_state()
@@ -681,7 +681,7 @@ class EditorRuntimeMixin:
 
     def on_runtime_transition_changed(
         self,
-        transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]],
+        transition: Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]],
     ) -> None:
         self.runtime_last_transition = transition
         self._refresh_runtime_shell_context()
@@ -762,7 +762,7 @@ class EditorRuntimeMixin:
         target_path = active_path[:-1] if active_path else tuple()
         self._navigate_to_runtime_container_path(target_path)
 
-    def _navigate_to_runtime_container_path(self, target_path: tuple[str, ...]) -> None:
+    def _navigate_to_runtime_container_path(self, target_path: Tuple[str, ...]) -> None:
         if not self.runtime_mode_enabled:
             return
 
@@ -778,7 +778,7 @@ class EditorRuntimeMixin:
                 return
             self.enter_container(container_node, show_status_message=False)
 
-    def _get_current_runtime_container_path(self) -> tuple[str, ...]:
+    def _get_current_runtime_container_path(self) -> Tuple[str, ...]:
         return current_runtime_container_path(
             explicit_path=self.current_runtime_container_path,
             current_container_path=self.current_container_path,

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-
+from typing import Tuple
 from yasmin_editor.dataclass_compat import dataclass
 
 
@@ -24,7 +24,7 @@ class ToolbarMenuSpec:
     object_name: str
     button_attribute_name: str
     text: str
-    action_attributes: tuple[str, ...]
+    action_attributes: Tuple[str, ...]
     tool_tip: str
     separator_before: bool = False
 
@@ -55,7 +55,7 @@ SELECTION_TOOLBAR_MENU = ToolbarMenuSpec(
     tool_tip="Open selection and shelf actions.",
 )
 
-TOOLBAR_MENU_SPECS: tuple[ToolbarMenuSpec, ...] = (
+TOOLBAR_MENU_SPECS: Tuple[ToolbarMenuSpec, ...] = (
     ADD_TOOLBAR_MENU,
     SELECTION_TOOLBAR_MENU,
 )

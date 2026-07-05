@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from yasmin_editor.dataclass_compat import dataclass
-from typing import Iterable
+from typing import Iterable, Tuple
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,7 +32,7 @@ class ActionSpec:
     status_tip: str = ""
 
 
-PRIMARY_TOOLBAR_ACTIONS: tuple[ActionSpec, ...] = (
+PRIMARY_TOOLBAR_ACTIONS: Tuple[ActionSpec, ...] = (
     ActionSpec(
         "new_action",
         "New",
@@ -100,7 +100,7 @@ PRIMARY_TOOLBAR_ACTIONS: tuple[ActionSpec, ...] = (
     ),
 )
 
-FILE_MENU_ACTIONS: tuple[ActionSpec, ...] = (
+FILE_MENU_ACTIONS: Tuple[ActionSpec, ...] = (
     ActionSpec(
         "new_action",
         "New",
@@ -135,7 +135,7 @@ FILE_MENU_ACTIONS: tuple[ActionSpec, ...] = (
     ),
 )
 
-ADD_MENU_ACTIONS: tuple[ActionSpec, ...] = (
+ADD_MENU_ACTIONS: Tuple[ActionSpec, ...] = (
     ActionSpec(
         "add_state_action",
         "Add State",
@@ -187,7 +187,7 @@ ADD_MENU_ACTIONS: tuple[ActionSpec, ...] = (
     ),
 )
 
-EDIT_MENU_ACTIONS: tuple[ActionSpec, ...] = (
+EDIT_MENU_ACTIONS: Tuple[ActionSpec, ...] = (
     ActionSpec(
         "edit_current_action",
         "Edit Current Container",
@@ -239,7 +239,7 @@ EDIT_MENU_ACTIONS: tuple[ActionSpec, ...] = (
     ),
 )
 
-VIEW_MENU_ACTIONS: tuple[ActionSpec, ...] = (
+VIEW_MENU_ACTIONS: Tuple[ActionSpec, ...] = (
     ActionSpec(
         "toggle_clipboard_action",
         "Toggle Shelf",
@@ -251,7 +251,7 @@ VIEW_MENU_ACTIONS: tuple[ActionSpec, ...] = (
     ),
 )
 
-HELP_MENU_ACTIONS: tuple[ActionSpec, ...] = (
+HELP_MENU_ACTIONS: Tuple[ActionSpec, ...] = (
     ActionSpec(
         "help_action",
         "Help",
@@ -261,7 +261,7 @@ HELP_MENU_ACTIONS: tuple[ActionSpec, ...] = (
     ),
 )
 
-ALL_ACTION_GROUPS: tuple[tuple[ActionSpec, ...], ...] = (
+ALL_ACTION_GROUPS: Tuple[Tuple[ActionSpec, ...], ...] = (
     PRIMARY_TOOLBAR_ACTIONS,
     FILE_MENU_ACTIONS,
     ADD_MENU_ACTIONS,
@@ -271,7 +271,7 @@ ALL_ACTION_GROUPS: tuple[tuple[ActionSpec, ...], ...] = (
 )
 
 
-def iter_action_specs(groups: Iterable[tuple[ActionSpec, ...]] = ALL_ACTION_GROUPS):
+def iter_action_specs(groups: Iterable[Tuple[ActionSpec, ...]] = ALL_ACTION_GROUPS):
     """Yield action specs in group order.
 
     The helper is intentionally tiny, but it gives tests and menu/toolbar wiring
@@ -283,7 +283,7 @@ def iter_action_specs(groups: Iterable[tuple[ActionSpec, ...]] = ALL_ACTION_GROU
 
 
 def action_specs_by_attribute(
-    groups: Iterable[tuple[ActionSpec, ...]] = ALL_ACTION_GROUPS,
+    groups: Iterable[Tuple[ActionSpec, ...]] = ALL_ACTION_GROUPS,
 ) -> dict[str, ActionSpec]:
     """Return the last visible spec for each QAction attribute name."""
 

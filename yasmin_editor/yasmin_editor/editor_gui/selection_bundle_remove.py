@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from typing import List, Set
 from yasmin_editor.editor_gui.selection_models import ContainerModel
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
@@ -22,16 +23,16 @@ from yasmin_editor.model.text_block import TextBlock
 
 def remove_selection_from_model(
     container_model: ContainerModel,
-    selected_state_names: set[str],
-    selected_outcome_instance_ids: set[str],
-    selected_text_blocks: list[TextBlock],
+    selected_state_names: Set[str],
+    selected_outcome_instance_ids: Set[str],
+    selected_text_blocks: List[TextBlock],
 ) -> None:
     """Remove the selected items from the source model."""
 
     for state_name in list(selected_state_names):
         container_model.remove_state(state_name)
 
-    removed_outcome_names: set[str] = set()
+    removed_outcome_names: Set[str] = set()
     for instance_id in list(selected_outcome_instance_ids):
         placement = container_model.layout.get_outcome_placement(instance_id)
         if placement is None:

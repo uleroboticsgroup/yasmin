@@ -14,8 +14,8 @@
 
 from __future__ import annotations
 
+from typing import Iterable, List, Set
 from yasmin_editor.dataclass_compat import dataclass, field
-from typing import Iterable
 
 _STATE_ITEM_CLASS_NAMES = frozenset({"StateNode", "ContainerStateNode"})
 _FINAL_OUTCOME_ITEM_CLASS_NAMES = frozenset({"FinalOutcomeNode"})
@@ -27,13 +27,13 @@ _CONNECTION_ITEM_CLASS_NAMES = frozenset({"ConnectionLine"})
 class SceneSelection:
     """Grouped editor-scene selection data."""
 
-    states: list[object] = field(default_factory=list)
-    final_outcomes: list[object] = field(default_factory=list)
-    text_blocks: list[object] = field(default_factory=list)
-    connections: list[object] = field(default_factory=list)
-    state_names: set[str] = field(default_factory=set)
-    outcome_instance_ids: set[str] = field(default_factory=set)
-    text_models: list[object] = field(default_factory=list)
+    states: List[object] = field(default_factory=list)
+    final_outcomes: List[object] = field(default_factory=list)
+    text_blocks: List[object] = field(default_factory=list)
+    connections: List[object] = field(default_factory=list)
+    state_names: Set[str] = field(default_factory=set)
+    outcome_instance_ids: Set[str] = field(default_factory=set)
+    text_models: List[object] = field(default_factory=list)
 
     @property
     def is_empty(self) -> bool:
@@ -42,7 +42,7 @@ class SceneSelection:
         )
 
 
-def _class_name_hierarchy(item: object) -> set[str]:
+def _class_name_hierarchy(item: object) -> Set[str]:
     return {cls.__name__ for cls in type(item).mro()}
 
 

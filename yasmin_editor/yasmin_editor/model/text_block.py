@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from typing import List
 from yasmin_editor.dataclass_compat import dataclass
 
 
@@ -25,9 +26,9 @@ class TextBlock:
     y: float = 0.0
     content: str = ""
 
-    def to_text_block_lines(self, prefix: str = "") -> list[str]:
+    def to_text_block_lines(self, prefix: str = "") -> List[str]:
         """Return lines for displaying this text block in to_string output."""
-        lines: list[str] = []
+        lines: List[str] = []
         preview = self.content.replace("\n", "\\n")
         lines.append(f"{prefix}    - ({self.x:.2f}, {self.y:.2f}): {preview}")
         return lines

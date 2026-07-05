@@ -14,14 +14,14 @@
 
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Tuple, List
 
 PointTuple = Tuple[float, float]
 
 
 def find_free_position(
     center: PointTuple,
-    occupied_positions: list[PointTuple],
+    occupied_positions: List[PointTuple],
     *,
     spacing_x: float = 180.0,
     spacing_y: float = 130.0,
@@ -62,11 +62,11 @@ def iter_candidate_positions(
     spacing_x: float,
     spacing_y: float,
     radius_limit: int,
-) -> list[PointTuple]:
+) -> List[PointTuple]:
     """Return candidate positions in the same ring order used by the editor."""
 
     center_x, center_y = center
-    candidates: list[PointTuple] = [(center_x, center_y)]
+    candidates: List[PointTuple] = [(center_x, center_y)]
     for radius in range(1, radius_limit + 1):
         for dy in range(-radius, radius + 1):
             for dx in range(-radius, radius + 1):
@@ -78,7 +78,7 @@ def iter_candidate_positions(
 
 def is_position_free(
     candidate: PointTuple,
-    occupied_positions: list[PointTuple],
+    occupied_positions: List[PointTuple],
     *,
     spacing_x: float,
     spacing_y: float,

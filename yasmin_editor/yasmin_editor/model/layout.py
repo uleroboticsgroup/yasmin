@@ -14,8 +14,9 @@
 
 from __future__ import annotations
 
-from yasmin_editor.dataclass_compat import dataclass, field
 from uuid import uuid4
+from typing import List, Dict
+from yasmin_editor.dataclass_compat import dataclass, field
 
 
 @dataclass(slots=True)
@@ -39,9 +40,9 @@ class OutcomePlacement:
 class Layout:
     """Stores positions for child states and final outcomes inside a container."""
 
-    state_positions: dict[str, Position] = field(default_factory=dict)
-    outcome_positions: dict[str, Position] = field(default_factory=dict)
-    outcome_placements: dict[str, OutcomePlacement] = field(default_factory=dict)
+    state_positions: Dict[str, Position] = field(default_factory=dict)
+    outcome_positions: Dict[str, Position] = field(default_factory=dict)
+    outcome_placements: Dict[str, OutcomePlacement] = field(default_factory=dict)
 
     def set_state_position(self, name: str, x: float, y: float) -> None:
         """Set the position of a child state."""
@@ -72,7 +73,7 @@ class Layout:
     def get_outcome_placements(
         self,
         outcome_name: str | None = None,
-    ) -> list[OutcomePlacement]:
+    ) -> List[OutcomePlacement]:
         """Return all stored outcome placements, optionally filtered by outcome name."""
 
         placements = list(self.outcome_placements.values())

@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Iterable
+from typing import Callable, Dict, Iterable, List, Set, Tuple
 from xml.etree import ElementTree as ET
 
 from yasmin_editor.model.concurrence import Concurrence
@@ -271,12 +271,12 @@ def _text_block_to_element(text_block: TextBlock) -> ET.Element:
 def _final_outcome_elements(
     outcome: Outcome,
     parent: StateMachine | Concurrence | OrthogonalState,
-) -> list[ET.Element]:
+) -> List[ET.Element]:
     """Serialize one logical outcome without mutating the in-memory layout."""
 
     serializable_placements = _serializable_outcome_placements(parent, outcome.name)
 
-    elements: list[ET.Element] = []
+    elements: List[ET.Element] = []
     for index, placement in enumerate(serializable_placements):
         element = ET.Element("FinalOutcome")
         element.set("name", outcome.name)
@@ -302,7 +302,7 @@ def _final_outcome_elements(
 def _serializable_outcome_placements(
     parent: StateMachine | Concurrence | OrthogonalState,
     outcome_name: str,
-) -> list[tuple[str | None, float, float] | None]:
+) -> List[Tuple[str | None, float, float] | None]:
     """Return outcome placements for XML serialization without changing layout state.
 
     Legacy layouts may still store only the primary ``outcome_positions`` entry without
@@ -370,7 +370,7 @@ def _parameter_to_element(parameter: Parameter) -> ET.Element:
 
 def _append_remap_elements(
     element: ET.Element,
-    mappings: dict[str, str],
+    mappings: Dict[str, str],
     tag: str,
 ) -> None:
     for old, new in mappings.items():
@@ -383,12 +383,12 @@ def _append_remap_elements(
 
 def _append_parameter_remaps(
     element: ET.Element,
-    parameter_mappings: dict[str, str],
+    parameter_mappings: Dict[str, str],
 ) -> None:
     _append_remap_elements(element, parameter_mappings, "ParamRemap")
 
 
-def _append_remaps(element: ET.Element, remappings: dict[str, str]) -> None:
+def _append_remaps(element: ET.Element, remappings: Dict[str, str]) -> None:
     _append_remap_elements(element, remappings, "Remap")
 
 
@@ -645,7 +645,7 @@ def _parse_state_machine_content(
             model.add_transition(state.name, transition)
 
 
-def _local_state_machine_targets(element: ET.Element) -> set[str]:
+def _local_state_machine_targets(element: ET.Element) -> Set[str]:
     targets = set(element.get("outcomes", "").split())
 
     for child in element:
@@ -672,7 +672,7 @@ def _is_leaked_same_name_container_transition(
     model: StateMachine,
     state_name: str,
     transition: Transition,
-    local_targets: set[str],
+    local_targets: Set[str],
 ) -> bool:
     return (
         state_name == model.name
@@ -827,11 +827,11 @@ def _parse_typed_elements(
     return result
 
 
-def _parse_parameters(elements: Iterable[ET.Element]) -> list[Parameter]:
+def _parse_parameters(elements: Iterable[ET.Element]) -> List[Parameter]:
     return _parse_typed_elements(elements, Parameter)
 
 
-def _parse_keys(elements: Iterable[ET.Element]) -> list[Key]:
+def _parse_keys(elements: Iterable[ET.Element]) -> List[Key]:
     return _parse_typed_elements(
         elements,
         Key,
@@ -839,8 +839,8 @@ def _parse_keys(elements: Iterable[ET.Element]) -> list[Key]:
     )
 
 
-def _parse_remap_dict(element: ET.Element, tag: str) -> dict[str, str]:
-    mappings: dict[str, str] = {}
+def _parse_remap_dict(element: ET.Element, tag: str) -> Dict[str, str]:
+    mappings: Dict[str, str] = {}
     for remap in element.findall(tag):
         old = remap.get("old", "")
         new = remap.get("new", "")
@@ -849,11 +849,11 @@ def _parse_remap_dict(element: ET.Element, tag: str) -> dict[str, str]:
     return mappings
 
 
-def _parse_parameter_remaps(element: ET.Element) -> dict[str, str]:
+def _parse_parameter_remaps(element: ET.Element) -> Dict[str, str]:
     return _parse_remap_dict(element, "ParamRemap")
 
 
-def _parse_remaps(element: ET.Element) -> dict[str, str]:
+def _parse_remaps(element: ET.Element) -> Dict[str, str]:
     return _parse_remap_dict(element, "Remap")
 
 

@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set, Tuple
 
 from yasmin_editor.qt_compat import Qt, QtWidgets, exec_dialog
 from yasmin_editor.editor_gui.blackboard_logic import (
@@ -137,7 +137,7 @@ class EditorBlackboardMixin:
     def _collect_blackboard_key_usage_for_model(
         self,
         container_model: StateMachine | Concurrence,
-    ) -> tuple[Dict[str, Dict[str, str]], set[str]]:
+    ) -> Tuple[Dict[str, Dict[str, str]], Set[str]]:
         """Collect derived key usage for one container model tree."""
 
         return collect_blackboard_key_usage_for_model(
@@ -315,7 +315,7 @@ class EditorBlackboardMixin:
 
     def _collect_container_key_lists(
         self, model: State
-    ) -> tuple[List[Dict[str, str]], List[Dict[str, str]]]:
+    ) -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
         """Return separate input and output key rows for one container."""
 
         return collect_container_key_lists(model)

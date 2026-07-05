@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
 import json
+import argparse
+from typing import List
 
 import rclpy
 from rclpy.node import Node
@@ -65,7 +66,7 @@ def _format_plugin_header(plugin) -> str:
     )
 
 
-def _format_plugin_details(plugin) -> list[str]:
+def _format_plugin_details(plugin) -> List[str]:
     """Format detailed plugin metadata lines."""
     details = [
         f"  class_name: {plugin.class_name}",

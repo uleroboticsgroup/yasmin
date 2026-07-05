@@ -21,10 +21,10 @@ paths and nested containers without scattering compatibility checks.
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, Dict, Optional, Set, Tuple
 
 
-def container_states(container: Any) -> dict[str, Any]:
+def container_states(container: Any) -> Dict[str, Any]:
     """Return a normalized mapping of child state names to runtime objects."""
     if container is None:
         return {}
@@ -50,7 +50,7 @@ def container_states(container: Any) -> dict[str, Any]:
     if not hasattr(states, "items"):
         return {}
 
-    normalized: dict[str, Any] = {}
+    normalized: Dict[str, Any] = {}
     for name, value in states.items():
         child_state = value
         if isinstance(value, dict):
@@ -97,7 +97,7 @@ def is_container_object(state: Any) -> bool:
     )
 
 
-def resolve_container(root_container: Any, path: tuple[str, ...]) -> Optional[Any]:
+def resolve_container(root_container: Any, path: Tuple[str, ...]) -> Optional[Any]:
     """Resolve a nested container path from the runtime root object."""
     container = root_container
     if container is None:
@@ -143,12 +143,12 @@ def get_container_entry_state_name(container: Any) -> Optional[str]:
 
 def expand_to_deepest_known_path(
     root_container: Any,
-    base_path: tuple[str, ...],
-) -> tuple[str, ...]:
+    base_path: Tuple[str, ...],
+) -> Tuple[str, ...]:
     """Follow container entry states until the deepest known active path is reached."""
     path = tuple(base_path)
     container = resolve_container(root_container, path)
-    visited: set[int] = set()
+    visited: Set[int] = set()
 
     while is_container_object(container) and id(container) not in visited:
         if is_concurrence_object(container):

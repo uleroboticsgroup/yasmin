@@ -15,15 +15,15 @@
 from __future__ import annotations
 
 from yasmin_editor.dataclass_compat import dataclass
-from typing import Iterable
+from typing import Iterable, Tuple
 
 
 @dataclass(frozen=True, slots=True)
 class SplitterLayoutSpec:
     """Layout defaults applied to a two-column QSplitter."""
 
-    initial_sizes: tuple[int, int]
-    stretch_factors: tuple[int, int]
+    initial_sizes: Tuple[int, int]
+    stretch_factors: Tuple[int, int]
     children_collapsible: bool = True
 
 

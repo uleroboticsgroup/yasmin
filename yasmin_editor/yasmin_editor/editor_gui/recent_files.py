@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, List, Set
 
 DEFAULT_MAX_RECENT_FILES = 10
 
@@ -37,9 +37,9 @@ def normalize_recent_file_path(file_path: str) -> str:
     return os.path.normpath(os.path.abspath(os.path.expanduser(file_path)))
 
 
-def _deduplicate_paths(file_paths: Iterable[str]) -> list[str]:
-    seen: set[str] = set()
-    ordered_paths: list[str] = []
+def _deduplicate_paths(file_paths: Iterable[str]) -> List[str]:
+    seen: Set[str] = set()
+    ordered_paths: List[str] = []
     for path in file_paths:
         if not path:
             continue
@@ -53,7 +53,7 @@ def _deduplicate_paths(file_paths: Iterable[str]) -> list[str]:
 
 def prune_recent_file_entries(
     file_paths: Iterable[str], *, existing_only: bool = False
-) -> list[str]:
+) -> List[str]:
     """Return cleaned recent-file entries with optional existence filtering."""
 
     entries = _deduplicate_paths(file_paths)
@@ -67,7 +67,7 @@ def update_recent_file_entries(
     file_path: str,
     *,
     max_entries: int = DEFAULT_MAX_RECENT_FILES,
-) -> list[str]:
+) -> List[str]:
     """Move one path to the front of the recent-files list."""
 
     normalized_file_path = normalize_recent_file_path(file_path)
@@ -92,7 +92,7 @@ class RecentFilesStore:
         )
         self.max_entries = max_entries
 
-    def load_entries(self, *, existing_only: bool = False) -> list[str]:
+    def load_entries(self, *, existing_only: bool = False) -> List[str]:
         """Load recent-file entries from disk.
 
         Invalid or unreadable files degrade gracefully to an empty list so the
@@ -111,7 +111,7 @@ class RecentFilesStore:
             : self.max_entries
         ]
 
-    def save_entries(self, file_paths: Iterable[str]) -> list[str]:
+    def save_entries(self, file_paths: Iterable[str]) -> List[str]:
         """Write recent-file entries to disk and return the stored list."""
 
         entries = prune_recent_file_entries(file_paths)[: self.max_entries]
@@ -121,7 +121,7 @@ class RecentFilesStore:
 
     def add_file(
         self, file_path: str, current_entries: Iterable[str] | None = None
-    ) -> list[str]:
+    ) -> List[str]:
         """Add one file path to the persistent recent-files list."""
 
         base_entries = (
@@ -138,7 +138,7 @@ class RecentFilesStore:
         self,
         file_path: str,
         current_entries: Iterable[str] | None = None,
-    ) -> list[str]:
+    ) -> List[str]:
         """Remove one file path from the persistent recent-files list."""
 
         normalized_file_path = normalize_recent_file_path(file_path)

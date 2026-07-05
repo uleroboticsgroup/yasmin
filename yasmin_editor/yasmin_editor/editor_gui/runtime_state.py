@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from yasmin_editor.dataclass_compat import dataclass
-from typing import Optional
+from typing import Optional, Tuple, List, Dict
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,15 +49,15 @@ class RuntimeLocalTransition:
     outcome: str
 
 
-def normalize_runtime_path(path: tuple[str, ...] | list[str] | None) -> tuple[str, ...]:
+def normalize_runtime_path(path: Tuple[str, ...] | List[str] | None) -> Tuple[str, ...]:
     """Normalize arbitrary runtime paths to a tuple of non-empty strings."""
     return tuple(str(item) for item in (path or tuple()) if str(item))
 
 
 def current_runtime_container_path(
-    explicit_path: tuple[str, ...] | list[str] | None,
-    current_container_path,
-) -> tuple[str, ...]:
+    explicit_path: Tuple[str, ...] | List[str] | None,
+    current_container_path: Tuple[str, ...] | List[str] | None,
+) -> Tuple[str, ...]:
     """Return the container path currently shown by the editor.
 
     Runtime mode can explicitly track the visible runtime container path. When
@@ -155,8 +155,8 @@ def runtime_button_states(
 
 
 def runtime_state_name_for_container(
-    active_path: tuple[str, ...] | list[str] | None,
-    current_path: tuple[str, ...] | list[str] | None,
+    active_path: Tuple[str, ...] | List[str] | None,
+    current_path: Tuple[str, ...] | List[str] | None,
 ) -> Optional[str]:
     """Return the active child state name visible in the current container."""
 
@@ -174,8 +174,8 @@ def runtime_state_name_for_container(
 
 
 def local_runtime_transition(
-    transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]],
-    current_path: tuple[str, ...] | list[str] | None,
+    transition: Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]],
+    current_path: Tuple[str, ...] | List[str] | None,
 ) -> Optional[RuntimeLocalTransition]:
     """Project one runtime transition into the currently visible container."""
 
@@ -206,9 +206,9 @@ def local_runtime_transition(
 
 def root_final_transition(
     root_state_name: str,
-    transitions_by_state: dict[str, list[object]],
+    transitions_by_state: Dict[str, List[object]],
     outcome: Optional[str],
-) -> Optional[tuple[tuple[str, ...], tuple[str, ...], str]]:
+) -> Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]]:
     """Resolve a finished root transition from the root container transitions."""
 
     normalized_outcome = str(outcome).strip() if outcome is not None else ""

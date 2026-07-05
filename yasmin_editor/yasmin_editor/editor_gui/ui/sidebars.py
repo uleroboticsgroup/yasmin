@@ -14,8 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Callable
-
+from typing import Callable, Tuple
 from yasmin_editor.qt_compat import QtWidgets
 
 
@@ -138,7 +137,7 @@ def build_filterable_list_section(
     *,
     filter_object_name: str,
     list_object_name: str,
-) -> tuple[QtWidgets.QLineEdit, QtWidgets.QListWidget]:
+) -> Tuple[QtWidgets.QLineEdit, QtWidgets.QListWidget]:
     """Create a titled filter + list section."""
     layout.addWidget(QtWidgets.QLabel(title))
 

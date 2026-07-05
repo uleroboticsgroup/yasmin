@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse
 import sys
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Tuple
 
 from yasmin_editor.qt_compat import exec_app
 
@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 
 
 def parse_cli_args(
-    argv: list[str] | None = None,
-) -> tuple[argparse.Namespace, list[str]]:
+    argv: List[str] | None = None,
+) -> Tuple[argparse.Namespace, List[str]]:
     """Parse editor-specific CLI arguments while preserving Qt arguments."""
 
     parser = argparse.ArgumentParser(add_help=True)
@@ -48,7 +48,7 @@ def viewport_is_ready(viewport: object, min_size: int = 10) -> bool:
     return viewport.width() >= min_size and viewport.height() >= min_size
 
 
-def build_qt_argv(program_name: str, qt_args: list[str]) -> list[str]:
+def build_qt_argv(program_name: str, qt_args: List[str]) -> List[str]:
     """Build the QApplication argument vector.
 
     The editor only consumes its own CLI flags. Every unknown argument is passed
@@ -89,7 +89,7 @@ def wait_for_canvas_ready(
     return False
 
 
-def create_application(argv: list[str]) -> "QtWidgets.QApplication":
+def create_application(argv: List[str]) -> "QtWidgets.QApplication":
     from yasmin_editor.qt_compat import QtWidgets
 
     return QtWidgets.QApplication(argv)
@@ -123,7 +123,7 @@ def open_startup_xml(editor: "YasminEditor", xml_file: str) -> None:
         )
 
 
-def run_editor(argv: list[str] | None = None) -> int:
+def run_editor(argv: List[str] | None = None) -> int:
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
     raw_argv = list(sys.argv if argv is None else argv)

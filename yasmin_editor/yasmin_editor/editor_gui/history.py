@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from typing import List, Tuple
 from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.state_machine import StateMachine
@@ -27,7 +28,7 @@ class EditorHistorySnapshot:
     """Serializable editor state used by the history stack."""
 
     root_model: StateMachine
-    container_path: tuple[str, ...] = tuple()
+    container_path: Tuple[str, ...] = tuple()
     current_file_path: str | None = None
 
 
@@ -36,8 +37,8 @@ class EditorHistory:
 
     def __init__(self, max_entries: int = 100) -> None:
         self.max_entries = max(2, int(max_entries))
-        self._undo_stack: list[EditorHistorySnapshot] = []
-        self._redo_stack: list[EditorHistorySnapshot] = []
+        self._undo_stack: List[EditorHistorySnapshot] = []
+        self._redo_stack: List[EditorHistorySnapshot] = []
 
     @property
     def can_undo(self) -> bool:
@@ -119,7 +120,7 @@ class EditorHistory:
         return snapshot
 
 
-def container_path_names(container_path: list[ContainerModel]) -> tuple[str, ...]:
+def container_path_names(container_path: List[ContainerModel]) -> Tuple[str, ...]:
     """Return the nested container path relative to the root container."""
 
     return tuple(container.name for container in container_path[1:])
@@ -127,11 +128,11 @@ def container_path_names(container_path: list[ContainerModel]) -> tuple[str, ...
 
 def resolve_container_path(
     root_model: StateMachine,
-    path_names: tuple[str, ...],
-) -> list[ContainerModel]:
+    path_names: Tuple[str, ...],
+) -> List[ContainerModel]:
     """Resolve one nested container path against the provided root model."""
 
-    resolved_path: list[ContainerModel] = [root_model]
+    resolved_path: List[ContainerModel] = [root_model]
     current: ContainerModel = root_model
 
     for name in path_names:

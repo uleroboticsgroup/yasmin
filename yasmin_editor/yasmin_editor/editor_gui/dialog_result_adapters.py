@@ -14,40 +14,40 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, List
 
 PluginStateDialogResult = Tuple[
     str,
     Any,
-    list[str],
-    dict[str, str],
+    List[str],
+    Dict[str, str],
     str,
-    list[dict[str, Any]],
-    list[dict[str, Any]],
+    List[Dict[str, Any]],
+    List[Dict[str, Any]],
 ]
 StateMachineDialogResult = Tuple[
     str,
-    list[str],
+    List[str],
     str | None,
-    dict[str, str],
+    Dict[str, str],
     str,
-    list[dict[str, Any]],
+    List[Dict[str, Any]],
 ]
 ConcurrenceDialogResult = Tuple[
     str,
-    list[str],
+    List[str],
     str | None,
-    dict[str, str],
+    Dict[str, str],
     str,
-    list[dict[str, Any]],
+    List[Dict[str, Any]],
 ]
 OrthogonalStateDialogResult = Tuple[
     str,
-    list[str],
+    List[str],
     str | None,
-    dict[str, str],
+    Dict[str, str],
     str,
-    list[dict[str, Any]],
+    List[Dict[str, Any]],
 ]
 JoinStateDialogResult = Tuple[
     str,
@@ -60,10 +60,10 @@ JoinStateDialogResult = Tuple[
 def _build_container_kwargs(
     *,
     name: str,
-    outcomes: list[str],
-    remappings: dict[str, str],
+    outcomes: List[str],
+    remappings: Dict[str, str],
     description: str,
-    defaults: list[dict[str, Any]],
+    defaults: List[Dict[str, Any]],
     is_state_machine: bool,
     start_state: str | None,
     default_outcome: str | None,

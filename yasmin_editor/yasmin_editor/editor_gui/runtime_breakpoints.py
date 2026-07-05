@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, List, Set
 from yasmin_editor.editor_gui.runtime_state import normalize_runtime_path
 
 BreakpointPath = Tuple[str, ...]
@@ -22,7 +22,7 @@ BreakpointPath = Tuple[str, ...]
 
 def breakpoint_parent_path(
     runtime_mode_enabled: bool,
-    current_container_path: tuple[str, ...] | list[str] | None,
+    current_container_path: Tuple[str, ...] | List[str] | None,
 ) -> BreakpointPath:
     """Return the runtime container path that owns visible breakpoint markers."""
 
@@ -33,7 +33,7 @@ def breakpoint_parent_path(
 
 def state_breakpoint_path(
     runtime_mode_enabled: bool,
-    current_container_path: tuple[str, ...] | list[str] | None,
+    current_container_path: Tuple[str, ...] | List[str] | None,
     state_name: object,
 ) -> BreakpointPath:
     """Return the full runtime breakpoint path for one visible state node."""
@@ -60,7 +60,7 @@ def breakpoint_tooltip(
 def toggle_breakpoint_before(
     before_paths: Iterable[BreakpointPath],
     state_path: BreakpointPath,
-) -> tuple[set[BreakpointPath], str]:
+) -> Tuple[Set[BreakpointPath], str]:
     """Toggle one breakpoint path and return the updated set and action label."""
 
     updated_paths = set(before_paths)

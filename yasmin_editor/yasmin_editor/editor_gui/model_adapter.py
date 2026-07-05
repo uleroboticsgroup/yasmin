@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
@@ -171,7 +171,7 @@ class EditorModelAdapter:
         outcome_model: Outcome,
         x: float | None = None,
         y: float | None = None,
-    ) -> list[FinalOutcomeNode]:
+    ) -> List[FinalOutcomeNode]:
         container_model = self.editor.current_container_model
         placements = container_model.layout.get_outcome_placements(outcome_model.name)
         if not placements:
@@ -192,7 +192,7 @@ class EditorModelAdapter:
             placement = container_model.layout.get_outcome_placement(instance_id)
             placements = [placement] if placement is not None else []
 
-        created_nodes: list[FinalOutcomeNode] = []
+        created_nodes: List[FinalOutcomeNode] = []
         for placement in placements:
             if placement is None or placement.instance_id in self.editor.final_outcomes:
                 continue

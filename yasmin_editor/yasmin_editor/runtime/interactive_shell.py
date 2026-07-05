@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import builtins
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional, List
 
 _MISSING = object()
 
@@ -94,13 +94,13 @@ class SafeBlackboardProxy:
         except Exception:
             return 0
 
-    def get_remappings(self) -> dict[str, str]:
+    def get_remappings(self) -> Dict[str, str]:
         try:
             return dict(self._require_blackboard().get_remappings())
         except Exception:
             return {}
 
-    def set_remappings(self, remappings: dict[str, str]) -> None:
+    def set_remappings(self, remappings: Dict[str, str]) -> None:
         self._require_blackboard().set_remappings(remappings)
 
     def keys(self):
@@ -158,7 +158,7 @@ class SafeBlackboardProxy:
         except Exception as exc:
             return f"<SafeBlackboardProxy unavailable error={exc}>"
 
-    def __dir__(self) -> list[str]:
+    def __dir__(self) -> List[str]:
         return sorted(
             {
                 "contains",
@@ -253,7 +253,7 @@ class InteractiveShellManager(QtCore.QObject):
         self._widget: Optional[RichJupyterWidget] = None
         self._kernel_manager: Optional[QtInProcessKernelManager] = None
         self._kernel_client = None
-        self._commands: dict[str, _RuntimeShellCommand] = {}
+        self._commands: Dict[str, _RuntimeShellCommand] = {}
         self._banner = (
             "YASMIN interactive shell\n"
             "\n"
@@ -297,7 +297,7 @@ class InteractiveShellManager(QtCore.QObject):
         sm: Any,
         current_state: Any = None,
         last_state: Any = None,
-        commands: Optional[dict[str, Callable[[], Any]]] = None,
+        commands: Optional[Dict[str, Callable[[], Any]]] = None,
         active_path: Any = None,
         last_transition: Any = None,
     ) -> None:
@@ -333,7 +333,7 @@ class InteractiveShellManager(QtCore.QObject):
         sm: Any,
         current_state: Any = None,
         last_state: Any = None,
-        commands: Optional[dict[str, Callable[[], Any]]] = None,
+        commands: Optional[Dict[str, Callable[[], Any]]] = None,
         active_path: Any = None,
         last_transition: Any = None,
     ) -> None:
@@ -538,7 +538,7 @@ class InteractiveShellManager(QtCore.QObject):
         sm: Any,
         current_state: Any = None,
         last_state: Any = None,
-        commands: Optional[dict[str, Callable[[], Any]]] = None,
+        commands: Optional[Dict[str, Callable[[], Any]]] = None,
         active_path: Any = None,
         last_transition: Any = None,
     ) -> None:

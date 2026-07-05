@@ -18,6 +18,7 @@ import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Dict, List
 
 from yasmin_factory.type_utils import (
     format_default_value,
@@ -38,8 +39,8 @@ from yasmin_cli.completer import (
 INPUT_KEY_TYPES = {"in", "in/out"}
 
 
-def _parse_assignments(values: list[str], assignment_kind: str) -> dict[str, str]:
-    result: dict[str, str] = {}
+def _parse_assignments(values: List[str], assignment_kind: str) -> Dict[str, str]:
+    result: Dict[str, str] = {}
 
     for value in values:
         if "=" not in value:
@@ -78,8 +79,8 @@ def _indent_xml(element: ET.Element, level: int = 0) -> None:
         element.tail = indent
 
 
-def _find_input_key_map(root: ET.Element) -> dict[str, ET.Element]:
-    result: dict[str, ET.Element] = {}
+def _find_input_key_map(root: ET.Element) -> Dict[str, ET.Element]:
+    result: Dict[str, ET.Element] = {}
 
     for child in root:
         if strip_namespace(child.tag) != "Key":
@@ -102,8 +103,8 @@ def _find_input_key_map(root: ET.Element) -> dict[str, ET.Element]:
     return result
 
 
-def _find_parameter_map(root: ET.Element) -> dict[str, ET.Element]:
-    result: dict[str, ET.Element] = {}
+def _find_parameter_map(root: ET.Element) -> Dict[str, ET.Element]:
+    result: Dict[str, ET.Element] = {}
 
     for child in root:
         if strip_namespace(child.tag) != "Param":
@@ -129,8 +130,8 @@ def _find_default_element(root: ET.Element, key_name: str) -> ET.Element | None:
 
 def _inject_overrides_into_xml(
     xml_path: str,
-    provided_inputs: dict[str, str],
-    provided_parameters: dict[str, str],
+    provided_inputs: Dict[str, str],
+    provided_parameters: Dict[str, str],
 ) -> str:
     tree = ET.parse(xml_path)
     root = tree.getroot()

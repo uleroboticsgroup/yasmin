@@ -26,10 +26,10 @@ class PluginInfo:
     """Store metadata of a discovered plugin."""
 
     @staticmethod
-    def _split_cpp_template_args(args: str) -> list[str]:
+    def _split_cpp_template_args(args: str) -> List[str]:
         """Split a C++ template argument list at top-level commas."""
-        parts: list[str] = []
-        current: list[str] = []
+        parts: List[str] = []
+        current: List[str] = []
         depth = 0
 
         for char in args:

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from typing import Dict, Optional
-
 from yasmin_editor.qt_compat import QtWidgets
 
 

@@ -15,11 +15,12 @@
 from __future__ import annotations
 
 import re
+from typing import Set
 
 _TRAILING_NUMBER_PATTERN = re.compile(r"^(.*?)(\d+)$")
 
 
-def increment_name(base_name: str, existing_names: set[str]) -> str:
+def increment_name(base_name: str, existing_names: Set[str]) -> str:
     """Return a name that follows the requested 2, 3, 4... suffix rule."""
 
     candidate = base_name.strip() or "state"

@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import os
-from typing import Iterable
+from typing import Iterable, List
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
@@ -82,9 +82,9 @@ def breadcrumb_label(
     return str(getattr(container_model, "name", container_model))
 
 
-def iter_xml_file_path_candidates(*sources: object | None) -> list[str]:
+def iter_xml_file_path_candidates(*sources: object | None) -> List[str]:
     """Collect candidate XML file paths from plugin and model metadata."""
-    candidates: list[str] = []
+    candidates: List[str] = []
     for source in sources:
         if source is None:
             continue

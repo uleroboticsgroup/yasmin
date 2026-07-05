@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from types import SimpleNamespace
-
 import pytest
+from types import SimpleNamespace
+from typing import List
 
 pytest.importorskip("yasmin_editor.qt_compat")
 
@@ -75,7 +75,7 @@ class FakeFinalOutcomeNode:
         self.name = name
 
 
-def make_node(name: str, outcomes: list[str]):
+def make_node(name: str, outcomes: List[str]):
     return SimpleNamespace(
         name=name,
         model=SimpleNamespace(outcomes=[Outcome(item) for item in outcomes]),

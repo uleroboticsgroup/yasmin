@@ -14,11 +14,11 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Tuple
 from yasmin_editor.editor_gui.selection_models import SelectionBundle
 
 
-def iter_bundle_points(bundle: SelectionBundle) -> Iterable[tuple[float, float]]:
+def iter_bundle_points(bundle: SelectionBundle) -> Iterable[Tuple[float, float]]:
     """Yield all positions that participate in the selection bounds."""
 
     for position in bundle.state_positions.values():
@@ -29,7 +29,7 @@ def iter_bundle_points(bundle: SelectionBundle) -> Iterable[tuple[float, float]]
         yield (text_block.x, text_block.y)
 
 
-def get_bundle_bounds(bundle: SelectionBundle) -> tuple[float, float, float, float]:
+def get_bundle_bounds(bundle: SelectionBundle) -> Tuple[float, float, float, float]:
     """Return the selection bounding box as min_x, min_y, max_x, max_y."""
 
     points = list(iter_bundle_points(bundle))

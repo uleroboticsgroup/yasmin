@@ -14,9 +14,9 @@
 
 from __future__ import annotations
 
-from yasmin_editor.dataclass_compat import dataclass
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, List
 
+from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
 from yasmin_editor.model.state_machine import StateMachine
@@ -28,7 +28,7 @@ class ContainerMetadataView:
 
     name_label_html: str
     selector_label_html: str
-    selector_items: list[str]
+    selector_items: List[str]
     current_selector_value: str | None
 
 

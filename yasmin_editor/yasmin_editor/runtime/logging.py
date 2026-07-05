@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, List
 
 import yasmin
 
@@ -59,7 +59,7 @@ class RuntimeLogger:
         self._clear_callback = clear_callback
         self._is_disposed = is_disposed
 
-        self._log_entries: list[str] = []
+        self._log_entries: List[str] = []
         self._log_buffer_lock = threading.Lock()
         self._last_log_message = ""
         self._last_log_timestamp = 0.0
@@ -70,7 +70,7 @@ class RuntimeLogger:
 
         self.configure()
 
-    def get_logs(self) -> list[str]:
+    def get_logs(self) -> List[str]:
         """Return a copy of the collected runtime log lines."""
         with self._log_buffer_lock:
             return list(self._log_entries)

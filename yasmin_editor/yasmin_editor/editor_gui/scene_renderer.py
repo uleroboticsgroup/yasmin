@@ -14,11 +14,11 @@
 
 from __future__ import annotations
 
-from typing import Callable, Protocol
+from typing import Callable, Protocol, List, Dict
 from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode, Dict
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
@@ -30,11 +30,12 @@ from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
 from yasmin_editor.model.text_block import TextBlock
+from yasmin_editor.model.layout import OutcomePlacement
 
 
 class _PluginInfoLike(Protocol):
     plugin_type: str | None
-    outcomes: list[str] | None
+    outcomes: List[str] | None
 
 
 SceneStateNode = StateNode | ContainerStateNode
@@ -47,10 +48,10 @@ class SceneRenderContext:
     """Scene-specific hooks and registries used during rendering."""
 
     scene: QtWidgets.QGraphicsScene
-    state_nodes: dict[str, SceneStateNode]
-    final_outcomes: dict[str, FinalOutcomeNode]
-    connections: list[ConnectionLine]
-    text_blocks: list[TextBlockNode]
+    state_nodes: Dict[str, SceneStateNode]
+    final_outcomes: Dict[str, FinalOutcomeNode]
+    connections: List[ConnectionLine]
+    text_blocks: List[TextBlockNode]
     clear_scene: Callable[[], None]
     register_state_node: Callable[[SceneStateNode], None]
     resolve_plugin_info: Callable[[State], _PluginInfoLike | None]
@@ -60,13 +61,13 @@ class SceneRenderContext:
         [SceneTargetView, SceneTargetView, str], ConnectionLine
     ]
     ensure_outcome_placements: Callable[
-        [ContainerModel, Outcome, int], list[OutcomePlacement]
+        [ContainerModel, Outcome, int], List[OutcomePlacement]
     ]
 
 
 def create_connection_view(
     scene: QtWidgets.QGraphicsScene,
-    connections: list[ConnectionLine],
+    connections: List[ConnectionLine],
     from_node: SceneTargetView,
     to_node: SceneTargetView,
     outcome: str,
@@ -214,7 +215,7 @@ def ensure_outcome_placements(
     model: ContainerModel,
     outcome_model: Outcome,
     fallback_index: int,
-) -> list[OutcomePlacement]:
+) -> List[OutcomePlacement]:
     """Return visible placements for one final outcome, creating a default alias if needed."""
 
     placements = model.layout.get_outcome_placements(outcome_model.name)

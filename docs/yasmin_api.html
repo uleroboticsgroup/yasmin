@@ -255,7 +255,7 @@
         <pre><code class="language-cpp">State(const std::set&lt;std::string&gt; &amp;outcomes);</code></pre>
 
         <h4>Python</h4>
-        <pre><code class="language-python">State(outcomes: list[str])</code></pre>
+        <pre><code class="language-python">State(outcomes: List[str])</code></pre>
 
         <h3>Core Methods</h3>
         <table>
@@ -324,7 +324,7 @@
                   const</code
                 >
               </td>
-              <td><code>def get_outcomes(self) -&gt; list[str]</code></td>
+              <td><code>def get_outcomes(self) -&gt; List[str]</code></td>
               <td>Returns the set of declared outcomes.</td>
             </tr>
           </tbody>
@@ -653,7 +653,7 @@ StateMachine(const std::string &amp;name,
              bool handle_sigint = false);</code></pre>
 
         <h4>Python</h4>
-        <pre><code class="language-python">StateMachine(outcomes: list[str], handle_sigint: bool = False)</code></pre>
+        <pre><code class="language-python">StateMachine(outcomes: List[str], handle_sigint: bool = False)</code></pre>
 
         <h3>State Management</h3>
         <table>
@@ -680,9 +680,9 @@ StateMachine(const std::string &amp;name,
               <td>
                 <code
                   >def add_state(<br />&nbsp;&nbsp;self, name: str,<br />&nbsp;&nbsp;state:
-                  State,<br />&nbsp;&nbsp;transitions: dict[str, str] = {},<br />&nbsp;&nbsp;remappings:
-                  dict[str, str] = {},<br />&nbsp;&nbsp;parameter_mappings:
-                  dict[str, str] = {}) -&gt; None</code
+                  State,<br />&nbsp;&nbsp;transitions: Dict[str, str] = {},<br />&nbsp;&nbsp;remappings:
+                  Dict[str, str] = {},<br />&nbsp;&nbsp;parameter_mappings:
+                  Dict[str, str] = {}) -&gt; None</code
                 >
               </td>
               <td>
@@ -1042,7 +1042,7 @@ outcome = sm(blackboard)</code></pre>
               <td>
                 <code>std::vector&lt;std::string&gt; keys() const</code>
               </td>
-              <td><code>def keys(self) -&gt; list[str]</code></td>
+              <td><code>def keys(self) -&gt; List[str]</code></td>
               <td>
                 Returns the list of keys visible in the current remapping scope.
               </td>
@@ -1072,7 +1072,7 @@ outcome = sm(blackboard)</code></pre>
               </td>
               <td>
                 <code
-                  >def set_remappings(self, remappings: dict[str, str]) -&gt;
+                  >def set_remappings(self, remappings: Dict[str, str]) -&gt;
                   None</code
                 >
               </td>
@@ -1141,7 +1141,7 @@ exists = bb.contains("counter")  # False</code></pre>
         std::function&lt;std::string(Blackboard::SharedPtr)&gt; callback);</code></pre>
 
         <h4>Python</h4>
-        <pre><code class="language-python">CbState(outcomes: list[str], callback: Callable[[Blackboard], str])</code></pre>
+        <pre><code class="language-python">CbState(outcomes: List[str], callback: Callable[[Blackboard], str])</code></pre>
 
         <p>
           The callback receives the shared <code>Blackboard</code> and must
@@ -1198,9 +1198,9 @@ sm.add_state("GREET", greeting_state, transitions={"done": "outcome1"})</code></
 
         <h4>Python</h4>
         <pre><code class="language-python">Concurrence(
-    states: dict[str, State],
+    states: Dict[str, State],
     default_outcome: str,
-    outcome_map: dict[str, dict[str, str]])</code></pre>
+    outcome_map: Dict[str, Dict[str, str]])</code></pre>
 
         <p>
           <code>states</code> maps logical names to <code>State</code> objects.
@@ -1376,7 +1376,7 @@ sm.add_state(
     const OutcomeMap &amp;outcome_map = {});</code></pre>
 
         <h4>Python</h4>
-        <pre><code class="language-python">OrthogonalState(default_outcome: str, outcome_map: dict[str, dict[str, str]] = {})</code></pre>
+        <pre><code class="language-python">OrthogonalState(default_outcome: str, outcome_map: Dict[str, Dict[str, str]] = {})</code></pre>
 
         <h3>Methods</h3>
         <table>

@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from typing import List, Dict
 from yasmin_editor.dataclass_compat import dataclass, field
 
 from .key import Key
@@ -27,11 +28,11 @@ class State:
 
     name: str
     description: str = ""
-    keys: list[Key] = field(default_factory=list)
-    outcomes: list[Outcome] = field(default_factory=list)
-    parameters: list[Parameter] = field(default_factory=list)
-    remappings: dict[str, str] = field(default_factory=dict)
-    parameter_mappings: dict[str, str] = field(default_factory=dict)
+    keys: List[Key] = field(default_factory=list)
+    outcomes: List[Outcome] = field(default_factory=list)
+    parameters: List[Parameter] = field(default_factory=list)
+    remappings: Dict[str, str] = field(default_factory=dict)
+    parameter_mappings: Dict[str, str] = field(default_factory=dict)
     state_type: str | None = None
     module: str | None = None
     class_name: str | None = None
@@ -80,8 +81,8 @@ class State:
 
     def _format_header(self) -> str:
         """Return a compact one-line header for this state."""
-        parts: list[str] = [self.name]
-        meta: list[str] = []
+        parts: List[str] = [self.name]
+        meta: List[str] = []
         if self.state_type:
             meta.append(f"type={self.state_type}")
         if self.class_name:

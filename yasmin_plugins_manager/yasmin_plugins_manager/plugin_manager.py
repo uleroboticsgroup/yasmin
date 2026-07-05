@@ -19,7 +19,7 @@ import os
 import time
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import yasmin
 from ament_index_python import (
@@ -226,27 +226,27 @@ class PluginManager:
         """
         return "__pluginlib__plugin" in resource_type
 
-    def _get_registered_plugin_resource_list(self) -> list[str]:
+    def _get_registered_plugin_resource_list(self) -> List[str]:
         """
         Return all pluginlib-related resource types from the ament index.
 
         Returns
         -------
-        list[str]
+        List[str]
             List of pluginlib resource type names.
         """
         return list(filter(self._is_plugin_resource_type, get_resource_types()))
 
-    def _get_cpp_plugin_resource_map(self) -> dict[str, list[str]]:
+    def _get_cpp_plugin_resource_map(self) -> Dict[str, List[str]]:
         """
         Build a mapping from package name to exported plugin XML resource paths.
 
         Returns
         -------
-        dict[str, list[str]]
+        Dict[str, List[str]]
             Mapping from package name to plugin XML paths relative to the package prefix.
         """
-        resource_map: dict[str, list[str]] = {}
+        resource_map: Dict[str, List[str]] = {}
 
         for plugin_resource in self._get_registered_plugin_resource_list():
             for package_name in get_resources(plugin_resource):
@@ -326,7 +326,7 @@ class PluginManager:
         self,
         package_name: str,
         tracked_files: Optional[List[dict]] = None,
-        cpp_resource_map: Optional[dict[str, list[str]]] = None,
+        cpp_resource_map: Optional[Dict[str, List[str]]] = None,
     ) -> None:
         """
         Discover YASMIN C++ plugins from pluginlib exports.
@@ -340,7 +340,7 @@ class PluginManager:
             Package name to inspect.
         tracked_files : Optional[List[dict]]
             Optional list that receives signatures of parsed plugin XML files.
-        cpp_resource_map : Optional[dict[str, list[str]]]
+        cpp_resource_map : Optional[Dict[str, List[str]]]
             Optional precomputed map of package names to plugin XML resource paths.
         """
         if cpp_resource_map is None:

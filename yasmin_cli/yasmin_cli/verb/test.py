@@ -18,6 +18,7 @@ import json
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import List, Dict
 
 from yasmin_cli.completer import (
     build_plugin_info,
@@ -35,8 +36,8 @@ from yasmin_factory.type_utils import (
 from yasmin_cli.verb.run import run_factory_node
 
 
-def _parse_assignments(values: list[str], assignment_kind: str) -> dict[str, str]:
-    result: dict[str, str] = {}
+def _parse_assignments(values: List[str], assignment_kind: str) -> Dict[str, str]:
+    result: Dict[str, str] = {}
 
     for value in values:
         if "=" not in value:
@@ -222,8 +223,8 @@ def _indent_xml(element: ET.Element, level: int = 0) -> None:
         element.tail = indent
 
 
-def _merge_plugin_keys(plugin) -> list[dict]:
-    merged_keys: dict[str, dict] = {}
+def _merge_plugin_keys(plugin) -> List[Dict]:
+    merged_keys: Dict[str, Dict] = {}
 
     for key in plugin.input_keys:
         name = key.get("name", "")
@@ -249,8 +250,8 @@ def _merge_plugin_keys(plugin) -> list[dict]:
 
 def _build_test_xml(
     plugin,
-    provided_inputs: dict[str, str],
-    provided_parameters: dict[str, str],
+    provided_inputs: Dict[str, str],
+    provided_parameters: Dict[str, str],
 ) -> str:
     outcomes = [outcome for outcome in plugin.outcomes if outcome]
     if not outcomes:
@@ -301,7 +302,7 @@ def _build_test_xml(
 
         ET.SubElement(root, "Key", key_attributes)
 
-    declared_parameter_names: list[str] = []
+    declared_parameter_names: List[str] = []
     for parameter in getattr(plugin, "parameters", []):
         parameter_name = parameter.get("name", "")
         if not parameter_name:
@@ -396,7 +397,7 @@ def _build_test_xml(
     return ET.tostring(root, encoding="unicode")
 
 
-def _print_plugin_input_summary(plugin, provided_inputs: dict[str, str]) -> None:
+def _print_plugin_input_summary(plugin, provided_inputs: Dict[str, str]) -> None:
     if not plugin.input_keys:
         return
 
@@ -421,7 +422,7 @@ def _print_plugin_input_summary(plugin, provided_inputs: dict[str, str]) -> None
             print(f"      {description}")
 
 
-def _print_plugin_parameter_summary(plugin, provided_parameters: dict[str, str]) -> None:
+def _print_plugin_parameter_summary(plugin, provided_parameters: Dict[str, str]) -> None:
     parameters = getattr(plugin, "parameters", [])
     if not parameters:
         return

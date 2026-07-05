@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import List, Union
+from typing import List, Union, Dict
 
 from yasmin_editor.dataclass_compat import dataclass, field
 
@@ -26,13 +26,13 @@ from .text_block import TextBlock
 OutcomeRuleValues = Union[str, List[str]]
 
 
-def iter_outcome_rule_values(values: OutcomeRuleValues) -> list[str]:
+def iter_outcome_rule_values(values: OutcomeRuleValues) -> List[str]:
     """Return one normalized list of unique child outcomes."""
 
     if isinstance(values, str):
         return [values] if values else []
 
-    normalized: list[str] = []
+    normalized: List[str] = []
     for outcome_name in values:
         if outcome_name and outcome_name not in normalized:
             normalized.append(outcome_name)
@@ -44,10 +44,10 @@ class ContainerState(State):
     """Abstract base for container states holding child states and outcome rules."""
 
     default_outcome: str | None = None
-    states: dict[str, State] = field(default_factory=dict)
-    outcome_map: dict[str, dict[str, list[str]]] = field(default_factory=dict)
+    states: Dict[str, State] = field(default_factory=dict)
+    outcome_map: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)
     layout: Layout = field(default_factory=Layout)
-    text_blocks: list[TextBlock] = field(default_factory=list)
+    text_blocks: List[TextBlock] = field(default_factory=list)
 
     @property
     def is_container(self) -> bool:
@@ -198,7 +198,7 @@ class ContainerState(State):
             state_outcomes = mapping.get(state_name)
             if state_outcomes is None:
                 continue
-            renamed_outcomes: list[str] = []
+            renamed_outcomes: List[str] = []
             for outcome_name in iter_outcome_rule_values(state_outcomes):
                 candidate = new_outcome if outcome_name == old_outcome else outcome_name
                 if candidate not in renamed_outcomes:
@@ -223,7 +223,7 @@ class ContainerState(State):
     def to_string(self, indent: int = 0) -> str:
         """Return a human-readable representation of the container."""
         prefix = " " * indent
-        lines: list[str] = []
+        lines: List[str] = []
         header = f"{prefix}{self._container_name}(name={self.name!r}"
         if self.default_outcome:
             header += f", default_outcome={self.default_outcome!r}"

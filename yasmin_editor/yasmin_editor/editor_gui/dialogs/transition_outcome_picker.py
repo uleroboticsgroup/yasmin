@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from typing import List
 from collections.abc import Sequence
 from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets
 
@@ -128,8 +129,8 @@ class TransitionOutcomePickerDialog(QtWidgets.QDialog):
     def _update_accept_button_state(self) -> None:
         self.accept_button.setEnabled(bool(self.selected_outcomes()))
 
-    def selected_outcomes(self) -> list[str]:
-        selected: list[str] = []
+    def selected_outcomes(self) -> List[str]:
+        selected: List[str] = []
         for index in range(self.outcome_list.count()):
             item = self.outcome_list.item(index)
             outcome_name = str(item.data(Qt.ItemDataRole.UserRole) or "")

@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Iterable
+from typing import Iterable, List, Set
 
 from yasmin_editor.editor_gui.selection_models import (
     ContainerModel,
@@ -45,7 +45,7 @@ def create_empty_bundle(container_model: ContainerModel) -> SelectionBundle:
 def copy_selected_states(
     bundle: SelectionBundle,
     container_model: ContainerModel,
-    selected_state_names: set[str],
+    selected_state_names: Set[str],
 ) -> None:
     """Copy selected states and their layout positions into the bundle."""
 
@@ -62,11 +62,11 @@ def copy_selected_states(
 def copy_selected_outcomes(
     bundle: SelectionBundle,
     container_model: ContainerModel,
-    selected_outcome_instance_ids: set[str],
-) -> set[str]:
+    selected_outcome_instance_ids: Set[str],
+) -> Set[str]:
     """Copy selected visual outcome aliases and return their logical names."""
 
-    selected_outcome_names: set[str] = set()
+    selected_outcome_names: Set[str] = set()
 
     for instance_id in selected_outcome_instance_ids:
         placement = container_model.layout.get_outcome_placement(instance_id)
@@ -108,9 +108,9 @@ def copy_selected_text_blocks(
 def copy_state_machine_links(
     bundle: SelectionBundle,
     container_model: StateMachine,
-    selected_state_names: set[str],
-    selected_outcome_names: set[str],
-    selected_outcome_instance_ids: set[str],
+    selected_state_names: Set[str],
+    selected_outcome_names: Set[str],
+    selected_outcome_instance_ids: Set[str],
 ) -> None:
     """Copy only transitions that stay inside the selected snapshot."""
 
@@ -136,8 +136,8 @@ def copy_state_machine_links(
 def copy_concurrence_rules(
     bundle: SelectionBundle,
     container_model: Concurrence | OrthogonalState,
-    selected_state_names: set[str],
-    selected_outcome_names: set[str],
+    selected_state_names: Set[str],
+    selected_outcome_names: Set[str],
 ) -> None:
     """Copy concurrence outcome-map rules that stay valid in the bundle."""
 
@@ -159,9 +159,9 @@ def copy_concurrence_rules(
 
 def collect_selection_bundle(
     container_model: ContainerModel,
-    selected_state_names: set[str],
-    selected_outcome_instance_ids: set[str],
-    selected_text_blocks: list[TextBlock],
+    selected_state_names: Set[str],
+    selected_outcome_instance_ids: Set[str],
+    selected_text_blocks: List[TextBlock],
 ) -> SelectionBundle:
     """Build a portable snapshot from the selected model items."""
 

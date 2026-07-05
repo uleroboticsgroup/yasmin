@@ -17,6 +17,7 @@ from __future__ import annotations
 import sys
 import types
 from dataclasses import dataclass, field
+from typing import List
 
 
 @dataclass
@@ -24,7 +25,7 @@ class FakePluginInfo:
     plugin_type: str = "python"
     module: str = "demo_pkg.demo_state"
     class_name: str = "DemoState"
-    outcomes: list[str] = field(default_factory=lambda: ["done", "failed"])
+    outcomes: List[str] = field(default_factory=lambda: ["done", "failed"])
     package_name: str = "demo_pkg"
     file_name: str = "demo_state.xml"
 

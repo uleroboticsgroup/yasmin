@@ -19,7 +19,7 @@ import platform
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 from ament_index_python import get_packages_with_prefixes
 
@@ -53,7 +53,7 @@ def get_cache_file(cache_dir: Optional[Path] = None) -> Path:
     return ensure_cache_dir(cache_dir) / "plugins_cache.json"
 
 
-def get_ignored_packages_from_env() -> list[str]:
+def get_ignored_packages_from_env() -> List[str]:
     """Return the sorted package ignore list configured through the environment."""
     raw_value = os.environ.get(IGNORE_PACKAGES_ENV_VAR, "")
     if not raw_value.strip():

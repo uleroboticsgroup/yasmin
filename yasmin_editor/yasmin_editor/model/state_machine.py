@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-
+from typing import List, Dict, Tuple, Set
 from yasmin_editor.dataclass_compat import dataclass, field
 
 from .layout import Layout
@@ -27,10 +27,10 @@ class StateMachine(State):
     """Represents a YASMIN state machine container."""
 
     start_state: str | None = None
-    states: dict[str, State] = field(default_factory=dict)
-    transitions: dict[str, list[Transition]] = field(default_factory=dict)
+    states: Dict[str, State] = field(default_factory=dict)
+    transitions: Dict[str, List[Transition]] = field(default_factory=dict)
     layout: Layout = field(default_factory=Layout)
-    text_blocks: list[TextBlock] = field(default_factory=list)
+    text_blocks: List[TextBlock] = field(default_factory=list)
 
     @property
     def is_container(self) -> bool:
@@ -174,8 +174,8 @@ class StateMachine(State):
         transitions = self.transitions.get(state_name, [])
         if not transitions:
             return
-        deduplicated: list[Transition] = []
-        seen: set[tuple[str, str]] = set()
+        deduplicated: List[Transition] = []
+        seen: Set[Tuple[str, str]] = set()
         for transition in transitions:
             source_outcome = (
                 new_outcome
@@ -208,7 +208,7 @@ class StateMachine(State):
     def to_string(self, indent: int = 0) -> str:
         """Return a human-readable representation of the state machine."""
         prefix = " " * indent
-        lines: list[str] = []
+        lines: List[str] = []
         header = f"{prefix}StateMachine(name={self.name!r}"
         if self.start_state:
             header += f", start_state={self.start_state!r}"

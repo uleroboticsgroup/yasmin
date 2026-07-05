@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import List, Tuple
 
 from ament_index_python import get_package_share_path
 from yasmin_factory import YasminFactory
@@ -24,19 +25,19 @@ from yasmin_plugins_manager import PluginManager
 from yasmin_cli.completer import xml_file_completer
 
 
-def _resolve_plugin_xml_files() -> list[tuple[str, Path]]:
+def _resolve_plugin_xml_files() -> List[Tuple[str, Path]]:
     """
     Collect all XML state machine files known to the plugin manager.
 
     Returns
     -------
-    list[tuple[str, Path]]
+    List[Tuple[str, Path]]
         Pairs of display label and absolute XML path.
     """
     plugin_manager = PluginManager()
     plugin_manager.load_all_plugins(hide_progress=True)
 
-    xml_files: list[tuple[str, Path]] = []
+    xml_files: List[Tuple[str, Path]] = []
 
     for plugin in plugin_manager.xml_files:
         if not plugin.package_name:
@@ -59,7 +60,7 @@ def _resolve_plugin_xml_files() -> list[tuple[str, Path]]:
     return xml_files
 
 
-def _validate_xml_file(xml_file: str, strict_mode: bool) -> tuple[bool, str]:
+def _validate_xml_file(xml_file: str, strict_mode: bool) -> Tuple[bool, str]:
     """
     Create a state machine from XML using the factory and validate it.
 
@@ -72,7 +73,7 @@ def _validate_xml_file(xml_file: str, strict_mode: bool) -> tuple[bool, str]:
 
     Returns
     -------
-    tuple[bool, str]
+    Tuple[bool, str]
         Validation success flag and a message.
     """
     try:
