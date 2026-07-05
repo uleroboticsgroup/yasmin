@@ -15,9 +15,7 @@
 import random
 from typing import Dict, List, Optional
 
-from PyQt5.QtCore import QSettings
-from PyQt5.QtGui import QCloseEvent, QCursor
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from yasmin_editor.qt_compat import QtCore, QtGui, QtWidgets
 from yasmin_plugins_manager.plugin_manager import PluginManager
 
 from yasmin_editor.editor_gui.clipboard_model import create_clipboard_container
@@ -30,12 +28,16 @@ from yasmin_editor.editor_gui.editor_mixin.editor_canvas_mixin import EditorCanv
 from yasmin_editor.editor_gui.editor_mixin.editor_document_mixin import (
     EditorDocumentMixin,
 )
-from yasmin_editor.editor_gui.editor_mixin.editor_history_mixin import EditorHistoryMixin
+from yasmin_editor.editor_gui.editor_mixin.editor_history_mixin import (
+    EditorHistoryMixin,
+)
 from yasmin_editor.editor_gui.editor_mixin.editor_clipboard_mixin import (
     EditorClipboardMixin,
 )
 from yasmin_editor.editor_gui.editor_mixin.editor_model_mixin import EditorModelMixin
-from yasmin_editor.editor_gui.editor_mixin.editor_runtime_mixin import EditorRuntimeMixin
+from yasmin_editor.editor_gui.editor_mixin.editor_runtime_mixin import (
+    EditorRuntimeMixin,
+)
 from yasmin_editor.editor_gui.editor_mixin.editor_ui_mixin import EditorUiMixin
 from yasmin_editor.editor_gui.model_adapter import EditorModelAdapter
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
@@ -62,7 +64,7 @@ class YasminEditor(
     EditorHistoryMixin,
     EditorModelMixin,
     EditorUiMixin,
-    QMainWindow,
+    QtWidgets.QMainWindow,
 ):
     """Main editor window for YASMIN state machines.
 
@@ -128,15 +130,15 @@ class YasminEditor(
         self.update_document_window_title()
 
         self.statusBar().showMessage("Loading plugins...")
-        QApplication.processEvents()
+        QtWidgets.QApplication.processEvents()
         self.populate_plugin_lists()
         self.statusBar().showMessage("Ready", 3000)
 
     @staticmethod
-    def _editor_settings() -> QSettings:
+    def _editor_settings() -> QtCore.QSettings:
         """Return the persistent settings store used by the editor UI."""
 
-        return QSettings("yasmin_editor", "yasmin_editor")
+        return QtCore.QSettings("yasmin_editor", "yasmin_editor")
 
     def _load_clipboard_panel_width(self) -> int:
         """Load the persisted shelf width or fall back to a safe default."""
@@ -151,7 +153,7 @@ class YasminEditor(
 
     def _apply_theme(self) -> None:
         """Apply the configured application palette and stylesheet."""
-        app = QApplication.instance()
+        app = QtWidgets.QApplication.instance()
         if app is None:
             return
         app.setPalette(build_qt_palette(PALETTE))
@@ -159,7 +161,7 @@ class YasminEditor(
 
     def _fit_initial_window_to_screen(self) -> None:
         """Clamp the initial editor window geometry to the active screen."""
-        app = QApplication.instance()
+        app = QtWidgets.QApplication.instance()
         if app is None:
             return
 
@@ -185,7 +187,7 @@ class YasminEditor(
             )
             for screen in screens
         ]
-        cursor_pos = QCursor.pos()
+        cursor_pos = QtGui.QCursor.pos()
         available = choose_preferred_screen_rect(
             screen_rects,
             cursor_x=cursor_pos.x(),
@@ -224,7 +226,7 @@ class YasminEditor(
             self.setGeometry(self._preferred_startup_screen.availableGeometry())
 
         self.show()
-        QApplication.processEvents()
+        QtWidgets.QApplication.processEvents()
 
         if window_handle is not None and self._preferred_startup_screen is not None:
             window_handle.setScreen(self._preferred_startup_screen)
@@ -244,7 +246,7 @@ class YasminEditor(
         """Update the name of the root state machine model."""
         self.root_model.name = value
 
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         """Handle window close event to ensure proper cleanup."""
         if not self.maybe_save_document_changes("closing"):
             event.ignore()

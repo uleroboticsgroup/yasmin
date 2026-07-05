@@ -12,25 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Clickable label items used by connection lines."""
-
 from typing import TYPE_CHECKING, Any
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QGraphicsRectItem, QGraphicsTextItem
+from yasmin_editor.qt_compat import Qt, QtWidgets
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
 
 
-class ConnectionLabelRectItem(QGraphicsRectItem):
+class ConnectionLabelRectItem(QtWidgets.QGraphicsRectItem):
     """Clickable label background that selects the owning connection."""
 
     def __init__(self, owner: "ConnectionLine") -> None:
         super().__init__()
         self.owner = owner
-        self.setAcceptedMouseButtons(Qt.LeftButton)
-        self.setCursor(Qt.PointingHandCursor)
+        self.setAcceptedMouseButtons(Qt.MouseButton.LeftButton)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def mousePressEvent(self, event: Any) -> None:
         self.owner.select_from_label(event)
@@ -39,14 +36,14 @@ class ConnectionLabelRectItem(QGraphicsRectItem):
         self.owner.start_rewire_from_label(event)
 
 
-class ConnectionLabelTextItem(QGraphicsTextItem):
+class ConnectionLabelTextItem(QtWidgets.QGraphicsTextItem):
     """Clickable label text that selects the owning connection."""
 
     def __init__(self, owner: "ConnectionLine", text: str) -> None:
         super().__init__(text)
         self.owner = owner
-        self.setAcceptedMouseButtons(Qt.LeftButton)
-        self.setCursor(Qt.PointingHandCursor)
+        self.setAcceptedMouseButtons(Qt.MouseButton.LeftButton)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def mousePressEvent(self, event: Any) -> None:
         self.owner.select_from_label(event)

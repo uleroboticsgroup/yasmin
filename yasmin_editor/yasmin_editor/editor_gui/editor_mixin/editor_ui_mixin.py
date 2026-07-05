@@ -15,17 +15,7 @@
 import os
 from typing import Optional
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (
-    QFileDialog,
-    QHBoxLayout,
-    QInputDialog,
-    QListWidget,
-    QListWidgetItem,
-    QMessageBox,
-    QSplitter,
-    QWidget,
-)
+from yasmin_editor.qt_compat import Qt, QtWidgets, exec_dialog
 from yasmin_editor.editor_gui.clipboard_model import is_container_empty
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.dialog_result_adapters import (
@@ -37,12 +27,16 @@ from yasmin_editor.editor_gui.dialog_result_adapters import (
 )
 from yasmin_editor.editor_gui.dialogs.concurrence_dialog import ConcurrenceDialog
 from yasmin_editor.editor_gui.dialogs.join_state_dialog import JoinStateDialog
-from yasmin_editor.editor_gui.dialogs.orthogonal_state_dialog import OrthogonalStateDialog
+from yasmin_editor.editor_gui.dialogs.orthogonal_state_dialog import (
+    OrthogonalStateDialog,
+)
 from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import (
     OutcomeDescriptionDialog,
 )
 from yasmin_editor.editor_gui.dialogs.state_machine_dialog import StateMachineDialog
-from yasmin_editor.editor_gui.dialogs.state_properties_dialog import StatePropertiesDialog
+from yasmin_editor.editor_gui.dialogs.state_properties_dialog import (
+    StatePropertiesDialog,
+)
 from yasmin_editor.editor_gui.dialogs.transition_outcome_picker import (
     TransitionOutcomePickerDialog,
 )
@@ -128,7 +122,7 @@ class EditorUiMixin:
         """Populate the plugin lists with available Python, C++, and XML states."""
         populate_plugin_list_widgets(self)
 
-    def filter_list(self, list_widget: QListWidget, text: str) -> None:
+    def filter_list(self, list_widget: QtWidgets.QListWidget, text: str) -> None:
         """Filter a list widget based on search text."""
         filter_list_widget(list_widget, text)
 
@@ -162,7 +156,7 @@ class EditorUiMixin:
 
         if not os.path.exists(file_path):
             self.remove_recent_file(file_path)
-            QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self,
                 "File Not Found",
                 f"The file does not exist anymore:\n{file_path}",
@@ -172,7 +166,9 @@ class EditorUiMixin:
         try:
             model = self.model_adapter.load_external_xml_model(file_path)
         except Exception as error:
-            QMessageBox.critical(self, "Error", f"Failed to open file: {str(error)}")
+            QtWidgets.QMessageBox.critical(
+                self, "Error", f"Failed to open file: {str(error)}"
+            )
             return False
 
         if not self.maybe_save_document_changes("opening another state machine"):
@@ -190,7 +186,7 @@ class EditorUiMixin:
     def open_state_machine(self) -> None:
         """Prompt for and open a state machine XML file."""
 
-        file_path, _ = QFileDialog.getOpenFileName(
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, "Open State Machine", "", "XML Files (*.xml)"
         )
         if not file_path:
@@ -204,13 +200,13 @@ class EditorUiMixin:
 
     def create_ui(self) -> None:
         """Create and setup the user interface."""
-        central_widget = QWidget()
+        central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
 
-        main_layout = QHBoxLayout(central_widget)
+        main_layout = QtWidgets.QHBoxLayout(central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        splitter = QSplitter(Qt.Horizontal)
+        splitter = QtWidgets.QSplitter(Qt.Orientation.Horizontal)
         main_layout.addWidget(splitter)
 
         build_menu_bar(self)
@@ -252,19 +248,19 @@ class EditorUiMixin:
             ),
         )
 
-        if dialog.exec_():
+        if exec_dialog(dialog):
             result = dialog.get_state_data()
             if result[0]:
                 self.create_state_node(**build_plugin_state_kwargs(result))
 
-    def on_plugin_double_clicked(self, item: QListWidgetItem) -> None:
-        plugin_info = item.data(Qt.UserRole)
+    def on_plugin_double_clicked(self, item: QtWidgets.QListWidgetItem) -> None:
+        plugin_info = item.data(Qt.ItemDataRole.UserRole)
         if plugin_info is None:
             return
         self._open_add_state_dialog_for_plugin(plugin_info)
 
-    def on_xml_double_clicked(self, item: QListWidgetItem) -> None:
-        xml_plugin = item.data(Qt.UserRole)
+    def on_xml_double_clicked(self, item: QtWidgets.QListWidgetItem) -> None:
+        xml_plugin = item.data(Qt.ItemDataRole.UserRole)
         if xml_plugin is None:
             return
         self._open_add_state_dialog_for_plugin(xml_plugin)
@@ -285,7 +281,7 @@ class EditorUiMixin:
                 self.current_container_model.parameters
             ),
         )
-        if dialog.exec_():
+        if exec_dialog(dialog):
             result = dialog.get_state_data()
             if result[0]:
                 self.create_state_node(**build_plugin_state_kwargs(result))
@@ -295,7 +291,7 @@ class EditorUiMixin:
             self._show_read_only_message()
             return
         dialog = StateMachineDialog(parent=self)
-        if dialog.exec_():
+        if exec_dialog(dialog):
             result = dialog.get_state_machine_data()
             if result:
                 self.create_state_node(**build_state_machine_kwargs(result))
@@ -305,7 +301,7 @@ class EditorUiMixin:
             self._show_read_only_message()
             return
         dialog = ConcurrenceDialog(parent=self)
-        if dialog.exec_():
+        if exec_dialog(dialog):
             result = dialog.get_concurrence_data()
             if result:
                 self.create_state_node(**build_concurrence_kwargs(result))
@@ -315,7 +311,7 @@ class EditorUiMixin:
             self._show_read_only_message()
             return
         dialog = OrthogonalStateDialog(parent=self)
-        if dialog.exec_():
+        if exec_dialog(dialog):
             result = dialog.get_orthogonal_state_data()
             if result:
                 self.create_state_node(**build_orthogonal_state_kwargs(result))
@@ -325,7 +321,7 @@ class EditorUiMixin:
             self._show_read_only_message()
             return
         dialog = JoinStateDialog(parent=self)
-        if dialog.exec_():
+        if exec_dialog(dialog):
             result = dialog.get_join_state_data()
             if result:
                 self.create_state_node(**build_join_state_kwargs(result))
@@ -345,7 +341,7 @@ class EditorUiMixin:
             return
 
         current_model = self.current_container_model
-        outcome_name, ok = QInputDialog.getText(
+        outcome_name, ok = QtWidgets.QInputDialog.getText(
             self, "Final Outcome", "Enter final outcome name:"
         )
         outcome_name = outcome_name.strip()
@@ -353,7 +349,7 @@ class EditorUiMixin:
             return
 
         if outcome_name in current_model.states:
-            QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self,
                 "Error",
                 f"Final outcome '{outcome_name}' conflicts with an existing state in this container!",
@@ -405,7 +401,9 @@ class EditorUiMixin:
                 used_outcomes,
             )
         except TransitionRuleError as exc:
-            QMessageBox.warning(self, getattr(exc, "title", "Error"), str(exc))
+            QtWidgets.QMessageBox.warning(
+                self, getattr(exc, "title", "Error"), str(exc)
+            )
             return
 
         if len(available_outcomes) < 2:
@@ -417,7 +415,7 @@ class EditorUiMixin:
             source_name=from_node.name,
             available_outcomes=available_outcomes,
         )
-        if picker.exec_():
+        if exec_dialog(picker):
             for outcome_name in picker.selected_outcomes():
                 self.create_connection(from_node, to_node, outcome_name)
 
@@ -478,7 +476,7 @@ class EditorUiMixin:
                 for transition in current_model.transitions.get(from_node.name, [])
             }
             if outcome in used_outcomes:
-                QMessageBox.warning(
+                QtWidgets.QMessageBox.warning(
                     self,
                     "Error",
                     f"Outcome '{outcome}' is already used for a transition!",
@@ -521,12 +519,16 @@ class EditorUiMixin:
 
         self.record_history_checkpoint()
 
-    def edit_final_outcome(self, outcome_node: Optional[FinalOutcomeNode] = None) -> None:
+    def edit_final_outcome(
+        self, outcome_node: Optional[FinalOutcomeNode] = None
+    ) -> None:
         if outcome_node is None:
             outcome_node = self.find_selected_item(FinalOutcomeNode)
 
         if outcome_node is None:
-            QMessageBox.warning(self, "Error", "Please select a final outcome to edit!")
+            QtWidgets.QMessageBox.warning(
+                self, "Error", "Please select a final outcome to edit!"
+            )
             return
 
         dialog = OutcomeDescriptionDialog(
@@ -537,13 +539,13 @@ class EditorUiMixin:
         )
 
         if self.is_read_only_mode():
-            dialog.exec_()
+            exec_dialog(dialog)
             return
 
-        if dialog.exec_():
+        if exec_dialog(dialog):
             new_name = dialog.get_outcome_name()
             if not new_name:
-                QMessageBox.warning(
+                QtWidgets.QMessageBox.warning(
                     self,
                     "Error",
                     "Final outcome name must not be empty!",
@@ -554,7 +556,7 @@ class EditorUiMixin:
                 new_name,
                 current_name=outcome_node.name,
             ):
-                QMessageBox.warning(
+                QtWidgets.QMessageBox.warning(
                     self,
                     "Error",
                     f"Final outcome '{new_name}' conflicts with an existing state or final outcome in this container!",
@@ -565,7 +567,7 @@ class EditorUiMixin:
                 try:
                     self.rename_final_outcome(outcome_node, new_name)
                 except ValueError as exc:
-                    QMessageBox.warning(self, "Error", str(exc))
+                    QtWidgets.QMessageBox.warning(self, "Error", str(exc))
                     return
 
             outcome_node.description = dialog.get_description()
@@ -606,16 +608,18 @@ class EditorUiMixin:
             container_kind=(
                 "Orthogonal State"
                 if isinstance(model, OrthogonalState)
-                else "Concurrence" if isinstance(model, Concurrence) else "State Machine"
+                else (
+                    "Concurrence" if isinstance(model, Concurrence) else "State Machine"
+                )
             ),
             readonly=self.is_read_only_mode(),
             enable_parameter_overwrites=parent_model is not None,
         )
         if self.is_read_only_mode():
-            dialog.exec_()
+            exec_dialog(dialog)
             return
 
-        if dialog.exec_():
+        if exec_dialog(dialog):
             result = dialog.get_state_data()
             if result and result[0]:
                 (
@@ -642,7 +646,7 @@ class EditorUiMixin:
                             outcome.name for outcome in parent_model.outcomes
                         ],
                     ):
-                        QMessageBox.warning(
+                        QtWidgets.QMessageBox.warning(
                             self,
                             "Error",
                             f"State '{name}' conflicts with an existing state or final outcome in this container!",
@@ -671,7 +675,9 @@ class EditorUiMixin:
     def edit_state(self) -> None:
         state_node = self.find_selected_state_node()
         if not state_node:
-            QMessageBox.warning(self, "Error", "Please select a state to edit!")
+            QtWidgets.QMessageBox.warning(
+                self, "Error", "Please select a state to edit!"
+            )
             return
 
         readonly = self.is_read_only_mode()
@@ -685,7 +691,9 @@ class EditorUiMixin:
         )
 
         if is_container:
-            input_keys, output_keys = self._collect_container_key_lists(state_node.model)
+            input_keys, output_keys = self._collect_container_key_lists(
+                state_node.model
+            )
             dialog = StatePropertiesDialog(
                 state_name=state_node.name,
                 plugin_info=None,
@@ -705,7 +713,9 @@ class EditorUiMixin:
                 defaults=getattr(state_node, "defaults", []),
                 fallback_input_keys=input_keys,
                 fallback_output_keys=output_keys,
-                fallback_parameters=self.parameters_to_dicts(state_node.model.parameters),
+                fallback_parameters=self.parameters_to_dicts(
+                    state_node.model.parameters
+                ),
                 container_kind=(
                     "Orthogonal State"
                     if state_node.is_orthogonal
@@ -714,9 +724,9 @@ class EditorUiMixin:
                 readonly=readonly,
             )
             if readonly:
-                dialog.exec_()
+                exec_dialog(dialog)
                 return
-            if dialog.exec_():
+            if exec_dialog(dialog):
                 result = dialog.get_state_data()
                 if result and result[0]:
                     (
@@ -755,9 +765,9 @@ class EditorUiMixin:
                 parent=self,
             )
             if readonly:
-                dialog.exec_()
+                exec_dialog(dialog)
                 return
-            if dialog.exec_():
+            if exec_dialog(dialog):
                 result = dialog.get_join_state_data()
                 if result:
                     name, sync_id, outcome, description = result
@@ -806,10 +816,10 @@ class EditorUiMixin:
             readonly=readonly,
         )
         if readonly:
-            dialog.exec_()
+            exec_dialog(dialog)
             return
 
-        if dialog.exec_():
+        if exec_dialog(dialog):
             result = dialog.get_state_data()
             if result[0]:
                 (

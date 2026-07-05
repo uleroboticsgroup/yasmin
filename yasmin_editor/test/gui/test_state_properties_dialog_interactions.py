@@ -20,13 +20,13 @@
 
 import pytest
 
-pytest.importorskip("PyQt5.QtCore")
-pytest.importorskip("PyQt5.QtTest")
-pytest.importorskip("PyQt5.QtWidgets")
+pytest.importorskip("yasmin_editor.qt_compat")
+pytest.importorskip("yasmin_editor.qt_compat")
+pytest.importorskip("yasmin_editor.qt_compat")
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QPushButton, QTableWidgetItem
+from yasmin_editor.qt_compat import Qt
+from yasmin_editor.qt_compat import QtTest
+from yasmin_editor.qt_compat import QtWidgets
 
 from gui_test_support import FakePluginInfo
 from yasmin_editor.editor_gui.dialogs.parameter_overwrite_dialog import (
@@ -37,10 +37,10 @@ from yasmin_editor.editor_gui.dialogs.state_properties_dialog import (
 )
 
 
-def _find_button_by_text(dialog, text: str) -> QPushButton:
+def _find_button_by_text(dialog, text: str) -> QtWidgets.QPushButton:
     # The toolbar-like table buttons are identified by text because they are
     # not standard buttons from a dialog button box.
-    for button in dialog.findChildren(QPushButton):
+    for button in dialog.findChildren(QtWidgets.QPushButton):
         if button.text() == text:
             return button
     raise AssertionError(f"Button '{text}' not found")
@@ -49,7 +49,9 @@ def _find_button_by_text(dialog, text: str) -> QPushButton:
 def _make_plugin(plugin_type: str, module: str, class_name: str) -> FakePluginInfo:
     # Build one fake plugin with enough metadata for the description panel and
     # result payload assertions.
-    plugin = FakePluginInfo(plugin_type=plugin_type, module=module, class_name=class_name)
+    plugin = FakePluginInfo(
+        plugin_type=plugin_type, module=module, class_name=class_name
+    )
     plugin.description = f"{class_name} description"
     plugin.parameters = [
         {
@@ -127,9 +129,9 @@ def test_state_properties_dialog_adds_parameter_overwrite_via_button_flow(
         self.description_edit.setPlainText("override timeout")
         self.default_type_combo.setCurrentText("int")
         self.default_value_edit.setText("25")
-        return self.Accepted
+        return QtWidgets.QDialog.DialogCode.Accepted
 
-    monkeypatch.setattr(ParameterOverwriteDialog, "exec_", fake_exec)
+    monkeypatch.setattr(ParameterOverwriteDialog, "exec", fake_exec)
 
     dialog = StatePropertiesDialog(
         available_plugins=[plugin],
@@ -139,9 +141,11 @@ def test_state_properties_dialog_adds_parameter_overwrite_via_button_flow(
     qapp.processEvents()
 
     dialog.name_edit.setFocus()
-    QTest.keyClicks(dialog.name_edit, "Worker")
+    QtTest.QTest.keyClicks(dialog.name_edit, "Worker")
 
-    QTest.mouseClick(_find_button_by_text(dialog, "Add Param Overwrite"), Qt.LeftButton)
+    QtTest.QTest.mouseClick(
+        _find_button_by_text(dialog, "Add Param Overwrite"), Qt.MouseButton.LeftButton
+    )
     qapp.processEvents()
 
     assert dialog.parameter_table.rowCount() == 1
@@ -150,12 +154,14 @@ def test_state_properties_dialog_adds_parameter_overwrite_via_button_flow(
     assert dialog.parameter_table.item(0, 2).text() == "int"
     assert dialog.parameter_table.item(0, 3).text() == "25"
 
-    QTest.mouseClick(_find_button_by_text(dialog, "Add Row"), Qt.LeftButton)
+    QtTest.QTest.mouseClick(
+        _find_button_by_text(dialog, "Add Row"), Qt.MouseButton.LeftButton
+    )
     qapp.processEvents()
 
     row = dialog.remappings_table.rowCount() - 1
-    dialog.remappings_table.setItem(row, 0, QTableWidgetItem("output"))
-    dialog.remappings_table.setItem(row, 1, QTableWidgetItem("bb_output"))
+    dialog.remappings_table.setItem(row, 0, QtWidgets.QTableWidgetItem("output"))
+    dialog.remappings_table.setItem(row, 1, QtWidgets.QTableWidgetItem("bb_output"))
 
     state_name, plugin_info, outcomes, remappings, description, defaults, overwrites = (
         dialog.get_state_data()

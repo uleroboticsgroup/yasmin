@@ -14,25 +14,8 @@
 
 from typing import Dict, List, Optional, Tuple
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (
-    QComboBox,
-    QDialog,
-    QDialogButtonBox,
-    QFormLayout,
-    QHBoxLayout,
-    QHeaderView,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QTableWidget,
-    QTableWidgetItem,
-    QTextEdit,
-    QVBoxLayout,
-    QWidget,
-)
+from yasmin_editor.qt_compat import Qt, QtWidgets, exec_dialog
 from yasmin_plugins_manager.plugin_info import PluginInfo
-
 from yasmin_editor.editor_gui.dialogs.parameter_overwrite_dialog import (
     ParameterOverwriteDialog,
 )
@@ -46,7 +29,7 @@ from yasmin_editor.editor_gui.state_properties_logic import (
 )
 
 
-class StatePropertiesDialog(QDialog):
+class StatePropertiesDialog(QtWidgets.QDialog):
     """Dialog for setting state properties."""
 
     def __init__(
@@ -59,7 +42,7 @@ class StatePropertiesDialog(QDialog):
         declared_parent_parameters: Optional[List[Dict[str, str]]] = None,
         outcomes: Optional[List[str]] = None,
         edit_mode: bool = False,
-        parent: Optional[QDialog] = None,
+        parent: Optional[QtWidgets.QDialog] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
         fallback_input_keys: Optional[List[Dict[str, str]]] = None,
@@ -90,15 +73,15 @@ class StatePropertiesDialog(QDialog):
         }
         self._enable_parameter_overwrites = enable_parameter_overwrites
 
-        layout: QFormLayout = QFormLayout(self)
+        layout: QtWidgets.QFormLayout = QtWidgets.QFormLayout(self)
         self._layout = layout
 
-        self.name_edit: QLineEdit = QLineEdit(state_name)
+        self.name_edit: QtWidgets.QLineEdit = QtWidgets.QLineEdit(state_name)
         self.name_edit.setPlaceholderText("Enter state name (required)")
         self.name_edit.setReadOnly(self.readonly)
         layout.addRow("Name:*", self.name_edit)
 
-        self.type_combo: QComboBox = QComboBox()
+        self.type_combo: QtWidgets.QComboBox = QtWidgets.QComboBox()
         self.type_combo.addItem("Python State")
         self.type_combo.addItem("C++ State")
         self.type_combo.addItem("XML File")
@@ -120,8 +103,8 @@ class StatePropertiesDialog(QDialog):
 
         layout.addRow("Type:", self.type_combo)
 
-        self.plugin_label: QLabel = QLabel("Plugin:*")
-        self.plugin_combo: QComboBox = QComboBox()
+        self.plugin_label: QtWidgets.QLabel = QtWidgets.QLabel("Plugin:*")
+        self.plugin_combo: QtWidgets.QComboBox = QtWidgets.QComboBox()
         self.available_plugins: List[PluginInfo] = available_plugins or []
         layout.addRow(self.plugin_label, self.plugin_combo)
 
@@ -135,43 +118,53 @@ class StatePropertiesDialog(QDialog):
             self.plugin_label.hide()
             self.plugin_combo.hide()
 
-        desc_label: QLabel = QLabel("<b>Description:</b>")
-        self.description_edit: QTextEdit = QTextEdit()
+        desc_label: QtWidgets.QLabel = QtWidgets.QLabel("<b>Description:</b>")
+        self.description_edit: QtWidgets.QTextEdit = QtWidgets.QTextEdit()
         self.description_edit.setMinimumHeight(240)
         self.description_edit.setMaximumHeight(320)
         self.description_edit.setReadOnly(True)
         self.description_edit.setProperty("viewerText", True)
         layout.addRow(desc_label, self.description_edit)
 
-        self.parameter_table = QTableWidget(0, 4)
+        self.parameter_table = QtWidgets.QTableWidget(0, 4)
         self.parameter_table.setHorizontalHeaderLabels(
             ["Name", "Overrides", "Type", "Default"]
         )
-        self.parameter_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.parameter_table.setSelectionBehavior(QTableWidget.SelectRows)
-        self.parameter_table.setSelectionMode(QTableWidget.SingleSelection)
+        self.parameter_table.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeMode.Stretch
+        )
+        self.parameter_table.setSelectionBehavior(
+            QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows
+        )
+        self.parameter_table.setSelectionMode(
+            QtWidgets.QAbstractItemView.SelectionMode.SingleSelection
+        )
         self.parameter_table.setMinimumHeight(100)
         self.parameter_table.setMaximumHeight(180)
-        self.parameter_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.parameter_table.setEditTriggers(
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
+        )
         self.parameter_table.setEnabled(
             self._enable_parameter_overwrites and not self.readonly
         )
-        self.parameter_table.itemDoubleClicked.connect(self.edit_parameter_overwrite_row)
+        self.parameter_table.itemDoubleClicked.connect(
+            self.edit_parameter_overwrite_row
+        )
 
         if self._enable_parameter_overwrites:
-            params_label = QLabel("<b>Params:</b>")
-            params_widget = QWidget()
-            params_layout = QVBoxLayout(params_widget)
+            params_label = QtWidgets.QLabel("<b>Params:</b>")
+            params_widget = QtWidgets.QWidget()
+            params_layout = QtWidgets.QVBoxLayout(params_widget)
             params_layout.setContentsMargins(0, 0, 0, 0)
             params_layout.addWidget(self.parameter_table)
 
-            param_btn_layout = QHBoxLayout()
-            add_param_btn = QPushButton("Add Param Overwrite")
+            param_btn_layout = QtWidgets.QHBoxLayout()
+            add_param_btn = QtWidgets.QPushButton("Add Param Overwrite")
             add_param_btn.setEnabled(not self.readonly)
             add_param_btn.clicked.connect(self.add_parameter_overwrite_row)
             param_btn_layout.addWidget(add_param_btn)
 
-            remove_param_btn = QPushButton("Remove Param Overwrite")
+            remove_param_btn = QtWidgets.QPushButton("Remove Param Overwrite")
             remove_param_btn.setEnabled(not self.readonly)
             remove_param_btn.clicked.connect(self.remove_parameter_overwrite_row)
             param_btn_layout.addWidget(remove_param_btn)
@@ -182,25 +175,29 @@ class StatePropertiesDialog(QDialog):
             for parameter_data in parameter_overwrites or []:
                 self._add_parameter_row_with_data(parameter_data)
 
-        remappings_label: QLabel = QLabel("<b>Remappings:</b>")
-        remappings_widget: QWidget = QWidget()
-        remappings_layout: QVBoxLayout = QVBoxLayout(remappings_widget)
+        remappings_label: QtWidgets.QLabel = QtWidgets.QLabel("<b>Remappings:</b>")
+        remappings_widget: QtWidgets.QWidget = QtWidgets.QWidget()
+        remappings_layout: QtWidgets.QVBoxLayout = QtWidgets.QVBoxLayout(
+            remappings_widget
+        )
         remappings_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.remappings_table: QTableWidget = QTableWidget(0, 2)
+        self.remappings_table: QtWidgets.QTableWidget = QtWidgets.QTableWidget(0, 2)
         self.remappings_table.setHorizontalHeaderLabels(["Old Key", "New Key"])
-        self.remappings_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.remappings_table.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeMode.Stretch
+        )
         self.remappings_table.setMinimumHeight(80)
         self.remappings_table.setMaximumHeight(150)
         self.remappings_table.setEnabled(not self.readonly)
         remappings_layout.addWidget(self.remappings_table)
 
-        remap_btn_layout: QHBoxLayout = QHBoxLayout()
-        add_remap_btn: QPushButton = QPushButton("Add Row")
+        remap_btn_layout: QtWidgets.QHBoxLayout = QtWidgets.QHBoxLayout()
+        add_remap_btn: QtWidgets.QPushButton = QtWidgets.QPushButton("Add Row")
         add_remap_btn.setEnabled(not self.readonly)
         add_remap_btn.clicked.connect(self.add_remapping_row)
         remap_btn_layout.addWidget(add_remap_btn)
-        remove_remap_btn: QPushButton = QPushButton("Remove Row")
+        remove_remap_btn: QtWidgets.QPushButton = QtWidgets.QPushButton("Remove Row")
         remove_remap_btn.setEnabled(not self.readonly)
         remove_remap_btn.clicked.connect(self.remove_remapping_row)
         remap_btn_layout.addWidget(remove_remap_btn)
@@ -235,10 +232,13 @@ class StatePropertiesDialog(QDialog):
                 )
             )
 
-        buttons: QDialogButtonBox = QDialogButtonBox(
-            QDialogButtonBox.Close
+        buttons: QtWidgets.QDialogButtonBox = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.StandardButton.Close
             if self.readonly
-            else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            else (
+                QtWidgets.QDialogButtonBox.StandardButton.Ok
+                | QtWidgets.QDialogButtonBox.StandardButton.Cancel
+            )
         )
         if self.readonly:
             buttons.rejected.connect(self.reject)
@@ -258,7 +258,7 @@ class StatePropertiesDialog(QDialog):
             declared_parameters=self._declared_state_parameters(),
             parent=self,
         )
-        if dialog.exec_():
+        if exec_dialog(dialog):
             self._add_parameter_row_with_data(dialog.get_parameter_data())
 
     def edit_parameter_overwrite_row(self, *_args) -> None:
@@ -273,7 +273,7 @@ class StatePropertiesDialog(QDialog):
             param_data=current_data,
             parent=self,
         )
-        if dialog.exec_():
+        if exec_dialog(dialog):
             self._set_parameter_row_data(row, dialog.get_parameter_data())
 
     def remove_parameter_overwrite_row(self) -> None:
@@ -288,8 +288,12 @@ class StatePropertiesDialog(QDialog):
         default_item = self.parameter_table.item(row, 3)
         return {
             "name": name_item.text().strip() if name_item else "",
-            "child_parameter": child_item.data(Qt.UserRole) if child_item else "",
-            "description": name_item.data(Qt.UserRole) if name_item else "",
+            "child_parameter": (
+                child_item.data(Qt.ItemDataRole.UserRole) if child_item else ""
+            ),
+            "description": (
+                name_item.data(Qt.ItemDataRole.UserRole) if name_item else ""
+            ),
             "default_type": type_item.text().strip() if type_item else "",
             "default_value": default_item.text().strip() if default_item else "",
         }
@@ -301,16 +305,16 @@ class StatePropertiesDialog(QDialog):
         default_type = str(parameter_data.get("default_type", "") or "").strip()
         default_value = str(parameter_data.get("default_value", "") or "").strip()
 
-        name_item = QTableWidgetItem(name)
-        name_item.setData(Qt.UserRole, description)
+        name_item = QtWidgets.QTableWidgetItem(name)
+        name_item.setData(Qt.ItemDataRole.UserRole, description)
         if description:
             name_item.setToolTip(description)
 
-        child_item = QTableWidgetItem(child_parameter)
-        child_item.setData(Qt.UserRole, child_parameter)
+        child_item = QtWidgets.QTableWidgetItem(child_parameter)
+        child_item.setData(Qt.ItemDataRole.UserRole, child_parameter)
 
-        type_item = QTableWidgetItem(default_type)
-        default_item = QTableWidgetItem(default_value)
+        type_item = QtWidgets.QTableWidgetItem(default_type)
+        default_item = QtWidgets.QTableWidgetItem(default_value)
 
         self.parameter_table.setItem(row, 0, name_item)
         self.parameter_table.setItem(row, 1, child_item)
@@ -340,8 +344,8 @@ class StatePropertiesDialog(QDialog):
     def _add_remapping_row_with_data(self, old_key: str, new_key: str) -> None:
         row = self.remappings_table.rowCount()
         self.remappings_table.insertRow(row)
-        self.remappings_table.setItem(row, 0, QTableWidgetItem(old_key))
-        self.remappings_table.setItem(row, 1, QTableWidgetItem(new_key))
+        self.remappings_table.setItem(row, 0, QtWidgets.QTableWidgetItem(old_key))
+        self.remappings_table.setItem(row, 1, QtWidgets.QTableWidgetItem(new_key))
 
     def update_description(self) -> None:
         plugin_info: Optional[PluginInfo] = (

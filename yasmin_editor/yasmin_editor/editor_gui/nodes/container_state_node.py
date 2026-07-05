@@ -14,10 +14,7 @@
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from PyQt5.QtCore import QPointF, Qt
-from PyQt5.QtGui import QBrush, QFont, QPen
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem, QMenu
-
+from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets, exec_menu
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
@@ -31,7 +28,7 @@ if TYPE_CHECKING:
     from yasmin_plugins_manager.plugin_info import PluginInfo
 
 
-class ContainerStateNode(BaseNodeMixin, QGraphicsRectItem):
+class ContainerStateNode(BaseNodeMixin, QtWidgets.QGraphicsRectItem):
     """Graphical representation of a nested State Machine or Concurrence."""
 
     def __init__(
@@ -47,7 +44,9 @@ class ContainerStateNode(BaseNodeMixin, QGraphicsRectItem):
         default_outcome: Optional[str] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
-        model: Optional[Union[StateMachine, Concurrence, OrthogonalState, State]] = None,
+        model: Optional[
+            Union[StateMachine, Concurrence, OrthogonalState, State]
+        ] = None,
         state_kind_label: Optional[str] = None,
         is_xml_reference: bool = False,
     ) -> None:
@@ -99,16 +98,16 @@ class ContainerStateNode(BaseNodeMixin, QGraphicsRectItem):
 
         self._apply_default_style()
 
-        self.title = QGraphicsTextItem(self.name, self)
+        self.title = QtWidgets.QGraphicsTextItem(self.name, self)
         self.title.setDefaultTextColor(PALETTE.text_primary)
-        title_font = QFont()
+        title_font = QtGui.QFont()
         title_font.setPointSize(10)
         title_font.setBold(True)
         self.title.setFont(title_font)
 
-        self.type_label = QGraphicsTextItem(self)
+        self.type_label = QtWidgets.QGraphicsTextItem(self)
         self.type_label.setDefaultTextColor(PALETTE.text_secondary)
-        type_font = QFont()
+        type_font = QtGui.QFont()
         type_font.setPointSize(8)
         type_font.setBold(True)
         self.type_label.setFont(type_font)
@@ -145,17 +144,17 @@ class ContainerStateNode(BaseNodeMixin, QGraphicsRectItem):
 
     def _apply_default_style(self) -> None:
         if self.is_xml_reference:
-            self.setBrush(QBrush(PALETTE.container_xml_fill))
-            self.setPen(QPen(PALETTE.container_xml_pen, 3))
+            self.setBrush(QtGui.QBrush(PALETTE.container_xml_fill))
+            self.setPen(QtGui.QPen(PALETTE.container_xml_pen, 3))
         elif self.is_concurrence:
-            self.setBrush(QBrush(PALETTE.container_concurrence_fill))
-            self.setPen(QPen(PALETTE.container_concurrence_pen, 3))
+            self.setBrush(QtGui.QBrush(PALETTE.container_concurrence_fill))
+            self.setPen(QtGui.QPen(PALETTE.container_concurrence_pen, 3))
         elif self.is_orthogonal:
-            self.setBrush(QBrush(PALETTE.container_orthogonal_fill))
-            self.setPen(QPen(PALETTE.container_orthogonal_pen, 3))
+            self.setBrush(QtGui.QBrush(PALETTE.container_orthogonal_fill))
+            self.setPen(QtGui.QPen(PALETTE.container_orthogonal_pen, 3))
         else:
-            self.setBrush(QBrush(PALETTE.container_state_machine_fill))
-            self.setPen(QPen(PALETTE.container_state_machine_pen, 3))
+            self.setBrush(QtGui.QBrush(PALETTE.container_state_machine_fill))
+            self.setPen(QtGui.QPen(PALETTE.container_state_machine_pen, 3))
 
     def update_start_state_label(self) -> None:
         self.update_label()
@@ -211,7 +210,7 @@ class ContainerStateNode(BaseNodeMixin, QGraphicsRectItem):
         self.update_label()
 
     def _on_double_click(self, editor: Any, event: Any) -> None:
-        if bool(event.modifiers() & Qt.ControlModifier):
+        if bool(event.modifiers() & Qt.KeyboardModifier.ControlModifier):
             editor.enter_container(self)
         else:
             editor.edit_state()
@@ -221,14 +220,14 @@ class ContainerStateNode(BaseNodeMixin, QGraphicsRectItem):
             if editor.show_runtime_breakpoint_menu(self, event.screenPos()):
                 return True
 
-        menu = QMenu()
+        menu = QtWidgets.QMenu()
         enter_action = menu.addAction("Enter")
         menu.addSeparator()
         edit_action = menu.addAction(
             "View Properties" if editor.is_read_only_mode() else "Edit Properties"
         )
         delete_action = None if editor.is_read_only_mode() else menu.addAction("Delete")
-        action = menu.exec_(event.screenPos())
+        action = exec_menu(menu, event.screenPos())
         if action == enter_action:
             editor.enter_container(self)
             return True
@@ -240,14 +239,19 @@ class ContainerStateNode(BaseNodeMixin, QGraphicsRectItem):
             return True
         return False
 
-    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
-        if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
+    def itemChange(
+        self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any
+    ) -> Any:
+        if (
+            change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionChange
+            and isinstance(value, QtCore.QPointF)
+        ):
             self.update_attached_connections()
-        elif change == QGraphicsItem.ItemSelectedChange:
+        elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
             self.update_selection_pen(
                 bool(value), default_pen_callback=self._apply_default_style
             )
         return super().itemChange(change, value)
 
-    def get_edge_point(self, target_pos: QPointF) -> QPointF:
+    def get_edge_point(self, target_pos: QtCore.QPointF) -> QtCore.QPointF:
         return BaseNodeMixin.get_edge_point(self, target_pos)

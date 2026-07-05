@@ -14,8 +14,7 @@
 
 from typing import Dict, List, Optional
 
-from PyQt5.QtCore import QPointF
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from yasmin_editor.qt_compat import QtCore, QtWidgets, exec_dialog
 from yasmin_plugins_manager.plugin_manager import PluginInfo
 
 from yasmin_editor.editor_gui.child_name_conflicts import (
@@ -144,7 +143,9 @@ class EditorModelMixin:
             parameter_mappings=parameter_mappings,
         )
 
-    def _create_connection_view(self, from_node, to_node, outcome: str) -> ConnectionLine:
+    def _create_connection_view(
+        self, from_node, to_node, outcome: str
+    ) -> ConnectionLine:
         return create_connection_view(
             self.canvas.scene,
             self.connections,
@@ -202,7 +203,7 @@ class EditorModelMixin:
                 new_name,
                 getattr(state_node, "parent_container", None),
             ):
-                QMessageBox.warning(
+                QtWidgets.QMessageBox.warning(
                     self,
                     "Error",
                     f"State '{new_name}' conflicts with an existing state or final outcome in this container!",
@@ -240,11 +241,11 @@ class EditorModelMixin:
     ) -> None:
         """Create a new state node in the canvas."""
         if not name:
-            QMessageBox.warning(self, "Validation Error", "Name is required!")
+            QtWidgets.QMessageBox.warning(self, "Validation Error", "Name is required!")
             return
 
         if self.has_state_name_conflict(name):
-            QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self,
                 "Error",
                 f"State '{name}' conflicts with an existing state or final outcome in this container!",
@@ -312,7 +313,7 @@ class EditorModelMixin:
         else:
             dialog = StateMachineDialog(parent=self)
             dialog_class = "state_machine"
-        if dialog.exec_():
+        if exec_dialog(dialog):
             if dialog_class == "orthogonal":
                 result = dialog.get_orthogonal_state_data()
                 param = result[2] if result else None
@@ -433,7 +434,9 @@ class EditorModelMixin:
             self.start_state_combo.addItem(item_name)
 
         if metadata_view.current_selector_value:
-            index = self.start_state_combo.findText(metadata_view.current_selector_value)
+            index = self.start_state_combo.findText(
+                metadata_view.current_selector_value
+            )
             self.start_state_combo.setCurrentIndex(index if index >= 0 else 0)
         else:
             self.start_state_combo.setCurrentIndex(0)
@@ -457,7 +460,9 @@ class EditorModelMixin:
                 text,
                 current_name=old_name,
                 sibling_state_names=parent_model.states,
-                sibling_outcome_names=[outcome.name for outcome in parent_model.outcomes],
+                sibling_outcome_names=[
+                    outcome.name for outcome in parent_model.outcomes
+                ],
             ):
                 return
             parent_model.rename_state(old_name, text)
@@ -565,7 +570,9 @@ class EditorModelMixin:
         return has_child_state_name_conflict(
             state_name,
             sibling_state_names=container_model.states,
-            sibling_outcome_names=[outcome.name for outcome in container_model.outcomes],
+            sibling_outcome_names=[
+                outcome.name for outcome in container_model.outcomes
+            ],
         )
 
     def has_final_outcome_name_conflict(
@@ -626,7 +633,7 @@ class EditorModelMixin:
     def finalize_pending_node_placement(
         self,
         node: StateNode | ContainerStateNode | FinalOutcomeNode | TextBlockNode,
-        scene_pos: QPointF,
+        scene_pos: QtCore.QPointF,
     ) -> None:
         node.setPos(scene_pos)
 
@@ -798,7 +805,8 @@ class EditorModelMixin:
                         if (
                             transition.source_outcome == connection.outcome
                             and transition.target == outcome_node.name
-                            and transition.target_instance_id == outcome_node.instance_id
+                            and transition.target_instance_id
+                            == outcome_node.instance_id
                         ):
                             transition.target_instance_id = replacement_view.instance_id
                             break
@@ -876,14 +884,15 @@ class EditorModelMixin:
             "Cannot save state machine. Please fix the following issues:\n\n"
             + "\n".join(errors)
         )
-        reply = QMessageBox.critical(
+        reply = QtWidgets.QMessageBox.critical(
             self,
             "Validation Errors",
             error_msg + "\n\nDo you want to save anyway?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
+            QtWidgets.QMessageBox.StandardButton.Yes
+            | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.No,
         )
-        return reply == QMessageBox.Yes
+        return reply == QtWidgets.QMessageBox.StandardButton.Yes
 
     def _normalize_save_file_path(self, file_path: str) -> str:
         """Return the normalized XML save path for the document."""
@@ -893,8 +902,11 @@ class EditorModelMixin:
     def _select_state_machine_save_path(self) -> Optional[str]:
         """Prompt the user for an XML save path."""
 
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "Save State Machine", self.current_file_path or "", "XML Files (*.xml)"
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "Save State Machine",
+            self.current_file_path or "",
+            "XML Files (*.xml)",
         )
         if not file_path:
             return None
@@ -915,7 +927,9 @@ class EditorModelMixin:
             self.statusBar().showMessage(f"Saved: {file_path}", 3000)
             return True
         except Exception as error:
-            QMessageBox.critical(self, "Error", f"Failed to save file: {str(error)}")
+            QtWidgets.QMessageBox.critical(
+                self, "Error", f"Failed to save file: {str(error)}"
+            )
             return False
 
     def save_state_machine(self) -> bool:
@@ -933,10 +947,10 @@ class EditorModelMixin:
             return False
         return self._save_state_machine_to_path(file_path)
 
-    def get_free_position(self) -> QPointF:
+    def get_free_position(self) -> QtCore.QPointF:
         """Get a free position close to the current viewport center."""
         if not hasattr(self, "canvas"):
-            return QPointF(100, 100)
+            return QtCore.QPointF(100, 100)
 
         viewport_rect = self.canvas.viewport().rect()
         visible_rect = self.canvas.mapToScene(viewport_rect).boundingRect()
@@ -948,7 +962,7 @@ class EditorModelMixin:
             + list(self.text_blocks)
         ]
         position = find_free_position(center, occupied_positions)
-        return QPointF(position[0], position[1])
+        return QtCore.QPointF(position[0], position[1])
 
     def load_from_xml(self, file_path: str) -> None:
         self.model_adapter.load_from_xml(file_path)

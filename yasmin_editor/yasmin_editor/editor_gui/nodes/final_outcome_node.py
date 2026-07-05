@@ -14,16 +14,13 @@
 
 from typing import Any, Optional
 
-from PyQt5.QtCore import QPointF
-from PyQt5.QtGui import QBrush, QFont, QPen
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem
-
+from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
 from yasmin_editor.model.outcome import Outcome
 
 
-class FinalOutcomeNode(BaseNodeMixin, QGraphicsRectItem):
+class FinalOutcomeNode(BaseNodeMixin, QtWidgets.QGraphicsRectItem):
     """Graphical representation of a final outcome."""
 
     def __init__(
@@ -42,12 +39,14 @@ class FinalOutcomeNode(BaseNodeMixin, QGraphicsRectItem):
 
         self._initialize_base_node_graphics(x, y)
 
-        self.setBrush(QBrush(PALETTE.final_outcome_fill))
-        self.setPen(QPen(PALETTE.final_outcome_pen, 3))
+        self.setBrush(QtGui.QBrush(PALETTE.final_outcome_fill))
+        self.setPen(QtGui.QPen(PALETTE.final_outcome_pen, 3))
 
-        self.text: QGraphicsTextItem = QGraphicsTextItem(self.name, self)
+        self.text: QtWidgets.QGraphicsTextItem = QtWidgets.QGraphicsTextItem(
+            self.name, self
+        )
         self.text.setDefaultTextColor(PALETTE.text_primary)
-        font: QFont = QFont()
+        font: QtGui.QFont = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
         self.text.setFont(font)
@@ -74,19 +73,28 @@ class FinalOutcomeNode(BaseNodeMixin, QGraphicsRectItem):
     def _on_double_click(self, editor: Any, event: Any) -> None:
         editor.edit_final_outcome(self)
 
-    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
-        if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
+    def itemChange(
+        self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any
+    ) -> Any:
+        if (
+            change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionChange
+            and isinstance(value, QtCore.QPointF)
+        ):
             value = self.constrain_position_to_parent(value)
             self.update_attached_connections()
 
-        elif change == QGraphicsItem.ItemPositionHasChanged:
+        elif (
+            change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged
+        ):
             self.notify_parent_container_resized()
 
-        elif change == QGraphicsItem.ItemSelectedChange:
-            self.update_selection_pen(bool(value), QPen(PALETTE.final_outcome_pen, 3))
+        elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
+            self.update_selection_pen(
+                bool(value), QtGui.QPen(PALETTE.final_outcome_pen, 3)
+            )
 
         return super().itemChange(change, value)
 
-    def get_edge_point(self, target_pos: QPointF) -> QPointF:
+    def get_edge_point(self, target_pos: QtCore.QPointF) -> QtCore.QPointF:
         """Get the point on the node edge that is centered on the closest side."""
         return BaseNodeMixin.get_edge_point(self, target_pos)

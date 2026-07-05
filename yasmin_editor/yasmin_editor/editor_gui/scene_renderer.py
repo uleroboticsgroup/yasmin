@@ -17,8 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Protocol
 
-from PyQt5.QtWidgets import QGraphicsScene
-
+from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
@@ -48,7 +47,7 @@ ContainerModel = StateMachine | Concurrence | OrthogonalState
 class SceneRenderContext:
     """Scene-specific hooks and registries used during rendering."""
 
-    scene: QGraphicsScene
+    scene: QtWidgets.QGraphicsScene
     state_nodes: dict[str, SceneStateNode]
     final_outcomes: dict[str, FinalOutcomeNode]
     connections: list[ConnectionLine]
@@ -67,7 +66,7 @@ class SceneRenderContext:
 
 
 def create_connection_view(
-    scene: QGraphicsScene,
+    scene: QtWidgets.QGraphicsScene,
     connections: list[ConnectionLine],
     from_node: SceneTargetView,
     to_node: SceneTargetView,
@@ -87,7 +86,7 @@ def create_connection_view(
 
 
 def create_text_block_view(
-    scene: QGraphicsScene,
+    scene: QtWidgets.QGraphicsScene,
     text_block_model: TextBlock,
     *,
     read_only: bool,
@@ -108,7 +107,7 @@ def create_text_block_view(
 
 
 def create_state_view(
-    scene: QGraphicsScene,
+    scene: QtWidgets.QGraphicsScene,
     state_model: State,
     *,
     resolve_plugin_info: Callable[[State], _PluginInfoLike | None],
@@ -193,7 +192,7 @@ def create_state_view(
 
 
 def create_final_outcome_view(
-    scene: QGraphicsScene,
+    scene: QtWidgets.QGraphicsScene,
     outcome_model: Outcome,
     placement: OutcomePlacement,
 ) -> FinalOutcomeNode:

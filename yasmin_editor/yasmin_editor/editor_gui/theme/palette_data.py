@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from PyQt5.QtGui import QColor
+from yasmin_editor.qt_compat import QtGui
 
 from yasmin_editor.editor_gui.theme.palette import (
     DARKMODE_PALETTE_NAME,
@@ -21,9 +21,9 @@ from yasmin_editor.editor_gui.theme.palette import (
 )
 
 
-def _color(red: int, green: int, blue: int) -> QColor:
+def _color(red: int, green: int, blue: int) -> QtGui.QColor:
     """Create a QColor from RGB values."""
-    return QColor(red, green, blue)
+    return QtGui.QColor(red, green, blue)
 
 
 PALETTES = {

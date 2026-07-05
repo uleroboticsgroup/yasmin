@@ -15,15 +15,7 @@
 import math
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set
 
-from PyQt5.QtCore import QPointF, Qt
-from PyQt5.QtGui import QBrush, QColor, QPen, QPolygonF
-from PyQt5.QtWidgets import (
-    QGraphicsEllipseItem,
-    QGraphicsItem,
-    QGraphicsLineItem,
-    QGraphicsPolygonItem,
-    QGraphicsTextItem,
-)
+from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets
 from yasmin_editor.editor_gui.colors import PALETTE
 
 if TYPE_CHECKING:
@@ -39,9 +31,11 @@ class BaseNodeMixin:
         self.parent_container: Optional["ContainerStateNode"] = None
 
         self.setPos(x, y)
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+        self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
+        self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
+        self.setFlag(
+            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True
+        )
 
     def add_connection(self, connection: "ConnectionLine") -> None:
         if connection not in self.connections:
@@ -58,14 +52,14 @@ class BaseNodeMixin:
             if connection.from_node == self
         }
 
-    def center_text_item(self, item: QGraphicsTextItem, y: float) -> None:
+    def center_text_item(self, item: QtWidgets.QGraphicsTextItem, y: float) -> None:
         text_rect = item.boundingRect()
         item.setPos(-text_rect.width() / 2.0, y)
 
-    def get_connection_point(self) -> QPointF:
+    def get_connection_point(self) -> QtCore.QPointF:
         return self.sceneBoundingRect().center()
 
-    def get_edge_point(self, target_pos: QPointF) -> QPointF:
+    def get_edge_point(self, target_pos: QtCore.QPointF) -> QtCore.QPointF:
         bounds = self.sceneBoundingRect()
         center = bounds.center()
         dx = target_pos.x() - center.x()
@@ -77,15 +71,15 @@ class BaseNodeMixin:
         half_width = max(bounds.width() / 2.0, 1.0)
         half_height = max(bounds.height() / 2.0, 1.0)
         scale = 1.0 / max(abs(dx) / half_width, abs(dy) / half_height, 1e-9)
-        return QPointF(center.x() + dx * scale, center.y() + dy * scale)
+        return QtCore.QPointF(center.x() + dx * scale, center.y() + dy * scale)
 
     def constrain_position_to_parent(
         self,
-        value: QPointF,
+        value: QtCore.QPointF,
         top_margin: float = 40.0,
         side_margin: float = 10.0,
         bottom_margin: float = 10.0,
-    ) -> QPointF:
+    ) -> QtCore.QPointF:
         if not self.parent_container:
             return value
 
@@ -99,7 +93,7 @@ class BaseNodeMixin:
 
         constrained_x = max(min_x, min(value.x(), max_x))
         constrained_y = max(min_y, min(value.y(), max_y))
-        return QPointF(constrained_x, constrained_y)
+        return QtCore.QPointF(constrained_x, constrained_y)
 
     def update_attached_connections(self) -> None:
         for connection in self.connections:
@@ -115,15 +109,15 @@ class BaseNodeMixin:
         marker_x = bounds.right() - marker_size / 2.0
         marker_y = bounds.center().y() - marker_size / 2.0
 
-        self.breakpoint_marker = QGraphicsEllipseItem(
+        self.breakpoint_marker = QtWidgets.QGraphicsEllipseItem(
             marker_x,
             marker_y,
             marker_size,
             marker_size,
             self,
         )
-        self.breakpoint_marker.setBrush(QBrush(PALETTE.runtime_log_error))
-        self.breakpoint_marker.setPen(QPen(PALETTE.final_outcome_pen, 2))
+        self.breakpoint_marker.setBrush(QtGui.QBrush(PALETTE.runtime_log_error))
+        self.breakpoint_marker.setPen(QtGui.QPen(PALETTE.final_outcome_pen, 2))
         self.breakpoint_marker.setZValue(10.0)
         self.breakpoint_marker.setVisible(False)
 
@@ -149,10 +143,10 @@ class BaseNodeMixin:
         connector_start_x = marker_center_x + (outer_size / 2.0) - 1.0
         connector_end_x = bounds.right() - 8.0
 
-        connector_pen = QPen(PALETTE.start_indicator_connector, 3)
-        connector_pen.setCapStyle(Qt.RoundCap)
+        connector_pen = QtGui.QPen(PALETTE.start_indicator_connector, 3)
+        connector_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
 
-        self.start_indicator_connector = QGraphicsLineItem(
+        self.start_indicator_connector = QtWidgets.QGraphicsLineItem(
             connector_start_x,
             marker_center_y,
             connector_end_x,
@@ -160,63 +154,69 @@ class BaseNodeMixin:
             self,
         )
         self.start_indicator_connector.setPen(connector_pen)
-        self.start_indicator_connector.setFlag(QGraphicsItem.ItemStacksBehindParent, True)
-        self.start_indicator_connector.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_connector.setFlag(
+            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemStacksBehindParent, True
+        )
+        self.start_indicator_connector.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
         self.start_indicator_connector.setVisible(False)
         self.start_indicator_connector.setToolTip("Start state")
 
-        outer_fill = QColor(PALETTE.start_indicator_outer_fill)
+        outer_fill = QtGui.QColor(PALETTE.start_indicator_outer_fill)
         outer_fill.setAlpha(220)
-        outer_pen = QColor(PALETTE.start_indicator_outer_pen)
+        outer_pen = QtGui.QColor(PALETTE.start_indicator_outer_pen)
         outer_pen.setAlpha(240)
 
-        self.start_indicator_outer = QGraphicsEllipseItem(
+        self.start_indicator_outer = QtWidgets.QGraphicsEllipseItem(
             marker_center_x - (outer_size / 2.0),
             marker_center_y - (outer_size / 2.0),
             outer_size,
             outer_size,
             self,
         )
-        self.start_indicator_outer.setBrush(QBrush(outer_fill))
-        self.start_indicator_outer.setPen(QPen(outer_pen, 2))
+        self.start_indicator_outer.setBrush(QtGui.QBrush(outer_fill))
+        self.start_indicator_outer.setPen(QtGui.QPen(outer_pen, 2))
         self.start_indicator_outer.setZValue(11.0)
-        self.start_indicator_outer.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_outer.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
         self.start_indicator_outer.setVisible(False)
         self.start_indicator_outer.setToolTip("Start state")
 
-        inner_fill = QColor(PALETTE.start_indicator_inner_fill)
+        inner_fill = QtGui.QColor(PALETTE.start_indicator_inner_fill)
         inner_fill.setAlpha(245)
 
-        self.start_indicator_inner = QGraphicsEllipseItem(
+        self.start_indicator_inner = QtWidgets.QGraphicsEllipseItem(
             marker_center_x - (inner_size / 2.0),
             marker_center_y - (inner_size / 2.0),
             inner_size,
             inner_size,
             self,
         )
-        self.start_indicator_inner.setBrush(QBrush(inner_fill))
-        self.start_indicator_inner.setPen(QPen(PALETTE.start_indicator_inner_pen, 1.5))
+        self.start_indicator_inner.setBrush(QtGui.QBrush(inner_fill))
+        self.start_indicator_inner.setPen(
+            QtGui.QPen(PALETTE.start_indicator_inner_pen, 1.5)
+        )
         self.start_indicator_inner.setZValue(11.0)
-        self.start_indicator_inner.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_inner.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
         self.start_indicator_inner.setVisible(False)
         self.start_indicator_inner.setToolTip("Start state")
 
-        arrow = QPolygonF(
+        arrow = QtGui.QPolygonF(
             [
-                QPointF(marker_center_x - 2.5, marker_center_y - 4.5),
-                QPointF(marker_center_x - 2.5, marker_center_y + 4.5),
-                QPointF(marker_center_x + 4.5, marker_center_y),
+                QtCore.QPointF(marker_center_x - 2.5, marker_center_y - 4.5),
+                QtCore.QPointF(marker_center_x - 2.5, marker_center_y + 4.5),
+                QtCore.QPointF(marker_center_x + 4.5, marker_center_y),
             ]
         )
-        self.start_indicator_arrow = QGraphicsPolygonItem(arrow, self)
-        self.start_indicator_arrow.setBrush(QBrush(PALETTE.start_indicator_arrow))
-        self.start_indicator_arrow.setPen(QPen(PALETTE.start_indicator_arrow, 1.2))
+        self.start_indicator_arrow = QtWidgets.QGraphicsPolygonItem(arrow, self)
+        self.start_indicator_arrow.setBrush(QtGui.QBrush(PALETTE.start_indicator_arrow))
+        self.start_indicator_arrow.setPen(
+            QtGui.QPen(PALETTE.start_indicator_arrow, 1.2)
+        )
         self.start_indicator_arrow.setZValue(11.0)
-        self.start_indicator_arrow.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_arrow.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
         self.start_indicator_arrow.setVisible(False)
         self.start_indicator_arrow.setToolTip("Start state")
 
-        self.start_indicator_label = QGraphicsTextItem("START", self)
+        self.start_indicator_label = QtWidgets.QGraphicsTextItem("START", self)
         start_font = self.start_indicator_label.font()
         start_font.setPointSize(8)
         start_font.setBold(True)
@@ -228,7 +228,7 @@ class BaseNodeMixin:
             marker_center_y - (outer_size / 2.0) - label_rect.height() - 3.0,
         )
         self.start_indicator_label.setZValue(11.0)
-        self.start_indicator_label.setAcceptedMouseButtons(Qt.NoButton)
+        self.start_indicator_label.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
         self.start_indicator_label.setVisible(False)
         self.start_indicator_label.setToolTip("Start state")
 
@@ -253,11 +253,11 @@ class BaseNodeMixin:
     def update_selection_pen(
         self,
         selected: bool,
-        default_pen: Optional[QPen] = None,
+        default_pen: Optional[QtGui.QPen] = None,
         default_pen_callback: Optional[Callable[[], Any]] = None,
     ) -> None:
         if selected:
-            self.setPen(QPen(PALETTE.selection_pen, 4))
+            self.setPen(QtGui.QPen(PALETTE.selection_pen, 4))
             return
 
         if default_pen is not None:

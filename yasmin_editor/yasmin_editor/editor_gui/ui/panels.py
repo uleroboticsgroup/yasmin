@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget
+from yasmin_editor.qt_compat import QtWidgets
 
 from yasmin_editor.editor_gui.ui.canvas_area import build_canvas_frame
 from yasmin_editor.editor_gui.ui.metadata import build_metadata_widget
@@ -25,38 +25,46 @@ CANVAS_HEADER_HTML = (
 )
 
 
-def build_right_panel(editor) -> QWidget:
+def build_right_panel(editor) -> QtWidgets.QWidget:
     """Create the complete right panel."""
 
-    right_panel = QWidget()
+    right_panel = QtWidgets.QWidget()
     right_panel.setMinimumWidth(0)
-    right_layout = QVBoxLayout(right_panel)
+    right_layout = QtWidgets.QVBoxLayout(right_panel)
     right_layout.setContentsMargins(0, 0, 0, 0)
     right_layout.setSpacing(6)
 
     metadata_widget = build_metadata_widget(editor)
-    metadata_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+    metadata_widget.setSizePolicy(
+        QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Maximum
+    )
     right_layout.addWidget(metadata_widget)
 
-    editor.canvas_header = QLabel(CANVAS_HEADER_HTML)
+    editor.canvas_header = QtWidgets.QLabel(CANVAS_HEADER_HTML)
     editor.canvas_header.setWordWrap(True)
-    editor.canvas_header.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+    editor.canvas_header.setSizePolicy(
+        QtWidgets.QSizePolicy.Policy.Ignored, QtWidgets.QSizePolicy.Policy.Preferred
+    )
     right_layout.addWidget(editor.canvas_header)
 
-    breadcrumb_widget = QWidget()
-    breadcrumb_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
-    editor.breadcrumb_layout = QHBoxLayout(breadcrumb_widget)
+    breadcrumb_widget = QtWidgets.QWidget()
+    breadcrumb_widget.setSizePolicy(
+        QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Maximum
+    )
+    editor.breadcrumb_layout = QtWidgets.QHBoxLayout(breadcrumb_widget)
     editor.breadcrumb_layout.setContentsMargins(0, 0, 0, 0)
     right_layout.addWidget(breadcrumb_widget)
 
     editor.runtime_controls_widget = build_runtime_controls_widget(editor)
     editor.runtime_controls_widget.setSizePolicy(
-        QSizePolicy.Expanding, QSizePolicy.Maximum
+        QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Maximum
     )
     right_layout.addWidget(editor.runtime_controls_widget)
 
     editor.canvas_frame = build_canvas_frame(editor)
-    editor.canvas_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    editor.canvas_frame.setSizePolicy(
+        QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding
+    )
     right_layout.addWidget(editor.canvas_frame, 1)
 
     return right_panel

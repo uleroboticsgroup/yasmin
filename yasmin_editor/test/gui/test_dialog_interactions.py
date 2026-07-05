@@ -19,13 +19,13 @@
 
 import pytest
 
-pytest.importorskip("PyQt5.QtCore")
-pytest.importorskip("PyQt5.QtTest")
-pytest.importorskip("PyQt5.QtWidgets")
+pytest.importorskip("yasmin_editor.qt_compat")
+pytest.importorskip("yasmin_editor.qt_compat")
+pytest.importorskip("yasmin_editor.qt_compat")
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QDialogButtonBox, QPushButton, QTableWidgetItem
+from yasmin_editor.qt_compat import Qt
+from yasmin_editor.qt_compat import QtTest
+from yasmin_editor.qt_compat import QtWidgets
 
 from yasmin_editor.editor_gui.dialogs.concurrence_dialog import ConcurrenceDialog
 from yasmin_editor.editor_gui.dialogs.outcome_description_dialog import (
@@ -36,17 +36,17 @@ from yasmin_editor.editor_gui.dialogs.state_machine_dialog import StateMachineDi
 
 def _dialog_button(dialog, standard_button):
     # Resolve one standard button from the button box so the test can click it.
-    button_box = dialog.findChild(QDialogButtonBox)
+    button_box = dialog.findChild(QtWidgets.QDialogButtonBox)
     assert button_box is not None
     button = button_box.button(standard_button)
     assert button is not None
     return button
 
 
-def _find_button_by_text(dialog, text: str) -> QPushButton:
+def _find_button_by_text(dialog, text: str) -> QtWidgets.QPushButton:
     # The row-creation button is identified by text because it is not a
     # standard dialog button.
-    for button in dialog.findChildren(QPushButton):
+    for button in dialog.findChildren(QtWidgets.QPushButton):
         if button.text() == text:
             return button
     raise AssertionError(f"Button '{text}' not found")
@@ -63,21 +63,26 @@ def test_state_machine_dialog_collects_user_input(qapp):
 
     # Fill the dialog through its real widgets.
     dialog.name_edit.setFocus()
-    QTest.keyClicks(dialog.name_edit, "WorkerContainer")
+    QtTest.QTest.keyClicks(dialog.name_edit, "WorkerContainer")
 
-    QTest.mouseClick(_find_button_by_text(dialog, "Add Row"), Qt.LeftButton)
+    QtTest.QTest.mouseClick(
+        _find_button_by_text(dialog, "Add Row"), Qt.MouseButton.LeftButton
+    )
     qapp.processEvents()
 
     row = dialog.remappings_table.rowCount() - 1
-    dialog.remappings_table.setItem(row, 0, QTableWidgetItem("output"))
-    dialog.remappings_table.setItem(row, 1, QTableWidgetItem("bb_output"))
+    dialog.remappings_table.setItem(row, 0, QtWidgets.QTableWidgetItem("output"))
+    dialog.remappings_table.setItem(row, 1, QtWidgets.QTableWidgetItem("bb_output"))
     dialog.description_edit.setFocus()
-    QTest.keyClicks(dialog.description_edit, "Nested editor container")
+    QtTest.QTest.keyClicks(dialog.description_edit, "Nested editor container")
 
-    QTest.mouseClick(_dialog_button(dialog, QDialogButtonBox.Ok), Qt.LeftButton)
+    QtTest.QTest.mouseClick(
+        _dialog_button(dialog, QtWidgets.QDialogButtonBox.StandardButton.Ok),
+        Qt.MouseButton.LeftButton,
+    )
     qapp.processEvents()
 
-    assert dialog.result() == dialog.Accepted
+    assert dialog.result() == QtWidgets.QDialog.DialogCode.Accepted
     assert dialog.get_state_machine_data() == (
         "WorkerContainer",
         ["done", "failed"],
@@ -103,20 +108,25 @@ def test_concurrence_dialog_collects_default_outcome_and_remappings(qapp):
     qapp.processEvents()
 
     dialog.name_edit.setFocus()
-    QTest.keyClicks(dialog.name_edit, "ParallelWorker")
+    QtTest.QTest.keyClicks(dialog.name_edit, "ParallelWorker")
     dialog.default_outcome_combo.setCurrentText("done")
     qapp.processEvents()
 
-    QTest.mouseClick(_find_button_by_text(dialog, "Add Row"), Qt.LeftButton)
+    QtTest.QTest.mouseClick(
+        _find_button_by_text(dialog, "Add Row"), Qt.MouseButton.LeftButton
+    )
     qapp.processEvents()
     row = dialog.remappings_table.rowCount() - 1
-    dialog.remappings_table.setItem(row, 0, QTableWidgetItem("result"))
-    dialog.remappings_table.setItem(row, 1, QTableWidgetItem("bb_result"))
+    dialog.remappings_table.setItem(row, 0, QtWidgets.QTableWidgetItem("result"))
+    dialog.remappings_table.setItem(row, 1, QtWidgets.QTableWidgetItem("bb_result"))
 
-    QTest.mouseClick(_dialog_button(dialog, QDialogButtonBox.Ok), Qt.LeftButton)
+    QtTest.QTest.mouseClick(
+        _dialog_button(dialog, QtWidgets.QDialogButtonBox.StandardButton.Ok),
+        Qt.MouseButton.LeftButton,
+    )
     qapp.processEvents()
 
-    assert dialog.result() == dialog.Accepted
+    assert dialog.result() == QtWidgets.QDialog.DialogCode.Accepted
     assert dialog.get_concurrence_data() == (
         "ParallelWorker",
         ["done", "failed"],
@@ -136,17 +146,20 @@ def test_outcome_description_dialog_round_trips_user_edits(qapp):
     qapp.processEvents()
 
     dialog.name_edit.selectAll()
-    QTest.keyClick(dialog.name_edit, Qt.Key_Delete)
-    QTest.keyClicks(dialog.name_edit, "finished")
+    QtTest.QTest.keyClick(dialog.name_edit, Qt.Key.Key_Delete)
+    QtTest.QTest.keyClicks(dialog.name_edit, "finished")
 
     dialog.description_edit.selectAll()
-    QTest.keyClick(dialog.description_edit, Qt.Key_Delete)
-    QTest.keyClicks(dialog.description_edit, "final transition target")
+    QtTest.QTest.keyClick(dialog.description_edit, Qt.Key.Key_Delete)
+    QtTest.QTest.keyClicks(dialog.description_edit, "final transition target")
 
-    QTest.mouseClick(_dialog_button(dialog, QDialogButtonBox.Ok), Qt.LeftButton)
+    QtTest.QTest.mouseClick(
+        _dialog_button(dialog, QtWidgets.QDialogButtonBox.StandardButton.Ok),
+        Qt.MouseButton.LeftButton,
+    )
     qapp.processEvents()
 
-    assert dialog.result() == dialog.Accepted
+    assert dialog.result() == QtWidgets.QDialog.DialogCode.Accepted
     assert dialog.get_outcome_name() == "finished"
     assert dialog.get_description() == "final transition target"
 

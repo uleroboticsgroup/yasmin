@@ -14,8 +14,7 @@
 
 from __future__ import annotations
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
+from yasmin_editor.qt_compat import Qt, QtWidgets
 
 from yasmin_editor.editor_gui.ui.runtime_specs import (
     RUNTIME_BUTTON_SPECS,
@@ -25,20 +24,20 @@ from yasmin_editor.editor_gui.ui.runtime_specs import (
 )
 
 
-def _build_runtime_status_label(editor) -> QLabel:
+def _build_runtime_status_label(editor) -> QtWidgets.QLabel:
     """Create the runtime status label shown at the beginning of the bar."""
 
-    editor.runtime_status_label = QLabel(RUNTIME_STATUS_LABEL_TEXT)
-    editor.runtime_status_label.setAlignment(Qt.AlignCenter)
+    editor.runtime_status_label = QtWidgets.QLabel(RUNTIME_STATUS_LABEL_TEXT)
+    editor.runtime_status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
     editor.runtime_status_label.setMinimumWidth(RUNTIME_STATUS_LABEL_MIN_WIDTH)
-    editor.runtime_status_label.setTextFormat(Qt.PlainText)
+    editor.runtime_status_label.setTextFormat(Qt.TextFormat.PlainText)
     return editor.runtime_status_label
 
 
-def _build_runtime_button(editor, spec: RuntimeButtonSpec) -> QPushButton:
+def _build_runtime_button(editor, spec: RuntimeButtonSpec) -> QtWidgets.QPushButton:
     """Create one runtime control button from its declarative specification."""
 
-    button = QPushButton(spec.text)
+    button = QtWidgets.QPushButton(spec.text)
     button.setToolTip(spec.tooltip)
     button.setCheckable(spec.checkable)
     if spec.checkable:
@@ -48,7 +47,7 @@ def _build_runtime_button(editor, spec: RuntimeButtonSpec) -> QPushButton:
     return button
 
 
-def build_runtime_controls_widget(editor) -> QWidget:
+def build_runtime_controls_widget(editor) -> QtWidgets.QWidget:
     """Create the runtime control bar.
 
     The runtime controls intentionally keep their original order so the runtime
@@ -56,8 +55,8 @@ def build_runtime_controls_widget(editor) -> QWidget:
     easier to maintain.
     """
 
-    widget = QWidget()
-    editor.runtime_controls_layout = QHBoxLayout(widget)
+    widget = QtWidgets.QWidget()
+    editor.runtime_controls_layout = QtWidgets.QHBoxLayout(widget)
     editor.runtime_controls_layout.setContentsMargins(0, 0, 0, 0)
 
     editor.runtime_controls_layout.addWidget(_build_runtime_status_label(editor))

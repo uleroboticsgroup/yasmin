@@ -14,8 +14,7 @@
 
 from __future__ import annotations
 
-from PyQt5.QtWidgets import QMessageBox
-
+from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.document_state import (
     EditorDirtyTracker,
     build_window_title,
@@ -102,16 +101,18 @@ class EditorDocumentMixin:
         if not self.is_document_dirty():
             return True
 
-        reply = QMessageBox.question(
+        reply = QtWidgets.QMessageBox.question(
             self,
             "Unsaved Changes",
             (
                 f"Save changes to '{document_display_name(self.current_file_path)}' "
                 f"before {action_label}?"
             ),
-            QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,
-            QMessageBox.Save,
+            QtWidgets.QMessageBox.StandardButton.Save
+            | QtWidgets.QMessageBox.StandardButton.Discard
+            | QtWidgets.QMessageBox.StandardButton.Cancel,
+            QtWidgets.QMessageBox.StandardButton.Save,
         )
-        if reply == QMessageBox.Save:
+        if reply == QtWidgets.QMessageBox.StandardButton.Save:
             return self.save_state_machine()
-        return reply == QMessageBox.Discard
+        return reply == QtWidgets.QMessageBox.StandardButton.Discard

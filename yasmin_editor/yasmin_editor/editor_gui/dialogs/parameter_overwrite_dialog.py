@@ -13,20 +13,10 @@
 # limitations under the License.
 
 from typing import Dict, List, Optional
-
-from PyQt5.QtWidgets import (
-    QComboBox,
-    QDialog,
-    QDialogButtonBox,
-    QFormLayout,
-    QLabel,
-    QLineEdit,
-    QMessageBox,
-    QTextEdit,
-)
+from yasmin_editor.qt_compat import QtWidgets
 
 
-class ParameterOverwriteDialog(QDialog):
+class ParameterOverwriteDialog(QtWidgets.QDialog):
     """Dialog for creating and editing a parameter overwrite entry."""
 
     VALUE_TYPE_OPTIONS = [
@@ -63,14 +53,14 @@ class ParameterOverwriteDialog(QDialog):
         self.resize(480, 360)
 
         param_data = dict(param_data or {})
-        layout = QFormLayout(self)
+        layout = QtWidgets.QFormLayout(self)
 
-        self.name_edit = QLineEdit(param_data.get("name", ""))
+        self.name_edit = QtWidgets.QLineEdit(param_data.get("name", ""))
         self.name_edit.setPlaceholderText("Enter parent parameter name")
         self.name_edit.setReadOnly(self.readonly)
         layout.addRow("Name:*", self.name_edit)
 
-        self.child_param_combo = QComboBox()
+        self.child_param_combo = QtWidgets.QComboBox()
         for entry in self._declared_parameters:
             param_name = str(entry.get("name", "") or "").strip()
             if not param_name:
@@ -85,13 +75,13 @@ class ParameterOverwriteDialog(QDialog):
             self.child_param_combo.setCurrentIndex(current_index)
         layout.addRow("Overrides:*", self.child_param_combo)
 
-        self.description_edit = QTextEdit()
+        self.description_edit = QtWidgets.QTextEdit()
         self.description_edit.setMaximumHeight(80)
         self.description_edit.setPlainText(param_data.get("description", ""))
         self.description_edit.setReadOnly(self.readonly)
-        layout.addRow(QLabel("<b>Description:</b>"), self.description_edit)
+        layout.addRow(QtWidgets.QLabel("<b>Description:</b>"), self.description_edit)
 
-        self.default_type_combo = QComboBox()
+        self.default_type_combo = QtWidgets.QComboBox()
         self.default_type_combo.addItem("No default", "")
         for option in self.VALUE_TYPE_OPTIONS[1:]:
             self.default_type_combo.addItem(option, option)
@@ -105,7 +95,7 @@ class ParameterOverwriteDialog(QDialog):
         self.default_type_combo.setEnabled(not self.readonly)
         layout.addRow("Default Type:", self.default_type_combo)
 
-        self.default_value_edit = QLineEdit(
+        self.default_value_edit = QtWidgets.QLineEdit(
             str(param_data.get("default_value", "") or "")
         )
         self.default_value_edit.setReadOnly(self.readonly)
@@ -119,10 +109,13 @@ class ParameterOverwriteDialog(QDialog):
         layout.addRow("Default Value:", self.default_value_edit)
         self._update_default_value_state()
 
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Close
+        buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.StandardButton.Close
             if self.readonly
-            else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            else (
+                QtWidgets.QDialogButtonBox.StandardButton.Ok
+                | QtWidgets.QDialogButtonBox.StandardButton.Cancel
+            )
         )
         if self.readonly:
             buttons.rejected.connect(self.reject)
@@ -139,7 +132,7 @@ class ParameterOverwriteDialog(QDialog):
 
     def _accept_with_validation(self) -> None:
         if not self.name_edit.text().strip():
-            QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self,
                 "Validation Error",
                 "Parameter name is required!",
@@ -149,7 +142,7 @@ class ParameterOverwriteDialog(QDialog):
             self.child_param_combo.currentIndex() < 0
             or not self.child_param_combo.currentData()
         ):
-            QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self,
                 "Validation Error",
                 "Please select a declared child parameter to override.",

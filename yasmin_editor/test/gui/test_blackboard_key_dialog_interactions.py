@@ -19,13 +19,13 @@
 
 import pytest
 
-pytest.importorskip("PyQt5.QtCore")
-pytest.importorskip("PyQt5.QtTest")
-pytest.importorskip("PyQt5.QtWidgets")
+pytest.importorskip("yasmin_editor.qt_compat")
+pytest.importorskip("yasmin_editor.qt_compat")
+pytest.importorskip("yasmin_editor.qt_compat")
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QDialogButtonBox
+from yasmin_editor.qt_compat import Qt
+from yasmin_editor.qt_compat import QtTest
+from yasmin_editor.qt_compat import QtWidgets
 
 from yasmin_editor.editor_gui.dialogs.blackboard_key_dialog import BlackboardKeyDialog
 
@@ -33,7 +33,7 @@ from yasmin_editor.editor_gui.dialogs.blackboard_key_dialog import BlackboardKey
 def _dialog_button(dialog, standard_button):
     # Resolve one standard dialog button so the test can click the same control
     # a user would use in the running application.
-    button_box = dialog.findChild(QDialogButtonBox)
+    button_box = dialog.findChild(QtWidgets.QDialogButtonBox)
     assert button_box is not None
     button = button_box.button(standard_button)
     assert button is not None
@@ -48,7 +48,7 @@ def test_blackboard_key_dialog_collects_defaults_for_input_key(qapp):
 
     # Fill the editable fields exactly like a user would do in the dialog.
     dialog.name_edit.setFocus()
-    QTest.keyClicks(dialog.name_edit, "goal_pose")
+    QtTest.QTest.keyClicks(dialog.name_edit, "goal_pose")
     dialog.type_combo.setCurrentText("in/out")
     dialog.default_type_combo.setCurrentText("list[int]")
     qapp.processEvents()
@@ -56,15 +56,18 @@ def test_blackboard_key_dialog_collects_defaults_for_input_key(qapp):
     assert dialog.default_value_edit.isEnabled()
 
     dialog.description_edit.setFocus()
-    QTest.keyClicks(dialog.description_edit, "goal indices")
+    QtTest.QTest.keyClicks(dialog.description_edit, "goal indices")
     dialog.default_value_edit.setFocus()
-    QTest.keyClicks(dialog.default_value_edit, "[1, 2, 3]")
+    QtTest.QTest.keyClicks(dialog.default_value_edit, "[1, 2, 3]")
 
     # Accept the dialog and verify the resulting payload.
-    QTest.mouseClick(_dialog_button(dialog, QDialogButtonBox.Ok), Qt.LeftButton)
+    QtTest.QTest.mouseClick(
+        _dialog_button(dialog, QtWidgets.QDialogButtonBox.StandardButton.Ok),
+        Qt.MouseButton.LeftButton,
+    )
     qapp.processEvents()
 
-    assert dialog.result() == dialog.Accepted
+    assert dialog.result() == QtWidgets.QDialog.DialogCode.Accepted
     assert dialog.get_key_data() == {
         "name": "goal_pose",
         "key_type": "in/out",
@@ -99,7 +102,10 @@ def test_blackboard_key_dialog_disables_and_clears_defaults_for_output_only_key(
     assert not dialog.default_value_edit.isEnabled()
     assert dialog.default_value_edit.text() == ""
 
-    QTest.mouseClick(_dialog_button(dialog, QDialogButtonBox.Ok), Qt.LeftButton)
+    QtTest.QTest.mouseClick(
+        _dialog_button(dialog, QtWidgets.QDialogButtonBox.StandardButton.Ok),
+        Qt.MouseButton.LeftButton,
+    )
     qapp.processEvents()
 
     assert dialog.get_key_data()["default_type"] == ""

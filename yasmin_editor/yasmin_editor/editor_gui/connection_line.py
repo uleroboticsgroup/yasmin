@@ -15,9 +15,7 @@
 import math
 from typing import TYPE_CHECKING, Any, List, Tuple, Union
 
-from PyQt5.QtCore import QPointF, Qt, QTimer
-from PyQt5.QtGui import QBrush, QFont, QPainterPath, QPen
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsPathItem, QGraphicsPolygonItem
+from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets
 
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection.geometry import (
@@ -49,7 +47,7 @@ if TYPE_CHECKING:
 NodeItem = Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]
 
 
-class ConnectionLine(QGraphicsPathItem):
+class ConnectionLine(QtWidgets.QGraphicsPathItem):
     """Visual representation of a transition between two state nodes.
 
     The line is rendered as a cubic Bezier curve with an arrow head and a
@@ -78,7 +76,7 @@ class ConnectionLine(QGraphicsPathItem):
         self.normal_pen = self._create_normal_pen()
         self.selected_pen = self._create_selected_pen()
         self.setPen(self.normal_pen)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
         self.setZValue(-2)
 
         self.arrow_head = self._create_arrow_head_item()
@@ -89,32 +87,32 @@ class ConnectionLine(QGraphicsPathItem):
         to_node.add_connection(self)
         self.update_position()
 
-    def _create_normal_pen(self) -> QPen:
+    def _create_normal_pen(self) -> QtGui.QPen:
         """Create the default pen used for the connection line."""
-        pen = QPen(PALETTE.connection_line, 3, Qt.SolidLine)
-        pen.setCapStyle(Qt.RoundCap)
-        pen.setJoinStyle(Qt.RoundJoin)
+        pen = QtGui.QPen(PALETTE.connection_line, 3, Qt.PenStyle.SolidLine)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
         return pen
 
-    def _create_selected_pen(self) -> QPen:
+    def _create_selected_pen(self) -> QtGui.QPen:
         """Create the pen used when the connection is selected."""
-        pen = QPen(PALETTE.connection_selected, 4, Qt.SolidLine)
-        pen.setCapStyle(Qt.RoundCap)
+        pen = QtGui.QPen(PALETTE.connection_selected, 4, Qt.PenStyle.SolidLine)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         return pen
 
-    def _create_arrow_head_item(self) -> QGraphicsPolygonItem:
+    def _create_arrow_head_item(self) -> QtWidgets.QGraphicsPolygonItem:
         """Create the arrow head graphics item."""
-        arrow_head = QGraphicsPolygonItem()
-        arrow_head.setBrush(QBrush(PALETTE.connection_line))
-        arrow_head.setPen(QPen(PALETTE.connection_line))
+        arrow_head = QtWidgets.QGraphicsPolygonItem()
+        arrow_head.setBrush(QtGui.QBrush(PALETTE.connection_line))
+        arrow_head.setPen(QtGui.QPen(PALETTE.connection_line))
         arrow_head.setZValue(-1)
         return arrow_head
 
     def _create_label_background_item(self) -> ConnectionLabelRectItem:
         """Create the clickable label background."""
         label_bg = ConnectionLabelRectItem(self)
-        label_bg.setBrush(QBrush(PALETTE.connection_label_bg))
-        label_bg.setPen(QPen(PALETTE.connection_label_pen, 1))
+        label_bg.setBrush(QtGui.QBrush(PALETTE.connection_label_bg))
+        label_bg.setPen(QtGui.QPen(PALETTE.connection_label_pen, 1))
         label_bg.setZValue(1)
         return label_bg
 
@@ -123,7 +121,7 @@ class ConnectionLine(QGraphicsPathItem):
         label = ConnectionLabelTextItem(self, text)
         label.setDefaultTextColor(PALETTE.connection_label_text)
 
-        font = QFont()
+        font = QtGui.QFont()
         font.setPointSize(9)
         font.setBold(True)
         label.setFont(font)
@@ -150,9 +148,9 @@ class ConnectionLine(QGraphicsPathItem):
 
     def _build_arrow_geometry(
         self,
-        target_pos: QPointF,
-        target_direction: QPointF,
-    ) -> Tuple[QPointF, float]:
+        target_pos: QtCore.QPointF,
+        target_direction: QtCore.QPointF,
+    ) -> Tuple[QtCore.QPointF, float]:
         """Update the arrow head polygon and return the shaft end point and angle."""
         polygon, line_end, angle = build_arrow_polygon(target_pos, target_direction)
         self.arrow_head.setPolygon(polygon)
@@ -160,7 +158,7 @@ class ConnectionLine(QGraphicsPathItem):
 
     def _hide_path_and_arrow(self) -> None:
         """Hide the rendered path for grouped transitions."""
-        self.setPath(QPainterPath())
+        self.setPath(QtGui.QPainterPath())
         self.arrow_head.setVisible(False)
 
     def _update_label_style(self, selected: bool | None = None) -> None:
@@ -170,20 +168,22 @@ class ConnectionLine(QGraphicsPathItem):
 
         if selected:
             self.setPen(self.selected_pen)
-            self.arrow_head.setBrush(QBrush(PALETTE.connection_selected))
-            self.arrow_head.setPen(QPen(PALETTE.connection_selected))
-            self.label_bg.setPen(QPen(PALETTE.connection_selected, 2))
+            self.arrow_head.setBrush(QtGui.QBrush(PALETTE.connection_selected))
+            self.arrow_head.setPen(QtGui.QPen(PALETTE.connection_selected))
+            self.label_bg.setPen(QtGui.QPen(PALETTE.connection_selected, 2))
             return
 
         self.setPen(self.normal_pen)
-        self.arrow_head.setBrush(QBrush(PALETTE.connection_line))
-        self.arrow_head.setPen(QPen(PALETTE.connection_line))
-        self.label_bg.setPen(QPen(PALETTE.connection_label_pen, 1))
+        self.arrow_head.setBrush(QtGui.QBrush(PALETTE.connection_line))
+        self.arrow_head.setPen(QtGui.QPen(PALETTE.connection_line))
+        self.label_bg.setPen(QtGui.QPen(PALETTE.connection_label_pen, 1))
 
     def select_from_label(self, event: Any) -> None:
         """Select the connection when the label or label background is clicked."""
         scene = self.scene()
-        if scene is not None and not bool(event.modifiers() & Qt.ControlModifier):
+        if scene is not None and not bool(
+            event.modifiers() & Qt.KeyboardModifier.ControlModifier
+        ):
             scene.clearSelection()
         self.setSelected(True)
         event.accept()
@@ -194,16 +194,18 @@ class ConnectionLine(QGraphicsPathItem):
         if self.scene() and self.scene().views():
             canvas = self.scene().views()[0]
             if hasattr(canvas, "start_rewire_drag"):
-                QTimer.singleShot(
+                QtCore.QTimer.singleShot(
                     0,
                     lambda connection=self: canvas.start_rewire_drag(connection),
                 )
                 return
         event.ignore()
 
-    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
+    def itemChange(
+        self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any
+    ) -> Any:
         """Update selection styling when the graphics item state changes."""
-        if change == QGraphicsItem.ItemSelectedChange:
+        if change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
             self._update_label_style(bool(value))
         return super().itemChange(change, value)
 
@@ -222,15 +224,15 @@ class ConnectionLine(QGraphicsPathItem):
         opposite_direction = self._get_opposite_direction_group()
         offset_amount = self._resolve_offset_amount(opposite_direction, representative)
 
-        center_vector = QPointF(
+        center_vector = QtCore.QPointF(
             to_center.x() - from_center.x(),
             to_center.y() - from_center.y(),
         )
         center_direction = normalize_vector(center_vector)
         if vector_length(center_direction) <= 1e-9:
-            center_direction = QPointF(1.0, 0.0)
+            center_direction = QtCore.QPointF(1.0, 0.0)
 
-        normal_direction = QPointF(-center_direction.y(), center_direction.x())
+        normal_direction = QtCore.QPointF(-center_direction.y(), center_direction.x())
         anchor_offset = offset_point(ZERO_POINT, normal_direction, offset_amount)
         from_pos, to_pos = self._compute_edge_points(
             from_center,
@@ -288,19 +290,19 @@ class ConnectionLine(QGraphicsPathItem):
 
     def _compute_edge_points(
         self,
-        from_center: QPointF,
-        to_center: QPointF,
-        anchor_offset: QPointF,
-    ) -> Tuple[QPointF, QPointF]:
+        from_center: QtCore.QPointF,
+        to_center: QtCore.QPointF,
+        anchor_offset: QtCore.QPointF,
+    ) -> Tuple[QtCore.QPointF, QtCore.QPointF]:
         """Compute the path start and end points on the node boundaries."""
         from_pos = self.from_node.get_edge_point(
-            QPointF(
+            QtCore.QPointF(
                 to_center.x() + anchor_offset.x(),
                 to_center.y() + anchor_offset.y(),
             )
         )
         to_pos = self.to_node.get_edge_point(
-            QPointF(
+            QtCore.QPointF(
                 from_center.x() + anchor_offset.x(),
                 from_center.y() + anchor_offset.y(),
             )
@@ -309,18 +311,20 @@ class ConnectionLine(QGraphicsPathItem):
 
     def _compute_radial_directions(
         self,
-        from_center: QPointF,
-        from_pos: QPointF,
-        to_center: QPointF,
-        to_pos: QPointF,
-        center_direction: QPointF,
-    ) -> Tuple[QPointF, QPointF]:
+        from_center: QtCore.QPointF,
+        from_pos: QtCore.QPointF,
+        to_center: QtCore.QPointF,
+        to_pos: QtCore.QPointF,
+        center_direction: QtCore.QPointF,
+    ) -> Tuple[QtCore.QPointF, QtCore.QPointF]:
         """Compute the tangent directions at the start and end of the path."""
         source_direction = normalize_vector(
-            QPointF(from_pos.x() - from_center.x(), from_pos.y() - from_center.y())
+            QtCore.QPointF(
+                from_pos.x() - from_center.x(), from_pos.y() - from_center.y()
+            )
         )
         target_direction = normalize_vector(
-            QPointF(to_center.x() - to_pos.x(), to_center.y() - to_pos.y())
+            QtCore.QPointF(to_center.x() - to_pos.x(), to_center.y() - to_pos.y())
         )
 
         if vector_length(source_direction) <= 1e-9:
@@ -331,28 +335,28 @@ class ConnectionLine(QGraphicsPathItem):
 
     def _compute_control_points(
         self,
-        from_pos: QPointF,
-        to_pos: QPointF,
-        source_direction: QPointF,
-        target_direction: QPointF,
-        normal_direction: QPointF,
+        from_pos: QtCore.QPointF,
+        to_pos: QtCore.QPointF,
+        source_direction: QtCore.QPointF,
+        target_direction: QtCore.QPointF,
+        normal_direction: QtCore.QPointF,
         offset_amount: float,
-    ) -> Tuple[QPointF, QPointF]:
+    ) -> Tuple[QtCore.QPointF, QtCore.QPointF]:
         """Compute the cubic Bezier control points for the transition path."""
         path_length = vector_length(
-            QPointF(to_pos.x() - from_pos.x(), to_pos.y() - from_pos.y())
+            QtCore.QPointF(to_pos.x() - from_pos.x(), to_pos.y() - from_pos.y())
         )
         tangent_length = max(36.0, min(90.0, path_length * 0.35))
-        offset_vector = QPointF(
+        offset_vector = QtCore.QPointF(
             normal_direction.x() * offset_amount,
             normal_direction.y() * offset_amount,
         )
 
-        ctrl1 = QPointF(
+        ctrl1 = QtCore.QPointF(
             from_pos.x() + source_direction.x() * tangent_length + offset_vector.x(),
             from_pos.y() + source_direction.y() * tangent_length + offset_vector.y(),
         )
-        ctrl2 = QPointF(
+        ctrl2 = QtCore.QPointF(
             to_pos.x() - target_direction.x() * tangent_length + offset_vector.x(),
             to_pos.y() - target_direction.y() * tangent_length + offset_vector.y(),
         )
@@ -360,43 +364,45 @@ class ConnectionLine(QGraphicsPathItem):
 
     def _update_arrow_head(
         self,
-        from_center: QPointF,
-        to_center: QPointF,
-        to_pos: QPointF,
-        ctrl2: QPointF,
-    ) -> QPointF:
+        from_center: QtCore.QPointF,
+        to_center: QtCore.QPointF,
+        to_pos: QtCore.QPointF,
+        ctrl2: QtCore.QPointF,
+    ) -> QtCore.QPointF:
         """Update the arrow head and return the path end point before the arrow."""
         target_direction = compute_arrow_direction(
             to_pos,
             ctrl2,
-            QPointF(to_center.x() - from_center.x(), to_center.y() - from_center.y()),
+            QtCore.QPointF(
+                to_center.x() - from_center.x(), to_center.y() - from_center.y()
+            ),
         )
         line_end, _ = self._build_arrow_geometry(to_pos, target_direction)
         return line_end
 
     def _build_curve_path(
         self,
-        from_pos: QPointF,
-        ctrl1: QPointF,
-        ctrl2: QPointF,
-        line_end: QPointF,
-    ) -> QPainterPath:
+        from_pos: QtCore.QPointF,
+        ctrl1: QtCore.QPointF,
+        ctrl2: QtCore.QPointF,
+        line_end: QtCore.QPointF,
+    ) -> QtGui.QPainterPath:
         """Build the cubic Bezier path used for the rendered connection."""
-        path = QPainterPath()
+        path = QtGui.QPainterPath()
         path.moveTo(from_pos)
         path.cubicTo(ctrl1, ctrl2, line_end)
         return path
 
     def _update_label_positions(
         self,
-        path: QPainterPath,
+        path: QtGui.QPainterPath,
         direction_group: List["ConnectionLine"],
         opposite_direction: List["ConnectionLine"],
-        from_center: QPointF,
-        to_center: QPointF,
+        from_center: QtCore.QPointF,
+        to_center: QtCore.QPointF,
     ) -> None:
         """Update label positions for grouped and opposing transitions."""
-        label_anchor = QPointF(path.pointAtPercent(0.5))
+        label_anchor = QtCore.QPointF(path.pointAtPercent(0.5))
         label_stack_direction = "center"
 
         if opposite_direction:
@@ -431,17 +437,17 @@ class ConnectionLine(QGraphicsPathItem):
 
         start_x = center_x - anchor_half_width
         end_x = center_x + anchor_half_width
-        start_pos = QPointF(start_x, node_top)
-        end_pos = QPointF(end_x, node_top)
+        start_pos = QtCore.QPointF(start_x, node_top)
+        end_pos = QtCore.QPointF(end_x, node_top)
 
-        ctrl1 = QPointF(start_x - loop_width / 2.0, node_top - loop_height)
-        ctrl2 = QPointF(end_x + loop_width / 2.0, node_top - loop_height)
+        ctrl1 = QtCore.QPointF(start_x - loop_width / 2.0, node_top - loop_height)
+        ctrl2 = QtCore.QPointF(end_x + loop_width / 2.0, node_top - loop_height)
 
         arrow_angle = math.pi / 2.0 + math.radians(16.0)
-        target_direction = QPointF(math.cos(arrow_angle), math.sin(arrow_angle))
+        target_direction = QtCore.QPointF(math.cos(arrow_angle), math.sin(arrow_angle))
         line_end, _ = self._build_arrow_geometry(end_pos, target_direction)
 
-        path = QPainterPath()
+        path = QtGui.QPainterPath()
         path.moveTo(start_pos)
         path.cubicTo(ctrl1, ctrl2, line_end)
 
@@ -451,6 +457,6 @@ class ConnectionLine(QGraphicsPathItem):
         else:
             self._hide_path_and_arrow()
 
-        label_anchor = QPointF(center_x, node_top - loop_height + 8.0)
+        label_anchor = QtCore.QPointF(center_x, node_top - loop_height + 8.0)
         layout_stacked_labels(self_loops, label_anchor)
         self._update_label_style()

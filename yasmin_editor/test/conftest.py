@@ -27,9 +27,11 @@ if str(PROJECT_ROOT) not in sys.path:
 
 @pytest.fixture(scope="session")
 def qapp():
-    qtwidgets = pytest.importorskip("PyQt5.QtWidgets")
-    app = qtwidgets.QApplication.instance()
+    pytest.importorskip("yasmin_editor.qt_compat")
+    from yasmin_editor.qt_compat import QtWidgets
+
+    app = QtWidgets.QApplication.instance()
     if app is None:
-        app = qtwidgets.QApplication(["pytest", "-platform", "offscreen"])
+        app = QtWidgets.QApplication(["pytest", "-platform", "offscreen"])
     app.setQuitOnLastWindowClosed(False)
     yield app

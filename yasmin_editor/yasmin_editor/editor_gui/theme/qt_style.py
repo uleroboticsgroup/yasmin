@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Qt palette and stylesheet builders for the editor theme."""
-
-from PyQt5.QtGui import QPalette
+from yasmin_editor.qt_compat import QtGui
 
 from yasmin_editor.editor_gui.theme.palette import EditorPalette
 
@@ -24,60 +22,98 @@ def _css(color) -> str:
     return color.name()
 
 
-def _set_group_color(qt_palette: QPalette, role: QPalette.ColorRole, color) -> None:
+def _set_group_color(
+    qt_palette: QtGui.QPalette, role: QtGui.QPalette.ColorRole, color
+) -> None:
     """Apply a color to all relevant palette groups."""
-    for group in (QPalette.Active, QPalette.Inactive, QPalette.Disabled):
+    for group in (
+        QtGui.QPalette.ColorGroup.Active,
+        QtGui.QPalette.ColorGroup.Inactive,
+        QtGui.QPalette.ColorGroup.Disabled,
+    ):
         qt_palette.setColor(group, role, color)
 
 
-def build_qt_palette(palette: EditorPalette) -> QPalette:
+def build_qt_palette(palette: EditorPalette) -> QtGui.QPalette:
     """Build the Qt application palette for the given editor palette."""
-    qt_palette = QPalette()
-    qt_palette.setColor(QPalette.Window, palette.ui_window_bg)
-    qt_palette.setColor(QPalette.WindowText, palette.text_primary)
-    qt_palette.setColor(QPalette.Base, palette.ui_input_bg)
-    qt_palette.setColor(QPalette.AlternateBase, palette.ui_panel_alt_bg)
-    qt_palette.setColor(QPalette.ToolTipBase, palette.ui_tooltip_bg)
-    qt_palette.setColor(QPalette.ToolTipText, palette.ui_tooltip_text)
-    qt_palette.setColor(QPalette.Text, palette.text_primary)
-    qt_palette.setColor(QPalette.Button, palette.ui_button_bg)
-    qt_palette.setColor(QPalette.ButtonText, palette.text_primary)
-    qt_palette.setColor(QPalette.BrightText, palette.ui_selection_text)
-    qt_palette.setColor(QPalette.Highlight, palette.ui_selection_bg)
-    qt_palette.setColor(QPalette.HighlightedText, palette.ui_selection_text)
-    qt_palette.setColor(QPalette.Light, palette.ui_panel_alt_bg)
-    qt_palette.setColor(QPalette.Midlight, palette.ui_panel_bg)
-    qt_palette.setColor(QPalette.Mid, palette.ui_border)
-    qt_palette.setColor(QPalette.Dark, palette.ui_border.darker(130))
-    qt_palette.setColor(QPalette.Shadow, palette.ui_border.darker(170))
-    qt_palette.setColor(QPalette.Link, palette.connection_line)
-    qt_palette.setColor(QPalette.LinkVisited, palette.connection_selected)
-    qt_palette.setColor(QPalette.PlaceholderText, palette.text_secondary)
+    qt_palette = QtGui.QPalette()
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Window, palette.ui_window_bg)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.WindowText, palette.text_primary)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Base, palette.ui_input_bg)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.AlternateBase, palette.ui_panel_alt_bg)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.ToolTipBase, palette.ui_tooltip_bg)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.ToolTipText, palette.ui_tooltip_text)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Text, palette.text_primary)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Button, palette.ui_button_bg)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.ButtonText, palette.text_primary)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.BrightText, palette.ui_selection_text)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Highlight, palette.ui_selection_bg)
+    qt_palette.setColor(
+        QtGui.QPalette.ColorRole.HighlightedText, palette.ui_selection_text
+    )
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Light, palette.ui_panel_alt_bg)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Midlight, palette.ui_panel_bg)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Mid, palette.ui_border)
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Dark, palette.ui_border.darker(130))
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Shadow, palette.ui_border.darker(170))
+    qt_palette.setColor(QtGui.QPalette.ColorRole.Link, palette.connection_line)
+    qt_palette.setColor(
+        QtGui.QPalette.ColorRole.LinkVisited, palette.connection_selected
+    )
+    qt_palette.setColor(
+        QtGui.QPalette.ColorRole.PlaceholderText, palette.text_secondary
+    )
     return qt_palette
 
 
-def build_qtconsole_palette(palette: EditorPalette) -> QPalette:
+def build_qtconsole_palette(palette: EditorPalette) -> QtGui.QPalette:
     """Build a dedicated Qt palette for the embedded interactive shell."""
-    qt_palette = QPalette()
+    qt_palette = QtGui.QPalette()
 
-    _set_group_color(qt_palette, QPalette.Window, palette.shell_bg)
-    _set_group_color(qt_palette, QPalette.WindowText, palette.shell_text)
-    _set_group_color(qt_palette, QPalette.Base, palette.shell_bg)
-    _set_group_color(qt_palette, QPalette.AlternateBase, palette.ui_panel_alt_bg)
-    _set_group_color(qt_palette, QPalette.Text, palette.shell_text)
-    _set_group_color(qt_palette, QPalette.Button, palette.ui_button_bg)
-    _set_group_color(qt_palette, QPalette.ButtonText, palette.text_primary)
-    _set_group_color(qt_palette, QPalette.ToolTipBase, palette.ui_tooltip_bg)
-    _set_group_color(qt_palette, QPalette.ToolTipText, palette.ui_tooltip_text)
-    _set_group_color(qt_palette, QPalette.Highlight, palette.shell_selection_bg)
-    _set_group_color(qt_palette, QPalette.HighlightedText, palette.shell_selection_text)
-    _set_group_color(qt_palette, QPalette.PlaceholderText, palette.text_secondary)
-    _set_group_color(qt_palette, QPalette.Link, palette.shell_prompt_in)
-    _set_group_color(qt_palette, QPalette.LinkVisited, palette.shell_prompt_out)
-    _set_group_color(qt_palette, QPalette.Light, palette.ui_panel_alt_bg)
-    _set_group_color(qt_palette, QPalette.Mid, palette.shell_border)
-    _set_group_color(qt_palette, QPalette.Dark, palette.shell_border.darker(130))
-    _set_group_color(qt_palette, QPalette.Shadow, palette.shell_border.darker(170))
+    _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Window, palette.shell_bg)
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.WindowText, palette.shell_text
+    )
+    _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Base, palette.shell_bg)
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.AlternateBase, palette.ui_panel_alt_bg
+    )
+    _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Text, palette.shell_text)
+    _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Button, palette.ui_button_bg)
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.ButtonText, palette.text_primary
+    )
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.ToolTipBase, palette.ui_tooltip_bg
+    )
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.ToolTipText, palette.ui_tooltip_text
+    )
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.Highlight, palette.shell_selection_bg
+    )
+    _set_group_color(
+        qt_palette,
+        QtGui.QPalette.ColorRole.HighlightedText,
+        palette.shell_selection_text,
+    )
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.PlaceholderText, palette.text_secondary
+    )
+    _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Link, palette.shell_prompt_in)
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.LinkVisited, palette.shell_prompt_out
+    )
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.Light, palette.ui_panel_alt_bg
+    )
+    _set_group_color(qt_palette, QtGui.QPalette.ColorRole.Mid, palette.shell_border)
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.Dark, palette.shell_border.darker(130)
+    )
+    _set_group_color(
+        qt_palette, QtGui.QPalette.ColorRole.Shadow, palette.shell_border.darker(170)
+    )
 
     return qt_palette
 

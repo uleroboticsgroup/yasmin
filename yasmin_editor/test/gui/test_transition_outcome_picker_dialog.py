@@ -19,12 +19,12 @@
 
 import pytest
 
-pytest.importorskip("PyQt5.QtCore")
-pytest.importorskip("PyQt5.QtTest")
-pytest.importorskip("PyQt5.QtWidgets")
+pytest.importorskip("yasmin_editor.qt_compat")
+pytest.importorskip("yasmin_editor.qt_compat")
+pytest.importorskip("yasmin_editor.qt_compat")
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtTest import QTest
+from yasmin_editor.qt_compat import Qt, QtWidgets
+from yasmin_editor.qt_compat import QtTest
 
 from yasmin_editor.editor_gui.dialogs.transition_outcome_picker import (
     TransitionOutcomePickerDialog,
@@ -54,27 +54,29 @@ def test_transition_outcome_picker_filters_and_selects_with_keyboard(qapp):
     qapp.processEvents()
 
     dialog.search_edit.setFocus()
-    QTest.keyClicks(dialog.search_edit, "ret")
+    QtTest.QTest.keyClicks(dialog.search_edit, "ret")
     qapp.processEvents()
 
     assert _visible_outcome_names(dialog) == ["retry"]
     assert not dialog.accept_button.isEnabled()
 
     dialog.outcome_list.setFocus()
-    QTest.keyClick(dialog.outcome_list, Qt.Key_Space)
+    QtTest.QTest.keyClick(dialog.outcome_list, Qt.Key.Key_Space)
     qapp.processEvents()
 
     assert dialog.accept_button.isEnabled()
     assert dialog.selected_outcomes() == ["retry"]
 
-    QTest.mouseClick(dialog.accept_button, Qt.LeftButton)
+    QtTest.QTest.mouseClick(dialog.accept_button, Qt.MouseButton.LeftButton)
     qapp.processEvents()
 
-    assert dialog.result() == dialog.Accepted
+    assert dialog.result() == QtWidgets.QDialog.DialogCode.Accepted
     dialog.close()
 
 
-def test_transition_outcome_picker_preserves_multiple_checked_outcomes_under_filter(qapp):
+def test_transition_outcome_picker_preserves_multiple_checked_outcomes_under_filter(
+    qapp,
+):
     # Already selected outcomes must remain selected even when the visible list
     # is narrowed by the search filter.
     dialog = TransitionOutcomePickerDialog(
@@ -86,15 +88,15 @@ def test_transition_outcome_picker_preserves_multiple_checked_outcomes_under_fil
     qapp.processEvents()
 
     dialog.outcome_list.setCurrentRow(0)
-    QTest.keyClick(dialog.outcome_list, Qt.Key_Space)
+    QtTest.QTest.keyClick(dialog.outcome_list, Qt.Key.Key_Space)
     dialog.outcome_list.setCurrentRow(2)
-    QTest.keyClick(dialog.outcome_list, Qt.Key_Space)
+    QtTest.QTest.keyClick(dialog.outcome_list, Qt.Key.Key_Space)
     qapp.processEvents()
 
     assert dialog.selected_outcomes() == ["done", "failed"]
 
     dialog.search_edit.setFocus()
-    QTest.keyClicks(dialog.search_edit, "fa")
+    QtTest.QTest.keyClicks(dialog.search_edit, "fa")
     qapp.processEvents()
 
     assert _visible_outcome_names(dialog) == ["failed"]

@@ -36,7 +36,7 @@ from gui_test_support import FakePluginManager, install_external_dependency_stub
 def editor_window(qapp, monkeypatch, tmp_path):
     # Create an isolated editor instance that does not touch the developer's
     # local configuration and does not require the external runtime stack.
-    pytest.importorskip("PyQt5.QtWidgets")
+    pytest.importorskip("yasmin_editor.qt_compat")
 
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
 

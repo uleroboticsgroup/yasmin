@@ -14,9 +14,7 @@
 
 from __future__ import annotations
 
-from PyQt5.QtCore import QPoint, QPointF, QRectF, Qt, QTimer
-from PyQt5.QtWidgets import QInputDialog, QMessageBox, QWidget
-
+from yasmin_editor.qt_compat import Qt, QtCore, QtWidgets
 from yasmin_editor.editor_gui.clipboard_logic import (
     cross_container_paste_warning,
     replacement_clipboard_message,
@@ -61,13 +59,14 @@ class EditorClipboardMixin:
         if is_container_empty(self.clipboard_model):
             self._switch_clipboard_model(required_kind)
             return True
-        reply = QMessageBox.question(
+        reply = QtWidgets.QMessageBox.question(
             self,
             "Replace Shelf Content",
             replacement_clipboard_message(required_kind),
-            QMessageBox.Yes | QMessageBox.No,
+            QtWidgets.QMessageBox.StandardButton.Yes
+            | QtWidgets.QMessageBox.StandardButton.No,
         )
-        if reply != QMessageBox.Yes:
+        if reply != QtWidgets.QMessageBox.StandardButton.Yes:
             return False
         self._switch_clipboard_model(required_kind)
         return True
@@ -81,13 +80,14 @@ class EditorClipboardMixin:
         )
         if warning_text is None:
             return True
-        reply = QMessageBox.question(
+        reply = QtWidgets.QMessageBox.question(
             self,
             "Place Across Container Types",
             warning_text,
-            QMessageBox.Yes | QMessageBox.No,
+            QtWidgets.QMessageBox.StandardButton.Yes
+            | QtWidgets.QMessageBox.StandardButton.No,
         )
-        return reply == QMessageBox.Yes
+        return reply == QtWidgets.QMessageBox.StandardButton.Yes
 
     def sync_clipboard_layout(self) -> None:
         sync_container_layout_from_views(
@@ -136,7 +136,9 @@ class EditorClipboardMixin:
 
     def _collect_main_selection_bundle(self):
         selection = self._current_scene_selection()
-        return self._bundle_from_scene_selection(self.current_container_model, selection)
+        return self._bundle_from_scene_selection(
+            self.current_container_model, selection
+        )
 
     def _collect_clipboard_selection_bundle(self, fallback_to_all: bool = False):
         selection = self._clipboard_scene_selection(fallback_to_all=fallback_to_all)
@@ -198,7 +200,7 @@ class EditorClipboardMixin:
             ensure_outcome_placements=ensure_outcome_placements,
         )
 
-    def _visible_clipboard_scene_rect(self) -> QRectF | None:
+    def _visible_clipboard_scene_rect(self) -> QtCore.QRectF | None:
         """Return the bounds of visible shelf items only."""
 
         canvas = getattr(self, "clipboard_canvas", None)
@@ -251,7 +253,7 @@ class EditorClipboardMixin:
             dock.resize(normalized_width, dock.height())
             resize_docks = getattr(self, "resizeDocks", None)
             if callable(resize_docks):
-                resize_docks([dock], [normalized_width], Qt.Horizontal)
+                resize_docks([dock], [normalized_width], Qt.Orientation.Horizontal)
         self._clipboard_panel_width = normalized_width
 
     def _restore_clipboard_panel_width(self) -> None:
@@ -279,7 +281,7 @@ class EditorClipboardMixin:
         margin = 12.0
         padded = bounds.adjusted(-margin, -margin, margin, margin)
         canvas.scene.setSceneRect(padded)
-        canvas.fitInView(padded, Qt.KeepAspectRatio)
+        canvas.fitInView(padded, Qt.AspectRatioMode.KeepAspectRatio)
         canvas.centerOn(bounds.center())
 
     def _hide_clipboard_connection_ports(self) -> None:
@@ -320,12 +322,14 @@ class EditorClipboardMixin:
             dock.setVisible(new_visible)
             if new_visible:
                 dock.raise_()
-                QTimer.singleShot(0, self._restore_clipboard_panel_width)
-                QTimer.singleShot(0, self.fit_clipboard_view)
+                QtCore.QTimer.singleShot(0, self._restore_clipboard_panel_width)
+                QtCore.QTimer.singleShot(0, self.fit_clipboard_view)
         elif panel is not None:
             panel.setVisible(new_visible)
         if hasattr(self, "clipboard_panel_toggle_button"):
-            self.clipboard_panel_toggle_button.setText("Hide" if new_visible else "Show")
+            self.clipboard_panel_toggle_button.setText(
+                "Hide" if new_visible else "Show"
+            )
         if hasattr(self, "canvas_clipboard_toggle_button"):
             self.canvas_clipboard_toggle_button.setText(
                 "Hide Shelf" if new_visible else "Show Shelf"
@@ -343,14 +347,16 @@ class EditorClipboardMixin:
 
     def _widget_contains_global_pos(
         self,
-        widget: QWidget | None,
-        global_pos: QPoint,
+        widget: QtWidgets.QWidget | None,
+        global_pos: QtCore.QPoint,
     ) -> bool:
         if widget is None or not widget.isVisible():
             return False
         return widget.rect().contains(widget.mapFromGlobal(global_pos))
 
-    def _clipboard_anchor_from_global(self, global_pos: QPoint) -> QPointF:
+    def _clipboard_anchor_from_global(
+        self, global_pos: QtCore.QPoint
+    ) -> QtCore.QPointF:
         viewport = self.clipboard_canvas.viewport()
         if self._widget_contains_global_pos(viewport, global_pos):
             return self.clipboard_canvas.mapToScene(
@@ -358,13 +364,15 @@ class EditorClipboardMixin:
             )
         return self.clipboard_canvas.get_preferred_placement_scene_pos()
 
-    def _main_canvas_anchor_from_global(self, global_pos: QPoint) -> QPointF:
+    def _main_canvas_anchor_from_global(
+        self, global_pos: QtCore.QPoint
+    ) -> QtCore.QPointF:
         viewport = self.canvas.viewport()
         if self._widget_contains_global_pos(viewport, global_pos):
             return self.canvas.mapToScene(self.canvas.mapFromGlobal(global_pos))
         return self.canvas.get_preferred_placement_scene_pos()
 
-    def _store_bundle_in_clipboard_model(self, bundle, anchor: QPointF) -> bool:
+    def _store_bundle_in_clipboard_model(self, bundle, anchor: QtCore.QPointF) -> bool:
         if bundle.is_empty:
             return False
         if not self._ensure_clipboard_model_kind(bundle.source_kind):
@@ -399,7 +407,7 @@ class EditorClipboardMixin:
         self,
         bundle,
         *,
-        anchor: QPointF,
+        anchor: QtCore.QPointF,
         remove_from_clipboard: bool,
     ) -> bool:
         if self.is_read_only_mode():
@@ -420,7 +428,9 @@ class EditorClipboardMixin:
             self._remove_selected_clipboard_items(fallback_to_all=False)
         return True
 
-    def handle_canvas_external_drop(self, source_canvas, global_pos: QPoint) -> bool:
+    def handle_canvas_external_drop(
+        self, source_canvas, global_pos: QtCore.QPoint
+    ) -> bool:
         if source_canvas is self.canvas:
             if not self._widget_contains_global_pos(
                 getattr(self, "clipboard_panel", None),
@@ -474,7 +484,9 @@ class EditorClipboardMixin:
 
         if bundle.is_empty:
             self._reset_pending_selection_state()
-            QMessageBox.warning(self, "Selection", "Please select at least one item.")
+            QtWidgets.QMessageBox.warning(
+                self, "Selection", "Please select at least one item."
+            )
             return
         preview = build_selection_preview(bundle, verb=verb)
         self.pending_selection_bundle = bundle.clone()
@@ -487,7 +499,7 @@ class EditorClipboardMixin:
             width=preview.width,
             height=preview.height,
         )
-        self.canvas.setFocus(Qt.ShortcutFocusReason)
+        self.canvas.setFocus(Qt.FocusReason.ShortcutFocusReason)
 
     def start_copy_selection_placement(self) -> None:
         if self.is_read_only_mode():
@@ -499,7 +511,7 @@ class EditorClipboardMixin:
             status_text="Placed copied selection",
         )
 
-    def finalize_pending_selection_placement(self, scene_pos: QPointF) -> None:
+    def finalize_pending_selection_placement(self, scene_pos: QtCore.QPointF) -> None:
         bundle = getattr(self, "pending_selection_bundle", None)
         if bundle is None or bundle.is_empty:
             self.cancel_pending_selection_placement()
@@ -543,13 +555,13 @@ class EditorClipboardMixin:
             selection,
         )
         if not bundle.states:
-            QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self,
                 "Selection",
                 "Please select at least one state to extract.",
             )
             return
-        container_name, ok = QInputDialog.getText(
+        container_name, ok = QtWidgets.QInputDialog.getText(
             self,
             "Extract Selection",
             "Name for the extracted state machine:",
@@ -558,7 +570,7 @@ class EditorClipboardMixin:
         if not ok or not container_name:
             return
         if self.has_state_name_conflict(container_name):
-            QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self,
                 "Error",
                 (

@@ -16,46 +16,45 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from PyQt5.QtCore import QPointF, QRectF, Qt
-from PyQt5.QtGui import QBrush, QFont, QKeySequence, QPen, QTextCursor, QTextDocument
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem, QMenu
-
+from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets, exec_menu
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
 from yasmin_editor.model.text_block import TextBlock
 
 
-class TextBlockEditorItem(QGraphicsTextItem):
+class TextBlockEditorItem(QtWidgets.QGraphicsTextItem):
     """Text item that provides inline editing helpers for text blocks."""
 
     def __init__(self, node: "TextBlockNode") -> None:
         super().__init__(node)
         self.node = node
         self.setTabChangesFocus(False)
-        self.setTextInteractionFlags(Qt.NoTextInteraction)
-        self.setAcceptedMouseButtons(Qt.NoButton)
+        self.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
+        self.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
 
     def focusOutEvent(self, event: Any) -> None:
         super().focusOutEvent(event)
         self.node.finish_editing()
 
     def keyPressEvent(self, event: Any) -> None:
-        if event.key() == Qt.Key_Escape:
+        if event.key() == Qt.Key.Key_Escape:
             self.node.cancel_editing()
             event.accept()
             return
 
-        if event.matches(QKeySequence.Bold):
+        if event.matches(QtGui.QKeySequence.StandardKey.Bold):
             self._wrap_selection("**", "**")
             event.accept()
             return
 
-        if event.matches(QKeySequence.Italic):
+        if event.matches(QtGui.QKeySequence.StandardKey.Italic):
             self._wrap_selection("_", "_")
             event.accept()
             return
 
-        if event.key() == Qt.Key_Return and bool(event.modifiers() & Qt.ControlModifier):
+        if event.key() == Qt.Key.Key_Return and bool(
+            event.modifiers() & Qt.KeyboardModifier.ControlModifier
+        ):
             self.node.finish_editing()
             event.accept()
             return
@@ -72,13 +71,13 @@ class TextBlockEditorItem(QGraphicsTextItem):
         else:
             cursor.insertText(f"{prefix}{suffix}")
             for _ in range(len(suffix)):
-                cursor.movePosition(QTextCursor.Left)
+                cursor.movePosition(QtGui.QTextCursor.Left)
             self.setTextCursor(cursor)
 
         self.node.update_geometry_from_document()
 
 
-class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
+class TextBlockNode(BaseNodeMixin, QtWidgets.QGraphicsRectItem):
     """Graphical free-form text block with inline editing and Markdown preview."""
 
     _PADDING_X = 12.0
@@ -98,12 +97,12 @@ class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
 
         self._initialize_base_node_graphics(x, y)
         self.setZValue(-1.0)
-        self.setBrush(QBrush(PALETTE.ui_panel_alt_bg))
+        self.setBrush(QtGui.QBrush(PALETTE.ui_panel_alt_bg))
         self.setPen(self._default_pen())
 
         self.text_item = TextBlockEditorItem(self)
         self.text_item.setDefaultTextColor(PALETTE.text_primary)
-        self._base_font = QFont()
+        self._base_font = QtGui.QFont()
         self._base_font.setPointSize(self._BASE_FONT_POINT_SIZE)
         self.text_item.setFont(self._base_font)
 
@@ -122,8 +121,8 @@ class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
         self.update_content_view()
         self.update_tooltip()
 
-    def _default_pen(self) -> QPen:
-        pen = QPen(PALETTE.ui_border, 1, Qt.DashLine)
+    def _default_pen(self) -> QtGui.QPen:
+        pen = QtGui.QPen(PALETTE.ui_border, 1, Qt.PenStyle.DashLine)
         return pen
 
     def update_tooltip(self) -> None:
@@ -133,9 +132,11 @@ class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
             f"{preview}\n\nDouble-click to edit inline. Ctrl+B / Ctrl+I insert Markdown markers. Ctrl+Enter finishes editing."
         )
 
-    def _create_document(self, content: str, markdown_enabled: bool) -> QTextDocument:
+    def _create_document(
+        self, content: str, markdown_enabled: bool
+    ) -> QtGui.QTextDocument:
         """Create a fresh text document for the requested rendering mode."""
-        document = QTextDocument(self.text_item)
+        document = QtGui.QTextDocument(self.text_item)
         document.setDocumentMargin(0.0)
         document.setDefaultFont(self._base_font)
 
@@ -164,11 +165,15 @@ class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
         """Refresh the displayed text based on the current edit mode."""
         if self._is_editing:
             self._apply_edit_content()
-            self.text_item.setTextInteractionFlags(Qt.TextEditorInteraction)
-            self.text_item.setAcceptedMouseButtons(Qt.AllButtons)
+            self.text_item.setTextInteractionFlags(
+                Qt.TextInteractionFlag.TextEditorInteraction
+            )
+            self.text_item.setAcceptedMouseButtons(Qt.MouseButton.AllButtons)
         else:
-            self.text_item.setTextInteractionFlags(Qt.NoTextInteraction)
-            self.text_item.setAcceptedMouseButtons(Qt.NoButton)
+            self.text_item.setTextInteractionFlags(
+                Qt.TextInteractionFlag.NoTextInteraction
+            )
+            self.text_item.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
             self._apply_rendered_content()
         self.update_geometry_from_document()
 
@@ -178,7 +183,7 @@ class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
         width = max(self._MIN_WIDTH, text_rect.width() + 2.0 * self._PADDING_X)
         height = max(self._MIN_HEIGHT, text_rect.height() + 2.0 * self._PADDING_Y)
         self.prepareGeometryChange()
-        self.setRect(QRectF(0.0, 0.0, width, height))
+        self.setRect(QtCore.QRectF(0.0, 0.0, width, height))
         self.text_item.setPos(self._PADDING_X, self._PADDING_Y)
 
     def enter_edit_mode(self) -> None:
@@ -199,9 +204,9 @@ class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
         self._is_editing = True
         self.setSelected(True)
         self.update_content_view()
-        self.text_item.setFocus(Qt.MouseFocusReason)
+        self.text_item.setFocus(Qt.FocusReason.MouseFocusReason)
         cursor = self.text_item.textCursor()
-        cursor.movePosition(QTextCursor.End)
+        cursor.movePosition(QtGui.QTextCursor.End)
         self.text_item.setTextCursor(cursor)
 
     def finish_editing(self) -> None:
@@ -237,10 +242,14 @@ class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
         """Apply the current read-only mode to the text block."""
         if readonly and self._is_editing:
             self.finish_editing()
-        self.setFlag(QGraphicsItem.ItemIsMovable, not readonly)
+        self.setFlag(
+            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable, not readonly
+        )
         if readonly:
-            self.text_item.setTextInteractionFlags(Qt.NoTextInteraction)
-            self.text_item.setAcceptedMouseButtons(Qt.NoButton)
+            self.text_item.setTextInteractionFlags(
+                Qt.TextInteractionFlag.NoTextInteraction
+            )
+            self.text_item.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
 
     def mouseDoubleClickEvent(self, event: Any) -> None:
         """Enter inline editing when the block is double-clicked."""
@@ -249,10 +258,10 @@ class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
 
     def _on_context_menu(self, editor: Any, event: Any) -> bool:
         readonly = editor.is_read_only_mode()
-        menu = QMenu()
+        menu = QtWidgets.QMenu()
         edit_action = menu.addAction("View Text" if readonly else "Edit Text")
         delete_action = None if readonly else menu.addAction("Delete")
-        action = menu.exec_(event.screenPos())
+        action = exec_menu(menu, event.screenPos())
 
         if action == edit_action:
             if not readonly:
@@ -264,11 +273,16 @@ class TextBlockNode(BaseNodeMixin, QGraphicsRectItem):
             return True
         return False
 
-    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
-        if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
+    def itemChange(
+        self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any
+    ) -> Any:
+        if (
+            change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionChange
+            and isinstance(value, QtCore.QPointF)
+        ):
             value = self.constrain_position_to_parent(value, top_margin=10.0)
 
-        elif change == QGraphicsItem.ItemSelectedChange:
+        elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
             self.update_selection_pen(bool(value), self._default_pen())
 
         return super().itemChange(change, value)

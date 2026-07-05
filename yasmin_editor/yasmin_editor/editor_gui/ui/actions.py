@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from PyQt5.QtWidgets import QAction
+from yasmin_editor.qt_compat import QtWidgets, QAction
 from yasmin_editor.editor_gui.ui.action_specs import ALL_ACTION_GROUPS, ActionSpec
 
 

@@ -14,10 +14,7 @@
 
 from typing import Optional
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QBrush, QPen
-from PyQt5.QtWidgets import QLabel, QMessageBox, QPushButton
-
+from yasmin_editor.qt_compat import Qt, QtGui, QtWidgets
 from yasmin_editor.editor_gui.canvas_logic import (
     breadcrumb_label,
     is_read_only_mode as canvas_is_read_only_mode,
@@ -51,7 +48,7 @@ class EditorCanvasMixin:
     ) -> Optional[ContainerStateNode]:
         container = self.find_selected_container()
         if container is None:
-            QMessageBox.warning(self, "Error", message)
+            QtWidgets.QMessageBox.warning(self, "Error", message)
         return container
 
     def delete_connection_item(self, connection: ConnectionLine) -> None:
@@ -76,7 +73,9 @@ class EditorCanvasMixin:
             for final_outcome in state_node.final_outcomes.values():
                 yield final_outcome
 
-    def _remove_state_node_entries(self, state_node: StateNode, prefix: str = "") -> None:
+    def _remove_state_node_entries(
+        self, state_node: StateNode, prefix: str = ""
+    ) -> None:
         full_name = f"{prefix}.{state_node.name}" if prefix else state_node.name
         if isinstance(state_node, ContainerStateNode):
             for child_state in list(state_node.child_states.values()):
@@ -115,7 +114,7 @@ class EditorCanvasMixin:
             return
 
         try:
-            connection.label_bg.setBrush(QBrush(PALETTE.connection_label_bg))
+            connection.label_bg.setBrush(QtGui.QBrush(PALETTE.connection_label_bg))
             connection._update_label_style(is_selected)
         except RuntimeError:
             return
@@ -132,45 +131,45 @@ class EditorCanvasMixin:
         try:
             if isinstance(item, StateNode):
                 item.setBrush(
-                    QBrush(
+                    QtGui.QBrush(
                         PALETTE.state_fill(
                             item.plugin_info.plugin_type if item.plugin_info else None
                         )
                     )
                 )
                 item.setPen(
-                    QPen(PALETTE.selection_pen, 4)
+                    QtGui.QPen(PALETTE.selection_pen, 4)
                     if is_selected
-                    else QPen(PALETTE.state_pen, 3)
+                    else QtGui.QPen(PALETTE.state_pen, 3)
                 )
             elif isinstance(item, ContainerStateNode):
                 if getattr(item, "is_xml_reference", False):
-                    item.setBrush(QBrush(PALETTE.container_xml_fill))
+                    item.setBrush(QtGui.QBrush(PALETTE.container_xml_fill))
                     item.setPen(
-                        QPen(PALETTE.selection_pen, 4)
+                        QtGui.QPen(PALETTE.selection_pen, 4)
                         if is_selected
-                        else QPen(PALETTE.container_xml_pen, 3)
+                        else QtGui.QPen(PALETTE.container_xml_pen, 3)
                     )
                 elif item.is_concurrence:
-                    item.setBrush(QBrush(PALETTE.container_concurrence_fill))
+                    item.setBrush(QtGui.QBrush(PALETTE.container_concurrence_fill))
                     item.setPen(
-                        QPen(PALETTE.selection_pen, 4)
+                        QtGui.QPen(PALETTE.selection_pen, 4)
                         if is_selected
-                        else QPen(PALETTE.container_concurrence_pen, 3)
+                        else QtGui.QPen(PALETTE.container_concurrence_pen, 3)
                     )
                 else:
-                    item.setBrush(QBrush(PALETTE.container_state_machine_fill))
+                    item.setBrush(QtGui.QBrush(PALETTE.container_state_machine_fill))
                     item.setPen(
-                        QPen(PALETTE.selection_pen, 4)
+                        QtGui.QPen(PALETTE.selection_pen, 4)
                         if is_selected
-                        else QPen(PALETTE.container_state_machine_pen, 3)
+                        else QtGui.QPen(PALETTE.container_state_machine_pen, 3)
                     )
             elif isinstance(item, FinalOutcomeNode):
-                item.setBrush(QBrush(PALETTE.final_outcome_fill))
+                item.setBrush(QtGui.QBrush(PALETTE.final_outcome_fill))
                 item.setPen(
-                    QPen(PALETTE.selection_pen, 4)
+                    QtGui.QPen(PALETTE.selection_pen, 4)
                     if is_selected
-                    else QPen(PALETTE.final_outcome_pen, 3)
+                    else QtGui.QPen(PALETTE.final_outcome_pen, 3)
                 )
         except RuntimeError:
             return
@@ -190,7 +189,7 @@ class EditorCanvasMixin:
         margin = 10.0
         padded = bounds.adjusted(-margin, -margin, margin, margin)
         self.canvas.scene.setSceneRect(padded)
-        self.canvas.fitInView(padded, Qt.KeepAspectRatio)
+        self.canvas.fitInView(padded, Qt.AspectRatioMode.KeepAspectRatio)
         self.canvas.centerOn(bounds.center())
 
     def _get_breadcrumb_label(self, index: int, container_model: object) -> str:
@@ -214,18 +213,18 @@ class EditorCanvasMixin:
 
         for index, container_model in enumerate(self.current_container_path):
             label = self._get_breadcrumb_label(index, container_model)
-            button = QPushButton(label)
+            button = QtWidgets.QPushButton(label)
             button.setFlat(True)
             button.clicked.connect(
                 lambda _checked=False, idx=index: self.navigate_to_container_index(idx)
             )
             self.breadcrumb_layout.addWidget(button)
             if index < len(self.current_container_path) - 1:
-                self.breadcrumb_layout.addWidget(QLabel(">"))
+                self.breadcrumb_layout.addWidget(QtWidgets.QLabel(">"))
 
         self.breadcrumb_layout.addStretch()
 
-        fit_button = QPushButton("Fit")
+        fit_button = QtWidgets.QPushButton("Fit")
         fit_button.clicked.connect(self.fit_current_view)
         self.breadcrumb_layout.addWidget(fit_button)
 
@@ -261,8 +260,12 @@ class EditorCanvasMixin:
                 if self.state_uses_blackboard_key(state_node, selected_key):
                     self.apply_default_visual_state(state_node)
                     try:
-                        state_node.setPen(QPen(PALETTE.blackboard_highlight_pen, 5))
-                        state_node.setBrush(QBrush(PALETTE.blackboard_highlight_fill))
+                        state_node.setPen(
+                            QtGui.QPen(PALETTE.blackboard_highlight_pen, 5)
+                        )
+                        state_node.setBrush(
+                            QtGui.QBrush(PALETTE.blackboard_highlight_fill)
+                        )
                     except RuntimeError:
                         continue
 
@@ -331,7 +334,9 @@ class EditorCanvasMixin:
 
     def _set_scene_read_only_state(self) -> None:
         readonly = self.is_read_only_mode()
-        for item in list(self.state_nodes.values()) + list(self.final_outcomes.values()):
+        for item in list(self.state_nodes.values()) + list(
+            self.final_outcomes.values()
+        ):
             item.setFlag(item.ItemIsMovable, not readonly)
             if hasattr(item, "connection_port") and readonly:
                 item.connection_port.setVisible(False)
@@ -413,16 +418,18 @@ class EditorCanvasMixin:
                 return
             xml_file_path = self._resolve_xml_state_file_path(container_node)
             if not xml_file_path:
-                QMessageBox.warning(
+                QtWidgets.QMessageBox.warning(
                     self,
                     "Error",
                     f"Unable to locate XML file for state '{container_node.name}'.",
                 )
                 return
             try:
-                external_model = self.model_adapter.load_external_xml_model(xml_file_path)
+                external_model = self.model_adapter.load_external_xml_model(
+                    xml_file_path
+                )
             except Exception as exc:
-                QMessageBox.critical(
+                QtWidgets.QMessageBox.critical(
                     self,
                     "Error",
                     f"Failed to load external XML state machine:\n{exc}",

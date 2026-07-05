@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from PyQt5.QtWidgets import QFrame, QVBoxLayout
+from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.state_machine_canvas import StateMachineCanvas
 
 
-def build_canvas_frame(editor) -> QFrame:
+def build_canvas_frame(editor) -> QtWidgets.QFrame:
     """Create the canvas frame and canvas widget."""
-    frame = QFrame()
+    frame = QtWidgets.QFrame()
     frame.setMinimumSize(0, 0)
-    editor.canvas_frame_layout = QVBoxLayout(frame)
+    editor.canvas_frame_layout = QtWidgets.QVBoxLayout(frame)
     editor.canvas_frame_layout.setContentsMargins(0, 0, 0, 0)
 
     editor.canvas = StateMachineCanvas()

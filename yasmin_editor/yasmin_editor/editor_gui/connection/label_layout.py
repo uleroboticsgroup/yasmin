@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Helpers for laying out grouped connection labels."""
-
 from typing import TYPE_CHECKING, List
 
-from PyQt5.QtCore import QPointF, QRectF
+from yasmin_editor.qt_compat import QtCore
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
@@ -28,7 +26,7 @@ LABEL_SPACING: float = 2.0
 
 def layout_stacked_labels(
     group: List["ConnectionLine"],
-    anchor_point: QPointF,
+    anchor_point: QtCore.QPointF,
     stack_direction: str = "center",
 ) -> None:
     """Lay out the labels of a grouped connection as a vertical stack."""
@@ -56,7 +54,9 @@ def layout_stacked_labels(
         label_rect = connection.label.boundingRect()
         box_width = label_rect.width() + LABEL_PADDING * 2
         box_left = anchor_point.x() - box_width / 2.0
-        connection.label_bg.setRect(QRectF(box_left, current_top, box_width, box_height))
+        connection.label_bg.setRect(
+            QtCore.QRectF(box_left, current_top, box_width, box_height)
+        )
         connection.label.setPos(
             box_left + LABEL_PADDING,
             current_top + LABEL_PADDING,

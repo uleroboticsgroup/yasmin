@@ -16,7 +16,7 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
-from PyQt5.QtGui import QColor
+from yasmin_editor.qt_compat import QtGui
 
 YASMIN_EDITOR_THEME_ENV = "YASMIN_EDITOR_THEME"
 DEFAULT_PALETTE_NAME = "default"
@@ -27,81 +27,81 @@ DARKMODE_PALETTE_NAME = "darkmode"
 class EditorPalette:
     """Complete color palette used by the editor UI and scene items."""
 
-    background: QColor
-    text_primary: QColor
-    text_secondary: QColor
-    ui_window_bg: QColor
-    ui_panel_bg: QColor
-    ui_panel_alt_bg: QColor
-    ui_input_bg: QColor
-    ui_button_bg: QColor
-    ui_button_hover_bg: QColor
-    ui_button_pressed_bg: QColor
-    ui_border: QColor
-    ui_selection_bg: QColor
-    ui_selection_text: QColor
-    ui_tooltip_bg: QColor
-    ui_tooltip_text: QColor
-    shell_bg: QColor
-    shell_text: QColor
-    shell_border: QColor
-    shell_selection_bg: QColor
-    shell_selection_text: QColor
-    shell_prompt_in: QColor
-    shell_prompt_out: QColor
-    shell_comment: QColor
-    shell_keyword: QColor
-    shell_string: QColor
-    shell_number: QColor
-    shell_error: QColor
-    state_python_fill: QColor
-    state_cpp_fill: QColor
-    state_xml_fill: QColor
-    state_pen: QColor
-    container_xml_fill: QColor
-    container_xml_pen: QColor
-    container_concurrence_fill: QColor
-    container_concurrence_pen: QColor
-    container_orthogonal_fill: QColor
-    container_orthogonal_pen: QColor
-    container_state_machine_fill: QColor
-    container_state_machine_pen: QColor
-    final_outcome_fill: QColor
-    final_outcome_pen: QColor
-    selection_pen: QColor
-    blackboard_highlight_pen: QColor
-    blackboard_highlight_fill: QColor
-    start_indicator_connector: QColor
-    start_indicator_outer_fill: QColor
-    start_indicator_outer_pen: QColor
-    start_indicator_inner_fill: QColor
-    start_indicator_inner_pen: QColor
-    start_indicator_arrow: QColor
-    start_indicator_label: QColor
-    runtime_highlight_pen: QColor
-    runtime_highlight_fill: QColor
-    runtime_transition_pen: QColor
-    runtime_transition_label_bg: QColor
-    runtime_canvas_border: QColor
-    runtime_mode_button_bg: QColor
-    runtime_mode_button_text: QColor
-    runtime_log_default: QColor
-    runtime_log_status: QColor
-    runtime_log_info: QColor
-    runtime_log_debug: QColor
-    runtime_log_warn: QColor
-    runtime_log_error: QColor
-    runtime_log_system: QColor
-    connection_line: QColor
-    connection_selected: QColor
-    connection_label_bg: QColor
-    connection_label_pen: QColor
-    connection_label_text: QColor
-    connection_port_fill: QColor
-    connection_port_pen: QColor
-    temp_connection: QColor
+    background: QtGui.QColor
+    text_primary: QtGui.QColor
+    text_secondary: QtGui.QColor
+    ui_window_bg: QtGui.QColor
+    ui_panel_bg: QtGui.QColor
+    ui_panel_alt_bg: QtGui.QColor
+    ui_input_bg: QtGui.QColor
+    ui_button_bg: QtGui.QColor
+    ui_button_hover_bg: QtGui.QColor
+    ui_button_pressed_bg: QtGui.QColor
+    ui_border: QtGui.QColor
+    ui_selection_bg: QtGui.QColor
+    ui_selection_text: QtGui.QColor
+    ui_tooltip_bg: QtGui.QColor
+    ui_tooltip_text: QtGui.QColor
+    shell_bg: QtGui.QColor
+    shell_text: QtGui.QColor
+    shell_border: QtGui.QColor
+    shell_selection_bg: QtGui.QColor
+    shell_selection_text: QtGui.QColor
+    shell_prompt_in: QtGui.QColor
+    shell_prompt_out: QtGui.QColor
+    shell_comment: QtGui.QColor
+    shell_keyword: QtGui.QColor
+    shell_string: QtGui.QColor
+    shell_number: QtGui.QColor
+    shell_error: QtGui.QColor
+    state_python_fill: QtGui.QColor
+    state_cpp_fill: QtGui.QColor
+    state_xml_fill: QtGui.QColor
+    state_pen: QtGui.QColor
+    container_xml_fill: QtGui.QColor
+    container_xml_pen: QtGui.QColor
+    container_concurrence_fill: QtGui.QColor
+    container_concurrence_pen: QtGui.QColor
+    container_orthogonal_fill: QtGui.QColor
+    container_orthogonal_pen: QtGui.QColor
+    container_state_machine_fill: QtGui.QColor
+    container_state_machine_pen: QtGui.QColor
+    final_outcome_fill: QtGui.QColor
+    final_outcome_pen: QtGui.QColor
+    selection_pen: QtGui.QColor
+    blackboard_highlight_pen: QtGui.QColor
+    blackboard_highlight_fill: QtGui.QColor
+    start_indicator_connector: QtGui.QColor
+    start_indicator_outer_fill: QtGui.QColor
+    start_indicator_outer_pen: QtGui.QColor
+    start_indicator_inner_fill: QtGui.QColor
+    start_indicator_inner_pen: QtGui.QColor
+    start_indicator_arrow: QtGui.QColor
+    start_indicator_label: QtGui.QColor
+    runtime_highlight_pen: QtGui.QColor
+    runtime_highlight_fill: QtGui.QColor
+    runtime_transition_pen: QtGui.QColor
+    runtime_transition_label_bg: QtGui.QColor
+    runtime_canvas_border: QtGui.QColor
+    runtime_mode_button_bg: QtGui.QColor
+    runtime_mode_button_text: QtGui.QColor
+    runtime_log_default: QtGui.QColor
+    runtime_log_status: QtGui.QColor
+    runtime_log_info: QtGui.QColor
+    runtime_log_debug: QtGui.QColor
+    runtime_log_warn: QtGui.QColor
+    runtime_log_error: QtGui.QColor
+    runtime_log_system: QtGui.QColor
+    connection_line: QtGui.QColor
+    connection_selected: QtGui.QColor
+    connection_label_bg: QtGui.QColor
+    connection_label_pen: QtGui.QColor
+    connection_label_text: QtGui.QColor
+    connection_port_fill: QtGui.QColor
+    connection_port_pen: QtGui.QColor
+    temp_connection: QtGui.QColor
 
-    def state_fill(self, plugin_type: Optional[str]) -> QColor:
+    def state_fill(self, plugin_type: Optional[str]) -> QtGui.QColor:
         """Return the fill color for a state based on the plugin type."""
         if plugin_type == "python":
             return self.state_python_fill

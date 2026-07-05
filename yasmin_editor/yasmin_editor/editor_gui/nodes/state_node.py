@@ -14,18 +14,15 @@
 
 from typing import Any, Dict, List, Optional
 
-from PyQt5.QtCore import QPointF
-from PyQt5.QtGui import QBrush, QFont, QPen
-from PyQt5.QtWidgets import QGraphicsEllipseItem, QGraphicsItem, QGraphicsTextItem, QMenu
 from yasmin_plugins_manager.plugin_info import PluginInfo
-
+from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets, exec_menu
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_port import ConnectionPort
 from yasmin_editor.editor_gui.nodes.base_node import BaseNodeMixin
 from yasmin_editor.model.state import State
 
 
-class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
+class StateNode(BaseNodeMixin, QtWidgets.QGraphicsEllipseItem):
     """Graphical representation of a regular state (not container)."""
 
     def __init__(
@@ -55,13 +52,17 @@ class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
         self._initialize_base_node_graphics(x, y)
 
         self.setBrush(
-            QBrush(PALETTE.state_fill(plugin_info.plugin_type if plugin_info else None))
+            QtGui.QBrush(
+                PALETTE.state_fill(plugin_info.plugin_type if plugin_info else None)
+            )
         )
-        self.setPen(QPen(PALETTE.state_pen, 3))
+        self.setPen(QtGui.QPen(PALETTE.state_pen, 3))
 
-        self.text: QGraphicsTextItem = QGraphicsTextItem(self.name, self)
+        self.text: QtWidgets.QGraphicsTextItem = QtWidgets.QGraphicsTextItem(
+            self.name, self
+        )
         self.text.setDefaultTextColor(PALETTE.text_primary)
-        font: QFont = QFont()
+        font: QtGui.QFont = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
         self.text.setFont(font)
@@ -75,9 +76,11 @@ class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
             type_text = custom_type_label
 
         if type_text:
-            self.type_label: QGraphicsTextItem = QGraphicsTextItem(type_text, self)
+            self.type_label: QtWidgets.QGraphicsTextItem = QtWidgets.QGraphicsTextItem(
+                type_text, self
+            )
             self.type_label.setDefaultTextColor(PALETTE.text_secondary)
-            type_font: QFont = QFont()
+            type_font: QtGui.QFont = QtGui.QFont()
             type_font.setPointSize(8)
             self.type_label.setFont(type_font)
             self.center_text_item(self.type_label, 10)
@@ -100,17 +103,17 @@ class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
                 return True
 
         if editor.is_read_only_mode():
-            menu = QMenu()
+            menu = QtWidgets.QMenu()
             view_action = menu.addAction("View Properties")
-            action = menu.exec_(event.screenPos())
+            action = exec_menu(menu, event.screenPos())
             if action == view_action:
                 editor.edit_state()
                 return True
         else:
-            menu = QMenu()
+            menu = QtWidgets.QMenu()
             edit_action = menu.addAction("Edit Properties")
             delete_action = menu.addAction("Delete")
-            action = menu.exec_(event.screenPos())
+            action = exec_menu(menu, event.screenPos())
             if action == edit_action:
                 editor.edit_state()
                 return True
@@ -119,20 +122,27 @@ class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
                 return True
         return False
 
-    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
-        if change == QGraphicsItem.ItemPositionChange and isinstance(value, QPointF):
+    def itemChange(
+        self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any
+    ) -> Any:
+        if (
+            change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionChange
+            and isinstance(value, QtCore.QPointF)
+        ):
             value = self.constrain_position_to_parent(value)
             self.update_attached_connections()
 
-        elif change == QGraphicsItem.ItemPositionHasChanged:
+        elif (
+            change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged
+        ):
             self.notify_parent_container_resized()
 
-        elif change == QGraphicsItem.ItemSelectedChange:
-            self.update_selection_pen(bool(value), QPen(PALETTE.state_pen, 3))
+        elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
+            self.update_selection_pen(bool(value), QtGui.QPen(PALETTE.state_pen, 3))
 
         return super().itemChange(change, value)
 
-    def get_edge_point(self, target_pos: QPointF) -> QPointF:
+    def get_edge_point(self, target_pos: QtCore.QPointF) -> QtCore.QPointF:
         """Get the ellipse boundary point on the ray from the center to the target."""
         bounds = self.sceneBoundingRect()
         center = bounds.center()
@@ -146,4 +156,4 @@ class StateNode(BaseNodeMixin, QGraphicsEllipseItem):
             return center
 
         scale = 1.0 / (denominator**0.5)
-        return QPointF(center.x() + dx * scale, center.y() + dy * scale)
+        return QtCore.QPointF(center.x() + dx * scale, center.y() + dy * scale)

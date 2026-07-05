@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Application bootstrap helpers for the YASMIN editor."""
 
 from __future__ import annotations
 
@@ -20,13 +19,17 @@ import sys
 import time
 from typing import TYPE_CHECKING
 
+from yasmin_editor.qt_compat import exec_app
+
 if TYPE_CHECKING:
-    from PyQt5.QtWidgets import QApplication
+    from yasmin_editor.qt_compat import QtWidgets
     from yasmin_plugins_manager.plugin_manager import PluginManager
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
-def parse_cli_args(argv: list[str] | None = None) -> tuple[argparse.Namespace, list[str]]:
+def parse_cli_args(
+    argv: list[str] | None = None,
+) -> tuple[argparse.Namespace, list[str]]:
     """Parse editor-specific CLI arguments while preserving Qt arguments."""
 
     parser = argparse.ArgumentParser(add_help=True)
@@ -73,12 +76,12 @@ def wait_for_canvas_ready(
     timeout_sec: float = 3.0,
     min_size: int = 10,
 ) -> bool:
-    from PyQt5.QtWidgets import QApplication
+    from yasmin_editor.qt_compat import QtWidgets
 
     end_time = time.monotonic() + timeout_sec
 
     while time.monotonic() < end_time:
-        QApplication.processEvents()
+        QtWidgets.QApplication.processEvents()
         if viewport_is_ready(editor.canvas.viewport(), min_size=min_size):
             return True
         time.sleep(0.05)
@@ -86,10 +89,10 @@ def wait_for_canvas_ready(
     return False
 
 
-def create_application(argv: list[str]) -> "QApplication":
-    from PyQt5.QtWidgets import QApplication
+def create_application(argv: list[str]) -> "QtWidgets.QApplication":
+    from yasmin_editor.qt_compat import QtWidgets
 
-    return QApplication(argv)
+    return QtWidgets.QApplication(argv)
 
 
 def create_plugin_manager() -> "PluginManager":
@@ -106,14 +109,14 @@ def open_startup_xml(editor: "YasminEditor", xml_file: str) -> None:
     if not xml_file:
         return
 
-    from PyQt5.QtWidgets import QMessageBox
+    from yasmin_editor.qt_compat import QtWidgets
 
     try:
         wait_for_canvas_ready(editor)
         editor.load_from_xml(xml_file)
         editor.statusBar().showMessage(startup_open_message(xml_file), 3000)
     except Exception as exc:
-        QMessageBox.critical(
+        QtWidgets.QMessageBox.critical(
             editor,
             "Error",
             startup_error_message(exc),
@@ -132,7 +135,7 @@ def run_editor(argv: list[str] | None = None) -> int:
     editor = YasminEditor(manager)
     editor.show_startup_window()
     open_startup_xml(editor, args.xml_file)
-    exit_code = app.exec_()
+    exit_code = exec_app(app)
 
     # Cleanup plugin manager to release ROS 2 nodes and other resources
     try:

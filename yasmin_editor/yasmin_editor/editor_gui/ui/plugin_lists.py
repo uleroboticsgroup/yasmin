@@ -16,8 +16,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QListWidget, QListWidgetItem
+from yasmin_editor.qt_compat import Qt, QtWidgets
 
 from yasmin_editor.editor_gui.plugin_catalog import (
     iter_plugin_list_entries,
@@ -26,7 +25,9 @@ from yasmin_editor.editor_gui.plugin_catalog import (
 )
 
 
-def _iter_list_items(list_widget: QListWidget) -> Iterator[QListWidgetItem]:
+def _iter_list_items(
+    list_widget: QtWidgets.QListWidget,
+) -> Iterator[QtWidgets.QListWidgetItem]:
     """Yield all items from a ``QListWidget`` in index order."""
 
     for index in range(list_widget.count()):
@@ -44,12 +45,12 @@ def populate_plugin_lists(editor) -> None:
         getattr(editor, widget_name).clear()
 
     for entry in iter_plugin_list_entries(editor.plugin_manager):
-        item = QListWidgetItem(entry.display_name)
-        item.setData(Qt.UserRole, entry.payload)
+        item = QtWidgets.QListWidgetItem(entry.display_name)
+        item.setData(Qt.ItemDataRole.UserRole, entry.payload)
         getattr(editor, entry.list_name).addItem(item)
 
 
-def filter_list_widget(list_widget: QListWidget, text: str) -> None:
+def filter_list_widget(list_widget: QtWidgets.QListWidget, text: str) -> None:
     """Apply a case-insensitive text filter to a plugin sidebar list."""
 
     for item in _iter_list_items(list_widget):

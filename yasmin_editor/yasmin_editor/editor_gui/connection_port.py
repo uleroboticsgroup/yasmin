@@ -14,9 +14,7 @@
 
 from typing import TYPE_CHECKING, Union
 
-from PyQt5.QtCore import QEvent, Qt
-from PyQt5.QtGui import QBrush, QPen
-from PyQt5.QtWidgets import QGraphicsEllipseItem, QGraphicsItem
+from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets
 
 from yasmin_editor.editor_gui.colors import PALETTE
 
@@ -26,7 +24,7 @@ if TYPE_CHECKING:
     from yasmin_editor.editor_gui.nodes.state_node import StateNode
 
 
-class ConnectionPort(QGraphicsEllipseItem):
+class ConnectionPort(QtWidgets.QGraphicsEllipseItem):
     """Connection port for drag-to-connect functionality."""
 
     def __init__(
@@ -36,31 +34,35 @@ class ConnectionPort(QGraphicsEllipseItem):
         self.parent_state: Union[
             "StateNode", "ContainerStateNode", "FinalOutcomeNode"
         ] = parent_state
-        self.setBrush(QBrush(PALETTE.connection_port_fill))
-        self.setPen(QPen(PALETTE.connection_port_pen, 1))
+        self.setBrush(QtGui.QBrush(PALETTE.connection_port_fill))
+        self.setPen(QtGui.QPen(PALETTE.connection_port_pen, 1))
 
-        from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
+        from yasmin_editor.editor_gui.nodes.container_state_node import (
+            ContainerStateNode,
+        )
 
         if isinstance(parent_state, ContainerStateNode):
             self.update_position_for_container()
         else:
             self.setPos(60, 0)
 
-        self.setCursor(Qt.CrossCursor)
-        self.setAcceptedMouseButtons(Qt.LeftButton)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, False)
+        self.setCursor(Qt.CursorShape.CrossCursor)
+        self.setAcceptedMouseButtons(Qt.MouseButton.LeftButton)
+        self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, False)
 
     def update_position_for_container(self) -> None:
         """Update position for container parent."""
-        from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
+        from yasmin_editor.editor_gui.nodes.container_state_node import (
+            ContainerStateNode,
+        )
 
         if isinstance(self.parent_state, ContainerStateNode):
             rect = self.parent_state.rect()
             center_y: float = rect.top() + rect.height() / 2
             self.setPos(rect.right(), center_y)
 
-    def mousePressEvent(self, event: QEvent) -> None:
-        if event.button() == Qt.LeftButton:
+    def mousePressEvent(self, event: QtCore.QEvent) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
             if self.scene() and self.scene().views():
                 canvas = self.scene().views()[0]
                 if hasattr(canvas, "start_connection_drag"):
@@ -69,8 +71,8 @@ class ConnectionPort(QGraphicsEllipseItem):
                     return
         event.ignore()
 
-    def mouseMoveEvent(self, event: QEvent) -> None:
+    def mouseMoveEvent(self, event: QtCore.QEvent) -> None:
         event.accept()
 
-    def mouseReleaseEvent(self, event: QEvent) -> None:
+    def mouseReleaseEvent(self, event: QtCore.QEvent) -> None:
         event.accept()

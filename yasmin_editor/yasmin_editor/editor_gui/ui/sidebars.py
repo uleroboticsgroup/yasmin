@@ -14,26 +14,15 @@
 
 from typing import Callable
 
-from PyQt5.QtWidgets import (
-    QAbstractItemView,
-    QComboBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QListWidget,
-    QPushButton,
-    QTextBrowser,
-    QVBoxLayout,
-    QWidget,
-)
+from yasmin_editor.qt_compat import QtWidgets
 
 
-def build_left_panel(editor) -> QWidget:
+def build_left_panel(editor) -> QtWidgets.QWidget:
     """Create the complete left panel."""
-    left_panel = QWidget()
+    left_panel = QtWidgets.QWidget()
     left_panel.setObjectName("leftPanel")
     left_panel.setMinimumWidth(0)
-    left_layout = QVBoxLayout(left_panel)
+    left_layout = QtWidgets.QVBoxLayout(left_panel)
 
     editor.blackboard_widget = build_blackboard_widget(editor)
     left_layout.addWidget(editor.blackboard_widget)
@@ -47,39 +36,45 @@ def build_left_panel(editor) -> QWidget:
     return left_panel
 
 
-def build_blackboard_widget(editor) -> QWidget:
+def build_blackboard_widget(editor) -> QtWidgets.QWidget:
     """Create the blackboard panel."""
-    widget = QWidget()
+    widget = QtWidgets.QWidget()
     widget.setObjectName("blackboardPanel")
-    layout = QVBoxLayout(widget)
+    layout = QtWidgets.QVBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
 
-    layout.addWidget(QLabel("<b>Blackboard Keys:</b>"))
+    layout.addWidget(QtWidgets.QLabel("<b>Blackboard Keys:</b>"))
 
-    editor.blackboard_filter = QLineEdit()
+    editor.blackboard_filter = QtWidgets.QLineEdit()
     editor.blackboard_filter.setObjectName("blackboardFilterEdit")
     editor.blackboard_filter.setPlaceholderText("Filter blackboard keys...")
     editor.blackboard_filter.textChanged.connect(editor.filter_blackboard_keys)
     layout.addWidget(editor.blackboard_filter)
 
-    editor.blackboard_list = QListWidget()
+    editor.blackboard_list = QtWidgets.QListWidget()
     editor.blackboard_list.setObjectName("blackboardList")
-    editor.blackboard_list.setSelectionMode(QAbstractItemView.SingleSelection)
+    editor.blackboard_list.setSelectionMode(
+        QtWidgets.QAbstractItemView.SelectionMode.SingleSelection
+    )
     editor.blackboard_list.itemSelectionChanged.connect(
         editor.on_blackboard_selection_changed
     )
-    editor.blackboard_list.itemDoubleClicked.connect(editor.edit_selected_blackboard_key)
+    editor.blackboard_list.itemDoubleClicked.connect(
+        editor.edit_selected_blackboard_key
+    )
     layout.addWidget(editor.blackboard_list)
 
-    button_row = QHBoxLayout()
-    editor.highlight_blackboard_btn = QPushButton("Highlight: On")
+    button_row = QtWidgets.QHBoxLayout()
+    editor.highlight_blackboard_btn = QtWidgets.QPushButton("Highlight: On")
     editor.highlight_blackboard_btn.setObjectName("highlightBlackboardButton")
     editor.highlight_blackboard_btn.setCheckable(True)
     editor.highlight_blackboard_btn.setChecked(True)
-    editor.highlight_blackboard_btn.toggled.connect(editor.toggle_blackboard_highlighting)
+    editor.highlight_blackboard_btn.toggled.connect(
+        editor.toggle_blackboard_highlighting
+    )
     button_row.addWidget(editor.highlight_blackboard_btn)
 
-    editor.show_hidden_blackboard_btn = QPushButton("Hidden: Off")
+    editor.show_hidden_blackboard_btn = QtWidgets.QPushButton("Hidden: Off")
     editor.show_hidden_blackboard_btn.setObjectName("showHiddenBlackboardButton")
     editor.show_hidden_blackboard_btn.setCheckable(True)
     editor.show_hidden_blackboard_btn.setChecked(False)
@@ -96,11 +91,11 @@ def build_blackboard_widget(editor) -> QWidget:
     return widget
 
 
-def build_editor_sidebar_widget(editor) -> QWidget:
+def build_editor_sidebar_widget(editor) -> QtWidgets.QWidget:
     """Create the editor sidebar with available plugins."""
-    widget = QWidget()
+    widget = QtWidgets.QWidget()
     widget.setObjectName("editorSidebarPanel")
-    layout = QVBoxLayout(widget)
+    layout = QtWidgets.QVBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
 
     editor.python_filter, editor.python_list = build_filterable_list_section(
@@ -137,7 +132,7 @@ def build_editor_sidebar_widget(editor) -> QWidget:
 
 
 def build_filterable_list_section(
-    layout: QVBoxLayout,
+    layout: QtWidgets.QVBoxLayout,
     title: str,
     placeholder: str,
     filter_handler: Callable[[str], None],
@@ -145,17 +140,17 @@ def build_filterable_list_section(
     *,
     filter_object_name: str,
     list_object_name: str,
-) -> tuple[QLineEdit, QListWidget]:
+) -> tuple[QtWidgets.QLineEdit, QtWidgets.QListWidget]:
     """Create a titled filter + list section."""
-    layout.addWidget(QLabel(title))
+    layout.addWidget(QtWidgets.QLabel(title))
 
-    filter_edit = QLineEdit()
+    filter_edit = QtWidgets.QLineEdit()
     filter_edit.setObjectName(filter_object_name)
     filter_edit.setPlaceholderText(placeholder)
     filter_edit.textChanged.connect(filter_handler)
     layout.addWidget(filter_edit)
 
-    list_widget = QListWidget()
+    list_widget = QtWidgets.QListWidget()
     list_widget.setObjectName(list_object_name)
     list_widget.itemDoubleClicked.connect(double_click_handler)
     layout.addWidget(list_widget)
@@ -163,18 +158,18 @@ def build_filterable_list_section(
     return filter_edit, list_widget
 
 
-def build_runtime_sidebar_widget(editor) -> QWidget:
+def build_runtime_sidebar_widget(editor) -> QtWidgets.QWidget:
     """Create the runtime log sidebar."""
-    widget = QWidget()
+    widget = QtWidgets.QWidget()
     widget.setObjectName("runtimeSidebarPanel")
-    layout = QVBoxLayout(widget)
+    layout = QtWidgets.QVBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
 
-    header_layout = QHBoxLayout()
-    header_layout.addWidget(QLabel("<b>Logs:</b>"))
+    header_layout = QtWidgets.QHBoxLayout()
+    header_layout.addWidget(QtWidgets.QLabel("<b>Logs:</b>"))
     header_layout.addStretch()
 
-    editor.runtime_log_level_combo = QComboBox()
+    editor.runtime_log_level_combo = QtWidgets.QComboBox()
     editor.runtime_log_level_combo.setObjectName("runtimeLogLevelCombo")
     editor.runtime_log_level_combo.setProperty("flatInput", True)
     editor.runtime_log_level_combo.addItems(["ERROR", "WARN", "INFO", "DEBUG"])
@@ -185,12 +180,12 @@ def build_runtime_sidebar_widget(editor) -> QWidget:
     header_layout.addWidget(editor.runtime_log_level_combo)
     layout.addLayout(header_layout)
 
-    editor.runtime_log_view = QTextBrowser()
+    editor.runtime_log_view = QtWidgets.QTextBrowser()
     editor.runtime_log_view.setObjectName("runtimeLogView")
     editor.runtime_log_view.setReadOnly(True)
     editor.runtime_log_view.setOpenExternalLinks(False)
     editor.runtime_log_view.setOpenLinks(False)
-    editor.runtime_log_view.setLineWrapMode(QTextBrowser.NoWrap)
+    editor.runtime_log_view.setLineWrapMode(QtWidgets.QTextBrowser.LineWrapMode.NoWrap)
     editor.runtime_log_view.setProperty("viewerText", True)
     editor.runtime_log_view.document().setDocumentMargin(8)
     layout.addWidget(editor.runtime_log_view)

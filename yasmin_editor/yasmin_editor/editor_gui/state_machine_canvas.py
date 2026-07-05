@@ -14,16 +14,13 @@
 
 from typing import TYPE_CHECKING, Optional, Union
 
-from PyQt5.QtCore import QEvent, QLineF, QPoint, QPointF, Qt, QTimer
-from PyQt5.QtGui import QBrush, QCursor, QPainter, QPen
-from PyQt5.QtWidgets import (
-    QGraphicsLineItem,
-    QGraphicsRectItem,
-    QGraphicsScene,
-    QGraphicsSimpleTextItem,
-    QGraphicsView,
-    QMenu,
-    QWidget,
+from yasmin_editor.qt_compat import (
+    Qt,
+    QtCore,
+    QtGui,
+    QtWidgets,
+    exec_menu,
+    mouse_event_global_pos,
 )
 
 from yasmin_editor.editor_gui.colors import PALETTE
@@ -39,43 +36,49 @@ if TYPE_CHECKING:
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
 
-class StateMachineCanvas(QGraphicsView):
+class StateMachineCanvas(QtWidgets.QGraphicsView):
     """Canvas for drawing and connecting state machine nodes."""
 
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, parent: Optional[QtWidgets.QWidget] = None) -> None:
         super().__init__(parent)
-        self.scene: QGraphicsScene = QGraphicsScene(self)
+        self.scene: QtWidgets.QGraphicsScene = QtWidgets.QGraphicsScene(self)
         self.setScene(self.scene)
-        self.setRenderHint(QPainter.Antialiasing)
-        self.setDragMode(QGraphicsView.RubberBandDrag)
-        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
-        self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
-        self.setBackgroundBrush(QBrush(PALETTE.background))
+        self.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        self.setDragMode(QtWidgets.QGraphicsView.DragMode.RubberBandDrag)
+        self.setTransformationAnchor(
+            QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse
+        )
+        self.setResizeAnchor(QtWidgets.QGraphicsView.ViewportAnchor.AnchorViewCenter)
+        self.setBackgroundBrush(QtGui.QBrush(PALETTE.background))
         self.setMouseTracking(True)
         self.viewport().setMouseTracking(True)
 
         self.is_dragging_connection: bool = False
         self.drag_start_node: Optional[
-            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"]
+            Union[
+                "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+            ]
         ] = None
-        self.temp_line: Optional[QGraphicsLineItem] = None
+        self.temp_line: Optional[QtWidgets.QGraphicsLineItem] = None
         self.drag_rewire_connection: Optional["ConnectionLine"] = None
         self.editor_ref: Optional["YasminEditor"] = None
         self.pending_placement_item: Optional[
-            Union["StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"]
+            Union[
+                "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+            ]
         ] = None
-        self.pending_bundle_preview: Optional[QGraphicsRectItem] = None
-        self.pending_bundle_label: Optional[QGraphicsSimpleTextItem] = None
+        self.pending_bundle_preview: Optional[QtWidgets.QGraphicsRectItem] = None
+        self.pending_bundle_label: Optional[QtWidgets.QGraphicsSimpleTextItem] = None
         self._panning_with_middle_button = False
-        self._last_pan_viewport_pos = QPoint()
+        self._last_pan_viewport_pos = QtCore.QPoint()
         self.layout_sync_handler = None
 
     def _schedule_layout_sync(self) -> None:
         if self.layout_sync_handler is not None:
-            QTimer.singleShot(0, self.layout_sync_handler)
+            QtCore.QTimer.singleShot(0, self.layout_sync_handler)
 
-    def get_preferred_placement_scene_pos(self) -> QPointF:
-        viewport_pos = self.viewport().mapFromGlobal(QCursor.pos())
+    def get_preferred_placement_scene_pos(self) -> QtCore.QPointF:
+        viewport_pos = self.viewport().mapFromGlobal(QtGui.QCursor.pos())
         if not self.viewport().rect().contains(viewport_pos):
             viewport_pos = self.viewport().rect().center()
         return self.mapToScene(viewport_pos)
@@ -87,7 +90,7 @@ class StateMachineCanvas(QGraphicsView):
         ],
     ) -> None:
         self.pending_placement_item = item
-        self.setDragMode(QGraphicsView.NoDrag)
+        self.setDragMode(QtWidgets.QGraphicsView.DragMode.NoDrag)
         self._update_pending_placement_item(self.get_preferred_placement_scene_pos())
         item.setSelected(True)
         if self.editor_ref:
@@ -100,16 +103,16 @@ class StateMachineCanvas(QGraphicsView):
         self, *, label: str, width: float, height: float
     ) -> None:
         self.clear_pending_bundle_placement()
-        self.setDragMode(QGraphicsView.NoDrag)
-        preview = QGraphicsRectItem(0.0, 0.0, float(width), float(height))
-        preview.setBrush(QBrush(PALETTE.ui_panel_alt_bg))
-        preview.setPen(QPen(PALETTE.selection_pen, 2, Qt.DashLine))
+        self.setDragMode(QtWidgets.QGraphicsView.DragMode.NoDrag)
+        preview = QtWidgets.QGraphicsRectItem(0.0, 0.0, float(width), float(height))
+        preview.setBrush(QtGui.QBrush(PALETTE.ui_panel_alt_bg))
+        preview.setPen(QtGui.QPen(PALETTE.selection_pen, 2, Qt.PenStyle.DashLine))
         preview.setOpacity(0.72)
         preview.setZValue(5000.0)
-        preview.setAcceptedMouseButtons(Qt.NoButton)
+        preview.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
         self.scene.addItem(preview)
-        text_item = QGraphicsSimpleTextItem(label, preview)
-        text_item.setBrush(QBrush(PALETTE.text_primary))
+        text_item = QtWidgets.QGraphicsSimpleTextItem(label, preview)
+        text_item.setBrush(QtGui.QBrush(PALETTE.text_primary))
         text_rect = text_item.boundingRect()
         text_item.setPos(
             max(8.0, (float(width) - text_rect.width()) / 2.0),
@@ -134,29 +137,29 @@ class StateMachineCanvas(QGraphicsView):
             self.pending_placement_item = None
         self.clear_pending_bundle_placement()
         if not self.is_dragging_connection:
-            self.setDragMode(QGraphicsView.RubberBandDrag)
+            self.setDragMode(QtWidgets.QGraphicsView.DragMode.RubberBandDrag)
         self._stop_middle_pan()
 
-    def _update_pending_placement_item(self, scene_pos: QPointF) -> None:
+    def _update_pending_placement_item(self, scene_pos: QtCore.QPointF) -> None:
         if self.pending_placement_item is None:
             return
         self.pending_placement_item.setPos(scene_pos)
 
-    def _update_pending_bundle_preview(self, scene_pos: QPointF) -> None:
+    def _update_pending_bundle_preview(self, scene_pos: QtCore.QPointF) -> None:
         if self.pending_bundle_preview is None:
             return
         self.pending_bundle_preview.setPos(scene_pos)
 
-    def _start_middle_pan(self, viewport_pos: QPoint) -> None:
+    def _start_middle_pan(self, viewport_pos: QtCore.QPoint) -> None:
         self._panning_with_middle_button = True
-        self._last_pan_viewport_pos = QPoint(viewport_pos)
-        self.viewport().setCursor(Qt.ClosedHandCursor)
+        self._last_pan_viewport_pos = QtCore.QPoint(viewport_pos)
+        self.viewport().setCursor(Qt.CursorShape.ClosedHandCursor)
 
-    def _update_middle_pan(self, viewport_pos: QPoint) -> None:
+    def _update_middle_pan(self, viewport_pos: QtCore.QPoint) -> None:
         if not self._panning_with_middle_button:
             return
         delta = viewport_pos - self._last_pan_viewport_pos
-        self._last_pan_viewport_pos = QPoint(viewport_pos)
+        self._last_pan_viewport_pos = QtCore.QPoint(viewport_pos)
         self.horizontalScrollBar().setValue(
             self.horizontalScrollBar().value() - delta.x()
         )
@@ -193,8 +196,8 @@ class StateMachineCanvas(QGraphicsView):
                 return True
         return False
 
-    def keyPressEvent(self, event: QEvent) -> None:
-        if event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
+    def keyPressEvent(self, event: QtCore.QEvent) -> None:
+        if event.key() in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace):
             if self._is_inline_text_editing_active():
                 super().keyPressEvent(event)
                 return
@@ -202,7 +205,7 @@ class StateMachineCanvas(QGraphicsView):
                 self.editor_ref.delete_selected()
                 event.accept()
                 return
-        if event.key() == Qt.Key_Escape:
+        if event.key() == Qt.Key.Key_Escape:
             if self.pending_placement_item is not None:
                 if self.editor_ref:
                     self.editor_ref.cancel_pending_node_placement(
@@ -221,7 +224,7 @@ class StateMachineCanvas(QGraphicsView):
                 return
         super().keyPressEvent(event)
 
-    def wheelEvent(self, event: QEvent) -> None:
+    def wheelEvent(self, event: QtCore.QEvent) -> None:
         factor: float = 1.2 if event.angleDelta().y() > 0 else 1.0 / 1.2
         self.scale(factor, factor)
 
@@ -230,18 +233,18 @@ class StateMachineCanvas(QGraphicsView):
     ) -> None:
         self.drag_start_node = from_node
         self.is_dragging_connection = True
-        self.setDragMode(QGraphicsView.NoDrag)
-        self.temp_line = QGraphicsLineItem()
-        pen: QPen = QPen(PALETTE.temp_connection, 3, Qt.DashLine)
+        self.setDragMode(QtWidgets.QGraphicsView.DragMode.NoDrag)
+        self.temp_line = QtWidgets.QGraphicsLineItem()
+        pen: QtGui.QPen = QtGui.QPen(PALETTE.temp_connection, 3, Qt.PenStyle.DashLine)
         self.temp_line.setPen(pen)
         self.scene.addItem(self.temp_line)
-        port_scene_pos: QPointF = from_node.connection_port.scenePos()
-        self.temp_line.setLine(QLineF(port_scene_pos, port_scene_pos))
+        port_scene_pos: QtCore.QPointF = from_node.connection_port.scenePos()
+        self.temp_line.setLine(QtCore.QLineF(port_scene_pos, port_scene_pos))
 
     def start_connection_drag(
         self,
         from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"],
-        event: QEvent,
+        event: QtCore.QEvent,
     ) -> None:
         if (
             self.pending_placement_item is not None
@@ -270,9 +273,9 @@ class StateMachineCanvas(QGraphicsView):
                 f"Rewiring transition '{connection.outcome}' from {connection.from_node.name}. Click a new target state."
             )
 
-    def mousePressEvent(self, event: QEvent) -> None:
+    def mousePressEvent(self, event: QtCore.QEvent) -> None:
         if self.pending_placement_item is not None:
-            if event.button() == Qt.LeftButton:
+            if event.button() == Qt.MouseButton.LeftButton:
                 scene_pos = self.mapToScene(event.pos())
                 if self.editor_ref:
                     self.editor_ref.finalize_pending_node_placement(
@@ -282,7 +285,7 @@ class StateMachineCanvas(QGraphicsView):
                     self.clear_pending_placement()
                 event.accept()
                 return
-            if event.button() == Qt.RightButton:
+            if event.button() == Qt.MouseButton.RightButton:
                 if self.editor_ref:
                     self.editor_ref.cancel_pending_node_placement(
                         self.pending_placement_item
@@ -292,7 +295,7 @@ class StateMachineCanvas(QGraphicsView):
                 event.accept()
                 return
         if self.pending_bundle_preview is not None:
-            if event.button() == Qt.LeftButton:
+            if event.button() == Qt.MouseButton.LeftButton:
                 if self.editor_ref:
                     self.editor_ref.finalize_pending_selection_placement(
                         self.mapToScene(event.pos())
@@ -301,24 +304,24 @@ class StateMachineCanvas(QGraphicsView):
                     self.clear_pending_placement()
                 event.accept()
                 return
-            if event.button() == Qt.RightButton:
+            if event.button() == Qt.MouseButton.RightButton:
                 if self.editor_ref:
                     self.editor_ref.cancel_pending_selection_placement()
                 else:
                     self.clear_pending_placement()
                 event.accept()
                 return
-        if event.button() == Qt.BackButton and self.editor_ref:
+        if event.button() == Qt.MouseButton.BackButton and self.editor_ref:
             self.editor_ref.navigate_up_one_level()
             event.accept()
             return
-        if event.button() == Qt.MiddleButton:
+        if event.button() == Qt.MouseButton.MiddleButton:
             self._start_middle_pan(event.pos())
             event.accept()
             return
         super().mousePressEvent(event)
 
-    def mouseMoveEvent(self, event: QEvent) -> None:
+    def mouseMoveEvent(self, event: QtCore.QEvent) -> None:
         if self.pending_placement_item is not None:
             self._update_pending_placement_item(self.mapToScene(event.pos()))
             event.accept()
@@ -332,9 +335,11 @@ class StateMachineCanvas(QGraphicsView):
             event.accept()
             return
         if self.is_dragging_connection and self.temp_line and self.drag_start_node:
-            port_scene_pos: QPointF = self.drag_start_node.connection_port.scenePos()
-            scene_pos: QPointF = self.mapToScene(event.pos())
-            self.temp_line.setLine(QLineF(port_scene_pos, scene_pos))
+            port_scene_pos: QtCore.QPointF = (
+                self.drag_start_node.connection_port.scenePos()
+            )
+            scene_pos: QtCore.QPointF = self.mapToScene(event.pos())
+            self.temp_line.setLine(QtCore.QLineF(port_scene_pos, scene_pos))
             for scene_item in self.scene.items():
                 if isinstance(
                     scene_item, (StateNode, FinalOutcomeNode, ContainerStateNode)
@@ -343,14 +348,19 @@ class StateMachineCanvas(QGraphicsView):
             item = self.itemAt(event.pos())
             target: Optional[
                 Union[
-                    "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+                    "StateNode",
+                    "ContainerStateNode",
+                    "FinalOutcomeNode",
+                    "TextBlockNode",
                 ]
             ] = None
             if isinstance(item, (StateNode, FinalOutcomeNode, ContainerStateNode)):
                 target = item
             elif hasattr(item, "parentItem"):
                 parent = item.parentItem()
-                if isinstance(parent, (StateNode, FinalOutcomeNode, ContainerStateNode)):
+                if isinstance(
+                    parent, (StateNode, FinalOutcomeNode, ContainerStateNode)
+                ):
                     target = parent
             if target and self.is_valid_connection(self.drag_start_node, target):
                 target.setOpacity(0.6)
@@ -358,17 +368,23 @@ class StateMachineCanvas(QGraphicsView):
             return
         super().mouseMoveEvent(event)
 
-    def mouseReleaseEvent(self, event: QEvent) -> None:
-        if event.button() == Qt.MiddleButton and self._panning_with_middle_button:
+    def mouseReleaseEvent(self, event: QtCore.QEvent) -> None:
+        if (
+            event.button() == Qt.MouseButton.MiddleButton
+            and self._panning_with_middle_button
+        ):
             self._stop_middle_pan()
             event.accept()
             return
-        if event.button() == Qt.LeftButton and self.is_dragging_connection:
-            scene_pos: QPointF = self.mapToScene(event.pos())
+        if event.button() == Qt.MouseButton.LeftButton and self.is_dragging_connection:
+            scene_pos: QtCore.QPointF = self.mapToScene(event.pos())
             items = self.scene.items(scene_pos)
             target_node: Optional[
                 Union[
-                    "StateNode", "ContainerStateNode", "FinalOutcomeNode", "TextBlockNode"
+                    "StateNode",
+                    "ContainerStateNode",
+                    "FinalOutcomeNode",
+                    "TextBlockNode",
                 ]
             ] = None
             for item in items:
@@ -395,7 +411,7 @@ class StateMachineCanvas(QGraphicsView):
             self.drag_start_node = None
             self.drag_rewire_connection = None
             self.is_dragging_connection = False
-            self.setDragMode(QGraphicsView.RubberBandDrag)
+            self.setDragMode(QtWidgets.QGraphicsView.DragMode.RubberBandDrag)
             if (
                 target_node
                 and source_node
@@ -403,14 +419,14 @@ class StateMachineCanvas(QGraphicsView):
             ):
                 if self.editor_ref:
                     if rewire_connection is not None:
-                        QTimer.singleShot(
+                        QtCore.QTimer.singleShot(
                             0,
                             lambda connection=rewire_connection, tgt=target_node: self.editor_ref.rewire_connection(
                                 connection, tgt
                             ),
                         )
                     else:
-                        QTimer.singleShot(
+                        QtCore.QTimer.singleShot(
                             0,
                             lambda src=source_node, tgt=target_node: self.editor_ref.create_connection_from_drag(
                                 src, tgt
@@ -421,14 +437,17 @@ class StateMachineCanvas(QGraphicsView):
             event.accept()
             return
         super().mouseReleaseEvent(event)
-        if event.button() == Qt.LeftButton and not self._panning_with_middle_button:
+        if (
+            event.button() == Qt.MouseButton.LeftButton
+            and not self._panning_with_middle_button
+        ):
             self._schedule_layout_sync()
             if self.editor_ref is not None:
                 self.editor_ref.handle_canvas_external_drop(
                     self, self.viewport().mapToGlobal(event.pos())
                 )
 
-    def contextMenuEvent(self, event: QEvent) -> None:
+    def contextMenuEvent(self, event: QtCore.QEvent) -> None:
         if (
             self.pending_placement_item is not None
             or self.pending_bundle_preview is not None
@@ -437,11 +456,11 @@ class StateMachineCanvas(QGraphicsView):
             return
         item = self.itemAt(event.pos())
         if item is None and self.editor_ref:
-            menu: QMenu = QMenu()
+            menu: QtWidgets.QMenu = QtWidgets.QMenu()
             if self.editor_ref.is_read_only_mode():
                 view_container_action = menu.addAction("View Current Container")
                 fit_action = menu.addAction("Fit")
-                action = menu.exec_(event.globalPos())
+                action = exec_menu(menu, mouse_event_global_pos(event))
                 if action == view_container_action:
                     self.editor_ref.edit_current_container()
                 elif action == fit_action:
@@ -457,7 +476,7 @@ class StateMachineCanvas(QGraphicsView):
             add_text_action = menu.addAction("Add Text")
             menu.addSeparator()
             edit_container_action = menu.addAction("Edit Current Container")
-            action = menu.exec_(event.globalPos())
+            action = exec_menu(menu, mouse_event_global_pos(event))
             if action == add_state_action:
                 self.editor_ref.add_state()
             elif action == add_sm_action:

@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from PyQt5.QtWidgets import QMenu
+from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.ui.action_specs import (
     ADD_MENU_ACTIONS,
     EDIT_MENU_ACTIONS,
@@ -26,7 +26,7 @@ from yasmin_editor.editor_gui.ui.actions import ensure_action_registry
 from yasmin_editor.editor_gui.ui.recent_menu import build_recent_file_menu
 
 
-def _populate_menu(menu: QMenu, editor, specs) -> None:
+def _populate_menu(menu: QtWidgets.QMenu, editor, specs) -> None:
     registry = ensure_action_registry(editor)
     first_item = True
     for spec in specs:

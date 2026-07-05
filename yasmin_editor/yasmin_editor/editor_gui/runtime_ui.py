@@ -29,8 +29,10 @@ _RUNTIME_LOG_PREFIX_COLORS = {
 }
 
 try:
-    from PyQt5.QtGui import QColor as _QtQColor
-except ModuleNotFoundError:
+    from yasmin_editor.qt_compat import QtGui
+
+    _QtQColor = QtGui.QColor
+except Exception:
     _QtQColor = None
 
 try:

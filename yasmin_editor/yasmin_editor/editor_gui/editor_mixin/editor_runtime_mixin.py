@@ -16,10 +16,7 @@ import os
 import tempfile
 from typing import Optional
 
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QBrush, QPen
-from PyQt5.QtWidgets import QMenu, QMessageBox
-
+from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets, exec_menu
 from yasmin_editor.editor_gui.colors import PALETTE
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
@@ -67,7 +64,9 @@ class EditorRuntimeMixin:
         self.runtime.running_changed.connect(self.update_runtime_actions)
         self.runtime.blocked_changed.connect(self.update_runtime_actions)
         self.runtime.active_state_changed.connect(self.on_runtime_active_state_changed)
-        self.runtime.active_transition_changed.connect(self.on_runtime_transition_changed)
+        self.runtime.active_transition_changed.connect(
+            self.on_runtime_transition_changed
+        )
         self.runtime.outcome_changed.connect(self.on_runtime_outcome_changed)
         self.runtime.status_changed.connect(self.on_runtime_status_changed)
         self.runtime.error_occurred.connect(self.on_runtime_error)
@@ -172,7 +171,7 @@ class EditorRuntimeMixin:
     def _schedule_runtime_highlight_refresh(self) -> None:
         if not self.runtime_mode_enabled:
             return
-        QTimer.singleShot(0, self._refresh_runtime_highlighting_from_runtime)
+        QtCore.QTimer.singleShot(0, self._refresh_runtime_highlighting_from_runtime)
 
     def _refresh_runtime_highlighting_from_runtime(self) -> None:
         if not self.runtime_mode_enabled:
@@ -406,21 +405,21 @@ class EditorRuntimeMixin:
         if not state_path:
             return False
 
-        menu = QMenu(self)
+        menu = QtWidgets.QMenu(self)
         before_enabled = state_path in self.runtime_breakpoints_before
 
         toggle_action = menu.addAction(
             "Remove Breakpoint" if before_enabled else "Add Breakpoint"
         )
 
-        action = menu.exec_(global_pos)
+        action = exec_menu(menu, global_pos)
         if action == toggle_action:
             self._toggle_runtime_breakpoint(state_node)
             return True
         return False
 
     def _show_runtime_finish_required_popup(self) -> None:
-        QMessageBox.information(
+        QtWidgets.QMessageBox.information(
             self,
             "Runtime Still Running",
             "The state machine is still running. Cancel the state machine and "
@@ -436,7 +435,7 @@ class EditorRuntimeMixin:
         except Exception as exc:
             self.runtime_mode_enabled = False
             self._set_runtime_mode_button_checked(False)
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Runtime Error",
                 f"Failed to enter runtime mode:\n{exc}",
@@ -491,7 +490,11 @@ class EditorRuntimeMixin:
 
     def restart_runtime_mode(self) -> None:
         runtime = self.runtime
-        if not self.runtime_mode_enabled or runtime is None or not runtime.is_finished():
+        if (
+            not self.runtime_mode_enabled
+            or runtime is None
+            or not runtime.is_finished()
+        ):
             return
 
         self.runtime_active_path = tuple()
@@ -519,7 +522,7 @@ class EditorRuntimeMixin:
 
         shell = self._ensure_runtime_shell()
         if shell is None:
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Interactive Shell Unavailable",
                 "The interactive shell requires qtconsole.\n\n"
@@ -652,7 +655,7 @@ class EditorRuntimeMixin:
             runtime.set_log_level(level_name)
         except Exception as exc:
             self.statusBar().showMessage("Failed to update log level", 3000)
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Runtime Error",
                 f"Failed to update runtime log level:\n{exc}",
@@ -711,7 +714,7 @@ class EditorRuntimeMixin:
         self.statusBar().showMessage("Runtime error", 3000)
         self.append_runtime_log(f"[ERROR] {message}")
         self._update_runtime_status_badge("Error")
-        QMessageBox.critical(self, "Runtime Error", message)
+        QtWidgets.QMessageBox.critical(self, "Runtime Error", message)
         self.update_runtime_actions()
 
     def update_runtime_actions(self) -> None:
@@ -811,8 +814,10 @@ class EditorRuntimeMixin:
             if self._is_deleted_connection_item(connection):
                 continue
             if (
-                getattr(connection.from_node, "name", None) == local_transition.from_name
-                and getattr(connection.to_node, "name", None) == local_transition.to_name
+                getattr(connection.from_node, "name", None)
+                == local_transition.from_name
+                and getattr(connection.to_node, "name", None)
+                == local_transition.to_name
                 and connection.outcome == local_transition.outcome
             ):
                 return connection
@@ -829,8 +834,8 @@ class EditorRuntimeMixin:
             return
 
         try:
-            active_item.setPen(QPen(PALETTE.runtime_highlight_pen, 5))
-            active_item.setBrush(QBrush(PALETTE.runtime_highlight_fill))
+            active_item.setPen(QtGui.QPen(PALETTE.runtime_highlight_pen, 5))
+            active_item.setBrush(QtGui.QBrush(PALETTE.runtime_highlight_fill))
         except RuntimeError:
             return
 
@@ -840,13 +845,13 @@ class EditorRuntimeMixin:
             return
 
         try:
-            pen = QPen(PALETTE.runtime_highlight_pen, 5)
-            pen.setCapStyle(Qt.RoundCap)
-            pen.setJoinStyle(Qt.RoundJoin)
+            pen = QtGui.QPen(PALETTE.runtime_highlight_pen, 5)
+            pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+            pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
             connection.setPen(pen)
-            connection.arrow_head.setBrush(QBrush(PALETTE.runtime_highlight_pen))
-            connection.arrow_head.setPen(QPen(PALETTE.runtime_highlight_pen))
-            connection.label_bg.setBrush(QBrush(PALETTE.runtime_highlight_fill))
-            connection.label_bg.setPen(QPen(PALETTE.runtime_highlight_pen, 2))
+            connection.arrow_head.setBrush(QtGui.QBrush(PALETTE.runtime_highlight_pen))
+            connection.arrow_head.setPen(QtGui.QPen(PALETTE.runtime_highlight_pen))
+            connection.label_bg.setBrush(QtGui.QBrush(PALETTE.runtime_highlight_fill))
+            connection.label_bg.setPen(QtGui.QPen(PALETTE.runtime_highlight_pen, 2))
         except RuntimeError:
             return

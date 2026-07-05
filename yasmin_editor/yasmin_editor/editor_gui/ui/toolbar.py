@@ -14,8 +14,7 @@
 
 from __future__ import annotations
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMenu, QToolBar, QToolButton
+from yasmin_editor.qt_compat import Qt, QtWidgets
 
 from yasmin_editor.editor_gui.ui.action_specs import (
     HELP_MENU_ACTIONS,
@@ -29,18 +28,20 @@ from yasmin_editor.editor_gui.ui.toolbar_config import (
 )
 
 
-def _build_menu_button(editor, toolbar: QToolBar, spec: ToolbarMenuSpec) -> None:
+def _build_menu_button(
+    editor, toolbar: QtWidgets.QToolBar, spec: ToolbarMenuSpec
+) -> None:
     registry = ensure_action_registry(editor)
 
-    button = QToolButton(toolbar)
+    button = QtWidgets.QToolButton(toolbar)
     button.setObjectName(spec.object_name)
     setattr(editor, spec.button_attribute_name, button)
     button.setText(spec.text)
     button.setToolTip(spec.tool_tip)
-    button.setPopupMode(QToolButton.InstantPopup)
-    button.setToolButtonStyle(Qt.ToolButtonTextOnly)
+    button.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup)
+    button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
 
-    menu = QMenu(button)
+    menu = QtWidgets.QMenu(button)
     for attribute_name in spec.action_attributes:
         menu.addAction(getattr(editor, attribute_name))
     button.setMenu(menu)
@@ -48,12 +49,12 @@ def _build_menu_button(editor, toolbar: QToolBar, spec: ToolbarMenuSpec) -> None
     toolbar.addWidget(button)
 
 
-def _add_runtime_mode_button(toolbar: QToolBar, editor) -> None:
-    editor.runtime_mode_button = QToolButton(toolbar)
+def _add_runtime_mode_button(toolbar: QtWidgets.QToolBar, editor) -> None:
+    editor.runtime_mode_button = QtWidgets.QToolButton(toolbar)
     editor.runtime_mode_button.setObjectName("runtimeModeButton")
     editor.runtime_mode_button.setText("Runtime Mode")
     editor.runtime_mode_button.setCheckable(True)
-    editor.runtime_mode_button.setToolButtonStyle(Qt.ToolButtonTextOnly)
+    editor.runtime_mode_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
     editor.runtime_mode_button.setToolTip(
         "Enter or leave runtime mode using the current state machine XML snapshot."
     )
@@ -69,11 +70,11 @@ def build_toolbar(editor) -> None:
     drop-down buttons.
     """
 
-    toolbar = QToolBar()
+    toolbar = QtWidgets.QToolBar()
     toolbar.setObjectName("yasminEditorToolbar")
     toolbar.setMovable(False)
     toolbar.setFloatable(False)
-    toolbar.setToolButtonStyle(Qt.ToolButtonTextOnly)
+    toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
     editor.addToolBar(toolbar)
 
     registry = ensure_action_registry(editor)

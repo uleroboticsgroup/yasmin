@@ -13,9 +13,7 @@
 # limitations under the License.
 
 from typing import Dict, List, Optional, Tuple
-
-from PyQt5.QtWidgets import QComboBox, QDialog, QLabel
-
+from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.dialogs.container_dialog_base import ContainerDialogBase
 
 
@@ -30,12 +28,12 @@ class StateMachineDialog(ContainerDialogBase):
         remappings: Optional[Dict[str, str]] = None,
         child_states: Optional[List[str]] = None,
         edit_mode: bool = False,
-        parent: Optional[QDialog] = None,
+        parent: Optional[QtWidgets.QDialog] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
     ) -> None:
-        self.start_state_combo: Optional[QComboBox] = None
-        self.start_state_label: Optional[QLabel] = None
+        self.start_state_combo: Optional[QtWidgets.QComboBox] = None
+        self.start_state_label: Optional[QtWidgets.QLabel] = None
         self._child_states = child_states
         self._start_state = start_state
         self.defaults = defaults or []
@@ -53,7 +51,7 @@ class StateMachineDialog(ContainerDialogBase):
 
     def _create_selector_row(self) -> None:
         """Create the state machine start-state selector."""
-        self.start_state_label = QLabel("Start State:")
+        self.start_state_label = QtWidgets.QLabel("Start State:")
         self.start_state_combo = self.create_optional_combo(
             values=self._child_states,
             current_value=self._start_state,

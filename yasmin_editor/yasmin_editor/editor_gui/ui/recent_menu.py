@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import os
 
-from PyQt5.QtWidgets import QAction, QMenu
+from yasmin_editor.qt_compat import QtWidgets, QAction
 
 
 def build_recent_file_label(index: int, file_path: str) -> str:
@@ -45,7 +45,9 @@ def refresh_recent_file_menu(editor) -> None:
         action.setToolTip(file_path)
         action.setStatusTip(file_path)
         action.triggered.connect(
-            lambda _checked=False, path=file_path: editor.open_recent_state_machine(path)
+            lambda _checked=False, path=file_path: editor.open_recent_state_machine(
+                path
+            )
         )
         menu.addAction(action)
 
@@ -67,7 +69,7 @@ def refresh_recent_file_menu(editor) -> None:
     clear_action.triggered.connect(editor.clear_recent_files)
 
 
-def build_recent_file_menu(editor, file_menu: QMenu) -> QMenu:
+def build_recent_file_menu(editor, file_menu: QtWidgets.QMenu) -> QtWidgets.QMenu:
     """Create the File > Open Recent submenu and populate its entries."""
 
     recent_files_menu = file_menu.addMenu("Open Recent")

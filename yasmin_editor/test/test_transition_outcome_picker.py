@@ -18,7 +18,7 @@ from types import SimpleNamespace
 
 import pytest
 
-pytest.importorskip("PyQt5.QtCore")
+pytest.importorskip("yasmin_editor.qt_compat")
 
 from yasmin_editor.editor_gui.editor_mixin.editor_ui_mixin import EditorUiMixin
 from yasmin_editor.model.concurrence import Concurrence

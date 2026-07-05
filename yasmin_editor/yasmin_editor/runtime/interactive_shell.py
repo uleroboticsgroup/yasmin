@@ -20,8 +20,7 @@ from typing import Any, Callable, Optional
 
 _MISSING = object()
 
-from PyQt5.QtCore import QObject, Qt, pyqtSignal
-from PyQt5.QtWidgets import QAbstractItemView, QDialog, QVBoxLayout, QWidget
+from yasmin_editor.qt_compat import Qt, QtCore, pyqtSignal, QtWidgets
 
 from yasmin_editor.editor_gui.theme import PALETTE
 from yasmin_editor.editor_gui.theme.qt_style import (
@@ -203,16 +202,16 @@ class _RuntimeShellCommand:
     __str__ = __repr__
 
 
-class _ShellDialog(QDialog):
+class _ShellDialog(QtWidgets.QDialog):
     visibility_changed = pyqtSignal(bool)
 
     def __init__(self, parent=None) -> None:
-        super().__init__(parent, Qt.Window)
+        super().__init__(parent, Qt.WindowType.Window)
         self._saved_geometry = None
         self._saved_show_mode = "normal"
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowCloseButtonHint, True)
+        self.setWindowFlag(Qt.WindowType.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, True)
 
     def preferred_show_mode(self) -> str:
         return str(self._saved_show_mode or "normal")
@@ -245,7 +244,7 @@ class _ShellDialog(QDialog):
         self.hide()
 
 
-class InteractiveShellManager(QObject):
+class InteractiveShellManager(QtCore.QObject):
     visibility_changed = pyqtSignal(bool)
 
     def __init__(self, parent=None) -> None:
@@ -409,7 +408,7 @@ class InteractiveShellManager(QObject):
         ]:
             _register_magic(command_name)
 
-    def _apply_widget_palette(self, widget: QWidget) -> None:
+    def _apply_widget_palette(self, widget: QtWidgets.QWidget) -> None:
         shell_palette = build_qtconsole_palette(PALETTE)
         widget.setAutoFillBackground(True)
         widget.setPalette(shell_palette)
@@ -438,7 +437,7 @@ class InteractiveShellManager(QObject):
         except Exception:
             pass
 
-        if isinstance(completion_widget, QAbstractItemView):
+        if isinstance(completion_widget, QtWidgets.QAbstractItemView):
             try:
                 completion_widget.viewport().setAutoFillBackground(True)
                 completion_widget.viewport().setPalette(shell_palette)
@@ -499,7 +498,7 @@ class InteractiveShellManager(QObject):
 
         self._apply_completion_theme(shell_palette, shell_stylesheet)
 
-        for child in self._widget.findChildren(QWidget):
+        for child in self._widget.findChildren(QtWidgets.QWidget):
             self._apply_widget_palette(child)
             try:
                 child.setStyleSheet(shell_stylesheet)
@@ -529,7 +528,7 @@ class InteractiveShellManager(QObject):
         self._dialog.visibility_changed.connect(self.visibility_changed.emit)
         self._apply_widget_palette(self._dialog)
 
-        layout = QVBoxLayout(self._dialog)
+        layout = QtWidgets.QVBoxLayout(self._dialog)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._widget)
 

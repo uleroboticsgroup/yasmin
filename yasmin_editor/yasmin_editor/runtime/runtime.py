@@ -12,19 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Runtime execution backend for the YASMIN editor.
-
-The runtime keeps a live state machine instance, mirrors its execution state into
-Qt signals, and provides a small control surface for play, pause, step, cancel,
-and shutdown.
-"""
-
 from __future__ import annotations
 
 import threading
 from typing import Any, Iterable, Optional
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from yasmin_editor.qt_compat import pyqtSignal, QtCore
 from yasmin_editor.runtime.logging import RuntimeLogger
 from yasmin_editor.runtime.traversal import (
     child_state,
@@ -40,7 +33,7 @@ from yasmin import Blackboard, StateMachine
 from yasmin_factory import YasminFactory
 
 
-class Runtime(QObject):
+class Runtime(QtCore.QObject):
     """Execute and observe a YASMIN state machine instance.
 
     The class exposes Qt signals so the editor can react to state changes,
@@ -77,9 +70,9 @@ class Runtime(QObject):
         self._shutting_down = False
 
         self._active_path: tuple[str, ...] = tuple()
-        self._last_transition: Optional[tuple[tuple[str, ...], tuple[str, ...], str]] = (
-            None
-        )
+        self._last_transition: Optional[
+            tuple[tuple[str, ...], tuple[str, ...], str]
+        ] = None
 
         self._execution_thread: Optional[threading.Thread] = None
         self._worker_state_lock = threading.Lock()

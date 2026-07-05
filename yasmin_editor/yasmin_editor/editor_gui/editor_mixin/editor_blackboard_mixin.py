@@ -14,9 +14,7 @@
 
 from typing import Dict, List, Optional
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QListWidgetItem
-
+from yasmin_editor.qt_compat import Qt, QtWidgets, exec_dialog
 from yasmin_editor.editor_gui.blackboard_logic import (
     build_container_metadata_map,
     collect_blackboard_key_usage_for_model,
@@ -48,7 +46,7 @@ class EditorBlackboardMixin:
 
         for i in range(self.blackboard_list.count()):
             item = self.blackboard_list.item(i)
-            key_data = item.data(Qt.UserRole) or {}
+            key_data = item.data(Qt.ItemDataRole.UserRole) or {}
             item.setHidden(
                 should_hide_blackboard_key(
                     item_text=item.text(),
@@ -86,7 +84,7 @@ class EditorBlackboardMixin:
         item = self.blackboard_list.currentItem()
         if item is None:
             return None
-        key_data = item.data(Qt.UserRole) or {}
+        key_data = item.data(Qt.ItemDataRole.UserRole) or {}
         return key_data.get("name")
 
     def on_blackboard_selection_changed(self) -> None:
@@ -200,8 +198,8 @@ class EditorBlackboardMixin:
         for key_data in sorted(
             self._blackboard_keys, key=lambda item: item.get("name", "").lower()
         ):
-            item = QListWidgetItem(self.format_blackboard_key_label(key_data))
-            item.setData(Qt.UserRole, dict(key_data))
+            item = QtWidgets.QListWidgetItem(self.format_blackboard_key_label(key_data))
+            item.setData(Qt.ItemDataRole.UserRole, dict(key_data))
             description = key_data.get("description", "")
             if description:
                 item.setToolTip(description)
@@ -212,14 +210,16 @@ class EditorBlackboardMixin:
         if current_key_name:
             for i in range(self.blackboard_list.count()):
                 item = self.blackboard_list.item(i)
-                key_data = item.data(Qt.UserRole) or {}
+                key_data = item.data(Qt.ItemDataRole.UserRole) or {}
                 if key_data.get("name") == current_key_name:
                     self.blackboard_list.setCurrentItem(item)
                     break
 
         self.update_blackboard_usage_highlighting()
 
-    def set_blackboard_keys(self, keys: List[Dict[str, str]], sync: bool = True) -> None:
+    def set_blackboard_keys(
+        self, keys: List[Dict[str, str]], sync: bool = True
+    ) -> None:
 
         self.root_model.keys = self.dicts_to_keys(keys)
         self._blackboard_key_metadata = self._get_container_metadata_map(
@@ -265,14 +265,14 @@ class EditorBlackboardMixin:
         self.refresh_visual_highlighting()
 
     def edit_selected_blackboard_key(
-        self, item: Optional[QListWidgetItem] = None
+        self, item: Optional[QtWidgets.QListWidgetItem] = None
     ) -> None:
         if item is None:
             item = self.blackboard_list.currentItem()
         if item is None:
             return
 
-        key_data = dict(item.data(Qt.UserRole) or {})
+        key_data = dict(item.data(Qt.ItemDataRole.UserRole) or {})
         key_name = key_data.get("name", "")
         if not key_name:
             return
@@ -298,11 +298,13 @@ class EditorBlackboardMixin:
             readonly=self.is_read_only_mode(),
         )
         if self.is_read_only_mode():
-            dlg.exec_()
+            exec_dialog(dlg)
             return
-        if dlg.exec_():
+        if exec_dialog(dlg):
             updated_key = dlg.get_key_data()
-            metadata_map = self._get_container_metadata_map(self.current_container_model)
+            metadata_map = self._get_container_metadata_map(
+                self.current_container_model
+            )
             metadata_map[key_name] = {
                 "description": updated_key.get("description", ""),
                 "key_type": key_data.get("key_type", "in"),

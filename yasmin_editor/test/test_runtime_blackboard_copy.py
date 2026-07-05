@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pytest
 
-pytest.importorskip("PyQt5.QtCore")
+pytest.importorskip("yasmin_editor.qt_compat")
 
 
 def _install_runtime_test_stubs(monkeypatch):

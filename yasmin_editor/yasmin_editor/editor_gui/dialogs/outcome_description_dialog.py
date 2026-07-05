@@ -13,24 +13,17 @@
 # limitations under the License.
 
 from typing import Optional
-
-from PyQt5.QtWidgets import (
-    QDialog,
-    QDialogButtonBox,
-    QFormLayout,
-    QLineEdit,
-    QTextEdit,
-)
+from yasmin_editor.qt_compat import QtWidgets
 
 
-class OutcomeDescriptionDialog(QDialog):
+class OutcomeDescriptionDialog(QtWidgets.QDialog):
     """Dialog for editing a final outcome."""
 
     def __init__(
         self,
         outcome_name: str,
         description: str = "",
-        parent: Optional[QDialog] = None,
+        parent: Optional[QtWidgets.QDialog] = None,
         readonly: bool = False,
     ) -> None:
         super().__init__(parent)
@@ -38,22 +31,25 @@ class OutcomeDescriptionDialog(QDialog):
         self.setWindowTitle("Edit Outcome" + (" (Readonly)" if self.readonly else ""))
         self.resize(500, 260)
 
-        layout = QFormLayout(self)
+        layout = QtWidgets.QFormLayout(self)
 
-        self.name_edit = QLineEdit()
+        self.name_edit = QtWidgets.QLineEdit()
         self.name_edit.setText(outcome_name)
         self.name_edit.setReadOnly(self.readonly)
         layout.addRow("Outcome:", self.name_edit)
 
-        self.description_edit = QTextEdit()
+        self.description_edit = QtWidgets.QTextEdit()
         self.description_edit.setPlainText(description)
         self.description_edit.setReadOnly(self.readonly)
         layout.addRow("Description:", self.description_edit)
 
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Close
+        buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.StandardButton.Close
             if self.readonly
-            else (QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            else (
+                QtWidgets.QDialogButtonBox.StandardButton.Ok
+                | QtWidgets.QDialogButtonBox.StandardButton.Cancel
+            )
         )
         if self.readonly:
             buttons.rejected.connect(self.reject)

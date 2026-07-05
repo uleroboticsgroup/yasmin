@@ -14,8 +14,7 @@
 
 from __future__ import annotations
 
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QTextBrowser, QVBoxLayout
-
+from yasmin_editor.qt_compat import QtWidgets, exec_dialog
 from yasmin_editor.editor_gui.ui.help_content import HELP_HTML
 
 HELP_DIALOG_TITLE = "YASMIN Editor Help"
@@ -23,27 +22,27 @@ HELP_DIALOG_MIN_SIZE = (600, 500)
 HELP_DIALOG_MAX_SIZE = (800, 600)
 
 
-def build_help_dialog(parent) -> QDialog:
+def build_help_dialog(parent) -> QtWidgets.QDialog:
     """Build the help dialog without executing it.
 
     Returning the dialog makes the construction path testable while keeping the
     public ``show_help_dialog`` entrypoint small and UI-focused.
     """
 
-    dialog = QDialog(parent)
+    dialog = QtWidgets.QDialog(parent)
     dialog.setWindowTitle(HELP_DIALOG_TITLE)
     dialog.setMinimumSize(*HELP_DIALOG_MIN_SIZE)
     dialog.setMaximumSize(*HELP_DIALOG_MAX_SIZE)
 
-    layout = QVBoxLayout(dialog)
-    text_browser = QTextBrowser()
+    layout = QtWidgets.QVBoxLayout(dialog)
+    text_browser = QtWidgets.QTextBrowser()
     text_browser.setHtml(HELP_HTML)
     text_browser.setOpenExternalLinks(False)
     layout.addWidget(text_browser)
 
-    button_layout = QHBoxLayout()
+    button_layout = QtWidgets.QHBoxLayout()
     button_layout.addStretch()
-    ok_button = QPushButton("OK")
+    ok_button = QtWidgets.QPushButton("OK")
     ok_button.clicked.connect(dialog.accept)
     ok_button.setDefault(True)
     button_layout.addWidget(ok_button)
@@ -54,4 +53,4 @@ def build_help_dialog(parent) -> QDialog:
 def show_help_dialog(parent) -> None:
     """Open the modal help dialog."""
 
-    build_help_dialog(parent).exec_()
+    exec_dialog(build_help_dialog(parent))

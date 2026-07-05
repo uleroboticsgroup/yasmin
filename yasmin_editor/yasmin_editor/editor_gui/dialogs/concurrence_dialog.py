@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from typing import Dict, List, Optional, Tuple
-from PyQt5.QtWidgets import QComboBox, QDialog, QLabel
+from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.dialogs.container_dialog_base import ContainerDialogBase
 
 
@@ -28,12 +28,12 @@ class ConcurrenceDialog(ContainerDialogBase):
         remappings: Optional[Dict[str, str]] = None,
         final_outcomes: Optional[List[str]] = None,
         edit_mode: bool = False,
-        parent: Optional[QDialog] = None,
+        parent: Optional[QtWidgets.QDialog] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
     ) -> None:
-        self.default_outcome_combo: Optional[QComboBox] = None
-        self.default_outcome_label: Optional[QLabel] = None
+        self.default_outcome_combo: Optional[QtWidgets.QComboBox] = None
+        self.default_outcome_label: Optional[QtWidgets.QLabel] = None
         self._final_outcomes = final_outcomes
         self._default_outcome = default_outcome
         self.defaults = defaults or []
@@ -51,7 +51,7 @@ class ConcurrenceDialog(ContainerDialogBase):
 
     def _create_selector_row(self) -> None:
         """Create the default-outcome selector for the concurrence."""
-        self.default_outcome_label = QLabel("Default Outcome:")
+        self.default_outcome_label = QtWidgets.QLabel("Default Outcome:")
         self.default_outcome_combo = self.create_optional_combo(
             values=self._final_outcomes,
             current_value=self._default_outcome,
