@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from uuid import uuid4
-from typing import List, Dict
+from typing import List, Dict, Union
 from yasmin_editor.dataclass_compat import dataclass, field
 
 
@@ -49,7 +49,7 @@ class Layout:
 
         self.state_positions[name] = Position(x, y)
 
-    def get_state_position(self, name: str) -> Position | None:
+    def get_state_position(self, name: str) -> Union[Position, None]:
         """Return the position of a child state if present."""
 
         return self.state_positions.get(name)
@@ -72,7 +72,7 @@ class Layout:
 
     def get_outcome_placements(
         self,
-        outcome_name: str | None = None,
+        outcome_name: Union[str, None] = None,
     ) -> List[OutcomePlacement]:
         """Return all stored outcome placements, optionally filtered by outcome name."""
 
@@ -85,7 +85,7 @@ class Layout:
             ]
         return placements
 
-    def get_outcome_placement(self, instance_id: str) -> OutcomePlacement | None:
+    def get_outcome_placement(self, instance_id: str) -> Union[OutcomePlacement, None]:
         """Return one outcome placement by its instance identifier."""
 
         return self.outcome_placements.get(instance_id)
@@ -95,7 +95,7 @@ class Layout:
         outcome_name: str,
         x: float,
         y: float,
-        instance_id: str | None = None,
+        instance_id: Union[str, None] = None,
     ) -> str:
         """Create or update one visual placement for a logical outcome."""
 
@@ -123,7 +123,7 @@ class Layout:
         name: str,
         x: float,
         y: float,
-        instance_id: str | None = None,
+        instance_id: Union[str, None] = None,
     ) -> str:
         """Update one stored final-outcome placement.
 
@@ -137,7 +137,7 @@ class Layout:
                 instance_id = placements[0].instance_id
         return self.ensure_outcome_placement(name, x, y, instance_id=instance_id)
 
-    def get_outcome_position(self, name: str) -> Position | None:
+    def get_outcome_position(self, name: str) -> Union[Position, None]:
         """Return the primary position of a logical final outcome if present."""
 
         placements = self.get_outcome_placements(name)
@@ -157,7 +157,7 @@ class Layout:
 
         self.outcome_positions[name] = Position(x, y)
 
-    def materialize_primary_outcome_position(self, name: str) -> str | None:
+    def materialize_primary_outcome_position(self, name: str) -> Union[str, None]:
         """Convert one legacy primary position into an explicit alias instance.
 
         This is useful when a layout initially loaded one legacy outcome

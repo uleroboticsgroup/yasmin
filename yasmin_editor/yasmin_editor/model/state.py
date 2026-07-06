@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import List, Dict
+from typing import List, Dict, Union
 from yasmin_editor.dataclass_compat import dataclass, field
 
 from .key import Key
@@ -33,11 +33,11 @@ class State:
     parameters: List[Parameter] = field(default_factory=list)
     remappings: Dict[str, str] = field(default_factory=dict)
     parameter_mappings: Dict[str, str] = field(default_factory=dict)
-    state_type: str | None = None
-    module: str | None = None
-    class_name: str | None = None
-    package_name: str | None = None
-    file_name: str | None = None
+    state_type: Union[str, None] = None
+    module: Union[str, None] = None
+    class_name: Union[str, None] = None
+    package_name: Union[str, None] = None
+    file_name: Union[str, None] = None
 
     def add_key(self, key: Key) -> None:
         """Add a blackboard key to the state."""
@@ -51,7 +51,7 @@ class State:
         """Add a declared parameter to the state."""
         self.parameters.append(parameter)
 
-    def get_outcome(self, name: str) -> Outcome | None:
+    def get_outcome(self, name: str) -> Union[Outcome, None]:
         """Return an outcome by name."""
         for outcome in self.outcomes:
             if outcome.name == name:

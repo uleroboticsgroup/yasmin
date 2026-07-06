@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Any, Callable, Optional, List
+from typing import Any, Callable, List, Optional, Union
 
 import yasmin
 
@@ -81,7 +81,7 @@ class RuntimeLogger:
 
     def set_log_level(
         self,
-        level: yasmin.LogLevel | str,
+        level: Union[yasmin.LogLevel, str],
         emit_status: bool = True,
     ) -> None:
         """Update the active YASMIN log level.

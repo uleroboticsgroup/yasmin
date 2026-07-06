@@ -15,7 +15,7 @@
 
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Union
 
 from yasmin_plugins_manager import PluginInfo, PluginManager
 
@@ -72,7 +72,7 @@ def build_plugin_info(plugin_name: str):
             return None
 
 
-def filter_plugins(plugins, plugin_type: str = "all", search: str | None = None):
+def filter_plugins(plugins, plugin_type: str = "all", search: Union[str, None] = None):
     filtered = []
     lowered_search = search.lower() if search else None
 

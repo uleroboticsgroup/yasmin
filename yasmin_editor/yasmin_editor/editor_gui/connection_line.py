@@ -162,7 +162,7 @@ class ConnectionLine(QtWidgets.QGraphicsPathItem):
         self.setPath(QtGui.QPainterPath())
         self.arrow_head.setVisible(False)
 
-    def _update_label_style(self, selected: bool | None = None) -> None:
+    def _update_label_style(self, selected: Union[bool, None] = None) -> None:
         """Apply the current visual style based on the selection state."""
         if selected is None:
             selected = self.isSelected()

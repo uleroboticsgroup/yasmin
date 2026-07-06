@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from yasmin_plugins_manager.plugin_info import PluginInfo
 from yasmin_editor.qt_compat import QtCore, QtGui, QtWidgets, exec_menu
@@ -36,7 +36,7 @@ class StateNode(BaseNodeMixin, QtWidgets.QGraphicsEllipseItem):
         remappings: Optional[Dict[str, str]] = None,
         description: str = "",
         defaults: Optional[List[Dict[str, str]]] = None,
-        custom_type_label: str | None = None,
+        custom_type_label: Union[str, None] = None,
         model: Optional[State] = None,
     ) -> None:
         super().__init__(-60, -40, 120, 80)
@@ -49,7 +49,7 @@ class StateNode(BaseNodeMixin, QtWidgets.QGraphicsEllipseItem):
         self.is_state_machine: bool = False
         self.is_concurrence: bool = False
         self.defaults: List[Dict[str, str]] = defaults or []
-        self.custom_type_label: str | None = custom_type_label
+        self.custom_type_label: Union[str, None] = custom_type_label
 
         self._initialize_base_node_graphics(x, y)
 
@@ -71,7 +71,7 @@ class StateNode(BaseNodeMixin, QtWidgets.QGraphicsEllipseItem):
 
         self.center_text_item(self.text, -self.text.boundingRect().height() / 2)
 
-        type_text: str | None = None
+        type_text: Union[str, None] = None
         if plugin_info:
             type_text = plugin_info.plugin_type.upper()
         elif custom_type_label:

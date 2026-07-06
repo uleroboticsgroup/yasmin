@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple, List
+from typing import Any, Dict, Tuple, List, Union
 
 PluginStateDialogResult = Tuple[
     str,
@@ -28,7 +28,7 @@ PluginStateDialogResult = Tuple[
 StateMachineDialogResult = Tuple[
     str,
     List[str],
-    str | None,
+    Union[str, None],
     Dict[str, str],
     str,
     List[Dict[str, Any]],
@@ -36,7 +36,7 @@ StateMachineDialogResult = Tuple[
 ConcurrenceDialogResult = Tuple[
     str,
     List[str],
-    str | None,
+    Union[str, None],
     Dict[str, str],
     str,
     List[Dict[str, Any]],
@@ -44,7 +44,7 @@ ConcurrenceDialogResult = Tuple[
 OrthogonalStateDialogResult = Tuple[
     str,
     List[str],
-    str | None,
+    Union[str, None],
     Dict[str, str],
     str,
     List[Dict[str, Any]],
@@ -65,8 +65,8 @@ def _build_container_kwargs(
     description: str,
     defaults: List[Dict[str, Any]],
     is_state_machine: bool,
-    start_state: str | None,
-    default_outcome: str | None,
+    start_state: Union[str, None],
+    default_outcome: Union[str, None],
 ) -> Dict[str, Any]:
     """Build the shared kwargs dictionary for container-like editor nodes."""
 

@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+from typing import Union
+
 from yasmin_editor.qt_compat import Qt, QtCore, QtWidgets
 from yasmin_editor.editor_gui.clipboard_logic import (
     cross_container_paste_warning,
@@ -198,7 +200,7 @@ class EditorClipboardMixin:
             ensure_outcome_placements=ensure_outcome_placements,
         )
 
-    def _visible_clipboard_scene_rect(self) -> QtCore.QRectF | None:
+    def _visible_clipboard_scene_rect(self) -> Union[QtCore.QRectF, None]:
         """Return the bounds of visible shelf items only."""
 
         canvas = getattr(self, "clipboard_canvas", None)
@@ -212,7 +214,7 @@ class EditorClipboardMixin:
             bounds = bounds.united(item.sceneBoundingRect())
         return bounds
 
-    def _remember_clipboard_panel_width(self, width: int | None = None) -> None:
+    def _remember_clipboard_panel_width(self, width: Union[int, None] = None) -> None:
         """Persist the current shelf width for hide/show toggles and restarts."""
 
         dock = getattr(self, "clipboard_dock", None)
@@ -307,7 +309,7 @@ class EditorClipboardMixin:
         self.render_current_container(fit_view=fit_view)
         self.record_history_checkpoint()
 
-    def toggle_clipboard_panel(self, visible: bool | None = None) -> None:
+    def toggle_clipboard_panel(self, visible: Union[bool, None] = None) -> None:
         dock = getattr(self, "clipboard_dock", None)
         panel = getattr(self, "clipboard_panel", None)
         if dock is None and panel is None:
@@ -343,7 +345,7 @@ class EditorClipboardMixin:
 
     def _widget_contains_global_pos(
         self,
-        widget: QtWidgets.QWidget | None,
+        widget: Union[QtWidgets.QWidget, None],
         global_pos: QtCore.QPoint,
     ) -> bool:
         if widget is None or not widget.isVisible():

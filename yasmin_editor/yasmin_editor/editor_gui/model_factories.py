@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
@@ -79,9 +79,9 @@ def create_leaf_model(
     plugin_info: PluginInfoLike,
     *,
     description: str = "",
-    remappings: Dict[str, str] | None = None,
-    parameter_mappings: Dict[str, str] | None = None,
-    outcomes: List[str] | None = None,
+    remappings: Union[Dict[str, str], None] = None,
+    parameter_mappings: Union[Dict[str, str], None] = None,
+    outcomes: Union[List[str], None] = None,
 ) -> State:
     """Create one leaf-state model from plugin metadata."""
 
@@ -107,13 +107,13 @@ def create_container_model(
     *,
     is_concurrence: bool = False,
     is_orthogonal: bool = False,
-    outcomes: List[str] | None = None,
-    remappings: Dict[str, str] | None = None,
-    start_state: str | None = None,
-    default_outcome: str | None = None,
+    outcomes: Union[List[str], None] = None,
+    remappings: Union[Dict[str, str], None] = None,
+    start_state: Union[str, None] = None,
+    default_outcome: Union[str, None] = None,
     description: str = "",
-    parameter_mappings: Dict[str, str] | None = None,
-) -> StateMachine | Concurrence | OrthogonalState:
+    parameter_mappings: Union[Dict[str, str], None] = None,
+) -> Union[StateMachine, Concurrence, OrthogonalState]:
     """Create one state-machine, concurrence, or orthogonal model for the editor."""
 
     common_kwargs = dict(
@@ -123,7 +123,7 @@ def create_container_model(
         parameter_mappings=dict(parameter_mappings or {}),
     )
     if is_orthogonal:
-        model: StateMachine | Concurrence | OrthogonalState = OrthogonalState(
+        model: Union[StateMachine, Concurrence, OrthogonalState] = OrthogonalState(
             default_outcome=default_outcome,
             **common_kwargs,
         )
@@ -142,7 +142,7 @@ def create_container_model(
     return model
 
 
-def plugin_type_to_state_type(plugin_type: str | None) -> str | None:
+def plugin_type_to_state_type(plugin_type: Union[str, None]) -> Union[str, None]:
     """Map plugin-manager plugin types onto serialized model state types."""
 
     if plugin_type is None:
@@ -152,7 +152,7 @@ def plugin_type_to_state_type(plugin_type: str | None) -> str | None:
 
 def iter_leaf_outcome_names(
     plugin_info: PluginInfoLike,
-    overrides: List[str] | None = None,
+    overrides: Union[List[str], None] = None,
 ) -> List[str]:
     """Return the outcome names that should be attached to a leaf model."""
 

@@ -34,12 +34,12 @@ from yasmin_editor.model.layout import OutcomePlacement
 
 
 class _PluginInfoLike(Protocol):
-    plugin_type: str | None
-    outcomes: List[str] | None
+    plugin_type: Union[str, None]
+    outcomes: Union[List[str], None]
 
 
-SceneStateNode = StateNode | ContainerStateNode
-SceneTargetView = SceneStateNode | FinalOutcomeNode
+SceneStateNode = Union[StateNode, ContainerStateNode]
+SceneTargetView = Union[SceneStateNode, FinalOutcomeNode]
 ContainerModel = Union[StateMachine, Concurrence, OrthogonalState]
 
 
@@ -54,9 +54,9 @@ class SceneRenderContext:
     text_blocks: List[TextBlockNode]
     clear_scene: Callable[[], None]
     register_state_node: Callable[[SceneStateNode], None]
-    resolve_plugin_info: Callable[[State], _PluginInfoLike | None]
-    resolve_target_view: Callable[[str, str], SceneTargetView | None]
-    resolve_primary_outcome_view: Callable[[str], FinalOutcomeNode | None]
+    resolve_plugin_info: Callable[[State], Union[_PluginInfoLike, None]]
+    resolve_target_view: Callable[[str, str], Union[SceneTargetView, None]]
+    resolve_primary_outcome_view: Callable[[str], Union[FinalOutcomeNode, None]]
     create_connection_view: Callable[
         [SceneTargetView, SceneTargetView, str], ConnectionLine
     ]
@@ -90,8 +90,8 @@ def create_text_block_view(
     text_block_model: TextBlock,
     *,
     read_only: bool,
-    x: float | None = None,
-    y: float | None = None,
+    x: Union[float, None] = None,
+    y: Union[float, None] = None,
 ) -> TextBlockNode:
     """Create one text-block node from its model."""
 
@@ -110,7 +110,7 @@ def create_state_view(
     scene: QtWidgets.QGraphicsScene,
     state_model: State,
     *,
-    resolve_plugin_info: Callable[[State], _PluginInfoLike | None],
+    resolve_plugin_info: Callable[[State], Union[_PluginInfoLike, None]],
     x: float,
     y: float,
 ) -> SceneStateNode:

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import List, Dict, Tuple, Set
+from typing import List, Dict, Tuple, Set, Union
 from yasmin_editor.dataclass_compat import dataclass, field
 
 from .layout import Layout
@@ -26,7 +26,7 @@ from .transition import Transition
 class StateMachine(State):
     """Represents a YASMIN state machine container."""
 
-    start_state: str | None = None
+    start_state: Union[str, None] = None
     states: Dict[str, State] = field(default_factory=dict)
     transitions: Dict[str, List[Transition]] = field(default_factory=dict)
     layout: Layout = field(default_factory=Layout)
@@ -41,8 +41,8 @@ class StateMachine(State):
         self,
         name: str,
         *,
-        exclude_state: str | None = None,
-        exclude_outcome: str | None = None,
+        exclude_state: Union[str, None] = None,
+        exclude_outcome: Union[str, None] = None,
     ) -> None:
         """Validate that a child state or final outcome name is available."""
         if name in self.states and name != exclude_state:
@@ -201,7 +201,7 @@ class StateMachine(State):
             transitions[:] = [item for item in transitions if item.target != name]
         self.layout.remove_outcome_position(name)
 
-    def get_state(self, name: str) -> State | None:
+    def get_state(self, name: str) -> Union[State, None]:
         """Return a child state by name."""
         return self.states.get(name)
 

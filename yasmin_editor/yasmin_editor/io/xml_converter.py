@@ -300,7 +300,7 @@ def _final_outcome_elements(
 def _serializable_outcome_placements(
     parent: Union[StateMachine, Concurrence, OrthogonalState],
     outcome_name: str,
-) -> List[Tuple[str | None, float, float] | None]:
+) -> List[Union[Tuple[Union[str, None], float, float], None]]:
     """Return outcome placements for XML serialization without changing layout state.
 
     Legacy layouts may still store only the primary ``outcome_positions`` entry without
@@ -338,7 +338,7 @@ def _transition_to_element(transition: Transition) -> ET.Element:
 def _data_to_element(
     tag: str,
     obj: Key | Parameter,
-    type_attr: str | None = None,
+    type_attr: Union[str, None] = None,
 ) -> ET.Element:
     element = ET.Element(tag)
     element.set("name", obj.name)
@@ -806,7 +806,7 @@ def _parse_transition(element: ET.Element) -> Transition:
 def _parse_typed_elements(
     elements: Iterable[ET.Element],
     cls: type,
-    field_fn: Callable[[ET.Element], dict] | None = None,
+    field_fn: Union[Callable[[ET.Element], dict], None] = None,
 ) -> list:
     result = []
     for element in elements:
@@ -856,7 +856,7 @@ def _normalize_newlines(value: str) -> str:
     return value.replace("\r\n", "\n").replace("\r", "\n")
 
 
-def _parse_float(value: str | None) -> float | None:
+def _parse_float(value: Union[str, None]) -> Union[float, None]:
     if value in (None, ""):
         return None
     try:

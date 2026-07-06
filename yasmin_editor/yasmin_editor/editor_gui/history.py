@@ -15,12 +15,12 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.state_machine import StateMachine
 
-ContainerModel = StateMachine | Concurrence
+ContainerModel = Union[StateMachine, Concurrence]
 
 
 @dataclass(slots=True)
@@ -29,7 +29,7 @@ class EditorHistorySnapshot:
 
     root_model: StateMachine
     container_path: Tuple[str, ...] = tuple()
-    current_file_path: str | None = None
+    current_file_path: Union[str, None] = None
 
 
 class EditorHistory:
@@ -82,7 +82,7 @@ class EditorHistory:
 
     def undo(
         self, current_snapshot: EditorHistorySnapshot
-    ) -> EditorHistorySnapshot | None:
+    ) -> Union[EditorHistorySnapshot, None]:
         """Return the previous snapshot if one is available."""
 
         current_state = deepcopy(current_snapshot)
@@ -103,7 +103,7 @@ class EditorHistory:
 
     def redo(
         self, current_snapshot: EditorHistorySnapshot
-    ) -> EditorHistorySnapshot | None:
+    ) -> Union[EditorHistorySnapshot, None]:
         """Return the next snapshot if one is available."""
 
         if not self._redo_stack:

@@ -60,7 +60,7 @@ class SelectionBundle:
     transitions: List[Transition] = field(default_factory=list)
     transition_sources: List[str] = field(default_factory=list)
     outcome_rules: List[OutcomeRuleSnapshot] = field(default_factory=list)
-    start_state: str | None = None
+    start_state: Union[str, None] = None
 
     @property
     def is_empty(self) -> bool:

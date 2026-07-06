@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from yasmin_editor.qt_compat import QtCore, QtWidgets, exec_dialog
 from yasmin_plugins_manager.plugin_manager import PluginInfo
@@ -77,7 +77,7 @@ class EditorModelMixin:
 
     def get_parameter_overwrites_for_child(
         self,
-        container_model: StateMachine | Concurrence,
+        container_model: Union[StateMachine, Concurrence],
         child_model: State,
     ) -> List[Dict[str, str]]:
         """Return one child overwrite table enriched with parent metadata."""
@@ -86,7 +86,7 @@ class EditorModelMixin:
 
     def apply_parameter_overwrites(
         self,
-        container_model: StateMachine | Concurrence,
+        container_model: Union[StateMachine, Concurrence],
         child_model: State,
         overwrites: List[Dict[str, str]],
     ) -> None:
@@ -130,7 +130,7 @@ class EditorModelMixin:
         default_outcome: Optional[str] = None,
         description: str = "",
         parameter_mappings: Optional[Dict[str, str]] = None,
-    ) -> StateMachine | Concurrence | OrthogonalState:
+    ) -> Union[StateMachine, Concurrence, OrthogonalState]:
         """Create one editor container model from dialog input."""
 
         return build_container_model(
@@ -191,7 +191,7 @@ class EditorModelMixin:
 
     def apply_common_state_updates(
         self,
-        state_node: StateNode | ContainerStateNode,
+        state_node: Union[StateNode, ContainerStateNode],
         new_name: str,
         remappings: Dict[str, str],
         description: str,
@@ -392,7 +392,7 @@ class EditorModelMixin:
         self.text_blocks.clear()
 
     def get_final_outcome_views(
-        self, outcome_name: str | None = None
+        self, outcome_name: Union[str, None] = None
     ) -> List[FinalOutcomeNode]:
         views = list(self.final_outcomes.values())
         if outcome_name is not None:
@@ -515,7 +515,7 @@ class EditorModelMixin:
     def save_to_xml(self, file_path: str) -> None:
         self.model_adapter.save_to_xml(file_path)
 
-    def get_root_state_nodes(self) -> Dict[str, StateNode | ContainerStateNode]:
+    def get_root_state_nodes(self) -> Dict[str, Union[StateNode, ContainerStateNode]]:
         return self.state_nodes
 
     def get_container_path(self, container: Optional[ContainerStateNode]) -> str:
@@ -532,7 +532,7 @@ class EditorModelMixin:
 
     def register_state_node(
         self,
-        state_node: StateNode | ContainerStateNode,
+        state_node: Union[StateNode, ContainerStateNode],
         parent_container: Optional[ContainerStateNode] = None,
     ) -> str:
         self.state_nodes[state_node.name] = state_node
@@ -572,7 +572,7 @@ class EditorModelMixin:
     def has_final_outcome_name_conflict(
         self,
         outcome_name: str,
-        current_name: str | None = None,
+        current_name: Union[str, None] = None,
     ) -> bool:
         return has_child_outcome_name_conflict(
             outcome_name,
@@ -591,7 +591,7 @@ class EditorModelMixin:
         parameter_overwrites: Optional[List[Dict[str, str]]] = None,
         x: Optional[float] = None,
         y: Optional[float] = None,
-    ) -> StateNode | ContainerStateNode:
+    ) -> Union[StateNode, ContainerStateNode]:
         position = self.get_free_position()
         x = position.x() if x is None else x
         y = position.y() if y is None else y
@@ -617,7 +617,7 @@ class EditorModelMixin:
 
     def start_pending_node_placement(
         self,
-        node: StateNode | ContainerStateNode | FinalOutcomeNode | TextBlockNode,
+        node: Union[StateNode, ContainerStateNode, FinalOutcomeNode, TextBlockNode],
     ) -> None:
         existing_pending = self.canvas.pending_placement_item
         if existing_pending is not None and existing_pending is not node:
@@ -626,7 +626,7 @@ class EditorModelMixin:
 
     def finalize_pending_node_placement(
         self,
-        node: StateNode | ContainerStateNode | FinalOutcomeNode | TextBlockNode,
+        node: Union[StateNode, ContainerStateNode, FinalOutcomeNode, TextBlockNode],
         scene_pos: QtCore.QPointF,
     ) -> None:
         node.setPos(scene_pos)
@@ -663,7 +663,7 @@ class EditorModelMixin:
 
     def cancel_pending_node_placement(
         self,
-        node: StateNode | ContainerStateNode | FinalOutcomeNode | TextBlockNode,
+        node: Union[StateNode, ContainerStateNode, FinalOutcomeNode, TextBlockNode],
     ) -> None:
         if isinstance(node, FinalOutcomeNode):
             siblings = [
@@ -758,7 +758,7 @@ class EditorModelMixin:
             connection.to_node.name,
         )
 
-    def delete_state_item(self, state_node: StateNode | ContainerStateNode) -> None:
+    def delete_state_item(self, state_node: Union[StateNode, ContainerStateNode]) -> None:
         for connection in list(state_node.connections):
             self.delete_connection_item(connection)
 

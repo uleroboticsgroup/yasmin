@@ -43,7 +43,7 @@ def iter_outcome_rule_values(values: OutcomeRuleValues) -> List[str]:
 class ContainerState(State):
     """Abstract base for container states holding child states and outcome rules."""
 
-    default_outcome: str | None = None
+    default_outcome: Union[str, None] = None
     states: Dict[str, State] = field(default_factory=dict)
     outcome_map: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)
     layout: Layout = field(default_factory=Layout)
@@ -73,8 +73,8 @@ class ContainerState(State):
         self,
         name: str,
         *,
-        exclude_state: str | None = None,
-        exclude_outcome: str | None = None,
+        exclude_state: Union[str, None] = None,
+        exclude_outcome: Union[str, None] = None,
     ) -> None:
         """Validate that a child state or final outcome name is available."""
         if name in self.states and name != exclude_state:
@@ -126,7 +126,7 @@ class ContainerState(State):
         self,
         outcome: str,
         state_name: str,
-        state_outcome: str | None = None,
+        state_outcome: Union[str, None] = None,
     ) -> None:
         """Remove one outcome rule entry from the container."""
         mapping = self.outcome_map.get(outcome, {})
@@ -216,7 +216,7 @@ class ContainerState(State):
             self.default_outcome = None
         self.layout.remove_outcome_position(name)
 
-    def get_state(self, name: str) -> State | None:
+    def get_state(self, name: str) -> Union[State, None]:
         """Return a child state by name."""
         return self.states.get(name)
 

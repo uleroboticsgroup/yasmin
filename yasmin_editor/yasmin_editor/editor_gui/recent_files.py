@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Iterable, List, Set
+from typing import Iterable, List, Set, Union
 
 DEFAULT_MAX_RECENT_FILES = 10
 
@@ -81,7 +81,7 @@ class RecentFilesStore:
 
     def __init__(
         self,
-        file_path: str | Path | None = None,
+        file_path: Union[str, Path, None] = None,
         *,
         max_entries: int = DEFAULT_MAX_RECENT_FILES,
     ) -> None:
@@ -120,7 +120,7 @@ class RecentFilesStore:
         return entries
 
     def add_file(
-        self, file_path: str, current_entries: Iterable[str] | None = None
+        self, file_path: str, current_entries: Union[Iterable[str], None] = None
     ) -> List[str]:
         """Add one file path to the persistent recent-files list."""
 
@@ -137,7 +137,7 @@ class RecentFilesStore:
     def remove_file(
         self,
         file_path: str,
-        current_entries: Iterable[str] | None = None,
+        current_entries: Union[Iterable[str], None] = None,
     ) -> List[str]:
         """Remove one file path from the persistent recent-files list."""
 

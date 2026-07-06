@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse
 import sys
 import time
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 from yasmin_editor.qt_compat import exec_app
 
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 def parse_cli_args(
-    argv: List[str] | None = None,
+    argv: Union[List[str], None] = None,
 ) -> Tuple[argparse.Namespace, List[str]]:
     """Parse editor-specific CLI arguments while preserving Qt arguments."""
 
@@ -123,7 +123,7 @@ def open_startup_xml(editor: "YasminEditor", xml_file: str) -> None:
         )
 
 
-def run_editor(argv: List[str] | None = None) -> int:
+def run_editor(argv: Union[List[str], None] = None) -> int:
     from yasmin_editor.editor_gui.yasmin_editor import YasminEditor
 
     raw_argv = list(sys.argv if argv is None else argv)

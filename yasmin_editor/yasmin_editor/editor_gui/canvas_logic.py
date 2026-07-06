@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import os
-from typing import Iterable, List
+from typing import Iterable, List, Union
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.orthogonal_state import OrthogonalState
@@ -32,8 +32,8 @@ _XML_PATH_ATTRIBUTES = (
 
 
 def external_xml_view_active(
-    extern_xml: object | None,
-    extern_xml_path_start_index: int | None,
+    extern_xml: Union[object, None],
+    extern_xml_path_start_index: Union[int, None],
     current_path_length: int,
 ) -> bool:
     """Return whether the editor is currently inside an external XML subtree."""
@@ -46,8 +46,8 @@ def external_xml_view_active(
 
 def is_read_only_mode(
     runtime_mode_enabled: bool,
-    extern_xml: object | None,
-    extern_xml_path_start_index: int | None,
+    extern_xml: Union[object, None],
+    extern_xml_path_start_index: Union[int, None],
     current_path_length: int,
 ) -> bool:
     """Return whether the canvas must behave as read-only."""
@@ -62,9 +62,9 @@ def breadcrumb_label(
     index: int,
     container_model: object,
     *,
-    extern_xml: object | None,
-    extern_xml_source_state: object | None,
-    extern_xml_path_start_index: int | None,
+    extern_xml: Union[object, None],
+    extern_xml_source_state: Union[object, None],
+    extern_xml_path_start_index: Union[int, None],
 ) -> str:
     """Return the label shown for one breadcrumb button."""
     if index == 0:
@@ -82,7 +82,7 @@ def breadcrumb_label(
     return str(getattr(container_model, "name", container_model))
 
 
-def iter_xml_file_path_candidates(*sources: object | None) -> List[str]:
+def iter_xml_file_path_candidates(*sources: Union[object, None]) -> List[str]:
     """Collect candidate XML file paths from plugin and model metadata."""
     candidates: List[str] = []
     for source in sources:
@@ -96,8 +96,8 @@ def iter_xml_file_path_candidates(*sources: object | None) -> List[str]:
 
 
 def _package_xml_file_candidates(
-    package_name: str | None,
-    file_name: str | None,
+    package_name: Union[str, None],
+    file_name: Union[str, None],
     *,
     package_share_lookup,
     file_exists,
@@ -129,13 +129,13 @@ def _default_package_share_lookup(package_name: str) -> str:
 
 
 def resolve_xml_state_file_path(
-    plugin_info: object | None,
-    state_model: object | None,
+    plugin_info: Union[object, None],
+    state_model: Union[object, None],
     *,
     file_exists=os.path.isfile,
     walk=os.walk,
     package_share_lookup=None,
-) -> str | None:
+) -> Union[str, None]:
     """Resolve the XML file path for an external XML state reference."""
     for candidate in iter_xml_file_path_candidates(plugin_info, state_model):
         if file_exists(candidate):
@@ -161,7 +161,7 @@ def resolve_xml_state_file_path(
 
 
 def state_has_available_outcomes(
-    state_model: object | None,
+    state_model: Union[object, None],
     current_container_model: object,
 ) -> bool:
     """Return whether a state still exposes at least one connectable outcome."""

@@ -18,7 +18,7 @@ import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from yasmin_factory.type_utils import (
     format_default_value,
@@ -119,7 +119,7 @@ def _find_parameter_map(root: ET.Element) -> Dict[str, ET.Element]:
     return result
 
 
-def _find_default_element(root: ET.Element, key_name: str) -> ET.Element | None:
+def _find_default_element(root: ET.Element, key_name: str) -> Union[ET.Element, None]:
     for child in root:
         if strip_namespace(child.tag) != "Default":
             continue

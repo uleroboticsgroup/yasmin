@@ -18,7 +18,7 @@ import json
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List, Union
 
 from yasmin_cli.completer import (
     build_plugin_info,
@@ -58,7 +58,7 @@ def _parse_assignments(values: List[str], assignment_kind: str) -> Dict[str, str
     return result
 
 
-def _infer_python_value_type(value) -> str | None:
+def _infer_python_value_type(value) -> Union[str, None]:
     """Infer the canonical XML type string from an already parsed Python value."""
     if isinstance(value, bool):
         return "bool"
@@ -134,14 +134,14 @@ def _serialize_default_value(value, type_name: str) -> str:
     return format_default_value(value, type_name)
 
 
-def _get_input_meta(plugin, key_name: str) -> dict | None:
+def _get_input_meta(plugin, key_name: str) -> Union[dict, None]:
     for key in plugin.input_keys:
         if key.get("name", "") == key_name:
             return key
     return None
 
 
-def _get_parameter_meta(plugin, parameter_name: str) -> dict | None:
+def _get_parameter_meta(plugin, parameter_name: str) -> Union[dict, None]:
     for parameter in getattr(plugin, "parameters", []):
         if parameter.get("name", "") == parameter_name:
             return parameter

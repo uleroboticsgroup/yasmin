@@ -29,7 +29,7 @@ class ContainerMetadataView:
     name_label_html: str
     selector_label_html: str
     selector_items: List[str]
-    current_selector_value: str | None
+    current_selector_value: Union[str, None]
 
 
 ContainerModel = Union[StateMachine, Concurrence, OrthogonalState]

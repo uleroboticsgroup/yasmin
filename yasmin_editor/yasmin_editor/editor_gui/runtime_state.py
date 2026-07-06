@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from yasmin_editor.dataclass_compat import dataclass
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Union
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,14 +49,16 @@ class RuntimeLocalTransition:
     outcome: str
 
 
-def normalize_runtime_path(path: Tuple[str, ...] | List[str] | None) -> Tuple[str, ...]:
+def normalize_runtime_path(
+    path: Union[Tuple[str, ...], List[str], None],
+) -> Tuple[str, ...]:
     """Normalize arbitrary runtime paths to a tuple of non-empty strings."""
     return tuple(str(item) for item in (path or tuple()) if str(item))
 
 
 def current_runtime_container_path(
-    explicit_path: Tuple[str, ...] | List[str] | None,
-    current_container_path: Tuple[str, ...] | List[str] | None,
+    explicit_path: Union[Tuple[str, ...], List[str], None],
+    current_container_path: Union[Tuple[str, ...], List[str], None],
 ) -> Tuple[str, ...]:
     """Return the container path currently shown by the editor.
 
@@ -155,8 +157,8 @@ def runtime_button_states(
 
 
 def runtime_state_name_for_container(
-    active_path: Tuple[str, ...] | List[str] | None,
-    current_path: Tuple[str, ...] | List[str] | None,
+    active_path: Union[Tuple[str, ...], List[str], None],
+    current_path: Union[Tuple[str, ...], List[str], None],
 ) -> Optional[str]:
     """Return the active child state name visible in the current container."""
 
@@ -175,7 +177,7 @@ def runtime_state_name_for_container(
 
 def local_runtime_transition(
     transition: Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]],
-    current_path: Tuple[str, ...] | List[str] | None,
+    current_path: Union[Tuple[str, ...], List[str], None],
 ) -> Optional[RuntimeLocalTransition]:
     """Project one runtime transition into the currently visible container."""
 

@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from yasmin_editor.dataclass_compat import dataclass
-from typing import Sequence
+from typing import Sequence, Union
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,10 +52,10 @@ def rect_contains_point(rect: WindowRect, *, x: int, y: int) -> bool:
 def choose_preferred_screen_rect(
     screen_rects: Sequence[WindowRect],
     *,
-    cursor_x: int | None,
-    cursor_y: int | None,
+    cursor_x: Union[int, None],
+    cursor_y: Union[int, None],
     fallback_index: int = 0,
-) -> WindowRect | None:
+) -> Union[WindowRect, None]:
     """Return the screen rectangle that should host the initial editor window.
 
     The editor should open on the screen that currently contains the mouse

@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from yasmin_editor.dataclass_compat import dataclass, field
-from typing import Iterable, List, Set
+from typing import Iterable, List, Set, Union
 
 from .container_state import ContainerState, iter_outcome_rule_values
 from .state import State
@@ -96,7 +96,7 @@ def _validate_state(
     state: State,
     result: ValidationResult,
     path: str,
-    parent_targets: Set[str] | None,
+    parent_targets: Union[Set[str], None],
 ) -> None:
     """Validate one state recursively."""
 
@@ -222,7 +222,7 @@ def _validate_state_machine(
     state_machine: StateMachine,
     result: ValidationResult,
     path: str,
-    parent_targets: Set[str] | None,
+    parent_targets: Union[Set[str], None],
 ) -> None:
     """Validate a state machine recursively."""
 
@@ -313,7 +313,7 @@ def _validate_container_state(
     container: ContainerState,
     result: ValidationResult,
     path: str,
-    parent_targets: Set[str] | None,
+    parent_targets: Union[Set[str], None],
 ) -> None:
     """Validate a container state (Concurrence or OrthogonalState) recursively."""
 

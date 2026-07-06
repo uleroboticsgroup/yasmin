@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-from typing import Optional
+from typing import Optional, Union
 
 from yasmin_editor.qt_compat import Qt, QtWidgets, exec_dialog
 from yasmin_editor.editor_gui.clipboard_model import is_container_empty
@@ -420,7 +420,7 @@ class EditorUiMixin:
     def rewire_connection(
         self,
         connection: ConnectionLine,
-        to_node: StateNode | ContainerStateNode | FinalOutcomeNode,
+        to_node: Union[StateNode, ContainerStateNode, FinalOutcomeNode],
     ) -> None:
         if self.is_read_only_mode():
             self._show_read_only_message()

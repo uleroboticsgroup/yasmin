@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
@@ -55,7 +55,7 @@ class EditorModelAdapter:
         self,
         model: StateMachine,
         *,
-        current_file_path: str | None = None,
+        current_file_path: Union[str, None] = None,
         fit_view: bool = False,
         reset_history: bool = True,
     ) -> StateMachine:
@@ -106,15 +106,17 @@ class EditorModelAdapter:
             ensure_outcome_placements=ensure_outcome_placements,
         )
 
-    def rebuild_scene(self, model: StateMachine | Concurrence | OrthogonalState) -> None:
+    def rebuild_scene(
+        self, model: Union[StateMachine, Concurrence, OrthogonalState]
+    ) -> None:
         render_container_scene(model, self._build_main_scene_context())
 
     def create_state_view(
         self,
         state_model: State,
-        x: float | None = None,
-        y: float | None = None,
-    ) -> StateNode | ContainerStateNode:
+        x: Union[float, None] = None,
+        y: Union[float, None] = None,
+    ) -> Union[StateNode, ContainerStateNode]:
         container_model = self.editor.current_container_model
         pos = container_model.layout.get_state_position(state_model.name)
         if x is None:
@@ -135,8 +137,8 @@ class EditorModelAdapter:
     def create_text_block_view(
         self,
         text_block_model: TextBlock,
-        x: float | None = None,
-        y: float | None = None,
+        x: Union[float, None] = None,
+        y: Union[float, None] = None,
     ) -> TextBlockNode:
         node = create_text_block_view(
             self.editor.canvas.scene,
@@ -169,8 +171,8 @@ class EditorModelAdapter:
     def create_final_outcome_views(
         self,
         outcome_model: Outcome,
-        x: float | None = None,
-        y: float | None = None,
+        x: Union[float, None] = None,
+        y: Union[float, None] = None,
     ) -> List[FinalOutcomeNode]:
         container_model = self.editor.current_container_model
         placements = container_model.layout.get_outcome_placements(outcome_model.name)

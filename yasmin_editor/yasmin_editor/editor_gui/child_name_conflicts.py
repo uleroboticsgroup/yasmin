@@ -14,13 +14,13 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, Union
 
 
 def _has_child_name_conflict(
     proposed_name: str,
     *,
-    current_name: str | None,
+    current_name: Union[str, None],
     sibling_state_names: Iterable[str],
     sibling_outcome_names: Sequence[str],
 ) -> bool:
@@ -43,7 +43,7 @@ def has_state_name_conflict(
     *,
     sibling_state_names: Iterable[str],
     sibling_outcome_names: Sequence[str],
-    current_name: str | None = None,
+    current_name: Union[str, None] = None,
 ) -> bool:
     """Return whether a child-state name collides with sibling states or outcomes."""
 
@@ -58,7 +58,7 @@ def has_state_name_conflict(
 def has_final_outcome_name_conflict(
     proposed_name: str,
     *,
-    current_name: str | None,
+    current_name: Union[str, None],
     sibling_state_names: Iterable[str],
     sibling_outcome_names: Sequence[str],
 ) -> bool:

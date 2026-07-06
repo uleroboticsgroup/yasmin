@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from yasmin_editor.qt_compat import QtCore, QtGui, QtWidgets
 from yasmin_plugins_manager.plugin_manager import PluginManager
@@ -85,12 +85,12 @@ class YasminEditor(
 
         self.plugin_manager = manager
         self.root_model = StateMachine(name="")
-        self.state_nodes: Dict[str, StateNode | ContainerStateNode] = {}
+        self.state_nodes: Dict[str, Union[StateNode, ContainerStateNode]] = {}
         self.final_outcomes: Dict[str, FinalOutcomeNode] = {}
         self.connections: List[ConnectionLine] = []
         self.text_blocks: List[TextBlockNode] = []
         self.clipboard_model = create_clipboard_container("state_machine")
-        self.clipboard_state_nodes: Dict[str, StateNode | ContainerStateNode] = {}
+        self.clipboard_state_nodes: Dict[str, Union[StateNode, ContainerStateNode]] = {}
         self.clipboard_final_outcomes: Dict[str, FinalOutcomeNode] = {}
         self.clipboard_connections: List[ConnectionLine] = []
         self.clipboard_text_blocks: List[TextBlockNode] = []

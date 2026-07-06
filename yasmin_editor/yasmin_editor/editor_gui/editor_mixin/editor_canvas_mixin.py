@@ -37,7 +37,7 @@ class EditorCanvasMixin:
                 return item
         return None
 
-    def find_selected_state_node(self) -> Optional[StateNode | ContainerStateNode]:
+    def find_selected_state_node(self) -> Optional[Union[StateNode, ContainerStateNode]]:
         return self.find_selected_item((StateNode, ContainerStateNode))
 
     def find_selected_container(self) -> Optional[ContainerStateNode]:

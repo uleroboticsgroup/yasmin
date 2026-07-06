@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import threading
-from typing import Any, Iterable, Optional, List, Set, Tuple
+from typing import Any, Iterable, List, Optional, Set, Tuple, Union
 
 from yasmin_editor.qt_compat import pyqtSignal, QtCore
 from yasmin_editor.runtime.logging import RuntimeLogger
@@ -160,7 +160,7 @@ class Runtime(QtCore.QObject):
 
     def set_log_level(
         self,
-        level: yasmin.LogLevel | str,
+        level: Union[yasmin.LogLevel, str],
         emit_status: bool = True,
     ) -> None:
         """Update the runtime log level and re-apply the logger callback.

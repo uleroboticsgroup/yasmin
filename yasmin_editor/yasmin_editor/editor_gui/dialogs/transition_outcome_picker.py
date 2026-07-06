@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import List, Union
 from collections.abc import Sequence
 from yasmin_editor.qt_compat import Qt, QtCore, QtGui, QtWidgets
 
@@ -41,7 +41,7 @@ class TransitionOutcomePickerDialog(QtWidgets.QDialog):
     def __init__(
         self,
         *,
-        parent: QtWidgets.QWidget | None,
+        parent: Union[QtWidgets.QWidget, None],
         source_name: str,
         available_outcomes: Sequence[str],
     ) -> None:

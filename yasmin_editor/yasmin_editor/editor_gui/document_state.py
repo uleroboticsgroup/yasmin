@@ -17,6 +17,8 @@ from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
 
+from typing import Union
+
 from yasmin_editor.model.state_machine import StateMachine
 
 WINDOW_TITLE = "YASMIN Editor"
@@ -27,7 +29,7 @@ class EditorDirtyTracker:
     """Track whether the current root model differs from the saved baseline."""
 
     def __init__(self) -> None:
-        self._saved_root_model: StateMachine | None = None
+        self._saved_root_model: Union[StateMachine, None] = None
 
     def reset(self, root_model: StateMachine) -> None:
         """Reset the saved baseline to the provided root model."""
@@ -42,7 +44,7 @@ class EditorDirtyTracker:
         return root_model != self._saved_root_model
 
 
-def document_display_name(file_path: str | None) -> str:
+def document_display_name(file_path: Union[str, None]) -> str:
     """Return the user-visible document name for the current file path."""
 
     if not file_path:
@@ -50,7 +52,7 @@ def document_display_name(file_path: str | None) -> str:
     return Path(file_path).name
 
 
-def build_window_title(file_path: str | None, *, is_dirty: bool) -> str:
+def build_window_title(file_path: Union[str, None], *, is_dirty: bool) -> str:
     """Return the main-window title for the current document state."""
 
     prefix = "* " if is_dirty else ""

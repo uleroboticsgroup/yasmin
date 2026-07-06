@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import Protocol
+from typing import Protocol, Union
 
 from yasmin_editor.model.concurrence import Concurrence
 from yasmin_editor.model.state_machine import StateMachine
@@ -34,7 +34,7 @@ class _NamedView(Protocol):
 
 
 class _OutcomeView(_NamedView, Protocol):
-    instance_id: str | None
+    instance_id: Union[str, None]
 
 
 class _TextBlockModel(Protocol):
@@ -51,7 +51,7 @@ class _TextBlockView(Protocol):
 
 
 def sync_container_layout_from_views(
-    container_model: StateMachine | Concurrence,
+    container_model: Union[StateMachine, Concurrence],
     state_views: Mapping[str, _NamedView],
     outcome_views: Iterable[_OutcomeView],
     text_block_views: Iterable[_TextBlockView],
