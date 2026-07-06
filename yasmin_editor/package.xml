@@ -26,9 +26,8 @@
   <exec_depend condition="$ROS_DISTRO == iron">python3-pyqt5</exec_depend>
   <exec_depend condition="$ROS_DISTRO == jazzy">python3-pyqt6</exec_depend>
   <exec_depend condition="$ROS_DISTRO == kilted">python3-pyqt6</exec_depend>
-  <exec_depend condition="$ROS_DISTRO == rolling">python3-pyqt6</exec_depend>
   <exec_depend condition="$ROS_DISTRO == lyrical">python3-pyqt6</exec_depend>
-  <exec_depend>python3-lxml</exec_depend>
+  <exec_depend condition="$ROS_DISTRO == rolling">python3-pyqt6</exec_depend>
   <build_depend>ros_environment</build_depend>
   <test_depend>ament_cmake_pytest</test_depend>
   <export>
