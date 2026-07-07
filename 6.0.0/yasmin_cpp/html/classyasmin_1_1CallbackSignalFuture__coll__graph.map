@@ -1,0 +1,11 @@
+<map id="yasmin::CallbackSignalFuture" name="yasmin::CallbackSignalFuture">
+<area shape="rect" id="Node000001" title="Handle returned by CallbackSignal::trigger_async()." alt="" coords="77,340,269,366"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="22,214,180,269"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,281,167,338,163,341,125,284"/>
+<area shape="rect" id="Node000003" href="$structyasmin_1_1CallbackSignalFuture_1_1SharedState.html" title="Shared state for the asynchronous trigger." alt="" coords="5,102,197,143"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,158,104,213,98,213,98,158"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="61,5,141,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="104,46,104,102,98,102,98,46"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="204,229,286,254"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="231,269,199,318,183,342,179,339,195,315,227,266"/>
+</map>

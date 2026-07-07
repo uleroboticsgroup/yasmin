@@ -1,0 +1,7 @@
+<map id="yasmin_ros::InterfaceSerializationHandler" name="yasmin_ros::InterfaceSerializationHandler">
+<area shape="rect" id="Node000001" title="A structure to hold the serialization handlers for a specific interface type." alt="" coords="5,192,220,233"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="74,95,151,121"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,136,115,192,110,192,110,136"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="51,5,174,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,61,115,95,110,95,110,61"/>
+</map>

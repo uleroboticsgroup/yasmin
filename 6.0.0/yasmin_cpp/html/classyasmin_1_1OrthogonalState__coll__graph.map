@@ -1,0 +1,26 @@
+<map id="yasmin::OrthogonalState" name="yasmin::OrthogonalState">
+<area shape="rect" id="Node000001" title="Represents a state that can execute multiple concurrent states in parallel." alt="" coords="1122,204,1285,230"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="809,59,908,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="924,67,1010,75,1056,86,1100,104,1132,126,1159,153,1196,202,1192,205,1155,156,1128,130,1097,109,1054,91,1009,80,924,72"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="360,5,502,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="517,23,716,45,809,60,808,65,716,50,517,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="343,59,519,84"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="534,69,809,69,809,74,534,74"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="740,162,977,202"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="993,193,1122,206,1122,211,993,198"/>
+<area shape="rect" id="Node000006" href="$structyasmin_1_1OrthogonalState_1_1RegionDescriptor.html" title="Shared pointer aliases for OrthogonalState." alt="" coords="350,170,512,210"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="528,186,739,182,740,187,528,191"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="178,205,255,231"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="246,194,278,174,310,162,343,156,520,133,659,127,799,134,978,148,1039,153,1099,166,1142,183,1179,201,1177,206,1140,188,1098,171,1038,158,977,153,799,139,659,133,521,139,344,161,311,167,281,179,249,198"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="271,209,349,198,350,203,271,214"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="543,222,716,278"/>
+<area shape="poly" id="edge9_Node000009_Node000007" title=" " alt="" coords="268,233,280,236,348,245,417,250,542,251,542,257,417,255,347,250,279,241,267,238"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="559,292,700,333"/>
+<area shape="poly" id="edge13_Node000011_Node000007" title=" " alt="" coords="241,240,259,256,280,269,352,293,426,307,497,313,559,314,559,319,497,318,425,312,350,299,278,274,256,261,237,244"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="5,198,129,238"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="144,216,178,216,178,221,144,221"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="732,245,977,235,1122,222,1122,228,978,240,732,250"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="769,369,948,425"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="964,397,1032,386,1066,376,1097,360,1133,330,1161,294,1182,257,1195,229,1199,231,1186,260,1165,297,1136,334,1100,365,1068,381,1034,392,965,402"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="714,305,839,293,977,273,1074,251,1158,228,1159,233,1076,256,978,278,839,298,715,310"/>
+</map>

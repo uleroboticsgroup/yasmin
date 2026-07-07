@@ -1,0 +1,7 @@
+<map id="yasmin::StateMachine" name="yasmin::StateMachine">
+<area shape="rect" id="Node000001" title="A class that implements a state machine with a set of states, transitions, and callback mechanisms fo..." alt="" coords="19,79,167,105"/>
+<area shape="rect" id="Node000003" href="$classDelayedStartStateMachine.html" title="Small helper state machine that delays its start." alt="" coords="5,153,181,178"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="96,120,96,152,90,152,90,120"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="43,5,143,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,46,96,79,90,79,90,46"/>
+</map>

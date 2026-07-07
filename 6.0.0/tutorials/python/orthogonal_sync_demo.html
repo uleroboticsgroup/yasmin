@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orthogonal Regions with Sync (Python) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <script src="../../sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="../../dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="../../index.html" class="logo">
+        <img src="../../logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="../../doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="../../index.html">Introduction</a></li>
+          <li><a href="../../docker.html">Docker Environment</a></li>
+          <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../callback_signal.html">Callback Signal</a></li>
+          <li><a href="../../xml_factory.html">XML State Machines</a></li>
+          <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="../../tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li><a href="../cpp/basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="../cpp/remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="../cpp/concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="../cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="../cpp/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="../cpp/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="../cpp/action_client_demo.html">Action Client</a>
+              </li>
+              <li><a href="../cpp/parameters_demo.html">ROS Parameters</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li><a href="../cpp/factory_demo.html">Factory (XML)</a></li>
+              <li>
+                <a href="../cpp/multiple_states_demo.html">Multiple States</a>
+              </li>
+              <li><a href="../cpp/nav2_demo.html">Nav2 Demo</a></li>
+              <li>
+                <a href="../cpp/orthogonal_demo.html">Orthogonal Regions</a>
+              </li>
+              <li>
+                <a href="../cpp/orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+              <li>
+                <a href="../cpp/ros_serialization_demo.html"
+                  >ROS Serialization</a
+                >
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="publisher_demo.html">Publisher</a></li>
+              <li><a href="monitor_demo.html">Monitor</a></li>
+              <li><a href="service_client_demo.html">Service Client</a></li>
+              <li><a href="action_client_demo.html">Action Client</a></li>
+              <li><a href="parameters_demo.html">ROS Parameters</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li><a href="factory_demo.html">Factory (XML)</a></li>
+              <li><a href="multiple_states_demo.html">Multiple States</a></li>
+              <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="orthogonal_demo.html">Orthogonal Regions</a></li>
+              <li>
+                <a href="orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+              <li>
+                <a href="ros_serialization_demo.html">ROS Serialization</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="../../yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
+            <a href="../../yasmin_plugins_manager.html"
+              >YASMIN Plugins Manager</a
+            >
+          </li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="../../citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>
+          <a
+            href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/yasmin_demos/orthogonal_sync_demo.py"
+            target="_blank"
+            style="color: inherit; text-decoration: none"
+            >Orthogonal Regions with Sync Demo (Python)</a
+          >
+        </h1>
+        <p>
+          This tutorial extends the basic orthogonal regions pattern by adding a
+          <code>JoinState</code> synchronization point. Synchronization allows
+          independent regions to coordinate at specific points during execution.
+          This is essential in robotics for behaviors like "wait for both arms
+          to reach a waypoint before proceeding" or "synchronize sensor fusion
+          data from multiple sources."
+        </p>
+
+        <h2>Background</h2>
+        <p>
+          The <strong>JoinState</strong> is a special state that acts as a
+          rendezvous point across orthogonal regions. All regions that share a
+          JoinState with the same identifier must reach it before any of them
+          can proceed. Once all participating regions arrive at the join point,
+          they are all released simultaneously to continue their individual
+          workflows. This pattern is useful for:
+        </p>
+        <ul>
+          <li>
+            Synchronizing phases of a multi-region mission (e.g., all subsystems
+            ready)
+          </li>
+          <li>
+            Coordinating sequential operations across independent state machines
+          </li>
+          <li>
+            Implementing barrier patterns where regions must align before
+            proceeding
+          </li>
+          <li>
+            Modeling parallel-then-merge workflows with shared dependencies
+          </li>
+        </ul>
+
+        <h2>1. Create the WorkerState</h2>
+        <p>
+          A simple looping state that counts iterations and returns
+          <code>"working"</code> or <code>"done"</code>. This is the same state
+          used in the basic orthogonal demo.
+        </p>
+
+        <pre><code class="language-python">class WorkerState(State):
+    def __init__(self, name: str, max_count: int, sleep_ms: int = 300) -&gt; None:
+        super().__init__(["working", "done"])
+        self.name = name
+        self.counter = 0
+        self.max_count = max_count
+        self.sleep_ms = sleep_ms
+
+    def execute(self, blackboard: Blackboard) -&gt; str:
+        yasmin.YASMIN_LOG_INFO(
+            f"WorkerState [{self.name}]: iteration {self.counter + 1}/{self.max_count}"
+        )
+        time.sleep(self.sleep_ms / 1000.0)
+
+        self.counter += 1
+        if self.counter &gt;= self.max_count:
+            return "done"
+        return "working"</code></pre>
+
+        <h2>2. Create Region A with Synchronization</h2>
+        <p>
+          Region A runs 3 iterations of <code>WORK_1</code>, then transitions to
+          a <code>JoinState</code> with identifier <code>"mid_sync"</code>. The
+          join state pauses execution until all other regions with the same
+          identifier also reach their join point. When synchronized, Region A
+          continues to <code>WORK_2</code> for 2 more iterations before
+          completing.
+        </p>
+
+        <pre><code class="language-python">def main() -&gt; None:
+    rclpy.init()
+    set_ros_loggers()
+    yasmin.YASMIN_LOG_INFO("yasmin_orthogonal_sync_demo")
+
+    SYNC_ID = "mid_sync"
+
+    # Region A: 3 iterations -&gt; JoinState -&gt; 2 more iterations
+    reg_a = StateMachine(outcomes=["done"])
+    reg_a.set_name("Region A")
+    reg_a.add_state(
+        "WORK_1",
+        WorkerState("A.1", 3, 200),
+        transitions={"working": "WORK_1", "done": "SYNC"},
+    )
+    reg_a.add_state(
+        "SYNC",
+        JoinState(SYNC_ID),
+        transitions={"joined": "WORK_2"},
+    )
+    reg_a.add_state(
+        "WORK_2",
+        WorkerState("A.2", 2, 200),
+        transitions={"working": "WORK_2", "done": "done"},
+    )
+    reg_a.set_start_state("WORK_1")</code></pre>
+
+        <h2>3. Create Region B with Synchronization</h2>
+        <p>
+          Region B runs 2 iterations of <code>WORK_1</code> (faster than A),
+          then reaches the same <code>JoinState</code> with
+          <code>"mid_sync"</code>. It waits at the join point until Region A
+          also arrives. After synchronization, Region B continues to
+          <code>WORK_2</code> for 3 more iterations. This demonstrates how the
+          faster region (B) waits at the barrier for the slower region (A).
+        </p>
+
+        <pre><code class="language-python">    # Region B: 2 iterations -&gt; JoinState -&gt; 3 more iterations
+    reg_b = StateMachine(outcomes=["done"])
+    reg_b.set_name("Region B")
+    reg_b.add_state(
+        "WORK_1",
+        WorkerState("B.1", 2, 200),
+        transitions={"working": "WORK_1", "done": "SYNC"},
+    )
+    reg_b.add_state(
+        "SYNC",
+        JoinState(SYNC_ID),
+        transitions={"joined": "WORK_2"},
+    )
+    reg_b.add_state(
+        "WORK_2",
+        WorkerState("B.2", 3, 200),
+        transitions={"working": "WORK_2", "done": "done"},
+    )
+    reg_b.set_start_state("WORK_1")</code></pre>
+
+        <h2>4. Create the OrthogonalState Container</h2>
+        <p>
+          The OrthogonalState is configured the same way as the basic demo. The
+          <code>outcome_map</code> defines <code>"success"</code> when both
+          regions complete. The JoinState synchronization is handled internally
+          by the OrthogonalState container.
+        </p>
+
+        <pre><code class="language-python">    # Orthogonal state runs both regions in parallel with sync point
+    ort = OrthogonalState(
+        default_outcome="timeout",
+        outcome_map={"success": {"A": "done", "B": "done"}},
+    )
+    ort.set_description("Runs two regions that sync at a JoinState before continuing.")
+    ort.add_region("A", reg_a)
+    ort.add_region("B", reg_b)</code></pre>
+
+        <h2>5. Create the Root State Machine</h2>
+        <p>
+          The root state machine wraps the OrthogonalState and handles its
+          outcomes. This is identical to the basic orthogonal demo.
+        </p>
+
+        <pre><code class="language-python">    # Root state machine
+    sm = StateMachine(outcomes=["success", "timeout"], handle_sigint=True)
+    sm.set_description("Demonstrates orthogonal state with JoinState synchronization.")
+    sm.add_state(
+        "PARALLEL",
+        ort,
+        transitions={"success": "success", "timeout": "timeout"},
+    )
+    sm.set_start_state("PARALLEL")
+
+    YasminViewerPub(sm, "YASMIN_ORTHOGONAL_SYNC_DEMO")
+
+    try:
+        outcome = sm()
+        yasmin.YASMIN_LOG_INFO(outcome)
+    except Exception as e:
+        yasmin.YASMIN_LOG_WARN(e)
+
+    if rclpy.ok():
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+
+        <h2>6. Run the Demo</h2>
+        <p>
+          Execute the orthogonal synchronization demonstration to observe how
+          JoinState coordinates region execution.
+        </p>
+        <pre><code>ros2 run yasmin_demos orthogonal_sync_demo.py</code></pre>
+
+        <h2>How It Works</h2>
+        <p>The <code>JoinState</code> synchronization follows this flow:</p>
+        <ul>
+          <li>
+            Region A starts WORK_1 (3 iterations, ~600ms total at 200ms each)
+          </li>
+          <li>
+            Region B starts WORK_1 (2 iterations, ~400ms total at 200ms each)
+          </li>
+          <li>Region B reaches the JoinState first and waits for Region A</li>
+          <li>Region A finishes WORK_1 and reaches the same JoinState</li>
+          <li>
+            Both regions are released simultaneously to their WORK_2 states
+          </li>
+          <li>
+            Region A runs WORK_2 (2 iterations), Region B runs WORK_2 (3
+            iterations)
+          </li>
+          <li>Both complete independently</li>
+        </ul>
+        <div class="page-navigation">
+          <a href="../python/orthogonal_demo.html" class="nav-button prev"
+            >Python: Orthogonal Regions</a
+          >
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2026 YASMIN Project. Licensed under Apache-2.0. | Documentation
+        generated with <a href="../../doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+<map id="TestServiceClientState" name="TestServiceClientState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="649,84,804,110"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="363,5,456,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="472,21,546,32,625,50,665,65,700,81,698,86,663,70,624,55,545,37,471,26"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="319,55,500,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="516,75,648,87,648,92,515,80"/>
+<area shape="rect" id="Node000004" href="$classAuxNode.html" title=" " alt="" coords="148,55,222,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="238,65,318,65,318,70,238,70"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,55,99,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="89,81,128,83,163,78,164,84,128,88,89,86"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="114,65,147,65,147,70,114,70"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="89,49,128,47,164,51,163,57,128,52,89,54"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="293,104,526,145"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="541,125,624,119,678,108,679,113,625,124,541,130"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="369,169,450,195"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="466,178,542,171,583,163,624,152,669,131,705,108,708,112,671,136,626,157,585,168,543,176,466,184"/>
+</map>

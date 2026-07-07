@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orthogonal Regions (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <script src="../../sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="../../dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="../../index.html" class="logo">
+        <img src="../../logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="../../doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="../../index.html">Introduction</a></li>
+          <li><a href="../../docker.html">Docker Environment</a></li>
+          <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../callback_signal.html">Callback Signal</a></li>
+          <li><a href="../../xml_factory.html">XML State Machines</a></li>
+          <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="../../tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="publisher_demo.html">Publisher</a></li>
+              <li><a href="monitor_demo.html">Monitor</a></li>
+              <li><a href="service_client_demo.html">Service Client</a></li>
+              <li><a href="action_client_demo.html">Action Client</a></li>
+              <li><a href="parameters_demo.html">ROS Parameters</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li><a href="factory_demo.html">Factory (XML)</a></li>
+              <li><a href="multiple_states_demo.html">Multiple States</a></li>
+              <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="orthogonal_demo.html">Orthogonal Regions</a></li>
+              <li>
+                <a href="orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+              <li>
+                <a href="ros_serialization_demo.html">ROS Serialization</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="../python/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="../python/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="../python/publisher_demo.html">Publisher</a></li>
+              <li><a href="../python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="../python/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="../python/action_client_demo.html">Action Client</a>
+              </li>
+              <li>
+                <a href="../python/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+              <li>
+                <a href="../python/multiple_states_demo.html"
+                  >Multiple States</a
+                >
+              </li>
+              <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+              <li>
+                <a href="../python/orthogonal_demo.html">Orthogonal Regions</a>
+              </li>
+              <li>
+                <a href="../python/orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+              <li>
+                <a href="../python/ros_serialization_demo.html"
+                  >ROS Serialization</a
+                >
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="../../yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
+            <a href="../../yasmin_plugins_manager.html"
+              >YASMIN Plugins Manager</a
+            >
+          </li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="../../citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>
+          <a
+            href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/orthogonal_demo.cpp"
+            target="_blank"
+            style="color: inherit; text-decoration: none"
+            >Orthogonal Regions Demo (C++)</a
+          >
+        </h1>
+        <p>
+          This tutorial demonstrates how to run multiple independent state
+          machines in parallel using YASMIN's <code>OrthogonalState</code>
+          container. Orthogonal regions allow you to define separate,
+          independently executing state machines (regions) that run concurrently
+          within a single parent state. Each region has its own internal state
+          and transitions, while the OrthogonalState coordinates their execution
+          and maps their combined outcomes to the next transition.
+        </p>
+
+        <h2>Background</h2>
+        <p>
+          The <strong>OrthogonalState</strong> container enables truly
+          independent parallel execution of multiple state machines (regions).
+          Unlike <code>Concurrence</code> which runs individual states in
+          parallel, orthogonal regions run full state machines in parallel, each
+          with its own lifecycle, blackboard, and outcome resolution. This is
+          useful when you need to:
+        </p>
+        <ul>
+          <li>
+            Model independent behaviors that have their own complex state logic
+          </li>
+          <li>
+            Run concurrent missions where each region has multiple sequential
+            steps
+          </li>
+          <li>
+            Combine independent subsystems (navigation, manipulation,
+            perception) into a single coordinated behavior
+          </li>
+          <li>
+            Synchronize regions at specific points using <code>JoinState</code>
+          </li>
+        </ul>
+
+        <h2>1. Create the WorkerState</h2>
+        <p>
+          This state counts iterations and returns <code>"working"</code> until
+          the maximum count is reached, then returns <code>"done"</code>. It
+          accepts a name for logging, a maximum iteration count, and an optional
+          sleep duration. This simple looping state is used by both regions to
+          demonstrate independent progress.
+        </p>
+        <pre><code class="language-cpp">class WorkerState : public yasmin::State {
+public:
+  int counter;
+  int max_count_;
+  int sleep_ms_;
+  std::string name_;
+
+  WorkerState(const std::string &amp;name, int max_count, int sleep_ms = 500)
+      : yasmin::State({"working", "done"}), counter(0), max_count_(max_count),
+        sleep_ms_(sleep_ms), name_(name) {
+    this-&gt;set_description(
+        "Counts iterations and returns 'working' until max_count is reached.");
+  };
+
+  std::string execute(yasmin::Blackboard::SharedPtr /*blackboard*/) override {
+    YASMIN_LOG_INFO("WorkerState [%s]: iteration %d/%d", name_.c_str(),
+                    this-&gt;counter + 1, max_count_);
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms_));
+
+    this-&gt;counter += 1;
+    if (this-&gt;counter &gt;= max_count_) {
+      return "done";
+    }
+    return "working";
+  };
+};</code></pre>
+
+        <h2>2. Create Regions</h2>
+        <p>
+          Each region is a full <code>StateMachine</code> with its own internal
+          states and transitions. Region A runs for 3 iterations, Region B runs
+          for 5 iterations. Because they execute in parallel, the total time is
+          determined by the slowest region (B). Each region has a single outcome
+          <code>"done"</code> that it emits when its internal workflow
+          completes.
+        </p>
+        <pre><code class="language-cpp">int main(int argc, char *argv[]) {
+  rclcpp::init(argc, argv);
+
+  yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_orthogonal_demo");
+
+  // Region A: 3 iterations
+  auto reg_a = yasmin::StateMachine::make_shared(
+      std::initializer_list&lt;std::string&gt;{"done"});
+  reg_a-&gt;set_name("Region A");
+  reg_a-&gt;add_state("WORK", std::make_shared&lt;WorkerState&gt;("A", 3, 300),
+                   {{"working", "WORK"}});
+  reg_a-&gt;set_start_state("WORK");
+
+  // Region B: 5 iterations
+  auto reg_b = yasmin::StateMachine::make_shared(
+      std::initializer_list&lt;std::string&gt;{"done"});
+  reg_b-&gt;set_name("Region B");
+  reg_b-&gt;add_state("WORK", std::make_shared&lt;WorkerState&gt;("B", 5, 300),
+                   {{"working", "WORK"}});
+  reg_b-&gt;set_start_state("WORK");</code></pre>
+
+        <h2>3. Create the OrthogonalState Container</h2>
+        <p>
+          The <code>OrthogonalState</code> takes two key parameters: a default
+          outcome (returned when no outcome map matches) and an outcome map that
+          defines how region outcomes map to the container's outcome. Here, the
+          outcome map specifies that <code>"success"</code> is returned when
+          <em>both</em> Region A and Region B emit <code>"done"</code>. If
+          either region finishes with an unmatched outcome, the default
+          <code>"timeout"</code> is returned.
+        </p>
+        <pre><code class="language-cpp">  // Orthogonal state runs both regions in parallel
+  auto ort = yasmin::OrthogonalState::make_shared(
+      "timeout", yasmin::OutcomeMap{
+                     {"success", {{"A", "done"}, {"B", "done"}}},
+                 });
+  ort-&gt;set_description("Runs Region A and Region B in parallel and maps their "
+                       "combined outcomes.");
+  ort-&gt;add_region("A", reg_a);
+  ort-&gt;add_region("B", reg_b);</code></pre>
+
+        <h2>4. Create the Root State Machine</h2>
+        <p>
+          Add the OrthogonalState to a root state machine and define transitions
+          from its outcomes. When the orthogonal container returns
+          <code>"success"</code> (both regions done), the root SM transitions to
+          its <code>"success"</code> outcome. When <code>"timeout"</code> is
+          returned, it transitions to the <code>"timeout"</code> outcome.
+        </p>
+        <pre><code class="language-cpp">  // Root state machine
+  auto sm = yasmin::StateMachine::make_shared(
+      std::initializer_list&lt;std::string&gt;{"success", "timeout"}, true);
+  sm-&gt;set_description(
+      "Demonstrates orthogonal state execution with two parallel regions.");
+  sm-&gt;add_state("PARALLEL", ort,
+                {{"success", "success"}, {"timeout", "timeout"}});
+  sm-&gt;set_start_state("PARALLEL");
+
+  {
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ORTHOGONAL_DEMO");
+
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &amp;e) {
+      YASMIN_LOG_WARN(e.what());
+    }
+  }
+
+  yasmin_ros::YasminNode::destroy_instance();
+  rclcpp::shutdown();
+  return 0;
+}</code></pre>
+
+        <h2>5. Run the Demo</h2>
+        <p>
+          Execute the orthogonal regions demonstration to observe parallel state
+          machine execution across independent regions.
+        </p>
+        <pre><code>ros2 run yasmin_demos orthogonal_demo</code></pre>
+
+        <h2>How It Works</h2>
+        <p>The <code>OrthogonalState</code> manages region lifecycles:</p>
+        <ul>
+          <li>
+            All regions start simultaneously when the orthogonal state is
+            entered
+          </li>
+          <li>Each region runs its own internal state machine independently</li>
+          <li>Regions share no internal state — they are truly isolated</li>
+          <li>
+            The orthogonal state waits until all regions complete (or a timeout
+            occurs)
+          </li>
+          <li>The outcome map combines region outcomes into a single result</li>
+        </ul>
+        <div class="page-navigation">
+          <a href="nav2_demo.html" class="nav-button prev">C++: Nav2 Demo</a>
+          <a href="orthogonal_sync_demo.html" class="nav-button next"
+            >C++: Orthogonal Regions with Sync</a
+          >
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2026 YASMIN Project. Licensed under Apache-2.0. | Documentation
+        generated with <a href="../../doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

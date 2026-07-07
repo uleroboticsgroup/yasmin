@@ -1,0 +1,15 @@
+<map id="WorkerState" name="WorkerState">
+<area shape="rect" id="Node000001" title="Represents a state that performs a simple counting task." alt="" coords="212,214,305,239"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="209,117,308,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,158,244,187,249,213,244,214,238,187,240,157"/>
+<area shape="poly" id="edge4_Node000001_Node000002" title=" " alt="" coords="261,158,261,213,256,213,256,158"/>
+<area shape="poly" id="edge5_Node000001_Node000002" title=" " alt="" coords="278,157,279,187,274,214,269,213,274,187,272,158"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,13,147,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="110,44,190,91,235,114,233,119,187,95,107,49"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="171,13,346,38"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="261,54,261,116,256,116,256,54"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="363,117,440,143"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="372,154,279,215,276,211,369,149"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="370,5,494,46"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="424,62,407,117,402,116,419,60"/>
+</map>

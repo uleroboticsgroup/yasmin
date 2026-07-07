@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ROS Serialization Demo (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <script src="../../sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="../../dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="../../index.html" class="logo">
+        <img src="../../logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="../../doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">&#127769;</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="../../index.html">Introduction</a></li>
+          <li><a href="../../docker.html">Docker Environment</a></li>
+          <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../callback_signal.html">Callback Signal</a></li>
+          <li><a href="../../xml_factory.html">XML State Machines</a></li>
+          <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="../../tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="publisher_demo.html">Publisher</a></li>
+              <li><a href="monitor_demo.html">Monitor</a></li>
+              <li><a href="service_client_demo.html">Service Client</a></li>
+              <li><a href="action_client_demo.html">Action Client</a></li>
+              <li><a href="parameters_demo.html">ROS Parameters</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li><a href="factory_demo.html">Factory (XML)</a></li>
+              <li><a href="multiple_states_demo.html">Multiple States</a></li>
+              <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="orthogonal_demo.html">Orthogonal Regions</a></li>
+              <li>
+                <a href="orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+              <li>
+                <a href="ros_serialization_demo.html">ROS Serialization</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="../python/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="../python/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="../python/publisher_demo.html">Publisher</a></li>
+              <li><a href="../python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="../python/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="../python/action_client_demo.html">Action Client</a>
+              </li>
+              <li>
+                <a href="../python/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+              <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+              <li>
+                <a href="../python/orthogonal_demo.html">Orthogonal Regions</a>
+              </li>
+              <li>
+                <a href="../python/orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="../../yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
+            <a href="../../yasmin_plugins_manager.html"
+              >YASMIN Plugins Manager</a
+            >
+          </li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="../../citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>
+          <a
+            href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/ros_serialization_demo.cpp"
+            target="_blank"
+            style="color: inherit; text-decoration: none"
+            >ROS Serialization Demo (C++)</a
+          >
+        </h1>
+        <p>
+          This tutorial demonstrates how to share ROS interfaces between C++ and
+          Python states using binary serialization. The demo uses the
+          <code>YasminFactory</code> to load an XML state machine where a C++
+          <code>PoseWriterState</code> serializes a
+          <code>geometry_msgs/Pose</code> message into bytes, and a Python
+          <code>PoseReaderState</code>
+          deserializes and logs the result. This pattern is essential for
+          cross-language state machine composition.
+        </p>
+
+        <h2>XML State Machine Definition</h2>
+        <p>
+          The state machine is defined in <code>demo_3.xml</code>. It configures
+          pose values on the C++ writer state, then transitions to the Python
+          reader state:
+        </p>
+
+        <pre><code class="language-xml"><?xml version='1.0' encoding='UTF-8'?>
+<StateMachine name="Demo3" outcomes="outcome4" start_state="PoseWriter" description="Demo FSM that configures pose values on the C++ writer state before serializing and reading them.">
+  <Param name="pose_x" description="Pose position x component" default_type="float" default_value="1.5"/>
+  <Param name="pose_y" description="Pose position y component" default_type="float" default_value="-0.5"/>
+  <Param name="pose_z" description="Pose position z component" default_type="float" default_value="0.25"/>
+  <Param name="pose_orientation_w" description="Pose orientation w component" default_type="float" default_value="1.0"/>
+  <Key name="pose_bytes" type="in/out" description="Serialized Pose message stored as bytes in the blackboard."/>
+  <Key name="pose_bytes__type" type="in/out" description="Type information for the serialized Pose message."/>
+  <State name="PoseWriter" type="cpp" class="yasmin_demos/PoseWriterState">
+    <ParamRemap old="position_x" new="pose_x"/>
+    <ParamRemap old="position_y" new="pose_y"/>
+    <ParamRemap old="position_z" new="pose_z"/>
+    <ParamRemap old="orientation_w" new="pose_orientation_w"/>
+    <Transition from="outcome1" to="PoseReader"/>
+  </State>
+  <State name="PoseReader" type="py" module="yasmin_demos.pose_reader_state" class="PoseReaderState">
+    <Transition from="outcome2" to="outcome4"/>
+  </State>
+  <FinalOutcome name="outcome4" description="Final outcome"/>
+</StateMachine></code></pre>
+
+        <h2>C++ Main Function</h2>
+        <p>
+          The C++ application uses <code>YasminFactory</code> to load and
+          execute the XML state machine:
+        </p>
+
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;string&gt;
+
+#include &lt;rclcpp/rclcpp.hpp&gt;
+
+#include "yasmin/state_machine.hpp"
+#include "yasmin_demos/share_directory.hpp"
+#include "yasmin_factory/yasmin_factory.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+int main(int argc, char *argv[]) {
+  // Initialize ROS 2
+  rclcpp::init(argc, argv);
+
+  // Set up ROS 2 loggers
+  yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO("yasmin_ros_serialization_demo");
+
+  // Create the factory and load the state machine
+  yasmin_factory::YasminFactory factory;
+
+  std::string xml_file =
+      yasmin_demos::get_share_file_path("state_machines/demo_3.xml");
+
+  auto sm = factory.create_sm_from_file(xml_file);
+  sm->set_description(
+      "Loads a state machine from an XML file that demonstrates ROS interface "
+      "serialization and executes it.");
+  sm->set_sigint_handler(true);
+
+  {
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm,
+                                              "YASMIN_ROS_SERIALIZATION_DEMO");
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN(e.what());
+    }
+  }
+
+  yasmin_ros::YasminNode::destroy_instance();
+  rclcpp::shutdown();
+  return 0;
+}</code></pre>
+
+        <h2>Build and Run</h2>
+        <pre><code>ros2 run yasmin_demos ros_serialization_demo</code></pre>
+
+        <div class="page-navigation">
+          <a href="multiple_states_demo.html" class="nav-button prev"
+            >C++: Multiple States</a
+          >
+          <div class="nav-button-placeholder"></div>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2026 YASMIN Project. Licensed under Apache-2.0. | Documentation
+        generated with <a href="../../doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

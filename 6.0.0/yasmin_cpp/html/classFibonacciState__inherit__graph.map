@@ -1,0 +1,7 @@
+<map id="FibonacciState" name="FibonacciState">
+<area shape="rect" id="Node000001" title="Represents the action state for the Fibonacci action." alt="" coords="32,168,140,193"/>
+<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1ActionState.html" title=" " alt="" coords="5,79,167,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,135,89,167,83,167,83,135"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="36,5,136,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,46,89,79,83,79,83,46"/>
+</map>

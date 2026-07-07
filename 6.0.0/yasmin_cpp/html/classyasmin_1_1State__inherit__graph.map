@@ -1,0 +1,83 @@
+<map id="yasmin::State" name="yasmin::State">
+<area shape="rect" id="Node000001" title="Represents a state in a state machine." alt="" coords="5,652,105,677"/>
+<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1ActionState.html" title=" " alt="" coords="170,5,332,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="54,636,60,513,75,340,88,252,104,171,125,104,137,78,151,57,168,43,171,47,155,61,142,80,130,106,109,172,93,253,81,341,66,513,60,636"/>
+<area shape="rect" id="Node000004" href="$classyasmin__ros_1_1MonitorState.html" title=" " alt="" coords="153,71,349,111"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="55,636,63,525,79,372,92,294,108,223,127,164,151,123,165,110,169,114,155,126,132,166,113,224,97,295,85,372,68,525,60,636"/>
+<area shape="rect" id="Node000006" href="$classyasmin__ros_1_1PublisherState.html" title=" " alt="" coords="162,136,340,177"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="56,636,65,536,83,402,96,335,111,273,129,222,151,187,164,175,167,179,155,190,134,224,116,275,101,336,88,403,70,537,61,636"/>
+<area shape="rect" id="Node000008" href="$classyasmin__ros_1_1ServiceState.html" title=" " alt="" coords="167,200,335,256"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="57,636,69,552,89,442,117,337,133,296,151,267,165,254,168,258,155,270,138,298,122,339,95,444,75,553,62,636"/>
+<area shape="rect" id="Node000010" href="$classBarState.html" title="Represents the &quot;Bar&quot; state in the state machine." alt="" coords="215,281,287,306"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="53,636,58,578,73,505,86,467,103,430,124,395,151,364,177,347,205,336,230,324,239,316,245,306,250,308,243,320,233,329,208,341,179,352,154,368,128,398,107,432,91,469,79,506,64,578,58,636"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="53,635,56,574,70,495,83,453,100,412,122,374,151,340,172,325,196,317,238,304,240,310,198,322,175,330,154,344,127,377,104,414,88,455,75,496,62,575,58,636"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="53,636,55,570,67,484,79,439,97,394,120,352,151,316,165,305,181,298,214,291,215,297,183,303,168,310,154,320,125,355,102,396,85,440,72,485,60,571,58,636"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="53,636,54,565,65,472,77,423,95,375,119,331,151,292,173,277,198,271,223,271,241,278,240,283,222,277,199,276,175,282,154,296,123,334,99,377,82,425,70,473,59,566,58,636"/>
+<area shape="poly" id="edge13_Node000001_Node000010" title=" " alt="" coords="53,636,53,559,64,459,75,406,93,355,118,308,151,268,177,252,207,249,234,257,244,267,250,279,245,282,239,270,231,262,206,254,179,257,154,272,122,311,98,358,80,408,69,460,59,559,58,636"/>
+<area shape="rect" id="Node000011" href="$classBlockingWriteState.html" title="State that waits until both concurrent branches are ready and then writes a value through the remappe..." alt="" coords="185,330,317,356"/>
+<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="54,636,59,579,74,506,86,468,103,430,124,396,151,365,166,354,183,347,185,352,169,359,154,369,128,399,107,433,91,470,79,508,65,580,59,637"/>
+<area shape="rect" id="Node000012" href="$classConfigurableConcurrentState.html" title=" " alt="" coords="158,380,344,405"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="56,636,64,588,81,528,109,467,128,439,151,414,167,403,170,408,154,418,132,442,113,469,86,530,70,589,62,636"/>
+<area shape="rect" id="Node000013" href="$classConfigurableLeafState.html" title=" " alt="" coords="176,429,326,454"/>
+<area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="59,636,70,597,88,550,115,503,151,464,175,450,177,455,154,468,119,506,93,552,75,598,65,637"/>
+<area shape="rect" id="Node000014" href="$classFooState.html" title="Represents the &quot;Foo&quot; state in the state machine." alt="" coords="214,478,288,504"/>
+<area shape="poly" id="edge17_Node000001_Node000014" title=" " alt="" coords="85,637,113,597,151,561,179,546,207,536,231,523,240,514,245,503,250,505,244,517,235,527,210,540,181,551,154,565,117,601,89,640"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="73,636,104,585,126,559,151,537,174,524,199,516,240,502,241,507,201,521,177,529,154,541,130,563,109,588,77,639"/>
+<area shape="poly" id="edge19_Node000001_Node000014" title=" " alt="" coords="64,636,96,573,121,541,151,513,181,498,213,491,214,496,183,503,154,517,125,544,101,576,69,638"/>
+<area shape="poly" id="edge20_Node000001_Node000014" title=" " alt="" coords="59,635,71,600,91,560,117,521,151,489,174,477,199,471,223,470,241,475,239,480,222,475,200,476,176,482,154,493,121,524,95,563,76,602,64,637"/>
+<area shape="poly" id="edge21_Node000001_Node000014" title=" " alt="" coords="56,636,67,592,87,545,115,501,151,465,179,451,209,448,234,456,244,465,250,477,245,479,240,468,232,460,208,453,180,457,154,469,119,504,91,547,72,594,62,637"/>
+<area shape="rect" id="Node000015" href="$classPoseWriterState.html" title="Represents a state that creates and serializes a Pose message." alt="" coords="193,528,309,553"/>
+<area shape="poly" id="edge22_Node000001_Node000015" title=" " alt="" coords="72,637,106,598,128,579,151,562,191,546,193,551,154,567,131,583,110,602,76,641"/>
+<area shape="rect" id="Node000016" href="$classStateWithAllTypes.html" title=" " alt="" coords="187,577,315,602"/>
+<area shape="poly" id="edge23_Node000001_Node000016" title=" " alt="" coords="90,641,152,611,186,600,187,606,154,616,93,646"/>
+<area shape="rect" id="Node000017" href="$classStateWithDefaults.html" title=" " alt="" coords="188,626,314,652"/>
+<area shape="poly" id="edge24_Node000001_Node000017" title=" " alt="" coords="120,653,187,645,188,650,121,659"/>
+<area shape="rect" id="Node000018" href="$classTestStateA.html" title=" " alt="" coords="207,676,294,701"/>
+<area shape="poly" id="edge25_Node000001_Node000018" title=" " alt="" coords="120,670,207,680,206,686,120,675"/>
+<area shape="rect" id="Node000019" href="$classTestStateB.html" title=" " alt="" coords="207,725,294,750"/>
+<area shape="poly" id="edge26_Node000001_Node000019" title=" " alt="" coords="93,683,154,711,208,727,206,732,152,716,91,687"/>
+<area shape="rect" id="Node000020" href="$classTestStateWithExtraOutcome.html" title=" " alt="" coords="158,774,344,800"/>
+<area shape="poly" id="edge27_Node000001_Node000020" title=" " alt="" coords="77,688,110,726,131,745,154,761,177,771,175,776,151,765,128,749,106,730,73,692"/>
+<area shape="rect" id="Node000021" href="$classWorkerState.html" title="Represents a state that performs a simple counting task." alt="" coords="204,824,298,849"/>
+<area shape="poly" id="edge28_Node000001_Node000021" title=" " alt="" coords="64,692,76,726,95,765,121,803,154,834,176,846,200,851,222,852,239,847,241,852,223,857,199,857,174,851,151,839,117,807,91,768,71,728,59,693"/>
+<area shape="poly" id="edge29_Node000001_Node000021" title=" " alt="" coords="69,691,101,752,125,784,154,810,178,822,204,830,203,835,176,827,151,815,121,787,97,755,64,693"/>
+<area shape="poly" id="edge30_Node000001_Node000021" title=" " alt="" coords="77,689,109,739,130,765,154,786,177,798,201,806,241,820,240,826,199,811,174,803,151,791,126,768,104,742,73,692"/>
+<area shape="rect" id="Node000022" href="$classyasmin_1_1CbState.html" title="Represents a state that executes a callback function." alt="" coords="193,873,308,898"/>
+<area shape="poly" id="edge31_Node000001_Node000022" title=" " alt="" coords="65,692,75,730,93,775,119,821,154,860,173,871,194,878,192,883,171,876,151,864,115,824,88,778,70,732,59,693"/>
+<area shape="rect" id="Node000023" href="$classyasmin_1_1Concurrence.html" title="Runs a series of states in parallel." alt="" coords="180,922,322,948"/>
+<area shape="poly" id="edge32_Node000001_Node000023" title=" " alt="" coords="62,692,70,740,86,798,113,858,132,885,154,909,181,924,179,929,151,913,128,889,109,861,81,800,64,741,56,693"/>
+<area shape="rect" id="Node000024" href="$classyasmin_1_1JoinState.html" title="Represents a state that waits for multiple concurrent states to complete." alt="" coords="189,972,312,997"/>
+<area shape="poly" id="edge33_Node000001_Node000024" title=" " alt="" coords="60,692,65,749,79,821,91,858,108,895,128,929,154,958,171,970,190,977,188,982,168,974,151,962,124,932,103,897,86,860,74,822,59,749,54,693"/>
+<area shape="rect" id="Node000025" href="$classyasmin_1_1OrthogonalState.html" title="Represents a state that can execute multiple concurrent states in parallel." alt="" coords="170,1021,332,1046"/>
+<area shape="poly" id="edge34_Node000001_Node000025" title=" " alt="" coords="58,693,60,757,73,843,85,888,102,931,125,972,154,1008,171,1019,168,1023,151,1012,120,975,97,934,80,889,67,844,55,758,53,693"/>
+<area shape="rect" id="Node000026" href="$classyasmin_1_1PyState.html" title="Trampoline class to enable Python classes to inherit from C++ State." alt="" coords="194,1070,308,1096"/>
+<area shape="poly" id="edge35_Node000001_Node000026" title=" " alt="" coords="62,692,73,777,93,886,120,990,136,1030,155,1057,173,1070,194,1077,192,1082,170,1074,151,1061,132,1033,115,992,87,887,68,778,57,693"/>
+<area shape="rect" id="Node000027" href="$classyasmin_1_1StateMachine.html" title="A class that implements a state machine with a set of states, transitions, and callback mechanisms fo..." alt="" coords="177,1120,325,1145"/>
+<area shape="poly" id="edge36_Node000001_Node000027" title=" " alt="" coords="61,693,71,786,89,911,102,973,117,1030,135,1076,155,1106,178,1122,175,1126,151,1110,130,1078,112,1031,97,974,84,912,66,787,56,693"/>
+<area shape="rect" id="Node000029" href="$classyasmin__ros_1_1ActionState.html" title="A state class for handling ROS 2 action client operations." alt="" coords="170,1169,332,1210"/>
+<area shape="poly" id="edge38_Node000001_Node000029" title=" " alt="" coords="61,692,70,795,87,934,100,1004,115,1068,133,1120,155,1156,172,1170,168,1174,151,1159,129,1122,110,1069,95,1005,82,934,64,795,56,693"/>
+<area shape="rect" id="Node000030" href="$classyasmin__ros_1_1GetParametersState.html" title="State that retrieves parameters from the ROS 2 parameter server." alt="" coords="160,1235,342,1275"/>
+<area shape="poly" id="edge39_Node000001_Node000030" title=" " alt="" coords="60,693,67,807,84,965,96,1045,112,1118,131,1179,155,1220,169,1232,165,1236,151,1223,126,1181,107,1120,91,1046,78,965,62,807,55,693"/>
+<area shape="rect" id="Node000031" href="$classyasmin__ros_1_1MonitorState.html" title="Template class to monitor a ROS 2 topic and process incoming messages." alt="" coords="167,1300,334,1341"/>
+<area shape="poly" id="edge40_Node000001_Node000031" title=" " alt="" coords="60,693,65,819,80,996,92,1087,108,1170,129,1239,141,1265,155,1285,168,1297,165,1301,151,1289,137,1268,124,1240,103,1171,87,1088,74,997,60,819,54,693"/>
+<area shape="rect" id="Node000032" href="$classyasmin__ros_1_1PublisherState.html" title="Template class to publish ROS 2 messages." alt="" coords="162,1365,340,1406"/>
+<area shape="poly" id="edge41_Node000001_Node000032" title=" " alt="" coords="59,693,63,830,76,1027,88,1129,105,1221,127,1298,140,1328,155,1351,168,1363,165,1367,151,1354,135,1330,122,1300,99,1223,83,1129,70,1028,57,830,54,693"/>
+<area shape="rect" id="Node000033" href="$classyasmin__ros_1_1RosDeserializeCppState.html" title="A state for deserializing ROS 2 messages into C++ objects." alt="" coords="161,1431,340,1471"/>
+<area shape="poly" id="edge42_Node000001_Node000033" title=" " alt="" coords="59,693,61,842,72,1058,84,1170,101,1273,124,1358,139,1391,155,1416,168,1428,165,1432,151,1419,134,1393,119,1360,96,1274,79,1171,67,1059,55,842,53,693"/>
+<area shape="rect" id="Node000034" href="$classyasmin__ros_1_1RosSerializeCppState.html" title="A state for serializing C++ objects into ROS 2 messages." alt="" coords="168,1496,334,1537"/>
+<area shape="poly" id="edge43_Node000001_Node000034" title=" " alt="" coords="58,692,59,853,68,1089,80,1212,97,1324,122,1418,137,1454,155,1481,169,1494,166,1498,151,1485,133,1456,117,1419,92,1325,75,1212,63,1089,53,853,53,692"/>
+<area shape="rect" id="Node000035" href="$classyasmin__ros_1_1ServiceState.html" title="A state class that interacts with a ROS 2 service." alt="" coords="167,1561,335,1602"/>
+<area shape="poly" id="edge44_Node000001_Node000035" title=" " alt="" coords="60,693,70,877,90,1148,103,1285,118,1405,136,1497,145,1528,155,1547,168,1559,164,1563,151,1550,140,1530,131,1498,113,1406,98,1286,85,1149,65,877,55,693"/>
+<area shape="rect" id="Node000036" href="$classyasmin__ros_1_1TfBufferState.html" title="State that creates a tf2 buffer and transform listener." alt="" coords="166,1626,336,1652"/>
+<area shape="poly" id="edge45_Node000001_Node000036" title=" " alt="" coords="60,693,69,890,87,1183,100,1330,115,1460,134,1559,144,1592,155,1612,169,1624,165,1628,151,1615,139,1594,129,1560,110,1461,94,1331,81,1183,63,890,55,693"/>
+<area shape="rect" id="Node000003" href="$classFibonacciState.html" title="Represents the action state for the Fibonacci action." alt="" coords="430,13,539,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="347,23,430,23,430,28,347,28"/>
+<area shape="rect" id="Node000005" href="$classPrintOdometryState.html" title="A state that monitors odometry data and transitions based on a specified count." alt="" coords="417,78,552,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="364,88,417,88,417,94,364,94"/>
+<area shape="rect" id="Node000007" href="$classPublishIntState.html" title="A state that publishes ints." alt="" coords="430,144,540,169"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="355,154,429,154,429,159,355,159"/>
+<area shape="rect" id="Node000009" href="$classAddTwoIntsState.html" title="State for calling the AddTwoInts service in ROS 2." alt="" coords="424,216,546,241"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="351,226,423,226,423,231,351,231"/>
+<area shape="rect" id="Node000028" href="$classDelayedStartStateMachine.html" title="Small helper state machine that delays its start." alt="" coords="397,1120,572,1145"/>
+<area shape="poly" id="edge37_Node000027_Node000028" title=" " alt="" coords="340,1130,397,1130,397,1135,340,1135"/>
+</map>
