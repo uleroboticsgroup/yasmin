@@ -2,6 +2,91 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.0.0 (2026-07-07)
+------------------
+* fix: correct dependency for yasmin_editor
+* Refactor type hints to use Union for optional types
+  - Updated type hints across multiple files to replace the use of the pipe operator (|) with Union from the typing module for better compatibility and clarity.
+  - This change affects various classes and functions, ensuring that optional types are consistently defined using Union, enhancing code readability and maintainability.
+* feat: update type hints to use Union for improved type compatibility in xml_converter.py
+* feat: update type hints to use Union for container models across multiple files
+* Refactor type hints across the codebase to use standard typing constructs
+  - Updated various type hints from built-in types to use `List`, `Dict`, `Tuple`, and `Set` from the `typing` module for consistency and clarity.
+  - Modified function signatures and variable declarations in multiple files, including `selection_names.py`, `selection_placement.py`, `transition_rules.py`, and others.
+  - Ensured that all instances of type hints are now using the updated typing constructs, improving code readability and maintainability.
+* feat: add future annotations and improve type hints across multiple files
+* feat: introduce dataclass compatibility layer and update imports across the codebase
+* refactor: simplify function signatures and improve code readability in EditorModelMixin
+* Refactor: Clean up code by removing unnecessary comments and simplifying function signatures
+  - Removed redundant comments from test files and GUI components to enhance readability.
+  - Simplified function signatures by consolidating parameters into single lines where applicable.
+  - Improved consistency in code formatting across various modules, including dialog and node classes.
+  - Streamlined connection and event handling code in UI components for better clarity.
+* fix: add yasmin_editor to package names in CI workflows and update test command
+* Refactor PyQt5 imports to use qt_compat for better compatibility with PyQt6
+  - Updated all UI-related files to import QtWidgets and other components from yasmin_editor.qt_compat.
+  - Replaced direct PyQt5 imports with qt_compat equivalents in canvas_area.py, clipboard_panel.py, docks.py, help_dialog.py, menus.py, metadata.py, panels.py, plugin_lists.py, recent_menu.py, runtime_controls.py, sidebars.py, toolbar.py, yasmin_editor.py, interactive_shell.py, and runtime.py.
+  - Ensured that all widget types and layout classes are now consistently referenced through the compatibility layer.
+  - This change enhances the codebase's flexibility to support both PyQt5 and PyQt6 without requiring extensive modifications in the future.
+* relicense to Apache 2.0 (`#122 <https://github.com/uleroboticsgroup/yasmin/issues/122>`_)
+* refactor: replace custom indentation function with ET.indent for XML serialization
+* refactor: improve readability of is_join_state assignment in EditorUiMixin
+* feat: add JoinState support with dialog and factory integration
+* refactor: update minimum CMake version to 3.10 across multiple CMakeLists.txt files
+* refactor: remove leading blank lines from multiple Python files
+* refactor: remove shebang lines from multiple Python files
+* refactor: removing duplicate code
+* Refactor and enhance yasmin packages
+  - Removed unnecessary destructors from PclToRosPointCloud2State and RosToPclPointCloud2State classes.
+  - Added cancellation checks in SavePcdState and SavePlyState execute methods.
+  - Improved ActionState to notify when action is done and handle cancellation more effectively.
+  - Updated basic_outcomes to use inline constexpr for string constants.
+  - Enhanced MonitorState and ServiceState to include cancellation checks and improved locking mechanisms.
+  - Refactored ROSClientsCache to use per-map locks for thread safety.
+  - Updated get_parameters_state to handle int64_t instead of int for parameter declaration.
+  - Improved YasminViewerNode to manage active HTTP connections and handle server shutdown more gracefully.
+  - Refactored yasmin_viewer_pub to use unordered_map for better performance and added checks for rclpy state before publishing.
+* refactor: refactor and optimize yasmin code
+  - Removed unnecessary code and improved the formatting of plugin headers in discovery_node.py.
+  - Simplified metadata loading in plugin_info.py by introducing a safe_get method to handle exceptions.
+  - Enhanced plugin manager to streamline package retrieval and signature validation.
+  - Cleaned up ROS interface serialization by removing unused includes.
+  - Updated action client state to utilize a retry mechanism for server connections.
+  - Improved service state handling with a retry mechanism for service calls.
+  - Consolidated node resolution logic into a utility function for better code reuse.
+  - Refactored viewer node to enhance readability and maintainability.
+  - Updated tests to reflect changes in expected warning log counts.
+  - Added new utility functions for retry logic and node resolution in ros_state_utils.py.
+* Feature/orthogonal regions (`#121 <https://github.com/uleroboticsgroup/yasmin/issues/121>`_)
+  * feat: Add JoinState and OrthogonalState for concurrent state management
+  - Introduced JoinState for synchronization between states.
+  - Added OrthogonalState to allow parallel execution of multiple regions.
+  - Implemented WorkerState for counting iterations with configurable parameters.
+  - Created orthogonal_demo and orthogonal_sync_demo to demonstrate new features.
+  - Updated CMakeLists.txt to include new demos and worker_state library.
+  - Added XML state machine definitions for orthogonal and synchronized execution.
+  - Enhanced yasmin_demos package to include new worker_state functionality.
+  * refactor: Encapsulate state machine publisher and execution in a block across multiple demo files
+  * feat: Implement OrthogonalState support with XML parsing and testing
+  * feat: Introduce OrthogonalState model and integrate into editor
+  - Added OrthogonalState model to represent orthogonal state regions in the editor.
+  - Updated selection bundle operations to support OrthogonalState in paste and remove functionalities.
+  - Enhanced XML conversion to include OrthogonalState serialization and deserialization.
+  - Modified validation logic to accommodate OrthogonalState alongside Concurrence.
+  - Updated UI action specifications and toolbar configurations to include actions for OrthogonalState.
+  - Refactored various components to ensure compatibility with the new OrthogonalState model.
+  * feat: Add OrthogonalState support with demo and documentation
+  * Add orthogonal regions tutorials and update navigation links
+  - Introduced new tutorials for Orthogonal Regions and Orthogonal Regions with Sync in Python.
+  - Updated navigation links in various demo pages to include links to the new orthogonal regions tutorials.
+  - Enhanced the documentation structure to facilitate easier access to the new content.
+  * refactor: Improve readability of add_container and default_outcome methods
+  * refactor: Update documentation for clarity and consistency across multiple headers
+  * refactor: Update parameter descriptions in MonitorState and PublisherState for clarity
+  * refactor: Improve documentation and parameter naming for clarity across multiple files
+  * refactor: Remove redundant execution time explanations from orthogonal region tutorials
+* Contributors: Miguel Ángel González Santamarta
+
 5.1.0 (2026-05-01)
 ------------------
 * fix nested state machine transition scope in editor XML roundtrip (`#117 <https://github.com/uleroboticsgroup/yasmin/issues/117>`_)

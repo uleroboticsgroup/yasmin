@@ -2,6 +2,27 @@
 Changelog for package yasmin_plugins_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.0.0 (2026-07-07)
+------------------
+* Refactor type hints across the codebase to use standard typing constructs
+  - Updated various type hints from built-in types to use `List`, `Dict`, `Tuple`, and `Set` from the `typing` module for consistency and clarity.
+  - Modified function signatures and variable declarations in multiple files, including `selection_names.py`, `selection_placement.py`, `transition_rules.py`, and others.
+  - Ensured that all instances of type hints are now using the updated typing constructs, improving code readability and maintainability.
+* relicense to Apache 2.0 (`#122 <https://github.com/uleroboticsgroup/yasmin/issues/122>`_)
+* refactor: remove shebang lines from multiple Python files
+* refactor: refactor and optimize yasmin code
+  - Removed unnecessary code and improved the formatting of plugin headers in discovery_node.py.
+  - Simplified metadata loading in plugin_info.py by introducing a safe_get method to handle exceptions.
+  - Enhanced plugin manager to streamline package retrieval and signature validation.
+  - Cleaned up ROS interface serialization by removing unused includes.
+  - Updated action client state to utilize a retry mechanism for server connections.
+  - Improved service state handling with a retry mechanism for service calls.
+  - Consolidated node resolution logic into a utility function for better code reuse.
+  - Refactored viewer node to enhance readability and maintainability.
+  - Updated tests to reflect changes in expected warning log counts.
+  - Added new utility functions for retry logic and node resolution in ros_state_utils.py.
+* Contributors: Miguel Ángel González Santamarta
+
 5.1.0 (2026-05-01)
 ------------------
 * fix plugin cache serialization for non-primitive defaults (`#114 <https://github.com/uleroboticsgroup/yasmin/issues/114>`_)

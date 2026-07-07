@@ -3,6 +3,12 @@ Changelog for package yasmin_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.0.0 (2026-07-07)
+------------------
+* relicense to Apache 2.0 (`#122 <https://github.com/uleroboticsgroup/yasmin/issues/122>`_)
+* refactor: update minimum CMake version to 3.10
+* Contributors: Miguel Ángel González Santamarta
+
 5.1.0 (2026-05-01)
 ------------------
 

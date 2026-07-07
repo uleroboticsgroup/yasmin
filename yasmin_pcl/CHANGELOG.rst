@@ -2,6 +2,46 @@
 Changelog for package yasmin_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.0.0 (2026-07-07)
+------------------
+* relicense to Apache 2.0 (`#122 <https://github.com/uleroboticsgroup/yasmin/issues/122>`_)
+* refactor: update minimum CMake version to 3.10 across multiple CMakeLists.txt files
+* Enhance documentation and improve code clarity across multiple modules
+  - Added detailed comments and descriptions for constructors, methods, and parameters in various classes, including `Concurrence`, `StateMachine`, and filter states in `yasmin_pcl`.
+  - Improved logging initialization comments in `logs.cpp` for better understanding of log level settings.
+  - Updated `blackboard_pybind11.cpp` to clarify the registration of `BlackboardPyWrapper`.
+  - Enhanced the `yasmin_demos` states with additional private member documentation for clarity on their purpose.
+  - Improved the `yasmin_factory` class documentation, particularly around blackboard key and parameter mappings.
+  - Added utility functions in `test_utils.hpp` for creating point clouds and temporary file paths with clear descriptions.
+  - Enhanced the `ros_clients_cache` and `supported_interface_serialization` classes with detailed comments on cache management and serialization callbacks.
+  - Improved the `YasminNode` and `YasminViewerNode` classes with comments on copy prevention and connection handling.
+  - General code cleanup and formatting improvements for better readability and maintainability.
+* refactor: use 'this' pointer for member variable access in multiple state classes
+* Refactor and enhance yasmin packages
+  - Removed unnecessary destructors from PclToRosPointCloud2State and RosToPclPointCloud2State classes.
+  - Added cancellation checks in SavePcdState and SavePlyState execute methods.
+  - Improved ActionState to notify when action is done and handle cancellation more effectively.
+  - Updated basic_outcomes to use inline constexpr for string constants.
+  - Enhanced MonitorState and ServiceState to include cancellation checks and improved locking mechanisms.
+  - Refactored ROSClientsCache to use per-map locks for thread safety.
+  - Updated get_parameters_state to handle int64_t instead of int for parameter declaration.
+  - Improved YasminViewerNode to manage active HTTP connections and handle server shutdown more gracefully.
+  - Refactored yasmin_viewer_pub to use unordered_map for better performance and added checks for rclpy state before publishing.
+* style: format code for improved readability in multiple files
+* refactor: refactor and optimize yasmin code
+  - Removed unnecessary code and improved the formatting of plugin headers in discovery_node.py.
+  - Simplified metadata loading in plugin_info.py by introducing a safe_get method to handle exceptions.
+  - Enhanced plugin manager to streamline package retrieval and signature validation.
+  - Cleaned up ROS interface serialization by removing unused includes.
+  - Updated action client state to utilize a retry mechanism for server connections.
+  - Improved service state handling with a retry mechanism for service calls.
+  - Consolidated node resolution logic into a utility function for better code reuse.
+  - Refactored viewer node to enhance readability and maintainability.
+  - Updated tests to reflect changes in expected warning log counts.
+  - Added new utility functions for retry logic and node resolution in ros_state_utils.py.
+* fix: update input_indices for VoxelGridState test to include only specific points
+* Contributors: Miguel Ángel González Santamarta
+
 5.1.0 (2026-05-01)
 ------------------
 
