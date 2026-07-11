@@ -217,6 +217,4 @@ def test_editor_window_updates_state_mobility(editor_window, qapp):
     editor._set_scene_read_only_state()
 
     state_node = editor.state_nodes["worker"]
-    assert state_node.flags() & (
-        QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable
-    )
+    assert state_node.flags() & (QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
