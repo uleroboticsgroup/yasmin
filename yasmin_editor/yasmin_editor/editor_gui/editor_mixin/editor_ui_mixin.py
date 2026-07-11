@@ -18,6 +18,10 @@ from typing import Optional, Union
 from yasmin_editor.qt_compat import Qt, QtWidgets, exec_dialog
 from yasmin_editor.editor_gui.clipboard_model import is_container_empty
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
+from yasmin_editor.editor_gui.container_metadata_logic import (
+    has_container_name_conflict,
+    normalize_container_name,
+)
 from yasmin_editor.editor_gui.dialog_result_adapters import (
     build_concurrence_kwargs,
     build_join_state_kwargs,
