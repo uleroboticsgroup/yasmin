@@ -71,7 +71,7 @@ class TextBlockEditorItem(QtWidgets.QGraphicsTextItem):
         else:
             cursor.insertText(f"{prefix}{suffix}")
             for _ in range(len(suffix)):
-                cursor.movePosition(QtGui.QTextCursor.Left)
+                cursor.movePosition(QtGui.QTextCursor.MoveOperation.Left)
             self.setTextCursor(cursor)
 
         self.node.update_geometry_from_document()
@@ -206,7 +206,7 @@ class TextBlockNode(BaseNodeMixin, QtWidgets.QGraphicsRectItem):
         self.update_content_view()
         self.text_item.setFocus(Qt.FocusReason.MouseFocusReason)
         cursor = self.text_item.textCursor()
-        cursor.movePosition(QtGui.QTextCursor.End)
+        cursor.movePosition(QtGui.QTextCursor.MoveOperation.End)
         self.text_item.setTextCursor(cursor)
 
     def finish_editing(self) -> None:

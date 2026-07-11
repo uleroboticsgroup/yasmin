@@ -218,3 +218,19 @@ def test_editor_window_updates_state_mobility(editor_window, qapp):
 
     state_node = editor.state_nodes["worker"]
     assert state_node.flags() & (QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
+
+
+def test_editor_window_finalizes_and_formats_text_block(editor_window, qapp):
+    editor = editor_window
+    editor.add_text_action.trigger()
+    qapp.processEvents()
+
+    text_block = editor.canvas.pending_placement_item
+    editor.finalize_pending_node_placement(text_block, text_block.pos())
+    text_block.text_item.setPlainText("")
+    text_block.text_item._wrap_selection("**", "**")
+
+    assert editor.canvas.pending_placement_item is None
+    assert text_block._is_editing
+    assert text_block.text_item.toPlainText() == "****"
+    assert text_block.text_item.textCursor().position() == 2
