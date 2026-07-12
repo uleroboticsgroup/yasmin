@@ -20,6 +20,7 @@ pytest.importorskip("yasmin_editor.qt_compat")
 
 from yasmin_editor.qt_compat import Qt
 from yasmin_editor.qt_compat import QtTest
+from yasmin_editor.qt_compat import QtWidgets
 
 from gui_test_support import FakePluginInfo
 
@@ -203,3 +204,33 @@ def test_editor_window_pending_state_updates_start_state_selector(editor_window,
     assert "worker" not in editor.current_container_model.states
     assert editor.current_container_model.start_state is None
     assert editor.start_state_combo.currentText() == "(None)"
+
+
+def test_editor_window_updates_state_mobility(editor_window, qapp):
+    editor = editor_window
+    editor.create_state_node(
+        name="worker",
+        plugin_info=FakePluginInfo(module="demo_pkg.alpha", class_name="AlphaState"),
+    )
+    qapp.processEvents()
+
+    editor._set_scene_read_only_state()
+
+    state_node = editor.state_nodes["worker"]
+    assert state_node.flags() & (QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
+
+
+def test_editor_window_finalizes_and_formats_text_block(editor_window, qapp):
+    editor = editor_window
+    editor.add_text_action.trigger()
+    qapp.processEvents()
+
+    text_block = editor.canvas.pending_placement_item
+    editor.finalize_pending_node_placement(text_block, text_block.pos())
+    text_block.text_item.setPlainText("")
+    text_block.text_item._wrap_selection("**", "**")
+
+    assert editor.canvas.pending_placement_item is None
+    assert text_block._is_editing
+    assert text_block.text_item.toPlainText() == "****"
+    assert text_block.text_item.textCursor().position() == 2
