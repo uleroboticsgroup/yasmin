@@ -227,43 +227,7 @@
           performing iterations of a computation, or tracking progress toward a
           goal.
         </p>
-        <pre><code class="language-cpp">class FooState : public yasmin::State {
-public:
-  int counter;
-
-  FooState()
-      : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {
-    this-&gt;set_description(
-        "Produces a counter string and stores it in the blackboard while "
-        "cycling through outcomes based on the internal counter.");
-    this-&gt;add_output_key(
-        "foo_str",
-        "String containing the current counter value produced by FooState.");
-  };
-
-  std::string
-  execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    YASMIN_LOG_INFO("Executing state FOO");
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-
-    std::string outcome;
-
-    blackboard-&gt;set&lt;std::string&gt;("foo_str",
-                                 "Counter: " + std::to_string(this-&gt;counter));
-
-    if (this-&gt;counter &lt; 3) {
-      outcome = "outcome1";
-    } else if (this-&gt;counter &lt; 5) {
-      outcome = "outcome2";
-    } else {
-      outcome = "outcome3";
-    }
-
-    YASMIN_LOG_INFO("Finishing state FOO");
-    this-&gt;counter += 1;
-    return outcome;
-  };
-};</code></pre>
+        <pre><code class="language-cpp">#include "yasmin_demos/foo_state.hpp"</code></pre>
 
         <h2>2. Create the BarState</h2>
         <p>
@@ -278,30 +242,7 @@ public:
           BarState always returns <code>"outcome3"</code>, providing a
           consistent counterpoint to FooState's variable outcomes.
         </p>
-        <pre><code class="language-cpp">class BarState : public yasmin::State {
-public:
-  BarState() : yasmin::State({"outcome3"}) {
-    this-&gt;set_description(
-        "Reads and prints the value stored in 'foo_str' from the blackboard.");
-    this-&gt;add_input_key(
-        "foo_str", "String produced by FooState containing the counter value.");
-  }
-
-  std::string
-  execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    YASMIN_LOG_INFO("Executing state BAR");
-    std::this_thread::sleep_for(std::chrono::seconds(4));
-
-    if (blackboard-&gt;contains("foo_str")) {
-      YASMIN_LOG_INFO(blackboard-&gt;get&lt;std::string&gt;("foo_str").c_str());
-    } else {
-      YASMIN_LOG_INFO("blackboard does not yet contains 'foo_str'");
-    }
-
-    YASMIN_LOG_INFO("Finishing state BAR");
-    return "outcome3";
-  }
-};</code></pre>
+        <pre><code class="language-cpp">#include "yasmin_demos/bar_state.hpp"</code></pre>
 
         <h2>3. Create Concurrence Container</h2>
         <p>
@@ -319,7 +260,22 @@ public:
           mapping allows you to implement AND, OR, or custom logic for combining
           parallel state results.
         </p>
-        <pre><code class="language-cpp">int main(int argc, char *argv[]) {
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;string&gt;
+
+#include &lt;rclcpp/rclcpp.hpp&gt;
+
+#include "yasmin/concurrence.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_demos/bar_state.hpp"
+#include "yasmin_demos/foo_state.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+int main(int argc, char *argv[]) {
   // Initialize ROS 2
   rclcpp::init(argc, argv);
 
@@ -349,8 +305,16 @@ public:
       },
       "defaulted",
       yasmin::OutcomeMap{
-          {"outcome1", {{"FOO", "outcome1"}, {"BAR", "outcome3"}}},
-          {"outcome2", {{"FOO", "outcome2"}, {"BAR", "outcome3"}}},
+          {"outcome1",
+           {
+               {"FOO", "outcome1"},
+               {"BAR", "outcome3"},
+           }},
+          {"outcome2",
+           {
+               {"FOO", "outcome2"},
+               {"BAR", "outcome3"},
+           }},
       });
   concurrent_state-&gt;set_description(
       "Executes FooState and BarState in parallel and maps their combined "
@@ -373,21 +337,24 @@ public:
   sm-&gt;add_state("CONCURRENCE", concurrent_state,
                 {
                     {"outcome1", "CONCURRENCE"},
-                    {"outcome2", "CONCURRENCE"},
+                    {"outcome2", "outcome4"},
                     {"defaulted", "outcome4"},
                 });
 
-  // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_CONCURRENCE_DEMO");
+  {
+    // Publish state machine updates
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_CONCURRENCE_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &amp;e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &amp;e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;

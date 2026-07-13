@@ -211,7 +211,25 @@
           simple conditional checks.
         </p>
 
-        <pre><code class="language-cpp">std::string
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+
+#include &lt;example_interfaces/srv/add_two_ints.hpp&gt;
+#include &lt;rclcpp/rclcpp.hpp&gt;
+
+#include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/service_state.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using std::placeholders::_1;
+using std::placeholders::_2;
+
+std::string
 set_ints(yasmin::Blackboard::SharedPtr blackboard) {
   blackboard-&gt;set&lt;int&gt;("a", 10);
   blackboard-&gt;set&lt;int&gt;("b", 5);
@@ -348,15 +366,20 @@ public:
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                 });
 
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_SERVICE_CLIENT_DEMO");
+  {
+    // Publish state machine visualization.
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_SERVICE_CLIENT_DEMO");
 
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &amp;e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine.
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &amp;e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
   return 0;
 }</code></pre>

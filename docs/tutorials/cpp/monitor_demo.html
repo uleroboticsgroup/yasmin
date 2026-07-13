@@ -222,7 +222,24 @@
           returns the <code>TIMEOUT</code> outcome.
         </p>
 
-        <pre><code class="language-cpp">class PrintOdometryState
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;string&gt;
+
+#include &lt;nav_msgs/msg/odometry.hpp&gt;
+#include &lt;rclcpp/rclcpp.hpp&gt;
+
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/monitor_state.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using std::placeholders::_1;
+using std::placeholders::_2;
+
+class PrintOdometryState
     : public yasmin_ros::MonitorState&lt;nav_msgs::msg::Odometry&gt; {
 
 public:
@@ -233,10 +250,10 @@ public:
             "odom",                   // topic name
             {"outcome1", "outcome2"}, // possible outcomes
             std::bind(&PrintOdometryState::monitor_handler, this, _1,
-                      _2), // monitor handler callback
-            10,            // QoS for the topic subscription
-            10,            // queue size for the callback
-            10             // timeout for receiving messages
+                      _2),           // monitor handler callback
+            rclcpp::SensorDataQoS(), // QoS for the topic subscription
+            10,                      // queue size for the callback
+            10                       // timeout for receiving messages
         ) {
     this-&gt;times = 5;
     this-&gt;set_description("Monitors odometry messages from the 'odom' topic "
@@ -251,9 +268,8 @@ public:
 
     (void)blackboard;
 
-    YASMIN_LOG_INFO("x: %f", msg-&gt;pose.pose.position.x);
-    YASMIN_LOG_INFO("y: %f", msg-&gt;pose.pose.position.y);
-    YASMIN_LOG_INFO("z: %f", msg-&gt;pose.pose.position.z);
+    YASMIN_LOG_INFO("x: %f, y: %f, z: %f", msg-&gt;pose.pose.position.x,
+                    msg-&gt;pose.pose.position.y, msg-&gt;pose.pose.position.z);
 
     this-&gt;times--;
 
@@ -310,17 +326,20 @@ public:
           {yasmin_ros::basic_outcomes::CANCEL, "outcome4"}, // Cancel transition
       });
 
-  // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MONITOR_DEMO");
+  {
+    // Publisher for visualizing the state machine's status
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_MONITOR_DEMO");
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &amp;e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &amp;e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;

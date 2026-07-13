@@ -225,32 +225,7 @@
           sleep duration. This simple looping state is used by both regions to
           demonstrate independent progress.
         </p>
-        <pre><code class="language-cpp">class WorkerState : public yasmin::State {
-public:
-  int counter;
-  int max_count_;
-  int sleep_ms_;
-  std::string name_;
-
-  WorkerState(const std::string &amp;name, int max_count, int sleep_ms = 500)
-      : yasmin::State({"working", "done"}), counter(0), max_count_(max_count),
-        sleep_ms_(sleep_ms), name_(name) {
-    this-&gt;set_description(
-        "Counts iterations and returns 'working' until max_count is reached.");
-  };
-
-  std::string execute(yasmin::Blackboard::SharedPtr /*blackboard*/) override {
-    YASMIN_LOG_INFO("WorkerState [%s]: iteration %d/%d", name_.c_str(),
-                    this-&gt;counter + 1, max_count_);
-    std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms_));
-
-    this-&gt;counter += 1;
-    if (this-&gt;counter &gt;= max_count_) {
-      return "done";
-    }
-    return "working";
-  };
-};</code></pre>
+        <pre><code class="language-cpp">#include "yasmin_demos/worker_state.hpp"</code></pre>
 
         <h2>2. Create Regions</h2>
         <p>
@@ -261,7 +236,21 @@ public:
           <code>"done"</code> that it emits when its internal workflow
           completes.
         </p>
-        <pre><code class="language-cpp">int main(int argc, char *argv[]) {
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;string&gt;
+
+#include &lt;rclcpp/rclcpp.hpp&gt;
+
+#include "yasmin/logs.hpp"
+#include "yasmin/orthogonal_state.hpp"
+#include "yasmin/state.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_demos/worker_state.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
 
   yasmin_ros::set_ros_loggers();
@@ -271,16 +260,20 @@ public:
   auto reg_a = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"done"});
   reg_a-&gt;set_name("Region A");
-  reg_a-&gt;add_state("WORK", std::make_shared&lt;WorkerState&gt;("A", 3, 300),
-                   {{"working", "WORK"}});
+  auto worker_a = std::make_shared&lt;WorkerState&gt;();
+  worker_a-&gt;set_parameter&lt;int&gt;("max_count", 3);
+  worker_a-&gt;set_parameter&lt;int&gt;("sleep_ms", 300);
+  reg_a-&gt;add_state("WORK", worker_a, {{"working", "WORK"}});
   reg_a-&gt;set_start_state("WORK");
 
   // Region B: 5 iterations
   auto reg_b = yasmin::StateMachine::make_shared(
       std::initializer_list&lt;std::string&gt;{"done"});
   reg_b-&gt;set_name("Region B");
-  reg_b-&gt;add_state("WORK", std::make_shared&lt;WorkerState&gt;("B", 5, 300),
-                   {{"working", "WORK"}});
+  auto worker_b = std::make_shared&lt;WorkerState&gt;();
+  worker_b-&gt;set_parameter&lt;int&gt;("max_count", 5);
+  worker_b-&gt;set_parameter&lt;int&gt;("sleep_ms", 300);
+  reg_b-&gt;add_state("WORK", worker_b, {{"working", "WORK"}});
   reg_b-&gt;set_start_state("WORK");</code></pre>
 
         <h2>3. Create the OrthogonalState Container</h2>

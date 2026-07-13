@@ -336,6 +336,7 @@ class BarState(State):
 
         <pre><code class="language-python">from yasmin_ros import GetParametersState
 from yasmin_ros.basic_outcomes import SUCCEED, ABORT
+from yasmin_ros.yasmin_node import YasminNode
 
 def main() -&gt; None:
     # Initialize ROS 2
@@ -416,15 +417,7 @@ def main() -&gt; None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")</code></pre>
-
-        <h2>4. Execute</h2>
-        <p>
-          Run the state machine and handle any interruptions gracefully with
-          proper ROS shutdown procedures.
-        </p>
-        <pre><code class="language-python">    # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
 
     # Execute the FSM
     try:
@@ -432,8 +425,11 @@ def main() -&gt; None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
+    YasminNode.destroy_instance()
     if rclpy.ok():
         rclpy.shutdown()
 

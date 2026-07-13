@@ -277,53 +277,15 @@
 
         <h2>2. Create the Bar State</h2>
         <p>
-          This state reads from <code>bar_data</code> and logs it. Like the Foo
-          state, this is designed generically to work with remapping. It doesn't
-          care where <code>bar_data</code> comes from or what it contains - it
-          simply reads and processes it. This demonstrates a consumer state that
-          can be connected to any producer state's output through remapping. The
-          separation between the state's internal key names
-          (<code>bar_data</code>) and the actual blackboard keys (which we'll
-          set via remapping) is what enables flexible composition of state
-          machines from reusable components.
+          This state reads a string from the blackboard and logs it. The shared
+          BarState imports are used directly from
+          <code>yasmin_demos.bar_state</code>, demonstrating how states defined
+          in separate modules can be reused across different state machines. Its
+          input key (<code>foo_str</code>) will be remapped to connect it with
+          the FooState output.
         </p>
 
-        <pre><code class="language-python">class BarState(State):
-    """
-    Represents the Bar state in the state machine.
-
-    """
-
-    def __init__(self):
-        """
-        Initializes the BarState instance, setting up the outcomes.
-
-        Outcomes:
-            SUCCEDED: Indicates the state should continue to the next state.
-        """
-        super().__init__(outcomes=[SUCCEED])
-        self.set_description("Reads remapped input data from the blackboard and logs it.")
-        self.add_input_key(
-            "bar_data",
-            "Input data read by the Bar state.",
-        )
-
-    def execute(self, blackboard: Blackboard):
-        """
-        Executes the logic for the Bar state.
-
-        Args:
-            blackboard (Blackboard): The shared data structure for states.
-
-        Returns:
-            str: The outcome of the execution, which can be SUCCEED.
-
-        Raises:
-            Exception: May raise exceptions related to state execution.
-        """
-        data = blackboard["bar_data"]
-        yasmin.YASMIN_LOG_INFO(f"{data}")
-        return SUCCEED</code></pre>
+        <pre><code class="language-python">from yasmin_demos.bar_state import BarState</code></pre>
 
         <h2>3. Setup the State Machine with Remapping</h2>
         <p>
@@ -336,15 +298,18 @@
           reads <code>foo_data</code>, it actually gets <code>msg1</code>. In
           STATE2, we reuse Foo again but remap to <code>msg2</code>, processing
           different data with the same code. In STATE3, we use BarState and
-          remap <code>bar_data</code> to <code>foo_out_data</code> (the output
-          from STATE2), creating a data pipeline where the output of one state
-          becomes the input of the next. This demonstrates the power of
-          remapping: write states once, compose them flexibly. Try running this
-          and you'll see "test1", "test2", and "test2" logged, showing how data
-          flows through the remapped connections.
+          remap <code>foo_str</code> to <code>foo_out_data</code> (the output
+          from STATE2), so BarState reads the data produced by the previous
+          FooState. This demonstrates the power of remapping: write states once,
+          compose them flexibly. Try running this and you'll see "test1",
+          "test2", and "test2" logged, showing how data flows through the
+          remapped connections.
         </p>
 
-        <pre><code class="language-python">def main() -&gt; None:
+        <pre><code class="language-python">from yasmin_ros.yasmin_node import YasminNode
+
+
+def main() -&gt; None:
     # Initialize ROS 2
     rclpy.init()
 
@@ -391,8 +356,8 @@
     sm.add_state(
         "STATE3",
         BarState(),
-        transitions={SUCCEED: SUCCEED},
-        remappings={"bar_data": "foo_out_data"},
+        transitions={"outcome3": SUCCEED},
+        remappings={"foo_str": "foo_out_data"},
     )</code></pre>
 
         <h2>4. Execute the State Machine</h2>
@@ -402,7 +367,7 @@
           without code modification.
         </p>
         <pre><code class="language-python">    # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
 
     # Execute the FSM
     try:
@@ -410,8 +375,11 @@
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
+    YasminNode.destroy_instance()
     if rclpy.ok():
         rclpy.shutdown()
 
@@ -439,7 +407,7 @@ if __name__ == "__main__":
           </li>
           <li>
             <strong>STATE3:</strong> Read <code>foo_out_data</code> (remapped as
-            <code>bar_data</code>) → prints "test2"
+            <code>foo_str</code>) → prints "test2"
           </li>
         </ol>
 

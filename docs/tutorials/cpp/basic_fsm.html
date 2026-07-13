@@ -205,55 +205,7 @@
           the state machine.
         </p>
 
-        <pre><code class="language-cpp">/**
- * @brief Represents the "Foo" state in the state machine.
- *
- * This state increments a counter each time it is executed and
- * communicates the current count via the blackboard.
- */
-class FooState : public yasmin::State {
-public:
-  /// Counter to track the number of executions.
-  int counter;
-
-  /**
-   * @brief Constructs a FooState object, initializing the counter.
-   */
-  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {
-    this-&gt;set_description(
-        "Increments an internal counter, writes the formatted counter string "
-        "to the blackboard, and controls the loop outcome.");
-    this-&gt;add_output_key("foo_str",
-                         "Formatted counter string written by FooState.");
-  };
-
-  /**
-   * @brief Executes the Foo state logic.
-   *
-   * This method logs the execution, waits for 3 seconds,
-   * increments the counter, and sets a string in the blackboard.
-   * The state will transition to either "outcome1" or "outcome2"
-   * based on the current value of the counter.
-   *
-   * @param blackboard Shared pointer to the blackboard for state communication.
-   * @return std::string The outcome of the execution: "outcome1" or "outcome2".
-   */
-  std::string
-  execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    YASMIN_LOG_INFO("Executing state FOO");
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    if (this-&gt;counter &lt; 3) {
-      this-&gt;counter += 1;
-      blackboard-&gt;set&lt;std::string&gt;("foo_str",
-                                   "Counter: " + std::to_string(this-&gt;counter));
-      return "outcome1";
-
-    } else {
-      return "outcome2";
-    }
-  };
-};</code></pre>
+        <pre><code class="language-cpp">#include &quot;yasmin_demos/foo_state.hpp&quot;</code></pre>
 
         <h2>2. Create the BarState</h2>
         <p>
@@ -267,43 +219,7 @@ public:
           <code>"outcome3"</code> to loop back to FooState.
         </p>
 
-        <pre><code class="language-cpp">/**
- * @brief Represents the "Bar" state in the state machine.
- *
- * This state logs the value from the blackboard and provides
- * a single outcome to transition.
- */
-class BarState : public yasmin::State {
-public:
-  /**
-   * @brief Constructs a BarState object.
-   */
-  BarState() : yasmin::State({"outcome3"}) {
-    this-&gt;set_description("Reads the counter string from the blackboard, logs "
-                          "it, and transitions back to FooState.");
-    this-&gt;add_input_key("foo_str",
-                        "Formatted counter string produced by FooState.");
-  }
-
-  /**
-   * @brief Executes the Bar state logic.
-   *
-   * This method logs the execution, waits for 3 seconds,
-   * retrieves a string from the blackboard, and logs it.
-   *
-   * @param blackboard Shared pointer to the blackboard for state communication.
-   * @return std::string The outcome of the execution: "outcome3".
-   */
-  std::string
-  execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    YASMIN_LOG_INFO("Executing state BAR");
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    YASMIN_LOG_INFO(blackboard-&gt;get&lt;std::string&gt;("foo_str").c_str());
-
-    return "outcome3";
-  }
-};</code></pre>
+        <pre><code class="language-cpp">#include &quot;yasmin_demos/bar_state.hpp&quot;</code></pre>
 
         <h2>3. Main Function</h2>
         <p>
@@ -320,45 +236,62 @@ public:
           state machine and handle any exceptions before shutting down ROS 2.
         </p>
 
-        <pre><code class="language-cpp">int main(int argc, char *argv[]) {
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;string&gt;
+
+#include &lt;rclcpp/rclcpp.hpp&gt;
+
+#include &quot;yasmin/logs.hpp&quot;
+#include &quot;yasmin/state.hpp&quot;
+#include &quot;yasmin/state_machine.hpp&quot;
+#include &quot;yasmin_demos/bar_state.hpp&quot;
+#include &quot;yasmin_demos/foo_state.hpp&quot;
+#include &quot;yasmin_ros/ros_logs.hpp&quot;
+#include &quot;yasmin_ros/yasmin_node.hpp&quot;
+#include &quot;yasmin_viewer/yasmin_viewer_pub.hpp&quot;
+
+int main(int argc, char *argv[]) {
   // Initialize ROS 2
   rclcpp::init(argc, argv);
 
   // Set ROS 2 logs
   yasmin_ros::set_ros_loggers();
-  YASMIN_LOG_INFO("yasmin_demo");
+  YASMIN_LOG_INFO(&quot;yasmin_demo&quot;);
 
   // Create a state machine
   auto sm = yasmin::StateMachine::make_shared(
-      std::initializer_list&lt;std::string&gt;{"outcome4"}, true);
-  sm-&gt;set_description("Runs a simple loop between FooState and BarState until "
-                      "FooState reaches its terminal outcome.");
+      std::initializer_list&lt;std::string&gt;{&quot;outcome4&quot;}, true);
+  sm-&gt;set_description(&quot;Runs a simple loop between FooState and BarState until &quot;
+                      &quot;FooState reaches its terminal outcome.&quot;);
   sm-&gt;add_output_key(
-      "foo_str",
-      "Formatted counter string produced by FooState and read by BarState.");
+      &quot;foo_str&quot;,
+      &quot;Formatted counter string produced by FooState and read by BarState.&quot;);
 
   // Add states to the state machine
-  sm-&gt;add_state("FOO", std::make_shared&lt;FooState&gt;(),
+  sm-&gt;add_state(&quot;FOO&quot;, std::make_shared&lt;FooState&gt;(),
                 {
-                    {"outcome1", "BAR"},
-                    {"outcome2", "outcome4"},
+                    {&quot;outcome1&quot;, &quot;BAR&quot;},
+                    {&quot;outcome2&quot;, &quot;outcome4&quot;},
                 });
-  sm-&gt;add_state("BAR", std::make_shared&lt;BarState&gt;(),
+  sm-&gt;add_state(&quot;BAR&quot;, std::make_shared&lt;BarState&gt;(),
                 {
-                    {"outcome3", "FOO"},
+                    {&quot;outcome3&quot;, &quot;FOO&quot;},
                 });
 
-  // Publish state machine updates
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_DEMO");
+  {
+    // Publish state machine updates
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, &quot;YASMIN_DEMO&quot;);
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &amp;e) {
-    YASMIN_LOG_WARN(e.what());
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &amp;e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;

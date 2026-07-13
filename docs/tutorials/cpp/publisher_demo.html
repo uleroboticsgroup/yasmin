@@ -217,14 +217,32 @@
           sequences.
         </p>
 
-        <pre><code class="language-cpp">class PublishIntState
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;string&gt;
+#include &lt;thread&gt;
+
+#include &lt;rclcpp/rclcpp.hpp&gt;
+#include &lt;std_msgs/msg/int32.hpp&gt;
+
+#include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/publisher_state.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using std::placeholders::_1;
+
+class PublishIntState
     : public yasmin_ros::PublisherState&lt;std_msgs::msg::Int32&gt; {
 
 public:
   PublishIntState()
       : yasmin_ros::PublisherState&lt;std_msgs::msg::Int32&gt;(
             "count", // topic name
-            std::bind(&PublishIntState::create_int_msg, this,
+            std::bind(&amp;PublishIntState::create_int_msg, this,
                       _1) // create msg handler callback
         ) {
     this-&gt;set_description("Publishes an incrementing integer to the 'count' "
@@ -269,7 +287,7 @@ public:
         <pre><code class="language-cpp">std::string
 check_count(yasmin::Blackboard::SharedPtr blackboard) {
 
-  // Sleep for 1 second to simulate some processing time
+  // Sleep for 1 second using the ROS 2 clock (respects sim time)
   rclcpp::sleep_for(std::chrono::seconds(1));
   YASMIN_LOG_INFO("Checking count: %d", blackboard-&gt;get&lt;int&gt;("counter"));
 
@@ -321,21 +339,24 @@ int main(int argc, char *argv[]) {
                 {{"outcome1", yasmin_ros::basic_outcomes::SUCCEED},
                  {"outcome2", "PUBLISHING_INT"}});
 
-  // Publisher for visualizing the state machine's status
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
-
-  // Execute the state machine
-  yasmin::Blackboard::SharedPtr blackboard =
-      yasmin::Blackboard::make_shared();
+  yasmin::Blackboard::SharedPtr blackboard = yasmin::Blackboard::make_shared();
   blackboard-&gt;set&lt;int&gt;("counter", 0);
   blackboard-&gt;set&lt;int&gt;("max_count", 10);
-  try {
-    std::string outcome = (*sm.get())(blackboard);
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &amp;e) {
-    YASMIN_LOG_WARN(e.what());
+
+  {
+    // Publisher for visualizing the state machine's status
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_PUBLISHER_DEMO");
+
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())(blackboard);
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &amp;e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;

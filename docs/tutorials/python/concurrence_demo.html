@@ -224,58 +224,7 @@
           goal.
         </p>
 
-        <pre><code class="language-python">class FooState(State):
-    """
-    Represents the Foo state in the state machine.
-    """
-
-    def __init__(self) -&gt; None:
-        """
-        Initializes the FooState instance, setting up the outcomes.
-
-        Outcomes:
-            outcome1: Indicates the state should continue.
-            outcome2: Indicates the state should continue.
-            outcome3: Indicates the state should finish execution and return.
-        """
-        super().__init__(["outcome1", "outcome2", "outcome3"])
-        self.counter = 0
-        self.set_description(
-            "Produces a counter string and stores it in the blackboard while cycling through outcomes based on the internal counter."
-        )
-        self.add_output_key(
-            "foo_str",
-            "String containing the current counter value produced by FooState.",
-        )
-
-    def execute(self, blackboard: Blackboard) -&gt; str:
-        """
-        Executes the logic for the Foo state.
-
-        Args:
-            blackboard (Blackboard): The shared data structure for states.
-
-        Returns:
-            str: The outcome of the execution.
-
-        Raises:
-            Exception: May raise exceptions related to state execution.
-        """
-        yasmin.YASMIN_LOG_INFO("Executing state FOO")
-        time.sleep(2)  # Simulate work by sleeping
-
-        blackboard["foo_str"] = f"Counter: {self.counter}"
-
-        if self.counter &lt; 3:
-            outcome = "outcome1"
-        elif self.counter &lt; 5:
-            outcome = "outcome2"
-        else:
-            outcome = "outcome3"
-
-        yasmin.YASMIN_LOG_INFO("Finishing state FOO")
-        self.counter += 1
-        return outcome</code></pre>
+        <pre><code class="language-python">from yasmin_demos.foo_state import FooState</code></pre>
 
         <h2>2. Create the BarState</h2>
         <p>
@@ -293,50 +242,7 @@
           FOO" and "Executing state BAR" at similar times.
         </p>
 
-        <pre><code class="language-python">class BarState(State):
-    """
-    Represents the Bar state in the state machine.
-    """
-
-    def __init__(self) -&gt; None:
-        """
-        Initializes the BarState instance, setting up the outcome.
-
-        Outcomes:
-            outcome3: This state will always return this outcome
-        """
-        super().__init__(outcomes=["outcome3"])
-        self.set_description(
-            "Reads and prints the value stored in 'foo_str' from the blackboard."
-        )
-        self.add_input_key(
-            "foo_str",
-            "String produced by FooState containing the counter value.",
-        )
-
-    def execute(self, blackboard: Blackboard) -&gt; str:
-        """
-        Executes the logic for the Bar state.
-
-        Args:
-            blackboard (Blackboard): The shared data structure for states.
-
-        Returns:
-            str: The outcome of the execution, which will always be "outcome3".
-
-        Raises:
-            Exception: May raise exceptions related to state execution.
-        """
-        yasmin.YASMIN_LOG_INFO("Executing state BAR")
-        time.sleep(4)  # Simulate work by sleeping
-
-        if "foo_str" in blackboard:
-            yasmin.YASMIN_LOG_INFO(blackboard["foo_str"])
-        else:
-            yasmin.YASMIN_LOG_INFO("Blackboard does not yet contain 'foo_str'")
-
-        yasmin.YASMIN_LOG_INFO("Finishing state BAR")
-        return "outcome3"</code></pre>
+        <pre><code class="language-python">from yasmin_demos.bar_state import BarState</code></pre>
 
         <h2>3. Create the Concurrence Container</h2>
         <p>
@@ -353,7 +259,10 @@
           for complex conditional logic based on runtime state.
         </p>
 
-        <pre><code class="language-python">def main() -&gt; None:
+        <pre><code class="language-python">from yasmin_ros.yasmin_node import YasminNode
+
+
+def main() -&gt; None:
     # Initialize ROS 2
     rclpy.init()
 
@@ -372,8 +281,8 @@
     )
 
     # Create states to run concurrently
-    foo_state: State = FooState()
-    bar_state: State = BarState()
+    foo_state = FooState()
+    bar_state = BarState()
 
     # Add concurrence state
     concurrence_state = Concurrence(
@@ -419,30 +328,30 @@
         concurrence_state,
         transitions={
             "outcome1": "CONCURRENCE",
-            "outcome2": "CONCURRENCE",
+            "outcome2": "outcome4",
             "defaulted": "outcome4",
         },
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")</code></pre>
+    pub = YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")</code></pre>
 
         <h2>5. Execute the State Machine</h2>
         <p>
           Execute the state machine with exception handling to manage
           interruptions and ensure proper cleanup of resources.
         </p>
-        <pre><code class="language-python">    # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_CONCURRENCE_DEMO")
-
-    # Execute the FSM
+        <pre><code class="language-python">    # Execute the FSM
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
+    YasminNode.destroy_instance()
     if rclpy.ok():
         rclpy.shutdown()
 

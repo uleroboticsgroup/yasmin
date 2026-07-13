@@ -275,8 +275,10 @@ class PublishIntState(PublisherState):
           based on accumulated state.
         </p>
 
-        <pre><code class="language-python">from yasmin import CbState
+        <pre><code class="language-python">from rclpy.duration import Duration
+from yasmin import CbState
 from yasmin_ros.basic_outcomes import SUCCEED
+from yasmin_ros.yasmin_node import YasminNode
 
 def check_count(blackboard: Blackboard) -&gt; str:
     """
@@ -288,8 +290,8 @@ def check_count(blackboard: Blackboard) -&gt; str:
     Returns:
         str: The outcome string ('outcome1' or 'outcome2').
     """
-    # Simulate processing time
-    time.sleep(1)
+    # Simulate processing time using the ROS 2 clock (respects sim time)
+    YasminNode.get_instance().get_clock().sleep_for(Duration(seconds=1))
 
     # Retrieve the counter and max value from blackboard
     count = blackboard.get("counter")
@@ -299,9 +301,9 @@ def check_count(blackboard: Blackboard) -&gt; str:
 
     # Determine and return the outcome based on the counter value
     if count &gt;= max_count:
-        return "outcome1"  # Done
+        return "outcome1"
     else:
-        return "outcome2"  # Continue</code></pre>
+        return "outcome2"</code></pre>
 
         <h2>3. Build and Execute State Machine</h2>
         <p>
@@ -309,7 +311,10 @@ def check_count(blackboard: Blackboard) -&gt; str:
           state machine with publishing and checking states, and executes with
           error handling.
         </p>
-        <pre><code class="language-python">def main() -&gt; None:
+        <pre><code class="language-python">from yasmin_ros.yasmin_node import YasminNode
+
+
+def main() -&gt; None:
     # Initialize ROS 2
     rclpy.init()
 
@@ -370,7 +375,7 @@ def check_count(blackboard: Blackboard) -&gt; str:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values
     blackboard = Blackboard()
@@ -383,8 +388,11 @@ def check_count(blackboard: Blackboard) -&gt; str:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
+    YasminNode.destroy_instance()
     if rclpy.ok():
         rclpy.shutdown()
 

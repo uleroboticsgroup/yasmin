@@ -270,7 +270,11 @@ class PrintOdometryState(MonitorState):
         Exceptions:
             None
         """
-        yasmin.YASMIN_LOG_INFO(msg)
+        yasmin.YASMIN_LOG_INFO(
+            f"x: {msg.pose.pose.position.x}, "
+            f"y: {msg.pose.pose.position.y}, "
+            f"z: {msg.pose.pose.position.z}"
+        )
 
         self.times -= 1
 
@@ -293,7 +297,10 @@ class PrintOdometryState(MonitorState):
           completion, timeout scenarios, and user interruption.
         </p>
 
-        <pre><code class="language-python">def main() -&gt; None:
+        <pre><code class="language-python">from yasmin_ros.yasmin_node import YasminNode
+
+
+def main() -&gt; None:
     # Initialize ROS 2
     rclpy.init()
 
@@ -324,24 +331,24 @@ class PrintOdometryState(MonitorState):
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")</code></pre>
+    pub = YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")</code></pre>
 
         <h2>3. Execute</h2>
         <p>
           Execute the state machine with proper exception handling to manage
           keyboard interrupts and ensure clean shutdown.
         </p>
-        <pre><code class="language-python">    # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
-
-    # Execute the FSM
+        <pre><code class="language-python">    # Execute the FSM
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
+    YasminNode.destroy_instance()
     if rclpy.ok():
         rclpy.shutdown()
 

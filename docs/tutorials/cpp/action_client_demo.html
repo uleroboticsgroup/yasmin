@@ -217,15 +217,35 @@
           us to monitor progress in real-time.
         </p>
 
-        <pre><code class="language-cpp">class FibonacciState : public yasmin_ros::ActionState&lt;Fibonacci&gt; {
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+#include &lt;example_interfaces/action/fibonacci.hpp&gt;
+
+#include "yasmin/cb_state.hpp"
+#include "yasmin/logs.hpp"
+#include "yasmin/state_machine.hpp"
+#include "yasmin_ros/action_state.hpp"
+#include "yasmin_ros/basic_outcomes.hpp"
+#include "yasmin_ros/ros_logs.hpp"
+#include "yasmin_ros/yasmin_node.hpp"
+#include "yasmin_viewer/yasmin_viewer_pub.hpp"
+
+using std::placeholders::_1;
+using std::placeholders::_2;
+using Fibonacci = example_interfaces::action::Fibonacci;
+
+class FibonacciState : public yasmin_ros::ActionState&lt;Fibonacci&gt; {
 
 public:
   FibonacciState()
       : yasmin_ros::ActionState&lt;Fibonacci&gt;(
             "/fibonacci",
-            std::bind(&FibonacciState::create_goal_handler, this, _1),
-            std::bind(&FibonacciState::response_handler, this, _1, _2),
-            std::bind(&FibonacciState::print_feedback, this, _1, _2)) {
+            std::bind(&amp;FibonacciState::create_goal_handler, this, _1), {},
+            std::bind(&amp;FibonacciState::response_handler, this, _1, _2),
+            std::bind(&amp;FibonacciState::print_feedback, this, _1, _2)) {
     this-&gt;set_description("Calls the Fibonacci action server and stores the "
                           "resulting sequence in the blackboard.");
     this-&gt;add_input_key&lt;int&gt;("n", "Order of the Fibonacci sequence to compute.",
@@ -234,8 +254,8 @@ public:
                          "Computed Fibonacci sequence returned by the action.");
   };
 
-  Fibonacci::Goal create_goal_handler(
-      yasmin::Blackboard::SharedPtr blackboard) {
+  Fibonacci::Goal
+  create_goal_handler(yasmin::Blackboard::SharedPtr blackboard) {
 
     auto goal = Fibonacci::Goal();
     goal.order = blackboard-&gt;get&lt;int&gt;("n");
@@ -320,22 +340,23 @@ public:
                     {yasmin_ros::basic_outcomes::SUCCEED, "outcome4"},
                 });
 
-  // Publisher for visualizing the state machine
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
-
-  // Create an initial blackboard and set the Fibonacci order
-  yasmin::Blackboard::SharedPtr blackboard =
-      yasmin::Blackboard::make_shared();
+  yasmin::Blackboard::SharedPtr blackboard = yasmin::Blackboard::make_shared();
   blackboard-&gt;set&lt;int&gt;("n", 10);
 
-  // Execute the state machine
-  try {
-    std::string outcome = (*sm.get())(blackboard);
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &amp;e) {
-    YASMIN_LOG_WARN(e.what());
+  {
+    // Publisher for visualizing the state machine
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_ACTION_CLIENT_DEMO");
+
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())(blackboard);
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &amp;e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;

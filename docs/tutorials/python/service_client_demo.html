@@ -343,7 +343,10 @@ def print_sum(blackboard: Blackboard) -&gt; str:
           execution, and result handling with graceful error management.
         </p>
 
-        <pre><code class="language-python">def main() -&gt; None:
+        <pre><code class="language-python">from yasmin_ros.yasmin_node import YasminNode
+
+
+def main() -&gt; None:
     # Init ROS 2
     rclpy.init()
 
@@ -406,7 +409,7 @@ def print_sum(blackboard: Blackboard) -&gt; str:
     )
 
     # Publish FSM info
-    YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
 
     # Execute the FSM
     try:
@@ -414,8 +417,11 @@ def print_sum(blackboard: Blackboard) -&gt; str:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
+    YasminNode.destroy_instance()
     if rclpy.ok():
         rclpy.shutdown()
 

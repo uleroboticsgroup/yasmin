@@ -426,18 +426,21 @@ int main(int argc, char *argv[]) {
                                          {yasmin_ros::basic_outcomes::ABORT,
                                           yasmin_ros::basic_outcomes::ABORT}});
 
-  yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_NAV2_DEMO");
+  {
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, "YASMIN_NAV2_DEMO");
 
-  auto blackboard = yasmin::Blackboard::make_shared();
-  blackboard-&gt;set&lt;int&gt;("waypoints_num", 2);
+    auto blackboard = yasmin::Blackboard::make_shared();
+    blackboard-&gt;set&lt;int&gt;("waypoints_num", 2);
 
-  try {
-    std::string outcome = (*sm.get())(blackboard);
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN(e.what());
+    try {
+      std::string outcome = (*sm.get())(blackboard);
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &amp;e) {
+      YASMIN_LOG_WARN(e.what());
+    }
   }
 
+  yasmin_ros::YasminNode::destroy_instance();
   rclcpp::shutdown();
 
   return 0;
