@@ -18,6 +18,9 @@
 #include <filesystem>
 #include <string>
 
+// RCLCPP_VERSION_GTE(32, 0, 0) corresponds to ROS 2 Jazzy+.
+// Jazzy added get_package_share_path() returning std::filesystem::path;
+// older distros only have get_package_share_directory() returning std::string.
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
 #if RCLCPP_VERSION_GTE(32, 0, 0)

@@ -53,7 +53,7 @@ public:
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome3".
    */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard);
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
   /// @brief Prefix for log messages

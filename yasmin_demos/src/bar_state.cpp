@@ -54,7 +54,7 @@ std::string BarState::execute(yasmin::Blackboard::SharedPtr blackboard) {
           .c_str());
 
   return "outcome3";
-};
+}
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(BarState, yasmin::State)

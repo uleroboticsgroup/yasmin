@@ -19,8 +19,6 @@
 #include <string>
 #include <thread>
 
-#include <rclcpp/rclcpp.hpp>
-
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
@@ -38,7 +36,7 @@ WorkerState::WorkerState() : yasmin::State({"working", "done"}) {
       "max_count", "Number of iterations before the state returns 'done'.", 3);
   this->declare_parameter<int>(
       "sleep_ms", "Delay in milliseconds before each execution.", 500);
-};
+}
 
 void WorkerState::configure() {
   this->max_count_ = this->get_parameter<int>("max_count");
@@ -56,7 +54,7 @@ std::string WorkerState::execute(yasmin::Blackboard::SharedPtr /*blackboard*/) {
     return "done";
   }
   return "working";
-};
+}
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(WorkerState, yasmin::State)

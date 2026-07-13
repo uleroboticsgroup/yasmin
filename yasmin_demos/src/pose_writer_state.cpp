@@ -19,7 +19,6 @@
 #include <vector>
 
 #include <geometry_msgs/msg/pose.hpp>
-#include <rclcpp/rclcpp.hpp>
 
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
@@ -27,7 +26,7 @@
 #include "yasmin_ros/interface_serialization.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 
-PoseWriterState::PoseWriterState() : yasmin::State({"outcome1"}) {
+PoseWriterState::PoseWriterState() : yasmin::State({"SUCCEED"}) {
   this->position_x_ = 1.0;
   this->position_y_ = 2.0;
   this->position_z_ = 3.0;
@@ -77,7 +76,7 @@ std::string PoseWriterState::execute(yasmin::Blackboard::SharedPtr blackboard) {
 
   YASMIN_LOG_INFO("Stored serialized Pose with %zu bytes", pose_bytes.size());
 
-  return "outcome1";
+  return "SUCCEED";
 }
 
 #include <pluginlib/class_list_macros.hpp>

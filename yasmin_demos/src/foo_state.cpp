@@ -44,7 +44,7 @@ FooState::FooState() : yasmin::State({"outcome1", "outcome2"}) {
   this->add_output_key(
       "foo_str",
       "String containing the current counter value produced by FooState.");
-};
+}
 
 void FooState::configure() {
   this->counter_prefix_ = this->get_parameter<std::string>("counter_prefix");
@@ -65,7 +65,7 @@ std::string FooState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   } else {
     return "outcome2";
   }
-};
+}
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(FooState, yasmin::State)

@@ -55,7 +55,7 @@ public:
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome1".
    */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard);
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
   /// @brief X coordinate of the pose

@@ -55,12 +55,11 @@ public:
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome1" or "outcome2".
    */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard);
-
-  /// Counter to track the number of executions.
-  int counter;
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// Counter to track the number of executions.
+  int counter;
   /// @brief Prefix for the counter output
   std::string counter_prefix_;
   /// @brief Maximum count before the state resets

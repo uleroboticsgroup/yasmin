@@ -55,16 +55,15 @@ public:
    * @param blackboard Shared pointer to the blackboard for state communication.
    * @return std::string The outcome of the execution: "outcome1" or "outcome2".
    */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard);
-
-  /// @brief Internal counter tracking execution count.
-  int counter;
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
 
 private:
+  /// @brief Internal counter tracking execution count.
+  int counter;
   /// @brief The maximum count value for the counter.
   int max_count_;
   /// @brief The sleep duration in milliseconds between counter increments.
   int sleep_ms_;
 };
 
-#endif // YASMIN_DEMOS_WORKER_STATE_H
+#endif // YASMIN_DEMOS_WORKER_STATE_HPP_
