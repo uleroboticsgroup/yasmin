@@ -49,7 +49,15 @@ def get_caller_info() -> List[Union[str, int]]:
     @return: A tuple containing the file name, function name, and line number.
     @rtype: tuple[str, str, int]
     """
-    frame = inspect.currentframe().f_back.f_back
+    frame = inspect.currentframe()
+    if frame is None:
+        return ("unknown", "unknown", 0)
+    frame = frame.f_back
+    if frame is None:
+        return ("unknown", "unknown", 0)
+    frame = frame.f_back
+    if frame is None:
+        return ("unknown", "unknown", 0)
     file = os.path.basename(frame.f_code.co_filename)
     line = frame.f_lineno
     function = frame.f_code.co_name

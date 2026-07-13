@@ -25,11 +25,11 @@ void default_log_message(LogLevel level, const char *file, const char *function,
 }
 
 // Default to INFO so debug/spam messages are hidden unless explicitly enabled
-LogLevel log_level = LogLevel::INFO;
+std::atomic<LogLevel> log_level{LogLevel::INFO};
 
-LogFunction log_message = default_log_message;
+std::atomic<LogFunction> log_message{default_log_message};
 
-void set_log_level(LogLevel new_log_level) { log_level = new_log_level; }
+void set_log_level(LogLevel new_log_level) { log_level.store(new_log_level); }
 
 const char *log_level_to_name(LogLevel log_level) {
   switch (log_level) {
@@ -46,11 +46,11 @@ const char *log_level_to_name(LogLevel log_level) {
   default:
     return "";
   }
-
-  return "";
 }
 
-void set_loggers(LogFunction new_log_message) { log_message = new_log_message; }
+void set_loggers(LogFunction new_log_message) {
+  log_message.store(new_log_message);
+}
 
 void set_default_loggers() { set_loggers(default_log_message); }
 
