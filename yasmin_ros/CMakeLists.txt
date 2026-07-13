@@ -163,6 +163,7 @@ if(BUILD_TESTING)
     test_ros_serialize_state
     test_ros_deserialize_state
     test_tf_buffer_state
+    test_complex_scenarios
   )
 
   foreach(_test_name ${_pytest_tests})
@@ -175,6 +176,7 @@ if(BUILD_TESTING)
     test_monitor_state
     test_publisher_state
     test_tf_buffer_state
+    test_complex_scenarios
   )
 
   foreach(_test_name ${_gtest_tests})
