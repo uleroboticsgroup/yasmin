@@ -281,7 +281,7 @@ private:
   /// Name of the current state
   std::string current_state;
   /// Mutex for current state access
-  std::unique_ptr<std::mutex> current_state_mutex;
+  mutable std::mutex current_state_mutex;
   /// Condition variable for current state changes
   std::condition_variable current_state_cond;
 
@@ -293,7 +293,11 @@ private:
   std::atomic_bool execution_active{false};
   /// Flag to indicate that a hard state machine cancel was requested
   std::atomic_bool cancel_state_machine_requested{false};
+  /// @brief Whether to register a SIGINT callback during execute()
+  bool handle_sigint_{false};
 
+  /// @brief Mutex protecting callback vectors
+  mutable std::mutex cbs_mutex_;
   /// Start callbacks executed before the state machine
   std::vector<StartCallbackType> start_cbs;
   /// Transition callbacks executed before changing the state

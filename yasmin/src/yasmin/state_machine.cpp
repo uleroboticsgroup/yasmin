@@ -19,10 +19,13 @@
 #include <exception>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "yasmin/blackboard.hpp"
@@ -37,14 +40,37 @@
 using namespace yasmin;
 
 namespace {
-std::sig_atomic_t sigint_caught = 0;
+std::mutex sigint_registry_mutex;
+std::unordered_map<int, std::function<void()>> sigint_callbacks;
+int next_sigint_id = 0;
+bool sigint_handler_installed = false;
 
-extern "C" void sigint_handler(int) { sigint_caught = 1; }
+extern "C" void sigint_handler(int) {
+  std::lock_guard<std::mutex> lock(sigint_registry_mutex);
+  for (const auto &[id, cb] : sigint_callbacks) {
+    (void)id;
+    cb();
+  }
+}
 
-bool was_sigint_caught() {
-  auto r = sigint_caught;
-  sigint_caught = 0;
-  return r;
+int register_sigint_callback(std::function<void()> cb) {
+  std::lock_guard<std::mutex> lock(sigint_registry_mutex);
+  if (!sigint_handler_installed) {
+    struct sigaction sigint_action {};
+    sigint_action.sa_handler = sigint_handler;
+    sigemptyset(&sigint_action.sa_mask);
+    sigint_action.sa_flags = 0;
+    sigaction(SIGINT, &sigint_action, nullptr);
+    sigint_handler_installed = true;
+  }
+  int id = next_sigint_id++;
+  sigint_callbacks[id] = std::move(cb);
+  return id;
+}
+
+void unregister_sigint_callback(int id) {
+  std::lock_guard<std::mutex> lock(sigint_registry_mutex);
+  sigint_callbacks.erase(id);
 }
 } // namespace
 
@@ -53,8 +79,7 @@ StateMachine::StateMachine(const Outcomes &outcomes, bool handle_sigint)
 
 StateMachine::StateMachine(const std::string &name, const Outcomes &outcomes,
                            bool handle_sigint)
-    : State(outcomes), current_state_mutex(std::make_unique<std::mutex>()),
-      name(name) {
+    : State(outcomes), name(name) {
   this->set_sigint_handler(handle_sigint);
 }
 
@@ -98,14 +123,10 @@ void StateMachine::add_state(const std::string &name, State::SharedPtr state,
     if (state_outcomes.find(key) == state_outcomes.end()) {
       std::ostringstream oss;
       oss << "State '" << name << "' references unregistered outcomes '" << key
-          << "', available outcomes are [";
-      for (const auto &outcome : state_outcomes) {
-        oss << "'" << outcome << "'";
-        if (outcome != *state_outcomes.rbegin()) {
-          oss << ", ";
-        }
-      }
-      oss << "]";
+          << "', available outcomes are ["
+          << yasmin::join(state_outcomes, ", ",
+                          [](const std::string &o) { return "'" + o + "'"; })
+          << "]";
       throw std::invalid_argument(oss.str());
     }
   }
@@ -191,17 +212,12 @@ void StateMachine::configure() {
 }
 
 std::string StateMachine::wait_for_current_state() {
-  std::unique_lock<std::mutex> lock(*this->current_state_mutex.get());
+  std::unique_lock<std::mutex> lock(this->current_state_mutex);
 
-  if (!this->current_state_cond.wait_for(
-          lock, std::chrono::seconds(5), [this]() {
-            return !this->current_state.empty() ||
-                   !this->execution_active.load() ||
-                   this->cancel_state_machine_requested.load();
-          })) {
-    YASMIN_LOG_WARN("Timeout waiting for current state in '%s'",
-                    this->to_string().c_str());
-  }
+  this->current_state_cond.wait(lock, [this]() {
+    return !this->current_state.empty() || !this->execution_active.load() ||
+           this->cancel_state_machine_requested.load();
+  });
 
   return this->current_state;
 }
@@ -230,32 +246,37 @@ TransitionsMap const &StateMachine::get_transitions() const noexcept {
 }
 
 std::string StateMachine::get_current_state() const {
-  const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
+  const std::lock_guard<std::mutex> lock(this->current_state_mutex);
   return this->current_state;
 }
 
 void StateMachine::set_current_state(const std::string &state_name) {
-  const std::lock_guard<std::mutex> lock(*this->current_state_mutex.get());
+  const std::lock_guard<std::mutex> lock(this->current_state_mutex);
   this->current_state = state_name;
   this->current_state_cond.notify_all();
 }
 
 void StateMachine::add_start_cb(StartCallbackType cb) {
-  this->start_cbs.emplace_back(cb);
+  const std::lock_guard<std::mutex> lock(this->cbs_mutex_);
+  this->start_cbs.emplace_back(std::move(cb));
 }
 
 void StateMachine::add_transition_cb(TransitionCallbackType cb) {
-  this->transition_cbs.emplace_back(cb);
+  const std::lock_guard<std::mutex> lock(this->cbs_mutex_);
+  this->transition_cbs.emplace_back(std::move(cb));
 }
 
 void StateMachine::add_end_cb(EndCallbackType cb) {
-  this->end_cbs.emplace_back(cb);
+  const std::lock_guard<std::mutex> lock(this->cbs_mutex_);
+  this->end_cbs.emplace_back(std::move(cb));
 }
 
 void StateMachine::call_start_cbs(Blackboard::SharedPtr blackboard,
                                   const std::string &start_state) {
 
   try {
+    const std::lock_guard<std::mutex> lock(this->cbs_mutex_);
+
     for (const auto &callback : this->start_cbs) {
       callback(blackboard, start_state);
     }
@@ -272,6 +293,8 @@ void StateMachine::call_transition_cbs(Blackboard::SharedPtr blackboard,
                                        const std::string &outcome) {
 
   try {
+    const std::lock_guard<std::mutex> lock(this->cbs_mutex_);
+
     for (const auto &callback : this->transition_cbs) {
       callback(blackboard, from_state, to_state, outcome);
     }
@@ -286,6 +309,8 @@ void StateMachine::call_end_cbs(Blackboard::SharedPtr blackboard,
                                 const std::string &outcome) {
 
   try {
+    const std::lock_guard<std::mutex> lock(this->cbs_mutex_);
+
     for (const auto &callback : this->end_cbs) {
       callback(blackboard, outcome);
     }
@@ -336,9 +361,9 @@ void StateMachine::validate(bool strict_mode) {
 
     const std::string &state_name = it->first;
     const State::SharedPtr &state = it->second;
-    Transitions transitions = this->transitions.at(state_name);
+    const Transitions &transitions = this->transitions.at(state_name);
 
-    Outcomes outcomes = state->get_outcomes();
+    const Outcomes &outcomes = state->get_outcomes();
 
     if (strict_mode) {
       // Check if all outcomes of the state are in transitions
@@ -372,8 +397,9 @@ void StateMachine::validate(bool strict_mode) {
     }
 
     // Add terminal outcomes
-    for (auto it = transitions.begin(); it != transitions.end(); ++it) {
-      const std::string &value = it->second;
+    for (auto trans_it = transitions.begin(); trans_it != transitions.end();
+         ++trans_it) {
+      const std::string &value = trans_it->second;
       terminal_outcomes.insert(value);
     }
   }
@@ -400,31 +426,75 @@ void StateMachine::validate(bool strict_mode) {
     }
   }
 
+  // Check for unreachable states from start_state via BFS
+  {
+    std::unordered_set<std::string> reachable;
+    std::queue<std::string> to_visit;
+    to_visit.push(this->start_state);
+    reachable.insert(this->start_state);
+
+    while (!to_visit.empty()) {
+      std::string current = to_visit.front();
+      to_visit.pop();
+
+      auto trans_map_it = this->transitions.find(current);
+      if (trans_map_it != this->transitions.end()) {
+        for (const auto &[outcome, target] : trans_map_it->second) {
+          if (this->outcomes.find(target) != this->outcomes.end()) {
+            continue;
+          }
+          if (reachable.find(target) == reachable.end()) {
+            reachable.insert(target);
+            to_visit.push(target);
+          }
+        }
+      }
+    }
+
+    for (const auto &[state_name, _] : this->states) {
+      if (reachable.find(state_name) == reachable.end()) {
+        throw std::runtime_error("State '" + state_name +
+                                 "' is unreachable from start state '" +
+                                 this->start_state + "'");
+      }
+    }
+  }
+
   // State machine has been validated
   this->validated.store(true);
 }
 
 std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
 
-  this->validate();
-  this->configure();
+  if (!this->validated.load()) {
+    this->validate();
+  }
+  if (!this->configured.load()) {
+    this->configure();
+  }
 
   YASMIN_LOG_INFO("Executing state machine with initial state '%s'",
                   this->start_state.c_str());
-  this->call_start_cbs(blackboard, this->start_state);
 
   this->cancel_state_machine_requested.store(false);
   this->execution_active.store(true);
   this->set_current_state(this->start_state);
+
+  // Start callbacks run after flags are set so cancel_state_machine() during a
+  // callback is properly tracked rather than silently cleared.
+  this->call_start_cbs(blackboard, this->start_state);
+
+  int sigint_reg_id = -1;
+  if (this->handle_sigint_) {
+    sigint_reg_id =
+        register_sigint_callback([this]() { this->cancel_state_machine(); });
+  }
 
   bool state_machine_ends = false;
   std::string outcome;
 
   try {
     while (!state_machine_ends) {
-      if (was_sigint_caught()) {
-        this->cancel_state_machine();
-      }
       this->throw_if_cancel_state_machine_requested();
 
       std::string current_state = this->get_current_state();
@@ -432,12 +502,19 @@ std::string StateMachine::execute(Blackboard::SharedPtr blackboard) {
           this->execute_step(blackboard, current_state, state_machine_ends);
     }
   } catch (...) {
+    if (sigint_reg_id >= 0) {
+      unregister_sigint_callback(sigint_reg_id);
+    }
+    this->call_end_cbs(blackboard, "");
     this->execution_active.store(false);
     this->set_current_state("");
     this->current_state_cond.notify_all();
     throw;
   }
 
+  if (sigint_reg_id >= 0) {
+    unregister_sigint_callback(sigint_reg_id);
+  }
   this->execution_active.store(false);
   this->current_state_cond.notify_all();
   return outcome;
@@ -491,11 +568,7 @@ void StateMachine::cancel_state_machine() {
 }
 
 void StateMachine::set_sigint_handler(bool handle) {
-  struct sigaction sigint_action;
-  sigint_action.sa_handler = handle ? sigint_handler : SIG_DFL;
-  sigemptyset(&sigint_action.sa_mask);
-  sigint_action.sa_flags = 0;
-  sigaction(SIGINT, &sigint_action, nullptr);
+  this->handle_sigint_ = handle;
 }
 
 std::string StateMachine::execute_step(Blackboard::SharedPtr blackboard,
@@ -533,12 +606,6 @@ std::string StateMachine::execute_step(Blackboard::SharedPtr blackboard,
   blackboard->set_remappings(parent_remappings);
 
   this->throw_if_cancel_state_machine_requested();
-
-  const auto &state_outcomes = state->get_outcomes();
-  if (state_outcomes.find(outcome) == state_outcomes.end()) {
-    throw std::logic_error("Outcome '" + outcome +
-                           "' is not registered in state " + current_state);
-  }
 
   if (local_transitions.find(outcome) != local_transitions.end()) {
     outcome = local_transitions.at(outcome);
