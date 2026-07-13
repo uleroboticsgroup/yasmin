@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
-#include <mutex>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
@@ -125,6 +124,7 @@ bool parse_bool_value(const std::string &value_str) {
 }
 
 py::object load_json_value(const std::string &value_str) {
+  py::gil_scoped_acquire acquire;
 #if PYBIND11_VERSION_MAJOR > 2 ||                                              \
     (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
   py::module_ json_module = py::module_::import("json");
@@ -368,7 +368,6 @@ void with_typed_xml_value(const std::string &value_str,
 std::unique_ptr<py::scoped_interpreter> YasminFactory::py_interpreter_ =
     nullptr;
 bool YasminFactory::py_initialized_ = false;
-std::once_flag YasminFactory::py_init_once_;
 
 // PythonStateHolder implementation
 PythonStateHolder::PythonStateHolder(yasmin::State::SharedPtr cpp_state,
@@ -382,40 +381,16 @@ PythonStateHolder::PythonStateHolder(yasmin::State::SharedPtr cpp_state,
     this->set_outcome_description(outcome, description);
   }
 
-  {
-    auto existing_inputs = this->get_input_keys();
-    const auto key_name_match = [&existing_inputs](const std::string &name) {
-      return std::any_of(existing_inputs.begin(), existing_inputs.end(),
-                         [&name](const yasmin::BlackboardKeyInfo &k) {
-                           return k.name == name;
-                         });
-    };
-    for (const auto &input_key : cpp_state->get_input_keys()) {
-      if (!key_name_match(input_key.name)) {
-        this->add_input_key(input_key);
-      }
-    }
+  for (const auto &input_key : cpp_state->get_input_keys()) {
+    this->add_input_key(input_key);
   }
 
-  {
-    auto existing_outputs = this->get_output_keys();
-    const auto key_name_match = [&existing_outputs](const std::string &name) {
-      return std::any_of(existing_outputs.begin(), existing_outputs.end(),
-                         [&name](const yasmin::BlackboardKeyInfo &k) {
-                           return k.name == name;
-                         });
-    };
-    for (const auto &output_key : cpp_state->get_output_keys()) {
-      if (!key_name_match(output_key.name)) {
-        this->add_output_key(output_key);
-      }
-    }
+  for (const auto &output_key : cpp_state->get_output_keys()) {
+    this->add_output_key(output_key);
   }
 
   for (const auto &parameter : cpp_state->get_parameters()) {
-    if (!this->is_parameter_declared(parameter.name)) {
-      this->declare_parameter(parameter);
-    }
+    this->declare_parameter(parameter);
   }
 }
 
@@ -451,7 +426,7 @@ std::string PythonStateHolder::to_string() const {
 
 // YasminFactory implementation
 YasminFactory::YasminFactory()
-    : state_loader_(std::make_shared<pluginlib::ClassLoader<yasmin::State>>(
+    : state_loader_(std::make_unique<pluginlib::ClassLoader<yasmin::State>>(
           "yasmin", "yasmin::State")) {
   this->initialize_python();
 }
@@ -465,43 +440,40 @@ void YasminFactory::cleanup() {
 }
 
 namespace {
-struct GilSavedState {
-  PyGILState_STATE gstate;
-  PyThreadState *tstate;
-};
-thread_local GilSavedState gil_saved_state{};
+PyThreadState *saved_gil_state = nullptr;
 
 void gil_before_fork() {
+  // Acquire the GIL if Python is initialized before saving/releasing it.
+  // This ensures PyEval_SaveThread is called with the GIL held.
   if (Py_IsInitialized()) {
-    gil_saved_state.gstate = PyGILState_Ensure();
-    gil_saved_state.tstate = PyEval_SaveThread();
+    // If GIL is not held, acquire it first
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    saved_gil_state = PyEval_SaveThread();
+    // Note: PyEval_SaveThread releases the GIL, so PyGILState_Release
+    // is not called here.
   }
 }
 
 void gil_after_join() {
-  if (gil_saved_state.tstate) {
-    PyEval_RestoreThread(gil_saved_state.tstate);
-    PyGILState_Release(gil_saved_state.gstate);
-    gil_saved_state.tstate = nullptr;
+  if (saved_gil_state) {
+    PyEval_RestoreThread(saved_gil_state);
+    saved_gil_state = nullptr;
   }
 }
 } // namespace
 
 void YasminFactory::initialize_python() {
-  // Set GIL hooks for OrthogonalState region threads (once only)
-  static bool hooks_set = false;
-  if (!hooks_set) {
-    yasmin::OrthogonalState::set_thread_hooks(gil_before_fork, gil_after_join);
-    hooks_set = true;
-  }
+  // Set GIL hooks for OrthogonalState region threads
+  yasmin::OrthogonalState::set_thread_hooks(gil_before_fork, gil_after_join);
 
-  std::call_once(py_init_once_, [this]() {
+  if (!py_initialized_) {
+    // Check if Python is already initialized (e.g., by ROS or another module)
     if (!Py_IsInitialized()) {
       py_interpreter_ = std::make_unique<py::scoped_interpreter>();
     }
     py_initialized_ = true;
 
-    // Import sys to set up sys.path for module discovery
+    // Import sys to ensure Python path is set up
     try {
       py::gil_scoped_acquire acquire;
 #if PYBIND11_VERSION_MAJOR > 2 ||                                              \
@@ -514,7 +486,7 @@ void YasminFactory::initialize_python() {
       throw std::runtime_error("Failed to initialize Python: " +
                                std::string(e.what()));
     }
-  });
+  }
 }
 
 yasmin::State::SharedPtr
@@ -614,37 +586,21 @@ void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
     const char *default_value_attr = key_elem->Attribute("default_value");
 
     if (key_usage == "in" || key_usage == "in/out") {
-      const auto &existing_inputs = owner->get_input_keys();
-      bool already_exists =
-          std::any_of(existing_inputs.begin(), existing_inputs.end(),
-                      [&key_name](const yasmin::BlackboardKeyInfo &k) {
-                        return k.name == key_name;
-                      });
-      if (!already_exists) {
-        if (default_value_attr) {
-          with_typed_xml_value(std::string(default_value_attr), default_type,
-                               [&](const auto &value) {
-                                 owner->add_input_key(yasmin::BlackboardKeyInfo(
-                                     key_name, key_description, value));
-                               });
-        } else {
-          owner->add_input_key(
-              yasmin::BlackboardKeyInfo(key_name, key_description));
-        }
+      if (default_value_attr) {
+        with_typed_xml_value(std::string(default_value_attr), default_type,
+                             [&](const auto &value) {
+                               owner->add_input_key(yasmin::BlackboardKeyInfo(
+                                   key_name, key_description, value));
+                             });
+      } else {
+        owner->add_input_key(
+            yasmin::BlackboardKeyInfo(key_name, key_description));
       }
     }
 
     if (key_usage == "out" || key_usage == "in/out") {
-      const auto &existing_outputs = owner->get_output_keys();
-      bool already_exists =
-          std::any_of(existing_outputs.begin(), existing_outputs.end(),
-                      [&key_name](const yasmin::BlackboardKeyInfo &k) {
-                        return k.name == key_name;
-                      });
-      if (!already_exists) {
-        owner->add_output_key(
-            yasmin::BlackboardKeyInfo(key_name, key_description));
-      }
+      owner->add_output_key(
+          yasmin::BlackboardKeyInfo(key_name, key_description));
     }
   }
 
@@ -677,9 +633,6 @@ void YasminFactory::add_parameters(yasmin::State::SharedPtr owner,
         this->get_optional_attribute(param_elem, "default_type", "str");
     const char *default_value_attr = param_elem->Attribute("default_value");
 
-    if (owner->is_parameter_declared(parameter_name)) {
-      continue;
-    }
     if (default_value_attr) {
       with_typed_xml_value(std::string(default_value_attr), default_type,
                            [&](const auto &value) {
@@ -721,10 +674,8 @@ YasminFactory::create_state(tinyxml2::XMLElement *state_elem) const {
         this->get_required_attribute(state_elem, "module");
     state = this->create_python_state(module_name, class_name);
   } else if (type == "cpp") {
-    auto *raw_state = this->state_loader_->createUnmanagedInstance(class_name);
     state = std::shared_ptr<yasmin::State>(
-        raw_state,
-        [loader = this->state_loader_](yasmin::State *ptr) { delete ptr; });
+        this->state_loader_->createUnmanagedInstance(class_name));
   } else {
     throw std::runtime_error("Unknown state type: " + type);
   }
@@ -735,8 +686,7 @@ YasminFactory::create_state(tinyxml2::XMLElement *state_elem) const {
 }
 
 yasmin::Concurrence::SharedPtr
-YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem,
-                                  const std::string &base_dir) const {
+YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
   std::string default_outcome =
       this->get_optional_attribute(conc_elem, "default_outcome", "");
 
@@ -756,26 +706,20 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem,
       parameter_mappings[name] = this->get_parameter_mappings(child);
     } else if (child_name == "Concurrence") {
       std::string name = this->get_required_attribute(child, "name");
-      states[name] = this->create_concurrence(child, base_dir);
+      states[name] = this->create_concurrence(child);
       parameter_mappings[name] = this->get_parameter_mappings(child);
     } else if (child_name == "StateMachine") {
       std::string name = this->get_required_attribute(child, "name");
-      states[name] = this->create_sm(child, base_dir);
+      states[name] = this->create_sm(child);
       parameter_mappings[name] = this->get_parameter_mappings(child);
     } else if (child_name == "OrthogonalState") {
       std::string name = this->get_required_attribute(child, "name");
-      states[name] = this->create_orthogonal_state(child, base_dir);
+      states[name] = this->create_orthogonal_state(child);
       parameter_mappings[name] = this->get_parameter_mappings(child);
     } else if (child_name == "JoinState") {
       std::string name = this->get_required_attribute(child, "name");
       states[name] = this->create_join_state(child);
       parameter_mappings[name] = this->get_parameter_mappings(child);
-    } else if (child_name != "OutcomeMap" && child_name != "Outcome" &&
-               child_name != "FinalOutcome" && child_name != "Key" &&
-               child_name != "Default" && child_name != "Param" &&
-               child_name != "ParamRemap") {
-      YASMIN_LOG_WARN("Unknown element '%s' in Concurrence",
-                      child_name.c_str());
     }
   }
 
@@ -798,9 +742,6 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem,
 
         if (states.find(state_name) != states.end()) {
           outcome_map[outcome_to][state_name] = outcome;
-        } else {
-          YASMIN_LOG_WARN("OutcomeMap '%s' references unknown state '%s'",
-                          outcome_to.c_str(), state_name.c_str());
         }
       }
     } else if (child_tag == "Outcome") {
@@ -818,14 +759,8 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem,
 
         if (states.find(state_name) != states.end()) {
           outcome_map[outcome_to][state_name] = outcome;
-        } else {
-          YASMIN_LOG_WARN("Outcome '%s' references unknown state '%s'",
-                          outcome_to.c_str(), state_name.c_str());
         }
       }
-    } else {
-      YASMIN_LOG_WARN("Unknown element '%s' in Concurrence outcome map",
-                      child_tag.c_str());
     }
   }
 
@@ -853,8 +788,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem,
 }
 
 yasmin::OrthogonalState::SharedPtr
-YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem,
-                                       const std::string &base_dir) const {
+YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem) {
   std::string default_outcome =
       this->get_optional_attribute(orth_elem, "default_outcome", "");
 
@@ -891,18 +825,12 @@ YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem,
             this->get_required_attribute(transition, "outcome");
         outcome_map[outcome_to][state_name] = outcome;
       }
-    } else if (child_tag != "Region" && child_tag != "Key" &&
-               child_tag != "Default" && child_tag != "Param" &&
-               child_tag != "ParamRemap") {
-      YASMIN_LOG_WARN("Unknown element '%s' in OrthogonalState outcome map",
-                      child_tag.c_str());
     }
   }
 
   auto ort = yasmin::OrthogonalState::make_shared(default_outcome, outcome_map);
 
   // Parse regions
-  std::unordered_set<std::string> region_names;
   for (tinyxml2::XMLElement *child = orth_elem->FirstChildElement(); child;
        child = child->NextSiblingElement()) {
     if (std::string(child->Name()) != "Region") {
@@ -910,22 +838,9 @@ YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem,
     }
 
     std::string region_name = this->get_required_attribute(child, "name");
-    auto region_sm = this->create_sm(child, base_dir);
+    auto region_sm = this->create_sm(child);
     region_sm->set_name(region_name);
     ort->add_region(region_name, region_sm);
-    region_names.insert(region_name);
-  }
-
-  // Validate outcome map items against region names
-  for (const auto &[outcome_name, state_map] : outcome_map) {
-    for (const auto &[state_name, unused_outcome] : state_map) {
-      (void)unused_outcome;
-      if (region_names.find(state_name) == region_names.end()) {
-        YASMIN_LOG_WARN(
-            "OutcomeMap '%s' references unknown region '%s' in OrthogonalState",
-            outcome_name.c_str(), state_name.c_str());
-      }
-    }
   }
 
   this->add_blackboard_keys(ort, orth_elem);
@@ -935,7 +850,7 @@ YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem,
 }
 
 yasmin::JoinState::SharedPtr
-YasminFactory::create_join_state(tinyxml2::XMLElement *join_elem) const {
+YasminFactory::create_join_state(tinyxml2::XMLElement *join_elem) {
   const std::string sync_id =
       this->get_optional_attribute(join_elem, "sync_id", "");
   const std::string outcome =
@@ -945,8 +860,7 @@ YasminFactory::create_join_state(tinyxml2::XMLElement *join_elem) const {
 }
 
 yasmin::StateMachine::SharedPtr
-YasminFactory::create_sm(tinyxml2::XMLElement *root,
-                         const std::string &base_dir) const {
+YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
   std::string file_path = this->get_optional_attribute(root, "file_path", "");
   bool from_file_path_attr = !file_path.empty();
@@ -971,21 +885,12 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root,
 #endif
 
         file_path = "";
-        std::vector<std::string> matches;
         for (const auto &entry :
              std::filesystem::recursive_directory_iterator(package_path)) {
           if (entry.is_regular_file() && entry.path().filename() == file_name) {
-            matches.push_back(entry.path().string());
+            file_path = entry.path().string();
+            break;
           }
-        }
-        if (matches.size() > 1) {
-          YASMIN_LOG_WARN(
-              "Found %zu matches for file '%s' in package '%s', using '%s'",
-              matches.size(), file_name.c_str(), package.c_str(),
-              matches[0].c_str());
-        }
-        if (!matches.empty()) {
-          file_path = matches[0];
         }
       } catch (const ament_index_cpp::PackageNotFoundError &e) {
         file_path = "";
@@ -998,28 +903,9 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root,
   // Check if StateMachine is an included XML file
   if (!file_path.empty()) {
     if (!std::filesystem::path(file_path).is_absolute()) {
-      if (base_dir.empty()) {
-        throw std::runtime_error(
-            "Cannot resolve relative file_path without a base directory");
-      }
-      file_path = (std::filesystem::path(base_dir) / file_path).string();
-    }
-    // Prevent path traversal outside the base directory, but only for
-    // user-supplied file_path attributes. Paths resolved via package +
-    // file_name are trusted (they come from the ament package registry)
-    // and may legitimately point to another package's share directory.
-    if (from_file_path_attr && !base_dir.empty()) {
-      std::string xml_dir =
-          std::filesystem::weakly_canonical(base_dir).string();
-      std::string resolved =
-          std::filesystem::weakly_canonical(file_path).string();
-      if (resolved != xml_dir &&
-          resolved.find(xml_dir + std::filesystem::path::preferred_separator) !=
-              0) {
-        throw std::runtime_error("File path '" + file_path +
-                                 "' resolves outside the XML directory");
-      }
-      file_path = resolved;
+      file_path =
+          (std::filesystem::path(this->xml_path_).parent_path() / file_path)
+              .string();
     }
     return this->create_sm_from_file(file_path);
   }
@@ -1027,14 +913,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root,
   std::string outcomes_str = this->get_optional_attribute(root, "outcomes", "");
   std::string set_start_state =
       this->get_optional_attribute(root, "start_state", "");
-  std::vector<std::string> outcomes_vec;
-  {
-    std::istringstream iss(outcomes_str);
-    std::string token;
-    while (iss >> token) {
-      outcomes_vec.push_back(token);
-    }
-  }
+  std::vector<std::string> outcomes_vec = this->split_string(outcomes_str, ' ');
   yasmin::Outcomes outcomes(outcomes_vec.begin(), outcomes_vec.end());
 
   auto sm = yasmin::StateMachine::make_shared(outcomes);
@@ -1047,12 +926,6 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root,
     if (child_name != "State" && child_name != "Concurrence" &&
         child_name != "StateMachine" && child_name != "OrthogonalState" &&
         child_name != "JoinState") {
-      if (child_name != "FinalOutcome" && child_name != "Key" &&
-          child_name != "Default" && child_name != "Param" &&
-          child_name != "ParamRemap") {
-        YASMIN_LOG_WARN("Unknown element '%s' in StateMachine",
-                        child_name.c_str());
-      }
       continue;
     }
 
@@ -1086,11 +959,11 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root,
     if (child_name == "State") {
       state = this->create_state(child);
     } else if (child_name == "Concurrence") {
-      state = this->create_concurrence(child, base_dir);
+      state = this->create_concurrence(child);
     } else if (child_name == "StateMachine") {
-      state = this->create_sm(child, base_dir);
+      state = this->create_sm(child);
     } else if (child_name == "OrthogonalState") {
-      state = this->create_orthogonal_state(child, base_dir);
+      state = this->create_orthogonal_state(child);
     } else if (child_name == "JoinState") {
       state = this->create_join_state(child);
     } else {
@@ -1134,7 +1007,8 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root,
 }
 
 yasmin::StateMachine::SharedPtr
-YasminFactory::create_sm_from_file(const std::string &xml_file) const {
+YasminFactory::create_sm_from_file(const std::string &xml_file) {
+  this->xml_path_ = xml_file;
   tinyxml2::XMLDocument doc;
   tinyxml2::XMLError error = doc.LoadFile(xml_file.c_str());
 
@@ -1156,11 +1030,8 @@ YasminFactory::create_sm_from_file(const std::string &xml_file) const {
   // Read the name of the state machine root if exists
   std::string sm_name = this->get_optional_attribute(root, "name", "");
 
-  // Use the XML file's parent directory as the base for relative includes
-  std::string base_dir = std::filesystem::path(xml_file).parent_path().string();
-
   // Create the state machine
-  auto sm = this->create_sm(root, base_dir);
+  auto sm = this->create_sm(root);
   sm->set_name(sm_name);
   return sm;
 }

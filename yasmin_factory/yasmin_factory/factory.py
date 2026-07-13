@@ -19,7 +19,6 @@ from typing import Dict
 
 from ament_index_python import get_package_share_path
 from lxml import etree as ET
-import yasmin
 from yasmin import Concurrence, JoinState, OrthogonalState, State, StateMachine
 from yasmin.orthogonal_state import setup_default_gil_hooks
 from yasmin_pybind_bridge import CppStateFactory
@@ -36,6 +35,7 @@ class YasminFactory:
         """
 
         self._cpp_factory = CppStateFactory()
+        self._xml_path: str = ""
 
         # Set up default GIL hooks for OrthogonalState so that threads
         # spawned by orthogonal regions can safely call into Python.
@@ -71,14 +71,11 @@ class YasminFactory:
         self._add_parameters(state, state_elem)
         return state
 
-    def create_concurrence(
-        self, conc_elem: ET.Element, base_dir: str = ""
-    ) -> Concurrence:
+    def create_concurrence(self, conc_elem: ET.Element) -> Concurrence:
         """
         Creates a concurrence from an XML element.
         Args:
             conc_elem (ET.Element): The XML element defining the concurrence.
-            base_dir (str): Base directory for resolving relative file_path includes.
         Returns:
             Concurrence: An instance of the created concurrence.
         Raises:
@@ -99,13 +96,13 @@ class YasminFactory:
                 )
 
             elif child.tag == "Concurrence":
-                states[child.attrib["name"]] = self.create_concurrence(child, base_dir)
+                states[child.attrib["name"]] = self.create_concurrence(child)
                 parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
                     child
                 )
 
             elif child.tag == "StateMachine":
-                states[child.attrib["name"]] = self.create_sm(child, base_dir)
+                states[child.attrib["name"]] = self.create_sm(child)
                 parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
                     child
                 )
@@ -117,9 +114,7 @@ class YasminFactory:
                 )
 
             elif child.tag == "OrthogonalState":
-                states[child.attrib["name"]] = self._create_orthogonal_state(
-                    child, base_dir
-                )
+                states[child.attrib["name"]] = self._create_orthogonal_state(child)
                 parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
                     child
                 )
@@ -132,16 +127,6 @@ class YasminFactory:
                     if item.tag == "Item":
                         state_name = item.attrib["state"]
                         outcome = item.attrib["outcome"]
-                        outcome_map[outcome_name][state_name] = outcome
-
-            elif child.tag == "Outcome":
-                outcome_name = child.attrib["to"]
-                outcome_map[outcome_name] = {}
-
-                for trans in child:
-                    if trans.tag == "Transition":
-                        state_name = trans.attrib["state"]
-                        outcome = trans.attrib["outcome"]
                         outcome_map[outcome_name][state_name] = outcome
 
         concurrence = Concurrence(
@@ -163,13 +148,10 @@ class YasminFactory:
 
         return concurrence
 
-    def _create_orthogonal_state(
-        self, orth_elem: ET.Element, base_dir: str = ""
-    ) -> OrthogonalState:
+    def _create_orthogonal_state(self, orth_elem: ET.Element) -> OrthogonalState:
         default_outcome = orth_elem.attrib.get("default_outcome", "")
 
         outcome_map = {}
-        region_names = set()
         for child in orth_elem:
             if child.tag == "OutcomeMap":
                 outcome_name = child.attrib["outcome"]
@@ -180,32 +162,14 @@ class YasminFactory:
                             "outcome"
                         ]
 
-            elif child.tag == "Outcome":
-                outcome_name = child.attrib["to"]
-                outcome_map[outcome_name] = {}
-                for trans in child:
-                    if trans.tag == "Transition":
-                        state_name = trans.attrib["state"]
-                        outcome = trans.attrib["outcome"]
-                        outcome_map[outcome_name][state_name] = outcome
-
         ort = OrthogonalState(default_outcome, outcome_map)
 
         for child in orth_elem:
             if child.tag == "Region":
                 region_name = child.attrib["name"]
-                region_sm = self.create_sm(child, base_dir)
+                region_sm = self.create_sm(child)
                 region_sm.set_name(region_name)
                 ort.add_region(region_name, region_sm)
-                region_names.add(region_name)
-
-        for outcome_name, state_map in outcome_map.items():
-            for state_name in state_map:
-                if state_name not in region_names:
-                    yasmin.YASMIN_LOG_WARN(
-                        f"OutcomeMap '{outcome_name}' references unknown region '{state_name}' "
-                        f"in OrthogonalState"
-                    )
 
         self._add_blackboard_keys(ort, orth_elem)
         self._add_parameters(ort, orth_elem)
@@ -216,21 +180,17 @@ class YasminFactory:
         outcome = join_elem.attrib.get("outcome", "joined")
         return JoinState(sync_id, outcome)
 
-    def create_sm(self, root: ET.Element, base_dir: str = "") -> StateMachine:
+    def create_sm(self, root: ET.Element) -> StateMachine:
         """
         Recursively creates a state machine from an XML element.
         Args:
             root (ET.Element): The XML element defining the state machine.
-            base_dir (str): Base directory for resolving relative file_path
-                includes. When empty, relative file_path attributes cannot be
-                resolved and will raise an error.
         Returns:
             StateMachine: An instance of the created state machine.
         Raises:
             ValueError: If the XML structure is invalid.
         """
         file_path = root.attrib.get("file_path", "")
-        from_file_path_attr = bool(file_path)
 
         if not file_path:
             file_name = root.attrib.get("file_name", "")
@@ -240,35 +200,22 @@ class YasminFactory:
                 try:
                     package_path = get_package_share_path(package)
                     file_path = ""
-                    matches = []
                     for dirpath, _, files in os.walk(package_path):
                         if file_name in files:
-                            matches.append(os.path.join(dirpath, file_name))
-                    if len(matches) > 1:
-                        yasmin.YASMIN_LOG_WARN(
-                            f"Found {len(matches)} matches for '{file_name}' in "
-                            f"package '{package}', using first match: {matches[0]}"
-                        )
-                    if matches:
-                        file_path = matches[0]
+                            file_path = os.path.join(dirpath, file_name)
+                            break
                 except (OSError, ValueError, KeyError):
                     file_path = ""
 
         if file_path:
             if not os.path.isabs(file_path):
-                file_path = os.path.normpath(os.path.join(base_dir, file_path))
-
-            # Prevent path traversal outside the base directory, but only for
-            # user-supplied file_path attributes. Paths resolved via package +
-            # file_name are trusted (they come from the ament package registry)
-            # and may legitimately point to another package's share directory.
-            if from_file_path_attr and base_dir:
-                base_dir_real = os.path.realpath(base_dir)
+                file_path = os.path.normpath(
+                    os.path.join(os.path.dirname(self._xml_path), file_path)
+                )
+                # Prevent path traversal outside the XML directory
+                xml_dir = os.path.realpath(os.path.dirname(self._xml_path))
                 resolved = os.path.realpath(file_path)
-                if (
-                    not resolved.startswith(base_dir_real + os.sep)
-                    and resolved != base_dir_real
-                ):
+                if not resolved.startswith(xml_dir + os.sep) and resolved != xml_dir:
                     raise ValueError(
                         f"File path '{file_path}' resolves outside the XML directory"
                     )
@@ -276,7 +223,7 @@ class YasminFactory:
 
             return self.create_sm_from_file(file_path)
 
-        sm = StateMachine(outcomes=root.attrib.get("outcomes", "").split())
+        sm = StateMachine(outcomes=root.attrib.get("outcomes", "").split(" "))
         set_start_state = root.attrib.get("start_state", "")
 
         for child in root:
@@ -297,13 +244,13 @@ class YasminFactory:
                 state = self.create_state(child)
 
             elif child.tag == "Concurrence":
-                state = self.create_concurrence(child, base_dir)
+                state = self.create_concurrence(child)
 
             elif child.tag == "StateMachine":
-                state = self.create_sm(child, base_dir)
+                state = self.create_sm(child)
 
             elif child.tag == "OrthogonalState":
-                state = self._create_orthogonal_state(child, base_dir)
+                state = self._create_orthogonal_state(child)
 
             elif child.tag == "JoinState":
                 state = self._create_join_state(child)
@@ -348,6 +295,7 @@ class YasminFactory:
             ValueError: If the XML structure is invalid.
         """
 
+        self._xml_path = xml_file
         tree = ET.parse(xml_file)
         root = tree.getroot()
 
@@ -357,10 +305,8 @@ class YasminFactory:
         # Read the name of the state machine root if available
         fsm_name = root.attrib.get("name", "")
 
-        # Create the state machine, threading the file's directory as base_dir
-        # so that relative file_path includes resolve correctly even with
-        # recursive create_sm_from_file calls.
-        sm = self.create_sm(root, os.path.dirname(xml_file))
+        # Create the state machine
+        sm = self.create_sm(root)
         sm.set_name(fsm_name)
         return sm
 

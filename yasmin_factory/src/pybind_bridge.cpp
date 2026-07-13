@@ -86,14 +86,17 @@ PYBIND11_MODULE(yasmin_pybind_bridge, m) {
   auto state_module = py::module::import("yasmin.state");
 #endif
 
+  // Get the State class that's already registered in yasmin.state
+  auto state_class = state_module.attr("State");
+
   py::class_<CppStateFactory>(m, "CppStateFactory")
       .def(py::init<>())
       .def("available_classes", &CppStateFactory::available_classes,
            "Get list of available C++ State class names")
       .def(
           "create",
-          [](CppStateFactory &self,
-             const std::string &class_name) -> py::object {
+          [state_class](CppStateFactory &self,
+                        const std::string &class_name) -> py::object {
             auto cpp_state = self.create(class_name);
             return py::cast(cpp_state);
           },

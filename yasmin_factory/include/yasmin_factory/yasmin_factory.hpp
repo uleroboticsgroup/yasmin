@@ -20,7 +20,6 @@
 #include <pybind11/stl.h>
 #include <tinyxml2.h>
 
-#include <mutex>
 #include <string>
 #include <vector>
 
@@ -134,8 +133,7 @@ public:
    *         XML structure is invalid.
    */
   yasmin::Concurrence::SharedPtr
-  create_concurrence(tinyxml2::XMLElement *conc_elem,
-                     const std::string &base_dir = "") const;
+  create_concurrence(tinyxml2::XMLElement *conc_elem);
 
   /**
    * @brief Creates an orthogonal state from an XML element.
@@ -145,8 +143,7 @@ public:
    * @throws std::runtime_error If the XML structure is invalid.
    */
   yasmin::OrthogonalState::SharedPtr
-  create_orthogonal_state(tinyxml2::XMLElement *orth_elem,
-                          const std::string &base_dir = "") const;
+  create_orthogonal_state(tinyxml2::XMLElement *orth_elem);
 
   /**
    * @brief Creates a join state from an XML element.
@@ -156,7 +153,7 @@ public:
    * @throws std::runtime_error If the XML structure is invalid.
    */
   yasmin::JoinState::SharedPtr
-  create_join_state(tinyxml2::XMLElement *join_elem) const;
+  create_join_state(tinyxml2::XMLElement *join_elem);
 
   /**
    * @brief Recursively creates a state machine from an XML element.
@@ -165,8 +162,7 @@ public:
    * @return A shared pointer to the created StateMachine.
    * @throws std::runtime_error If the XML structure is invalid.
    */
-  yasmin::StateMachine::SharedPtr
-  create_sm(tinyxml2::XMLElement *root, const std::string &base_dir = "") const;
+  yasmin::StateMachine::SharedPtr create_sm(tinyxml2::XMLElement *root);
 
   /**
    * @brief Creates a state machine from an XML file.
@@ -177,7 +173,7 @@ public:
    *         structure is invalid.
    */
   yasmin::StateMachine::SharedPtr
-  create_sm_from_file(const std::string &xml_file) const;
+  create_sm_from_file(const std::string &xml_file);
 
   /**
    * @brief Explicitly cleanup the factory resources.
@@ -189,14 +185,16 @@ public:
 
 private:
   /// Pluginlib class loader for yasmin::State classes
-  std::shared_ptr<pluginlib::ClassLoader<yasmin::State>> state_loader_;
+  std::unique_ptr<pluginlib::ClassLoader<yasmin::State>> state_loader_;
 
   /// Python interpreter guard (initialized once)
   static std::unique_ptr<py::scoped_interpreter> py_interpreter_;
 
   /// Track if Python interpreter is initialized
   static bool py_initialized_;
-  static std::once_flag py_init_once_;
+
+  /// Path to the XML file being processed
+  std::string xml_path_;
 
   /**
    * @brief Initializes the Python interpreter if not already initialized.
