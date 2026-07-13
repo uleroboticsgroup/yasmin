@@ -72,10 +72,8 @@ class TfBufferState(State):
     def execute(self, blackboard: Blackboard) -> str:
         try:
             # Clean up previous instances to avoid resource leaks
-            if self._prev_tf_listener is not None:
-                self._prev_tf_listener.__del__()
-            if self._prev_tf_buffer is not None:
-                self._prev_tf_buffer.__del__()
+            self._prev_tf_listener = None
+            self._prev_tf_buffer = None
 
             tf_buffer = Buffer(cache_time=Duration(seconds=self._cache_time_sec))
             tf_listener = TransformListener(tf_buffer, self._node)

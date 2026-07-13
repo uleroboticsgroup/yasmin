@@ -72,7 +72,8 @@ class YasminNode(Node):
             if YasminNode._instance is not None:
                 if yasmin_ros.logger_node is YasminNode._instance:
                     yasmin_ros.logger_node = None
-                YasminNode._instance.shutdown()
+                if rclpy.ok():
+                    YasminNode._instance.shutdown()
                 YasminNode._instance = None
 
     def __init__(self) -> None:

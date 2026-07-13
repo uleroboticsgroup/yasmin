@@ -22,7 +22,7 @@ from rclpy.callback_groups import CallbackGroup
 import yasmin
 from yasmin import State, Blackboard
 from yasmin_ros.ros_state_utils import resolve_node
-from yasmin_ros.basic_outcomes import SUCCEED
+from yasmin_ros.basic_outcomes import SUCCEED, CANCEL
 from yasmin_ros.ros_clients_cache import ROSClientsCache
 
 
@@ -75,7 +75,7 @@ class PublisherState(State):
         if not self._create_message_handler:
             raise ValueError("create_message_handler is needed")
 
-        super().__init__([SUCCEED])
+        super().__init__([SUCCEED, CANCEL])
 
     def execute(self, blackboard: Blackboard) -> str:
         """
@@ -87,6 +87,9 @@ class PublisherState(State):
         Returns:
             str: A string outcome indicating the result of the publishing operation.
         """
+
+        if self.is_canceled():
+            return CANCEL
 
         yasmin.YASMIN_LOG_DEBUG(f"Publishing to topic '{self._topic_name}'")
         msg = self._create_message_handler(blackboard)

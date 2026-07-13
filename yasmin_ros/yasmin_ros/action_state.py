@@ -133,11 +133,13 @@ class ActionState(State):
         """
         Cancel the current action state.
 
-        This function cancels the goal sent to the action server, if it exists.
+        This function cancels the goal sent to the action server, if it exists,
+        and waits for the cancellation to complete.
         """
         with self._goal_handle_lock:
             if self._goal_handle is not None:
-                self._goal_handle.cancel_goal()
+                cancel_future = self._goal_handle.cancel_goal_async()
+                cancel_future.result()
         super().cancel_state()
 
     def execute(self, blackboard: Blackboard) -> str:

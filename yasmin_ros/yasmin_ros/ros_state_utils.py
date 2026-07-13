@@ -49,14 +49,15 @@ def wait_with_retry(
     max_retry: int,
     log_msg: str,
     cancel_check: Optional[Callable[[], bool]] = None,
-    timeout: Optional[float] = None,
 ) -> Optional[str]:
     retry_count = 0
     while not condition_fn():
         if cancel_check is not None and cancel_check():
             return CANCEL
-        if retry_count >= max_retry:
+        yasmin.YASMIN_LOG_WARN(f"{log_msg}")
+        if retry_count < max_retry:
+            retry_count += 1
+            yasmin.YASMIN_LOG_WARN(f"Retrying ({retry_count}/{max_retry})")
+        else:
             return TIMEOUT
-        retry_count += 1
-        yasmin.YASMIN_LOG_WARN(f"{log_msg} ({retry_count}/{max_retry})")
     return None

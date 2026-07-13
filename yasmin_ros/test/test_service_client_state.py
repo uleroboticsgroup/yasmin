@@ -133,10 +133,11 @@ class TestServiceClientState(unittest.TestCase):
             self.assertEqual(TIMEOUT, state())
 
         ## Check that the number of WARNING logs is correct
+        expected_logs = retries * 2 + 1
         self.assertEqual(
-            retries,
+            expected_logs,
             len(captured.records),
-            msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
+            msg=f"Expected {expected_logs} WARNING logs, saw {len(captured)}.\n"
             f"Captured messages: {[r.getMessage() for r in captured.records]}",
         )
 
@@ -161,10 +162,11 @@ class TestServiceClientState(unittest.TestCase):
             self.assertEqual(TIMEOUT, state())
 
         ## Check that the number of WARNING logs is correct
+        expected_logs = retries * 2 + 1
         self.assertEqual(
-            retries,
+            expected_logs,
             len(captured.records),
-            msg=f"Expected {retries} WARNING logs, saw {len(captured)}.\n"
+            msg=f"Expected {expected_logs} WARNING logs, saw {len(captured)}.\n"
             f"Captured messages: {[r.getMessage() for r in captured.records]}",
         )
 

@@ -297,6 +297,16 @@ class ROSClientsCache:
                         else 0
                     ),
                     qos_profile.liveliness,
+                    (
+                        qos_profile.liveliness_lease_duration.nanoseconds
+                        if hasattr(qos_profile.liveliness_lease_duration, "nanoseconds")
+                        else 0
+                    ),
+                    (
+                        qos_profile.avoid_ros_namespace_conventions
+                        if hasattr(qos_profile, "avoid_ros_namespace_conventions")
+                        else False
+                    ),
                 )
             )
 

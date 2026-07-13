@@ -86,7 +86,7 @@ class ServiceState(State):
         # Set outcomes
         outcomes = setup_outcomes(
             outcomes,
-            {SUCCEED, ABORT},
+            {SUCCEED, ABORT, CANCEL},
             add_timeout=bool(self._wait_timeout or self._response_timeout),
         )
 
@@ -152,11 +152,13 @@ class ServiceState(State):
         try:
             yasmin.YASMIN_LOG_INFO(f"Sending request to service '{self._srv_name}'")
 
+            self._response = None
             self._response_received_event.clear()
 
             future = self._service_client.call_async(request)
             future.add_done_callback(self.response_callback)
 
+            retry_count = 0
             outcome = wait_with_retry(
                 lambda: self._response_received_event.wait(self._response_timeout),
                 self._maximum_retry,
@@ -172,6 +174,9 @@ class ServiceState(State):
 
         except Exception as e:
             yasmin.YASMIN_LOG_WARN(f"Service call failed: {e}")
+            return ABORT
+
+        if self._response is None:
             return ABORT
 
         if self._response_handler:
@@ -194,5 +199,8 @@ class ServiceState(State):
         Args:
             future (Future): The future object containing the service response.
         """
-        self._response = future.result()
+        try:
+            self._response = future.result()
+        except Exception:
+            self._response = None
         self._response_received_event.set()

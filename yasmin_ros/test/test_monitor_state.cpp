@@ -22,7 +22,6 @@
 #include <std_msgs/msg/string.hpp>
 
 #include "yasmin/types.hpp"
-#include "yasmin_ros/action_state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/monitor_state.hpp"
 #include "yasmin_ros/ros_clients_cache.hpp"
@@ -75,7 +74,6 @@ protected:
     if (spin_thread.joinable()) {
       spin_thread.join();
     }
-    ROSClientsCache::clear_all();
     aux_node.reset();
     executor.reset();
     yasmin_ros::ROSClientsCache::clear_all();

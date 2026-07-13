@@ -26,7 +26,6 @@ if(BUILD_TESTING)
 endif()
 
 # C++
-include_directories(src)
 include_directories(include)
 
 set(SOURCES

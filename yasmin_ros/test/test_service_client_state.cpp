@@ -21,7 +21,6 @@
 #include <example_interfaces/srv/add_two_ints.hpp>
 
 #include "yasmin/types.hpp"
-#include "yasmin_ros/action_state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/ros_clients_cache.hpp"
 #include "yasmin_ros/ros_logs.hpp"
