@@ -11,10 +11,10 @@
     <ParamRemap old="position_y" new="pose_y"/>
     <ParamRemap old="position_z" new="pose_z"/>
     <ParamRemap old="orientation_w" new="pose_orientation_w"/>
-    <Transition from="outcome1" to="PoseReader"/>
+    <Transition from="SUCCEED" to="PoseReader"/>
   </State>
   <State name="PoseReader" x="443.37" y="81.80" type="py" module="yasmin_demos.pose_reader_state" class="PoseReaderState">
-    <Transition from="outcome2" to="outcome4"/>
+    <Transition from="SUCCEED" to="outcome4"/>
   </State>
   <FinalOutcome name="outcome4" x="664.20" y="82.80" description="Final outcome"/>
 </StateMachine>

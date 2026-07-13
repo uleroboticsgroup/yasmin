@@ -30,9 +30,9 @@ class PoseReaderState(State):
         Initializes the PoseReaderState instance, setting up the outcome.
 
         Outcomes:
-            outcome2: Indicates the serialized Pose was read successfully.
+            SUCCEED: Indicates the serialized Pose was read successfully.
         """
-        super().__init__(outcomes=["outcome2"])
+        super().__init__(outcomes=["SUCCEED"])
         self.set_description(
             "Reads a serialized Pose message from the blackboard, deserializes it, and logs the position and orientation."
         )
@@ -54,7 +54,7 @@ class PoseReaderState(State):
             blackboard (Blackboard): The shared data structure for states.
 
         Returns:
-            str: The outcome of the execution, which will always be "outcome2".
+            str: The outcome of the execution, which will always be "SUCCEED".
 
         Raises:
             Exception: May raise exceptions related to blackboard access or deserialization.
@@ -73,4 +73,4 @@ class PoseReaderState(State):
             f"Orientation: x={pose.orientation.x}, y={pose.orientation.y}, z={pose.orientation.z}, w={pose.orientation.w}"
         )
 
-        return "outcome2"
+        return "SUCCEED"

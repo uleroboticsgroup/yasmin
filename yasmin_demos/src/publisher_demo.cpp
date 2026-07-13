@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <string>
+#include <thread>
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int32.hpp>
@@ -91,7 +92,7 @@ public:
  */
 std::string check_count(yasmin::Blackboard::SharedPtr blackboard) {
 
-  // Sleep for 1 second to simulate some processing time
+  // Sleep for 1 second using the ROS 2 clock (respects sim time)
   rclcpp::sleep_for(std::chrono::seconds(1));
   YASMIN_LOG_INFO("Checking count: %d", blackboard->get<int>("counter"));
 

@@ -185,7 +185,7 @@ def main() -> None:
     )
 
     # Publish FSM info
-    YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_SERVICE_CLIENT_DEMO")
 
     # Execute the FSM
     try:
@@ -193,6 +193,8 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
     YasminNode.destroy_instance()

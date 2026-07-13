@@ -27,6 +27,12 @@
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
+// Note: Local FooState and BarState definitions are intentional here.
+// This demo specifically illustrates ROS parameter loading via the
+// blackboard-key pattern (max_counter, counter_str, foo_str), which
+// differs from the shared yasmin_demos::FooState / BarState that use the
+// declare_parameter/configure interface.  Do not replace them with the
+// shared versions.
 /**
  * @brief Represents the "Foo" state in the state machine.
  *

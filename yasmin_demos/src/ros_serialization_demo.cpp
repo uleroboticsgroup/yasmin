@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// C++ only server demo, no Python equivalent
+
 #include <memory>
 #include <string>
 

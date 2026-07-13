@@ -75,7 +75,11 @@ class PrintOdometryState(MonitorState):
         Exceptions:
             None
         """
-        yasmin.YASMIN_LOG_INFO(msg)
+        yasmin.YASMIN_LOG_INFO(
+            f"x: {msg.pose.pose.position.x}, "
+            f"y: {msg.pose.pose.position.y}, "
+            f"z: {msg.pose.pose.position.z}"
+        )
 
         self.times -= 1
 
@@ -116,7 +120,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_MONITOR_DEMO")
 
     # Execute the FSM
     try:
@@ -124,6 +128,8 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
     YasminNode.destroy_instance()

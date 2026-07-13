@@ -23,7 +23,8 @@
 
 /**
  * @class FibonacciActionServer
- * @brief A ROS 2 action server node for calculating Fibonacci sequences.
+ * @brief A ROS 2 action server node for calculating Fibonacci sequences (C++
+ * only, no Python equivalent).
  */
 class FibonacciActionServer : public rclcpp::Node {
 public:
@@ -42,7 +43,6 @@ public:
    *
    * Initializes the action server and sets up the goal, cancel, and accepted
    * callbacks.
-   * @param options Node options for initialization.
    */
   explicit FibonacciActionServer() : Node("fibonacci_action_server") {
     this->threads_.reserve(8);
@@ -75,6 +75,12 @@ public:
           };
           {
             std::lock_guard<std::mutex> lock(this->threads_mutex_);
+            for (auto &thread : this->threads_) {
+              if (thread.joinable()) {
+                thread.join();
+              }
+            }
+            this->threads_.clear();
             this->threads_.emplace_back(execute_in_thread);
           }
         };
@@ -128,7 +134,9 @@ private:
     // Initialize the Fibonacci sequence with the first two numbers.
     auto &sequence = feedback->sequence;
     sequence.push_back(0);
-    sequence.push_back(1);
+    if (goal->order >= 1) {
+      sequence.push_back(1);
+    }
 
     auto result = std::make_shared<Fibonacci::Result>();
 

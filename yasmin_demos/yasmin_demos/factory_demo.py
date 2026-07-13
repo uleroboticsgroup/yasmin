@@ -35,14 +35,16 @@ def main() -> None:
     # Create a finite state machine (FSM)
     factory = YasminFactory()
     sm = factory.create_sm_from_file(
+        # Other XML demos: demo_1.xml, demo_3.xml, demo_orthogonal.xml,
+        #                  demo_orthogonal_sync.xml, demo_fsm_metadata.xml
         os.path.join(
-            get_package_share_directory("yasmin_demos"), "state_machines", "demo_1.xml"
+            get_package_share_directory("yasmin_demos"), "state_machines", "demo_2.xml"
         )
     )
     sm.set_sigint_handler(True)
 
     # Publish FSM information for visualization
-    pub = YasminViewerPub(sm, "plugin_demo")
+    pub = YasminViewerPub(sm, "YASMIN_FACTORY_DEMO")
 
     # Execute the FSM
     try:

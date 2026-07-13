@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <memory>
+#include <sstream>
 #include <string>
 
 #include <example_interfaces/srv/add_two_ints.hpp>

@@ -19,6 +19,7 @@ from yasmin_ros.basic_outcomes import SUCCEED
 
 import yasmin
 from yasmin import Blackboard, State, StateMachine
+from yasmin_demos.bar_state import BarState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_viewer import YasminViewerPub
@@ -65,44 +66,6 @@ class Foo(State):
         data = blackboard["foo_data"]
         yasmin.YASMIN_LOG_INFO(f"{data}")
         blackboard["foo_out_data"] = data
-        return SUCCEED
-
-
-class BarState(State):
-    """
-    Represents the Bar state in the state machine.
-
-    """
-
-    def __init__(self):
-        """
-        Initializes the BarState instance, setting up the outcomes.
-
-        Outcomes:
-            SUCCEDED: Indicates the state should continue to the next state.
-        """
-        super().__init__(outcomes=[SUCCEED])
-        self.set_description("Reads remapped input data from the blackboard and logs it.")
-        self.add_input_key(
-            "bar_data",
-            "Input data read by the Bar state.",
-        )
-
-    def execute(self, blackboard: Blackboard):
-        """
-        Executes the logic for the Bar state.
-
-        Args:
-            blackboard (Blackboard): The shared data structure for states.
-
-        Returns:
-            str: The outcome of the execution, which can be SUCCEED.
-
-        Raises:
-            Exception: May raise exceptions related to state execution.
-        """
-        data = blackboard["bar_data"]
-        yasmin.YASMIN_LOG_INFO(f"{data}")
         return SUCCEED
 
 
@@ -153,12 +116,12 @@ def main() -> None:
     sm.add_state(
         "STATE3",
         BarState(),
-        transitions={SUCCEED: SUCCEED},
-        remappings={"bar_data": "foo_out_data"},
+        transitions={"outcome3": SUCCEED},
+        remappings={"foo_str": "foo_out_data"},
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_REMAPPING_DEMO")
 
     # Execute the FSM
     try:
@@ -166,6 +129,8 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
     YasminNode.destroy_instance()

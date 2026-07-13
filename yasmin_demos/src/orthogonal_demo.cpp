@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <chrono>
 #include <memory>
 #include <string>
 
@@ -22,36 +21,10 @@
 #include "yasmin/orthogonal_state.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin_demos/worker_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
-
-class WorkerState : public yasmin::State {
-public:
-  int counter;
-  int max_count_;
-  int sleep_ms_;
-  std::string name_;
-
-  WorkerState(const std::string &name, int max_count, int sleep_ms = 500)
-      : yasmin::State({"working", "done"}), counter(0), max_count_(max_count),
-        sleep_ms_(sleep_ms), name_(name) {
-    this->set_description(
-        "Counts iterations and returns 'working' until max_count is reached.");
-  };
-
-  std::string execute(yasmin::Blackboard::SharedPtr /*blackboard*/) override {
-    YASMIN_LOG_INFO("WorkerState [%s]: iteration %d/%d", this->name_.c_str(),
-                    this->counter + 1, this->max_count_);
-    std::this_thread::sleep_for(std::chrono::milliseconds(this->sleep_ms_));
-
-    this->counter += 1;
-    if (this->counter >= this->max_count_) {
-      return "done";
-    }
-    return "working";
-  };
-};
 
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
@@ -63,16 +36,20 @@ int main(int argc, char *argv[]) {
   auto reg_a = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"done"});
   reg_a->set_name("Region A");
-  reg_a->add_state("WORK", std::make_shared<WorkerState>("A", 3, 300),
-                   {{"working", "WORK"}});
+  auto worker_a = std::make_shared<WorkerState>();
+  worker_a->set_parameter<int>("max_count", 3);
+  worker_a->set_parameter<int>("sleep_ms", 300);
+  reg_a->add_state("WORK", worker_a, {{"working", "WORK"}});
   reg_a->set_start_state("WORK");
 
   // Region B: 5 iterations
   auto reg_b = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"done"});
   reg_b->set_name("Region B");
-  reg_b->add_state("WORK", std::make_shared<WorkerState>("B", 5, 300),
-                   {{"working", "WORK"}});
+  auto worker_b = std::make_shared<WorkerState>();
+  worker_b->set_parameter<int>("max_count", 5);
+  worker_b->set_parameter<int>("sleep_ms", 300);
+  reg_b->add_state("WORK", worker_b, {{"working", "WORK"}});
   reg_b->set_start_state("WORK");
 
   // Orthogonal state runs both regions in parallel

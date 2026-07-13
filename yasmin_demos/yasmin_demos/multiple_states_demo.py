@@ -60,7 +60,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_MULTIPLE_STATES_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_MULTIPLE_STATES_DEMO")
 
     # Execute the FSM
     try:
@@ -68,6 +68,8 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
     YasminNode.destroy_instance()

@@ -26,6 +26,12 @@ from yasmin_ros.yasmin_node import YasminNode
 from yasmin_viewer import YasminViewerPub
 
 
+# Note: Local FooState and BarState definitions are intentional here.
+# This demo specifically illustrates ROS parameter loading via the
+# blackboard-key pattern (max_counter, counter_str, foo_str), which differs
+# from the shared yasmin_demos.FooState / BarState that use the
+# declare_parameter/configure interface.  Do not replace them with the
+# shared versions.
 # Define the FooState class, inheriting from the State class
 class FooState(State):
     """
@@ -133,6 +139,12 @@ def main() -> None:
     set_ros_loggers()
     yasmin.YASMIN_LOG_INFO("yasmin_parameters_demo")
 
+    # This demo loads parameters from the ROS 2 parameter server.
+    # To run with custom parameters:
+    #   ros2 launch yasmin_demos parameters_demo.launch.py max_counter:=5 counter_str:=Step
+    # or:
+    #   ros2 run yasmin_demos parameters_demo --ros-args -p max_counter:=5 -p counter_str:=Step
+
     # Create a finite state machine (FSM)
     sm = StateMachine(outcomes=["outcome4"], handle_sigint=True)
     sm.set_description(
@@ -198,7 +210,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_PARAMETERS_DEMO")
 
     # Execute the FSM
     try:
@@ -206,6 +218,8 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
     YasminNode.destroy_instance()

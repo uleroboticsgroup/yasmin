@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <chrono>
 #include <memory>
 #include <string>
 
@@ -21,11 +20,16 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin_demos/bar_state.hpp"
 #include "yasmin_ros/basic_outcomes.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
+// Note: A local FooState is defined here instead of using the shared
+// yasmin_demos::FooState because this demo illustrates blackboard key
+// remapping with custom pass-through keys (foo_data / foo_out_data) that
+// differ fundamentally from the shared counter-based FooState interface.
 /**
  * @brief Represents the "Foo" state in the state machine.
  */
@@ -56,35 +60,6 @@ public:
     blackboard->set<std::string>("foo_out_data", data);
     return yasmin_ros::basic_outcomes::SUCCEED;
   };
-};
-
-/**
- * @brief Represents the "Bar" state in the state machine.
- */
-class BarState : public yasmin::State {
-public:
-  /**
-   * @brief Constructs a BarState object.
-   */
-  BarState() : yasmin::State({yasmin_ros::basic_outcomes::SUCCEED}) {
-    this->set_description(
-        "Reads remapped input data from the blackboard and logs it.");
-    this->add_input_key("bar_data", "Input data read by the Bar state.");
-  }
-
-  /**
-   * @brief Executes the Bar state logic.
-   *
-   * Executes the logic for the Bar state.
-   *
-   * @param blackboard Shared pointer to the blackboard for state communication.
-   * @return std::string The outcome of the execution: "outcome3".
-   */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    const auto &data = blackboard->get<std::string>("bar_data");
-    YASMIN_LOG_INFO("%s", data.c_str());
-    return yasmin_ros::basic_outcomes::SUCCEED;
-  }
 };
 
 int main(int argc, char *argv[]) {
@@ -131,11 +106,10 @@ int main(int argc, char *argv[]) {
                 });
   sm->add_state("STATE3", std::make_shared<BarState>(),
                 {
-                    {yasmin_ros::basic_outcomes::SUCCEED,
-                     yasmin_ros::basic_outcomes::SUCCEED},
+                    {"outcome3", yasmin_ros::basic_outcomes::SUCCEED},
                 },
                 {
-                    {"bar_data", "foo_out_data"},
+                    {"foo_str", "foo_out_data"},
                 });
 
   {

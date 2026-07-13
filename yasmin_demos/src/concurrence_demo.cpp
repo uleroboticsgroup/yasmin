@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <chrono>
 #include <memory>
 #include <string>
 
@@ -23,109 +22,11 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin_demos/bar_state.hpp"
+#include "yasmin_demos/foo_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
-
-/**
- * @brief Represents the "Foo" state in the state machine.
- *
- * This state increments a counter each time it is executed and
- * communicates the current count via the blackboard.
- */
-class FooState : public yasmin::State {
-public:
-  /// Counter to track the number of executions.
-  int counter;
-
-  /**
-   * @brief Constructs a FooState object, initializing the counter.
-   */
-  FooState() : yasmin::State({"outcome1", "outcome2", "outcome3"}), counter(0) {
-    this->set_description(
-        "Produces a counter string and stores it in the blackboard while "
-        "cycling through outcomes based on the internal counter.");
-    this->add_output_key(
-        "foo_str",
-        "String containing the current counter value produced by FooState.");
-  };
-
-  /**
-   * @brief Executes the Foo state logic.
-   *
-   * This method logs the execution, waits for 3 seconds,
-   * increments the counter, and sets a string in the blackboard.
-   * The state will transition to either "outcome1" or "outcome2"
-   * based on the current value of the counter.
-   *
-   * @param blackboard Shared pointer to the blackboard for state communication.
-   * @return std::string The outcome of the execution: "outcome1" or "outcome2".
-   */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    YASMIN_LOG_INFO("Executing state FOO");
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-
-    std::string outcome;
-
-    blackboard->set<std::string>("foo_str",
-                                 "Counter: " + std::to_string(this->counter));
-
-    if (this->counter < 3) {
-      outcome = "outcome1";
-    } else if (this->counter < 5) {
-      outcome = "outcome2";
-    } else {
-      outcome = "outcome3";
-    }
-
-    YASMIN_LOG_INFO("Finishing state FOO");
-    this->counter += 1;
-    return outcome;
-  };
-};
-
-/**
- * @brief Represents the "Bar" state in the state machine.
- *
- * This state logs the value from the blackboard and provides
- * a single outcome to transition.
- */
-class BarState : public yasmin::State {
-public:
-  /**
-   * @brief Constructs a BarState object.
-   */
-  BarState() : yasmin::State({"outcome3"}) {
-    this->set_description(
-        "Reads and prints the value stored in 'foo_str' from the blackboard.");
-    this->add_input_key(
-        "foo_str", "String produced by FooState containing the counter value.");
-  }
-
-  /**
-   * @brief Executes the Bar state logic.
-   *
-   * This method logs the execution, waits for 3 seconds,
-   * retrieves a string from the blackboard, and logs it.
-   *
-   * @param blackboard Shared pointer to the blackboard for state communication.
-   * @return std::string The outcome of the execution: "outcome3".
-   */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    YASMIN_LOG_INFO("Executing state BAR");
-    std::this_thread::sleep_for(std::chrono::seconds(4));
-
-    if (blackboard->contains("foo_str")) {
-      YASMIN_LOG_INFO(blackboard->get<std::string>("foo_str").c_str());
-    } else {
-      YASMIN_LOG_INFO("blackboard does not yet contains 'foo_str'");
-    }
-
-    YASMIN_LOG_INFO("Finishing state BAR");
-
-    return "outcome3";
-  }
-};
 
 int main(int argc, char *argv[]) {
   // Initialize ROS 2
@@ -157,8 +58,16 @@ int main(int argc, char *argv[]) {
       },
       "defaulted",
       yasmin::OutcomeMap{
-          {"outcome1", {{"FOO", "outcome1"}, {"BAR", "outcome3"}}},
-          {"outcome2", {{"FOO", "outcome2"}, {"BAR", "outcome3"}}},
+          {"outcome1",
+           {
+               {"FOO", "outcome1"},
+               {"BAR", "outcome3"},
+           }},
+          {"outcome2",
+           {
+               {"FOO", "outcome2"},
+               {"BAR", "outcome3"},
+           }},
       });
   concurrent_state->set_description(
       "Executes FooState and BarState in parallel and maps their combined "
@@ -172,7 +81,7 @@ int main(int argc, char *argv[]) {
   sm->add_state("CONCURRENCE", concurrent_state,
                 {
                     {"outcome1", "CONCURRENCE"},
-                    {"outcome2", "CONCURRENCE"},
+                    {"outcome2", "outcome4"},
                     {"defaulted", "outcome4"},
                 });
 

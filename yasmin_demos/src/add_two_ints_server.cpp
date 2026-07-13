@@ -21,21 +21,20 @@
 
 /**
  * @class ServerNode
- * @brief A ROS 2 service server node for adding two integers.
+ * @brief A ROS 2 service server node for adding two integers (C++ only, no
+ * Python equivalent).
  *
  * This node provides a service named "add_two_ints" that accepts two integers
- * as input and returns their sum. It also supports an optional one-shot mode
- * that shuts down the server after handling the first request.
+ * as input and returns their sum.
  */
 class ServerNode final : public rclcpp::Node {
 public:
   /**
    * @brief Constructor for the ServerNode class.
    *
-   * Initializes the service server and an optional one-shot timer.
-   * @param options Node options for initialization.
+   * Initializes the service server.
    */
-  explicit ServerNode() : Node("add_two_ints_server") {
+  ServerNode() : Node("add_two_ints_server") {
 
     // Callback to handle "add_two_ints" service requests.
     auto handle_add_two_ints =

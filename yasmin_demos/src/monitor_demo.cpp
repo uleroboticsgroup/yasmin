@@ -53,10 +53,10 @@ public:
             "odom",                   // topic name
             {"outcome1", "outcome2"}, // possible outcomes
             std::bind(&PrintOdometryState::monitor_handler, this, _1,
-                      _2), // monitor handler callback
-            10,            // QoS for the topic subscription
-            10,            // queue size for the callback
-            10             // timeout for receiving messages
+                      _2),           // monitor handler callback
+            rclcpp::SensorDataQoS(), // QoS for the topic subscription
+            10,                      // queue size for the callback
+            10                       // timeout for receiving messages
         ) {
     this->times = 5;
     this->set_description("Monitors odometry messages from the 'odom' topic "
@@ -84,9 +84,8 @@ public:
 
     (void)blackboard; // blackboard is not used in this implementation
 
-    YASMIN_LOG_INFO("x: %f", msg->pose.pose.position.x);
-    YASMIN_LOG_INFO("y: %f", msg->pose.pose.position.y);
-    YASMIN_LOG_INFO("z: %f", msg->pose.pose.position.z);
+    YASMIN_LOG_INFO("x: %f, y: %f, z: %f", msg->pose.pose.position.x,
+                    msg->pose.pose.position.y, msg->pose.pose.position.z);
 
     this->times--;
 

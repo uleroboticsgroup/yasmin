@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <chrono>
 #include <memory>
 #include <string>
 
@@ -23,32 +22,10 @@
 #include "yasmin/orthogonal_state.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin_demos/worker_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
-
-class WorkerState : public yasmin::State {
-public:
-  int counter;
-  int max_count_;
-  int sleep_ms_;
-  std::string name_;
-
-  WorkerState(const std::string &name, int max_count, int sleep_ms = 300)
-      : yasmin::State({"working", "done"}), counter(0), max_count_(max_count),
-        sleep_ms_(sleep_ms), name_(name) {}
-
-  std::string execute(yasmin::Blackboard::SharedPtr /*blackboard*/) override {
-    YASMIN_LOG_INFO("WorkerState [%s]: iteration %d/%d", this->name_.c_str(),
-                    this->counter + 1, this->max_count_);
-    std::this_thread::sleep_for(std::chrono::milliseconds(this->sleep_ms_));
-    this->counter += 1;
-    if (this->counter >= this->max_count_) {
-      return "done";
-    }
-    return "working";
-  };
-};
 
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
@@ -62,11 +39,17 @@ int main(int argc, char *argv[]) {
   auto reg_a = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"done"});
   reg_a->set_name("Region A");
-  reg_a->add_state("WORK_1", std::make_shared<WorkerState>("A.1", 100, 200),
+  auto worker_a1 = std::make_shared<WorkerState>();
+  worker_a1->set_parameter<int>("max_count", 3);
+  worker_a1->set_parameter<int>("sleep_ms", 200);
+  reg_a->add_state("WORK_1", worker_a1,
                    {{"working", "WORK_1"}, {"done", "SYNC"}});
   reg_a->add_state("SYNC", std::make_shared<yasmin::JoinState>(SYNC_ID),
                    {{"joined", "WORK_2"}});
-  reg_a->add_state("WORK_2", std::make_shared<WorkerState>("A.2", 2, 200),
+  auto worker_a2 = std::make_shared<WorkerState>();
+  worker_a2->set_parameter<int>("max_count", 2);
+  worker_a2->set_parameter<int>("sleep_ms", 200);
+  reg_a->add_state("WORK_2", worker_a2,
                    {{"working", "WORK_2"}, {"done", "done"}});
   reg_a->set_start_state("WORK_1");
 
@@ -74,11 +57,17 @@ int main(int argc, char *argv[]) {
   auto reg_b = yasmin::StateMachine::make_shared(
       std::initializer_list<std::string>{"done"});
   reg_b->set_name("Region B");
-  reg_b->add_state("WORK_1", std::make_shared<WorkerState>("B.1", 2, 200),
+  auto worker_b1 = std::make_shared<WorkerState>();
+  worker_b1->set_parameter<int>("max_count", 2);
+  worker_b1->set_parameter<int>("sleep_ms", 200);
+  reg_b->add_state("WORK_1", worker_b1,
                    {{"working", "WORK_1"}, {"done", "SYNC"}});
   reg_b->add_state("SYNC", std::make_shared<yasmin::JoinState>(SYNC_ID),
                    {{"joined", "WORK_2"}});
-  reg_b->add_state("WORK_2", std::make_shared<WorkerState>("B.2", 100, 200),
+  auto worker_b2 = std::make_shared<WorkerState>();
+  worker_b2->set_parameter<int>("max_count", 3);
+  worker_b2->set_parameter<int>("sleep_ms", 200);
+  reg_b->add_state("WORK_2", worker_b2,
                    {{"working", "WORK_2"}, {"done", "done"}});
   reg_b->set_start_state("WORK_1");
 

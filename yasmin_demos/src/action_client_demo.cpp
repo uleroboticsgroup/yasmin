@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #include <memory>
+#include <sstream>
 #include <string>
+#include <vector>
 
 #include <example_interfaces/action/fibonacci.hpp>
 
@@ -75,7 +77,7 @@ public:
   FibonacciState()
       : yasmin_ros::ActionState<Fibonacci>(
             "/fibonacci",
-            std::bind(&FibonacciState::create_goal_handler, this, _1),
+            std::bind(&FibonacciState::create_goal_handler, this, _1), {},
             std::bind(&FibonacciState::response_handler, this, _1, _2),
             std::bind(&FibonacciState::print_feedback, this, _1, _2)) {
     this->set_description("Calls the Fibonacci action server and stores the "

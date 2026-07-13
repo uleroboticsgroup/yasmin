@@ -14,36 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
-
 import rclpy
 
 import yasmin
-from yasmin import Blackboard, OrthogonalState, State, StateMachine
+from yasmin import OrthogonalState, StateMachine
+from yasmin_demos.worker_state import WorkerState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_viewer import YasminViewerPub
-
-
-# Define a WorkerState that loops until max_count is reached
-class WorkerState(State):
-    def __init__(self, name: str, max_count: int, sleep_ms: int = 500) -> None:
-        super().__init__(["working", "done"])
-        self.name = name
-        self.counter = 0
-        self.max_count = max_count
-        self.sleep_ms = sleep_ms
-
-    def execute(self, blackboard: Blackboard) -> str:
-        yasmin.YASMIN_LOG_INFO(
-            f"WorkerState [{self.name}]: iteration {self.counter + 1}/{self.max_count}"
-        )
-        time.sleep(self.sleep_ms / 1000.0)
-
-        self.counter += 1
-        if self.counter >= self.max_count:
-            return "done"
-        return "working"
 
 
 def main() -> None:
@@ -54,9 +32,12 @@ def main() -> None:
     # Region A: 3 iterations
     reg_a = StateMachine(outcomes=["done"])
     reg_a.set_name("Region A")
+    worker_a = WorkerState()
+    worker_a.set_parameter("max_count", 3)
+    worker_a.set_parameter("sleep_ms", 300)
     reg_a.add_state(
         "WORK",
-        WorkerState("A", 3, 300),
+        worker_a,
         transitions={"working": "WORK"},
     )
     reg_a.set_start_state("WORK")
@@ -64,9 +45,12 @@ def main() -> None:
     # Region B: 5 iterations
     reg_b = StateMachine(outcomes=["done"])
     reg_b.set_name("Region B")
+    worker_b = WorkerState()
+    worker_b.set_parameter("max_count", 5)
+    worker_b.set_parameter("sleep_ms", 300)
     reg_b.add_state(
         "WORK",
-        WorkerState("B", 5, 300),
+        worker_b,
         transitions={"working": "WORK"},
     )
     reg_b.set_start_state("WORK")
@@ -94,13 +78,15 @@ def main() -> None:
     )
     sm.set_start_state("PARALLEL")
 
-    YasminViewerPub(sm, "YASMIN_ORTHOGONAL_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_ORTHOGONAL_DEMO")
 
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     YasminNode.destroy_instance()
     if rclpy.ok():

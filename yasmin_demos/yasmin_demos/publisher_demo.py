@@ -14,9 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
-
 import rclpy
+from rclpy.duration import Duration
 from std_msgs.msg import Int32
 from yasmin_ros.basic_outcomes import SUCCEED
 
@@ -87,8 +86,8 @@ def check_count(blackboard: Blackboard) -> str:
     Returns:
         str: The outcome string ('outcome1' or 'outcome2').
     """
-    # Simulate processing time
-    time.sleep(1)
+    # Simulate processing time using the ROS 2 clock (respects sim time)
+    YasminNode.get_instance().get_clock().sleep_for(Duration(seconds=1))
 
     # Retrieve the counter and max value from blackboard
     count = blackboard.get("counter")
@@ -164,7 +163,7 @@ def main() -> None:
     )
 
     # Publish FSM information for visualization
-    YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_PUBLISHER_DEMO")
 
     # Initialize blackboard with counter values
     blackboard = Blackboard()
@@ -177,6 +176,8 @@ def main() -> None:
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     # Shutdown ROS 2 if it's running
     YasminNode.destroy_instance()

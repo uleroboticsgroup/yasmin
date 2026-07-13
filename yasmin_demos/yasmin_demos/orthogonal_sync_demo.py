@@ -14,35 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
-
 import rclpy
 
 import yasmin
-from yasmin import Blackboard, JoinState, OrthogonalState, State, StateMachine
+from yasmin import JoinState, OrthogonalState, StateMachine
+from yasmin_demos.worker_state import WorkerState
 from yasmin_ros import set_ros_loggers
 from yasmin_ros.yasmin_node import YasminNode
 from yasmin_viewer import YasminViewerPub
-
-
-class WorkerState(State):
-    def __init__(self, name: str, max_count: int, sleep_ms: int = 300) -> None:
-        super().__init__(["working", "done"])
-        self.name = name
-        self.counter = 0
-        self.max_count = max_count
-        self.sleep_ms = sleep_ms
-
-    def execute(self, blackboard: Blackboard) -> str:
-        yasmin.YASMIN_LOG_INFO(
-            f"WorkerState [{self.name}]: iteration {self.counter + 1}/{self.max_count}"
-        )
-        time.sleep(self.sleep_ms / 1000.0)
-
-        self.counter += 1
-        if self.counter >= self.max_count:
-            return "done"
-        return "working"
 
 
 def main() -> None:
@@ -55,9 +34,12 @@ def main() -> None:
     # Region A: 3 iterations -> JoinState -> 2 more iterations
     reg_a = StateMachine(outcomes=["done"])
     reg_a.set_name("Region A")
+    worker_a1 = WorkerState()
+    worker_a1.set_parameter("max_count", 3)
+    worker_a1.set_parameter("sleep_ms", 200)
     reg_a.add_state(
         "WORK_1",
-        WorkerState("A.1", 3, 200),
+        worker_a1,
         transitions={"working": "WORK_1", "done": "SYNC"},
     )
     reg_a.add_state(
@@ -65,9 +47,12 @@ def main() -> None:
         JoinState(SYNC_ID),
         transitions={"joined": "WORK_2"},
     )
+    worker_a2 = WorkerState()
+    worker_a2.set_parameter("max_count", 2)
+    worker_a2.set_parameter("sleep_ms", 200)
     reg_a.add_state(
         "WORK_2",
-        WorkerState("A.2", 2, 200),
+        worker_a2,
         transitions={"working": "WORK_2", "done": "done"},
     )
     reg_a.set_start_state("WORK_1")
@@ -75,9 +60,12 @@ def main() -> None:
     # Region B: 2 iterations -> JoinState -> 3 more iterations
     reg_b = StateMachine(outcomes=["done"])
     reg_b.set_name("Region B")
+    worker_b1 = WorkerState()
+    worker_b1.set_parameter("max_count", 2)
+    worker_b1.set_parameter("sleep_ms", 200)
     reg_b.add_state(
         "WORK_1",
-        WorkerState("B.1", 2, 200),
+        worker_b1,
         transitions={"working": "WORK_1", "done": "SYNC"},
     )
     reg_b.add_state(
@@ -85,9 +73,12 @@ def main() -> None:
         JoinState(SYNC_ID),
         transitions={"joined": "WORK_2"},
     )
+    worker_b2 = WorkerState()
+    worker_b2.set_parameter("max_count", 3)
+    worker_b2.set_parameter("sleep_ms", 200)
     reg_b.add_state(
         "WORK_2",
-        WorkerState("B.2", 3, 200),
+        worker_b2,
         transitions={"working": "WORK_2", "done": "done"},
     )
     reg_b.set_start_state("WORK_1")
@@ -111,13 +102,15 @@ def main() -> None:
     )
     sm.set_start_state("PARALLEL")
 
-    YasminViewerPub(sm, "YASMIN_ORTHOGONAL_SYNC_DEMO")
+    pub = YasminViewerPub(sm, "YASMIN_ORTHOGONAL_SYNC_DEMO")
 
     try:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
         yasmin.YASMIN_LOG_WARN(e)
+    finally:
+        pub.shutdown()
 
     YasminNode.destroy_instance()
     if rclpy.ok():

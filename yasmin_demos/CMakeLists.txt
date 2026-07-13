@@ -14,7 +14,6 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
-find_package(rclpy REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(yasmin REQUIRED)
 find_package(yasmin_ros REQUIRED)
@@ -58,7 +57,7 @@ install(DIRECTORY include/
 )
 
 # demo
-add_executable(yasmin_demo src/yasmin_demo.cpp)
+add_executable(yasmin_demo src/yasmin_demo.cpp src/foo_state.cpp src/bar_state.cpp)
 target_link_libraries(yasmin_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   yasmin_demo
@@ -66,7 +65,7 @@ install(TARGETS
 )
 
 # remap demo
-add_executable(remap_demo src/remap_demo.cpp)
+add_executable(remap_demo src/remap_demo.cpp src/bar_state.cpp)
 target_link_libraries(remap_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   remap_demo
@@ -130,7 +129,7 @@ install(TARGETS
 )
 
 # concurrent states demo
-add_executable(concurrence_demo src/concurrence_demo.cpp)
+add_executable(concurrence_demo src/concurrence_demo.cpp src/foo_state.cpp src/bar_state.cpp)
 target_link_libraries(concurrence_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   concurrence_demo
@@ -146,7 +145,7 @@ install(TARGETS
 )
 
 # orthogonal demo
-add_executable(orthogonal_demo src/orthogonal_demo.cpp)
+add_executable(orthogonal_demo src/orthogonal_demo.cpp src/worker_state.cpp)
 target_link_libraries(orthogonal_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   orthogonal_demo
@@ -154,7 +153,7 @@ install(TARGETS
 )
 
 # orthogonal sync demo
-add_executable(orthogonal_sync_demo src/orthogonal_sync_demo.cpp)
+add_executable(orthogonal_sync_demo src/orthogonal_sync_demo.cpp src/worker_state.cpp)
 target_link_libraries(orthogonal_sync_demo PUBLIC ${DEPENDENCIES})
 install(TARGETS
   orthogonal_sync_demo
@@ -262,11 +261,6 @@ install(PROGRAMS
 )
 
 install(PROGRAMS
-  yasmin_demos/pose_reader_state.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(PROGRAMS
   yasmin_demos/orthogonal_demo.py
   DESTINATION lib/${PROJECT_NAME}
 )
@@ -278,6 +272,11 @@ install(PROGRAMS
 
 # Install state_machines directory
 install(DIRECTORY state_machines
+  DESTINATION share/${PROJECT_NAME}/
+)
+
+# Install launch files
+install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/
 )
 

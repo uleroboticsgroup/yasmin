@@ -35,7 +35,9 @@ int main(int argc, char *argv[]) {
   // Create the factory and state machine in a scope to ensure proper cleanup
   yasmin_factory::YasminFactory factory;
 
-  // Load state machine from XML file
+  // Load state machine from XML file.
+  // Other XML demos: demo_1.xml, demo_3.xml, demo_orthogonal.xml,
+  //                  demo_orthogonal_sync.xml, demo_fsm_metadata.xml
   std::string xml_file =
       yasmin_demos::get_share_file_path("state_machines/demo_2.xml");
 

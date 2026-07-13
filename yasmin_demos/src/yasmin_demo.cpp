@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <chrono>
 #include <memory>
 #include <string>
 
@@ -21,95 +20,11 @@
 #include "yasmin/logs.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
+#include "yasmin_demos/bar_state.hpp"
+#include "yasmin_demos/foo_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
-
-/**
- * @brief Represents the "Foo" state in the state machine.
- *
- * This state increments a counter each time it is executed and
- * communicates the current count via the blackboard.
- */
-class FooState : public yasmin::State {
-public:
-  /// Counter to track the number of executions.
-  int counter;
-
-  /**
-   * @brief Constructs a FooState object, initializing the counter.
-   */
-  FooState() : yasmin::State({"outcome1", "outcome2"}), counter(0) {
-    this->set_description(
-        "Increments an internal counter, writes the formatted counter string "
-        "to the blackboard, and controls the loop outcome.");
-    this->add_output_key("foo_str",
-                         "Formatted counter string written by FooState.");
-  };
-
-  /**
-   * @brief Executes the Foo state logic.
-   *
-   * This method logs the execution, waits for 3 seconds,
-   * increments the counter, and sets a string in the blackboard.
-   * The state will transition to either "outcome1" or "outcome2"
-   * based on the current value of the counter.
-   *
-   * @param blackboard Shared pointer to the blackboard for state communication.
-   * @return std::string The outcome of the execution: "outcome1" or "outcome2".
-   */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    YASMIN_LOG_INFO("Executing state FOO");
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    if (this->counter < 3) {
-      this->counter += 1;
-      blackboard->set<std::string>("foo_str",
-                                   "Counter: " + std::to_string(this->counter));
-      return "outcome1";
-
-    } else {
-      return "outcome2";
-    }
-  };
-};
-
-/**
- * @brief Represents the "Bar" state in the state machine.
- *
- * This state logs the value from the blackboard and provides
- * a single outcome to transition.
- */
-class BarState : public yasmin::State {
-public:
-  /**
-   * @brief Constructs a BarState object.
-   */
-  BarState() : yasmin::State({"outcome3"}) {
-    this->set_description("Reads the counter string from the blackboard, logs "
-                          "it, and transitions back to FooState.");
-    this->add_input_key("foo_str",
-                        "Formatted counter string produced by FooState.");
-  }
-
-  /**
-   * @brief Executes the Bar state logic.
-   *
-   * This method logs the execution, waits for 3 seconds,
-   * retrieves a string from the blackboard, and logs it.
-   *
-   * @param blackboard Shared pointer to the blackboard for state communication.
-   * @return std::string The outcome of the execution: "outcome3".
-   */
-  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    YASMIN_LOG_INFO("Executing state BAR");
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    YASMIN_LOG_INFO(blackboard->get<std::string>("foo_str").c_str());
-
-    return "outcome3";
-  }
-};
 
 int main(int argc, char *argv[]) {
   // Initialize ROS 2
