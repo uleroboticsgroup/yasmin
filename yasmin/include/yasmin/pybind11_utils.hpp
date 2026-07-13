@@ -50,7 +50,7 @@ convert_blackboard_from_python(const py::object &blackboard_obj) {
   }
   // Case 2: Check if it's a BlackboardPyWrapper
   else if (py::isinstance<yasmin::BlackboardPyWrapper>(blackboard_obj)) {
-    auto wrapper = blackboard_obj.cast<yasmin::BlackboardPyWrapper>();
+    auto &wrapper = blackboard_obj.cast<yasmin::BlackboardPyWrapper &>();
     // Get the shared pointer directly instead of copying
     blackboard = wrapper.get_cpp_blackboard();
   }

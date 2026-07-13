@@ -100,7 +100,7 @@ if(BUILD_TESTING)
     test_state
     test_state_machine
     test_concurrence
-  test_orthogonal_state
+    test_orthogonal_state
   )
   
   foreach(_test_name ${_pytest_tests})

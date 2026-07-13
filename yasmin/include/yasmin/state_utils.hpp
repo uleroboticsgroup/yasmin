@@ -163,7 +163,7 @@ inline std::string resolve_outcome(const Outcomes &satisfied_outcomes,
 
 /**
  * @brief Apply parameter mappings from a parent state to a child state.
- * @param blackboard The container type string used in error messages.
+ * @param container_type The container type string used in error messages.
  * @param param_mappings The map of parameter mappings from child to parent.
  * @param state_name The name of the child state.
  */

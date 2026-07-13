@@ -60,7 +60,7 @@ class TestState(unittest.TestCase):
             default_outcome="default",
             outcome_map={
                 "outcome1": {"FOO": "outcome1"},
-                "outcome2": {"BAR": "outcome1", "BAR": "outcome1"},
+                "outcome2": {"BAR": "outcome1"},
             },
         )
 

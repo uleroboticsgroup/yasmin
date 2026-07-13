@@ -73,9 +73,8 @@ protected:
     yasmin::StateMap states = {
         {"FOO", foo_state}, {"FOO2", foo2_state}, {"BAR", bar_state}};
 
-    yasmin::OutcomeMap outcome_map = {
-        {"outcome1", {{"FOO", "outcome1"}}},
-        {"outcome2", {{"BAR", "outcome1"}, {"BAR", "outcome1"}}}};
+    yasmin::OutcomeMap outcome_map = {{"outcome1", {{"FOO", "outcome1"}}},
+                                      {"outcome2", {{"BAR", "outcome1"}}}};
 
     state = yasmin::Concurrence::make_shared(states, "default", outcome_map);
   }

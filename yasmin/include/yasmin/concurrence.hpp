@@ -125,6 +125,7 @@ public:
    * @brief Cancels the current state execution.
    *
    * This method sets the canceled flag to true and logs the action.
+   * This method is asynchronous and does not wait for child threads to finish.
    */
   void cancel_state() override;
 

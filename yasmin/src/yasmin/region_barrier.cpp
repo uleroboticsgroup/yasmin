@@ -27,6 +27,11 @@ RegionBarrier::RegionBarrier(int party_count)
 
 void RegionBarrier::arrive_and_wait() {
   std::unique_lock<std::mutex> lock(this->mtx_);
+  if (this->canceled_) {
+    this->arrived_ = 0;
+    return;
+  }
+
   this->arrived_++;
   if (this->arrived_ < this->party_count_) {
     int my_gen = this->generation_;

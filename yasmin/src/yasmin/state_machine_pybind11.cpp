@@ -65,15 +65,13 @@ PYBIND11_MODULE(state_machine, m) {
       // Add state method with keep_alive to manage object lifetime
       .def(
           "add_state",
-          [](yasmin::StateMachine &self, const std::string &name,
-             yasmin::State::SharedPtr state,
-             const yasmin::Transitions &transitions,
-             const yasmin::Remappings &remappings,
-             const yasmin::ParameterMappings &parameter_mappings) {
-            // Ensure the Python object is kept alive
-            py::object py_state = py::cast(state);
-            self.add_state(name, state, transitions, remappings,
-                           parameter_mappings);
+            [](yasmin::StateMachine &self, const std::string &name,
+              yasmin::State::SharedPtr state,
+              const yasmin::Transitions &transitions,
+              const yasmin::Remappings &remappings,
+              const yasmin::ParameterMappings &parameter_mappings) {
+             self.add_state(name, state, transitions, remappings,
+                            parameter_mappings);
           },
           "Add a state to the state machine", py::arg("name"), py::arg("state"),
           py::arg("transitions") = yasmin::Transitions(),

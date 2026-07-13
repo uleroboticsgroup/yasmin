@@ -96,6 +96,7 @@ bool State::is_completed() const noexcept {
 
 std::string State::operator()(Blackboard::SharedPtr blackboard) {
 
+  this->set_status(StateStatus::IDLE);
   YASMIN_LOG_DEBUG("Executing state '%s'", this->to_string().c_str());
   this->set_status(StateStatus::RUNNING);
 
