@@ -120,13 +120,6 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# multiple_states_demos
-add_executable(multiple_states_demo src/multiple_states_demo.cpp src/foo_state.cpp src/bar_state.cpp)
-target_link_libraries(multiple_states_demo PUBLIC ${DEPENDENCIES})
-install(TARGETS
-  multiple_states_demo
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 # concurrent states demo
 add_executable(concurrence_demo src/concurrence_demo.cpp src/foo_state.cpp src/bar_state.cpp)
@@ -240,10 +233,6 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(PROGRAMS
-  yasmin_demos/multiple_states_demo.py
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 install(PROGRAMS
   yasmin_demos/concurrence_demo.py
