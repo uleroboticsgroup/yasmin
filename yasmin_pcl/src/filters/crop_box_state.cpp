@@ -25,6 +25,7 @@
 
 #include "yasmin/logs.hpp"
 #include "yasmin_pcl/common/cloud_types.hpp"
+#include "yasmin_pcl/common/filter_state_utils.hpp"
 #include "yasmin_pcl/common/transform_utils.hpp"
 
 namespace yasmin_pcl::filters {
@@ -193,25 +194,14 @@ std::string CropBoxState::execute(yasmin::Blackboard::SharedPtr blackboard) {
           this->transform_pitch_, this->transform_yaw_));
     }
 
-    if (blackboard->contains("input_indices")) {
-      const auto input_indices =
-          blackboard->get<common::Indices>("input_indices");
-      pcl::IndicesPtr input_indices_ptr(new pcl::Indices(input_indices));
-      filter.setIndices(input_indices_ptr);
-    }
+    common::set_optional_input_indices(filter, blackboard);
 
     auto output_cloud = common::make_pcl_point_cloud2();
     filter.filter(*output_cloud);
     blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
 
     if (this->extract_removed_indices_) {
-      const auto removed_indices_ptr = filter.getRemovedIndices();
-      if (removed_indices_ptr) {
-        blackboard->set<common::Indices>("removed_indices",
-                                         *removed_indices_ptr);
-      } else {
-        blackboard->set<common::Indices>("removed_indices", common::Indices{});
-      }
+      common::store_removed_indices(filter, blackboard);
     }
 
     return "succeeded";

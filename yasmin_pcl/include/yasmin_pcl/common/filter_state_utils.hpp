@@ -17,6 +17,7 @@
 
 #include <exception>
 #include <string>
+#include <unordered_set>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
@@ -24,6 +25,33 @@
 #include "yasmin_pcl/common/pcl_compat.hpp"
 
 namespace yasmin_pcl::common {
+
+/** @brief Build a dense index vector [0, 1, ..., n-1] from cloud dimensions. */
+inline Indices make_domain_indices(const PclPointCloud2Ptr &input_cloud) {
+  const auto num_points = static_cast<std::size_t>(input_cloud->width) *
+                          static_cast<std::size_t>(input_cloud->height);
+  Indices indices;
+  indices.reserve(num_points);
+  for (std::size_t idx = 0; idx < num_points; ++idx) {
+    indices.push_back(static_cast<int>(idx));
+  }
+  return indices;
+}
+
+/** @brief Return the set of indices present in domain but absent from kept. */
+inline Indices compute_removed_indices(const Indices &domain_indices,
+                                       const Indices &output_indices) {
+  std::unordered_set<int> selected(output_indices.begin(),
+                                   output_indices.end());
+  Indices removed;
+  removed.reserve(domain_indices.size());
+  for (const int index : domain_indices) {
+    if (selected.count(index) == 0U) {
+      removed.push_back(index);
+    }
+  }
+  return removed;
+}
 
 /**
  * @brief Set the input indices for a PCL filter if they exist in the
@@ -78,27 +106,6 @@ store_removed_indices(FilterT &filter,
 }
 
 /**
- * @brief Store the output indices from a PCL filter into the blackboard.
- * @tparam FilterT Type of the PCL filter.
- * @param filter Reference to the PCL filter.
- * @param blackboard Shared pointer to the blackboard.
- * @param key Key to store output indices in the blackboard (default:
- * "output_indices").
- *
- * This function retrieves the output indices from the provided PCL filter and
- * stores them in the blackboard under the specified key.
- */
-template <class FilterT>
-inline void
-store_output_indices(FilterT &filter,
-                     const yasmin::Blackboard::SharedPtr &blackboard,
-                     const std::string &key = "output_indices") {
-  Indices output_indices;
-  filter.filter(output_indices);
-  blackboard->set<Indices>(key, output_indices);
-}
-
-/**
  * @brief Execute a PCL filter and store the results in the blackboard.
  * @tparam FilterT Type of the PCL filter.
  * @tparam SetupFn Type of the setup function for the filter.
@@ -116,10 +123,10 @@ store_output_indices(FilterT &filter,
  * filtering, it logs an error message and returns "aborted".
  */
 template <typename FilterT, typename SetupFn>
-inline std::string execute_filter(yasmin::Blackboard::SharedPtr blackboard,
-                                  const std::string &filter_name,
-                                  bool extract_removed_indices,
-                                  SetupFn &&setup) {
+inline std::string
+execute_filter(const yasmin::Blackboard::SharedPtr &blackboard,
+               const std::string &filter_name, bool extract_removed_indices,
+               SetupFn &&setup) {
   try {
     const auto input_cloud = blackboard->get<PclPointCloud2Ptr>("input_cloud");
     if (!input_cloud) {

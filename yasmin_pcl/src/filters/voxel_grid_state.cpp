@@ -17,6 +17,7 @@
 #include <pcl/filters/voxel_grid.h>
 
 #include <exception>
+#include <limits>
 #include <string>
 
 #include <pluginlib/class_list_macros.hpp>
@@ -35,8 +36,8 @@ VoxelGridState::VoxelGridState() : yasmin::State({"succeeded", "aborted"}) {
   this->minimum_points_number_per_voxel_ = 0;
   this->save_leaf_layout_ = false;
   this->filter_field_name_.clear();
-  this->filter_limit_min_ = 0.0;
-  this->filter_limit_max_ = 0.0;
+  this->filter_limit_min_ = -std::numeric_limits<double>::infinity();
+  this->filter_limit_max_ = std::numeric_limits<double>::infinity();
   this->filter_limit_negative_ = false;
 
   this->set_description(
@@ -66,10 +67,12 @@ VoxelGridState::VoxelGridState() : yasmin::State({"succeeded", "aborted"}) {
                                        "Optional field name used together with "
                                        "filter limits before downsampling.",
                                        std::string(""));
-  this->declare_parameter<double>(
-      "filter_limit_min", "Minimum field value used for pre-filtering.", 0.0);
-  this->declare_parameter<double>(
-      "filter_limit_max", "Maximum field value used for pre-filtering.", 0.0);
+  this->declare_parameter<double>("filter_limit_min",
+                                  "Minimum field value used for pre-filtering.",
+                                  -std::numeric_limits<double>::infinity());
+  this->declare_parameter<double>("filter_limit_max",
+                                  "Maximum field value used for pre-filtering.",
+                                  std::numeric_limits<double>::infinity());
   this->declare_parameter<bool>(
       "filter_limit_negative",
       "Return points outside the specified field interval before downsampling.",

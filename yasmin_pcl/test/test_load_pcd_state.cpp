@@ -24,7 +24,8 @@
 #include "yasmin_pcl/io/load_pcd_state.hpp"
 
 TEST(LoadPcdState, LoadsCloudAndMetadataFromPcdFile) {
-  const auto file_path = yasmin_pcl::test::make_temp_path("load_pcd", ".pcd");
+  auto temp_file = yasmin_pcl::test::make_temp_file("load_pcd", ".pcd");
+  const auto file_path = temp_file.path();
   const auto input_cloud = yasmin_pcl::test::create_pcl_cloud_ptr(
       {{0.0F, 0.0F, 0.0F}, {0.0F, 1.0F, 2.0F}});
 
@@ -54,8 +55,6 @@ TEST(LoadPcdState, LoadsCloudAndMetadataFromPcdFile) {
   EXPECT_FLOAT_EQ(sensor_origin[2], 3.0F);
 
   EXPECT_GE(blackboard->get<int>("pcd_version"), 0);
-
-  std::filesystem::remove(file_path);
 }
 
 TEST(LoadPcdState, AbortsWhenFilePathIsEmpty) {

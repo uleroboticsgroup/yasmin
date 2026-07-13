@@ -18,6 +18,7 @@
 
 #include <Eigen/Geometry>
 #include <exception>
+#include <filesystem>
 #include <string>
 
 #include <pluginlib/class_list_macros.hpp>
@@ -93,6 +94,13 @@ std::string SavePcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
 
     if (this->file_path_.empty()) {
       YASMIN_LOG_WARN("Parameter 'file_path' is empty");
+      return "aborted";
+    }
+
+    const auto parent = std::filesystem::path(this->file_path_).parent_path();
+    if (!parent.empty() && !std::filesystem::exists(parent)) {
+      YASMIN_LOG_WARN("Parent directory does not exist for '%s'",
+                      this->file_path_.c_str());
       return "aborted";
     }
 

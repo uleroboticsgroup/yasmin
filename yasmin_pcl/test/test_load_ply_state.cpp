@@ -24,7 +24,8 @@
 #include "yasmin_pcl/io/load_ply_state.hpp"
 
 TEST(LoadPlyState, LoadsCloudAndMetadataFromPlyFile) {
-  const auto file_path = yasmin_pcl::test::make_temp_path("load_ply", ".ply");
+  auto temp_file = yasmin_pcl::test::make_temp_file("load_ply", ".ply");
+  const auto file_path = temp_file.path();
   const auto input_cloud = yasmin_pcl::test::create_pcl_cloud_ptr(
       {{0.0F, 0.0F, 0.0F}, {1.5F, 0.0F, 0.0F}});
   const Eigen::Vector4f origin(4.0F, 5.0F, 6.0F, 0.0F);
@@ -51,8 +52,6 @@ TEST(LoadPlyState, LoadsCloudAndMetadataFromPlyFile) {
   EXPECT_FLOAT_EQ(sensor_origin[0], 4.0F);
   EXPECT_FLOAT_EQ(sensor_origin[1], 5.0F);
   EXPECT_FLOAT_EQ(sensor_origin[2], 6.0F);
-
-  std::filesystem::remove(file_path);
 }
 
 TEST(LoadPlyState, AbortsWhenFilePathIsEmpty) {

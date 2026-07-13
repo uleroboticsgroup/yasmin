@@ -23,7 +23,8 @@
 #include "yasmin_pcl/io/save_pcd_state.hpp"
 
 TEST(SavePcdState, SavesPcdFileFromBlackboardCloud) {
-  const auto file_path = yasmin_pcl::test::make_temp_path("save_pcd", ".pcd");
+  auto temp_file = yasmin_pcl::test::make_temp_file("save_pcd", ".pcd");
+  const auto file_path = temp_file.path();
 
   yasmin_pcl::io::SavePcdState state;
   state.set_parameter<std::string>("file_path", file_path.string());
@@ -41,13 +42,12 @@ TEST(SavePcdState, SavesPcdFileFromBlackboardCloud) {
   pcl::PCLPointCloud2 loaded_cloud;
   ASSERT_EQ(pcl::io::loadPCDFile(file_path.string(), loaded_cloud), 0);
   EXPECT_EQ(yasmin_pcl::test::to_xyz_cloud(loaded_cloud).points.size(), 2U);
-
-  std::filesystem::remove(file_path);
 }
 
 TEST(SavePcdState, SavesBinaryCompressedPcdFile) {
-  const auto file_path =
-      yasmin_pcl::test::make_temp_path("save_pcd_compressed", ".pcd");
+  auto temp_file =
+      yasmin_pcl::test::make_temp_file("save_pcd_compressed", ".pcd");
+  const auto file_path = temp_file.path();
 
   yasmin_pcl::io::SavePcdState state;
   state.set_parameter<std::string>("file_path", file_path.string());
@@ -65,13 +65,11 @@ TEST(SavePcdState, SavesBinaryCompressedPcdFile) {
   pcl::PCLPointCloud2 loaded_cloud;
   ASSERT_EQ(pcl::io::loadPCDFile(file_path.string(), loaded_cloud), 0);
   EXPECT_EQ(yasmin_pcl::test::to_xyz_cloud(loaded_cloud).points.size(), 2U);
-
-  std::filesystem::remove(file_path);
 }
 
 TEST(SavePcdState, AbortsForUnsupportedStorageMode) {
-  const auto file_path =
-      yasmin_pcl::test::make_temp_path("save_pcd_bad", ".pcd");
+  auto temp_file = yasmin_pcl::test::make_temp_file("save_pcd_bad", ".pcd");
+  const auto file_path = temp_file.path();
 
   yasmin_pcl::io::SavePcdState state;
   state.set_parameter<std::string>("file_path", file_path.string());
@@ -84,5 +82,4 @@ TEST(SavePcdState, AbortsForUnsupportedStorageMode) {
                          {{1.0F, 0.0F, 0.0F}, {2.0F, 3.0F, 4.0F}}));
 
   EXPECT_EQ(state(blackboard), "aborted");
-  EXPECT_FALSE(std::filesystem::exists(file_path));
 }

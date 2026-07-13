@@ -14,51 +14,16 @@
 
 #include "yasmin_pcl/filters/random_sample_state.hpp"
 
-#include <pcl/filters/extract_indices.h>
 #include <pcl/filters/random_sample.h>
 
 #include <exception>
 #include <limits>
-#include <unordered_set>
 
 #include <pluginlib/class_list_macros.hpp>
 
 #include "yasmin/logs.hpp"
 #include "yasmin_pcl/common/cloud_types.hpp"
 #include "yasmin_pcl/common/filter_state_utils.hpp"
-
-namespace {
-
-yasmin_pcl::common::Indices
-make_domain_indices(const yasmin_pcl::common::PclPointCloud2Ptr &input_cloud) {
-  const auto num_points = static_cast<std::size_t>(input_cloud->width) *
-                          static_cast<std::size_t>(input_cloud->height);
-  yasmin_pcl::common::Indices indices;
-  indices.reserve(num_points);
-  for (std::size_t idx = 0; idx < num_points; ++idx) {
-    indices.push_back(static_cast<int>(idx));
-  }
-  return indices;
-}
-
-yasmin_pcl::common::Indices
-compute_removed_indices(const yasmin_pcl::common::Indices &domain_indices,
-                        const yasmin_pcl::common::Indices &output_indices) {
-  std::unordered_set<int> selected_indices(output_indices.begin(),
-                                           output_indices.end());
-
-  yasmin_pcl::common::Indices removed_indices;
-  removed_indices.reserve(domain_indices.size());
-  for (const int index : domain_indices) {
-    if (selected_indices.count(index) == 0U) {
-      removed_indices.push_back(index);
-    }
-  }
-
-  return removed_indices;
-}
-
-} // namespace
 
 namespace yasmin_pcl::filters {
 
@@ -141,26 +106,26 @@ RandomSampleState::execute(yasmin::Blackboard::SharedPtr blackboard) {
     filter.setUserFilterValue(this->user_filter_value_);
     common::set_optional_input_indices(filter, blackboard);
 
+    auto output_cloud = common::make_pcl_point_cloud2();
+    filter.filter(*output_cloud);
+    blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
+
+    // Derive output indices from a second filter pass with the same seed so
+    // the random sample is identical to the one that produced output_cloud.
+    // PCL's RandomSample<PCLPointCloud2> does not expose
+    // setExtractRemovedIndices, so we cannot retrieve kept/removed indices from
+    // a single pass. Resetting the seed before the indices pass ensures
+    // deterministic, matching results.
     common::Indices output_indices;
+    filter.setSeed(static_cast<unsigned int>(this->seed_));
     filter.filter(output_indices);
     blackboard->set<common::Indices>("output_indices", output_indices);
 
-    pcl::ExtractIndices<pcl::PCLPointCloud2> extractor;
-    extractor.setInputCloud(input_cloud);
-    extractor.setIndices(pcl::IndicesPtr(new pcl::Indices(output_indices)));
-    extractor.setNegative(false);
-    extractor.setKeepOrganized(this->keep_organized_);
-    extractor.setUserFilterValue(this->user_filter_value_);
-
-    auto output_cloud = common::make_pcl_point_cloud2();
-    extractor.filter(*output_cloud);
-    blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
-
     if (this->extract_removed_indices_) {
-      const auto domain_indices = make_domain_indices(input_cloud);
+      const auto domain_indices = common::make_domain_indices(input_cloud);
       blackboard->set<common::Indices>(
           "removed_indices",
-          compute_removed_indices(domain_indices, output_indices));
+          common::compute_removed_indices(domain_indices, output_indices));
     }
 
     return "succeeded";

@@ -23,7 +23,8 @@
 #include "yasmin_pcl/io/save_ply_state.hpp"
 
 TEST(SavePlyState, SavesPlyFileFromBlackboardCloud) {
-  const auto file_path = yasmin_pcl::test::make_temp_path("save_ply", ".ply");
+  auto temp_file = yasmin_pcl::test::make_temp_file("save_ply", ".ply");
+  const auto file_path = temp_file.path();
 
   yasmin_pcl::io::SavePlyState state;
   state.set_parameter<std::string>("file_path", file_path.string());
@@ -42,13 +43,11 @@ TEST(SavePlyState, SavesPlyFileFromBlackboardCloud) {
   pcl::PCLPointCloud2 loaded_cloud;
   ASSERT_EQ(pcl::io::loadPLYFile(file_path.string(), loaded_cloud), 0);
   EXPECT_EQ(yasmin_pcl::test::to_xyz_cloud(loaded_cloud).points.size(), 2U);
-
-  std::filesystem::remove(file_path);
 }
 
 TEST(SavePlyState, SavesBinaryPlyFileFromBlackboardCloud) {
-  const auto file_path =
-      yasmin_pcl::test::make_temp_path("save_ply_binary", ".ply");
+  auto temp_file = yasmin_pcl::test::make_temp_file("save_ply_binary", ".ply");
+  const auto file_path = temp_file.path();
 
   yasmin_pcl::io::SavePlyState state;
   state.set_parameter<std::string>("file_path", file_path.string());
@@ -67,8 +66,6 @@ TEST(SavePlyState, SavesBinaryPlyFileFromBlackboardCloud) {
   pcl::PCLPointCloud2 loaded_cloud;
   ASSERT_EQ(pcl::io::loadPLYFile(file_path.string(), loaded_cloud), 0);
   EXPECT_EQ(yasmin_pcl::test::to_xyz_cloud(loaded_cloud).points.size(), 2U);
-
-  std::filesystem::remove(file_path);
 }
 
 TEST(SavePlyState, AbortsWhenFilePathIsEmpty) {

@@ -21,12 +21,15 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-#include <chrono>
 #include <cstdint>
+#include <cstdio>
 #include <filesystem>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
+
+#include <unistd.h>
 
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
@@ -79,16 +82,57 @@ to_xyz_cloud(const pcl::PCLPointCloud2 &cloud) {
   return xyz_cloud;
 }
 
-/** @brief Create a unique temporary file path.
+/** @brief RAII temporary file that removes itself on destruction. */
+class TempFile {
+public:
+  TempFile() = default;
+
+  explicit TempFile(std::filesystem::path path) : path_(std::move(path)) {}
+
+  TempFile(const TempFile &) = delete;
+  TempFile &operator=(const TempFile &) = delete;
+
+  TempFile(TempFile &&other) noexcept : path_(std::exchange(other.path_, {})) {}
+
+  TempFile &operator=(TempFile &&other) noexcept {
+    if (this != &other) {
+      reset();
+      path_ = std::exchange(other.path_, {});
+    }
+    return *this;
+  }
+
+  ~TempFile() { reset(); }
+
+  const std::filesystem::path &path() const { return path_; }
+
+  void reset() {
+    if (!path_.empty()) {
+      std::error_code ec;
+      std::filesystem::remove(path_, ec);
+      path_.clear();
+    }
+  }
+
+private:
+  std::filesystem::path path_;
+};
+
+/** @brief Create a unique temporary file path using mkstemps.
  *  @param stem The filename stem (prefix).
- *  @param suffix The file extension (suffix).
- *  @return A unique temporary file path. */
-inline std::filesystem::path make_temp_path(const std::string &stem,
-                                            const std::string &suffix) {
-  const auto unique_id =
-      std::chrono::steady_clock::now().time_since_epoch().count();
-  return std::filesystem::temp_directory_path() /
-         (stem + "_" + std::to_string(unique_id) + suffix);
+ *  @param suffix The file extension with leading dot, e.g. ".ply".
+ *  @return A TempFile whose path() gives the created path. */
+inline TempFile make_temp_file(const std::string &stem,
+                               const std::string &suffix) {
+  const auto dir = std::filesystem::temp_directory_path();
+  std::string tmpl = (dir / (stem + "_XXXXXX" + suffix)).string();
+  const int suffix_len = static_cast<int>(suffix.size());
+  const int fd = mkstemps(tmpl.data(), suffix_len);
+  if (fd < 0) {
+    throw std::runtime_error("mkstemps failed for " + tmpl);
+  }
+  close(fd);
+  return TempFile(std::filesystem::path(tmpl));
 }
 
 } // namespace yasmin_pcl::test
