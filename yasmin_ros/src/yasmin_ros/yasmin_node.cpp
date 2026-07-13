@@ -72,8 +72,8 @@ YasminNode::SharedPtr YasminNode::get_instance() {
 void YasminNode::destroy_instance() {
   std::lock_guard<std::mutex> lock(get_yasmin_node_instance_mutex());
   auto &instance = get_yasmin_node_instance();
-  if (logger_node == instance.get()) {
-    logger_node = nullptr;
+  if (logger_node == instance) {
+    logger_node.reset();
   }
   instance.reset();
 }
@@ -89,8 +89,8 @@ YasminNode::YasminNode() : rclcpp::Node("yasmin_" + generateUUID() + "_node") {
 }
 
 YasminNode::~YasminNode() {
-  if (logger_node == this) {
-    logger_node = nullptr;
+  if (logger_node.get() == this) {
+    logger_node.reset();
   }
   this->stop_executor();
 }

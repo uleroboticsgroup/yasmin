@@ -15,12 +15,14 @@
 #ifndef YASMIN_ROS__LOGS_HPP_
 #define YASMIN_ROS__LOGS_HPP_
 
+#include <memory>
+
 #include <rclcpp/rclcpp.hpp>
 
 namespace yasmin_ros {
 
 /// @brief Node used in the YASMIN ROS 2 logs
-extern rclcpp::Node *logger_node;
+extern std::shared_ptr<rclcpp::Node> logger_node;
 
 /**
  * @brief Sets the logging functions for ROS, linking ROS 2 log levels to YASMIN

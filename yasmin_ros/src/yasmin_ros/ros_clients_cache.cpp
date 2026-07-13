@@ -132,7 +132,10 @@ std::string ROSClientsCache::hash_qos_profile(const rclcpp::QoS &qos_profile) {
       << static_cast<int>(rmw_qos.reliability) << "_"
       << static_cast<int>(rmw_qos.durability) << "_" << rmw_qos.deadline.sec
       << "_" << rmw_qos.deadline.nsec << "_" << rmw_qos.lifespan.sec << "_"
-      << rmw_qos.lifespan.nsec << "_" << static_cast<int>(rmw_qos.liveliness);
+      << rmw_qos.lifespan.nsec << "_" << static_cast<int>(rmw_qos.liveliness)
+      << "_" << rmw_qos.liveliness_lease_duration.sec << "_"
+      << rmw_qos.liveliness_lease_duration.nsec << "_"
+      << static_cast<int>(rmw_qos.avoid_ros_namespace_conventions);
 
   return oss.str();
 }
