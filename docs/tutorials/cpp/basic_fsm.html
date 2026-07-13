@@ -39,6 +39,7 @@
           <li><a href="../../index.html">Introduction</a></li>
           <li><a href="../../docker.html">Docker Environment</a></li>
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../shared_states.html">Shared States</a></li>
           <li><a href="../../callback_signal.html">Callback Signal</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
@@ -205,7 +206,67 @@
           the state machine.
         </p>
 
-        <pre><code class="language-cpp">#include &quot;yasmin_demos/foo_state.hpp&quot;</code></pre>
+        <pre><code class="language-cpp">#include &lt;chrono&gt;
+#include &lt;string&gt;
+#include &lt;thread&gt;
+
+#include &lt;yasmin/blackboard.hpp&gt;
+#include &lt;yasmin/state.hpp&gt;
+#include &lt;yasmin/types.hpp&gt;
+
+#include &quot;yasmin/logs.hpp&quot;
+
+
+class FooState : public yasmin::State {
+public:
+  FooState() : yasmin::State({&quot;outcome1&quot;, &quot;outcome2&quot;}) {
+    this-&gt;counter = 0;
+    this-&gt;counter_prefix_ = &quot;Counter&quot;;
+    this-&gt;max_count_ = 3;
+    this-&gt;sleep_ms_ = 300;
+    this-&gt;set_description(&quot;Produces a counter string and stores it in the &quot;
+                          &quot;blackboard while the counter is below the threshold.&quot;);
+    this-&gt;set_outcome_description(&quot;outcome1&quot;, &quot;Counter is below the threshold&quot;);
+    this-&gt;set_outcome_description(&quot;outcome2&quot;, &quot;Counter reached the threshold.&quot;);
+    this-&gt;declare_parameter&lt;std::string&gt;(
+        &quot;counter_prefix&quot;, &quot;Prefix used when formatting the counter string.&quot;,
+        std::string(&quot;Counter&quot;));
+    this-&gt;declare_parameter&lt;int&gt;(
+        &quot;max_count&quot;,
+        &quot;Number of successful loops before the state returns outcome2.&quot;, 3);
+    this-&gt;declare_parameter&lt;int&gt;(
+        &quot;sleep_ms&quot;, &quot;Delay in milliseconds before each execution.&quot;, 300);
+    this-&gt;add_output_key(
+        &quot;foo_str&quot;,
+        &quot;String containing the current counter value produced by FooState.&quot;);
+  }
+
+  void configure() override {
+    this-&gt;counter_prefix_ = this-&gt;get_parameter&lt;std::string&gt;(&quot;counter_prefix&quot;);
+    this-&gt;max_count_ = this-&gt;get_parameter&lt;int&gt;(&quot;max_count&quot;);
+    this-&gt;sleep_ms_ = this-&gt;get_parameter&lt;int&gt;(&quot;sleep_ms&quot;);
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    YASMIN_LOG_INFO(&quot;Executing state FOO&quot;);
+    std::this_thread::sleep_for(std::chrono::milliseconds(this-&gt;sleep_ms_));
+
+    if (this-&gt;counter &lt; this-&gt;max_count_) {
+      this-&gt;counter += 1;
+      blackboard-&gt;set&lt;std::string&gt;(&quot;foo_str&quot;, this-&gt;counter_prefix_ + &quot;: &quot; +
+                                                  std::to_string(this-&gt;counter));
+      return &quot;outcome1&quot;;
+    } else {
+      return &quot;outcome2&quot;;
+    }
+  }
+
+private:
+  int counter;
+  std::string counter_prefix_;
+  int max_count_;
+  int sleep_ms_;
+};</code></pre>
 
         <h2>2. Create the BarState</h2>
         <p>
@@ -219,7 +280,55 @@
           <code>"outcome3"</code> to loop back to FooState.
         </p>
 
-        <pre><code class="language-cpp">#include &quot;yasmin_demos/bar_state.hpp&quot;</code></pre>
+        <pre><code class="language-cpp">#include &lt;chrono&gt;
+#include &lt;string&gt;
+#include &lt;thread&gt;
+
+#include &lt;yasmin/blackboard.hpp&gt;
+#include &lt;yasmin/state.hpp&gt;
+#include &lt;yasmin/types.hpp&gt;
+
+#include &quot;yasmin/logs.hpp&quot;
+
+
+class BarState : public yasmin::State {
+public:
+  BarState() : yasmin::State({&quot;outcome3&quot;}) {
+    this-&gt;log_prefix_ = &quot;Observed value&quot;;
+    this-&gt;sleep_ms_ = 300;
+    this-&gt;set_description(&quot;Prints the value stored in 'foo_str' from the &quot;
+                          &quot;blackboard and transitions back to the Foo state.&quot;);
+    this-&gt;set_outcome_description(&quot;outcome3&quot;, &quot;Final outcome&quot;);
+    this-&gt;declare_parameter&lt;std::string&gt;(
+        &quot;log_prefix&quot;, &quot;Prefix printed before the blackboard value.&quot;,
+        std::string(&quot;Observed value&quot;));
+    this-&gt;declare_parameter&lt;int&gt;(
+        &quot;sleep_ms&quot;, &quot;Delay in milliseconds before each execution.&quot;, 300);
+    this-&gt;add_input_key&lt;std::string&gt;(
+        &quot;foo_str&quot;, &quot;String produced by FooState and printed by this state.&quot;,
+        std::string(&quot;Foo&quot;));
+  }
+
+  void configure() override {
+    this-&gt;log_prefix_ = this-&gt;get_parameter&lt;std::string&gt;(&quot;log_prefix&quot;);
+    this-&gt;sleep_ms_ = this-&gt;get_parameter&lt;int&gt;(&quot;sleep_ms&quot;);
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    YASMIN_LOG_INFO(&quot;Executing state BAR&quot;);
+    std::this_thread::sleep_for(std::chrono::milliseconds(this-&gt;sleep_ms_));
+
+    YASMIN_LOG_INFO(
+        (this-&gt;log_prefix_ + &quot;: &quot; + blackboard-&gt;get&lt;std::string&gt;(&quot;foo_str&quot;))
+            .c_str());
+
+    return &quot;outcome3&quot;;
+  }
+
+private:
+  std::string log_prefix_;
+  int sleep_ms_;
+};</code></pre>
 
         <h2>3. Main Function</h2>
         <p>
@@ -244,8 +353,6 @@
 #include &quot;yasmin/logs.hpp&quot;
 #include &quot;yasmin/state.hpp&quot;
 #include &quot;yasmin/state_machine.hpp&quot;
-#include &quot;yasmin_demos/bar_state.hpp&quot;
-#include &quot;yasmin_demos/foo_state.hpp&quot;
 #include &quot;yasmin_ros/ros_logs.hpp&quot;
 #include &quot;yasmin_ros/yasmin_node.hpp&quot;
 #include &quot;yasmin_viewer/yasmin_viewer_pub.hpp&quot;

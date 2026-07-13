@@ -39,6 +39,7 @@
           <li><a href="../../index.html">Introduction</a></li>
           <li><a href="../../docker.html">Docker Environment</a></li>
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../shared_states.html">Shared States</a></li>
           <li><a href="../../callback_signal.html">Callback Signal</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
@@ -217,7 +218,50 @@
           used in the basic orthogonal demo.
         </p>
 
-        <pre><code class="language-python">from yasmin_demos.worker_state import WorkerState</code></pre>
+        <pre><code class="language-python">import time
+
+import yasmin
+from yasmin import Blackboard, State
+
+
+class WorkerState(State):
+
+    def __init__(self) -&gt; None:
+        super().__init__(["working", "done"])
+        self.counter = 0
+        self.max_count = 3
+        self.sleep_ms = 500
+        self.set_description(
+            "Counts iterations and returns 'working' until max_count is reached."
+        )
+        self.set_outcome_description("working", "Counter is below the threshold")
+        self.set_outcome_description("done", "Counter reached the threshold")
+        self.declare_parameter(
+            "max_count",
+            "Number of iterations before returning 'done'.",
+            3,
+        )
+        self.declare_parameter(
+            "sleep_ms",
+            "Delay in milliseconds before each execution.",
+            500,
+        )
+
+    def configure(self) -&gt; None:
+        self.max_count = self.get_parameter("max_count")
+        self.sleep_ms = self.get_parameter("sleep_ms")
+        self.counter = 0
+
+    def execute(self, blackboard: Blackboard) -&gt; str:
+        yasmin.YASMIN_LOG_INFO(
+            f"Executing WorkerState: iteration {self.counter + 1}/{self.max_count}"
+        )
+        time.sleep(self.sleep_ms / 1000.0)
+
+        self.counter += 1
+        if self.counter &gt;= self.max_count:
+            return "done"
+        return "working"</code></pre>
 
         <h2>2. Create Region A with Synchronization</h2>
         <p>

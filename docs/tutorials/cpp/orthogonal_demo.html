@@ -39,6 +39,7 @@
           <li><a href="../../index.html">Introduction</a></li>
           <li><a href="../../docker.html">Docker Environment</a></li>
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../shared_states.html">Shared States</a></li>
           <li><a href="../../callback_signal.html">Callback Signal</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
@@ -225,7 +226,56 @@
           sleep duration. This simple looping state is used by both regions to
           demonstrate independent progress.
         </p>
-        <pre><code class="language-cpp">#include "yasmin_demos/worker_state.hpp"</code></pre>
+        <pre><code class="language-cpp">#include &lt;chrono&gt;
+#include &lt;string&gt;
+#include &lt;thread&gt;
+
+#include &lt;yasmin/blackboard.hpp&gt;
+#include &lt;yasmin/state.hpp&gt;
+#include &lt;yasmin/types.hpp&gt;
+
+#include "yasmin/logs.hpp"
+
+
+class WorkerState : public yasmin::State {
+public:
+  WorkerState() : yasmin::State({"working", "done"}) {
+    this-&gt;counter = 0;
+    this-&gt;max_count_ = 3;
+    this-&gt;sleep_ms_ = 500;
+    this-&gt;set_description(
+        "Counts iterations and returns 'working' until max_count is reached.");
+    this-&gt;set_outcome_description("working", "Counter is below the threshold");
+    this-&gt;set_outcome_description("done", "Counter reached the threshold.");
+    this-&gt;declare_parameter&lt;int&gt;(
+        "max_count", "Number of iterations before the state returns 'done'.", 3);
+    this-&gt;declare_parameter&lt;int&gt;(
+        "sleep_ms", "Delay in milliseconds before each execution.", 500);
+  }
+
+  void configure() override {
+    this-&gt;max_count_ = this-&gt;get_parameter&lt;int&gt;("max_count");
+    this-&gt;sleep_ms_ = this-&gt;get_parameter&lt;int&gt;("sleep_ms");
+    this-&gt;counter = 0;
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr /*blackboard*/) override {
+    YASMIN_LOG_INFO("Executing WorkerState: iteration %d/%d", this-&gt;counter + 1,
+                    this-&gt;max_count_);
+    std::this_thread::sleep_for(std::chrono::milliseconds(this-&gt;sleep_ms_));
+
+    this-&gt;counter += 1;
+    if (this-&gt;counter &gt;= this-&gt;max_count_) {
+      return "done";
+    }
+    return "working";
+  }
+
+private:
+  int counter;
+  int max_count_;
+  int sleep_ms_;
+};</code></pre>
 
         <h2>2. Create Regions</h2>
         <p>
@@ -245,7 +295,6 @@
 #include "yasmin/orthogonal_state.hpp"
 #include "yasmin/state.hpp"
 #include "yasmin/state_machine.hpp"
-#include "yasmin_demos/worker_state.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"

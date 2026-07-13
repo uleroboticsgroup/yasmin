@@ -39,6 +39,7 @@
           <li><a href="../../index.html">Introduction</a></li>
           <li><a href="../../docker.html">Docker Environment</a></li>
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../shared_states.html">Shared States</a></li>
           <li><a href="../../callback_signal.html">Callback Signal</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
@@ -200,7 +201,60 @@
           the state machine.
         </p>
 
-        <pre><code class="language-python">from yasmin_demos.foo_state import FooState</code></pre>
+        <pre><code class="language-python">import time
+
+import yasmin
+from yasmin import Blackboard, State
+
+
+class FooState(State):
+
+    def __init__(self) -&gt; None:
+        super().__init__(["outcome1", "outcome2"])
+        self.counter = 0
+        self.counter_prefix = "Counter"
+        self.max_count = 3
+        self.sleep_ms = 300
+        self.set_description(
+            "Produces a counter string and stores it in the blackboard while the counter is below the threshold."
+        )
+        self.set_outcome_description("outcome1", "Counter is below the threshold")
+        self.set_outcome_description("outcome2", "Counter reached the threshold")
+        self.declare_parameter(
+            "counter_prefix",
+            "Prefix used when formatting the counter string.",
+            "Counter",
+        )
+        self.declare_parameter(
+            "max_count",
+            "Number of successful loops before the state returns outcome2.",
+            3,
+        )
+        self.declare_parameter(
+            "sleep_ms",
+            "Delay in milliseconds before each execution.",
+            300,
+        )
+        self.add_output_key(
+            "foo_str",
+            "String containing the current counter value produced by FooState.",
+        )
+
+    def configure(self) -&gt; None:
+        self.counter_prefix = self.get_parameter("counter_prefix")
+        self.max_count = self.get_parameter("max_count")
+        self.sleep_ms = self.get_parameter("sleep_ms")
+
+    def execute(self, blackboard: Blackboard) -&gt; str:
+        yasmin.YASMIN_LOG_INFO("Executing state FOO")
+        time.sleep(self.sleep_ms / 1000.0)
+
+        if self.counter &lt; self.max_count:
+            self.counter += 1
+            blackboard["foo_str"] = f"{self.counter_prefix}: {self.counter}"
+            return "outcome1"
+        else:
+            return "outcome2"</code></pre>
 
         <h2>2. Create the BarState</h2>
         <p>
@@ -216,7 +270,47 @@
           <code>time.sleep(3)</code> call simulates processing time.
         </p>
 
-        <pre><code class="language-python">from yasmin_demos.bar_state import BarState</code></pre>
+        <pre><code class="language-python">import time
+
+import yasmin
+from yasmin import Blackboard, State
+
+
+class BarState(State):
+
+    def __init__(self) -&gt; None:
+        super().__init__(outcomes=["outcome3"])
+        self.log_prefix = "Observed value"
+        self.sleep_ms = 300
+        self.set_description(
+            "Prints the value stored in 'foo_str' from the blackboard and transitions back to the Foo state."
+        )
+        self.set_outcome_description("outcome3", "Final outcome")
+        self.declare_parameter(
+            "log_prefix",
+            "Prefix printed before the blackboard value.",
+            "Observed value",
+        )
+        self.declare_parameter(
+            "sleep_ms",
+            "Delay in milliseconds before each execution.",
+            300,
+        )
+        self.add_input_key(
+            "foo_str",
+            "String produced by FooState and printed by this state.",
+        )
+
+    def configure(self) -&gt; None:
+        self.log_prefix = self.get_parameter("log_prefix")
+        self.sleep_ms = self.get_parameter("sleep_ms")
+
+    def execute(self, blackboard: Blackboard) -&gt; str:
+        yasmin.YASMIN_LOG_INFO("Executing state BAR")
+        time.sleep(self.sleep_ms / 1000.0)
+
+        yasmin.YASMIN_LOG_INFO(f"{self.log_prefix}: {blackboard['foo_str']}")
+        return "outcome3"</code></pre>
 
         <h2>3. Main Function</h2>
         <p>

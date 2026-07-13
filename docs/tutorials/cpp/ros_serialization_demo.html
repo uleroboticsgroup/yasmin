@@ -39,6 +39,7 @@
           <li><a href="../../index.html">Introduction</a></li>
           <li><a href="../../docker.html">Docker Environment</a></li>
           <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../shared_states.html">Shared States</a></li>
           <li><a href="../../callback_signal.html">Callback Signal</a></li>
           <li><a href="../../xml_factory.html">XML State Machines</a></li>
           <li><a href="../../packages.html">Packages Overview</a></li>
@@ -213,6 +214,91 @@
   </State>
   <FinalOutcome name="outcome4" description="Final outcome"/>
 </StateMachine></code></pre>
+
+        <h2>C++ State: PoseWriterState</h2>
+        <p>
+          The <code>PoseWriterState</code> creates a
+          <code>geometry_msgs::msg::Pose</code>, serializes it to bytes, and
+          stores both the serialized data and type information in the blackboard
+          for the Python <code>PoseReaderState</code> to read and deserialize.
+        </p>
+
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+#include &lt;geometry_msgs/msg/pose.hpp&gt;
+
+#include &lt;yasmin/blackboard.hpp&gt;
+#include &lt;yasmin/state.hpp&gt;
+#include &lt;yasmin/types.hpp&gt;
+
+#include &quot;yasmin/logs.hpp&quot;
+#include &quot;yasmin_ros/interface_serialization.hpp&quot;
+#include &quot;yasmin_ros/ros_logs.hpp&quot;
+
+
+class PoseWriterState : public yasmin::State {
+public:
+  PoseWriterState() : yasmin::State({&quot;SUCCEED&quot;}) {
+    this-&gt;position_x_ = 1.0;
+    this-&gt;position_y_ = 2.0;
+    this-&gt;position_z_ = 3.0;
+    this-&gt;orientation_w_ = 1.0;
+    this-&gt;set_description(
+        &quot;Creates a Pose message, serializes it, and stores the serialized bytes &quot;
+        &quot;and type information in the blackboard.&quot;);
+    this-&gt;declare_parameter&lt;double&gt;(&quot;position_x&quot;, &quot;Pose position x coordinate.&quot;,
+                                   1.0);
+    this-&gt;declare_parameter&lt;double&gt;(&quot;position_y&quot;, &quot;Pose position y coordinate.&quot;,
+                                   2.0);
+    this-&gt;declare_parameter&lt;double&gt;(&quot;position_z&quot;, &quot;Pose position z coordinate.&quot;,
+                                   3.0);
+    this-&gt;declare_parameter&lt;double&gt;(&quot;orientation_w&quot;,
+                                   &quot;Pose orientation w component.&quot;, 1.0);
+    this-&gt;add_output_key(
+        &quot;pose_bytes&quot;,
+        &quot;Serialized Pose message stored as bytes in the blackboard.&quot;);
+    this-&gt;add_output_key(&quot;pose_bytes__type&quot;,
+                         &quot;Type information for the serialized Pose message.&quot;);
+  }
+
+  void configure() override {
+    this-&gt;position_x_ = this-&gt;get_parameter&lt;double&gt;(&quot;position_x&quot;);
+    this-&gt;position_y_ = this-&gt;get_parameter&lt;double&gt;(&quot;position_y&quot;);
+    this-&gt;position_z_ = this-&gt;get_parameter&lt;double&gt;(&quot;position_z&quot;);
+    this-&gt;orientation_w_ = this-&gt;get_parameter&lt;double&gt;(&quot;orientation_w&quot;);
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    YASMIN_LOG_INFO(&quot;Executing state POSE_WRITER&quot;);
+
+    geometry_msgs::msg::Pose pose;
+    pose.position.x = this-&gt;position_x_;
+    pose.position.y = this-&gt;position_y_;
+    pose.position.z = this-&gt;position_z_;
+    pose.orientation.x = 0.0;
+    pose.orientation.y = 0.0;
+    pose.orientation.z = 0.0;
+    pose.orientation.w = this-&gt;orientation_w_;
+
+    const std::vector&lt;uint8_t&gt; pose_bytes =
+        yasmin_ros::serialize_interface&lt;geometry_msgs::msg::Pose&gt;(pose);
+
+    blackboard-&gt;set&lt;std::vector&lt;uint8_t&gt;&gt;(&quot;pose_bytes&quot;, pose_bytes);
+    blackboard-&gt;set&lt;std::string&gt;(&quot;pose_bytes__type&quot;, &quot;geometry_msgs/msg/Pose&quot;);
+
+    YASMIN_LOG_INFO(&quot;Stored serialized Pose with %zu bytes&quot;, pose_bytes.size());
+
+    return &quot;SUCCEED&quot;;
+  }
+
+private:
+  double position_x_;
+  double position_y_;
+  double position_z_;
+  double orientation_w_;
+};</code></pre>
 
         <h2>C++ Main Function</h2>
         <p>
