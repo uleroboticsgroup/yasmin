@@ -33,29 +33,8 @@ from yasmin_factory.type_utils import (
     parse_key_value,
 )
 
+from yasmin_cli.verb._xml_utils import indent_xml, parse_assignments
 from yasmin_cli.verb.run import run_factory_node
-
-
-def _parse_assignments(values: List[str], assignment_kind: str) -> Dict[str, str]:
-    result: Dict[str, str] = {}
-
-    for value in values:
-        if "=" not in value:
-            raise ValueError(
-                f"Invalid {assignment_kind} assignment '{value}'. Expected NAME=VALUE."
-            )
-
-        key, raw_value = value.split("=", 1)
-        key = key.strip()
-
-        if not key:
-            raise ValueError(
-                f"Invalid {assignment_kind} assignment '{value}'. Empty name is not allowed."
-            )
-
-        result[key] = raw_value
-
-    return result
 
 
 def _infer_python_value_type(value) -> Union[str, None]:
@@ -105,7 +84,7 @@ def _infer_python_value_type(value) -> Union[str, None]:
 def _infer_value_type(raw_value: str) -> str:
     value = raw_value.strip()
 
-    if value.lower() in ("true", "false", "1", "0"):
+    if value.lower() in ("true", "false"):
         return "bool"
 
     try:
@@ -175,23 +154,6 @@ def _resolve_parameter_type(plugin, parameter_name: str, raw_value: str) -> str:
         return normalize_type(default_type)
 
     if parameter_meta.get("has_default", False):
-        inferred_type = _infer_python_value_type(parameter_meta.get("default_value"))
-        if inferred_type:
-            return inferred_type
-
-    return _infer_value_type(raw_value)
-
-
-def _resolve_parameter_type(plugin, parameter_name: str, raw_value: str) -> str:
-    parameter_meta = _get_parameter_meta(plugin, parameter_name)
-    if parameter_meta is None:
-        return _infer_value_type(raw_value)
-
-    default_type = parameter_meta.get("default_value_type", "")
-    if default_type:
-        return normalize_type(default_type)
-
-    if parameter_meta.get("has_default", False):
         default_value = parameter_meta.get("default_value")
         if isinstance(default_value, bool):
             return "bool"
@@ -201,26 +163,12 @@ def _resolve_parameter_type(plugin, parameter_name: str, raw_value: str) -> str:
             return "float"
         if isinstance(default_value, str):
             return "str"
+        if isinstance(default_value, (list, dict)):
+            inferred = _infer_python_value_type(default_value)
+            if inferred:
+                return inferred
 
     return _infer_value_type(raw_value)
-
-
-def _indent_xml(element: ET.Element, level: int = 0) -> None:
-    indent = "\n" + level * "    "
-    child_indent = "\n" + (level + 1) * "    "
-
-    if len(element):
-        if not element.text or not element.text.strip():
-            element.text = child_indent
-
-        for child in element:
-            _indent_xml(child, level + 1)
-
-        if not element[-1].tail or not element[-1].tail.strip():
-            element[-1].tail = indent
-
-    if level and (not element.tail or not element.tail.strip()):
-        element.tail = indent
 
 
 def _merge_plugin_keys(plugin) -> List[Dict]:
@@ -393,7 +341,7 @@ def _build_test_xml(
             },
         )
 
-    _indent_xml(root)
+    indent_xml(root)
     return ET.tostring(root, encoding="unicode")
 
 
@@ -517,8 +465,8 @@ def _main_test(args):
         return 1
 
     try:
-        provided_inputs = _parse_assignments(args.input, "input")
-        provided_parameters = _parse_assignments(args.param, "parameter")
+        provided_inputs = parse_assignments(args.input, "input")
+        provided_parameters = parse_assignments(args.param, "parameter")
     except ValueError as exc:
         print(str(exc))
         return 1
@@ -559,7 +507,14 @@ def _main_test(args):
 
     if args.keep_temp_file:
         safe_name = plugin_id(plugin).replace("/", "_").replace(".", "_")
-        temp_path = Path.cwd() / f"yasmin_test_{safe_name}.xml"
+        base_path = Path.cwd() / f"yasmin_test_{safe_name}"
+        temp_path = base_path.with_suffix(".xml")
+        counter = 1
+        while temp_path.exists():
+            temp_path = base_path.with_name(f"{base_path.name}_{counter}").with_suffix(
+                ".xml"
+            )
+            counter += 1
         temp_path.write_text(xml_content, encoding="utf-8")
         return run_factory_node(
             state_machine_file=temp_path.as_posix(),

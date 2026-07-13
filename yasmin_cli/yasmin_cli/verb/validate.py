@@ -183,7 +183,7 @@ def _validate_all_plugin_xml_files(strict_mode: bool) -> int:
 
     for _, xml_path in xml_files:
         return_code = _run_single_validation_subprocess(xml_path, strict_mode)
-        if return_code != 0:
+        if return_code not in (0, 130):
             failed += 1
 
     print("")

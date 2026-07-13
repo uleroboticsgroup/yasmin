@@ -27,56 +27,14 @@ from yasmin_factory.type_utils import (
 )
 
 from yasmin_cli.completer import (
-    get_state_machine_input_keys,
-    get_state_machine_parameters,
-    is_state_machine_xml,
     run_input_completer,
     run_param_completer,
     strip_namespace,
     xml_file_completer,
 )
+from yasmin_cli.verb._xml_utils import indent_xml, parse_assignments
 
 INPUT_KEY_TYPES = {"in", "in/out"}
-
-
-def _parse_assignments(values: List[str], assignment_kind: str) -> Dict[str, str]:
-    result: Dict[str, str] = {}
-
-    for value in values:
-        if "=" not in value:
-            raise ValueError(
-                f"Invalid {assignment_kind} assignment '{value}'. Expected NAME=VALUE."
-            )
-
-        key, raw_value = value.split("=", 1)
-        key = key.strip()
-
-        if not key:
-            raise ValueError(
-                f"Invalid {assignment_kind} assignment '{value}'. Empty name is not allowed."
-            )
-
-        result[key] = raw_value
-
-    return result
-
-
-def _indent_xml(element: ET.Element, level: int = 0) -> None:
-    indent = "\n" + level * "    "
-    child_indent = "\n" + (level + 1) * "    "
-
-    if len(element):
-        if not element.text or not element.text.strip():
-            element.text = child_indent
-
-        for child in element:
-            _indent_xml(child, level + 1)
-
-        if not element[-1].tail or not element[-1].tail.strip():
-            element[-1].tail = indent
-
-    if level and (not element.tail or not element.tail.strip()):
-        element.tail = indent
 
 
 def _find_input_key_map(root: ET.Element) -> Dict[str, ET.Element]:
@@ -128,32 +86,13 @@ def _find_default_element(root: ET.Element, key_name: str) -> Union[ET.Element, 
     return None
 
 
-def _inject_overrides_into_xml(
-    xml_path: str,
+def _inject_overrides_into_root(
+    root: ET.Element,
     provided_inputs: Dict[str, str],
     provided_parameters: Dict[str, str],
 ) -> str:
-    tree = ET.parse(xml_path)
-    root = tree.getroot()
-
-    if strip_namespace(root.tag) != "StateMachine":
-        raise ValueError(f"Not a valid YASMIN state machine XML file: {xml_path}")
-
     input_key_map = _find_input_key_map(root)
-    unknown_inputs = sorted(name for name in provided_inputs if name not in input_key_map)
-    if unknown_inputs:
-        raise ValueError(
-            f"Unknown input keys for state machine '{xml_path}': {', '.join(unknown_inputs)}"
-        )
-
     parameter_map = _find_parameter_map(root)
-    unknown_parameters = sorted(
-        name for name in provided_parameters if name not in parameter_map
-    )
-    if unknown_parameters:
-        raise ValueError(
-            f"Unknown parameters for state machine '{xml_path}': {', '.join(unknown_parameters)}"
-        )
 
     for key_name, raw_value in provided_inputs.items():
         key_element = input_key_map[key_name]
@@ -178,7 +117,7 @@ def _inject_overrides_into_xml(
         parameter_element.set("default_value", serialized_value)
         parameter_element.set("default_type", normalize_type(default_type))
 
-    _indent_xml(root)
+    indent_xml(root)
     return ET.tostring(root, encoding="unicode")
 
 
@@ -262,13 +201,20 @@ def _main_run(args):
         print(f"File does not exist: {args.state_machine_file}")
         return 1
 
-    if not is_state_machine_xml(xml_path):
+    try:
+        tree = ET.parse(xml_path)
+    except ET.ParseError as exc:
+        print(f"Failed to parse XML file '{args.state_machine_file}': {exc}")
+        return 1
+
+    root = tree.getroot()
+    if strip_namespace(root.tag) != "StateMachine":
         print(f"Not a valid YASMIN state machine XML file: {args.state_machine_file}")
         return 1
 
     try:
-        provided_inputs = _parse_assignments(args.input, "input")
-        provided_parameters = _parse_assignments(args.param, "parameter")
+        provided_inputs = parse_assignments(args.input, "input")
+        provided_parameters = parse_assignments(args.param, "parameter")
     except ValueError as exc:
         print(str(exc))
         return 1
@@ -280,10 +226,8 @@ def _main_run(args):
             use_python=args.py,
         )
 
-    valid_input_names = {
-        key.get("name", "")
-        for key in get_state_machine_input_keys(args.state_machine_file)
-    }
+    input_key_map = _find_input_key_map(root)
+    valid_input_names = set(input_key_map.keys())
     unknown_inputs = sorted(
         name for name in provided_inputs if name not in valid_input_names
     )
@@ -294,10 +238,8 @@ def _main_run(args):
         )
         return 1
 
-    valid_parameter_names = {
-        parameter.get("name", "")
-        for parameter in get_state_machine_parameters(args.state_machine_file)
-    }
+    parameter_map = _find_parameter_map(root)
+    valid_parameter_names = set(parameter_map.keys())
     unknown_parameters = sorted(
         name for name in provided_parameters if name not in valid_parameter_names
     )
@@ -309,16 +251,13 @@ def _main_run(args):
         return 1
 
     try:
-        xml_content = _inject_overrides_into_xml(
-            args.state_machine_file,
+        xml_content = _inject_overrides_into_root(
+            root,
             provided_inputs,
             provided_parameters,
         )
     except ValueError as exc:
         print(str(exc))
-        return 1
-    except ET.ParseError as exc:
-        print(f"Failed to parse XML file '{args.state_machine_file}': {exc}")
         return 1
 
     with tempfile.TemporaryDirectory(prefix="yasmin_run_") as temp_dir:

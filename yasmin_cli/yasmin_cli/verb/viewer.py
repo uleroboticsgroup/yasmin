@@ -20,7 +20,6 @@ import subprocess
 def run_viewer(
     host: str = "127.0.0.1",
     port: int = 5000,
-    msg_per_second: int = 30,
 ) -> int:
     command = [
         "ros2",
@@ -32,8 +31,6 @@ def run_viewer(
         f"host:={host}",
         "-p",
         f"port:={port}",
-        "-p",
-        f"msg_per_second:={msg_per_second}",
     ]
 
     try:
@@ -64,12 +61,6 @@ def add_viewer_verb(subparsers):
         default=5000,
         help="Viewer port",
     )
-    parser.add_argument(
-        "--msg-per-second",
-        type=int,
-        default=30,
-        help="Viewer update rate",
-    )
 
     parser.set_defaults(main=_main_viewer)
 
@@ -78,5 +69,4 @@ def _main_viewer(args):
     return run_viewer(
         host=args.host,
         port=args.port,
-        msg_per_second=args.msg_per_second,
     )

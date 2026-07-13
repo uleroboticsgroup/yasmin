@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import sys
 
 from ros2cli.command import CommandExtension
 
@@ -47,7 +48,11 @@ class YasminCommand(CommandExtension):
     def main(self, *, parser, args):
         if hasattr(args, "main"):
             result = args.main(args)
+            sys.stdout.flush()
+            sys.stderr.flush()
             os._exit(result if result is not None else 0)
 
         self._parser.print_help()
+        sys.stdout.flush()
+        sys.stderr.flush()
         os._exit(0)

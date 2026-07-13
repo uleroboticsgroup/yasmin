@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, List, Set, Union
@@ -21,6 +22,13 @@ from yasmin_plugins_manager import PluginInfo, PluginManager
 
 IGNORE_XML_FILES = {"package.xml", "plugins.xml"}
 INPUT_KEY_TYPES = {"in", "in/out"}
+
+_plugin_manager_cache: Union[PluginManager, None] = None
+
+
+def invalidate_plugin_cache():
+    global _plugin_manager_cache
+    _plugin_manager_cache = None
 
 
 def plugin_id(plugin) -> str:
@@ -36,15 +44,18 @@ def plugin_id(plugin) -> str:
 
 
 def load_plugins(include_xml: bool = True):
-    manager = PluginManager()
-    manager.load_all_plugins(True)
+    global _plugin_manager_cache
+
+    if _plugin_manager_cache is None:
+        _plugin_manager_cache = PluginManager()
+        _plugin_manager_cache.load_all_plugins(True)
 
     plugins = []
-    plugins.extend(manager.cpp_plugins)
-    plugins.extend(manager.python_plugins)
+    plugins.extend(_plugin_manager_cache.cpp_plugins)
+    plugins.extend(_plugin_manager_cache.python_plugins)
 
     if include_xml:
-        plugins.extend(manager.xml_files)
+        plugins.extend(_plugin_manager_cache.xml_files)
 
     return sorted(plugins, key=plugin_id)
 
@@ -293,11 +304,30 @@ def run_param_completer(prefix, parsed_args, **kwargs):
     return _assignment_completer(prefix, parameters, already_used)
 
 
+def _xml_file_candidates(start_dir: Path, max_depth: int = 3) -> List[Path]:
+    candidates: List[Path] = []
+    start = str(start_dir.resolve())
+
+    for dirpath, dirnames, filenames in os.walk(start_dir):
+        rel = os.path.relpath(dirpath, start)
+        depth = 0 if rel == "." else rel.count(os.sep) + 1
+
+        if depth > max_depth:
+            dirnames.clear()
+            continue
+
+        for f in filenames:
+            if f.endswith(".xml"):
+                candidates.append(Path(dirpath) / f)
+
+    return candidates
+
+
 def xml_file_completer(prefix, parsed_args, **kwargs):
     current_dir = Path.cwd()
     matches: List[str] = []
 
-    for path in sorted(current_dir.rglob("*.xml")):
+    for path in sorted(_xml_file_candidates(current_dir)):
         if path.name in IGNORE_XML_FILES:
             continue
 
