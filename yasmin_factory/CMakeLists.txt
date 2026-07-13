@@ -108,7 +108,32 @@ if(BUILD_TESTING)
     pluginlib::pluginlib
   )
 
-  # Export plugin description for tests (build tree only)
+  # Install test plugin library
+  install(TARGETS yasmin_factory_test_states
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+  )
+  
+  # Install test plugin description
+  install(FILES test/test_plugins.xml
+    DESTINATION share/${PROJECT_NAME}
+  )
+  
+  # Install test XML files
+  install(FILES
+    test/test_simple_sm_1.xml
+    test/test_simple_sm_2.xml
+    test/test_nested_sm.xml
+    test/test_remapping.xml
+    test/test_file_path_sm.xml
+    test/test_included_sm.xml
+    test/test_fsm_metadata.xml
+    test/test_orthogonal_sm.xml
+    DESTINATION share/${PROJECT_NAME}/test
+  )
+
+  # Export plugin description for tests
   pluginlib_export_plugin_description_file(yasmin test/test_plugins.xml)
 
   # Python tests
