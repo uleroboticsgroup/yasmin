@@ -230,6 +230,7 @@ class YasminFactory:
             ValueError: If the XML structure is invalid.
         """
         file_path = root.attrib.get("file_path", "")
+        from_file_path_attr = bool(file_path)
 
         if not file_path:
             file_name = root.attrib.get("file_name", "")
@@ -257,8 +258,11 @@ class YasminFactory:
             if not os.path.isabs(file_path):
                 file_path = os.path.normpath(os.path.join(base_dir, file_path))
 
-            # Prevent path traversal outside the base directory
-            if base_dir:
+            # Prevent path traversal outside the base directory, but only for
+            # user-supplied file_path attributes. Paths resolved via package +
+            # file_name are trusted (they come from the ament package registry)
+            # and may legitimately point to another package's share directory.
+            if from_file_path_attr and base_dir:
                 base_dir_real = os.path.realpath(base_dir)
                 resolved = os.path.realpath(file_path)
                 if (

@@ -949,6 +949,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root,
                          const std::string &base_dir) const {
 
   std::string file_path = this->get_optional_attribute(root, "file_path", "");
+  bool from_file_path_attr = !file_path.empty();
 
   if (file_path.empty()) {
     std::string file_name = this->get_optional_attribute(root, "file_name", "");
@@ -1003,8 +1004,11 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root,
       }
       file_path = (std::filesystem::path(base_dir) / file_path).string();
     }
-    // Prevent path traversal outside the base directory
-    if (!base_dir.empty()) {
+    // Prevent path traversal outside the base directory, but only for
+    // user-supplied file_path attributes. Paths resolved via package +
+    // file_name are trusted (they come from the ament package registry)
+    // and may legitimately point to another package's share directory.
+    if (from_file_path_attr && !base_dir.empty()) {
       std::string xml_dir =
           std::filesystem::weakly_canonical(base_dir).string();
       std::string resolved =
