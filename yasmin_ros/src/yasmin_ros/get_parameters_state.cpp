@@ -39,7 +39,6 @@ GetParametersState::GetParametersState(
 
   for (const auto &param : parameters) {
     const std::string &param_name = param.first;
-    const std::any &default_value = param.second;
     this->add_output_key(param_name, "");
   }
 
@@ -95,9 +94,8 @@ GetParametersState::execute(yasmin::Blackboard::SharedPtr blackboard) {
     YASMIN_LOG_INFO("Retrieving parameter '%s'", param_name.c_str());
 
     auto parameter = this->node_->get_parameter(param_name);
-    auto type = this->node_->get_parameter_types({param_name});
 
-    switch (type[0]) {
+    switch (parameter.get_type()) {
     case rclcpp::ParameterType::PARAMETER_BOOL:
       blackboard->set<bool>(param_name, parameter.as_bool());
       break;

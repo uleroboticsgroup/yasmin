@@ -15,6 +15,7 @@
 #ifndef YASMIN_ROS__ACTION_STATE_HPP_
 #define YASMIN_ROS__ACTION_STATE_HPP_
 
+#include <atomic>
 #include <condition_variable>
 #include <functional>
 #include <memory>
@@ -237,7 +238,7 @@ public:
     this->set_outcome_description(basic_outcomes::CANCEL,
                                   "The action was canceled");
 
-    if (this->wait_timeout > 0 || this->response_timeout > 0) {
+    if (this->wait_timeout != -1 || this->response_timeout != -1) {
       this->outcomes.insert(basic_outcomes::TIMEOUT);
       this->set_outcome_description(
           basic_outcomes::TIMEOUT,
@@ -287,7 +288,9 @@ public:
     // Wait for cancellation to complete outside of the goal_handle_mutex lock
     if (waiting_for_cancel) {
       std::unique_lock<std::mutex> cancel_lock(this->action_cancel_mutex);
-      this->action_cancel_cond.wait(cancel_lock);
+      this->action_cancel_cond.wait(cancel_lock,
+                                    [this]() { return this->cancel_done_; });
+      this->cancel_done_ = false;
     }
 
     // Wake up the execute() method if it's waiting
@@ -301,7 +304,13 @@ public:
    * This function is called to notify that the action cancellation process
    * has finished.
    */
-  void cancel_done() { this->action_cancel_cond.notify_all(); }
+  void cancel_done() {
+    {
+      std::lock_guard<std::mutex> lock(this->action_cancel_mutex);
+      this->cancel_done_ = true;
+    }
+    this->action_cancel_cond.notify_all();
+  }
 
   /**
    * @brief Execute the action and return the outcome.
@@ -323,8 +332,6 @@ public:
 
     std::unique_lock<std::mutex> lock(this->action_done_mutex);
     int retry_count = 0;
-
-    Goal goal = this->create_goal_handler(blackboard);
 
     // Wait for the action server to be available
     YASMIN_LOG_INFO("Waiting for action '%s'", this->action_name.c_str());
@@ -354,6 +361,8 @@ public:
       return basic_outcomes::CANCEL;
     }
 
+    Goal goal = this->create_goal_handler(blackboard);
+
     // Prepare options for sending the goal
     SendGoalOptions send_goal_options;
     send_goal_options.goal_response_callback = std::bind(
@@ -362,6 +371,8 @@ public:
         std::bind(&ActionState::result_callback, this, std::placeholders::_1);
 
     if (this->feedback_handler) {
+      // blackboard is a SharedPtr captured by value, keeping the blackboard
+      // alive for the duration of the feedback callback
       send_goal_options.feedback_callback =
           [this, blackboard](typename GoalHandle::SharedPtr,
                              std::shared_ptr<const Feedback> feedback) {
@@ -371,35 +382,31 @@ public:
 
     // Send the goal to the action server
     YASMIN_LOG_INFO("Sending goal to action '%s'", this->action_name.c_str());
-    this->action_done_ = false;
+    this->action_done_.store(false);
     this->action_client->async_send_goal(goal, send_goal_options);
 
-    if (this->response_timeout > 0) {
-      const auto response_timeout_dur =
-          std::chrono::seconds(this->response_timeout);
-      while (this->action_done_cond.wait_for(lock, response_timeout_dur) ==
-             std::cv_status::timeout) {
+    // Reset retry_count for the response-wait phase
+    retry_count = 0;
 
+    if (this->response_timeout > 0) {
+      // Use a single total timeout instead of a retry loop that doesn't
+      // re-send the request on each iteration
+      const auto total_timeout =
+          std::chrono::seconds(static_cast<int64_t>(this->response_timeout) *
+                               (static_cast<int64_t>(this->maximum_retry) + 1));
+      if (!this->action_done_cond.wait_for(lock, total_timeout, [this]() {
+            return this->action_done_.load() || this->is_canceled();
+          })) {
         if (this->is_canceled()) {
           return basic_outcomes::CANCEL;
         }
-
-        YASMIN_LOG_WARN(
-            "Timeout reached while waiting for response from action '%s'",
-            this->action_name.c_str());
-        if (retry_count < this->maximum_retry) {
-          retry_count++;
-          YASMIN_LOG_WARN("Retrying to wait for action '%s' response (%d/%d)",
-                          this->action_name.c_str(), retry_count,
-                          this->maximum_retry);
-        } else {
-          return basic_outcomes::TIMEOUT;
-        }
+        return basic_outcomes::TIMEOUT;
       }
 
     } else {
-      this->action_done_cond.wait(
-          lock, [this]() { return this->action_done_ || this->is_canceled(); });
+      this->action_done_cond.wait(lock, [this]() {
+        return this->action_done_.load() || this->is_canceled();
+      });
     }
 
     if (this->is_canceled()) {
@@ -444,7 +451,9 @@ private:
   std::mutex action_cancel_mutex;
 
   /// @brief Flag set when result is received.
-  bool action_done_{false};
+  std::atomic<bool> action_done_{false};
+  /// @brief Flag set when cancellation is confirmed.
+  bool cancel_done_{false};
   /// @brief Shared pointer to the action result.
   Result action_result;
   /// @brief Status of the action execution.
@@ -523,7 +532,7 @@ private:
   void result_callback(const typename GoalHandle::WrappedResult &result) {
     this->action_result = result.result;
     this->action_status = result.code;
-    this->action_done_ = true;
+    this->action_done_.store(true);
     this->action_done_cond.notify_one();
   }
 };

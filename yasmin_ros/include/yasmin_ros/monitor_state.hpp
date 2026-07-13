@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <condition_variable>
+#include <deque>
 #include <functional>
 #include <memory>
 #include <string>
@@ -189,6 +190,9 @@ public:
           const auto timeout_dur = std::chrono::seconds(this->timeout);
           wait_status = this->msg_cond.wait_for(lock, timeout_dur);
         } else {
+          if (this->is_canceled()) {
+            return basic_outcomes::CANCEL;
+          }
           return basic_outcomes::TIMEOUT;
         }
 
@@ -200,8 +204,8 @@ public:
 
     YASMIN_LOG_INFO("Processing msg from topic '%s'", this->topic_name.c_str());
     std::string outcome =
-        this->monitor_handler(blackboard, this->msg_list.at(0));
-    this->msg_list.erase(this->msg_list.begin());
+        this->monitor_handler(blackboard, this->msg_list.front());
+    this->msg_list.pop_front();
 
     return outcome;
   }
@@ -230,7 +234,7 @@ private:
   rclcpp::QoS qos;
 
   /// @brief List to store queued messages.
-  std::vector<std::shared_ptr<MsgT>> msg_list;
+  std::deque<std::shared_ptr<MsgT>> msg_list;
   /// @brief Callback function to handle incoming messages.
   MonitorHandler monitor_handler;
   /// @brief Maximum number of messages to queue.
@@ -259,7 +263,7 @@ private:
     this->msg_list.push_back(msg);
 
     if ((int)this->msg_list.size() > this->msg_queue) {
-      this->msg_list.erase(this->msg_list.begin());
+      this->msg_list.pop_front();
     }
 
     this->msg_cond.notify_one();

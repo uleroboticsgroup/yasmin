@@ -195,7 +195,8 @@ public:
                rclcpp::CallbackGroup::SharedPtr callback_group,
                int wait_timeout = -1, int response_timeout = -1,
                int maximum_retry = 3)
-      : State({basic_outcomes::SUCCEED, basic_outcomes::ABORT}),
+      : State({basic_outcomes::SUCCEED, basic_outcomes::ABORT,
+               basic_outcomes::CANCEL}),
         srv_name(srv_name), wait_timeout(wait_timeout),
         response_timeout(response_timeout), maximum_retry(maximum_retry) {
 
@@ -203,8 +204,10 @@ public:
                                   "The service call was successful");
     this->set_outcome_description(basic_outcomes::ABORT,
                                   "The service call failed");
+    this->set_outcome_description(basic_outcomes::CANCEL,
+                                  "The service call was canceled");
 
-    if (this->wait_timeout > 0 || this->response_timeout > 0) {
+    if (this->wait_timeout != -1 || this->response_timeout != -1) {
       this->outcomes.insert(basic_outcomes::TIMEOUT);
       this->set_outcome_description(
           basic_outcomes::TIMEOUT,
@@ -249,7 +252,6 @@ public:
    * ABORT, or TIMEOUT.
    */
   std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
-    Request request = this->create_request(blackboard);
     std::unique_lock<std::mutex> lock(this->response_done_mutex);
     int retry_count = 0;
 
@@ -277,6 +279,8 @@ public:
       }
     }
 
+    Request request = this->create_request(blackboard);
+
     // Send the service request
     YASMIN_LOG_INFO("Sending request to service '%s'", this->srv_name.c_str());
 
@@ -286,23 +290,21 @@ public:
         request, std::bind(&ServiceState::response_callback, this,
                            std::placeholders::_1));
 
+    // Reset retry_count for the response-wait phase
+    retry_count = 0;
+
     // Wait for response with timeout
     if (this->response_timeout > 0) {
-      const auto response_timeout_dur =
-          std::chrono::seconds(this->response_timeout);
-      while (this->response_done_cond.wait_for(lock, response_timeout_dur) ==
-             std::cv_status::timeout) {
-        YASMIN_LOG_WARN(
-            "Timeout reached while waiting for response from service '%s'",
-            this->srv_name.c_str());
-        if (retry_count < this->maximum_retry) {
-          retry_count++;
-          YASMIN_LOG_WARN("Retrying to wait for service '%s' response (%d/%d)",
-                          this->srv_name.c_str(), retry_count,
-                          this->maximum_retry);
-        } else {
-          return basic_outcomes::TIMEOUT;
+      const auto total_timeout =
+          std::chrono::seconds(static_cast<int64_t>(this->response_timeout) *
+                               (static_cast<int64_t>(this->maximum_retry) + 1));
+      if (!this->response_done_cond.wait_for(lock, total_timeout, [this]() {
+            return this->service_response != nullptr || this->is_canceled();
+          })) {
+        if (this->is_canceled()) {
+          return basic_outcomes::CANCEL;
         }
+        return basic_outcomes::TIMEOUT;
       }
     } else {
       this->response_done_cond.wait(lock, [this]() {
@@ -327,11 +329,6 @@ public:
     }
   }
 
-protected:
-  /// @brief Shared pointer to the ROS 2 node
-  rclcpp::Node::SharedPtr node_;
-
-public:
   /**
    * @brief Cancel the current service state.
    */
@@ -339,6 +336,10 @@ public:
     this->response_done_cond.notify_all();
     yasmin::State::cancel_state();
   }
+
+protected:
+  /// @brief Shared pointer to the ROS 2 node
+  rclcpp::Node::SharedPtr node_;
 
 private:
   /// @brief Shared pointer to the service client.
