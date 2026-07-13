@@ -69,6 +69,25 @@ private:
 
 public:
   /**
+   * @brief Raw type-erased entry used by batched lookups.
+   */
+  struct RawEntry {
+    std::shared_ptr<void> value;
+    std::string type_name;
+  };
+
+  /**
+   * @brief Get the raw value and type name for a single key under one lock.
+   */
+  RawEntry get_raw(const std::string &key) const;
+
+  /**
+   * @brief Get raw values and type names for a batch of keys under one lock.
+   */
+  std::vector<RawEntry>
+  get_raw_batch(const std::vector<std::string> &keys) const;
+
+  /**
    * @brief Shared pointer type for Blackboard.
    */
   YASMIN_PTR_ALIASES(Blackboard)
@@ -92,6 +111,12 @@ public:
    * @tparam T The type of the value to store.
    * @param name The key to associate with the value.
    * @param value The value to store.
+   *
+   * @note When @p T is a pybind11 Python type (e.g. `py::object`), in-place
+   * updates modify Python refcounts and require the GIL. C++ threads that
+   * call `set<py::object>` directly (e.g. `Concurrence` workers) **must**
+   * hold the GIL. The Python wrapper (`BlackboardPyWrapper::set`) acquires
+   * the GIL automatically; direct C++ callers do not.
    */
   template <class T> void set(const std::string &name, T value) {
     using DecayT = std::decay_t<T>;
@@ -162,6 +187,10 @@ public:
    *
    * The stored value is forwarded using the existing type-erased storage so the
    * type does not need to be known at compile time.
+   *
+   * @note This performs a shallow copy: the shared_ptr entries in the target
+   * blackboard refer to the same underlying value object as the source.
+   * Mutating the value through one handle affects the other.
    */
   void copy_value_from(const Blackboard &other, const std::string &source_key,
                        const std::string &target_key);
@@ -206,7 +235,7 @@ public:
    * @brief Get the remappings of the blackboard.
    * @return The remappings of the blackboard.
    */
-  const Remappings &get_remappings() const noexcept;
+  Remappings get_remappings() const;
 };
 
 } // namespace yasmin

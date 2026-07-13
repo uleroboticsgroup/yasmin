@@ -74,7 +74,8 @@ struct BlackboardKeyInfo {
    * @param value The default value.
    */
   template <typename T>
-  BlackboardKeyInfo(std::string key_name, std::string key_description, T value)
+  BlackboardKeyInfo(std::string key_name, std::string key_description,
+                    T &&value)
       : name(std::move(key_name)), description(std::move(key_description)),
         has_default(true), default_value(std::make_shared<std::decay_t<T>>(
                                std::forward<T>(value))),
@@ -110,6 +111,10 @@ struct BlackboardKeyInfo {
    * @return The default value.
    */
   template <typename T> T get_default_value() const {
+    if (!this->has_default) {
+      throw std::runtime_error("BlackboardKeyInfo '" + this->name +
+                               "' has no default value");
+    }
     return *std::static_pointer_cast<T>(this->default_value);
   }
 };

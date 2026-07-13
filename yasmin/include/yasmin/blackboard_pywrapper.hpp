@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "yasmin/blackboard.hpp"
+#include "yasmin/blackboard_key_info_py.hpp"
 #include "yasmin/callback_signal.hpp"
 #include "yasmin/callback_signal_pyutils.hpp"
 #include "yasmin/types.hpp"
@@ -313,6 +314,7 @@ public:
    * native mapping exists, the value is stored as py::object.
    */
   void set(const std::string &key, py::object value) {
+    py::gil_scoped_acquire gil;
     if (py::isinstance<py::bool_>(value)) {
       this->blackboard->set<bool>(key, value.cast<bool>());
       return;
@@ -478,44 +480,11 @@ public:
         using T = decltype(dummy);
         (*m)[demangle_type(typeid(T).name())] = [](const Blackboard &bb,
                                                    const std::string &k) {
-          return byte_vector_to_py_bytes(bb.get<T>(k));
+          return detail::byte_vector_to_py_bytes(bb.get<T>(k));
         };
       };
 
-      // Scalars
-      add(std::string{});
-      add(std::int64_t{});
-      add(int{});
-      add(long{});
-      add(float{});
-      add(double{});
-      add(bool{});
-      add(yasmin::CallbackSignal::SharedPtr{});
-
-      // Vectors
-      add(StringVector{});
-      add(IntVector{});
-      add(FloatVector{});
-      add(BoolVector{});
-      // Alternate C++ integer widths that pybind11 may store
-      add(std::vector<int>{});
-      add(std::vector<long>{});
-      add(std::vector<long long>{});
-      add(std::vector<float>{});
-      // Byte vectors
-      add_bytes(std::vector<uint8_t>{});
-      add_bytes(std::vector<unsigned char>{});
-      add_bytes(std::vector<char>{});
-
-      // Dicts
-      add(StringDict{});
-      add(IntDict{});
-      add(FloatDict{});
-      add(BoolDict{});
-      add(std::unordered_map<std::string, int>{});
-      add(std::unordered_map<std::string, long>{});
-      add(std::unordered_map<std::string, long long>{});
-      add(std::unordered_map<std::string, float>{});
+      detail::register_standard_py_types(add, add_bytes);
 
       return m;
     }();
@@ -525,7 +494,7 @@ public:
       return it->second(*this->blackboard, key);
     }
 
-    return py::none();
+    throw std::runtime_error("Unsupported type for Python conversion: " + type);
   }
 
   /**
@@ -556,14 +525,63 @@ public:
   std::vector<std::string> keys() const { return this->blackboard->keys(); }
 
   /**
+   * @brief Convert a raw type-erased entry to a Python object.
+   *
+   * The type dispatch mirrors the mapping in BlackboardPyWrapper::set() so
+   * that values written through Python and read back round-trip correctly.
+   */
+  static py::object raw_entry_to_pyobject(const Blackboard::RawEntry &entry) {
+    using Getter = std::function<py::object(const std::shared_ptr<void> &)>;
+
+    static const auto *const RAW_GETTERS = []() {
+      using Map = std::unordered_map<std::string, Getter>;
+      auto *m = new Map();
+
+      auto add = [&](auto dummy) {
+        using T = decltype(dummy);
+        (*m)[demangle_type(typeid(T).name())] =
+            [](const std::shared_ptr<void> &ptr) {
+              return py::cast(*std::static_pointer_cast<T>(ptr));
+            };
+      };
+
+      auto add_bytes = [&](auto dummy) {
+        using T = decltype(dummy);
+        (*m)[demangle_type(typeid(T).name())] =
+            [](const std::shared_ptr<void> &ptr) {
+              return detail::byte_vector_to_py_bytes(
+                  *std::static_pointer_cast<T>(ptr));
+            };
+      };
+
+      detail::register_standard_py_types(add, add_bytes);
+
+      return m;
+    }();
+
+    auto it = RAW_GETTERS->find(entry.type_name);
+    if (it != RAW_GETTERS->end()) {
+      return it->second(entry.value);
+    }
+
+    throw std::runtime_error("Unsupported type for Python conversion: " +
+                             entry.type_name);
+  }
+
+  /**
    * @brief Get the values visible in the current remapping scope.
    * @return Python list with the values in key order.
+   *
+   * Uses a single-lock batched snapshot to avoid N individual lock
+   * acquisitions.
    */
   py::list values() const {
+    auto keys = this->blackboard->keys();
+    auto entries = this->blackboard->get_raw_batch(keys);
     py::list result;
 
-    for (const auto &key : this->blackboard->keys()) {
-      result.append(this->get(key));
+    for (const auto &entry : entries) {
+      result.append(raw_entry_to_pyobject(entry));
     }
 
     return result;
@@ -572,12 +590,17 @@ public:
   /**
    * @brief Get the key-value pairs visible in the current remapping scope.
    * @return Python list of ``(key, value)`` tuples.
+   *
+   * Uses a single-lock batched snapshot to avoid N individual lock
+   * acquisitions.
    */
   py::list items() const {
+    auto keys = this->blackboard->keys();
+    auto entries = this->blackboard->get_raw_batch(keys);
     py::list result;
 
-    for (const auto &key : this->blackboard->keys()) {
-      result.append(py::make_tuple(key, this->get(key)));
+    for (size_t i = 0; i < keys.size(); i++) {
+      result.append(py::make_tuple(keys[i], raw_entry_to_pyobject(entries[i])));
     }
 
     return result;
@@ -599,9 +622,9 @@ public:
 
   /**
    * @brief Get the current key remappings.
-   * @return Reference to the underlying remapping table.
+   * @return A copy of the remapping table.
    */
-  const Remappings &get_remappings() const {
+  Remappings get_remappings() const {
     return this->blackboard->get_remappings();
   }
 

@@ -232,6 +232,59 @@ template <typename T> inline bool is_exact_cpp_type(const std::string &type) {
   return type == demangle_type(typeid(T).name());
 }
 
+/**
+ * @brief Register all standard C++ ↔ Python type conversions into a map.
+ *
+ * Both BlackboardKeyInfo and BlackboardPyWrapper maintain a lookup table
+ * mapping demangled C++ type names to conversion functions. The set of
+ * supported types is identical, so this helper centralises the type list.
+ *
+ * @tparam AddFn Callable type for standard types (takes a dummy value of
+ *   the type to register).
+ * @tparam AddBytesFn Callable type for byte-vector types (uses
+ *   byte_vector_to_py_bytes for conversion).
+ * @param add Functor called once per standard scalar/vector/dict type.
+ * @param add_bytes Functor called once per byte-vector type.
+ */
+template <typename AddFn, typename AddBytesFn>
+inline void register_standard_py_types(AddFn &&add, AddBytesFn &&add_bytes) {
+  // Scalars
+  add(std::string{});
+  add(std::int64_t{});
+  add(int{});
+  add(static_cast<long>(0));
+  add(static_cast<long long>(0));
+  add(float{});
+  add(double{});
+  add(bool{});
+  add(yasmin::CallbackSignal::SharedPtr{});
+
+  // Vectors
+  add(StringVector{});
+  add(IntVector{});
+  add(FloatVector{});
+  add(BoolVector{});
+  add(std::vector<int>{});
+  add(std::vector<long>{});
+  add(std::vector<long long>{});
+  add(std::vector<float>{});
+
+  // Byte vectors
+  add_bytes(std::vector<uint8_t>{});
+  add_bytes(std::vector<unsigned char>{});
+  add_bytes(std::vector<char>{});
+
+  // Dicts
+  add(StringDict{});
+  add(IntDict{});
+  add(FloatDict{});
+  add(BoolDict{});
+  add(std::unordered_map<std::string, int>{});
+  add(std::unordered_map<std::string, long>{});
+  add(std::unordered_map<std::string, long long>{});
+  add(std::unordered_map<std::string, float>{});
+}
+
 } // namespace detail
 
 /**
@@ -384,118 +437,44 @@ blackboard_key_info_get_py_default(const BlackboardKeyInfo &info) {
     return py::none();
   }
 
-  const std::string &type = info.default_value_type;
+  using Getter = std::function<py::object(const BlackboardKeyInfo &)>;
 
-  if (is_exact_cpp_type<std::vector<uint8_t>>(type)) {
-    return byte_vector_to_py_bytes(
-        info.get_default_value<std::vector<uint8_t>>());
-  }
-  if (is_exact_cpp_type<std::vector<unsigned char>>(type)) {
-    return byte_vector_to_py_bytes(
-        info.get_default_value<std::vector<unsigned char>>());
-  }
-  if (is_exact_cpp_type<std::vector<char>>(type)) {
-    return byte_vector_to_py_bytes(info.get_default_value<std::vector<char>>());
-  }
+  static const auto *const GETTERS = []() {
+    using Map = std::unordered_map<std::string, Getter>;
+    auto *m = new Map();
 
-  if (is_exact_cpp_type<StringVector>(type)) {
-    return py::cast(info.get_default_value<StringVector>());
-  }
-  if (is_exact_cpp_type<IntVector>(type) ||
-      is_exact_cpp_type<std::vector<int>>(type) ||
-      is_exact_cpp_type<std::vector<long>>(type) ||
-      is_exact_cpp_type<std::vector<long long>>(type)) {
-    if (is_exact_cpp_type<IntVector>(type)) {
-      return py::cast(info.get_default_value<IntVector>());
-    }
-    if (is_exact_cpp_type<std::vector<int>>(type)) {
-      return py::cast(info.get_default_value<std::vector<int>>());
-    }
-    if (is_exact_cpp_type<std::vector<long>>(type)) {
-      return py::cast(info.get_default_value<std::vector<long>>());
-    }
-    return py::cast(info.get_default_value<std::vector<long long>>());
-  }
-  if (is_exact_cpp_type<FloatVector>(type) ||
-      is_exact_cpp_type<std::vector<float>>(type)) {
-    if (is_exact_cpp_type<FloatVector>(type)) {
-      return py::cast(info.get_default_value<FloatVector>());
-    }
-    return py::cast(info.get_default_value<std::vector<float>>());
-  }
-  if (is_exact_cpp_type<BoolVector>(type)) {
-    return py::cast(info.get_default_value<BoolVector>());
-  }
+    auto add = [&](auto dummy) {
+      using T = decltype(dummy);
+      (*m)[demangle_type(typeid(T).name())] = [](const BlackboardKeyInfo &i) {
+        return py::cast(i.get_default_value<T>());
+      };
+    };
 
-  if (is_exact_cpp_type<StringDict>(type)) {
-    return py::cast(info.get_default_value<StringDict>());
-  }
-  if (is_exact_cpp_type<IntDict>(type) ||
-      is_exact_cpp_type<std::unordered_map<std::string, int>>(type) ||
-      is_exact_cpp_type<std::unordered_map<std::string, long>>(type) ||
-      is_exact_cpp_type<std::unordered_map<std::string, long long>>(type)) {
-    if (is_exact_cpp_type<IntDict>(type)) {
-      return py::cast(info.get_default_value<IntDict>());
-    }
-    if (is_exact_cpp_type<std::unordered_map<std::string, int>>(type)) {
-      return py::cast(
-          info.get_default_value<std::unordered_map<std::string, int>>());
-    }
-    if (is_exact_cpp_type<std::unordered_map<std::string, long>>(type)) {
-      return py::cast(
-          info.get_default_value<std::unordered_map<std::string, long>>());
-    }
-    return py::cast(
-        info.get_default_value<std::unordered_map<std::string, long long>>());
-  }
-  if (is_exact_cpp_type<FloatDict>(type) ||
-      is_exact_cpp_type<std::unordered_map<std::string, float>>(type)) {
-    if (is_exact_cpp_type<FloatDict>(type)) {
-      return py::cast(info.get_default_value<FloatDict>());
-    }
-    return py::cast(
-        info.get_default_value<std::unordered_map<std::string, float>>());
-  }
-  if (is_exact_cpp_type<BoolDict>(type)) {
-    return py::cast(info.get_default_value<BoolDict>());
-  }
+    auto add_bytes = [&](auto dummy) {
+      using T = decltype(dummy);
+      (*m)[demangle_type(typeid(T).name())] = [](const BlackboardKeyInfo &i) {
+        return byte_vector_to_py_bytes(i.get_default_value<T>());
+      };
+    };
 
-  if (is_exact_cpp_type<yasmin::CallbackSignal::SharedPtr>(type)) {
-    return py::cast(
-        info.get_default_value<yasmin::CallbackSignal::SharedPtr>());
-  }
+    detail::register_standard_py_types(add, add_bytes);
 
-  if (is_exact_cpp_type<std::string>(type)) {
-    return py::cast(info.get_default_value<std::string>());
-  }
-  if (is_exact_cpp_type<std::int64_t>(type)) {
-    return py::cast(info.get_default_value<std::int64_t>());
-  }
-  if (is_exact_cpp_type<int>(type)) {
-    return py::cast(info.get_default_value<int>());
-  }
-  if (is_exact_cpp_type<long>(type)) {
-    return py::cast(info.get_default_value<long>());
-  }
-  if (is_exact_cpp_type<long long>(type)) {
-    return py::cast(info.get_default_value<long long>());
-  }
-  if (is_exact_cpp_type<float>(type)) {
-    return py::cast(info.get_default_value<float>());
-  }
-  if (is_exact_cpp_type<double>(type)) {
-    return py::cast(info.get_default_value<double>());
-  }
-  if (is_exact_cpp_type<bool>(type)) {
-    return py::cast(info.get_default_value<bool>());
-  }
-  if (type == "py::object") {
-    return info.get_default_value<py::object>();
+    // py::object (not part of the standard set)
+    (*m)["py::object"] = [](const BlackboardKeyInfo &i) {
+      return i.get_default_value<py::object>();
+    };
+
+    return m;
+  }();
+
+  auto it = GETTERS->find(info.default_value_type);
+  if (it != GETTERS->end()) {
+    return it->second(info);
   }
 
   throw std::runtime_error("Unsupported BlackboardKeyInfo default value type "
                            "for Python conversion: " +
-                           type);
+                           info.default_value_type);
 }
 
 } // namespace yasmin
