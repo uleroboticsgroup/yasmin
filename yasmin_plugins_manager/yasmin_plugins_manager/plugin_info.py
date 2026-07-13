@@ -17,6 +17,8 @@ import os
 import re
 from typing import Dict, List, Optional
 
+import yasmin
+
 from ament_index_python import get_package_share_path
 from lxml import etree as ET
 from yasmin_pybind_bridge import CppStateFactory
@@ -178,6 +180,13 @@ class PluginInfo:
         """
         Load plugin metadata immediately.
 
+        .. warning::
+
+           **Trust model**: This constructor imports Python modules and executes
+           C++ plugin factories to extract metadata. Only use this on packages
+           you trust. To skip execution during discovery, pass ``--no-execute``
+           to the discovery entry point (not yet implemented).
+
         Parameters
         ----------
         plugin_type : str
@@ -226,11 +235,12 @@ class PluginInfo:
                 file_path = os.path.join(package_path, self.relative_path)
             else:
                 file_path = ""
-                for root, _, files in os.walk(package_path):
-                    if self.file_name in files:
-                        file_path = os.path.join(root, self.file_name)
-                        self.relative_path = os.path.relpath(file_path, package_path)
-                        break
+                if self.file_name:
+                    for root, _, files in os.walk(package_path):
+                        if self.file_name in files:
+                            file_path = os.path.join(root, self.file_name)
+                            self.relative_path = os.path.relpath(file_path, package_path)
+                            break
 
             if not file_path or not os.path.exists(file_path):
                 raise ValueError(
@@ -310,6 +320,9 @@ class PluginInfo:
                 value = transform(value)
             return value
         except Exception:
+            yasmin.YASMIN_LOG_DEBUG(
+                f"Failed to read {attr} via {getter} on {type(instance).__name__}"
+            )
             return fallback
 
     def _load_instance_metadata(self, instance) -> None:

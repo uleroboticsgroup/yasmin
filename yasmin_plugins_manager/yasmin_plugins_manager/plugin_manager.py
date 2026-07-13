@@ -31,7 +31,7 @@ from ament_index_python import (
 from ament_index_python.resources import get_resource, get_resource_types, get_resources
 from lxml import etree as ET
 from tqdm import tqdm
-from yasmin import LogLevel, State, set_log_level
+from yasmin import LogLevel, State, get_log_level, set_log_level
 
 from yasmin_plugins_manager.cache import (
     CACHE_VERSION,
@@ -40,6 +40,7 @@ from yasmin_plugins_manager.cache import (
     get_ignored_packages_from_env,
     is_stat_signature_valid,
     load_cache,
+    recursive_dir_signature,
     save_cache,
     stat_signature,
 )
@@ -49,6 +50,12 @@ PACKAGE_IGNORE_EXPORT_TAG = "yasmin_plugins_manager"
 PACKAGE_IGNORE_EXPORT_ATTRIBUTE = "ignore"
 XML_DISCOVERY_IGNORE_COMMENT = "<!-- YASMIN_IGNORE_DISCOVERY -->"
 TRUTHY_VALUES = {"1", "true", "yes", "on"}
+
+
+def _strip_namespace(tag: str) -> str:
+    if "}" in tag:
+        return tag.split("}", 1)[1]
+    return tag
 
 
 class PluginManager:
@@ -86,51 +93,69 @@ class PluginManager:
         The cache is used when possible. If the cache is missing, outdated or invalid,
         a full discovery is performed and the result is written back to the cache.
         """
+        saved_log_level = get_log_level()
         set_log_level(LogLevel.WARN)
+        try:
+            if not force_refresh and self._load_from_cache():
+                return
 
-        if not force_refresh and self._load_from_cache():
-            return
+            self.cpp_plugins = []
+            self.python_plugins = []
+            self.xml_files = []
 
-        self.cpp_plugins = []
-        self.python_plugins = []
-        self.xml_files = []
+            tracked_files: List[dict] = []
+            tracked_dirs: List[dict] = []
+            ignored_packages_env = set(get_ignored_packages_from_env())
+            packages = list(get_packages_with_prefixes())
+            cpp_resource_map = self._get_cpp_plugin_resource_map()
 
-        tracked_files: List[dict] = []
-        tracked_dirs: List[dict] = []
-        ignored_packages_env = set(get_ignored_packages_from_env())
-        packages = list(get_packages_with_prefixes())
-        cpp_resource_map = self._get_cpp_plugin_resource_map()
+            for package in tqdm(packages, desc="Loading plugins", disable=hide_progress):
+                try:
+                    package_share_path = get_package_share_path(package)
+                except Exception:
+                    continue
 
-        for package in tqdm(packages, desc="Loading plugins", disable=hide_progress):
-            try:
-                package_share_path = get_package_share_path(package)
-            except Exception:
-                continue
+                share_signature = stat_signature(str(package_share_path))
+                if share_signature:
+                    tracked_dirs.append(share_signature)
 
-            share_signature = stat_signature(str(package_share_path))
-            if share_signature:
-                tracked_dirs.append(share_signature)
+                package_xml_path = package_share_path / "package.xml"
+                package_xml_signature = stat_signature(str(package_xml_path))
+                if package_xml_signature:
+                    tracked_files.append(package_xml_signature)
 
-            package_xml_path = package_share_path / "package.xml"
-            package_xml_signature = stat_signature(str(package_xml_path))
-            if package_xml_signature:
-                tracked_files.append(package_xml_signature)
+                if package in ignored_packages_env:
+                    continue
 
-            if package in ignored_packages_env:
-                continue
+                if self._package_has_discovery_ignore_export(package_xml_path):
+                    continue
 
-            if self._package_has_discovery_ignore_export(package_xml_path):
-                continue
+                self.load_cpp_plugins_from_package(
+                    package_name=package,
+                    tracked_files=tracked_files,
+                    cpp_resource_map=cpp_resource_map,
+                )
+                self.load_python_plugins_from_package(
+                    package, tracked_files, tracked_dirs
+                )
+                self.load_xml_state_machines_from_package(package, tracked_files)
 
-            self.load_cpp_plugins_from_package(
-                package_name=package,
-                tracked_files=tracked_files,
-                cpp_resource_map=cpp_resource_map,
-            )
-            self.load_python_plugins_from_package(package, tracked_files, tracked_dirs)
-            self.load_xml_state_machines_from_package(package, tracked_files)
+            self._save_to_cache(tracked_files, tracked_dirs)
+        finally:
+            set_log_level(saved_log_level)
 
-        self._save_to_cache(tracked_files, tracked_dirs)
+        self._dedup_plugins()
+
+    def _dedup_plugins(self) -> None:
+        seen: set = set()
+        for plugin_list in (self.cpp_plugins, self.python_plugins, self.xml_files):
+            deduped: List[PluginInfo] = []
+            for plugin in plugin_list:
+                key = plugin.dedup_key
+                if key not in seen:
+                    seen.add(key)
+                    deduped.append(plugin)
+            plugin_list[:] = deduped
 
     def _load_from_cache(self) -> bool:
         """
@@ -464,7 +489,7 @@ class PluginManager:
         package_path: str = os.path.dirname(package.__file__)
 
         if tracked_dirs is not None:
-            signature = stat_signature(package_path)
+            signature = recursive_dir_signature(package_path)
             if signature:
                 tracked_dirs.append(signature)
 
@@ -472,7 +497,7 @@ class PluginManager:
             if "__pycache__" in dirpath or "/test" in dirpath:
                 continue
 
-            if len(dirpath.replace(package_path, "").split(os.sep)) > 3:
+            if len(os.path.relpath(dirpath, package_path).split(os.sep)) > 3:
                 continue
 
             for filename in filenames:
@@ -480,15 +505,6 @@ class PluginManager:
                     continue
 
                 file_path: str = os.path.join(dirpath, filename)
-
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        content: str = f.read(2000)
-
-                    if "yasmin" not in content or "State" not in content:
-                        continue
-                except (IOError, UnicodeDecodeError):
-                    continue
 
                 if tracked_files is not None:
                     signature = stat_signature(file_path)
@@ -549,7 +565,7 @@ class PluginManager:
                 try:
                     tree = ET.parse(xml_file)
                     xml_root = tree.getroot()
-                    if xml_root.tag == "StateMachine":
+                    if _strip_namespace(xml_root.tag) == "StateMachine":
                         relative_path = os.path.relpath(xml_file, package_share_path)
                         self.load_xml_state_machine(
                             filename,
