@@ -96,12 +96,14 @@ class StateMachine(State):
     ) -> None:
         """Remove a transition for a child state."""
         transitions = self.transitions.get(state_name, [])
-        self.transitions[state_name] = [
+        filtered = [
             item
             for item in transitions
             if not (item.source_outcome == source_outcome and item.target == target)
         ]
-        if not self.transitions.get(state_name):
+        if filtered:
+            self.transitions[state_name] = filtered
+        else:
             self.transitions.pop(state_name, None)
 
     def remove_state(self, name: str) -> None:

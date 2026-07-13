@@ -108,7 +108,6 @@ class EditorRuntimeMixin:
             runtime.deleteLater()
         except Exception:
             pass
-        del runtime
 
     def _recreate_runtime(self) -> None:
         self._destroy_runtime()

@@ -145,7 +145,4 @@ def run_editor(argv: Union[List[str], None] = None) -> int:
         YasminNode.destroy_instance()
     except Exception:
         pass
-
-    del manager
-
     return exit_code

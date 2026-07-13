@@ -20,7 +20,6 @@ from yasmin_editor.editor_gui.colors import PALETTE
 
 if TYPE_CHECKING:
     from yasmin_editor.editor_gui.connection_line import ConnectionLine
-    from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 
 
 class BaseNodeMixin:
@@ -28,7 +27,6 @@ class BaseNodeMixin:
 
     def _initialize_base_node_graphics(self, x: float, y: float) -> None:
         self.connections: List["ConnectionLine"] = []
-        self.parent_container: Optional["ContainerStateNode"] = None
 
         self.setPos(x, y)
         self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
@@ -73,35 +71,9 @@ class BaseNodeMixin:
         scale = 1.0 / max(abs(dx) / half_width, abs(dy) / half_height, 1e-9)
         return QtCore.QPointF(center.x() + dx * scale, center.y() + dy * scale)
 
-    def constrain_position_to_parent(
-        self,
-        value: QtCore.QPointF,
-        top_margin: float = 40.0,
-        side_margin: float = 10.0,
-        bottom_margin: float = 10.0,
-    ) -> QtCore.QPointF:
-        if not self.parent_container:
-            return value
-
-        container_rect = self.parent_container.rect()
-        node_rect = self.boundingRect()
-
-        min_x = container_rect.left() - node_rect.left() + side_margin
-        max_x = container_rect.right() - node_rect.right() - side_margin
-        min_y = container_rect.top() - node_rect.top() + top_margin
-        max_y = container_rect.bottom() - node_rect.bottom() - bottom_margin
-
-        constrained_x = max(min_x, min(value.x(), max_x))
-        constrained_y = max(min_y, min(value.y(), max_y))
-        return QtCore.QPointF(constrained_x, constrained_y)
-
     def update_attached_connections(self) -> None:
         for connection in self.connections:
             connection.update_position()
-
-    def notify_parent_container_resized(self) -> None:
-        if self.parent_container:
-            self.parent_container.auto_resize_for_children()
 
     def initialize_breakpoint_marker(self) -> None:
         bounds = self.boundingRect()

@@ -62,7 +62,12 @@ def paste_outcomes(
     offset_x: float,
     offset_y: float,
 ) -> Tuple[dict[str, str], dict[str, str]]:
-    """Paste logical outcomes and their visual aliases into the target."""
+    """Paste logical outcomes and their visual aliases into the target.
+
+    Note: Outcome names are not de-duplicated. If multiple source outcomes
+    share the same name they will map to the same target outcome, which may
+    produce fewer outcomes than ``outcome_placements`` entries.
+    """
 
     outcome_instance_map: dict[str, str] = {}
     outcome_name_map: dict[str, str] = {}
@@ -72,9 +77,10 @@ def paste_outcomes(
         copied_name = placement.outcome_name
         outcome_name_map[placement.outcome_name] = copied_name
         if copied_name not in existing_outcome_names:
-            outcome_model = copy.deepcopy(bundle.outcomes[placement.outcome_name])
-            target_model.add_outcome(outcome_model)
-            existing_outcome_names.add(copied_name)
+            outcome_model = copy.deepcopy(bundle.outcomes.get(placement.outcome_name))
+            if outcome_model is not None:
+                target_model.add_outcome(outcome_model)
+                existing_outcome_names.add(copied_name)
         new_instance_id = target_model.layout.create_outcome_alias(
             copied_name,
             placement.position.x + offset_x,

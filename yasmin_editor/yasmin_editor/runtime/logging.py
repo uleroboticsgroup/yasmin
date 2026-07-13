@@ -68,6 +68,10 @@ class RuntimeLogger:
         self._log_depth = 0
         self._log_depth_lock = threading.Lock()
 
+        self._pending_log_level: Optional[yasmin.LogLevel] = None
+        self._worker_active = False
+        self._worker_lock = threading.Lock()
+
         self.configure()
 
     def get_logs(self) -> List[str]:
@@ -86,6 +90,10 @@ class RuntimeLogger:
     ) -> None:
         """Update the active YASMIN log level.
 
+        When the worker thread is active, the reconfiguration is deferred
+        until ``worker_stopped()`` is called. This avoids interleaving
+        level-inconsistent log output from the running state machine.
+
         Args:
             level: Target log level as a ``yasmin.LogLevel`` or its name.
             emit_status: Whether the log view should receive a status line.
@@ -96,11 +104,29 @@ class RuntimeLogger:
                 raise ValueError(f"Unsupported log level: {level}")
             level = normalized_level
 
-        self._log_level = level
-        self.configure()
+        with self._worker_lock:
+            if self._worker_active:
+                self._pending_log_level = level
+            else:
+                self._log_level = level
+                self.configure()
 
         if emit_status:
             self.append(f"[STATUS] Log level set to {self.get_log_level_name()}")
+
+    def worker_started(self) -> None:
+        """Mark the worker thread as active so log-level changes are deferred."""
+        with self._worker_lock:
+            self._worker_active = True
+
+    def worker_stopped(self) -> None:
+        """Mark the worker thread as idle and apply any deferred log-level change."""
+        with self._worker_lock:
+            self._worker_active = False
+            if self._pending_log_level is not None:
+                self._log_level = self._pending_log_level
+                self._pending_log_level = None
+                self.configure()
 
     def configure(self) -> None:
         """Install the runtime logger callback into YASMIN."""

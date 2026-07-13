@@ -96,15 +96,18 @@ class Runtime(QtCore.QObject):
 
     def is_running(self) -> bool:
         """Return whether the runtime worker is actively executing."""
-        return self._running
+        with self._worker_state_lock:
+            return self._running
 
     def is_blocked(self) -> bool:
         """Return whether execution is currently paused."""
-        return self._blocked
+        with self._worker_state_lock:
+            return self._blocked
 
     def is_finished(self) -> bool:
         """Return whether the loaded state machine finished execution."""
-        return self._finished
+        with self._worker_state_lock:
+            return self._finished
 
     def is_step_mode(self) -> bool:
         """Return whether execution is currently armed for a single step."""
@@ -112,43 +115,50 @@ class Runtime(QtCore.QObject):
 
     def get_final_outcome(self) -> Optional[str]:
         """Return the final outcome once execution completed."""
-        return self._final_outcome
+        with self._worker_state_lock:
+            return self._final_outcome
 
     def get_status_label(self) -> str:
         """Return the human-readable runtime status shown in the UI."""
-        if self._finished and self._final_outcome:
-            return self._final_outcome
-        if self._running and self._blocked:
-            return "Paused"
-        if self._running:
-            return "Running"
+        with self._worker_state_lock:
+            if self._finished and self._final_outcome:
+                return self._final_outcome
+            if self._running and self._blocked:
+                return "Paused"
+            if self._running:
+                return "Running"
         if self.is_ready():
             return "Ready"
         return "Inactive"
 
     def get_current_state(self) -> Optional[str]:
         """Return the currently active leaf state name if available."""
-        if self._finished:
-            return None
-        return self._active_path[-1] if self._active_path else None
+        with self._worker_state_lock:
+            if self._finished:
+                return None
+            return self._active_path[-1] if self._active_path else None
 
     def get_current_state_ref(self) -> Optional[Any]:
         """Return the currently highlighted runtime state object."""
-        return self._current_state_ref
+        with self._worker_state_lock:
+            return self._current_state_ref
 
     def get_last_state_ref(self) -> Optional[Any]:
         """Return the previously active runtime state object."""
-        return self._last_state_ref
+        with self._worker_state_lock:
+            return self._last_state_ref
 
     def get_active_path(self) -> Tuple[str, ...]:
         """Return the last known active path inside the loaded machine."""
-        return self._active_path
+        with self._worker_state_lock:
+            return self._active_path
 
     def get_last_transition(
         self,
     ) -> Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]]:
         """Return the most recently observed transition."""
-        return self._last_transition
+        with self._worker_state_lock:
+            return self._last_transition
 
     def get_logs(self) -> List[str]:
         """Return a copy of the collected runtime log lines."""
@@ -189,10 +199,13 @@ class Runtime(QtCore.QObject):
             self.error_occurred.emit(f"Failed to create runtime state machine:\n{exc}")
             return False
 
-        self._running = False
-        self._blocked = False
-        self._finished = False
-        self._final_outcome = None
+        with self._worker_state_lock:
+            self._running = False
+            self._blocked = False
+            self._finished = False
+            self._final_outcome = None
+            self._current_state_ref = None
+            self._last_state_ref = None
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
@@ -200,7 +213,6 @@ class Runtime(QtCore.QObject):
         self._set_last_transition(None)
         initial_active_path = self._resolve_initial_active_path()
         self._set_active_path(initial_active_path)
-        self._last_state_ref = None
         self._current_state_ref = self._resolve_state_reference(initial_active_path)
         self.ready_changed.emit(self.is_ready())
         self.status_changed.emit("Runtime state machine loaded")
@@ -256,7 +268,12 @@ class Runtime(QtCore.QObject):
             }
 
     def cancel_state(self) -> None:
-        """Request cancellation of the currently active state."""
+        """Request cancellation of the currently active state.
+
+        Called from the GUI thread. The underlying YASMIN ``cancel_state``
+        method is assumed to be thread-safe, so no additional synchronization
+        is added here.
+        """
         if not self.is_ready() or self.is_finished() or self._disposed:
             return
         try:
@@ -266,7 +283,12 @@ class Runtime(QtCore.QObject):
             self.error_occurred.emit(f"Failed to cancel current state:\n{exc}")
 
     def cancel_state_machine(self) -> None:
-        """Request cancellation of the complete runtime state machine."""
+        """Request cancellation of the complete runtime state machine.
+
+        Called from the GUI thread. The underlying YASMIN
+        ``cancel_state_machine`` method is assumed to be thread-safe, so no
+        additional synchronization is added here.
+        """
         if (
             not self.is_ready()
             or not self.is_running()
@@ -287,6 +309,7 @@ class Runtime(QtCore.QObject):
             return
 
         self._shutting_down = True
+        self._disposed = True
 
         with self._pause_condition:
             self._pause_requested = False
@@ -304,22 +327,29 @@ class Runtime(QtCore.QObject):
 
         if self._execution_thread is not None and self._execution_thread.is_alive():
             self._execution_thread.join(timeout=1.0)
+            if self._execution_thread.is_alive():
+                self.logger.append(
+                    "[WARN] Worker thread did not finish within the timeout",
+                    is_end=True,
+                )
 
         self.sm = None
         self._execution_thread = None
-        self._finished = False
-        self._final_outcome = None
         self._pause_requested = False
         self._shutting_down = False
         self._step_mode = False
+        self.logger.worker_stopped()
         self.logger.reset_depth()
 
         self._set_running(False)
         self._set_blocked(False)
         self._set_active_path(tuple())
         self._set_last_transition(None)
-        self._current_state_ref = None
-        self._last_state_ref = None
+        with self._worker_state_lock:
+            self._finished = False
+            self._final_outcome = None
+            self._current_state_ref = None
+            self._last_state_ref = None
         self.ready_changed.emit(False)
 
         if reset_disposed:
@@ -362,17 +392,20 @@ class Runtime(QtCore.QObject):
             self._step_mode = False
             self._pause_condition.notify_all()
 
-        final_active_path = tuple(self._active_path)
+        with self._worker_state_lock:
+            final_active_path = tuple(self._active_path)
         if final_active_path:
             self._set_active_path(final_active_path)
-            self._last_state_ref = self._resolve_state_reference(final_active_path)
+            with self._worker_state_lock:
+                self._last_state_ref = self._resolve_state_reference(final_active_path)
 
-        self._finished = True
-        self._final_outcome = str(final_outcome)
+        with self._worker_state_lock:
+            self._finished = True
+            self._final_outcome = str(final_outcome)
+            self._current_state_ref = None
         self._set_running(False)
         self._set_blocked(False)
         self._set_last_transition(None)
-        self._current_state_ref = None
         self.outcome_changed.emit(self._final_outcome)
         self.status_changed.emit(status_message)
 
@@ -392,12 +425,14 @@ class Runtime(QtCore.QObject):
         if self._execution_thread is not None and self._execution_thread.is_alive():
             return
 
-        initial_path = self._active_path or self._resolve_initial_active_path()
+        with self._worker_state_lock:
+            initial_path = self._active_path or self._resolve_initial_active_path()
         if initial_path:
             self._set_running(True)
             self._set_active_path(initial_path)
 
         self._shutting_down = False
+        self.logger.worker_started()
         self._execution_thread = threading.Thread(
             target=self._execute_worker,
             name="yasmin-runtime",
@@ -412,29 +447,34 @@ class Runtime(QtCore.QObject):
             self._pause_requested = False
             self._pause_status_message = None
             self._pause_condition.notify_all()
-        if self._blocked:
-            self._set_blocked(False)
+        with self._worker_state_lock:
+            if self._blocked:
+                self._blocked = False
+                self.blocked_changed.emit(False)
 
     def _set_running(self, value: bool) -> None:
         """Update the running flag and emit the corresponding signal."""
-        if self._running == value:
-            return
-        self._running = value
+        with self._worker_state_lock:
+            if self._running == value:
+                return
+            self._running = value
         self.running_changed.emit(value)
 
     def _set_blocked(self, value: bool) -> None:
         """Update the paused flag and emit the corresponding signal."""
-        if self._blocked == value:
-            return
-        self._blocked = value
+        with self._worker_state_lock:
+            if self._blocked == value:
+                return
+            self._blocked = value
         self.blocked_changed.emit(value)
 
     def _set_active_path(self, state_path: Iterable[str]) -> None:
         """Store the active state path and notify the UI if it changed."""
         next_path = tuple(state_path)
-        if self._active_path == next_path:
-            return
-        self._active_path = next_path
+        with self._worker_state_lock:
+            if self._active_path == next_path:
+                return
+            self._active_path = next_path
         self.active_state_changed.emit(next_path)
 
     def _set_last_transition(
@@ -442,9 +482,10 @@ class Runtime(QtCore.QObject):
         transition: Optional[Tuple[Tuple[str, ...], Tuple[str, ...], str]],
     ) -> None:
         """Store the most recent transition and append a readable log line."""
-        if self._last_transition == transition:
-            return
-        self._last_transition = transition
+        with self._worker_state_lock:
+            if self._last_transition == transition:
+                return
+            self._last_transition = transition
         self.active_transition_changed.emit(transition)
 
     def _resolve_state_reference(self, path: Tuple[str, ...]) -> Optional[Any]:
@@ -464,9 +505,10 @@ class Runtime(QtCore.QObject):
         last_path: Optional[Tuple[str, ...]] = None,
     ) -> None:
         """Update the live state references exposed in the shell."""
-        if last_path is not None:
-            self._last_state_ref = self._resolve_state_reference(last_path)
-        self._current_state_ref = self._resolve_state_reference(current_path)
+        with self._worker_state_lock:
+            if last_path is not None:
+                self._last_state_ref = self._resolve_state_reference(last_path)
+            self._current_state_ref = self._resolve_state_reference(current_path)
 
     def _resolve_container(self, path: Tuple[str, ...]) -> Optional[Any]:
         """Resolve a container object for the given path inside the live machine."""
@@ -620,7 +662,8 @@ class Runtime(QtCore.QObject):
         self._set_running(True)
         active_path = self._expand_to_deepest_known_path(prefix + (str(start_state),))
         self._set_active_path(active_path)
-        self._current_state_ref = self._resolve_state_reference(active_path)
+        with self._worker_state_lock:
+            self._current_state_ref = self._resolve_state_reference(active_path)
         self._request_breakpoint_pause(active_path)
         self._pause_if_requested()
 
@@ -642,7 +685,8 @@ class Runtime(QtCore.QObject):
 
         if prefix:
             self._set_active_path(prefix)
-            self._current_state_ref = self._resolve_state_reference(prefix)
+            with self._worker_state_lock:
+                self._current_state_ref = self._resolve_state_reference(prefix)
             self._pause_if_requested()
             return
 
@@ -673,7 +717,8 @@ class Runtime(QtCore.QObject):
         self._set_last_transition((from_path, to_path, str(outcome)))
 
         self._set_active_path(from_path)
-        self._current_state_ref = self._resolve_state_reference(from_path)
+        with self._worker_state_lock:
+            self._current_state_ref = self._resolve_state_reference(from_path)
 
         with self._pause_condition:
             if self._step_mode:
@@ -683,7 +728,8 @@ class Runtime(QtCore.QObject):
         if self._has_breakpoint(to_path):
             self._update_shell_state_refs(to_path, from_path)
             self._set_active_path(to_path)
-            self._current_state_ref = self._resolve_state_reference(to_path)
+            with self._worker_state_lock:
+                self._current_state_ref = self._resolve_state_reference(to_path)
             self._request_breakpoint_pause(to_path)
             self._pause_if_requested()
 

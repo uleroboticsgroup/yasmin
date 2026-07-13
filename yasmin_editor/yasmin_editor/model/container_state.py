@@ -159,7 +159,9 @@ class ContainerState(State):
         if old_name == new_name:
             return
         self._assert_child_name_available(new_name, exclude_state=old_name)
-        state = self.states.pop(old_name)
+        state = self.states.pop(old_name, None)
+        if state is None:
+            return
         state.name = new_name
         self.states[new_name] = state
         for mapping in self.outcome_map.values():

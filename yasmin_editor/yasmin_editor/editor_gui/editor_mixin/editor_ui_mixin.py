@@ -348,7 +348,7 @@ class EditorUiMixin:
         outcome_name, ok = QtWidgets.QInputDialog.getText(
             self, "Final Outcome", "Enter final outcome name:"
         )
-        outcome_name = outcome_name.strip()
+        outcome_name = str(outcome_name or "").strip()
         if not (ok and outcome_name):
             return
 
@@ -776,7 +776,12 @@ class EditorUiMixin:
                         return
                     state_node.model.sync_id = sync_id
                     state_node.model.join_outcome = outcome
-                    state_node.model.outcomes = [Outcome(name=outcome)]
+                    old_desc = ""
+                    if state_node.model.outcomes:
+                        old_desc = state_node.model.outcomes[0].description
+                    state_node.model.outcomes = [
+                        Outcome(name=outcome, description=old_desc)
+                    ]
                     self.sync_blackboard_keys()
                     self.refresh_connection_port_visibility()
                     self.statusBar().showMessage(f"Updated join state: {name}", 2000)
@@ -834,7 +839,19 @@ class EditorUiMixin:
                     parameter_overwrites,
                 ):
                     return
-                state_node.model.outcomes = [Outcome(name=item) for item in outcomes]
+                old_outcomes = {o.name: o.description for o in state_node.model.outcomes}
+                new_outcome_names = set(outcomes)
+                state_node.model.outcomes = [
+                    Outcome(name=item, description=old_outcomes.get(item, ""))
+                    for item in outcomes
+                ]
+                parent_model = self.current_container_model
+                if hasattr(parent_model, "transitions"):
+                    parent_model.transitions[state_node.name] = [
+                        t
+                        for t in parent_model.transitions.get(state_node.name, [])
+                        if t.source_outcome in new_outcome_names
+                    ]
                 self.sync_blackboard_keys()
                 self.refresh_connection_port_visibility()
                 self.statusBar().showMessage(f"Updated state: {name}", 2000)

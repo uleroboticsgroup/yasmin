@@ -30,6 +30,7 @@ class EditorHistorySnapshot:
     root_model: StateMachine
     container_path: Tuple[str, ...] = tuple()
     current_file_path: Union[str, None] = None
+    runtime_container_path: Tuple[str, ...] = tuple()
 
 
 class EditorHistory:
@@ -56,6 +57,10 @@ class EditorHistory:
         if len(self._undo_stack) > self.max_entries:
             self._undo_stack = self._undo_stack[-self.max_entries :]
 
+    @staticmethod
+    def _snapshot_fingerprint(snapshot: EditorHistorySnapshot) -> int:
+        return hash((snapshot.container_path, snapshot.current_file_path))
+
     def clear(self) -> None:
         """Remove all stored snapshots."""
 
@@ -72,8 +77,11 @@ class EditorHistory:
         """Append one snapshot when it differs from the latest entry."""
 
         stored_snapshot = deepcopy(snapshot)
-        if self._undo_stack and self._undo_stack[-1] == stored_snapshot:
-            return False
+        if self._undo_stack and self._snapshot_fingerprint(
+            self._undo_stack[-1]
+        ) == self._snapshot_fingerprint(stored_snapshot):
+            if self._undo_stack[-1] == stored_snapshot:
+                return False
 
         self._undo_stack.append(stored_snapshot)
         self._trim_undo_stack()
@@ -90,7 +98,11 @@ class EditorHistory:
             self._undo_stack.append(current_state)
             return None
 
-        if self._undo_stack[-1] != current_state:
+        if (
+            self._snapshot_fingerprint(self._undo_stack[-1])
+            != self._snapshot_fingerprint(current_state)
+            or self._undo_stack[-1] != current_state
+        ):
             self._undo_stack.append(current_state)
             self._trim_undo_stack()
 

@@ -222,7 +222,9 @@ class StateMachineCanvas(QtWidgets.QGraphicsView):
 
     def wheelEvent(self, event: QtCore.QEvent) -> None:
         factor: float = 1.2 if event.angleDelta().y() > 0 else 1.0 / 1.2
-        self.scale(factor, factor)
+        new_zoom = self.transform().m11() * factor
+        if 0.1 <= new_zoom <= 5.0:
+            self.scale(factor, factor)
 
     def _begin_connection_drag(
         self, from_node: Union["StateNode", "ContainerStateNode", "FinalOutcomeNode"]

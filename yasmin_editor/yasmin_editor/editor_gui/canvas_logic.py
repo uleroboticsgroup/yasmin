@@ -105,20 +105,22 @@ def _package_xml_file_candidates(
 ) -> Iterable[str]:
     """Yield candidate XML paths resolved through the ROS package share dir."""
     if not package_name or not file_name or package_share_lookup is None:
-        return []
+        return
 
     try:
         share_dir = package_share_lookup(str(package_name))
     except Exception:
-        return []
+        return
 
     basename = os.path.basename(str(file_name))
     direct_candidate = os.path.join(share_dir, str(file_name))
-    candidates = [direct_candidate]
+    if file_exists(direct_candidate):
+        yield direct_candidate
     for root_dir, _dirs, files in walk(share_dir):
         if basename in files:
-            candidates.append(os.path.join(root_dir, basename))
-    return [candidate for candidate in candidates if file_exists(candidate)]
+            candidate = os.path.join(root_dir, basename)
+            if file_exists(candidate):
+                yield candidate
 
 
 def _default_package_share_lookup(package_name: str) -> str:

@@ -256,6 +256,8 @@ class YasminEditor(
 
         self._remember_clipboard_panel_width()
         self._shutdown_runtime_shell()
+        if self.runtime is not None:
+            self.runtime._disposed = True
         self._destroy_runtime()
         self._delete_runtime_snapshot()
 

@@ -224,20 +224,20 @@ class EditorModelMixin:
     def create_state_node(
         self,
         name: str,
-        plugin_info: PluginInfo,
+        plugin_info: Optional[PluginInfo],
         is_state_machine: bool = False,
         is_concurrence: bool = False,
         is_orthogonal: bool = False,
         is_join_state: bool = False,
         sync_id: str = "",
         join_outcome: str = "joined",
-        outcomes: List[str] = None,
-        remappings: Dict[str, str] = None,
-        start_state: str = None,
-        default_outcome: str = None,
+        outcomes: Optional[List[str]] = None,
+        remappings: Optional[Dict[str, str]] = None,
+        start_state: Optional[str] = None,
+        default_outcome: Optional[str] = None,
         description: str = "",
-        defaults: List[Dict[str, str]] = None,
-        parameter_overwrites: List[Dict[str, str]] = None,
+        defaults: Optional[List[Dict[str, str]]] = None,
+        parameter_overwrites: Optional[List[Dict[str, str]]] = None,
     ) -> None:
         """Create a new state node in the canvas."""
         if not name:

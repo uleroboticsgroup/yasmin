@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 from xml.etree import ElementTree as ET
 
 from yasmin_editor.model.concurrence import Concurrence
@@ -31,7 +31,9 @@ from yasmin_editor.model.text_block import TextBlock
 from yasmin_editor.model.transition import Transition
 
 
-def model_to_xml(model: StateMachine, file_path: Union[str, Path] = None) -> str:
+def model_to_xml(
+    model: StateMachine, file_path: Optional[Union[str, Path]] = None
+) -> str:
     """Serialize a state machine model to XML."""
 
     root = _state_machine_to_element(model, parent=None)
@@ -46,18 +48,43 @@ def model_to_xml(model: StateMachine, file_path: Union[str, Path] = None) -> str
 
 
 def model_from_xml(xml_input: Union[str, Path]) -> StateMachine:
-    """Deserialize a state machine model from XML text or a file path."""
+    """Deserialize a state machine model from XML text or a file path.
 
-    if isinstance(xml_input, Path):
-        root = ET.parse(xml_input).getroot()
-    elif (
-        isinstance(xml_input, str)
-        and not xml_input.lstrip().startswith("<")
-        and Path(xml_input).exists()
-    ):
-        root = ET.parse(xml_input).getroot()
-    else:
-        root = ET.fromstring(str(xml_input))
+    The input is discriminated by type and content:
+    - ``Path`` objects are always parsed as file paths.
+    - ``str`` values starting with ``<`` are treated as XML content.
+    - ``bytes``/``bytearray`` values are treated as XML content.
+    - Other ``str`` values are treated as file paths.
+
+    Passing a string that coincidentally matches an existing filename but is
+    meant as XML content can be avoided by prefixing the content with a
+    ``<`` character (all valid YASMIN XML starts with ``<?xml`` or
+    ``<StateMachine``).
+    """
+
+    try:
+        if isinstance(xml_input, Path):
+            root = ET.parse(xml_input).getroot()
+        elif isinstance(xml_input, (bytes, bytearray)):
+            root = ET.fromstring(xml_input)
+        elif isinstance(xml_input, str) and xml_input.lstrip().startswith("<"):
+            root = ET.fromstring(xml_input)
+        elif isinstance(xml_input, str):
+            root = ET.parse(xml_input).getroot()
+        else:
+            raise ValueError(
+                f"Unsupported input type for model_from_xml: {type(xml_input).__name__}. "
+                "Expected str, bytes, or Path."
+            )
+    except ET.ParseError as exc:
+        raise ValueError(
+            f"Failed to parse XML: {exc}. "
+            "The file may be corrupted or not a valid YASMIN XML file."
+        ) from exc
+    except FileNotFoundError as exc:
+        raise ValueError(
+            f"XML file not found: {xml_input}. " "Check the path and try again."
+        ) from exc
 
     if root.tag != "StateMachine":
         raise ValueError("The root XML element must be 'StateMachine'.")

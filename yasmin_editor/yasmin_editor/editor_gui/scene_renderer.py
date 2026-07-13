@@ -18,7 +18,7 @@ from typing import Callable, Protocol, List, Dict, Union
 from yasmin_editor.dataclass_compat import dataclass
 from yasmin_editor.qt_compat import QtWidgets
 from yasmin_editor.editor_gui.connection_line import ConnectionLine
-from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode, Dict
+from yasmin_editor.editor_gui.nodes.container_state_node import ContainerStateNode
 from yasmin_editor.editor_gui.nodes.final_outcome_node import FinalOutcomeNode
 from yasmin_editor.editor_gui.nodes.state_node import StateNode
 from yasmin_editor.editor_gui.nodes.text_block_node import TextBlockNode
@@ -80,8 +80,10 @@ def create_connection_view(
     scene.addItem(connection.label_bg)
     scene.addItem(connection.label)
     connections.append(connection)
-    for existing_connection in connections:
-        existing_connection.update_position()
+    connection.update_position()
+    for existing_connection in connection.from_node.connections:
+        if existing_connection is not connection:
+            existing_connection.update_position()
     return connection
 
 

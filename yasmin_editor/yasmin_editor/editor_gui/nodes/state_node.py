@@ -30,7 +30,7 @@ class StateNode(BaseNodeMixin, QtWidgets.QGraphicsEllipseItem):
     def __init__(
         self,
         name: str,
-        plugin_info: PluginInfo,
+        plugin_info: Optional[PluginInfo],
         x: float,
         y: float,
         remappings: Optional[Dict[str, str]] = None,
@@ -131,11 +131,7 @@ class StateNode(BaseNodeMixin, QtWidgets.QGraphicsEllipseItem):
             change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionChange
             and isinstance(value, QtCore.QPointF)
         ):
-            value = self.constrain_position_to_parent(value)
             self.update_attached_connections()
-
-        elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
-            self.notify_parent_container_resized()
 
         elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
             self.update_selection_pen(bool(value), QtGui.QPen(PALETTE.state_pen, 3))

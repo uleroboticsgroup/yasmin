@@ -61,7 +61,9 @@ class EditorCanvasMixin:
         self.canvas.scene.removeItem(connection.label)
         if connection in self.connections:
             self.connections.remove(connection)
-        for existing_connection in self.connections:
+        for existing_connection in list(connection.from_node.connections):
+            existing_connection.update_position()
+        for existing_connection in list(connection.to_node.connections):
             existing_connection.update_position()
         self.refresh_connection_port_visibility()
 

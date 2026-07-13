@@ -37,6 +37,7 @@ class EditorHistoryMixin:
             root_model=deepcopy(self.root_model),
             container_path=container_path_names(self.current_container_path),
             current_file_path=self.current_file_path,
+            runtime_container_path=tuple(self.current_runtime_container_path),
         )
 
     def reset_history(self) -> None:
@@ -82,7 +83,7 @@ class EditorHistoryMixin:
             self.current_container_path = resolve_container_path(
                 model, snapshot.container_path
             )
-            self.current_runtime_container_path = list(snapshot.container_path)
+            self.current_runtime_container_path = list(snapshot.runtime_container_path)
             self.render_current_container(fit_view=True)
         finally:
             self._history_restore_active = False

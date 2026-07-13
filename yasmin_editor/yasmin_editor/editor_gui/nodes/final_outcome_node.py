@@ -80,11 +80,7 @@ class FinalOutcomeNode(BaseNodeMixin, QtWidgets.QGraphicsRectItem):
             change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionChange
             and isinstance(value, QtCore.QPointF)
         ):
-            value = self.constrain_position_to_parent(value)
             self.update_attached_connections()
-
-        elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
-            self.notify_parent_container_resized()
 
         elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
             self.update_selection_pen(

@@ -278,7 +278,7 @@ class TextBlockNode(BaseNodeMixin, QtWidgets.QGraphicsRectItem):
             change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionChange
             and isinstance(value, QtCore.QPointF)
         ):
-            value = self.constrain_position_to_parent(value, top_margin=10.0)
+            pass
 
         elif change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
             self.update_selection_pen(bool(value), self._default_pen())
