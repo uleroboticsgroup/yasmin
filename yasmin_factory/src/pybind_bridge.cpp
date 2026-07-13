@@ -63,15 +63,10 @@ public:
    * instantiated.
    */
   yasmin::State::SharedPtr create(const std::string &class_name) {
-    // Create an unmanaged instance of the specified class
-    // Python will manage the lifetime via shared_ptr
-    auto state = this->loader_->createUnmanagedInstance(class_name);
-
-    // Wrap the raw pointer in a shared_ptr (Python will manage the lifetime)
-    yasmin::State::SharedPtr state_ptr(state);
-
-    // Return the shared pointer to the created state
-    return state_ptr;
+    auto *raw_state = this->loader_->createUnmanagedInstance(class_name);
+    return yasmin::State::SharedPtr(
+        raw_state,
+        [loader = this->loader_](yasmin::State *ptr) { delete ptr; });
   }
 
 private:
@@ -91,17 +86,14 @@ PYBIND11_MODULE(yasmin_pybind_bridge, m) {
   auto state_module = py::module::import("yasmin.state");
 #endif
 
-  // Get the State class that's already registered in yasmin.state
-  auto state_class = state_module.attr("State");
-
   py::class_<CppStateFactory>(m, "CppStateFactory")
       .def(py::init<>())
       .def("available_classes", &CppStateFactory::available_classes,
            "Get list of available C++ State class names")
       .def(
           "create",
-          [state_class](CppStateFactory &self,
-                        const std::string &class_name) -> py::object {
+          [](CppStateFactory &self,
+             const std::string &class_name) -> py::object {
             auto cpp_state = self.create(class_name);
             return py::cast(cpp_state);
           },

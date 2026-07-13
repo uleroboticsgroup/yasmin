@@ -31,6 +31,8 @@ def main() -> None:
     node = YasminNode.get_instance()
     node.declare_parameter("state_machine_file", "")
     sm_file = node.get_parameter("state_machine_file").get_parameter_value().string_value
+    if not sm_file:
+        raise ValueError("state_machine_file parameter must be non-empty")
 
     # Get if enable viewer parameter
     node.declare_parameter("enable_viewer_pub", True)
@@ -57,7 +59,7 @@ def main() -> None:
         outcome = sm()
         yasmin.YASMIN_LOG_INFO(outcome)
     except Exception as e:
-        yasmin.YASMIN_LOG_WARN(e)
+        yasmin.YASMIN_LOG_WARN(f"State machine execution failed: {e}")
 
     if pub is not None:
         pub.shutdown()

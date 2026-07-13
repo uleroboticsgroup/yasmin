@@ -38,6 +38,10 @@ int main(int argc, char *argv[]) {
                             .get_parameter_value()
                             .get<std::string>();
 
+  if (sm_file.empty()) {
+    throw std::runtime_error("state_machine_file parameter must be non-empty");
+  }
+
   // Get if enable viewer parameter
   node->declare_parameter("enable_viewer_pub", true);
   bool enable_viewer_pub = node->get_parameter("enable_viewer_pub")

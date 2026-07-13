@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdio>
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -46,10 +47,23 @@ protected:
 
   // Helper function to create a temporary XML file
   std::string createTempXMLFile(const std::string &content) {
-    std::string temp_file = test_dir + "/temp_test.xml";
+    char temp_path[] = "/tmp/yasmin_factory_test_XXXXXX";
+    int fd = mkstemp(temp_path);
+    if (fd == -1) {
+      throw std::runtime_error("Failed to create temp file");
+    }
+
+    close(fd);
+    std::string temp_file(temp_path);
     std::ofstream ofs(temp_file);
     ofs << content;
     ofs.close();
+
+    if (ofs.fail()) {
+      std::remove(temp_file.c_str());
+      throw std::runtime_error("Failed to write to temp file");
+    }
+
     return temp_file;
   }
 

@@ -11,6 +11,7 @@ find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(yasmin REQUIRED)
+find_package(yasmin_ros REQUIRED)
 find_package(yasmin_viewer REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
@@ -106,33 +107,8 @@ if(BUILD_TESTING)
     yasmin::yasmin
     pluginlib::pluginlib
   )
-  
-  # Install test plugin library
-  install(TARGETS yasmin_factory_test_states
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-  )
-  
-  # Install test plugin description
-  install(FILES test/test_plugins.xml
-    DESTINATION share/${PROJECT_NAME}
-  )
-  
-  # Install test XML files
-  install(FILES
-    test/test_simple_sm_1.xml
-    test/test_simple_sm_2.xml
-    test/test_nested_sm.xml
-    test/test_remapping.xml
-    test/test_file_path_sm.xml
-    test/test_included_sm.xml
-    test/test_fsm_metadata.xml
-    test/test_orthogonal_sm.xml
-    DESTINATION share/${PROJECT_NAME}/test
-  )
 
-  # Export plugin description for tests
+  # Export plugin description for tests (build tree only)
   pluginlib_export_plugin_description_file(yasmin test/test_plugins.xml)
 
   # Python tests

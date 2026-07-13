@@ -176,7 +176,7 @@ def _parse_dict_value(value_str: str, normalized_type: str):
 
 
 def format_default_value(value, type_name: str) -> str:
-    normalized_type = normalize_type(type_name)
+    normalized_type = validate_type(type_name)
 
     if normalized_type == "bool":
         return "true" if value else "false"

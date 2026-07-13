@@ -14,6 +14,7 @@
   <depend>class_loader</depend>
   <depend>rclcpp</depend>
   <depend>yasmin</depend>
+  <depend>yasmin_ros</depend>
   <depend>yasmin_viewer</depend>
   <depend>tinyxml2_vendor</depend>
   <depend condition="$ROS_DISTRO == foxy">boost</depend>
