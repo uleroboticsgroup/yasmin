@@ -29,7 +29,10 @@ public:
       : callback_(std::move(callback)) {}
 
   ~PythonCallbackHolder() {
-    if (Py_IsInitialized() == 0) {
+    try {
+      auto &internals = py::detail::get_internals();
+      (void)internals;
+    } catch (...) {
       return;
     }
 
@@ -58,6 +61,11 @@ PYBIND11_MODULE(callback_signal, m) {
 
   py::class_<yasmin::CallbackSignalFuture,
              yasmin::CallbackSignalFuture::SharedPtr>(m, "CallbackSignalFuture")
+      .def("__del__",
+           [](yasmin::CallbackSignalFuture &self) {
+             py::gil_scoped_release release;
+             self.join();
+           })
       .def("wait", &yasmin::CallbackSignalFuture::wait,
            py::call_guard<py::gil_scoped_release>(),
            "Wait until the asynchronous trigger completes")
@@ -97,5 +105,6 @@ PYBIND11_MODULE(callback_signal, m) {
            py::call_guard<py::gil_scoped_release>(),
            "Trigger all registered callbacks synchronously")
       .def("trigger_async", &yasmin::CallbackSignal::trigger_async,
+           py::call_guard<py::gil_scoped_release>(),
            "Trigger all registered callbacks asynchronously");
 }

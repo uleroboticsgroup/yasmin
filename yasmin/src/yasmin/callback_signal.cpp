@@ -23,11 +23,13 @@ using namespace yasmin;
 CallbackSignalFuture::CallbackSignalFuture(std::shared_ptr<SharedState> state)
     : state_(std::move(state)) {}
 
-CallbackSignalFuture::~CallbackSignalFuture() {
+void CallbackSignalFuture::join() {
   if (this->thread_.joinable()) {
     this->thread_.join();
   }
 }
+
+CallbackSignalFuture::~CallbackSignalFuture() { this->join(); }
 
 void CallbackSignalFuture::set_completed(std::exception_ptr exception) {
   {

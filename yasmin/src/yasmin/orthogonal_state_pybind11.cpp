@@ -25,7 +25,7 @@ PYBIND11_MAKE_OPAQUE(yasmin::BlackboardPyWrapper);
 
 namespace {
 
-PyThreadState *default_gil_state = nullptr;
+thread_local PyThreadState *default_gil_state = nullptr;
 
 void default_gil_before_fork() {
   if (Py_IsInitialized()) {

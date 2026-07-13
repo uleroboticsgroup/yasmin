@@ -75,10 +75,17 @@ public:
   std::string get_exception_message() const;
 
   /**
+   * @brief Wait for the background thread to finish (idempotent).
+   *
+   * Calls `thread_.join()` if the thread is still joinable. Safe to call
+   * multiple times. The destructor calls this automatically.
+   */
+  void join();
+
+  /**
    * @brief Destructor for CallbackSignalFuture.
    *
-   * Waits for the background thread to finish and rethrows any captured
-   * exception if one exists.
+   * Waits for the background thread to finish via join().
    */
   ~CallbackSignalFuture();
 

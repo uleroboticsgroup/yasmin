@@ -24,13 +24,15 @@
 
 namespace yasmin {
 
-OrthogonalState::GilHook OrthogonalState::before_fork_hook_ = nullptr;
-OrthogonalState::GilHook OrthogonalState::after_join_hook_ = nullptr;
+std::shared_ptr<OrthogonalState::GilHook> OrthogonalState::before_fork_hook_;
+std::shared_ptr<OrthogonalState::GilHook> OrthogonalState::after_join_hook_;
+std::mutex OrthogonalState::hooks_mutex_;
 
 void OrthogonalState::set_thread_hooks(GilHook before_fork,
                                        GilHook after_join) {
-  before_fork_hook_ = before_fork;
-  after_join_hook_ = after_join;
+  std::lock_guard<std::mutex> lock(hooks_mutex_);
+  before_fork_hook_ = std::make_shared<GilHook>(std::move(before_fork));
+  after_join_hook_ = std::make_shared<GilHook>(std::move(after_join));
 }
 
 OrthogonalState::OrthogonalState(const std::string &default_outcome,
@@ -126,9 +128,19 @@ std::string OrthogonalState::execute(Blackboard::SharedPtr blackboard) {
   std::vector<std::string> region_outcomes(this->regions_.size());
   std::vector<std::exception_ptr> exceptions(this->regions_.size(), nullptr);
 
+  // Snapshot hooks under lock for thread-safe access during concurrent
+  // execution
+  std::shared_ptr<GilHook> before_hook;
+  std::shared_ptr<GilHook> after_hook;
+  {
+    std::lock_guard<std::mutex> lock(hooks_mutex_);
+    before_hook = before_fork_hook_;
+    after_hook = after_join_hook_;
+  }
+
   // Invoke before-fork hook (e.g., GIL release when Python states are used)
-  if (before_fork_hook_) {
-    before_fork_hook_();
+  if (before_hook) {
+    (*before_hook)();
   }
 
   // Fork: launch all regions
@@ -152,8 +164,8 @@ std::string OrthogonalState::execute(Blackboard::SharedPtr blackboard) {
   }
 
   // Invoke after-join hook (e.g., GIL re-acquire when Python states are used)
-  if (after_join_hook_) {
-    after_join_hook_();
+  if (after_hook) {
+    (*after_hook)();
   }
 
   // Check for exceptions
@@ -206,7 +218,8 @@ std::string OrthogonalState::evaluate_outcomes(
         if (it != this->region_name_to_index_.end()) {
           return region_outcomes[it->second];
         }
-        return "";
+        throw std::runtime_error("Unknown region name '" + state_name +
+                                 "' in orthogonal state outcome map");
       });
 
   return yasmin::resolve_outcome(satisfied_outcomes, this->default_outcome_,

@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
 #include "yasmin/logs.hpp"
@@ -45,13 +46,12 @@ Concurrence::Concurrence(const StateMap &states,
   }
 
   // Check for duplicate state instances
-  std::set<std::shared_ptr<State>> unique_instances;
+  std::unordered_set<State *> unique_instances;
   for (const auto &[state_name, state] : states) {
-    if (unique_instances.find(state) != unique_instances.end()) {
+    if (!unique_instances.insert(state.get()).second) {
       throw std::invalid_argument(
           "There are duplicate state instances in the states");
     }
-    unique_instances.insert(state);
   }
 
   // Validate outcome map and prepare intermediate outcomes map
@@ -129,11 +129,18 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
   std::vector<std::thread> state_threads;
 
   // Reset stored intermediate outcomes before starting a new execution.
-  for (auto &[state_name, intermediate_outcome] :
-       this->intermediate_outcome_map) {
-    (void)state_name;
-    intermediate_outcome.clear();
+  {
+    const std::lock_guard<std::mutex> lock(this->intermediate_outcome_mutex);
+    for (auto &[state_name, intermediate_outcome] :
+         this->intermediate_outcome_map) {
+      (void)state_name;
+      intermediate_outcome.clear();
+    }
   }
+
+  // Capture exceptions from child threads (same pattern as OrthogonalState)
+  std::vector<std::exception_ptr> exceptions(this->states.size(), nullptr);
+  size_t thread_idx = 0;
 
   // Initialize the parallel execution of all the states.
   // Each branch receives a blackboard copy that shares the underlying storage
@@ -141,18 +148,39 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
   for (const auto &[state_name, state] : this->states) {
     Blackboard::SharedPtr thread_blackboard =
         std::make_shared<Blackboard>(*blackboard);
-    state_threads.push_back(std::thread([this, state_name, state,
-                                         thread_blackboard]() {
-      std::string outcome = (*state.get())(thread_blackboard);
-      const std::lock_guard<std::mutex> lock(this->intermediate_outcome_mutex);
-      this->intermediate_outcome_map[state_name] = outcome;
-    }));
+    size_t idx = thread_idx++;
+    state_threads.push_back(std::thread(
+        [this, state_name, state, thread_blackboard, &exceptions, idx]() {
+          try {
+            std::string outcome = (*state.get())(thread_blackboard);
+            const std::lock_guard<std::mutex> lock(
+                this->intermediate_outcome_mutex);
+            this->intermediate_outcome_map[state_name] = outcome;
+          } catch (...) {
+            exceptions[idx] = std::current_exception();
+          }
+        }));
   }
 
   // Wait for states to finish
   for (std::thread &state_thread : state_threads) {
     if (state_thread.joinable()) {
       state_thread.join();
+    }
+  }
+
+  // Check for exceptions from child threads
+  for (size_t i = 0; i < exceptions.size(); i++) {
+    if (exceptions[i]) {
+      try {
+        std::rethrow_exception(exceptions[i]);
+      } catch (const std::exception &e) {
+        YASMIN_LOG_ERROR("Concurrence child state threw: %s", e.what());
+        throw;
+      } catch (...) {
+        YASMIN_LOG_ERROR("Concurrence child state threw unknown exception");
+        throw;
+      }
     }
   }
 

@@ -18,6 +18,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -150,9 +151,11 @@ public:
 private:
   /// @brief Hooks for GIL management before forking threads and after joining
   /// threads.
-  static GilHook before_fork_hook_;
+  static std::shared_ptr<GilHook> before_fork_hook_;
   /// @brief Hook for GIL management after joining threads.
-  static GilHook after_join_hook_;
+  static std::shared_ptr<GilHook> after_join_hook_;
+  /// @brief Mutex protecting hook access across threads.
+  static std::mutex hooks_mutex_;
 
   /// @brief The list of regions in the OrthogonalState.
   std::vector<RegionDescriptor> regions_;
