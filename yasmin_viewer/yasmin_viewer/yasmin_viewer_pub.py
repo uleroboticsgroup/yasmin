@@ -292,7 +292,7 @@ class YasminViewerPub(object):
             )
             self._pub.publish(state_machine_msg)
 
-        except ValueError as e:
+        except Exception as e:
             yasmin.YASMIN_LOG_ERROR(
                 f"Not publishing state machine '{self._fsm_name}' due to validation failure: {e}"
             )

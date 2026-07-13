@@ -49,7 +49,7 @@ public:
    */
   YasminViewerPub(const rclcpp::Node::SharedPtr &node,
                   yasmin::StateMachine::SharedPtr fsm,
-                  const std::string &fsm_name);
+                  const std::string &fsm_name, double rate_hz = 4.0);
 
   /**
    * @brief Constructs YasminViewerPub with a default ROS 2 node instance, state
@@ -75,6 +75,11 @@ public:
    * @param fsm Shared pointer to the StateMachine instance to be published.
    */
   YasminViewerPub(yasmin::StateMachine::SharedPtr fsm);
+
+  /**
+   * @brief Destroys the YasminViewerPub instance and stops publishing.
+   */
+  ~YasminViewerPub();
 
   /**
    * @brief Parses transitions from a map of transitions and returns a list of

@@ -17,11 +17,20 @@
 #include "yasmin_viewer/yasmin_viewer_node.hpp"
 
 int main(int argc, char **argv) {
-  rclcpp::init(argc, argv); // Initialize ROS 2 communications
-  auto node =
-      std::make_shared<yasmin_viewer::YasminViewerNode>(); // Create the viewer
-                                                           // node
-  rclcpp::spin(node); // Process callbacks until SIGINT
-  rclcpp::shutdown(); // Tear down ROS 2 resources
+  rclcpp::init(argc, argv);
+
+  std::shared_ptr<yasmin_viewer::YasminViewerNode> node;
+
+  try {
+    node = std::make_shared<yasmin_viewer::YasminViewerNode>();
+  } catch (const std::exception &e) {
+    RCLCPP_ERROR(rclcpp::get_logger("yasmin_viewer"),
+                 "Failed to start YASMIN viewer: %s", e.what());
+    rclcpp::shutdown();
+    return 1;
+  }
+
+  rclcpp::spin(node);
+  rclcpp::shutdown();
   return 0;
 }

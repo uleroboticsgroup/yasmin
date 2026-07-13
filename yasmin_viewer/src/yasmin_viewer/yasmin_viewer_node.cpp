@@ -140,7 +140,8 @@ std::filesystem::path resolve_file_path(const std::string &web_root,
   std::string resolved_str = resolved.string();
   std::string web_root_str = web_root_normalized.string();
 
-  if (resolved_str.find(web_root_str) != 0) {
+  std::string web_root_prefix = web_root_str + "/";
+  if (resolved_str != web_root_str && resolved_str.find(web_root_prefix) != 0) {
     throw std::runtime_error("Path traversal detected");
   }
 
@@ -164,13 +165,15 @@ http::response<http::string_body> make_response(http::status status,
   return response;
 }
 
-void handle_session(tcp::socket socket, YasminViewerNode *node) {
+void handle_session(beast::tcp_stream stream, YasminViewerNode *node) {
   beast::error_code error_code;
   beast::flat_buffer buffer;
 
   while (true) {
+    stream.expires_after(std::chrono::seconds(30));
+
     http::request<http::string_body> request;
-    http::read(socket, buffer, request, error_code);
+    http::read(stream, buffer, request, error_code);
 
     if (error_code == http::error::end_of_stream) {
       break;
@@ -196,13 +199,20 @@ void handle_session(tcp::socket socket, YasminViewerNode *node) {
         try {
           const auto file_path =
               resolve_file_path(node->get_web_root(), target);
-          const std::string body = read_file(file_path);
-          response =
-              make_response(http::status::ok, mime_type(file_path.string()),
-                            request.method() == http::verb::head ? "" : body,
-                            request.keep_alive());
           if (request.method() == http::verb::head) {
-            response.content_length(body.size());
+            std::error_code ec;
+            auto file_size = std::filesystem::file_size(file_path, ec);
+            response =
+                make_response(http::status::ok, mime_type(file_path.string()),
+                              "", request.keep_alive());
+            if (!ec) {
+              response.content_length(file_size);
+            }
+          } else {
+            const std::string body = read_file(file_path);
+            response =
+                make_response(http::status::ok, mime_type(file_path.string()),
+                              body, request.keep_alive());
           }
         } catch (const std::exception &) {
           response = make_response(http::status::not_found, "text/plain",
@@ -211,13 +221,15 @@ void handle_session(tcp::socket socket, YasminViewerNode *node) {
       }
     }
 
-    http::write(socket, response, error_code);
+    stream.expires_after(std::chrono::seconds(30));
+    http::write(stream, response, error_code);
     if (error_code || !request.keep_alive()) {
       break;
     }
   }
 
-  socket.shutdown(tcp::socket::shutdown_send, error_code);
+  beast::error_code ec;
+  stream.socket().shutdown(tcp::socket::shutdown_send, ec);
   node->on_connection_closed();
 }
 
@@ -230,7 +242,7 @@ YasminViewerNode::YasminViewerNode()
   this->declare_parameter<int64_t>("port", 5000);
   this->declare_parameter<double>("max_age_seconds", 3.0);
 
-  this->host_ = this->get_parameter("host").as_string();
+  this->host_ = resolve_host(this->get_parameter("host").as_string());
   this->port_ = this->get_parameter("port").as_int();
   this->max_age_seconds_ = this->get_parameter("max_age_seconds").as_double();
 
@@ -287,7 +299,13 @@ void YasminViewerNode::fsm_viewer_cb(const StateMachineMsg::SharedPtr msg) {
   }
 
   const auto now = std::chrono::steady_clock::now();
-  const std::string fsm_name = msg->states.front().name;
+  std::string fsm_name = "unknown";
+  for (const auto &state : msg->states) {
+    if (state.parent == -1) {
+      fsm_name = state.name;
+      break;
+    }
+  }
   const std::string json = state_machine_to_json(*msg);
 
   std::lock_guard<std::mutex> lock(this->fsms_mutex_);
@@ -297,7 +315,7 @@ void YasminViewerNode::fsm_viewer_cb(const StateMachineMsg::SharedPtr msg) {
 
 void YasminViewerNode::start_server() {
   this->acceptor_holder_ = std::make_unique<AcceptorHolder>(
-      resolve_host(this->host_), static_cast<unsigned short>(this->port_));
+      this->host_, static_cast<unsigned short>(this->port_));
   this->server_running_.store(true);
   this->server_thread_ = std::thread(&YasminViewerNode::run_server, this);
 }
@@ -307,11 +325,21 @@ void YasminViewerNode::stop_server() {
 
   if (this->acceptor_holder_) {
     beast::error_code ec;
-    this->acceptor_holder_->acceptor.cancel(ec);
+    this->acceptor_holder_->acceptor.close(ec);
   }
 
   if (this->server_thread_.joinable()) {
     this->server_thread_.join();
+  }
+
+  {
+    std::lock_guard<std::mutex> lock(this->sessions_mutex_);
+    for (auto &t : this->sessions_) {
+      if (t.joinable()) {
+        t.join();
+      }
+    }
+    this->sessions_.clear();
   }
 }
 
@@ -326,9 +354,10 @@ void YasminViewerNode::run_server() {
     auto &io_context = this->acceptor_holder_->io_context;
 
     while (rclcpp::ok() && this->server_running_.load()) {
-      tcp::socket socket(io_context);
+      beast::tcp_stream stream(io_context);
+      stream.expires_after(std::chrono::seconds(30));
       beast::error_code error_code;
-      acceptor.accept(socket, error_code);
+      acceptor.accept(stream.socket(), error_code);
 
       if (error_code) {
         if (this->server_running_.load()) {
@@ -348,7 +377,10 @@ void YasminViewerNode::run_server() {
         continue;
       }
 
-      std::thread(handle_session, std::move(socket), this).detach();
+      {
+        std::lock_guard<std::mutex> lock(this->sessions_mutex_);
+        this->sessions_.emplace_back(handle_session, std::move(stream), this);
+      }
     }
   } catch (const std::exception &exception) {
     RCLCPP_ERROR(this->get_logger(), "Viewer server stopped: %s",

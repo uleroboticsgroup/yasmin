@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <list>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -150,31 +151,37 @@ private:
    */
   static std::string state_machine_to_json(const StateMachineMsg &msg);
 
-  /// Mutex protecting access to the finite state machine cache.
+  /// @brief Mutex protecting access to the finite state machine cache.
   mutable std::mutex fsms_mutex_;
-  /// Cache of serialized finite state machines indexed by name.
+  /// @brief Cache of serialized finite state machines indexed by name.
   std::unordered_map<std::string, CachedFsm> fsms_;
 
-  /// Subscription for incoming state machine descriptions.
+  /// @brief Subscription for incoming state machine descriptions.
   rclcpp::Subscription<StateMachineMsg>::SharedPtr fsm_sub_;
 
-  /// Host address used by the embedded web server.
+  /// @brief Host address used by the embedded web server.
   std::string host_;
-  /// Root directory containing the web viewer files.
+  /// @brief Root directory containing the web viewer files.
   std::string web_root_;
-  /// Port used by the embedded web server.
+  /// @brief Port used by the embedded web server.
   int64_t port_;
-  /// Maximum cache age in seconds before a finite state machine is removed.
+  /// @brief Maximum cache age in seconds before a finite state machine is
+  /// removed.
   double max_age_seconds_;
 
-  /// Indicates whether the embedded web server is running.
+  /// @brief Indicates whether the embedded web server is running.
   std::atomic_bool server_running_;
-  /// Background thread executing the embedded web server.
+  /// @brief Background thread executing the embedded web server.
   std::thread server_thread_;
-  /// Maximum number of concurrent HTTP connections.
+  /// @brief Maximum number of concurrent HTTP connections.
   static constexpr uint32_t kMaxConnections = 64;
-  /// Number of currently active HTTP connections.
+  /// @brief Number of currently active HTTP connections.
   std::atomic<uint32_t> active_connections_{0};
+
+  /// @brief Protects access to the session thread list.
+  std::mutex sessions_mutex_;
+  /// @brief Tracks active HTTP session threads for safe shutdown.
+  std::list<std::thread> sessions_;
 
   /// Asio acceptor holder (created in start_server, used by
   /// run_server/stop_server).

@@ -35,7 +35,7 @@ YasminViewerPub::YasminViewerPub(yasmin::StateMachine::SharedPtr fsm,
 
 YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
                                  yasmin::StateMachine::SharedPtr fsm,
-                                 const std::string &fsm_name)
+                                 const std::string &fsm_name, double rate_hz)
     : fsm(fsm), fsm_name(fsm_name) {
 
   if (node == nullptr) {
@@ -55,7 +55,14 @@ YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
           "/fsm_viewer", 10);
 
   this->timer = this->node_->create_wall_timer(
-      250ms, std::bind(&YasminViewerPub::publish_data, this));
+      std::chrono::duration<double>(1.0 / rate_hz),
+      std::bind(&YasminViewerPub::publish_data, this));
+}
+
+YasminViewerPub::~YasminViewerPub() {
+  if (this->timer) {
+    this->timer->cancel();
+  }
 }
 
 std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
