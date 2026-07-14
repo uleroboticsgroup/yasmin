@@ -21,10 +21,12 @@ import time
 import pytest
 import rclpy
 from action_msgs.msg import GoalStatus
-from ament_index_python.packages import get_package_prefix, get_package_share_directory
+from ament_index_python.packages import (
+    get_package_prefix,
+    get_package_share_directory,
+)
 from rclpy.action import ActionClient
 from yasmin_msgs.action import RunStateMachine
-
 
 ROS_LOG_DIR = os.path.join(tempfile.gettempdir(), "yasmin_factory_action_test_logs")
 os.makedirs(ROS_LOG_DIR, exist_ok=True)

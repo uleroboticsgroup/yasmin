@@ -40,10 +40,13 @@ class FactoryActionServer:
         self._shutdown = False
         self._sm = None
         self._server = ActionServer(
-            node, RunStateMachine, "run_state_machine",
+            node,
+            RunStateMachine,
+            "run_state_machine",
             execute_callback=self.execute,
             goal_callback=self.goal_callback,
-            cancel_callback=self.cancel_callback)
+            cancel_callback=self.cancel_callback,
+        )
 
     def goal_callback(self, goal):
         with self._lock:
@@ -77,12 +80,15 @@ class FactoryActionServer:
             sm.set_sigint_handler(False)
             sm.add_start_cb(lambda _bb, state: self._feedback(goal_handle, state))
             sm.add_transition_cb(
-                lambda _bb, _from, to, _out: self._feedback(goal_handle, to))
+                lambda _bb, _from, to, _out: self._feedback(goal_handle, to)
+            )
             with self._lock:
                 self._sm = sm
             viewer = YasminViewerPub(sm) if self.enable_viewer else None
             outcome = sm()
-            result.outcome = "" if self._cancel or goal_handle.is_cancel_requested else outcome
+            result.outcome = (
+                "" if self._cancel or goal_handle.is_cancel_requested else outcome
+            )
             with self._lock:
                 canceled = self._cancel or goal_handle.is_cancel_requested
             if canceled:
