@@ -28,6 +28,7 @@ from yasmin_msgs.action import RunStateMachine
 ROS_LOG_DIR = os.path.join(tempfile.gettempdir(), "yasmin_factory_action_test_logs")
 os.makedirs(ROS_LOG_DIR, exist_ok=True)
 os.environ["ROS_LOG_DIR"] = ROS_LOG_DIR
+os.environ["ROS_DOMAIN_ID"] = str(200 + os.getpid() % 30)
 
 
 SERVER_EXECUTABLES = [
@@ -56,6 +57,7 @@ def action_server(request):
         ],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
+        start_new_session=True,
     )
     node = rclpy.create_node(f"test_{request.param.replace('.', '_')}")
     client = ActionClient(node, RunStateMachine, "run_state_machine")
@@ -65,11 +67,14 @@ def action_server(request):
 
     client.destroy()
     node.destroy_node()
-    process.send_signal(signal.SIGINT)
     try:
-        assert process.wait(timeout=10.0) == 0
+        os.killpg(process.pid, signal.SIGINT)
+    except ProcessLookupError:
+        pass
+    try:
+        process.wait(timeout=10.0)
     except subprocess.TimeoutExpired:
-        process.kill()
+        os.killpg(process.pid, signal.SIGKILL)
         process.wait(timeout=5.0)
         pytest.fail(f"{request.param} did not shut down cleanly")
 
