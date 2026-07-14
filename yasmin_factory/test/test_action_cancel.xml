@@ -1,0 +1,5 @@
+<StateMachine outcomes="done">
+    <State name="SlowState" type="cpp" class="yasmin_factory/TestSlowState">
+        <Transition from="done" to="done"/>
+    </State>
+</StateMachine>

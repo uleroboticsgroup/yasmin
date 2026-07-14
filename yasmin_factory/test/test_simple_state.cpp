@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <atomic>
+#include <chrono>
 #include <memory>
 #include <string>
+#include <thread>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/state.hpp"
@@ -57,6 +60,24 @@ public:
   }
 };
 
+class TestSlowState : public yasmin::State {
+public:
+  TestSlowState() : yasmin::State({"done"}) {}
+
+  std::string execute(yasmin::Blackboard::SharedPtr) override {
+    for (int i = 0; i < 100 && !canceled_.load(); ++i) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+    return "done";
+  }
+
+  void cancel_state() override { canceled_.store(true); }
+
+private:
+  std::atomic_bool canceled_{false};
+};
+
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(TestSimpleState, yasmin::State)
 PLUGINLIB_EXPORT_CLASS(TestRemappingState, yasmin::State)
+PLUGINLIB_EXPORT_CLASS(TestSlowState, yasmin::State)
