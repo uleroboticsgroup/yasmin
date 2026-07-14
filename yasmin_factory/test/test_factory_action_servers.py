@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import itertools
 import os
 import signal
 import subprocess
@@ -24,12 +25,15 @@ import rclpy
 from action_msgs.msg import GoalStatus
 from ament_index_python.packages import get_package_share_directory
 from rclpy.action import ActionClient
+from rclpy.context import Context
+from rclpy.executors import SingleThreadedExecutor
 from yasmin_msgs.action import RunStateMachine
 
 ROS_LOG_DIR = os.path.join(tempfile.gettempdir(), "yasmin_factory_action_test_logs")
 os.makedirs(ROS_LOG_DIR, exist_ok=True)
 os.environ["ROS_LOG_DIR"] = ROS_LOG_DIR
-os.environ["ROS_DOMAIN_ID"] = str(200 + os.getpid() % 30)
+
+DOMAIN_IDS = itertools.count(200)
 
 
 SERVER_EXECUTABLES = [
@@ -38,15 +42,19 @@ SERVER_EXECUTABLES = [
 ]
 
 
-def spin_until_complete(node, future, timeout=10.0):
-    rclpy.spin_until_future_complete(node, future, timeout_sec=timeout)
+def spin_until_complete(executor, future, timeout=10.0):
+    executor.spin_until_future_complete(future, timeout_sec=timeout)
     assert future.done(), "ROS action operation timed out"
     return future.result()
 
 
 @pytest.fixture(params=SERVER_EXECUTABLES)
 def action_server(request):
-    action_name = f"run_state_machine_{uuid.uuid4().hex}"
+    domain_id = next(DOMAIN_IDS)
+    context = Context()
+    rclpy.init(context=context, domain_id=domain_id)
+    environment = os.environ.copy()
+    environment["ROS_DOMAIN_ID"] = str(domain_id)
     process = subprocess.Popen(
         [
             "ros2",
@@ -56,20 +64,26 @@ def action_server(request):
             "--ros-args",
             "-p",
             "enable_viewer_pub:=false",
-            "-r",
-            f"run_state_machine:={action_name}",
         ],
+        env=environment,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         start_new_session=True,
     )
-    node = rclpy.create_node(f"test_{request.param.replace('.', '_')}")
-    client = ActionClient(node, RunStateMachine, action_name)
+    node = rclpy.create_node(
+        f"test_{request.param.replace('.', '_')}_{uuid.uuid4().hex}",
+        context=context,
+    )
+    executor = SingleThreadedExecutor(context=context)
+    executor.add_node(node)
+    client = ActionClient(node, RunStateMachine, "run_state_machine")
     assert client.wait_for_server(timeout_sec=10.0), f"{request.param} did not start"
 
-    yield node, client
+    yield client, executor
 
     client.destroy()
+    executor.remove_node(node)
+    executor.shutdown()
     node.destroy_node()
     try:
         os.killpg(process.pid, signal.SIGINT)
@@ -81,13 +95,7 @@ def action_server(request):
         os.killpg(process.pid, signal.SIGKILL)
         process.wait(timeout=5.0)
         pytest.fail(f"{request.param} did not shut down cleanly")
-
-
-@pytest.fixture(scope="module", autouse=True)
-def ros_context():
-    rclpy.init()
-    yield
-    rclpy.shutdown()
+    rclpy.shutdown(context=context)
 
 
 def fixture_path(filename):
@@ -95,13 +103,13 @@ def fixture_path(filename):
 
 
 def test_goal_completes(action_server):
-    node, client = action_server
+    client, executor = action_server
     goal = RunStateMachine.Goal()
     goal.state_machine_file = fixture_path("test_action_complete.xml")
     feedback_states = []
 
     goal_handle = spin_until_complete(
-        node,
+        executor,
         client.send_goal_async(
             goal,
             feedback_callback=lambda msg: feedback_states.append(
@@ -110,7 +118,7 @@ def test_goal_completes(action_server):
         ),
     )
     assert goal_handle.accepted
-    result = spin_until_complete(node, goal_handle.get_result_async())
+    result = spin_until_complete(executor, goal_handle.get_result_async())
 
     assert result.status == GoalStatus.STATUS_SUCCEEDED
     assert result.result.outcome == "done"
@@ -118,13 +126,13 @@ def test_goal_completes(action_server):
 
 
 def test_goal_is_canceled(action_server):
-    node, client = action_server
+    client, executor = action_server
     goal = RunStateMachine.Goal()
     goal.state_machine_file = fixture_path("test_action_cancel.xml")
     feedback_states = []
 
     goal_handle = spin_until_complete(
-        node,
+        executor,
         client.send_goal_async(
             goal,
             feedback_callback=lambda msg: feedback_states.append(
@@ -136,12 +144,12 @@ def test_goal_is_canceled(action_server):
 
     deadline = time.monotonic() + 5.0
     while not feedback_states and time.monotonic() < deadline:
-        rclpy.spin_once(node, timeout_sec=0.1)
+        executor.spin_once(timeout_sec=0.1)
     assert feedback_states == ["SlowState"]
 
-    cancel_response = spin_until_complete(node, goal_handle.cancel_goal_async())
+    cancel_response = spin_until_complete(executor, goal_handle.cancel_goal_async())
     assert cancel_response.goals_canceling
-    result = spin_until_complete(node, goal_handle.get_result_async())
+    result = spin_until_complete(executor, goal_handle.get_result_async())
 
     assert result.status == GoalStatus.STATUS_CANCELED
     assert result.result.outcome == ""
