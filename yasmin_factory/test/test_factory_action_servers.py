@@ -17,6 +17,7 @@ import signal
 import subprocess
 import tempfile
 import time
+import uuid
 
 import pytest
 import rclpy
@@ -45,6 +46,7 @@ def spin_until_complete(node, future, timeout=10.0):
 
 @pytest.fixture(params=SERVER_EXECUTABLES)
 def action_server(request):
+    action_name = f"run_state_machine_{uuid.uuid4().hex}"
     process = subprocess.Popen(
         [
             "ros2",
@@ -54,13 +56,15 @@ def action_server(request):
             "--ros-args",
             "-p",
             "enable_viewer_pub:=false",
+            "-r",
+            f"run_state_machine:={action_name}",
         ],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         start_new_session=True,
     )
     node = rclpy.create_node(f"test_{request.param.replace('.', '_')}")
-    client = ActionClient(node, RunStateMachine, "run_state_machine")
+    client = ActionClient(node, RunStateMachine, action_name)
     assert client.wait_for_server(timeout_sec=10.0), f"{request.param} did not start"
 
     yield node, client
