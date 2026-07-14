@@ -92,9 +92,9 @@ private:
               std::shared_ptr<const RunStateMachine::Goal> goal) {
     std::lock_guard<std::mutex> lock(state_mutex_);
 
-    const std::string state_machine_file =
-        goal->state_machine_file.empty() ? default_state_machine_file_
-                                         : goal->state_machine_file;
+    const std::string state_machine_file = goal->state_machine_file.empty()
+                                               ? default_state_machine_file_
+                                               : goal->state_machine_file;
     if (shutting_down_ || busy_ || state_machine_file.empty()) {
       return rclcpp_action::GoalResponse::REJECT;
     }
@@ -139,8 +139,8 @@ private:
     goal_handle->publish_feedback(feedback);
   }
 
-  bool cancellation_requested(
-      const std::shared_ptr<GoalHandle> &goal_handle) const {
+  bool
+  cancellation_requested(const std::shared_ptr<GoalHandle> &goal_handle) const {
     std::lock_guard<std::mutex> lock(state_mutex_);
     return cancel_requested_ || goal_handle->is_canceling();
   }
@@ -159,9 +159,9 @@ private:
   void execute(const std::shared_ptr<GoalHandle> goal_handle) {
     auto result = std::make_shared<RunStateMachine::Result>();
     const auto goal = goal_handle->get_goal();
-    const std::string state_machine_file =
-        goal->state_machine_file.empty() ? default_state_machine_file_
-                                         : goal->state_machine_file;
+    const std::string state_machine_file = goal->state_machine_file.empty()
+                                               ? default_state_machine_file_
+                                               : goal->state_machine_file;
 
     try {
       auto factory = std::make_shared<YasminFactory>();
@@ -196,7 +196,8 @@ private:
 
       std::unique_ptr<yasmin_viewer::YasminViewerPub> viewer;
       if (enable_viewer_pub_) {
-        viewer = std::make_unique<yasmin_viewer::YasminViewerPub>(state_machine);
+        viewer =
+            std::make_unique<yasmin_viewer::YasminViewerPub>(state_machine);
       }
 
       result->outcome = (*state_machine)();
