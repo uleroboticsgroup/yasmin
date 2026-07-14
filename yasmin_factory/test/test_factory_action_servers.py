@@ -21,10 +21,7 @@ import time
 import pytest
 import rclpy
 from action_msgs.msg import GoalStatus
-from ament_index_python.packages import (
-    get_package_prefix,
-    get_package_share_directory,
-)
+from ament_index_python.packages import get_package_share_directory
 from rclpy.action import ActionClient
 from yasmin_msgs.action import RunStateMachine
 
@@ -47,14 +44,16 @@ def spin_until_complete(node, future, timeout=10.0):
 
 @pytest.fixture(params=SERVER_EXECUTABLES)
 def action_server(request):
-    executable = os.path.join(
-        get_package_prefix("yasmin_factory"),
-        "lib",
-        "yasmin_factory",
-        request.param,
-    )
     process = subprocess.Popen(
-        [executable, "--ros-args", "-p", "enable_viewer_pub:=false"],
+        [
+            "ros2",
+            "run",
+            "yasmin_factory",
+            request.param,
+            "--ros-args",
+            "-p",
+            "enable_viewer_pub:=false",
+        ],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
