@@ -51,10 +51,11 @@ def spin_until_complete(executor, future, timeout=10.0):
 @pytest.fixture(params=SERVER_EXECUTABLES)
 def action_server(request):
     domain_id = next(DOMAIN_IDS)
+    previous_domain_id = os.environ.get("ROS_DOMAIN_ID")
+    os.environ["ROS_DOMAIN_ID"] = str(domain_id)
     context = Context()
-    rclpy.init(context=context, domain_id=domain_id)
+    rclpy.init(context=context)
     environment = os.environ.copy()
-    environment["ROS_DOMAIN_ID"] = str(domain_id)
     process = subprocess.Popen(
         [
             "ros2",
@@ -96,6 +97,10 @@ def action_server(request):
         process.wait(timeout=5.0)
         pytest.fail(f"{request.param} did not shut down cleanly")
     rclpy.shutdown(context=context)
+    if previous_domain_id is None:
+        os.environ.pop("ROS_DOMAIN_ID", None)
+    else:
+        os.environ["ROS_DOMAIN_ID"] = previous_domain_id
 
 
 def fixture_path(filename):
