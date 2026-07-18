@@ -23,8 +23,8 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 
 #include "yasmin/state_machine.hpp"
-#include "yasmin_factory/yasmin_factory_action_server.hpp"
 #include "yasmin_factory/yasmin_factory.hpp"
+#include "yasmin_factory/yasmin_factory_action_server.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
@@ -98,8 +98,8 @@ rclcpp_action::GoalResponse YasminFactoryActionServer::handle_goal(
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-rclcpp_action::CancelResponse YasminFactoryActionServer::handle_cancel(
-    const std::shared_ptr<GoalHandle> &) {
+rclcpp_action::CancelResponse
+YasminFactoryActionServer::handle_cancel(const std::shared_ptr<GoalHandle> &) {
   std::shared_ptr<YasminFactory> factory;
   yasmin::StateMachine::SharedPtr state_machine;
   {
