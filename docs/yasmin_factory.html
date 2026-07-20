@@ -274,6 +274,26 @@
           <pre><code class="language-bash">ros2 run yasmin_factory yasmin_factory_node --ros-args -p state_machine_file:=/path/to/file.xml</code></pre>
         </div>
 
+        <div class="section">
+          <h2>Action Server</h2>
+          <p>
+            For on-demand, cancelable execution, start either the C++ or Python
+            action server. Both expose the
+            <code>yasmin_msgs/action/RunStateMachine</code> interface on the
+            <code>run_state_machine</code> action.
+          </p>
+          <pre><code class="language-bash">ros2 run yasmin_factory yasmin_factory_action_server
+ros2 run yasmin_factory yasmin_factory_action_server.py</code></pre>
+          <p>
+            Each goal can provide a <code>state_machine_file</code>; an empty
+            value falls back to the node's parameter of the same name. Feedback
+            reports the current state, the result contains the final outcome,
+            and an active goal can be canceled. The server executes one state
+            machine at a time.
+          </p>
+          <pre><code class="language-bash">ros2 action send_goal /run_state_machine yasmin_msgs/action/RunStateMachine "{state_machine_file: '/path/to/file.xml'}" --feedback</code></pre>
+        </div>
+
         <div class="page-navigation">
           <a href="yasmin_editor.html" class="nav-button prev">YASMIN Editor</a>
           <a href="yasmin_cli.html" class="nav-button next">YASMIN CLI</a>

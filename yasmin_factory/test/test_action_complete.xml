@@ -1,0 +1,6 @@
+<StateMachine outcomes="done">
+    <State name="CompleteState" type="cpp" class="yasmin_factory/TestSimpleState">
+        <Transition from="outcome1" to="CompleteState"/>
+        <Transition from="outcome2" to="done"/>
+    </State>
+</StateMachine>

@@ -9,6 +9,8 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(yasmin_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(yasmin REQUIRED)
 find_package(yasmin_ros REQUIRED)
@@ -74,8 +76,10 @@ ament_environment_hooks(PYTHONPATH.sh.in)
 # factory node
 set(DEPENDENCIES
   rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
   yasmin::yasmin
   yasmin_viewer::yasmin_viewer
+  ${yasmin_msgs_TARGETS}
   yasmin_factory
 )
 add_executable(yasmin_factory_node src/yasmin_factory_node.cpp)
@@ -85,12 +89,17 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+add_executable(yasmin_factory_action_server src/yasmin_factory_action_server.cpp)
+target_link_libraries(yasmin_factory_action_server PUBLIC ${DEPENDENCIES})
+install(TARGETS yasmin_factory_action_server DESTINATION lib/${PROJECT_NAME})
+
 
 # Install Python loader package
 ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
   yasmin_factory/yasmin_factory_node.py
+  yasmin_factory/yasmin_factory_action_server.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -130,6 +139,8 @@ if(BUILD_TESTING)
     test/test_included_sm.xml
     test/test_fsm_metadata.xml
     test/test_orthogonal_sm.xml
+    test/test_action_complete.xml
+    test/test_action_cancel.xml
     DESTINATION share/${PROJECT_NAME}/test
   )
 
@@ -139,6 +150,10 @@ if(BUILD_TESTING)
   # Python tests
   ament_add_pytest_test(test_yasmin_factory test/test_yasmin_factory.py
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+  ament_add_pytest_test(test_factory_action_servers
+    test/test_factory_action_servers.py
+    TIMEOUT 90
   )
 
   # C++ tests

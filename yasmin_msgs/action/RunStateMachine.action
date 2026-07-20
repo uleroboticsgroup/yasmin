@@ -1,0 +1,5 @@
+string state_machine_file
+---
+string outcome
+---
+string current_state

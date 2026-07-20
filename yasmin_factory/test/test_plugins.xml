@@ -10,5 +10,8 @@
         A test state that reads from and writes to specific blackboard keys for testing remappings.
       </description>
       </class>
+      <class name="yasmin_factory/TestSlowState" type="TestSlowState" base_class_type="yasmin::State">
+          <description>A cancellable state for action server integration tests.</description>
+      </class>
   </library>
 </class_libraries>

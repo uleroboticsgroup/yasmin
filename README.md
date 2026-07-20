@@ -4575,6 +4575,8 @@ The **YASMIN Factory** enables the creation of state machines from XML configura
 ros2 run yasmin_factory yasmin_factory_node --ros-args -p state_machine_file:=/path/to/state_machine.xml
 ```
 
+For on-demand, cancelable execution, run `yasmin_factory_action_server` (C++) or `yasmin_factory_action_server.py` (Python). Both expose the `run_state_machine` action, which accepts an XML state-machine path in each goal or falls back to the `state_machine_file` parameter.
+
 For detailed information on XML syntax, plugin creation, and cross-language support, see the [XML State Machines documentation](./xml_factory.html).
 
 ## YASMIN PCL
