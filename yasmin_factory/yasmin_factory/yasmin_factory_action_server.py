@@ -122,6 +122,7 @@ class FactoryActionServer:
 
 
 def main():
+    rclpy.init()
     set_ros_loggers()
     node = YasminNode.get_instance()
     server = FactoryActionServer(node)

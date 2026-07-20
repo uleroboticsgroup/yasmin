@@ -68,7 +68,7 @@ def action_server(request):
         ],
         env=environment,
         stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
         start_new_session=True,
     )
     node = rclpy.create_node(
@@ -78,7 +78,16 @@ def action_server(request):
     executor = SingleThreadedExecutor(context=context)
     executor.add_node(node)
     client = ActionClient(node, RunStateMachine, "run_state_machine")
-    assert client.wait_for_server(timeout_sec=10.0), f"{request.param} did not start"
+    try:
+        assert client.wait_for_server(timeout_sec=10.0), (
+            f"{request.param} did not start\n"
+            f"stderr:\n{process.stderr.read().decode()}"
+        )
+    except AssertionError:
+        os.killpg(process.pid, signal.SIGKILL)
+        process.wait(timeout=5.0)
+        rclpy.shutdown(context=context)
+        raise
 
     yield client, executor
 
