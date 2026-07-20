@@ -23,7 +23,7 @@ import uuid
 import pytest
 import rclpy
 from action_msgs.msg import GoalStatus
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_prefix, get_package_share_directory
 from rclpy.action import ActionClient
 from rclpy.context import Context
 from rclpy.executors import SingleThreadedExecutor
@@ -56,12 +56,15 @@ def action_server(request):
     context = Context()
     rclpy.init(context=context)
     environment = os.environ.copy()
+    executable = os.path.join(
+        get_package_prefix("yasmin_factory"),
+        "lib",
+        "yasmin_factory",
+        request.param,
+    )
     process = subprocess.Popen(
         [
-            "ros2",
-            "run",
-            "yasmin_factory",
-            request.param,
+            executable,
             "--ros-args",
             "-p",
             "enable_viewer_pub:=false",
