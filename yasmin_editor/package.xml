@@ -12,6 +12,7 @@
   <depend>yasmin</depend>
   <depend>yasmin_plugins_manager</depend>
   <depend>yasmin_factory</depend>
+  <exec_depend>yasmin_ros</exec_depend>
   <exec_depend>python3-tqdm</exec_depend>
   <!-- PyQt selection by Ubuntu version (threshold: resolute = 26):
        Ubuntu < 26 → python3-pyqt5,  Ubuntu >= 26 → python3-pyqt6
