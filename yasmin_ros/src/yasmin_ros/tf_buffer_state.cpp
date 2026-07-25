@@ -77,8 +77,19 @@ std::string TfBufferState::execute(yasmin::Blackboard::SharedPtr blackboard) {
     auto tf_buffer = std::make_shared<tf2_ros::Buffer>(
         this->node_->get_clock(), to_tf_duration(this->cache_time_sec_));
 
-    auto tf_listener = std::make_shared<tf2_ros::TransformListener>(
-        *tf_buffer, this->node_, false);
+    auto tf_listener =
+        std::make_shared<tf2_ros::TransformListener>(*tf_buffer,
+#if __has_include("rclcpp/version.h")
+#include "rclcpp/version.h"
+#if RCLCPP_VERSION_GTE(33, 0, 2)
+                                                     *this->node_,
+#else
+                                                     this->node_,
+#endif
+#else
+                                                     this->node_,
+#endif
+                                                     false);
 
     blackboard->set<std::shared_ptr<tf2_ros::Buffer>>("tf_buffer", tf_buffer);
     blackboard->set<std::shared_ptr<tf2_ros::TransformListener>>("tf_listener",
