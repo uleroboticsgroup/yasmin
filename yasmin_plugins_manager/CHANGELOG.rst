@@ -2,6 +2,24 @@
 Changelog for package yasmin_plugins_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.0 (2026-07-26)
+------------------
+* feat(plugins): implement recursive directory signature for cache validation
+  Introduce recursive directory hashing to improve the reliability of the
+  plugin discovery cache. Previously, the cache only validated individual
+  files; the new implementation tracks changes in directory structures
+  by hashing file metadata (mtime and size) recursively.
+  Other changes:
+  - Add `recursive_dir_signature` to `cache.py` to support directory-level
+  validation.
+  - Integrate `yasmin` logging into the plugin manager and cache modules.
+  - Improve `PluginManager.discover_plugins` robustness by wrapping
+  discovery logic in a try-finally block to restore log levels.
+  - Update `package.xml` to remove unused `python3-yaml` dependency.
+  - Add documentation warning regarding the trust model of plugin
+  metadata extraction.
+* Contributors: Miguel Ángel González Santamarta
+
 6.0.0 (2026-07-07)
 ------------------
 * Refactor type hints across the codebase to use standard typing constructs

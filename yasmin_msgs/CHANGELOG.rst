@@ -3,6 +3,28 @@ Changelog for package yasmin_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.0 (2026-07-26)
+------------------
+* YASMIN Factory Action Server (`#124 <https://github.com/uleroboticsgroup/yasmin/issues/124>`_)
+  * add yasmin_factory_action_server
+  * formatter cpp
+  * formatter py
+  * use ros2 run in tests
+  * add reliable wrapper cleanup
+  * use unique action name to prevent a newly started client from discovering the previous stale server endpoint.
+  * use isolated ROS contexts, DDS domains, and context-bound executors for each test.
+  * foxy support
+  Foxy does not support domain_id keyword in rclpy.init
+  * trigger ci
+  * trigger ci
+  * Split and document the factory action server
+  * add action server to README
+  * formatter
+  * added an action server section to yasmin_factory.html
+  ---------
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Contributors: Maik
+
 6.0.0 (2026-07-07)
 ------------------
 * relicense to Apache 2.0 (`#122 <https://github.com/uleroboticsgroup/yasmin/issues/122>`_)

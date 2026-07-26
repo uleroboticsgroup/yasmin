@@ -3,6 +3,31 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.0 (2026-07-26)
+------------------
+* style(pybind): fix indentation in add_state lambda
+  Adjust the indentation of the `add_state` lambda function in the
+  pybind11 module definition to ensure consistent alignment of
+  parameters and function body.
+* feat(blackboard): add raw entry retrieval and batch processing methods
+* refactor(state-machine): modernize concurrency primitives and signal handling
+  Refactor the `StateMachine` implementation to improve thread safety and
+  simplify resource management.
+  - Replace `std::unique_ptr<std::mutex>` with a direct `mutable std::mutex`
+  to allow thread-safe access within `const` methods and avoid heap
+  allocation.
+  - Implement a robust SIGINT callback registry using a mutex-protected
+  `std::unordered_map` to support multiple signal handlers.
+  - Replace the global `sig_atomic_t` flag with a structured registry
+  system (`register_sigint_callback`, `unregister_sigint_callback`).
+  - Simplify `wait_for_current_state` by removing the timeout and using
+  the predicate-based `wait` overload.
+  - Improve error message formatting in `add_state` using `yasmin::join`.
+* fix: enhance thread safety with mutexes and shared pointers in callback and orthogonal state management
+* fix: replace log_level and log_message with atomic types for thread safety
+* fix: clean up code formatting and improve comments in various files
+* Contributors: Miguel Ángel González Santamarta
+
 6.0.0 (2026-07-07)
 ------------------
 * relicense to Apache 2.0 (`#122 <https://github.com/uleroboticsgroup/yasmin/issues/122>`_)

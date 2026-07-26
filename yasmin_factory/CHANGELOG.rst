@@ -2,6 +2,79 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.0 (2026-07-26)
+------------------
+* fix(tests): update action server executable path in test setup
+* fix(action_server): improve error handling and logging for action server startup
+* YASMIN Factory Action Server (`#124 <https://github.com/uleroboticsgroup/yasmin/issues/124>`_)
+  * add yasmin_factory_action_server
+  * formatter cpp
+  * formatter py
+  * use ros2 run in tests
+  * add reliable wrapper cleanup
+  * use unique action name to prevent a newly started client from discovering the previous stale server endpoint.
+  * use isolated ROS contexts, DDS domains, and context-bound executors for each test.
+  * foxy support
+  Foxy does not support domain_id keyword in rclpy.init
+  * trigger ci
+  * trigger ci
+  * Split and document the factory action server
+  * add action server to README
+  * formatter
+  * added an action server section to yasmin_factory.html
+  ---------
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* refactor(yasmin_factory): simplify state creation and improve GIL management
+  Refactor the `YasminFactory` to remove redundant `base_dir` parameters in
+  state creation methods, instead utilizing an internal `xml_path\_` to
+  manage file resolution.
+  Key changes include:
+  - Removed `base_dir` from `create_concurrence`, `create_orthogonal_state`,
+  `create_join_state`, and `create_sm` signatures.
+  - Switched `state_loader\_` from `std::shared_ptr` to `std::unique_ptr`.
+  - Improved Python/C++ interoperability by adding `py::gil_scoped_acquire`
+  in `load_json_value`.
+  - Simplified `PythonStateHolder` by removing redundant existence checks
+  when adding input/output keys and parameters.
+  - Updated `pybind_bridge` to use the registered `State` class from the
+  `yasmin.state` module.
+  - Refactored `gil_before_fork` to ensure the GIL is held before saving
+  thread state.
+  - Renamed `validate_type` to `normalize_type` in `type_utils.py` for
+  consistency.
+* fix(factory): enhance path traversal protection for user-supplied file paths
+* build(yasmin_factory): install test targets and XML resources
+  Add installation rules for the test plugin library, plugin descriptions,
+  and various XML test files to ensure they are available in the install
+  prefix. This enables testing against installed packages rather than
+  relying solely on the build tree.
+* feat(factory): enhance XML parsing robustness and support relative paths
+  Improve the factory's ability to handle complex XML structures and
+  ensure safer type conversion and resource management.
+  - **Core Logic**:
+  - Add `base_dir` support to `create_sm`, `create_concurrence`, and
+  `create_orthogonal_state` to allow resolving relative file paths.
+  - Implement stricter integer and float parsing with trailing character
+  detection in `with_typed_xml_value`.
+  - Add support for `integer` type normalization.
+  - Prevent duplicate blackboard keys, outputs, and parameters during
+  `PythonStateHolder` initialization.
+  - **Python/C++ Bridge**:
+  - Use `std::once_flag` for thread-safe, one-time Python interpreter
+  initialization.
+  - Update `CppStateFactory::create` to use a custom deleter for
+  unmanaged instances, ensuring proper lifetime management via the
+  loader.
+  - Improve error messaging in the Python node execution loop.
+  - **Build & Dependencies**:
+  - Add `yasmin_ros` as a dependency in `package.xml` and `CMakeLists.txt`.
+  - Clean up test installation logic in `CMakeLists.txt`.
+  - **Python API**:
+  - Expand `YasminFactory` to support `Outcome` tags and improved
+  orthogonal state creation.
+  - Refactor `format_default_value` to use `validate_type`.
+* Contributors: Maik, Miguel Ángel González Santamarta
+
 6.0.0 (2026-07-07)
 ------------------
 * fix: remove deprecated RCLCPP version checks for package share path retrieval

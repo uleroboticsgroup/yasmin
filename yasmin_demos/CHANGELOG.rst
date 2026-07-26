@@ -3,6 +3,43 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.0 (2026-07-26)
+------------------
+* docs: remove multiple states demo from documentation and demos
+  Remove the "Multiple States Demo" from the C++ and Python tutorials,
+  the README, and the documentation website. Additionally, delete the
+  corresponding demo source files and update the CMakeLists.txt to
+  remove the executable and installation targets.
+* fix(cmake): remove installation of launch files from CMakeLists
+* build(demos): modularize state implementations and update build configuration
+  Refactor the `yasmin_demos` package to move inline state definitions
+  into dedicated header and source files, improving code reuse and
+  maintainability across C++ and Python demos.
+  - Move `FooState`, `BarState`, and `WorkerState` from local demo files
+  to shared `yasmin_demos` modules.
+  - Update `CMakeLists.txt` to include new state source files in
+  executable targets and install the `launch` directory.
+  - Standardize outcome strings (e.g., using `SUCCEED` instead of
+  `outcome2`) in XML state machine definitions and Python states.
+  - Improve Python demo robustness by adding `finally` blocks to
+  ensure `YasminViewerPub` is properly shut down.
+  - Replace `time.sleep` with ROS 2 clock-aware sleep mechanisms in
+  `publisher_demo.py` to respect simulation time.
+  - Clean up unused includes and redundant documentation in C++ files.
+* refactor(demos): update state implementations and improve code hygiene
+  Refactor demo states to use proper method overriding, clean up
+  unnecessary includes, and improve header consistency.
+  - Add `override` keyword to `execute` methods in `BarState`, `FooState`,
+  `PoseWriterState`, and `WorkerState`.
+  - Standardize header guards in `worker_state.hpp`.
+  - Remove unused `<rclcpp/rclcpp.hpp>` includes from `pose_writer_state.cpp`
+  and `worker_state.cpp`.
+  - Update `PoseWriterState` to return `"SUCCEED"` instead of `"outcome1"`.
+  - Reorganize private member declarations in `FooState` and `WorkerState`.
+  - Add documentation regarding ROS 2 Jazzy+ compatibility in
+  `share_directory.hpp`.
+* Contributors: Miguel Ángel González Santamarta
+
 6.0.0 (2026-07-07)
 ------------------
 * fix: remove deprecated RCLCPP version checks for package share path retrieval

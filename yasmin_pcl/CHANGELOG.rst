@@ -2,6 +2,31 @@
 Changelog for package yasmin_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.0 (2026-07-26)
+------------------
+* refactor(pcl): centralize filter utilities and improve IO robustness
+  Refactor PCL filter states to use shared utility functions and enhance
+  the reliability of file IO operations.
+  - **Refactor**:
+  - Move `make_domain_indices` and `compute_removed_indices` from
+  individual filter implementations to `filter_state_utils.hpp`.
+  - Standardize index handling and removed index extraction across
+  `CropBoxState`, `ExtractIndicesState`, and `RandomSampleState`.
+  - Simplify `RandomSampleState` by using a deterministic second pass
+  to derive indices.
+  - **Fix**:
+  - Add directory existence checks for PCD and PLY save/load operations.
+  - Improve PLY camera metadata parsing to handle multi-token properties
+  and skip unsupported binary camera elements.
+  - Fix `VoxelGridState` default filter limits by using infinity instead
+  of zero.
+  - **Test**:
+  - Implement `TempFile` RAII class in `test_utils.hpp` for safer
+  temporary file management.
+  - Replace manual file deletion in tests with `TempFile` to prevent
+  leaked files on failure.
+* Contributors: Miguel Ángel González Santamarta
+
 6.0.0 (2026-07-07)
 ------------------
 * relicense to Apache 2.0 (`#122 <https://github.com/uleroboticsgroup/yasmin/issues/122>`_)

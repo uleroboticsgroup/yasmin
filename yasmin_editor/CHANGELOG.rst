@@ -2,6 +2,52 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.0 (2026-07-26)
+------------------
+* Declare yasmin_ros as an editor runtime dependency (`#126 <https://github.com/uleroboticsgroup/yasmin/issues/126>`_)
+* refactor(editor): improve stability and thread safety of runtime and GUI
+  Refactor the editor core to enhance concurrency management, improve
+  undo/redo reliability, and harden XML serialization/deserialization.
+  - **Runtime & Logging**:
+  - Implement thread-safe access to `Runtime` state using `_worker_state_lock`.
+  - Defer log-level reconfigurations in `RuntimeLogger` while the worker
+  thread is active to prevent inconsistent log output.
+  - **GUI & Canvas**:
+  - Improve connection grouping logic by using object IDs to prevent
+  duplicate entries in `seen` sets.
+  - Fix connection position updates to ensure all related connections
+  refresh when a node or connection is modified.
+  - Add zoom constraints to the `StateMachineCanvas` to prevent extreme
+  scaling.
+  - Remove deprecated node position constraints and parent notification
+  logic in `BaseNodeMixin`.
+  - **Model & History**:
+  - Enhance `EditorHistory` with a fingerprinting mechanism to improve
+  snapshot comparison efficiency.
+  - Include `runtime_container_path` in history snapshots to maintain
+  context during undo/redo.
+  - Update `EditorUiMixin` to preserve outcome descriptions when
+  modifying state outcomes.
+  - **IO**:
+  - Robustify `model_from_xml` to support `bytes`, `bytearray`, and
+  explicit XML string detection, with improved error handling for
+  parsing and file access.
+  - **Cleanup**:
+  - Remove redundant `del` calls and unused imports.
+  - Add type hinting and docstring improvements across the editor module.
+* Fix graphics item mobility with PyQt6 (`#123 <https://github.com/uleroboticsgroup/yasmin/issues/123>`_)
+  * Fix graphics item mobility with PyQt6
+  Use the scoped QGraphicsItem flag when updating editor node mobility and
+  add regression coverage for the PyQt6 code path.
+  * formatter
+  * Fix text block editing with PyQt6
+  * Fix missing container metadata imports
+  Import the container name normalization and conflict detection helpers
+  used when editing root and nested container metadata.
+  ---------
+  Co-authored-by: Maik Knof <knofm@hs-weingarten.de>
+* Contributors: Maik, Miguel Ángel González Santamarta, Plumezz
+
 6.0.0 (2026-07-07)
 ------------------
 * fix: correct dependency for yasmin_editor

@@ -2,6 +2,25 @@
 Changelog for package yasmin_cli
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.0 (2026-07-26)
+------------------
+* feat(cli): enhance command utility and refactor XML processing
+  Improve the `yasmin_cli` by centralizing XML utility functions, optimizing
+  plugin loading, and adding new dependencies.
+  - Extract `parse_assignments` and `indent_xml` to a new `_xml_utils.py`
+  module to reduce duplication across verbs.
+  - Implement a plugin manager cache in `completer.py` to avoid redundant
+  plugin loading during autocompletion.
+  - Add `yasmin_viewer` and `yasmin_editor` as execution dependencies in
+  `package.xml`.
+  - Optimize XML file discovery in `xml_file_completer` using a depth-limited
+  walk.
+  - Improve CLI robustness by flushing `stdout`/`stderr` before exit and
+  adding better XML parsing error handling in the `run` verb.
+  - Update `validate` verb to allow exit code 130 (SIGINT) during validation.
+  - Clean up unused arguments in the `viewer` verb.
+* Contributors: Miguel Ángel González Santamarta
+
 6.0.0 (2026-07-07)
 ------------------
 * Refactor type hints to use Union for optional types

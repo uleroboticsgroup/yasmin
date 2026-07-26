@@ -3,6 +3,69 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.0 (2026-07-26)
+------------------
+* fix(yasmin_ros): handle rclcpp version differences in TransformListener
+  Update the TransformListener instantiation to account for API changes
+  in rclcpp version 33.0.2 and above, ensuring compatibility across
+  different ROS 2 distributions by checking the version macro.
+* test(yasmin_ros): add complex scenario integration tests
+  Add comprehensive integration tests for complex ROS 2 scenarios in both
+  C++ and Python. These tests verify the interaction between state
+  machines and various ROS 2 primitives including actions, services, and
+  topics.
+  - Implement `test_complex_scenarios.cpp` using GTest.
+  - Implement `test_complex_scenarios.py` using unittest.
+  - Update `CMakeLists.txt` to include the new test targets for both
+  C++ and Python test runners.
+* fix(ros): enhance thread safety and state robustness
+  Improve the reliability of ROS-related states by implementing thread-safe
+  access patterns, refining lifecycle management, and expanding QoS
+  caching granularity.
+  Key changes:
+  - monitor: introduced `_msg_lock` to protect `msg_list` during concurrent
+  access and improved the message retrieval loop.
+  - action: updated `cancel_state` to asynchronously wait for goal
+  cancellation to complete.
+  - service: added `CANCEL` outcome support and improved error handling
+  in service response callbacks to prevent crashes on failed futures.
+  - publisher: added explicit check for `is_canceled()` before publishing.
+  - tf_buffer: replaced manual `__del_\_` calls with standard reference
+  clearing to allow proper garbage collection.
+  - ros_clients_cache: expanded QoS profile hashing to include
+  `liveliness_lease_duration` and `avoid_ros_namespace_conventions`.
+  - tests: updated test assertions to account for new log patterns and
+  cleaned up unnecessary includes and redundant cache clearing.
+  - build: removed obsolete `src` include directory from CMake configuration.
+* refactor(ros): modernize logger management and expand QoS hashing
+  Update the ROS logging infrastructure to use smart pointers and thread-safe
+  access patterns, and improve the granularity of QoS profile caching.
+  Key changes:
+  - ros_logs: Transition `logger_node` from a raw pointer to a
+  `std::shared_ptr` and introduce `logger_node_mutex` to ensure thread-safe
+  access during logging and node lifecycle changes.
+  - ros_clients_cache: Expand `hash_qos_profile` to include
+  `liveliness_lease_duration` and `avoid_ros_namespace_conventions` in
+  the hash calculation for more accurate cache validation.
+  - yasmin_node: Update lifecycle management to use `std::shared_ptr::reset()`
+  when clearing the logger node reference.
+* fix(ros): improve thread safety and timeout logic in ROS states
+  Refactor ROS-related states (Action, Monitor, Service) to enhance
+  reliability and concurrency handling.
+  Key changes:
+  - action_state: Implement atomic flags for state tracking, fix
+  condition variable usage with predicates, and replace the retry
+  loop with a single total timeout calculation.
+  - monitor_state: Replace `std::vector` with `std::deque` for more
+  efficient message queuing and implement cancellation checks
+  during timeouts.
+  - service_state: Add `CANCEL` outcome support, fix timeout logic
+  to use a consolidated duration, and ensure cancellation is
+  checked during the wait period.
+  - get_parameters_state: Simplify parameter type retrieval by
+  using the `rclcpp::Parameter` object directly.
+* Contributors: Miguel Ángel González Santamarta
+
 6.0.0 (2026-07-07)
 ------------------
 * relicense to Apache 2.0 (`#122 <https://github.com/uleroboticsgroup/yasmin/issues/122>`_)

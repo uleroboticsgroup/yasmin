@@ -3,6 +3,28 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.0 (2026-07-26)
+------------------
+* feat(viewer): improve web server stability and session management
+  Enhance the robustness of the embedded web server and the viewer node
+  by implementing better session tracking, improved error handling, and
+  more secure path resolution.
+  Key changes:
+  - server: transitioned to `beast::tcp_stream` with timeout support to
+  prevent hanging connections.
+  - server: implemented `sessions_mutex\_` and a `sessions\_` list to
+  track and safely manage active HTTP session threads.
+  - security: refined `resolve_file_path` to prevent path traversal
+  attacks by enforcing stricter prefix matching.
+  - node: added exception handling in `main.cpp` during node
+  initialization to prevent ungraceful crashes.
+  - pub: added configurable publication rate and proper timer
+  cancellation in the destructor.
+  - pub: improved FSM name resolution logic to correctly identify the
+  root state.
+  - docs: updated header documentation with Doxygen-style comments.
+* Contributors: Miguel Ángel González Santamarta
+
 6.0.0 (2026-07-07)
 ------------------
 * fix: remove deprecated RCLCPP version checks for package share path retrieval
