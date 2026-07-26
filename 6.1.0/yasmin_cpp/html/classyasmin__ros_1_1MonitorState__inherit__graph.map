@@ -1,0 +1,5 @@
+<map id="yasmin_ros::MonitorState&lt; MsgT &gt;" name="yasmin_ros::MonitorState&lt; MsgT &gt;">
+<area shape="rect" id="Node000001" title="Template class to monitor a ROS 2 topic and process incoming messages." alt="" coords="5,79,173,120"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="39,5,139,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,46,92,79,86,79,86,46"/>
+</map>

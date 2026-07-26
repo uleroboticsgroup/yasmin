@@ -1,0 +1,9 @@
+<map id="yasmin::Blackboard::RawEntry" name="yasmin::Blackboard::RawEntry">
+<area shape="rect" id="Node000001" title="Raw type&#45;erased entry used by batched lookups." alt="" coords="67,192,200,233"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,95,158,121"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,134,126,190,121,193,92,136"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="182,95,259,121"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,135,152,193,148,190,198,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="158,5,282,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="223,61,223,95,218,95,218,61"/>
+</map>

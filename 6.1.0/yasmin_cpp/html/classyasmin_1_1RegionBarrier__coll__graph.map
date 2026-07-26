@@ -1,0 +1,5 @@
+<map id="yasmin::RegionBarrier" name="yasmin::RegionBarrier">
+<area shape="rect" id="Node000001" title="A synchronization primitive that allows multiple threads to wait for each other at a barrier point." alt="" coords="5,102,152,128"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="38,5,119,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,46,81,101,76,101,76,46"/>
+</map>
