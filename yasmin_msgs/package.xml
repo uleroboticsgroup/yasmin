@@ -7,6 +7,7 @@
   <maintainer email="mgons@unileon.es">Miguel Ángel González Santamarta</maintainer>
   <license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>action_msgs</depend>
   <depend>rosidl_default_generators</depend>
   <member_of_group>rosidl_interface_packages</member_of_group>
   <export>
