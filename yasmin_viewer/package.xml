@@ -8,8 +8,10 @@
   <license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <build_depend>libboost-dev</build_depend>
+
+  <build_export_depend>libboost-dev</build_export_depend>
   <depend>ament_index_cpp</depend>
-  <depend>boost</depend>
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>yasmin</depend>
