@@ -39,7 +39,7 @@
 namespace {
 
 std::string resolve_host(const std::string &host) {
-  if (host == "0.0.0.0" || host == "::" || host == "localhost") {
+  if (host == "localhost") {
     return "127.0.0.1";
   }
   return host;
