@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shared States Reference - YASMIN</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">&#127769;</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="index.html">Introduction</a></li>
+          <li><a href="docker.html">Docker Environment</a></li>
+          <li><a href="main_concepts.html">Main Concepts</a></li>
+          <li><a href="shared_states.html">Shared States</a></li>
+          <li><a href="callback_signal.html">Callback Signal</a></li>
+          <li><a href="xml_factory.html">XML State Machines</a></li>
+          <li><a href="packages.html">Packages Overview</a></li>
+          <li><a href="yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/cpp/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li>
+                <a href="tutorials/cpp/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="tutorials/cpp/publisher_demo.html">Publisher</a></li>
+              <li><a href="tutorials/cpp/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/cpp/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/cpp/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/cpp/nav2_demo.html">Nav2 Demo</a></li>
+              <li>
+                <a href="tutorials/cpp/orthogonal_demo.html"
+                  >Orthogonal Regions</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/cpp/ros_serialization_demo.html"
+                  >ROS Serialization</a
+                >
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="tutorials/python/basic_fsm.html"
+                  >Writing a Simple FSM</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/remap_demo.html"
+                  >Blackboard Remapping</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/concurrence_demo.html">Concurrence</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li>
+                <a href="tutorials/python/publisher_demo.html">Publisher</a>
+              </li>
+              <li><a href="tutorials/python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="tutorials/python/service_client_demo.html"
+                  >Service Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/action_client_demo.html"
+                  >Action Client</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/parameters_demo.html"
+                  >ROS Parameters</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li>
+                <a href="tutorials/python/factory_demo.html">Factory (XML)</a>
+              </li>
+              <li><a href="tutorials/python/nav2_demo.html">Nav2 Demo</a></li>
+              <li>
+                <a href="tutorials/python/orthogonal_demo.html"
+                  >Orthogonal Regions</a
+                >
+              </li>
+              <li>
+                <a href="tutorials/python/orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="yasmin_ros_serialization.html">ROS Serialization States</a>
+          </li>
+          <li><a href="yasmin_ros_tf.html">TF States</a></li>
+          <li>
+            <a href="yasmin_plugins_manager.html">YASMIN Plugins Manager</a>
+          </li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>Shared States Reference</h1>
+        <p>
+          The <code>yasmin_demos</code> package includes a set of reusable state
+          classes that are used across multiple demo examples. These states are
+          available in both C++ and Python and demonstrate common patterns like
+          counting, logging, and serialization.
+        </p>
+
+        <h2>FooState</h2>
+        <p>
+          Produces a counter string and stores it in the blackboard while the
+          counter is below the threshold. Each execution increments an internal
+          counter and writes the formatted value to the blackboard.
+        </p>
+
+        <h3>C++</h3>
+        <pre><code class="language-cpp">class FooState : public yasmin::State {
+public:
+  FooState();
+  ~FooState() override = default;
+  void configure() override;
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
+
+private:
+  int counter;
+  std::string counter_prefix_;
+  int max_count_;
+  int sleep_ms_;
+};</code></pre>
+
+        <h4>Outcomes</h4>
+        <ul>
+          <li><code>outcome1</code> — counter is below the threshold</li>
+          <li><code>outcome2</code> — counter reached the threshold</li>
+        </ul>
+
+        <h4>Blackboard</h4>
+        <ul>
+          <li>
+            <strong>Output:</strong> <code>foo_str</code> — Formatted counter
+            string
+          </li>
+        </ul>
+
+        <h4>Parameters</h4>
+        <ul>
+          <li><code>counter_prefix</code> (default <code>"Counter"</code>)</li>
+          <li><code>max_count</code> (default <code>3</code>)</li>
+          <li><code>sleep_ms</code> (default <code>300</code>)</li>
+        </ul>
+
+        <h3>Python</h3>
+        <pre><code class="language-python">import time
+
+import yasmin
+from yasmin import Blackboard, State
+
+
+class FooState(State):
+
+    def __init__(self) -> None:
+        super().__init__(["outcome1", "outcome2"])
+        self.counter = 0
+        self.counter_prefix = "Counter"
+        self.max_count = 3
+        self.sleep_ms = 300
+        self.set_description(
+            "Produces a counter string and stores it in the blackboard "
+            "while the counter is below the threshold."
+        )
+        self.set_outcome_description("outcome1",
+                                     "Counter is below the threshold")
+        self.set_outcome_description("outcome2",
+                                     "Counter reached the threshold")
+        self.declare_parameter(
+            "counter_prefix",
+            "Prefix used when formatting the counter string.",
+            "Counter",
+        )
+        self.declare_parameter(
+            "max_count",
+            "Number of successful loops before the state returns outcome2.",
+            3,
+        )
+        self.declare_parameter(
+            "sleep_ms",
+            "Delay in milliseconds before each execution.",
+            300,
+        )
+        self.add_output_key(
+            "foo_str",
+            "String containing the current counter value produced by FooState.",
+        )
+
+    def configure(self) -> None:
+        self.counter_prefix = self.get_parameter("counter_prefix")
+        self.max_count = self.get_parameter("max_count")
+        self.sleep_ms = self.get_parameter("sleep_ms")
+
+    def execute(self, blackboard: Blackboard) -> str:
+        yasmin.YASMIN_LOG_INFO("Executing state FOO")
+        time.sleep(self.sleep_ms / 1000.0)
+
+        if self.counter &lt; self.max_count:
+            self.counter += 1
+            blackboard["foo_str"] = f"{self.counter_prefix}: {self.counter}"
+            return "outcome1"
+        else:
+            return "outcome2"</code></pre>
+
+        <h2>BarState</h2>
+        <p>
+          Prints the value stored in <code>foo_str</code> from the blackboard
+          and transitions back to the Foo state.
+        </p>
+
+        <h3>C++</h3>
+        <pre><code class="language-cpp">class BarState : public yasmin::State {
+public:
+  BarState();
+  ~BarState() override = default;
+  void configure() override;
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
+
+private:
+  std::string log_prefix_;
+  int sleep_ms_;
+};</code></pre>
+
+        <h4>Outcomes</h4>
+        <ul>
+          <li><code>outcome3</code> — always returned after logging</li>
+        </ul>
+
+        <h4>Blackboard</h4>
+        <ul>
+          <li>
+            <strong>Input:</strong> <code>foo_str</code> — String produced by
+            FooState
+          </li>
+        </ul>
+
+        <h4>Parameters</h4>
+        <ul>
+          <li>
+            <code>log_prefix</code> (default <code>"Observed value"</code>)
+          </li>
+          <li><code>sleep_ms</code> (default <code>300</code>)</li>
+        </ul>
+
+        <h3>Python</h3>
+        <pre><code class="language-python">import time
+
+import yasmin
+from yasmin import Blackboard, State
+
+
+class BarState(State):
+
+    def __init__(self) -> None:
+        super().__init__(outcomes=["outcome3"])
+        self.log_prefix = "Observed value"
+        self.sleep_ms = 300
+        self.set_description(
+            "Prints the value stored in 'foo_str' from the blackboard "
+            "and transitions back to the Foo state."
+        )
+        self.set_outcome_description("outcome3", "Final outcome")
+        self.declare_parameter(
+            "log_prefix",
+            "Prefix printed before the blackboard value.",
+            "Observed value",
+        )
+        self.declare_parameter(
+            "sleep_ms",
+            "Delay in milliseconds before each execution.",
+            300,
+        )
+        self.add_input_key(
+            "foo_str",
+            "String produced by FooState and printed by this state.",
+        )
+
+    def configure(self) -> None:
+        self.log_prefix = self.get_parameter("log_prefix")
+        self.sleep_ms = self.get_parameter("sleep_ms")
+
+    def execute(self, blackboard: Blackboard) -> str:
+        yasmin.YASMIN_LOG_INFO("Executing state BAR")
+        time.sleep(self.sleep_ms / 1000.0)
+
+        yasmin.YASMIN_LOG_INFO(
+            f"{self.log_prefix}: {blackboard['foo_str']}"
+        )
+        return "outcome3"</code></pre>
+
+        <h2>WorkerState</h2>
+        <p>
+          Counts iterations and returns <code>working</code> until
+          <code>max_count</code> is reached, then returns <code>done</code>.
+        </p>
+
+        <h3>C++</h3>
+        <pre><code class="language-cpp">class WorkerState : public yasmin::State {
+public:
+  WorkerState();
+  ~WorkerState() override = default;
+  void configure() override;
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
+
+private:
+  int counter;
+  int max_count_;
+  int sleep_ms_;
+};</code></pre>
+
+        <h4>Outcomes</h4>
+        <ul>
+          <li><code>working</code> — counter is below the threshold</li>
+          <li><code>done</code> — counter reached the threshold</li>
+        </ul>
+
+        <h4>Blackboard</h4>
+        <p>None</p>
+
+        <h4>Parameters</h4>
+        <ul>
+          <li><code>max_count</code> (default <code>3</code>)</li>
+          <li><code>sleep_ms</code> (default <code>500</code>)</li>
+        </ul>
+
+        <h3>Python</h3>
+        <pre><code class="language-python">import time
+
+import yasmin
+from yasmin import Blackboard, State
+
+
+class WorkerState(State):
+
+    def __init__(self) -> None:
+        super().__init__(["working", "done"])
+        self.counter = 0
+        self.max_count = 3
+        self.sleep_ms = 500
+        self.set_description(
+            "Counts iterations and returns 'working' until "
+            "max_count is reached."
+        )
+        self.set_outcome_description("working",
+                                     "Counter is below the threshold")
+        self.set_outcome_description("done",
+                                     "Counter reached the threshold")
+        self.declare_parameter(
+            "max_count",
+            "Number of iterations before returning 'done'.",
+            3,
+        )
+        self.declare_parameter(
+            "sleep_ms",
+            "Delay in milliseconds before each execution.",
+            500,
+        )
+
+    def configure(self) -> None:
+        self.max_count = self.get_parameter("max_count")
+        self.sleep_ms = self.get_parameter("sleep_ms")
+        self.counter = 0
+
+    def execute(self, blackboard: Blackboard) -> str:
+        yasmin.YASMIN_LOG_INFO(
+            f"Executing WorkerState: iteration "
+            f"{self.counter + 1}/{self.max_count}"
+        )
+        time.sleep(self.sleep_ms / 1000.0)
+
+        self.counter += 1
+        if self.counter &gt;= self.max_count:
+            return "done"
+        return "working"</code></pre>
+
+        <h2>PoseWriterState / PoseReaderState</h2>
+        <p>
+          A cross-language pair for ROS message serialization. The C++
+          <code>PoseWriterState</code> serializes a Pose message to the
+          blackboard, and the Python <code>PoseReaderState</code> deserializes
+          and logs it.
+        </p>
+
+        <h3>PoseWriterState (C++)</h3>
+        <pre><code class="language-cpp">class PoseWriterState : public yasmin::State {
+public:
+  PoseWriterState();
+  ~PoseWriterState() override = default;
+  void configure() override;
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override;
+
+private:
+  double position_x_;
+  double position_y_;
+  double position_z_;
+  double orientation_w_;
+};</code></pre>
+
+        <h4>Outcomes</h4>
+        <ul>
+          <li><code>SUCCEED</code></li>
+        </ul>
+
+        <h4>Blackboard Output</h4>
+        <ul>
+          <li><code>pose_bytes</code> — Serialized Pose bytes</li>
+          <li>
+            <code>pose_bytes__type</code> — Type string
+            <code>"geometry_msgs/msg/Pose"</code>
+          </li>
+        </ul>
+
+        <h4>Parameters</h4>
+        <ul>
+          <li><code>position_x</code> (default <code>1.0</code>)</li>
+          <li><code>position_y</code> (default <code>2.0</code>)</li>
+          <li><code>position_z</code> (default <code>3.0</code>)</li>
+          <li><code>orientation_w</code> (default <code>1.0</code>)</li>
+        </ul>
+
+        <h3>PoseReaderState (Python)</h3>
+        <pre><code class="language-python">from geometry_msgs.msg import Pose
+from rclpy.serialization import deserialize_message
+
+import yasmin
+from yasmin import Blackboard, State
+
+
+class PoseReaderState(State):
+
+    def __init__(self) -> None:
+        super().__init__(outcomes=["SUCCEED"])
+        self.set_description(
+            "Reads a serialized Pose message from the blackboard, "
+            "deserializes it, and logs the position and orientation."
+        )
+        self.add_input_key(
+            "pose_bytes",
+            "Serialized Pose message stored as bytes in the blackboard.",
+        )
+        self.add_input_key(
+            "pose_bytes__type",
+            "Type information for the serialized Pose message.",
+            "geometry_msgs/msg/Pose",
+        )
+
+    def execute(self, blackboard: Blackboard) -> str:
+        yasmin.YASMIN_LOG_INFO("Executing state POSE_READER")
+
+        pose_type = blackboard["pose_bytes__type"]
+        pose_bytes = blackboard["pose_bytes"]
+        pose = deserialize_message(pose_bytes, Pose)
+
+        yasmin.YASMIN_LOG_INFO(f"Stored type: {pose_type}")
+        yasmin.YASMIN_LOG_INFO(
+            f"Position: x={pose.position.x}, "
+            f"y={pose.position.y}, z={pose.position.z}"
+        )
+        yasmin.YASMIN_LOG_INFO(
+            f"Orientation: x={pose.orientation.x}, "
+            f"y={pose.orientation.y}, "
+            f"z={pose.orientation.z}, w={pose.orientation.w}"
+        )
+
+        return "SUCCEED"</code></pre>
+
+        <div class="page-navigation">
+          <a href="main_concepts.html" class="nav-button prev">Main Concepts</a>
+          <a href="callback_signal.html" class="nav-button next"
+            >Callback Signal</a
+          >
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2026 YASMIN Project. Licensed under Apache-2.0. | Documentation
+        generated with <a href="doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>

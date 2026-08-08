@@ -1,0 +1,23 @@
+<map id="yasmin/include/yasmin/region_barrier.hpp" name="yasmin/include/yasmin/region_barrier.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="106,5,259,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,94,131,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,49,99,87,96,83,153,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="154,94,211,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,46,185,78,180,78,180,46"/>
+<area shape="rect" id="Node000004" href="$types_8hpp.html" title=" " alt="" coords="235,94,357,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="212,44,268,83,265,87,209,49"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="13,168,91,193"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="255,123,106,166,105,161,254,118"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="114,168,182,193"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="272,123,188,163,186,158,270,118"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="206,168,245,193"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="286,122,250,158,246,155,282,118"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="269,168,323,193"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="299,120,299,152,293,152,293,120"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="347,168,429,193"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="313,118,362,156,359,160,310,122"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="453,168,563,193"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="333,118,459,160,457,165,331,123"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="587,168,645,193"/>
+<area shape="poly" id="edge10_Node000004_Node000011" title=" " alt="" coords="358,117,573,165,571,170,357,123"/>
+</map>

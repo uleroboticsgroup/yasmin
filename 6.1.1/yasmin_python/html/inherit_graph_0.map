@@ -1,0 +1,15 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,149,58,174"/>
+<area shape="rect" id="Node000001" href="$classtest__action__client__state_1_1AuxNode.html" title=" " alt="" coords="166,5,290,46"/>
+<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="43,133,67,93,84,73,104,55,134,40,165,31,167,36,136,45,107,60,88,76,72,96,47,136"/>
+<area shape="rect" id="Node000002" href="$classtest__complex__scenarios_1_1AuxNode.html" title=" " alt="" coords="119,70,336,96"/>
+<area shape="poly" id="edge2_Node000000_Node000002" title=" " alt="" coords="56,136,79,119,105,105,134,94,136,99,107,109,82,124,60,140"/>
+<area shape="rect" id="Node000003" href="$classtest__monitor__state_1_1AuxNode.html" title=" " alt="" coords="135,120,320,145"/>
+<area shape="poly" id="edge3_Node000000_Node000003" title=" " alt="" coords="72,153,137,143,138,148,73,158"/>
+<area shape="rect" id="Node000004" href="$classtest__service__client__state_1_1AuxNode.html" title=" " alt="" coords="163,169,293,210"/>
+<area shape="poly" id="edge4_Node000000_Node000004" title=" " alt="" coords="74,165,162,178,162,183,73,170"/>
+<area shape="rect" id="Node000005" href="$classtest__tf__buffer__state_1_1TestTransformBroadcasterNode.html" title=" " alt="" coords="137,235,318,275"/>
+<area shape="poly" id="edge5_Node000000_Node000005" title=" " alt="" coords="58,184,81,203,107,219,138,232,136,237,104,224,78,207,55,188"/>
+<area shape="rect" id="Node000006" href="$classyasmin__ros_1_1yasmin__node_1_1YasminNode.html" title=" " alt="" coords="106,300,350,325"/>
+<area shape="poly" id="edge6_Node000000_Node000006" title=" " alt="" coords="44,188,67,239,85,264,107,285,129,297,126,301,104,289,81,267,63,241,39,191"/>
+</map>

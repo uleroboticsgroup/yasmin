@@ -1,0 +1,7 @@
+<map id="yasmin_viewer::YasminViewerNode::CachedFsm" name="yasmin_viewer::YasminViewerNode::CachedFsm">
+<area shape="rect" id="Node000001" title="Stores a serialized finite state machine and its last update time." alt="" coords="5,192,203,233"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="65,95,143,121"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,136,107,192,101,192,101,136"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="42,5,166,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,61,107,95,101,95,101,61"/>
+</map>
