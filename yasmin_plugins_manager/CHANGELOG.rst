@@ -2,6 +2,9 @@
 Changelog for package yasmin_plugins_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.1 (2026-08-08)
+------------------
+
 6.1.0 (2026-07-26)
 ------------------
 * feat(plugins): implement recursive directory signature for cache validation

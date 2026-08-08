@@ -2,6 +2,9 @@
 Changelog for package yasmin_cli
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.1 (2026-08-08)
+------------------
+
 6.1.0 (2026-07-26)
 ------------------
 * feat(cli): enhance command utility and refactor XML processing

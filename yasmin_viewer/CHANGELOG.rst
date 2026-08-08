@@ -3,6 +3,12 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.1 (2026-08-08)
+------------------
+* Allow remote connections to yasmin_viewer (`#129 <https://github.com/uleroboticsgroup/yasmin/issues/129>`_)
+* Minimize boost dependencies as only headers are used during build (`#128 <https://github.com/uleroboticsgroup/yasmin/issues/128>`_)
+* Contributors: Ferry Schoenmakers
+
 6.1.0 (2026-07-26)
 ------------------
 * feat(viewer): improve web server stability and session management

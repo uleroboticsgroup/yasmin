@@ -3,6 +3,19 @@ Changelog for package yasmin_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.1 (2026-08-08)
+------------------
+* yasmin_msgs: Depend on action_msgs (`#127 <https://github.com/uleroboticsgroup/yasmin/issues/127>`_)
+  Without this dependency, when the package is build separately, the
+  build fails with the following error:
+  CMake Error at /nix/store/x11khyi2rivpyy70xxvkm319v5nzwq75-ros-humble-rosidl-cmake-3.1.9-r1/share/rosidl_cmake/cmake/rosidl_generate_interfaces.cmake:147 (message):
+  Unable to generate action interface for 'action/RunStateMachine.action'.
+  In order to generate action interfaces you must add a depend tag for
+  'action_msgs' in your package.xml.
+  Call Stack (most recent call first):
+  CMakeLists.txt:8 (rosidl_generate_interfaces)
+* Contributors: Michal Sojka
+
 6.1.0 (2026-07-26)
 ------------------
 * YASMIN Factory Action Server (`#124 <https://github.com/uleroboticsgroup/yasmin/issues/124>`_)

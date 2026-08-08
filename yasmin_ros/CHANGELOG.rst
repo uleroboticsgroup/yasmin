@@ -3,6 +3,9 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.1 (2026-08-08)
+------------------
+
 6.1.0 (2026-07-26)
 ------------------
 * fix(yasmin_ros): handle rclcpp version differences in TransformListener

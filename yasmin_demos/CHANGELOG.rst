@@ -3,6 +3,9 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.1 (2026-08-08)
+------------------
+
 6.1.0 (2026-07-26)
 ------------------
 * docs: remove multiple states demo from documentation and demos

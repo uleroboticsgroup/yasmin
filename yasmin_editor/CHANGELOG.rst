@@ -2,6 +2,9 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.1 (2026-08-08)
+------------------
+
 6.1.0 (2026-07-26)
 ------------------
 * Declare yasmin_ros as an editor runtime dependency (`#126 <https://github.com/uleroboticsgroup/yasmin/issues/126>`_)
