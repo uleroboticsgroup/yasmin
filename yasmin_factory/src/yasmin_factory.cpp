@@ -32,6 +32,7 @@
 #endif
 
 #include "yasmin/blackboard_pywrapper.hpp"
+#include "yasmin/pybind11_utils.hpp"
 #include "yasmin/types.hpp"
 
 #include "yasmin_factory/yasmin_factory.hpp"
@@ -439,32 +440,12 @@ void YasminFactory::cleanup() {
   }
 }
 
-namespace {
-PyThreadState *saved_gil_state = nullptr;
-
-void gil_before_fork() {
-  // Acquire the GIL if Python is initialized before saving/releasing it.
-  // This ensures PyEval_SaveThread is called with the GIL held.
-  if (Py_IsInitialized()) {
-    // If GIL is not held, acquire it first
-    PyGILState_STATE gstate = PyGILState_Ensure();
-    saved_gil_state = PyEval_SaveThread();
-    // Note: PyEval_SaveThread releases the GIL, so PyGILState_Release
-    // is not called here.
-  }
-}
-
-void gil_after_join() {
-  if (saved_gil_state) {
-    PyEval_RestoreThread(saved_gil_state);
-    saved_gil_state = nullptr;
-  }
-}
-} // namespace
-
 void YasminFactory::initialize_python() {
-  // Set GIL hooks for OrthogonalState region threads
-  yasmin::OrthogonalState::set_thread_hooks(gil_before_fork, gil_after_join);
+  // Set GIL hooks for every container that forks worker threads. The
+  // default hook pair lives in pybind11_utils.hpp so there is exactly one
+  // implementation shared with the Python bindings.
+  yasmin::pybind11_utils::register_default_gil_hooks<yasmin::OrthogonalState>();
+  yasmin::pybind11_utils::register_default_gil_hooks<yasmin::Concurrence>();
 
   if (!py_initialized_) {
     // Check if Python is already initialized (e.g., by ROS or another module)

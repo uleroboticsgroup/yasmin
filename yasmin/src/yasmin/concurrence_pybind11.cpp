@@ -78,4 +78,8 @@ PYBIND11_MODULE(concurrence, m) {
   yasmin::pybind11_utils::add_call_operator<decltype(concurrence_class),
                                             yasmin::Concurrence>(
       concurrence_class);
+
+  m.def("setup_default_gil_hooks", []() {
+    yasmin::pybind11_utils::register_default_gil_hooks<yasmin::Concurrence>();
+  });
 }
