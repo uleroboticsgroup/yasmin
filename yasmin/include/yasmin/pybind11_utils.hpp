@@ -182,8 +182,7 @@ inline void default_gil_after_join() {
  * @tparam Container The container class exposing set_thread_hooks.
  */
 template <typename Container> inline void register_default_gil_hooks() {
-  Container::set_thread_hooks(default_gil_before_fork,
-                              default_gil_after_join);
+  Container::set_thread_hooks(default_gil_before_fork, default_gil_after_join);
 }
 
 } // namespace pybind11_utils

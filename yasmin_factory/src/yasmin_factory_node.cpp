@@ -87,9 +87,16 @@ int main(int argc, char *argv[]) {
   // and try to finalize publishers on a dead DDS participant.
   try {
     pybind11::gil_scoped_acquire acquire;
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
     pybind11::module_::import("yasmin_ros.yasmin_node")
         .attr("YasminNode")
         .attr("destroy_instance")();
+#else
+    pybind11::module::import("yasmin_ros.yasmin_node")
+        .attr("YasminNode")
+        .attr("destroy_instance")();
+#endif
   } catch (const pybind11::error_already_set &e) {
     RCLCPP_WARN(rclcpp::get_logger("yasmin_factory_node"),
                 "Failed to destroy Python YasminNode: %s", e.what());
