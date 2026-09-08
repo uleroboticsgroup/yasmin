@@ -17,6 +17,8 @@
 #define YASMIN__CONCURRENCE_HPP_
 
 #include <atomic>
+#include <functional>
+#include <memory>
 #include <mutex>
 #include <string>
 
@@ -63,6 +65,17 @@ private:
   /// Flag to indicate if this concurrence state has been configured
   std::atomic_bool configured{false};
 
+  /// Hook type for GIL management around thread fork/join
+  using GilHook = std::function<void()>;
+
+  /// Hooks for GIL management before forking threads and after joining
+  /// (e.g., release/reacquire the GIL when Python states are used)
+  static std::shared_ptr<GilHook> before_fork_hook_;
+  /// Hook for GIL management after joining threads.
+  static std::shared_ptr<GilHook> after_join_hook_;
+  /// Mutex protecting the static hooks
+  static std::mutex hooks_mutex_;
+
   /**
    * @brief Applies this container's parameter mappings to a direct child.
    * @param state_name The child state name.
@@ -76,6 +89,14 @@ public:
    * @brief Shared pointer type for Concurrence.
    */
   YASMIN_PTR_ALIASES(Concurrence)
+
+  /**
+   * @brief Sets the hooks for GIL management before forking worker threads
+   * and after joining them.
+   * @param before_fork Function invoked before the worker threads are spawned.
+   * @param after_join Function invoked after all worker threads are joined.
+   */
+  static void set_thread_hooks(GilHook before_fork, GilHook after_join);
 
   /**
    * @brief Constructs a Concurrence with states running in parallel.

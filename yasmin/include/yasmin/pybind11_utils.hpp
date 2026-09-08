@@ -135,6 +135,56 @@ inline void add_call_operator(ClassType &cls) {
       py::arg("blackboard") = py::none());
 }
 
+/**
+ * @brief Per-thread slot for the GIL state saved by the default fork/join
+ * hooks.
+ *
+ * A container's fork and join hooks always run back-to-back on the same
+ * thread, so a single per-thread slot is always balanced.
+ */
+inline PyThreadState *&default_gil_saved_state() {
+  thread_local PyThreadState *state = nullptr;
+  return state;
+}
+
+/**
+ * @brief Default before-fork GIL hook.
+ *
+ * Releases the GIL only if this thread actually holds it (worker threads
+ * spawned by OrthogonalState/Concurrence never acquired it, and Python
+ * callers may have already released it via add_call_operator).
+ */
+inline void default_gil_before_fork() {
+  if (Py_IsInitialized() && PyGILState_Check()) {
+    default_gil_saved_state() = PyEval_SaveThread();
+  }
+}
+
+/**
+ * @brief Default after-join GIL hook.
+ *
+ * Restores the thread state saved by default_gil_before_fork, if any.
+ */
+inline void default_gil_after_join() {
+  if (default_gil_saved_state()) {
+    PyEval_RestoreThread(default_gil_saved_state());
+    default_gil_saved_state() = nullptr;
+  }
+}
+
+/**
+ * @brief Registers the default GIL fork/join hooks on a container class.
+ *
+ * Each binding module calls this for its own container type
+ * (OrthogonalState, Concurrence) so that container-specific headers are
+ * only needed where the container is actually bound.
+ *
+ * @tparam Container The container class exposing set_thread_hooks.
+ */
+template <typename Container> inline void register_default_gil_hooks() {
+  Container::set_thread_hooks(default_gil_before_fork, default_gil_after_join);
+}
+
 } // namespace pybind11_utils
 } // namespace yasmin
 

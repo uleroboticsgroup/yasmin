@@ -32,6 +32,16 @@
 
 using namespace yasmin;
 
+std::shared_ptr<Concurrence::GilHook> Concurrence::before_fork_hook_;
+std::shared_ptr<Concurrence::GilHook> Concurrence::after_join_hook_;
+std::mutex Concurrence::hooks_mutex_;
+
+void Concurrence::set_thread_hooks(GilHook before_fork, GilHook after_join) {
+  std::lock_guard<std::mutex> lock(hooks_mutex_);
+  before_fork_hook_ = std::make_shared<GilHook>(std::move(before_fork));
+  after_join_hook_ = std::make_shared<GilHook>(std::move(after_join));
+}
+
 Concurrence::Concurrence(const StateMap &states,
                          const std::string &default_outcome,
                          const OutcomeMap &outcome_map,
@@ -142,6 +152,21 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
   std::vector<std::exception_ptr> exceptions(this->states.size(), nullptr);
   size_t thread_idx = 0;
 
+  // Snapshot hooks under lock for thread-safe access during concurrent
+  // execution
+  std::shared_ptr<GilHook> before_hook;
+  std::shared_ptr<GilHook> after_hook;
+  {
+    std::lock_guard<std::mutex> lock(hooks_mutex_);
+    before_hook = before_fork_hook_;
+    after_hook = after_join_hook_;
+  }
+
+  // Invoke before-fork hook (e.g., GIL release when Python states are used)
+  if (before_hook) {
+    (*before_hook)();
+  }
+
   // Initialize the parallel execution of all the states.
   // Each branch receives a blackboard copy that shares the underlying storage
   // but keeps an isolated remapping scope.
@@ -167,6 +192,11 @@ std::string Concurrence::execute(Blackboard::SharedPtr blackboard) {
     if (state_thread.joinable()) {
       state_thread.join();
     }
+  }
+
+  // Invoke after-join hook (e.g., GIL re-acquire when Python states are used)
+  if (after_hook) {
+    (*after_hook)();
   }
 
   // Check for exceptions from child threads

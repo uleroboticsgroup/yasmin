@@ -23,31 +23,6 @@ namespace py = pybind11;
 
 PYBIND11_MAKE_OPAQUE(yasmin::BlackboardPyWrapper);
 
-namespace {
-
-thread_local PyThreadState *default_gil_state = nullptr;
-
-void default_gil_before_fork() {
-  if (Py_IsInitialized()) {
-    // Only release the GIL if this thread actually holds it.
-    // add_call_operator may have already released it via gil_scoped_release.
-    if (PyGILState_Check()) {
-      default_gil_state = PyEval_SaveThread();
-    } else {
-      default_gil_state = nullptr;
-    }
-  }
-}
-
-void default_gil_after_join() {
-  if (default_gil_state) {
-    PyEval_RestoreThread(default_gil_state);
-    default_gil_state = nullptr;
-  }
-}
-
-} // namespace
-
 PYBIND11_MODULE(orthogonal_state, m) {
   m.doc() = "Python bindings for yasmin::OrthogonalState";
 
@@ -85,7 +60,7 @@ PYBIND11_MODULE(orthogonal_state, m) {
       orthogonal_state_class);
 
   m.def("setup_default_gil_hooks", []() {
-    yasmin::OrthogonalState::set_thread_hooks(default_gil_before_fork,
-                                              default_gil_after_join);
+    yasmin::pybind11_utils::register_default_gil_hooks<
+        yasmin::OrthogonalState>();
   });
 }

@@ -609,6 +609,142 @@ TEST_F(TestYasminFactory, TestCreateOrthogonalState) {
   }
 }
 
+// Regression test: a Concurrence with Python child states used to deadlock
+// when executed from C++ (factory holds the GIL, worker threads could never
+// acquire it). It must now complete.
+TEST_F(TestYasminFactory, TestConcurrencePythonStates) {
+  std::string xml_content = R"(
+    <StateMachine outcomes="done" start_state="conc">
+      <Concurrence name="conc" default_outcome="timeout">
+        <State name="A" type="py" module="test.test_simple_state" class="TestParameterizedState">
+          <Param name="sleep_ms" default_type="int" default_value="1"/>
+        </State>
+        <State name="B" type="py" module="test.test_simple_state" class="TestParameterizedState">
+          <Param name="sleep_ms" default_type="int" default_value="1"/>
+        </State>
+        <OutcomeMap outcome="done">
+          <Item state="A" outcome="done"/>
+          <Item state="B" outcome="done"/>
+        </OutcomeMap>
+        <Transition from="done" to="end_state"/>
+      </Concurrence>
+      <State name="end_state" type="py" module="test.test_simple_state" class="TestParameterizedState">
+        <Transition from="done" to="done"/>
+      </State>
+    </StateMachine>
+  )";
+
+  tinyxml2::XMLDocument doc;
+  doc.Parse(xml_content.c_str());
+  tinyxml2::XMLElement *root = doc.FirstChildElement("StateMachine");
+  ASSERT_NE(root, nullptr);
+
+  try {
+    auto sm = factory->create_sm(root);
+    ASSERT_NE(sm, nullptr);
+
+    auto bb = yasmin::Blackboard::make_shared();
+    EXPECT_EQ((*sm)(bb), "done");
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "Python state creation failed: " << e.what();
+  }
+}
+
+// Repeated runs smoke out a leaked GIL: if the fork/join hooks are
+// unbalanced, the second iteration hangs or errors.
+TEST_F(TestYasminFactory, TestConcurrencePythonStatesRepeated) {
+  std::string xml_content = R"(
+    <StateMachine outcomes="done" start_state="conc">
+      <Concurrence name="conc" default_outcome="timeout">
+        <State name="A" type="py" module="test.test_simple_state" class="TestParameterizedState">
+          <Param name="sleep_ms" default_type="int" default_value="1"/>
+        </State>
+        <State name="B" type="py" module="test.test_simple_state" class="TestParameterizedState">
+          <Param name="sleep_ms" default_type="int" default_value="1"/>
+        </State>
+        <OutcomeMap outcome="done">
+          <Item state="A" outcome="done"/>
+          <Item state="B" outcome="done"/>
+        </OutcomeMap>
+        <Transition from="done" to="end_state"/>
+      </Concurrence>
+      <State name="end_state" type="py" module="test.test_simple_state" class="TestParameterizedState">
+        <Transition from="done" to="done"/>
+      </State>
+    </StateMachine>
+  )";
+
+  tinyxml2::XMLDocument doc;
+  doc.Parse(xml_content.c_str());
+  tinyxml2::XMLElement *root = doc.FirstChildElement("StateMachine");
+  ASSERT_NE(root, nullptr);
+
+  try {
+    auto sm = factory->create_sm(root);
+    ASSERT_NE(sm, nullptr);
+
+    for (int i = 0; i < 20; ++i) {
+      auto bb = yasmin::Blackboard::make_shared();
+      EXPECT_EQ((*sm)(bb), "done") << "iteration " << i;
+    }
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "Python state creation failed: " << e.what();
+  }
+}
+
+// Nesting: Concurrence child that is an OrthogonalState with Python regions,
+// exercising the thread_local save/restore across container boundaries.
+TEST_F(TestYasminFactory, TestNestedConcurrenceOrthogonalPythonStates) {
+  std::string xml_content = R"(
+    <StateMachine outcomes="done" start_state="conc">
+      <Concurrence name="conc" default_outcome="timeout">
+        <OrthogonalState name="ortho" default_outcome="timeout">
+          <Region name="R1" outcomes="done" start_state="w1">
+            <State name="w1" type="py" module="test.test_simple_state" class="TestParameterizedState">
+              <Param name="sleep_ms" default_type="int" default_value="1"/>
+            </State>
+          </Region>
+          <Region name="R2" outcomes="done" start_state="w2">
+            <State name="w2" type="py" module="test.test_simple_state" class="TestParameterizedState">
+              <Param name="sleep_ms" default_type="int" default_value="1"/>
+            </State>
+          </Region>
+          <OutcomeMap outcome="done">
+            <Item state="R1" outcome="done"/>
+            <Item state="R2" outcome="done"/>
+          </OutcomeMap>
+        </OrthogonalState>
+        <State name="B" type="py" module="test.test_simple_state" class="TestParameterizedState">
+          <Param name="sleep_ms" default_type="int" default_value="1"/>
+        </State>
+        <OutcomeMap outcome="done">
+          <Item state="ortho" outcome="done"/>
+          <Item state="B" outcome="done"/>
+        </OutcomeMap>
+        <Transition from="done" to="end_state"/>
+      </Concurrence>
+      <State name="end_state" type="py" module="test.test_simple_state" class="TestParameterizedState">
+        <Transition from="done" to="done"/>
+      </State>
+    </StateMachine>
+  )";
+
+  tinyxml2::XMLDocument doc;
+  doc.Parse(xml_content.c_str());
+  tinyxml2::XMLElement *root = doc.FirstChildElement("StateMachine");
+  ASSERT_NE(root, nullptr);
+
+  try {
+    auto sm = factory->create_sm(root);
+    ASSERT_NE(sm, nullptr);
+
+    auto bb = yasmin::Blackboard::make_shared();
+    EXPECT_EQ((*sm)(bb), "done");
+  } catch (const std::exception &e) {
+    GTEST_SKIP() << "Python state creation failed: " << e.what();
+  }
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

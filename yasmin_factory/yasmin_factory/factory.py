@@ -20,10 +20,20 @@ from typing import Dict
 from ament_index_python import get_package_share_path
 from lxml import etree as ET
 from yasmin import Concurrence, JoinState, OrthogonalState, State, StateMachine
-from yasmin.orthogonal_state import setup_default_gil_hooks
+from yasmin.concurrence import setup_default_gil_hooks as _setup_concurrence_gil_hooks
+from yasmin.orthogonal_state import setup_default_gil_hooks as _setup_orthogonal_gil_hooks
 from yasmin_pybind_bridge import CppStateFactory
 
 from yasmin_factory.type_utils import parse_key_value
+
+
+def _setup_all_gil_hooks() -> None:
+    """
+    Registers the default GIL hooks for every container that forks worker
+    threads. Must be updated when a new container type is added.
+    """
+    _setup_orthogonal_gil_hooks()
+    _setup_concurrence_gil_hooks()
 
 
 class YasminFactory:
@@ -31,15 +41,15 @@ class YasminFactory:
     def __init__(self) -> None:
         """
         Initializes the factory, setting up the C++ state factory
-        and default GIL hooks for OrthogonalState threads.
+        and default GIL hooks for container worker threads.
         """
 
         self._cpp_factory = CppStateFactory()
         self._xml_path: str = ""
 
-        # Set up default GIL hooks for OrthogonalState so that threads
-        # spawned by orthogonal regions can safely call into Python.
-        setup_default_gil_hooks()
+        # Set up default GIL hooks for all containers that fork worker
+        # threads (OrthogonalState, Concurrence).
+        _setup_all_gil_hooks()
 
     def create_state(self, state_elem: ET.Element) -> State:
         """

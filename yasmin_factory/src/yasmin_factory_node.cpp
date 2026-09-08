@@ -48,27 +48,62 @@ int main(int argc, char *argv[]) {
                                .get_parameter_value()
                                .get<bool>();
 
-  // Create the factory in a scope
-  yasmin_factory::YasminFactory factory;
+  // Create the state machine, viewer publisher, and run everything inside a
+  // scope so that every ROS- and Python-touching object is destroyed while
+  // the rclcpp context and DDS participant are still valid.
+  {
+    // Create the factory in a scope
+    yasmin_factory::YasminFactory factory;
 
-  // Create the state machine from the XML file
-  auto sm = factory.create_sm_from_file(sm_file);
-  sm->set_sigint_handler(true);
+    // Create the state machine from the XML file
+    auto sm = factory.create_sm_from_file(sm_file);
+    sm->set_sigint_handler(true);
 
-  // Publisher for visualizing the state machine
-  std::unique_ptr<yasmin_viewer::YasminViewerPub> yasmin_pub_ptr;
-  if (enable_viewer_pub) {
-    yasmin_pub_ptr = std::make_unique<yasmin_viewer::YasminViewerPub>(sm);
+    // Publisher for visualizing the state machine
+    std::unique_ptr<yasmin_viewer::YasminViewerPub> yasmin_pub_ptr;
+    if (enable_viewer_pub) {
+      yasmin_pub_ptr = std::make_unique<yasmin_viewer::YasminViewerPub>(sm);
+    }
+
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN("State machine execution failed: %s", e.what());
+    }
+
+    // Tear down in strict order while the context is still alive: stop the
+    // viewer (timer + publisher), then the SM (releases the Python states),
+    // then the factory.
+    yasmin_pub_ptr.reset();
+    sm.reset();
   }
 
-  // Execute the state machine
+  // Destroy the Python-side YasminNode singleton as well: Python states
+  // (e.g. GetParametersState) create it lazily, and it holds an rclpy node
+  // with a parameter_event publisher plus a spin thread. Its only other
+  // owner is an atexit handler, which would run after rclcpp::shutdown()
+  // and try to finalize publishers on a dead DDS participant.
   try {
-    std::string outcome = (*sm.get())();
-    YASMIN_LOG_INFO(outcome.c_str());
-  } catch (const std::exception &e) {
-    YASMIN_LOG_WARN("State machine execution failed: %s", e.what());
+    pybind11::gil_scoped_acquire acquire;
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
+    pybind11::module_::import("yasmin_ros.yasmin_node")
+        .attr("YasminNode")
+        .attr("destroy_instance")();
+#else
+    pybind11::module::import("yasmin_ros.yasmin_node")
+        .attr("YasminNode")
+        .attr("destroy_instance")();
+#endif
+  } catch (const pybind11::error_already_set &e) {
+    RCLCPP_WARN(rclcpp::get_logger("yasmin_factory_node"),
+                "Failed to destroy Python YasminNode: %s", e.what());
   }
 
+  // Now nothing else holds the node, so this really destroys it and joins
+  // the executor spin thread.
   yasmin_ros::YasminNode::destroy_instance();
 
   // Shutdown ROS 2
