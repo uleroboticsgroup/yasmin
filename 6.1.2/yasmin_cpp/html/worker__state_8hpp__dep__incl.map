@@ -1,0 +1,9 @@
+<map id="yasmin_demos/include/yasmin_demos/worker_state.hpp" name="yasmin_demos/include/yasmin_demos/worker_state.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="244,5,399,61"/>
+<area shape="rect" id="Node000002" href="$orthogonal__demo_8cpp.html" title=" " alt="" coords="5,109,200,150"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,70,149,111,147,106,243,65"/>
+<area shape="rect" id="Node000003" href="$orthogonal__sync__demo_8cpp.html" title=" " alt="" coords="224,109,418,150"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="324,77,324,109,318,109,318,77"/>
+<area shape="rect" id="Node000004" href="$worker__state_8cpp.html" title=" " alt="" coords="442,109,616,150"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="396,65,487,106,485,111,394,70"/>
+</map>

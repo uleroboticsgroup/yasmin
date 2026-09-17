@@ -1,0 +1,7 @@
+<map id="FibonacciActionServer::GoalThread" name="FibonacciActionServer::GoalThread">
+<area shape="rect" id="Node000001" title="An execution thread and its completion flag." alt="" coords="34,102,186,143"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,87,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,43,100,100,96,103,59,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="110,5,240,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="162,46,125,103,120,100,157,43"/>
+</map>

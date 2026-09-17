@@ -1,0 +1,17 @@
+<map id="FibonacciActionServer" name="FibonacciActionServer">
+<area shape="rect" id="Node000001" title="A ROS 2 action server node for calculating Fibonacci sequences (C++ only, no Python equivalent)." alt="" coords="1082,55,1234,80"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="794,5,888,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="903,19,978,25,1058,37,1116,52,1115,57,1057,42,977,30,903,24"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="801,55,881,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="896,65,1081,65,1081,70,896,70"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="748,105,934,161"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="948,114,1057,93,1113,78,1114,84,1058,98,949,120"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="459,112,639,153"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="655,130,748,130,748,136,655,136"/>
+<area shape="rect" id="Node000006" href="$structFibonacciActionServer_1_1GoalThread.html" title="An execution thread and its completion flag." alt="" coords="236,112,388,153"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="403,130,458,130,458,136,403,136"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="30,93,111,119"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="127,110,235,122,235,127,126,115"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="5,147,136,172"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="151,152,211,147,235,143,235,149,212,152,151,158"/>
+</map>

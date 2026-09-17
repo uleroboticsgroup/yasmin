@@ -1,0 +1,29 @@
+<map id="yasmin::StateMachine" name="yasmin::StateMachine">
+<area shape="rect" id="Node000001" title="A class that implements a state machine with a set of states, transitions, and callback mechanisms fo..." alt="" coords="693,348,841,374"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="355,55,454,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="469,51,517,47,570,48,623,59,648,70,671,84,700,113,723,147,740,185,752,224,765,297,769,347,763,348,760,297,747,225,735,187,718,150,696,116,667,88,645,74,621,64,569,53,517,52,470,57"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="22,5,164,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="180,29,355,57,354,62,179,34"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,59,181,84"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="196,69,270,68,355,66,355,71,270,73,196,74"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="366,120,444,146"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="459,138,585,161,640,173,670,184,691,202,709,223,736,269,755,314,765,347,760,349,750,315,732,272,704,226,687,206,668,188,638,178,584,166,458,144"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="31,112,155,153"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="170,130,366,130,366,136,170,136"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="332,170,478,226"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="494,203,582,221,627,237,670,257,699,278,724,302,759,346,755,349,720,306,696,282,668,262,625,242,580,227,493,208"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="320,250,490,290"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="506,279,587,293,670,314,708,329,742,345,740,350,706,334,668,319,585,299,505,284"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="316,315,494,356"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="510,340,693,353,693,358,509,345"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="294,380,516,421"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="531,392,669,379,708,372,709,377,669,384,532,397"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="365,445,445,471"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="461,462,507,464,560,463,615,456,668,440,694,426,718,408,753,372,757,376,721,412,697,431,670,445,616,461,560,468,507,470,460,467"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="320,495,490,536"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="505,524,546,523,588,519,629,509,668,492,701,466,727,433,746,400,758,373,763,375,751,402,731,436,704,470,670,497,631,514,589,524,546,529,505,529"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="305,560,504,601"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="520,590,558,588,597,582,634,570,667,552,689,534,708,511,736,460,753,410,761,373,766,375,758,412,740,462,712,514,693,537,671,557,636,575,598,587,559,594,520,596"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="323,626,487,666"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="502,658,545,658,588,653,630,640,667,619,695,592,716,561,733,526,745,489,759,422,763,374,768,374,764,422,750,491,738,528,721,563,699,596,671,623,632,645,589,658,545,663,502,663"/>
+</map>

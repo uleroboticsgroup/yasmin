@@ -1,0 +1,20 @@
+<map id="TestComplexRosScenarios" name="TestComplexRosScenarios">
+<area shape="rect" id="Node000001" title=" " alt="" coords="649,112,827,138"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="363,5,456,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="471,21,546,33,626,56,678,82,720,109,717,114,676,86,624,61,545,38,471,26"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="319,55,500,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="516,78,625,96,685,109,684,114,624,101,515,83"/>
+<area shape="rect" id="Node000004" href="$classAuxNode.html" title=" " alt="" coords="148,55,222,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="238,65,318,65,318,70,238,70"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,55,99,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="75,85,101,91,129,91,156,87,176,78,178,83,158,92,130,97,100,96,74,91"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="114,74,147,73,148,78,114,79"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="114,56,148,57,147,62,114,61"/>
+<area shape="poly" id="edge7_Node000004_Node000005" title=" " alt="" coords="74,44,100,39,130,38,158,43,178,52,176,57,156,48,129,44,101,44,75,50"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="293,104,526,145"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="541,122,648,122,648,128,541,128"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="369,169,450,195"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="465,174,624,151,688,136,689,141,625,156,466,179"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="313,220,506,246"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="521,218,573,207,624,191,676,164,718,136,721,140,679,169,626,196,574,212,522,223"/>
+</map>

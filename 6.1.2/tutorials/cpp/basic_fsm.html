@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Writing a Simple FSM (C++) - YASMIN</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <script src="../../sidebar.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <script src="../../dark_mode.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="../../index.html" class="logo">
+        <img src="../../logo.png" alt="YASMIN Logo" />
+        YASMIN
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html">Docs</a>
+        <a href="https://github.com/uleroboticsgroup/yasmin" target="_blank"
+          >GitHub</a
+        >
+        <a href="../../doxygen.html" target="_blank">Doxygen</a>
+        <button id="theme-toggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <h3>Getting Started</h3>
+        <ul>
+          <li><a href="../../index.html">Introduction</a></li>
+          <li><a href="../../docker.html">Docker Environment</a></li>
+          <li><a href="../../main_concepts.html">Main Concepts</a></li>
+          <li><a href="../../shared_states.html">Shared States</a></li>
+          <li><a href="../../callback_signal.html">Callback Signal</a></li>
+          <li><a href="../../xml_factory.html">XML State Machines</a></li>
+          <li><a href="../../packages.html">Packages Overview</a></li>
+          <li><a href="../../yasmin_api.html">API Reference</a></li>
+        </ul>
+
+        <h3>Tutorials</h3>
+        <ul>
+          <li><a href="../../tutorials.html">All Tutorials</a></li>
+        </ul>
+
+        <h3 class="collapsible">C++ Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li><a href="basic_fsm.html">Writing a Simple FSM</a></li>
+              <li><a href="remap_demo.html">Blackboard Remapping</a></li>
+              <li><a href="concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="publisher_demo.html">Publisher</a></li>
+              <li><a href="monitor_demo.html">Monitor</a></li>
+              <li><a href="service_client_demo.html">Service Client</a></li>
+              <li><a href="action_client_demo.html">Action Client</a></li>
+              <li><a href="parameters_demo.html">ROS Parameters</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li><a href="factory_demo.html">Factory (XML)</a></li>
+
+              <li><a href="nav2_demo.html">Nav2 Demo</a></li>
+              <li><a href="orthogonal_demo.html">Orthogonal Regions</a></li>
+              <li>
+                <a href="orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+              <li>
+                <a href="ros_serialization_demo.html">ROS Serialization</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3 class="collapsible">Python Tutorials</h3>
+        <ul>
+          <li class="tutorial-level">
+            Beginner
+            <ul>
+              <li>
+                <a href="../python/basic_fsm.html">Writing a Simple FSM</a>
+              </li>
+              <li>
+                <a href="../python/remap_demo.html">Blackboard Remapping</a>
+              </li>
+              <li><a href="../python/concurrence_demo.html">Concurrence</a></li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Intermediate
+            <ul>
+              <li><a href="../python/publisher_demo.html">Publisher</a></li>
+              <li><a href="../python/monitor_demo.html">Monitor</a></li>
+              <li>
+                <a href="../python/service_client_demo.html">Service Client</a>
+              </li>
+              <li>
+                <a href="../python/action_client_demo.html">Action Client</a>
+              </li>
+              <li>
+                <a href="../python/parameters_demo.html">ROS Parameters</a>
+              </li>
+            </ul>
+          </li>
+          <li class="tutorial-level">
+            Advanced
+            <ul>
+              <li><a href="../python/factory_demo.html">Factory (XML)</a></li>
+
+              <li><a href="../python/nav2_demo.html">Nav2 Demo</a></li>
+              <li>
+                <a href="../python/orthogonal_demo.html">Orthogonal Regions</a>
+              </li>
+              <li>
+                <a href="../python/orthogonal_sync_demo.html"
+                  >Orthogonal Regions with Sync</a
+                >
+              </li>
+              <li>
+                <a href="../python/ros_serialization_demo.html"
+                  >ROS Serialization</a
+                >
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Tools</h3>
+        <ul>
+          <li><a href="../../yasmin_editor.html">YASMIN Editor</a></li>
+          <li><a href="../../yasmin_factory.html">YASMIN Factory</a></li>
+          <li><a href="../../yasmin_cli.html">YASMIN CLI</a></li>
+          <li><a href="../../yasmin_viewer.html">YASMIN Viewer</a></li>
+        </ul>
+
+        <h3>Extensions</h3>
+        <ul>
+          <li><a href="../../yasmin_pcl.html">YASMIN PCL</a></li>
+          <li>
+            <a href="../../yasmin_ros_serialization.html"
+              >ROS Serialization States</a
+            >
+          </li>
+          <li><a href="../../yasmin_ros_tf.html">TF States</a></li>
+          <li>
+            <a href="../../yasmin_plugins_manager.html"
+              >YASMIN Plugins Manager</a
+            >
+          </li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="../../citations.html">Citations</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content content">
+        <h1>
+          <a
+            href="https://github.com/uleroboticsgroup/yasmin/blob/main/yasmin_demos/src/yasmin_demo.cpp"
+            target="_blank"
+            style="color: inherit; text-decoration: none"
+            >Writing a Simple FSM (C++)</a
+          >
+        </h1>
+        <p>
+          This tutorial shows how to create a simple Finite State Machine (FSM)
+          using YASMIN in C++. We will create two custom states,
+          <code>FooState</code> and <code>BarState</code>, and transition
+          between them. This example demonstrates the fundamental concepts of
+          state machines: defining states with specific behaviors, managing
+          state transitions, and sharing data between states using the
+          blackboard.
+        </p>
+
+        <h2>1. Create the FooState</h2>
+        <p>
+          First, we define the <code>FooState</code> class inheriting from
+          <code>yasmin::State</code>. This state will increment a counter and
+          switch outcomes based on the counter value. The constructor
+          initializes two possible outcomes: <code>"outcome1"</code> (to
+          continue to BarState) and <code>"outcome2"</code> (to finish
+          execution). In the <code>execute()</code> method, we check if the
+          counter is less than 3 - if so, we increment it, store a message in
+          the blackboard, and return <code>"outcome1"</code> to transition to
+          BarState. After 3 executions, we return <code>"outcome2"</code> to end
+          the state machine.
+        </p>
+
+        <pre><code class="language-cpp">#include &lt;chrono&gt;
+#include &lt;string&gt;
+#include &lt;thread&gt;
+
+#include &lt;yasmin/blackboard.hpp&gt;
+#include &lt;yasmin/state.hpp&gt;
+#include &lt;yasmin/types.hpp&gt;
+
+#include &quot;yasmin/logs.hpp&quot;
+
+
+class FooState : public yasmin::State {
+public:
+  FooState() : yasmin::State({&quot;outcome1&quot;, &quot;outcome2&quot;}) {
+    this-&gt;counter = 0;
+    this-&gt;counter_prefix_ = &quot;Counter&quot;;
+    this-&gt;max_count_ = 3;
+    this-&gt;sleep_ms_ = 300;
+    this-&gt;set_description(&quot;Produces a counter string and stores it in the &quot;
+                          &quot;blackboard while the counter is below the threshold.&quot;);
+    this-&gt;set_outcome_description(&quot;outcome1&quot;, &quot;Counter is below the threshold&quot;);
+    this-&gt;set_outcome_description(&quot;outcome2&quot;, &quot;Counter reached the threshold.&quot;);
+    this-&gt;declare_parameter&lt;std::string&gt;(
+        &quot;counter_prefix&quot;, &quot;Prefix used when formatting the counter string.&quot;,
+        std::string(&quot;Counter&quot;));
+    this-&gt;declare_parameter&lt;int&gt;(
+        &quot;max_count&quot;,
+        &quot;Number of successful loops before the state returns outcome2.&quot;, 3);
+    this-&gt;declare_parameter&lt;int&gt;(
+        &quot;sleep_ms&quot;, &quot;Delay in milliseconds before each execution.&quot;, 300);
+    this-&gt;add_output_key(
+        &quot;foo_str&quot;,
+        &quot;String containing the current counter value produced by FooState.&quot;);
+  }
+
+  void configure() override {
+    this-&gt;counter_prefix_ = this-&gt;get_parameter&lt;std::string&gt;(&quot;counter_prefix&quot;);
+    this-&gt;max_count_ = this-&gt;get_parameter&lt;int&gt;(&quot;max_count&quot;);
+    this-&gt;sleep_ms_ = this-&gt;get_parameter&lt;int&gt;(&quot;sleep_ms&quot;);
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    YASMIN_LOG_INFO(&quot;Executing state FOO&quot;);
+    std::this_thread::sleep_for(std::chrono::milliseconds(this-&gt;sleep_ms_));
+
+    if (this-&gt;counter &lt; this-&gt;max_count_) {
+      this-&gt;counter += 1;
+      blackboard-&gt;set&lt;std::string&gt;(&quot;foo_str&quot;, this-&gt;counter_prefix_ + &quot;: &quot; +
+                                                  std::to_string(this-&gt;counter));
+      return &quot;outcome1&quot;;
+    } else {
+      return &quot;outcome2&quot;;
+    }
+  }
+
+private:
+  int counter;
+  std::string counter_prefix_;
+  int max_count_;
+  int sleep_ms_;
+};</code></pre>
+
+        <h2>2. Create the BarState</h2>
+        <p>
+          Next, we define the <code>BarState</code>, which acts as an
+          intermediary state in our FSM. This state has only one outcome:
+          <code>"outcome3"</code>, which will transition back to FooState. In
+          the <code>execute()</code> method, we retrieve the string stored by
+          FooState from the blackboard and log it. This demonstrates how states
+          can communicate by reading and writing shared data through the
+          blackboard. After logging the message, the state returns
+          <code>"outcome3"</code> to loop back to FooState.
+        </p>
+
+        <pre><code class="language-cpp">#include &lt;chrono&gt;
+#include &lt;string&gt;
+#include &lt;thread&gt;
+
+#include &lt;yasmin/blackboard.hpp&gt;
+#include &lt;yasmin/state.hpp&gt;
+#include &lt;yasmin/types.hpp&gt;
+
+#include &quot;yasmin/logs.hpp&quot;
+
+
+class BarState : public yasmin::State {
+public:
+  BarState() : yasmin::State({&quot;outcome3&quot;}) {
+    this-&gt;log_prefix_ = &quot;Observed value&quot;;
+    this-&gt;sleep_ms_ = 300;
+    this-&gt;set_description(&quot;Prints the value stored in 'foo_str' from the &quot;
+                          &quot;blackboard and transitions back to the Foo state.&quot;);
+    this-&gt;set_outcome_description(&quot;outcome3&quot;, &quot;Final outcome&quot;);
+    this-&gt;declare_parameter&lt;std::string&gt;(
+        &quot;log_prefix&quot;, &quot;Prefix printed before the blackboard value.&quot;,
+        std::string(&quot;Observed value&quot;));
+    this-&gt;declare_parameter&lt;int&gt;(
+        &quot;sleep_ms&quot;, &quot;Delay in milliseconds before each execution.&quot;, 300);
+    this-&gt;add_input_key&lt;std::string&gt;(
+        &quot;foo_str&quot;, &quot;String produced by FooState and printed by this state.&quot;,
+        std::string(&quot;Foo&quot;));
+  }
+
+  void configure() override {
+    this-&gt;log_prefix_ = this-&gt;get_parameter&lt;std::string&gt;(&quot;log_prefix&quot;);
+    this-&gt;sleep_ms_ = this-&gt;get_parameter&lt;int&gt;(&quot;sleep_ms&quot;);
+  }
+
+  std::string execute(yasmin::Blackboard::SharedPtr blackboard) override {
+    YASMIN_LOG_INFO(&quot;Executing state BAR&quot;);
+    std::this_thread::sleep_for(std::chrono::milliseconds(this-&gt;sleep_ms_));
+
+    YASMIN_LOG_INFO(
+        (this-&gt;log_prefix_ + &quot;: &quot; + blackboard-&gt;get&lt;std::string&gt;(&quot;foo_str&quot;))
+            .c_str());
+
+    return &quot;outcome3&quot;;
+  }
+
+private:
+  std::string log_prefix_;
+  int sleep_ms_;
+};</code></pre>
+
+        <h2>3. Main Function</h2>
+        <p>
+          In the main function, we initialize ROS 2 and set up the complete
+          state machine. First, we call <code>rclcpp::init()</code> to
+          initialize the ROS 2 context and configure the YASMIN loggers. Then we
+          create a <code>StateMachine</code> with <code>"outcome4"</code> as the
+          terminal outcome. Using <code>add_state()</code>, we register our
+          FooState and BarState, defining their transitions: FooState can
+          transition to BarState (<code>outcome1</code>) or end the machine
+          (<code>outcome2</code>), while BarState always loops back to FooState
+          (<code>outcome3</code>). The YasminViewerPub enables real-time
+          visualization of the state machine execution. Finally, we execute the
+          state machine and handle any exceptions before shutting down ROS 2.
+        </p>
+
+        <pre><code class="language-cpp">#include &lt;memory&gt;
+#include &lt;string&gt;
+
+#include &lt;rclcpp/rclcpp.hpp&gt;
+
+#include &quot;yasmin/logs.hpp&quot;
+#include &quot;yasmin/state.hpp&quot;
+#include &quot;yasmin/state_machine.hpp&quot;
+#include &quot;yasmin_ros/ros_logs.hpp&quot;
+#include &quot;yasmin_ros/yasmin_node.hpp&quot;
+#include &quot;yasmin_viewer/yasmin_viewer_pub.hpp&quot;
+
+int main(int argc, char *argv[]) {
+  // Initialize ROS 2
+  rclcpp::init(argc, argv);
+
+  // Set ROS 2 logs
+  yasmin_ros::set_ros_loggers();
+  YASMIN_LOG_INFO(&quot;yasmin_demo&quot;);
+
+  // Create a state machine
+  auto sm = yasmin::StateMachine::make_shared(
+      std::initializer_list&lt;std::string&gt;{&quot;outcome4&quot;}, true);
+  sm-&gt;set_description(&quot;Runs a simple loop between FooState and BarState until &quot;
+                      &quot;FooState reaches its terminal outcome.&quot;);
+  sm-&gt;add_output_key(
+      &quot;foo_str&quot;,
+      &quot;Formatted counter string produced by FooState and read by BarState.&quot;);
+
+  // Add states to the state machine
+  sm-&gt;add_state(&quot;FOO&quot;, std::make_shared&lt;FooState&gt;(),
+                {
+                    {&quot;outcome1&quot;, &quot;BAR&quot;},
+                    {&quot;outcome2&quot;, &quot;outcome4&quot;},
+                });
+  sm-&gt;add_state(&quot;BAR&quot;, std::make_shared&lt;BarState&gt;(),
+                {
+                    {&quot;outcome3&quot;, &quot;FOO&quot;},
+                });
+
+  {
+    // Publish state machine updates
+    yasmin_viewer::YasminViewerPub yasmin_pub(sm, &quot;YASMIN_DEMO&quot;);
+
+    // Execute the state machine
+    try {
+      std::string outcome = (*sm.get())();
+      YASMIN_LOG_INFO(outcome.c_str());
+    } catch (const std::exception &amp;e) {
+      YASMIN_LOG_WARN(e.what());
+    }
+  }
+
+  yasmin_ros::YasminNode::destroy_instance();
+  rclcpp::shutdown();
+
+  return 0;
+}</code></pre>
+
+        <h2>4. Build and Run</h2>
+        <p>
+          Compile your ROS 2 package using colcon build and execute the
+          demonstration to see the state machine in action, cycling through the
+          FOO and BAR states.
+        </p>
+        <pre><code>ros2 run yasmin_demos yasmin_demo</code></pre>
+
+        <div class="page-navigation">
+          <div class="nav-button-placeholder"></div>
+          <a href="remap_demo.html" class="nav-button next"
+            >C++: Remapping Demo</a
+          >
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2026 YASMIN Project. Licensed under Apache-2.0. | Documentation
+        generated with <a href="../../doxygen.html" target="_blank">Doxygen</a>
+      </p>
+    </footer>
+  </body>
+</html>
