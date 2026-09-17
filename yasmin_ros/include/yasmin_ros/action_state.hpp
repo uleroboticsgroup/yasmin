@@ -19,6 +19,7 @@
 #include <condition_variable>
 #include <cstdint>
 #include <functional>
+#include <future>
 #include <memory>
 #include <string>
 #include <utility>
@@ -409,11 +410,11 @@ public:
     const uint64_t epoch = ++this->action_epoch_;
     auto callback_guard = this->callback_guard;
     SendGoalOptions send_goal_options;
-    send_goal_options.goal_response_callback = [this, callback_guard,
-                                                epoch](auto goal_response) {
-      ActionState::goal_response_callback_guarded(this, callback_guard, epoch,
-                                                  goal_response);
-    };
+    send_goal_options.goal_response_callback =
+        [this, callback_guard, epoch](GoalResponseArg goal_response) {
+          ActionState::goal_response_callback_guarded(this, callback_guard,
+                                                      epoch, goal_response);
+        };
 
     send_goal_options.result_callback =
         [this, callback_guard,
@@ -570,6 +571,9 @@ private:
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
 #if RCLCPP_VERSION_GTE(2, 4, 3) // Greater or equal to latest Foxy
+  /// @brief Argument type passed to the goal response callback.
+  using GoalResponseArg = typename GoalHandle::SharedPtr;
+
   /**
    * @brief Callback for handling the goal response.
    *
@@ -577,8 +581,7 @@ private:
    *
    * @param goal_handle A shared pointer to the goal handle.
    */
-  void
-  goal_response_callback(const typename GoalHandle::SharedPtr &goal_handle) {
+  void goal_response_callback(const GoalResponseArg &goal_handle) {
     std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
     this->goal_handle = goal_handle;
 
@@ -589,6 +592,9 @@ private:
     }
   }
 #else
+  /// @brief Argument type passed to the goal response callback.
+  using GoalResponseArg = std::shared_future<typename GoalHandle::SharedPtr>;
+
   /**
    * @brief Callback for handling the goal response.
    *
@@ -596,8 +602,7 @@ private:
    *
    * @param future A future that holds the goal handle.
    */
-  void goal_response_callback(
-      std::shared_future<typename GoalHandle::SharedPtr> future) {
+  void goal_response_callback(GoalResponseArg future) {
     std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
     this->goal_handle = future.get();
 
@@ -609,6 +614,9 @@ private:
   }
 #endif
 #else
+  /// @brief Argument type passed to the goal response callback.
+  using GoalResponseArg = std::shared_future<typename GoalHandle::SharedPtr>;
+
   /**
    * @brief Callback for handling the goal response.
    *
@@ -616,8 +624,7 @@ private:
    *
    * @param future A future that holds the goal handle.
    */
-  void goal_response_callback(
-      std::shared_future<typename GoalHandle::SharedPtr> future) {
+  void goal_response_callback(GoalResponseArg future) {
     std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
     this->goal_handle = future.get();
 
