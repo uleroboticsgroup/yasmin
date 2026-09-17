@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <geometry_msgs/msg/pose.hpp>
@@ -68,13 +69,14 @@ std::string PoseWriterState::execute(yasmin::Blackboard::SharedPtr blackboard) {
   pose.orientation.z = 0.0;
   pose.orientation.w = this->orientation_w_;
 
-  const std::vector<uint8_t> pose_bytes =
+  std::vector<uint8_t> pose_bytes =
       yasmin_ros::serialize_interface<geometry_msgs::msg::Pose>(pose);
+  const auto pose_bytes_size = pose_bytes.size();
 
-  blackboard->set<std::vector<uint8_t>>("pose_bytes", pose_bytes);
+  blackboard->set<std::vector<uint8_t>>("pose_bytes", std::move(pose_bytes));
   blackboard->set<std::string>("pose_bytes__type", "geometry_msgs/msg/Pose");
 
-  YASMIN_LOG_INFO("Stored serialized Pose with %zu bytes", pose_bytes.size());
+  YASMIN_LOG_INFO("Stored serialized Pose with %zu bytes", pose_bytes_size);
 
   return "SUCCEED";
 }

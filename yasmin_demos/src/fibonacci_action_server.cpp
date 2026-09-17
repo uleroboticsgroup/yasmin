@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -70,19 +71,25 @@ public:
     // Callback to handle accepted goals.
     auto handle_accepted =
         [this](const std::shared_ptr<GoalHandleFibonacci> goal_handle) {
-          auto execute_in_thread = [this, goal_handle]() {
-            return this->execute(goal_handle);
-          };
-          {
-            std::lock_guard<std::mutex> lock(this->threads_mutex_);
-            for (auto &thread : this->threads_) {
-              if (thread.joinable()) {
-                thread.join();
+          auto goal_thread = std::make_shared<GoalThread>();
+          std::lock_guard<std::mutex> lock(this->threads_mutex_);
+
+          for (auto it = this->threads_.begin(); it != this->threads_.end();) {
+            if ((*it)->finished.load()) {
+              if ((*it)->thread.joinable()) {
+                (*it)->thread.join();
               }
+              it = this->threads_.erase(it);
+            } else {
+              ++it;
             }
-            this->threads_.clear();
-            this->threads_.emplace_back(execute_in_thread);
           }
+
+          goal_thread->thread = std::thread([this, goal_handle, goal_thread]() {
+            this->execute(goal_handle);
+            goal_thread->finished.store(true);
+          });
+          this->threads_.push_back(goal_thread);
         };
 
     // Create the Fibonacci action server.
@@ -93,14 +100,23 @@ public:
   }
 
   ~FibonacciActionServer() {
-    for (auto &thread : this->threads_) {
-      if (thread.joinable()) {
-        thread.join();
+    std::lock_guard<std::mutex> lock(this->threads_mutex_);
+    for (auto &goal_thread : this->threads_) {
+      if (goal_thread->thread.joinable()) {
+        goal_thread->thread.join();
       }
     }
   }
 
 private:
+  /**
+   * @brief An execution thread and its completion flag.
+   */
+  struct GoalThread {
+    std::thread thread;
+    std::atomic<bool> finished{false};
+  };
+
   /**
    * @brief Mutex protecting the threads vector.
    */
@@ -108,7 +124,7 @@ private:
   /**
    * @brief Tracked execution threads, joined on destruction.
    */
-  std::vector<std::thread> threads_;
+  std::vector<std::shared_ptr<GoalThread>> threads_;
 
   /**
    * @brief The action server instance for Fibonacci calculations.

@@ -15,6 +15,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <example_interfaces/action/fibonacci.hpp>
@@ -117,7 +118,8 @@ public:
   std::string response_handler(yasmin::Blackboard::SharedPtr blackboard,
                                Fibonacci::Result::SharedPtr response) {
 
-    blackboard->set<std::vector<int>>("fibo_res", response->sequence);
+    blackboard->set<std::vector<int>>("fibo_res",
+                                      std::move(response->sequence));
     return yasmin_ros::basic_outcomes::SUCCEED;
   };
 

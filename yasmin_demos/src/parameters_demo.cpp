@@ -76,7 +76,7 @@ public:
     YASMIN_LOG_INFO("Executing state FOO");
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
-    if (this->counter < blackboard->get<int>("max_counter")) {
+    if (this->counter < blackboard->get<int64_t>("max_counter")) {
       this->counter += 1;
       blackboard->set<std::string>("foo_str",
                                    blackboard->get<std::string>("counter_str") +
