@@ -82,18 +82,26 @@ void RosDeserializeCppState::configure() {
 
 std::string
 RosDeserializeCppState::execute(yasmin::Blackboard::SharedPtr blackboard) {
+  if (this->handler_ == nullptr) {
+    YASMIN_LOG_WARN("RosDeserializeCppState is not configured for '%s'",
+                    this->interface_type_.c_str());
+    return ERROR;
+  }
+
   try {
     validate_blackboard_key_type(blackboard, "input", SERIALIZED_BYTES_TYPE);
+  } catch (const std::runtime_error &e) {
+    YASMIN_LOG_WARN("RosDeserializeCppState type error for '%s': %s",
+                    this->interface_type_.c_str(), e.what());
+    return TYPE_ERROR;
+  }
 
+  try {
     const std::vector<uint8_t> serialized_data =
         blackboard->get<std::vector<uint8_t>>("input");
     this->handler_->deserialize_to_blackboard(blackboard, "output",
                                               serialized_data);
     return SUCCEED;
-  } catch (const std::runtime_error &e) {
-    YASMIN_LOG_WARN("RosDeserializeCppState type error for '%s': %s",
-                    this->interface_type_.c_str(), e.what());
-    return TYPE_ERROR;
   } catch (const std::exception &e) {
     YASMIN_LOG_WARN("RosDeserializeCppState failed for '%s': %s",
                     this->interface_type_.c_str(), e.what());

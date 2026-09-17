@@ -119,6 +119,9 @@ class TestComplexRosScenarios(unittest.TestCase):
     def tearDownClass(cls):
         ROSClientsCache.clear_all()
         YasminNode.destroy_instance()
+        cls.executor.shutdown()
+        cls.spin_thread.join()
+        cls.aux_node.destroy_node()
         rclpy.shutdown()
 
     def setUp(self):
@@ -485,7 +488,9 @@ class TestComplexRosScenarios(unittest.TestCase):
             "JOIN", JoinState("sync_point"), transitions={"joined": "DONE"}
         )
         region_a.add_state(
-            "DONE", CbState([SUCCEED], lambda bb: SUCCEED), transitions={SUCCEED: SUCCEED}
+            "DONE",
+            CbState([SUCCEED], lambda bb: SUCCEED),
+            transitions={SUCCEED: SUCCEED},
         )
 
         region_b = StateMachine(ros_outcomes)
@@ -501,7 +506,9 @@ class TestComplexRosScenarios(unittest.TestCase):
             "JOIN", JoinState("sync_point"), transitions={"joined": "DONE"}
         )
         region_b.add_state(
-            "DONE", CbState([SUCCEED], lambda bb: SUCCEED), transitions={SUCCEED: SUCCEED}
+            "DONE",
+            CbState([SUCCEED], lambda bb: SUCCEED),
+            transitions={SUCCEED: SUCCEED},
         )
 
         ort = OrthogonalState(

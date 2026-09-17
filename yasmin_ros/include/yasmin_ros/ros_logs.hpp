@@ -39,6 +39,16 @@ extern std::shared_ptr<rclcpp::Node> logger_node;
  */
 void set_ros_loggers(rclcpp::Node::SharedPtr node = nullptr);
 
+/**
+ * @brief Resets the logger node if it matches the given node.
+ *
+ * This function is thread-safe and should be used when destroying a node that
+ * may currently be used as the logger node.
+ *
+ * @param node Node that is being destroyed.
+ */
+void reset_logger_node(const rclcpp::Node *node);
+
 } // namespace yasmin_ros
 
 #endif // YASMIN_ROS__LOGS_HPP_

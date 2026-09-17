@@ -24,7 +24,7 @@ from action_msgs.msg import GoalStatus
 
 import yasmin
 from yasmin import State, Blackboard
-from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL
+from yasmin_ros.basic_outcomes import SUCCEED, ABORT, CANCEL, TIMEOUT
 from yasmin_ros.ros_clients_cache import ROSClientsCache
 from yasmin_ros.ros_state_utils import resolve_node, wait_with_retry, setup_outcomes
 
@@ -85,6 +85,8 @@ class ActionState(State):
         self._goal_handle: ClientGoalHandle = None
         ## Lock to manage access to the goal handle.
         self._goal_handle_lock: RLock = RLock()
+        ## Whether a cancel was requested before the goal handle was received.
+        self._cancel_requested: bool = False
 
         ## Handler function for creating goals.
         self._create_goal_handler: Callable[[Blackboard], Any] = create_goal_handler
@@ -105,7 +107,9 @@ class ActionState(State):
         outcomes = setup_outcomes(
             outcomes,
             {SUCCEED, ABORT, CANCEL},
-            add_timeout=bool(self._wait_timeout or self._response_timeout),
+            add_timeout=(
+                self._wait_timeout is not None or self._response_timeout is not None
+            ),
         )
 
         self._node: Node = resolve_node(node)
@@ -129,6 +133,16 @@ class ActionState(State):
 
         super().__init__(outcomes)
 
+    def _cancel_goal(self, wait: bool = True) -> None:
+        with self._goal_handle_lock:
+            self._cancel_requested = True
+            goal_handle = self._goal_handle
+
+        if goal_handle is not None:
+            cancel_future = goal_handle.cancel_goal_async()
+            if wait:
+                cancel_future.result()
+
     def cancel_state(self) -> None:
         """
         Cancel the current action state.
@@ -136,10 +150,7 @@ class ActionState(State):
         This function cancels the goal sent to the action server, if it exists,
         and waits for the cancellation to complete.
         """
-        with self._goal_handle_lock:
-            if self._goal_handle is not None:
-                cancel_future = self._goal_handle.cancel_goal_async()
-                cancel_future.result()
+        self._cancel_goal()
         super().cancel_state()
 
     def execute(self, blackboard: Blackboard) -> str:
@@ -174,6 +185,11 @@ class ActionState(State):
             return CANCEL
 
         self._action_done_event.clear()
+        self._action_result = None
+        self._action_status = None
+        with self._goal_handle_lock:
+            self._goal_handle = None
+            self._cancel_requested = False
 
         yasmin.YASMIN_LOG_INFO(f"Sending goal to action '{self._action_name}'")
 
@@ -194,6 +210,8 @@ class ActionState(State):
             cancel_check=self.is_canceled,
         )
         if outcome is not None:
+            if outcome == TIMEOUT:
+                self._cancel_goal(wait=False)
             return outcome
 
         if self.is_canceled():
@@ -225,10 +243,24 @@ class ActionState(State):
             future: The future object representing the result of the goal sending operation.
         """
 
-        with self._goal_handle_lock:
-            self._goal_handle: ClientGoalHandle = future.result()
-            get_result_future: Future = self._goal_handle.get_result_async()
+        try:
+            goal_handle: ClientGoalHandle = future.result()
+
+            with self._goal_handle_lock:
+                self._goal_handle = goal_handle
+
+            if self._cancel_requested and goal_handle is not None:
+                goal_handle.cancel_goal_async()
+
+            get_result_future: Future = goal_handle.get_result_async()
             get_result_future.add_done_callback(self._get_result_callback)
+        except Exception as e:
+            yasmin.YASMIN_LOG_ERROR(
+                f"Failed to handle goal response for action "
+                f"'{self._action_name}': {e}"
+            )
+            self._action_status = GoalStatus.STATUS_UNKNOWN
+            self._action_done_event.set()
 
     def _get_result_callback(self, future: Future) -> None:
         """
@@ -239,6 +271,15 @@ class ActionState(State):
         Args:
             future: The future object representing the result of the action execution.
         """
-        self._action_result: Any = future.result().result
-        self._action_status: GoalStatus = future.result().status
-        self._action_done_event.set()
+        try:
+            result = future.result()
+            self._action_result: Any = result.result
+            self._action_status: GoalStatus = result.status
+        except Exception as e:
+            yasmin.YASMIN_LOG_ERROR(
+                f"Failed to handle result for action '{self._action_name}': {e}"
+            )
+            self._action_result = None
+            self._action_status = GoalStatus.STATUS_UNKNOWN
+        finally:
+            self._action_done_event.set()

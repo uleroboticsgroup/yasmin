@@ -34,6 +34,7 @@ class TfBufferState(State):
         super().__init__([SUCCEED, ABORT])
         self._node = None
         self._cache_time_sec = 10.0
+        self._prev_cache_time_sec = None
         self._prev_tf_buffer = None
         self._prev_tf_listener = None
 
@@ -71,16 +72,25 @@ class TfBufferState(State):
 
     def execute(self, blackboard: Blackboard) -> str:
         try:
-            # Clean up previous instances to avoid resource leaks
-            self._prev_tf_listener = None
-            self._prev_tf_buffer = None
+            if self._node is None:
+                self._node = resolve_node()
 
-            tf_buffer = Buffer(cache_time=Duration(seconds=self._cache_time_sec))
-            tf_listener = TransformListener(tf_buffer, self._node)
-            self._prev_tf_buffer = tf_buffer
-            self._prev_tf_listener = tf_listener
-            blackboard["tf_buffer"] = tf_buffer
-            blackboard["tf_listener"] = tf_listener
+            if (
+                self._prev_tf_listener is None
+                or self._prev_cache_time_sec != self._cache_time_sec
+            ):
+                # Clean up previous instances to avoid resource leaks
+                self._prev_tf_listener = None
+                self._prev_tf_buffer = None
+
+                tf_buffer = Buffer(cache_time=Duration(seconds=self._cache_time_sec))
+                tf_listener = TransformListener(tf_buffer, self._node)
+                self._prev_tf_buffer = tf_buffer
+                self._prev_tf_listener = tf_listener
+                self._prev_cache_time_sec = self._cache_time_sec
+
+            blackboard["tf_buffer"] = self._prev_tf_buffer
+            blackboard["tf_listener"] = self._prev_tf_listener
             return SUCCEED
         except Exception as exc:
             yasmin.YASMIN_LOG_ERROR(f"TfBufferState failed to create tf2 objects: {exc}")

@@ -21,6 +21,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
@@ -116,8 +117,8 @@ public:
                rclcpp::CallbackGroup::SharedPtr callback_group = nullptr,
                int msg_queue = 10, int timeout = -1, int maximum_retry = 3)
       : State(outcomes), topic_name(topic_name),
-        monitor_handler(monitor_handler), qos(qos), msg_queue(msg_queue),
-        timeout(timeout), maximum_retry(maximum_retry) {
+        monitor_handler(std::move(monitor_handler)), qos(qos),
+        msg_queue(msg_queue), timeout(timeout), maximum_retry(maximum_retry) {
 
     // Set outcomes
     if (timeout > 0) {
@@ -202,12 +203,12 @@ public:
       }
     }
 
-    YASMIN_LOG_INFO("Processing msg from topic '%s'", this->topic_name.c_str());
-    std::string outcome =
-        this->monitor_handler(blackboard, this->msg_list.front());
+    auto msg = this->msg_list.front();
     this->msg_list.pop_front();
+    lock.unlock();
 
-    return outcome;
+    YASMIN_LOG_INFO("Processing msg from topic '%s'", this->topic_name.c_str());
+    return this->monitor_handler(blackboard, msg);
   }
 
   /**
@@ -216,8 +217,8 @@ public:
    * This function cancels the ongoing monitor.
    */
   void cancel_state() override {
-    this->msg_cond.notify_one();
     yasmin::State::cancel_state();
+    this->msg_cond.notify_one();
   }
 
 protected:
@@ -257,10 +258,10 @@ private:
    *
    * @param msg The message received from the topic.
    */
-  void callback(const typename MsgT::SharedPtr msg) {
+  void callback(typename MsgT::SharedPtr msg) {
     std::lock_guard<std::mutex> lock(this->msg_mutex);
 
-    this->msg_list.push_back(msg);
+    this->msg_list.push_back(std::move(msg));
 
     if ((int)this->msg_list.size() > this->msg_queue) {
       this->msg_list.pop_front();

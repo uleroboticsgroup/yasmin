@@ -89,18 +89,21 @@ class YasminNode(Node):
             RuntimeError: Raised when an attempt is made to create
             more than one instance of YasminNode.
         """
-        if YasminNode._instance is not None:
-            raise RuntimeError("This class is a Singleton")
+        with YasminNode._lock:
+            if YasminNode._instance is not None:
+                raise RuntimeError("This class is a Singleton")
 
-        super().__init__(f"yasmin_{str(uuid.uuid4()).replace('-', '')[:16]}_node")
+            super().__init__(f"yasmin_{str(uuid.uuid4()).replace('-', '')[:16]}_node")
 
-        ## Executor for managing node operations.
-        self._executor = Executor()
-        self._executor.add_node(self)
+            ## Executor for managing node operations.
+            self._executor = Executor()
+            self._executor.add_node(self)
 
-        ## Thread to execute the spinning of the node.
-        self._spin_thread: Thread = Thread(target=self._executor.spin, daemon=True)
-        self._spin_thread.start()
+            ## Thread to execute the spinning of the node.
+            self._spin_thread: Thread = Thread(target=self._executor.spin, daemon=True)
+            self._spin_thread.start()
+
+            YasminNode._instance = self
 
     def shutdown(self) -> None:
         """

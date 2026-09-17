@@ -46,7 +46,7 @@ class GetParametersState(State):
         self._parameters = parameters
         self._node = resolve_node(node)
 
-        super().__init__([SUCCEED, ABORT])
+        super().__init__([SUCCEED, ABORT, CANCEL])
 
     def execute(self, blackboard: Blackboard) -> str:
         """

@@ -57,37 +57,43 @@ GetParametersState::execute(yasmin::Blackboard::SharedPtr blackboard) {
 
     if (!this->node_->has_parameter(param_name)) {
 
-      if (default_value.type() == typeid(bool)) {
-        this->node_->declare_parameter(param_name,
-                                       std::any_cast<bool>(default_value));
-      } else if (default_value.type() == typeid(int)) {
-        this->node_->declare_parameter(param_name,
-                                       std::any_cast<int>(default_value));
-      } else if (default_value.type() == typeid(double)) {
-        this->node_->declare_parameter(param_name,
-                                       std::any_cast<double>(default_value));
-      } else if (default_value.type() == typeid(std::string)) {
-        this->node_->declare_parameter(
-            param_name, std::any_cast<std::string>(default_value));
-      } else if (default_value.type() == typeid(std::vector<bool>)) {
-        this->node_->declare_parameter(
-            param_name, std::any_cast<std::vector<bool>>(default_value));
-      } else if (default_value.type() == typeid(std::vector<int64_t>)) {
-        this->node_->declare_parameter(
-            param_name, std::any_cast<std::vector<int64_t>>(default_value));
-      } else if (default_value.type() == typeid(std::vector<double>)) {
-        this->node_->declare_parameter(
-            param_name, std::any_cast<std::vector<double>>(default_value));
-      } else if (default_value.type() == typeid(std::vector<std::string>)) {
-        this->node_->declare_parameter(
-            param_name, std::any_cast<std::vector<std::string>>(default_value));
-      } else if (default_value.type() == typeid(std::vector<uint8_t>)) {
-        this->node_->declare_parameter(
-            param_name, std::any_cast<std::vector<uint8_t>>(default_value));
-      } else {
-        YASMIN_LOG_ERROR("Unsupported default type for parameter: '%s'",
+      try {
+        if (default_value.type() == typeid(bool)) {
+          this->node_->declare_parameter(param_name,
+                                         std::any_cast<bool>(default_value));
+        } else if (default_value.type() == typeid(int)) {
+          this->node_->declare_parameter(param_name,
+                                         std::any_cast<int>(default_value));
+        } else if (default_value.type() == typeid(double)) {
+          this->node_->declare_parameter(param_name,
+                                         std::any_cast<double>(default_value));
+        } else if (default_value.type() == typeid(std::string)) {
+          this->node_->declare_parameter(
+              param_name, std::any_cast<std::string>(default_value));
+        } else if (default_value.type() == typeid(std::vector<bool>)) {
+          this->node_->declare_parameter(
+              param_name, std::any_cast<std::vector<bool>>(default_value));
+        } else if (default_value.type() == typeid(std::vector<int64_t>)) {
+          this->node_->declare_parameter(
+              param_name, std::any_cast<std::vector<int64_t>>(default_value));
+        } else if (default_value.type() == typeid(std::vector<double>)) {
+          this->node_->declare_parameter(
+              param_name, std::any_cast<std::vector<double>>(default_value));
+        } else if (default_value.type() == typeid(std::vector<std::string>)) {
+          this->node_->declare_parameter(
+              param_name,
+              std::any_cast<std::vector<std::string>>(default_value));
+        } else if (default_value.type() == typeid(std::vector<uint8_t>)) {
+          this->node_->declare_parameter(
+              param_name, std::any_cast<std::vector<uint8_t>>(default_value));
+        } else {
+          YASMIN_LOG_ERROR("Unsupported default type for parameter: '%s'",
+                           param_name.c_str());
+          return basic_outcomes::ABORT;
+        }
+      } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException &) {
+        YASMIN_LOG_DEBUG("Parameter '%s' was already declared",
                          param_name.c_str());
-        return basic_outcomes::ABORT;
       }
     }
 

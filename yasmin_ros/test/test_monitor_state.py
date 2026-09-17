@@ -59,6 +59,9 @@ class TestYasminRos(unittest.TestCase):
     def tearDownClass(cls):
         ROSClientsCache.clear_all()
         YasminNode.destroy_instance()
+        cls.executor.shutdown()
+        cls.spin_thread.join()
+        cls.aux_node.destroy_node()
         rclpy.shutdown()
 
     def test_monitor_timeout(self):

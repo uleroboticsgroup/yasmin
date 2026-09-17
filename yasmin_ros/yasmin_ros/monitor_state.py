@@ -138,7 +138,19 @@ class MonitorState(State):
         retry_count = 0
 
         while True:
+            if self.is_canceled():
+                return CANCEL
+
             self._msg_event.clear()
+
+            with self._msg_lock:
+                if self.msg_list:
+                    msg = self.msg_list.pop(0)
+                    break
+
+            if self.is_canceled():
+                return CANCEL
+
             timeout_flag = self._msg_event.wait(self._timeout)
 
             if self.is_canceled():
@@ -171,5 +183,5 @@ class MonitorState(State):
         This method cancels the monitor if waiting for messages.
         """
 
-        cancel_with_event(self._msg_event)
         super().cancel_state()
+        cancel_with_event(self._msg_event)

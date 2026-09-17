@@ -62,17 +62,24 @@ void ros_log_message(yasmin::LogLevel level, const char *file,
 
 void set_ros_loggers(rclcpp::Node::SharedPtr node) {
 
+  if (node == nullptr) {
+    node = YasminNode::get_instance();
+  }
+
   {
     std::lock_guard<std::mutex> lock(logger_node_mutex);
-
-    if (node == nullptr) {
-      logger_node = YasminNode::get_instance();
-    } else {
-      logger_node = node;
-    }
+    logger_node = node;
   }
 
   yasmin::set_loggers(ros_log_message);
+}
+
+void reset_logger_node(const rclcpp::Node *node) {
+  std::lock_guard<std::mutex> lock(logger_node_mutex);
+
+  if (logger_node.get() == node) {
+    logger_node.reset();
+  }
 }
 
 } // namespace yasmin_ros

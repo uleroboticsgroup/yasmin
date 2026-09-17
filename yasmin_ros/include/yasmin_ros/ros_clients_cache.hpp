@@ -63,8 +63,8 @@ public:
   template <typename ActionT>
   static typename rclcpp_action::Client<ActionT>::SharedPtr
   get_or_create_action_client(
-      rclcpp::Node::SharedPtr node, const std::string &action_name,
-      rclcpp::CallbackGroup::SharedPtr callback_group = nullptr) {
+      const rclcpp::Node::SharedPtr &node, const std::string &action_name,
+      const rclcpp::CallbackGroup::SharedPtr &callback_group = nullptr) {
 
     // Create a unique key
     std::string node_name = node->get_name();
@@ -112,8 +112,8 @@ public:
   template <typename ServiceT>
   static typename rclcpp::Client<ServiceT>::SharedPtr
   get_or_create_service_client(
-      rclcpp::Node::SharedPtr node, const std::string &service_name,
-      rclcpp::CallbackGroup::SharedPtr callback_group = nullptr) {
+      const rclcpp::Node::SharedPtr &node, const std::string &service_name,
+      const rclcpp::CallbackGroup::SharedPtr &callback_group = nullptr) {
 
     // Create a unique key
     std::string node_name = node->get_name();
@@ -172,16 +172,18 @@ public:
    */
   template <typename MsgT>
   static typename rclcpp::Publisher<MsgT>::SharedPtr get_or_create_publisher(
-      rclcpp::Node::SharedPtr node, const std::string &topic_name,
+      const rclcpp::Node::SharedPtr &node, const std::string &topic_name,
       const rclcpp::QoS &qos_profile = rclcpp::QoS(10),
-      rclcpp::CallbackGroup::SharedPtr callback_group = nullptr) {
+      const rclcpp::CallbackGroup::SharedPtr &callback_group = nullptr) {
 
     // Create a unique key
     std::string node_name = node->get_name();
     std::string msg_type_name = get_type_name<MsgT>();
     std::string qos_hash = hash_qos_profile(qos_profile);
-    auto cache_key = std::make_tuple(node_name, msg_type_name, topic_name,
-                                     qos_hash, std::type_index(typeid(MsgT)));
+    std::string callback_group_name = get_callback_group_name(callback_group);
+    auto cache_key =
+        std::make_tuple(node_name, msg_type_name, topic_name, qos_hash,
+                        callback_group_name, std::type_index(typeid(MsgT)));
 
     std::lock_guard<std::recursive_mutex> lock(get_publisher_lock());
 
@@ -266,7 +268,7 @@ private:
   using ServiceClientKey = std::tuple<std::string, std::string, std::string,
                                       std::string, std::type_index>;
   using PublisherKey = std::tuple<std::string, std::string, std::string,
-                                  std::string, std::type_index>;
+                                  std::string, std::string, std::type_index>;
 
   /**
    * @brief Get the action clients cache map.

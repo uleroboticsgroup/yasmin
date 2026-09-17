@@ -87,7 +87,9 @@ class ServiceState(State):
         outcomes = setup_outcomes(
             outcomes,
             {SUCCEED, ABORT, CANCEL},
-            add_timeout=bool(self._wait_timeout or self._response_timeout),
+            add_timeout=(
+                self._wait_timeout is not None or self._response_timeout is not None
+            ),
         )
 
         self._node = resolve_node(node)
@@ -167,9 +169,11 @@ class ServiceState(State):
                 cancel_check=self.is_canceled,
             )
             if outcome is not None:
+                self._service_client.remove_pending_request(future)
                 return outcome
 
             if self.is_canceled():
+                self._service_client.remove_pending_request(future)
                 return CANCEL
 
         except Exception as e:
@@ -186,8 +190,8 @@ class ServiceState(State):
         return SUCCEED
 
     def cancel_state(self) -> None:
-        cancel_with_event(self._response_received_event)
         super().cancel_state()
+        cancel_with_event(self._response_received_event)
 
     def response_callback(self, future: Future) -> None:
         """
@@ -201,6 +205,7 @@ class ServiceState(State):
         """
         try:
             self._response = future.result()
-        except Exception:
+        except Exception as e:
+            yasmin.YASMIN_LOG_WARN(f"Service call failed: {e}")
             self._response = None
         self._response_received_event.set()

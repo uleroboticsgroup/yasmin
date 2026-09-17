@@ -73,6 +73,11 @@ void TfBufferState::configure() {
 }
 
 std::string TfBufferState::execute(yasmin::Blackboard::SharedPtr blackboard) {
+  if (!this->node_) {
+    YASMIN_LOG_WARN("TfBufferState is not configured");
+    return basic_outcomes::ABORT;
+  }
+
   try {
     auto tf_buffer = std::make_shared<tf2_ros::Buffer>(
         this->node_->get_clock(), to_tf_duration(this->cache_time_sec_));

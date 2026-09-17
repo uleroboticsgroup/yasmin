@@ -16,10 +16,12 @@
 #define YASMIN_ROS__SERVICE_STATE_HPP_
 
 #include <condition_variable>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <utility>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -231,13 +233,23 @@ public:
             this->node_, srv_name, callback_group);
 
     // Set the request and response handlers
-    this->create_request_handler = create_request_handler;
-    this->response_handler = response_handler;
+    this->create_request_handler = std::move(create_request_handler);
+    this->response_handler = std::move(response_handler);
 
     // Validate request handler
     if (this->create_request_handler == nullptr) {
       throw std::invalid_argument("create_request_handler is needed");
     }
+  }
+
+  /**
+   * @brief Destroy the service state.
+   *
+   * Disables late callbacks so they cannot access the destroyed state.
+   */
+  ~ServiceState() override {
+    std::lock_guard<std::mutex> lock(this->callback_guard->mutex);
+    this->callback_guard->alive = false;
   }
 
   /**
@@ -260,12 +272,26 @@ public:
 
     const auto wait_duration =
         std::chrono::duration<int64_t, std::ratio<1>>(this->wait_timeout);
-    while (!this->service_client->wait_for_service(wait_duration)) {
+    const auto wait_slice = std::chrono::milliseconds(100);
+    auto waited = std::chrono::milliseconds::zero();
+
+    while (!this->service_client->wait_for_service(wait_slice)) {
 
       if (this->is_canceled()) {
         return basic_outcomes::CANCEL;
       }
 
+      if (this->wait_timeout < 0) {
+        continue;
+      }
+
+      waited += wait_slice;
+
+      if (waited < wait_duration) {
+        continue;
+      }
+
+      waited = std::chrono::milliseconds::zero();
       YASMIN_LOG_WARN("Timeout reached, service '%s' is not available",
                       this->srv_name.c_str());
       if (retry_count < this->maximum_retry) {
@@ -286,9 +312,17 @@ public:
 
     // Send request with callback
     this->service_response = nullptr; // Reset previous response
+    const uint64_t epoch = ++this->response_epoch_;
+    auto callback_guard = this->callback_guard;
     this->service_client->async_send_request(
-        request, std::bind(&ServiceState::response_callback, this,
-                           std::placeholders::_1));
+        std::move(request),
+        [this, callback_guard,
+         epoch](typename rclcpp::Client<ServiceT>::SharedFuture response) {
+          std::lock_guard<std::mutex> lock(callback_guard->mutex);
+          if (callback_guard->alive) {
+            this->response_callback(response, epoch);
+          }
+        });
 
     // Reset retry_count for the response-wait phase
     retry_count = 0;
@@ -333,8 +367,8 @@ public:
    * @brief Cancel the current service state.
    */
   void cancel_state() override {
-    this->response_done_cond.notify_all();
     yasmin::State::cancel_state();
+    this->response_done_cond.notify_all();
   }
 
 protected:
@@ -342,6 +376,12 @@ protected:
   rclcpp::Node::SharedPtr node_;
 
 private:
+  /// @brief Guard disabling callbacks after the state is destroyed.
+  struct CallbackGuard {
+    std::mutex mutex;
+    bool alive{true};
+  };
+
   /// @brief Shared pointer to the service client.
   std::shared_ptr<rclcpp::Client<ServiceT>> service_client;
   /// @brief Function to create service requests.
@@ -364,6 +404,12 @@ private:
   /// @brief Shared pointer to the service response.
   Response service_response;
 
+  /// @brief Guard shared with callbacks stored on the cached service client.
+  std::shared_ptr<CallbackGuard> callback_guard =
+      std::make_shared<CallbackGuard>();
+  /// @brief Execution counter used to discard callbacks from previous runs.
+  uint64_t response_epoch_{0};
+
   /**
    * @brief Create a service request based on the blackboard.
    *
@@ -384,8 +430,12 @@ private:
    * @param response The response received from the service.
    */
   void
-  response_callback(typename rclcpp::Client<ServiceT>::SharedFuture response) {
+  response_callback(typename rclcpp::Client<ServiceT>::SharedFuture response,
+                    uint64_t epoch) {
     std::lock_guard<std::mutex> lock(this->response_done_mutex);
+    if (epoch != this->response_epoch_) {
+      return;
+    }
     this->service_response = response.get();
     this->response_done_cond.notify_one();
   }

@@ -18,6 +18,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -81,7 +82,8 @@ public:
                  rclcpp::QoS qos = 10,
                  rclcpp::CallbackGroup::SharedPtr callback_group = nullptr)
       : State({basic_outcomes::SUCCEED, basic_outcomes::CANCEL}),
-        topic_name(topic_name), create_message_handler(create_message_handler) {
+        topic_name(topic_name),
+        create_message_handler(std::move(create_message_handler)) {
 
     this->set_outcome_description(basic_outcomes::SUCCEED,
                                   "The message was published successfully");
