@@ -531,6 +531,11 @@ public:
    * that values written through Python and read back round-trip correctly.
    */
   static py::object raw_entry_to_pyobject(const Blackboard::RawEntry &entry) {
+    // py::object is stored directly without extra wrapping
+    if (entry.type_name == demangle_type(typeid(py::object).name())) {
+      return *std::static_pointer_cast<py::object>(entry.value);
+    }
+
     using Getter = std::function<py::object(const std::shared_ptr<void> &)>;
 
     static const auto *const RAW_GETTERS = []() {

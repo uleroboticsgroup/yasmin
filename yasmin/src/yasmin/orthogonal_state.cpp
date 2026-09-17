@@ -72,6 +72,11 @@ void OrthogonalState::configure() {
                                        this->to_string().c_str()))
     return;
 
+  // Configure all regions
+  for (auto &region : this->regions_) {
+    region.sm->configure();
+  }
+
   // Collect all JoinStates grouped by sync_id
   std::unordered_map<std::string, std::vector<JoinState *>> join_groups;
 
@@ -109,16 +114,16 @@ void OrthogonalState::configure() {
     this->region_name_to_index_[this->regions_[i].name] = i;
   }
 
-  // Configure all regions
-  for (auto &region : this->regions_) {
-    region.sm->configure();
-  }
-
   this->configured_.store(true);
 }
 
 std::string OrthogonalState::execute(Blackboard::SharedPtr blackboard) {
   this->configure();
+
+  for (auto &[sync_id, barrier] : this->barriers_) {
+    (void)sync_id;
+    barrier->reset();
+  }
 
   if (this->regions_.empty()) {
     return this->default_outcome_;
@@ -144,16 +149,34 @@ std::string OrthogonalState::execute(Blackboard::SharedPtr blackboard) {
   }
 
   // Fork: launch all regions
-  for (size_t i = 0; i < this->regions_.size(); i++) {
-    auto bb_copy = std::make_shared<Blackboard>(*blackboard);
-    threads.push_back(
-        std::thread([this, i, bb_copy, &region_outcomes, &exceptions]() {
-          try {
-            region_outcomes[i] = this->regions_[i].sm->execute(bb_copy);
-          } catch (...) {
-            exceptions[i] = std::current_exception();
-          }
-        }));
+  threads.reserve(this->regions_.size());
+  try {
+    for (size_t i = 0; i < this->regions_.size(); i++) {
+      auto bb_copy = std::make_shared<Blackboard>(*blackboard);
+      threads.push_back(
+          std::thread([this, i, bb_copy, &region_outcomes, &exceptions]() {
+            try {
+              region_outcomes[i] = this->regions_[i].sm->execute(bb_copy);
+            } catch (...) {
+              exceptions[i] = std::current_exception();
+            }
+          }));
+    }
+
+  } catch (...) {
+    for (auto &[sync_id, barrier] : this->barriers_) {
+      (void)sync_id;
+      barrier->cancel();
+    }
+    for (auto &thread : threads) {
+      if (thread.joinable()) {
+        thread.join();
+      }
+    }
+    if (after_hook) {
+      (*after_hook)();
+    }
+    throw;
   }
 
   // Join: wait for all regions to finish

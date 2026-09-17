@@ -18,6 +18,7 @@
 #include <pybind11/pybind11.h>
 
 #include <memory>
+#include <utility>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/blackboard_pywrapper.hpp"
@@ -27,6 +28,43 @@ namespace py = pybind11;
 
 namespace yasmin {
 namespace pybind11_utils {
+
+/**
+ * @brief Holder for a Python callable used inside C++ std::function
+ * callbacks.
+ *
+ * The C++ callbacks may be copied from threads that do not hold the GIL
+ * (e.g. a state machine running with the GIL released), so the wrapped
+ * std::function must not touch Python reference counts when copied. Storing
+ * the callable in a heap holder makes copies of the wrapping lambda mere
+ * shared_ptr copies. The holder releases the Python object with the GIL held.
+ */
+class PythonCallbackHolder {
+public:
+  explicit PythonCallbackHolder(py::function callback)
+      : callback_(new py::function(std::move(callback))) {}
+
+  PythonCallbackHolder(const PythonCallbackHolder &) = delete;
+  PythonCallbackHolder &operator=(const PythonCallbackHolder &) = delete;
+
+  ~PythonCallbackHolder() {
+    try {
+      auto &internals = py::detail::get_internals();
+      (void)internals;
+    } catch (...) {
+      return;
+    }
+
+    py::gil_scoped_acquire acquire;
+    delete this->callback_;
+    this->callback_ = nullptr;
+  }
+
+  py::function &callback() { return *this->callback_; }
+
+private:
+  py::function *callback_;
+};
 
 /**
  * @brief Convert a Python blackboard object to a C++ Blackboard shared pointer.
@@ -79,10 +117,11 @@ convert_blackboard_from_python(const py::object &blackboard_obj) {
  * BlackboardPyWrapper
  */
 template <typename Func> inline auto wrap_blackboard_callback(py::function cb) {
-  return [cb](Blackboard::SharedPtr blackboard, auto... args) {
+  auto holder = std::make_shared<PythonCallbackHolder>(std::move(cb));
+  return [holder](Blackboard::SharedPtr blackboard, auto... args) {
     py::gil_scoped_acquire acquire;
     yasmin::BlackboardPyWrapper wrapper(blackboard);
-    cb(wrapper, args...);
+    holder->callback()(wrapper, args...);
   };
 }
 
@@ -100,10 +139,11 @@ template <typename Func> inline auto wrap_blackboard_callback(py::function cb) {
  */
 template <typename ReturnType>
 inline auto wrap_blackboard_callback_with_return(py::function cb) {
-  return [cb](Blackboard::SharedPtr blackboard) -> ReturnType {
+  auto holder = std::make_shared<PythonCallbackHolder>(std::move(cb));
+  return [holder](Blackboard::SharedPtr blackboard) -> ReturnType {
     py::gil_scoped_acquire acquire;
     yasmin::BlackboardPyWrapper wrapper(blackboard);
-    return cb(wrapper).cast<ReturnType>();
+    return holder->callback()(wrapper).template cast<ReturnType>();
   };
 }
 

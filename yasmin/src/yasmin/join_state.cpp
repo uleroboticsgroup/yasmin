@@ -27,6 +27,7 @@ void JoinState::configure() {
   }
   if (this->has_parameter("outcome")) {
     this->outcome_ = this->get_parameter<std::string>("outcome");
+    this->outcomes = {this->outcome_};
   }
 }
 

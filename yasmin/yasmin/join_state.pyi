@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
+from typing import Optional, overload
 from yasmin.state import State
 from yasmin import Blackboard
 
 class JoinState(State):
+    @overload
     def __init__(self) -> None: ...
+    @overload
     def __init__(self, sync_id: str, outcome: str = "joined") -> None: ...
     def get_sync_id(self) -> str: ...
     def to_string(self) -> str: ...

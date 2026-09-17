@@ -246,7 +246,7 @@ public:
   void add_input_key(const std::string &key_name,
                      const std::string &description, T default_value) {
     this->add_input_key(
-        BlackboardKeyInfo(key_name, description, default_value));
+        BlackboardKeyInfo(key_name, description, std::move(default_value)));
   }
 
   /**
@@ -311,8 +311,8 @@ public:
   template <typename T>
   void declare_parameter(const std::string &parameter_name,
                          const std::string &description, T default_value) {
-    this->declare_parameter(
-        BlackboardKeyInfo(parameter_name, description, default_value));
+    this->declare_parameter(BlackboardKeyInfo(parameter_name, description,
+                                              std::move(default_value)));
   }
 
   /**
@@ -341,7 +341,7 @@ public:
    */
   template <typename T>
   void set_parameter(const std::string &parameter_name, T value) {
-    this->get_parameters_blackboard()->set<T>(parameter_name, value);
+    this->get_parameters_blackboard()->set<T>(parameter_name, std::move(value));
   }
 
   /**

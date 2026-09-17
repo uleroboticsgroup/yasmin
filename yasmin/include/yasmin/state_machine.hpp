@@ -113,7 +113,7 @@ public:
    *
    * @return The name of the state machine.
    */
-  std::string get_name() const noexcept { return this->name; }
+  const std::string &get_name() const noexcept { return this->name; }
 
   /**
    * @brief Sets the start state for the state machine.

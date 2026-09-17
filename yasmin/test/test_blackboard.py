@@ -440,6 +440,15 @@ class TestBlackboard(unittest.TestCase):
         self.blackboard["bar"] = 3
         self.assertEqual([("bar", 3), ("foo", "foo")], self.blackboard.items())
 
+    def test_values_and_items_with_pyobject_entries(self):
+        self.blackboard["mixed"] = [1, "x"]
+        self.blackboard["obj"] = {"nested": [1, 2]}
+        self.assertEqual([[1, "x"], {"nested": [1, 2]}], self.blackboard.values())
+        self.assertEqual(
+            [("mixed", [1, "x"]), ("obj", {"nested": [1, 2]})],
+            self.blackboard.items(),
+        )
+
     def test_keys_with_remappings(self):
         self.blackboard["shared"] = "value"
         self.blackboard["plain"] = 3

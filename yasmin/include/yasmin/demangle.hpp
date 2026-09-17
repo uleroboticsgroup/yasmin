@@ -15,7 +15,9 @@
 #ifndef YASMIN__DEMANGLE_HPP_
 #define YASMIN__DEMANGLE_HPP_
 
+#ifdef __GNUG__
 #include <cxxabi.h>
+#endif
 
 #include <cstdlib>
 #include <list>

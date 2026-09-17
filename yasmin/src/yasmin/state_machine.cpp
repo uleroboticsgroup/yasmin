@@ -44,6 +44,7 @@ std::mutex sigint_registry_mutex;
 std::unordered_map<int, std::function<void()>> sigint_callbacks;
 int next_sigint_id = 0;
 bool sigint_handler_installed = false;
+struct sigaction previous_sigint_action {};
 
 extern "C" void sigint_handler(int) {
   std::lock_guard<std::mutex> lock(sigint_registry_mutex);
@@ -60,7 +61,7 @@ int register_sigint_callback(std::function<void()> cb) {
     sigint_action.sa_handler = sigint_handler;
     sigemptyset(&sigint_action.sa_mask);
     sigint_action.sa_flags = 0;
-    sigaction(SIGINT, &sigint_action, nullptr);
+    sigaction(SIGINT, &sigint_action, &previous_sigint_action);
     sigint_handler_installed = true;
   }
   int id = next_sigint_id++;
@@ -71,6 +72,10 @@ int register_sigint_callback(std::function<void()> cb) {
 void unregister_sigint_callback(int id) {
   std::lock_guard<std::mutex> lock(sigint_registry_mutex);
   sigint_callbacks.erase(id);
+  if (sigint_handler_installed && sigint_callbacks.empty()) {
+    sigaction(SIGINT, &previous_sigint_action, nullptr);
+    sigint_handler_installed = false;
+  }
 }
 } // namespace
 
@@ -94,6 +99,10 @@ void StateMachine::add_state(const std::string &name, State::SharedPtr state,
                              const Transitions &transitions,
                              const Remappings &remappings,
                              const ParameterMappings &parameter_mappings) {
+
+  if (!state) {
+    throw std::invalid_argument("State '" + name + "' cannot be null");
+  }
 
   if (this->states.find(name) != this->states.end()) {
     throw std::logic_error("State '" + name +
@@ -274,10 +283,14 @@ void StateMachine::add_end_cb(EndCallbackType cb) {
 void StateMachine::call_start_cbs(Blackboard::SharedPtr blackboard,
                                   const std::string &start_state) {
 
-  try {
+  std::vector<StartCallbackType> callbacks;
+  {
     const std::lock_guard<std::mutex> lock(this->cbs_mutex_);
+    callbacks = this->start_cbs;
+  }
 
-    for (const auto &callback : this->start_cbs) {
+  try {
+    for (const auto &callback : callbacks) {
       callback(blackboard, start_state);
     }
 
@@ -292,10 +305,14 @@ void StateMachine::call_transition_cbs(Blackboard::SharedPtr blackboard,
                                        const std::string &to_state,
                                        const std::string &outcome) {
 
-  try {
+  std::vector<TransitionCallbackType> callbacks;
+  {
     const std::lock_guard<std::mutex> lock(this->cbs_mutex_);
+    callbacks = this->transition_cbs;
+  }
 
-    for (const auto &callback : this->transition_cbs) {
+  try {
+    for (const auto &callback : callbacks) {
       callback(blackboard, from_state, to_state, outcome);
     }
 
@@ -308,10 +325,14 @@ void StateMachine::call_transition_cbs(Blackboard::SharedPtr blackboard,
 void StateMachine::call_end_cbs(Blackboard::SharedPtr blackboard,
                                 const std::string &outcome) {
 
-  try {
+  std::vector<EndCallbackType> callbacks;
+  {
     const std::lock_guard<std::mutex> lock(this->cbs_mutex_);
+    callbacks = this->end_cbs;
+  }
 
-    for (const auto &callback : this->end_cbs) {
+  try {
+    for (const auto &callback : callbacks) {
       callback(blackboard, outcome);
     }
 

@@ -13,12 +13,20 @@
 // limitations under the License.
 
 #include "yasmin/cb_state.hpp"
+
+#include <stdexcept>
+#include <utility>
+
 #include "yasmin/types.hpp"
 
 namespace yasmin {
 
 CbState::CbState(const Outcomes &outcomes, CbStateCallback callback)
-    : State(outcomes), callback(callback) {}
+    : State(outcomes), callback(std::move(callback)) {
+  if (!this->callback) {
+    throw std::invalid_argument("CbState callback cannot be empty");
+  }
+}
 
 std::string CbState::execute(Blackboard::SharedPtr blackboard) {
   return this->callback(blackboard);

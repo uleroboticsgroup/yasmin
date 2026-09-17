@@ -54,9 +54,10 @@ TEST_F(TestBlackboard, TestType) {
 }
 
 TEST_F(TestBlackboard, TestRemappings) {
-  blackboard.set<std::string>("bar", "foo");
+  blackboard.set<std::string>("bar", "value");
   blackboard.set_remappings({{"foo", "bar"}});
-  EXPECT_EQ(blackboard.get<std::string>("bar"), "foo");
+  EXPECT_EQ(blackboard.get<std::string>("foo"), "value");
+  EXPECT_EQ(blackboard.get<std::string>("bar"), "value");
 }
 
 TEST_F(TestBlackboard, TestKeysWithoutRemappings) {
