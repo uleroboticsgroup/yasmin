@@ -20,6 +20,7 @@
 #include <pybind11/stl.h>
 #include <tinyxml2.h>
 
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -54,6 +55,11 @@ public:
    * @param py_state The Python state object (kept alive).
    */
   PythonStateHolder(yasmin::State::SharedPtr cpp_state, py::object py_state);
+
+  /**
+   * @brief Releases the Python object while the GIL is held.
+   */
+  ~PythonStateHolder() override;
 
   /**
    * @brief Synchronizes the wrapper parameter view with the Python state and
@@ -190,8 +196,8 @@ private:
   /// Python interpreter guard (initialized once)
   static std::unique_ptr<py::scoped_interpreter> py_interpreter_;
 
-  /// Track if Python interpreter is initialized
-  static bool py_initialized_;
+  /// Guards one-time Python interpreter initialization
+  static std::once_flag py_init_flag_;
 
   /// Path to the XML file being processed
   std::string xml_path_;
@@ -261,7 +267,7 @@ private:
    * @param owner Pointer to the state to which the keys will be added.
    * @param parent XML element containing the blackboard key definitions.
    */
-  void add_blackboard_keys(yasmin::State::SharedPtr owner,
+  void add_blackboard_keys(const yasmin::State::SharedPtr &owner,
                            tinyxml2::XMLElement *parent) const;
 
   /**
@@ -270,7 +276,7 @@ private:
    * @param owner Pointer to the state to which the parameters will be added.
    * @param parent XML element containing the parameter definitions.
    */
-  void add_parameters(yasmin::State::SharedPtr owner,
+  void add_parameters(const yasmin::State::SharedPtr &owner,
                       tinyxml2::XMLElement *parent) const;
 
   /**

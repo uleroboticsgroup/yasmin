@@ -194,6 +194,23 @@ std::unordered_map<std::string, T> dict_to_unordered_map(const py::dict &dict) {
   return result;
 }
 
+class XmlPathGuard {
+public:
+  XmlPathGuard(std::string &path, const std::string &new_path)
+      : path_(path), previous_(std::move(path)) {
+    path_ = new_path;
+  }
+
+  ~XmlPathGuard() { path_ = std::move(previous_); }
+
+  XmlPathGuard(const XmlPathGuard &) = delete;
+  XmlPathGuard &operator=(const XmlPathGuard &) = delete;
+
+private:
+  std::string &path_;
+  std::string previous_;
+};
+
 template <typename Callback>
 void with_typed_xml_value(const std::string &value_str,
                           const std::string &type_str, Callback &&callback) {
@@ -368,31 +385,36 @@ void with_typed_xml_value(const std::string &value_str,
 // Static member initialization
 std::unique_ptr<py::scoped_interpreter> YasminFactory::py_interpreter_ =
     nullptr;
-bool YasminFactory::py_initialized_ = false;
+std::once_flag YasminFactory::py_init_flag_;
 
 // PythonStateHolder implementation
 PythonStateHolder::PythonStateHolder(yasmin::State::SharedPtr cpp_state,
                                      py::object py_state)
-    : yasmin::State(cpp_state->get_outcomes()), cpp_state_(cpp_state),
-      py_state_(py_state) {
-  this->set_description(cpp_state->get_description());
+    : yasmin::State(cpp_state->get_outcomes()),
+      cpp_state_(std::move(cpp_state)), py_state_(std::move(py_state)) {
+  this->set_description(this->cpp_state_->get_description());
 
   for (const auto &[outcome, description] :
-       cpp_state->get_outcome_descriptions()) {
+       this->cpp_state_->get_outcome_descriptions()) {
     this->set_outcome_description(outcome, description);
   }
 
-  for (const auto &input_key : cpp_state->get_input_keys()) {
+  for (const auto &input_key : this->cpp_state_->get_input_keys()) {
     this->add_input_key(input_key);
   }
 
-  for (const auto &output_key : cpp_state->get_output_keys()) {
+  for (const auto &output_key : this->cpp_state_->get_output_keys()) {
     this->add_output_key(output_key);
   }
 
-  for (const auto &parameter : cpp_state->get_parameters()) {
+  for (const auto &parameter : this->cpp_state_->get_parameters()) {
     this->declare_parameter(parameter);
   }
+}
+
+PythonStateHolder::~PythonStateHolder() {
+  py::gil_scoped_acquire acquire;
+  this->py_state_ = py::object();
 }
 
 yasmin::State *PythonStateHolder::get_inner_state() {
@@ -441,18 +463,18 @@ void YasminFactory::cleanup() {
 }
 
 void YasminFactory::initialize_python() {
-  // Set GIL hooks for every container that forks worker threads. The
-  // default hook pair lives in pybind11_utils.hpp so there is exactly one
-  // implementation shared with the Python bindings.
-  yasmin::pybind11_utils::register_default_gil_hooks<yasmin::OrthogonalState>();
-  yasmin::pybind11_utils::register_default_gil_hooks<yasmin::Concurrence>();
+  std::call_once(py_init_flag_, []() {
+    // Set GIL hooks for every container that forks worker threads. The
+    // default hook pair lives in pybind11_utils.hpp so there is exactly one
+    // implementation shared with the Python bindings.
+    yasmin::pybind11_utils::register_default_gil_hooks<
+        yasmin::OrthogonalState>();
+    yasmin::pybind11_utils::register_default_gil_hooks<yasmin::Concurrence>();
 
-  if (!py_initialized_) {
     // Check if Python is already initialized (e.g., by ROS or another module)
     if (!Py_IsInitialized()) {
       py_interpreter_ = std::make_unique<py::scoped_interpreter>();
     }
-    py_initialized_ = true;
 
     // Import sys to ensure Python path is set up
     try {
@@ -467,7 +489,7 @@ void YasminFactory::initialize_python() {
       throw std::runtime_error("Failed to initialize Python: " +
                                std::string(e.what()));
     }
-  }
+  });
 }
 
 yasmin::State::SharedPtr
@@ -548,7 +570,7 @@ YasminFactory::get_optional_attribute(tinyxml2::XMLElement *element,
   return attr ? std::string(attr) : default_value;
 }
 
-void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
+void YasminFactory::add_blackboard_keys(const yasmin::State::SharedPtr &owner,
                                         tinyxml2::XMLElement *parent) const {
 
   for (tinyxml2::XMLElement *key_elem = parent->FirstChildElement("Key");
@@ -602,7 +624,7 @@ void YasminFactory::add_blackboard_keys(yasmin::State::SharedPtr owner,
   }
 }
 
-void YasminFactory::add_parameters(yasmin::State::SharedPtr owner,
+void YasminFactory::add_parameters(const yasmin::State::SharedPtr &owner,
                                    tinyxml2::XMLElement *parent) const {
   for (tinyxml2::XMLElement *param_elem = parent->FirstChildElement("Param");
        param_elem; param_elem = param_elem->NextSiblingElement("Param")) {
@@ -712,7 +734,8 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
     if (child_tag == "OutcomeMap") {
       const std::string outcome_to =
           this->get_required_attribute(child, "outcome");
-      outcome_map[outcome_to] = {};
+      auto &state_outcomes = outcome_map[outcome_to];
+      state_outcomes.clear();
 
       for (tinyxml2::XMLElement *item = child->FirstChildElement("Item"); item;
            item = item->NextSiblingElement("Item")) {
@@ -722,12 +745,13 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
             this->get_required_attribute(item, "outcome");
 
         if (states.find(state_name) != states.end()) {
-          outcome_map[outcome_to][state_name] = outcome;
+          state_outcomes[state_name] = outcome;
         }
       }
     } else if (child_tag == "Outcome") {
       const std::string outcome_to = this->get_required_attribute(child, "to");
-      outcome_map[outcome_to] = {};
+      auto &state_outcomes = outcome_map[outcome_to];
+      state_outcomes.clear();
 
       for (tinyxml2::XMLElement *transition =
                child->FirstChildElement("Transition");
@@ -739,7 +763,7 @@ YasminFactory::create_concurrence(tinyxml2::XMLElement *conc_elem) {
             this->get_required_attribute(transition, "outcome");
 
         if (states.find(state_name) != states.end()) {
-          outcome_map[outcome_to][state_name] = outcome;
+          state_outcomes[state_name] = outcome;
         }
       }
     }
@@ -782,7 +806,8 @@ YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem) {
     if (child_tag == "OutcomeMap") {
       const std::string outcome_to =
           this->get_required_attribute(child, "outcome");
-      outcome_map[outcome_to] = {};
+      auto &state_outcomes = outcome_map[outcome_to];
+      state_outcomes.clear();
 
       for (tinyxml2::XMLElement *item = child->FirstChildElement("Item"); item;
            item = item->NextSiblingElement("Item")) {
@@ -790,11 +815,12 @@ YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem) {
             this->get_required_attribute(item, "state");
         const std::string outcome =
             this->get_required_attribute(item, "outcome");
-        outcome_map[outcome_to][state_name] = outcome;
+        state_outcomes[state_name] = outcome;
       }
     } else if (child_tag == "Outcome") {
       const std::string outcome_to = this->get_required_attribute(child, "to");
-      outcome_map[outcome_to] = {};
+      auto &state_outcomes = outcome_map[outcome_to];
+      state_outcomes.clear();
 
       for (tinyxml2::XMLElement *transition =
                child->FirstChildElement("Transition");
@@ -804,7 +830,7 @@ YasminFactory::create_orthogonal_state(tinyxml2::XMLElement *orth_elem) {
             this->get_required_attribute(transition, "state");
         const std::string outcome =
             this->get_required_attribute(transition, "outcome");
-        outcome_map[outcome_to][state_name] = outcome;
+        state_outcomes[state_name] = outcome;
       }
     }
   }
@@ -989,7 +1015,7 @@ YasminFactory::create_sm(tinyxml2::XMLElement *root) {
 
 yasmin::StateMachine::SharedPtr
 YasminFactory::create_sm_from_file(const std::string &xml_file) {
-  this->xml_path_ = xml_file;
+  XmlPathGuard path_guard(this->xml_path_, xml_file);
   tinyxml2::XMLDocument doc;
   tinyxml2::XMLError error = doc.LoadFile(xml_file.c_str());
 

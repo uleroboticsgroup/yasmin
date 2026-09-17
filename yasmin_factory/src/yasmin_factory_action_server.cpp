@@ -120,6 +120,10 @@ YasminFactoryActionServer::handle_cancel(const std::shared_ptr<GoalHandle> &) {
 
 void YasminFactoryActionServer::handle_accepted(
     const std::shared_ptr<GoalHandle> goal_handle) {
+  std::lock_guard<std::mutex> lock(state_mutex_);
+  if (shutting_down_) {
+    return;
+  }
   if (execution_thread_.joinable()) {
     execution_thread_.join();
   }
@@ -155,7 +159,7 @@ void YasminFactoryActionServer::make_available() {
 void YasminFactoryActionServer::execute(
     const std::shared_ptr<GoalHandle> goal_handle) {
   auto result = std::make_shared<RunStateMachine::Result>();
-  const auto goal = goal_handle->get_goal();
+  const auto &goal = goal_handle->get_goal();
   const std::string state_machine_file = goal->state_machine_file.empty()
                                              ? default_state_machine_file_
                                              : goal->state_machine_file;
@@ -247,6 +251,23 @@ int main(int argc, char *argv[]) {
     while (rclcpp::ok()) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+  }
+
+  try {
+    pybind11::gil_scoped_acquire acquire;
+#if PYBIND11_VERSION_MAJOR > 2 ||                                              \
+    (PYBIND11_VERSION_MAJOR == 2 && PYBIND11_VERSION_MINOR >= 6)
+    pybind11::module_::import("yasmin_ros.yasmin_node")
+        .attr("YasminNode")
+        .attr("destroy_instance")();
+#else
+    pybind11::module::import("yasmin_ros.yasmin_node")
+        .attr("YasminNode")
+        .attr("destroy_instance")();
+#endif
+  } catch (const pybind11::error_already_set &e) {
+    RCLCPP_WARN(rclcpp::get_logger("yasmin_factory_action_server"),
+                "Failed to destroy Python YasminNode: %s", e.what());
   }
 
   yasmin_ros::YasminNode::destroy_instance();

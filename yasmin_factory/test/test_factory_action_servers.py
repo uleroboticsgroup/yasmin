@@ -81,16 +81,12 @@ def action_server(request):
     executor = SingleThreadedExecutor(context=context)
     executor.add_node(node)
     client = ActionClient(node, RunStateMachine, "run_state_machine")
-    try:
-        assert client.wait_for_server(timeout_sec=10.0), (
-            f"{request.param} did not start\n"
-            f"stderr:\n{process.stderr.read().decode()}"
-        )
-    except AssertionError:
+    if not client.wait_for_server(timeout_sec=10.0):
         os.killpg(process.pid, signal.SIGKILL)
         process.wait(timeout=5.0)
+        stderr = process.stderr.read().decode()
         rclpy.shutdown(context=context)
-        raise
+        pytest.fail(f"{request.param} did not start\nstderr:\n{stderr}")
 
     yield client, executor
 

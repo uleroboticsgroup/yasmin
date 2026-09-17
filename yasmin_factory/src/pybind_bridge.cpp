@@ -22,6 +22,20 @@
 
 namespace py = pybind11;
 
+namespace {
+
+/**
+ * @brief Keeps the plugin loader alive until the wrapped state is destroyed.
+ */
+struct SharedStateDeleter {
+  std::shared_ptr<yasmin::State> instance;
+  std::shared_ptr<pluginlib::ClassLoader<yasmin::State>> loader;
+
+  void operator()(yasmin::State *) { this->instance.reset(); }
+};
+
+} // namespace
+
 /**
  * @class CppStateFactory
  * @brief A factory class to create C++ State instances from available
@@ -63,10 +77,10 @@ public:
    * instantiated.
    */
   yasmin::State::SharedPtr create(const std::string &class_name) {
-    auto *raw_state = this->loader_->createUnmanagedInstance(class_name);
+    auto instance = this->loader_->createSharedInstance(class_name);
+    yasmin::State *raw_instance = instance.get();
     return yasmin::State::SharedPtr(
-        raw_state,
-        [loader = this->loader_](yasmin::State *ptr) { delete ptr; });
+        raw_instance, SharedStateDeleter{std::move(instance), this->loader_});
   }
 
 private:

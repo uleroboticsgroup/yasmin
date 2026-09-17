@@ -21,7 +21,9 @@ from ament_index_python import get_package_share_path
 from lxml import etree as ET
 from yasmin import Concurrence, JoinState, OrthogonalState, State, StateMachine
 from yasmin.concurrence import setup_default_gil_hooks as _setup_concurrence_gil_hooks
-from yasmin.orthogonal_state import setup_default_gil_hooks as _setup_orthogonal_gil_hooks
+from yasmin.orthogonal_state import (
+    setup_default_gil_hooks as _setup_orthogonal_gil_hooks,
+)
 from yasmin_pybind_bridge import CppStateFactory
 
 from yasmin_factory.type_utils import parse_key_value
@@ -100,34 +102,29 @@ class YasminFactory:
 
         for child in conc_elem:
             if child.tag == "State":
-                states[child.attrib["name"]] = self.create_state(child)
-                parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
-                    child
-                )
+                name = child.attrib["name"]
+                states[name] = self.create_state(child)
+                parameter_mappings[name] = self._get_parameter_mappings(child)
 
             elif child.tag == "Concurrence":
-                states[child.attrib["name"]] = self.create_concurrence(child)
-                parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
-                    child
-                )
+                name = child.attrib["name"]
+                states[name] = self.create_concurrence(child)
+                parameter_mappings[name] = self._get_parameter_mappings(child)
 
             elif child.tag == "StateMachine":
-                states[child.attrib["name"]] = self.create_sm(child)
-                parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
-                    child
-                )
+                name = child.attrib["name"]
+                states[name] = self.create_sm(child)
+                parameter_mappings[name] = self._get_parameter_mappings(child)
 
             elif child.tag == "JoinState":
-                states[child.attrib["name"]] = self._create_join_state(child)
-                parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
-                    child
-                )
+                name = child.attrib["name"]
+                states[name] = self._create_join_state(child)
+                parameter_mappings[name] = self._get_parameter_mappings(child)
 
             elif child.tag == "OrthogonalState":
-                states[child.attrib["name"]] = self._create_orthogonal_state(child)
-                parameter_mappings[child.attrib["name"]] = self._get_parameter_mappings(
-                    child
-                )
+                name = child.attrib["name"]
+                states[name] = self._create_orthogonal_state(child)
+                parameter_mappings[name] = self._get_parameter_mappings(child)
 
             elif child.tag == "OutcomeMap":
                 outcome_name = child.attrib["outcome"]
@@ -233,7 +230,7 @@ class YasminFactory:
 
             return self.create_sm_from_file(file_path)
 
-        sm = StateMachine(outcomes=root.attrib.get("outcomes", "").split(" "))
+        sm = StateMachine(outcomes=root.attrib.get("outcomes", "").split())
         set_start_state = root.attrib.get("start_state", "")
 
         for child in root:
@@ -305,20 +302,24 @@ class YasminFactory:
             ValueError: If the XML structure is invalid.
         """
 
+        previous_xml_path = self._xml_path
         self._xml_path = xml_file
-        tree = ET.parse(xml_file)
-        root = tree.getroot()
+        try:
+            tree = ET.parse(xml_file)
+            root = tree.getroot()
 
-        if root.tag != "StateMachine":
-            raise ValueError("Root element must be 'StateMachine'")
+            if root.tag != "StateMachine":
+                raise ValueError("Root element must be 'StateMachine'")
 
-        # Read the name of the state machine root if available
-        fsm_name = root.attrib.get("name", "")
+            # Read the name of the state machine root if available
+            fsm_name = root.attrib.get("name", "")
 
-        # Create the state machine
-        sm = self.create_sm(root)
-        sm.set_name(fsm_name)
-        return sm
+            # Create the state machine
+            sm = self.create_sm(root)
+            sm.set_name(fsm_name)
+            return sm
+        finally:
+            self._xml_path = previous_xml_path
 
     def _add_parameters(self, owner, parent_elem: ET.Element) -> None:
         """Parse Param elements into state-local parameters."""

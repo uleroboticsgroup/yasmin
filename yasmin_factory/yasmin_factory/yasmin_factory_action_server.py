@@ -84,6 +84,11 @@ class FactoryActionServer:
             )
             with self._lock:
                 self._sm = sm
+            if self._cancel or goal_handle.is_cancel_requested:
+                sm.cancel_state_machine()
+                result.outcome = ""
+                goal_handle.canceled()
+                return result
             viewer = YasminViewerPub(sm) if self.enable_viewer else None
             outcome = sm()
             result.outcome = (
