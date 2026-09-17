@@ -74,9 +74,13 @@ class EditorHistory:
         self._redo_stack.clear()
 
     def record(self, snapshot: EditorHistorySnapshot) -> bool:
-        """Append one snapshot when it differs from the latest entry."""
+        """Append one snapshot when it differs from the latest entry.
 
-        stored_snapshot = deepcopy(snapshot)
+        The caller is expected to pass a freshly created snapshot whose
+        ownership transfers to the history stack.
+        """
+
+        stored_snapshot = snapshot
         if self._undo_stack and self._snapshot_fingerprint(
             self._undo_stack[-1]
         ) == self._snapshot_fingerprint(stored_snapshot):

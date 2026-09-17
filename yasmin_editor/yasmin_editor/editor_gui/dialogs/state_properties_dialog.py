@@ -407,7 +407,7 @@ class StatePropertiesDialog(QtWidgets.QDialog):
 
         outcomes_list = resolve_outcomes(plugin, self._fallback_outcomes)
 
-        description: str = self.description_edit.toPlainText().strip()
+        description: str = self._base_description.strip()
         return (
             name,
             plugin,

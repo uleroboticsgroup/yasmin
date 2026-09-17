@@ -852,6 +852,12 @@ class EditorUiMixin:
                         for t in parent_model.transitions.get(state_node.name, [])
                         if t.source_outcome in new_outcome_names
                     ]
+                for connection in list(state_node.connections):
+                    if (
+                        connection.from_node is state_node
+                        and connection.outcome not in new_outcome_names
+                    ):
+                        self.delete_connection_item(connection)
                 self.sync_blackboard_keys()
                 self.refresh_connection_port_visibility()
                 self.statusBar().showMessage(f"Updated state: {name}", 2000)

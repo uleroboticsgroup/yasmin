@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+from yasmin_editor.qt_compat import QtCore
 from yasmin_editor.editor_gui.history import (
     EditorHistory,
     EditorHistorySnapshot,
@@ -54,6 +55,20 @@ class EditorHistoryMixin:
         self.update_history_actions()
         self.update_document_window_title()
         return changed
+
+    def _schedule_history_checkpoint(self) -> None:
+        """Coalesce rapid text edits into one deferred history checkpoint."""
+
+        if not hasattr(self, "history") or self._history_restore_active:
+            return
+        timer = getattr(self, "_history_checkpoint_timer", None)
+        if timer is None:
+            timer = QtCore.QTimer(self)
+            timer.setSingleShot(True)
+            timer.setInterval(400)
+            timer.timeout.connect(self.record_history_checkpoint)
+            self._history_checkpoint_timer = timer
+        timer.start()
 
     def sync_current_container_layout_and_record_history(self) -> None:
         self.sync_current_container_layout()

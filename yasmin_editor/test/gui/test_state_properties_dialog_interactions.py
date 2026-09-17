@@ -128,6 +128,7 @@ def test_state_properties_dialog_adds_parameter_overwrite_via_button_flow(
     dialog = StatePropertiesDialog(
         available_plugins=[plugin],
         remappings={"input": "bb_input"},
+        description="Configured state",
     )
     dialog.show()
     qapp.processEvents()
@@ -163,7 +164,7 @@ def test_state_properties_dialog_adds_parameter_overwrite_via_button_flow(
     assert plugin_info == plugin
     assert outcomes == ["done", "failed"]
     assert remappings == {"input": "bb_input", "output": "bb_output"}
-    assert "AlphaState description" in description
+    assert description == "Configured state"
     assert defaults == []
     assert overwrites == [
         {

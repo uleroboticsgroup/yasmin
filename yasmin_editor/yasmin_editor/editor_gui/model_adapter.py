@@ -119,10 +119,14 @@ class EditorModelAdapter:
     ) -> Union[StateNode, ContainerStateNode]:
         container_model = self.editor.current_container_model
         pos = container_model.layout.get_state_position(state_model.name)
+        free_position = None
+
+        if x is None or y is None:
+            free_position = self.editor.get_free_position()
         if x is None:
-            x = pos.x if pos is not None else self.editor.get_free_position().x()
+            x = pos.x if pos is not None else free_position.x()
         if y is None:
-            y = pos.y if pos is not None else self.editor.get_free_position().y()
+            y = pos.y if pos is not None else free_position.y()
 
         node = create_state_view(
             self.editor.canvas.scene,

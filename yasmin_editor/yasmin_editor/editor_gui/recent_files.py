@@ -157,5 +157,5 @@ class RecentFilesStore:
 
         try:
             self.file_path.unlink()
-        except FileNotFoundError:
+        except OSError:
             return

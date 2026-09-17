@@ -371,6 +371,11 @@ class InteractiveShellManager(QtCore.QObject):
                 pass
             self._kernel_manager = None
 
+        if self._widget is not None:
+            self._widget.deleteLater()
+        if self._dialog is not None:
+            self._dialog.deleteLater()
+
         self._widget = None
         self._dialog = None
 

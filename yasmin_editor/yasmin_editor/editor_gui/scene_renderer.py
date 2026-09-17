@@ -57,9 +57,7 @@ class SceneRenderContext:
     resolve_plugin_info: Callable[[State], Union[_PluginInfoLike, None]]
     resolve_target_view: Callable[[str, str], Union[SceneTargetView, None]]
     resolve_primary_outcome_view: Callable[[str], Union[FinalOutcomeNode, None]]
-    create_connection_view: Callable[
-        [SceneTargetView, SceneTargetView, str], ConnectionLine
-    ]
+    create_connection_view: Callable[..., ConnectionLine]
     ensure_outcome_placements: Callable[
         [ContainerModel, Outcome, int], List[OutcomePlacement]
     ]
@@ -71,8 +69,15 @@ def create_connection_view(
     from_node: SceneTargetView,
     to_node: SceneTargetView,
     outcome: str,
+    *,
+    update_existing: bool = True,
 ) -> ConnectionLine:
-    """Create a connection item and register all of its scene fragments."""
+    """Create a connection item and register all of its scene fragments.
+
+    When ``update_existing`` is false, position updates for the new and sibling
+    connections are skipped so callers building many connections can refresh
+    them once at the end.
+    """
 
     connection = ConnectionLine(from_node, to_node, outcome)
     scene.addItem(connection)
@@ -80,10 +85,11 @@ def create_connection_view(
     scene.addItem(connection.label_bg)
     scene.addItem(connection.label)
     connections.append(connection)
-    connection.update_position()
-    for existing_connection in connection.from_node.connections:
-        if existing_connection is not connection:
-            existing_connection.update_position()
+    if update_existing:
+        connection.update_position()
+        for existing_connection in connection.from_node.connections:
+            if existing_connection is not connection:
+                existing_connection.update_position()
     return connection
 
 
@@ -244,6 +250,18 @@ def render_container_scene(
 
     context.clear_scene()
 
+    def add_connection(from_view, to_view, outcome: str) -> None:
+        context.create_connection_view(
+            from_view,
+            to_view,
+            outcome,
+            update_existing=False,
+        )
+
+    def refresh_connections() -> None:
+        for connection in context.connections:
+            connection.update_position()
+
     for text_block in model.text_blocks:
         node = create_text_block_view(context.scene, text_block, read_only=False)
         context.text_blocks.append(node)
@@ -283,11 +301,12 @@ def render_container_scene(
                 )
                 if to_view is None:
                     continue
-                context.create_connection_view(
+                add_connection(
                     from_view,
                     to_view,
                     transition.source_outcome,
                 )
+        refresh_connections()
         return
 
     if isinstance(model, OrthogonalState):
@@ -300,7 +319,8 @@ def render_container_scene(
                 if from_view is None:
                     continue
                 for source_outcome in iter_outcome_rule_values(source_outcomes):
-                    context.create_connection_view(from_view, to_view, source_outcome)
+                    add_connection(from_view, to_view, source_outcome)
+        refresh_connections()
         return
 
     for outcome_name, mapping in model.outcome_map.items():
@@ -312,4 +332,6 @@ def render_container_scene(
             if from_view is None:
                 continue
             for source_outcome in iter_outcome_rule_values(source_outcomes):
-                context.create_connection_view(from_view, to_view, source_outcome)
+                add_connection(from_view, to_view, source_outcome)
+
+    refresh_connections()

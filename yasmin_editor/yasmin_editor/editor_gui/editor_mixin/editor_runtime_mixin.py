@@ -495,7 +495,6 @@ class EditorRuntimeMixin:
         self.runtime_active_path = tuple()
         self.runtime_last_transition = None
         self._delete_runtime_snapshot()
-        self._recreate_runtime()
         self.clear_runtime_log_view()
         self._enter_runtime_mode()
 

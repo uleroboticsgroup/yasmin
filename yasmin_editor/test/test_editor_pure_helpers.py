@@ -68,6 +68,11 @@ from yasmin_editor.editor_gui.plugin_catalog import (
     list_widget_targets,
     matches_plugin_filter,
 )
+from yasmin_editor.editor_gui.selection_bundle_paste import paste_outcomes, paste_states
+from yasmin_editor.editor_gui.selection_models import (
+    OutcomePlacementSnapshot,
+    SelectionBundle,
+)
 from yasmin_editor.editor_gui.selection_names import increment_name
 from yasmin_editor.editor_gui.window_sizing import (
     WindowRect,
@@ -76,6 +81,7 @@ from yasmin_editor.editor_gui.window_sizing import (
     rect_contains_point,
 )
 from yasmin_editor.model.concurrence import Concurrence
+from yasmin_editor.model.layout import Position
 from yasmin_editor.model.outcome import Outcome
 from yasmin_editor.model.state import State
 from yasmin_editor.model.state_machine import StateMachine
@@ -296,6 +302,41 @@ def test_editor_action_and_plugin_catalog_helpers_expose_stable_rules():
     assert increment_name("", set()) == "state"
 
 
+def test_paste_helpers_deduplicate_names_across_states_and_outcomes():
+    """Pasted state and outcome names must avoid conflicts with either kind."""
+
+    target = StateMachine(name="target", outcomes=[Outcome("worker")])
+    target.add_state(make_leaf("existing", ["done"]))
+
+    bundle = SelectionBundle(
+        source_kind="state_machine",
+        states={"worker": make_leaf("worker", ["done"])},
+        outcomes={"existing": Outcome("existing")},
+        outcome_placements=[
+            OutcomePlacementSnapshot(
+                outcome_name="existing",
+                instance_id="one",
+                position=Position(x=0.0, y=0.0),
+            ),
+            OutcomePlacementSnapshot(
+                outcome_name="existing",
+                instance_id="two",
+                position=Position(x=0.0, y=0.0),
+            ),
+        ],
+    )
+
+    state_name_map = paste_states(target, bundle, 0.0, 0.0)
+    outcome_name_map, outcome_instance_map = paste_outcomes(target, bundle, 0.0, 0.0)
+
+    assert state_name_map["worker"] == "worker2"
+    assert outcome_name_map["existing"] == "existing2"
+    assert set(outcome_instance_map) == {"one", "two"}
+    assert len(target.layout.get_outcome_placements("existing2")) == 2
+    assert target.get_outcome("existing2") is not None
+    assert target.get_state("worker2") is not None
+
+
 def test_canvas_helpers_resolve_external_xml_paths_and_available_outcomes(tmp_path: Path):
     """Canvas navigation helpers should resolve labels, file paths, and transition gaps."""
 
@@ -370,6 +411,42 @@ def test_canvas_helpers_resolve_external_xml_paths_and_available_outcomes(tmp_pa
     assert state_has_available_outcomes(worker, state_machine) is False
     assert state_has_available_outcomes(worker, Concurrence(name="parallel")) is True
     assert state_has_available_outcomes(None, state_machine) is False
+
+
+def test_resolve_xml_state_file_path_memoizes_package_share_scans(tmp_path: Path):
+    """Repeated resolutions should not walk the package share tree again."""
+
+    walk_calls = []
+
+    def walk(root):
+        walk_calls.append(root)
+        return []
+
+    file_exists = lambda _candidate: False
+    package_share_lookup = lambda _package: str(tmp_path)
+    state_model = SimpleNamespace(package_name="demo_pkg", file_name="missing.xml")
+
+    assert (
+        resolve_xml_state_file_path(
+            state_model,
+            None,
+            file_exists=file_exists,
+            walk=walk,
+            package_share_lookup=package_share_lookup,
+        )
+        is None
+    )
+    assert (
+        resolve_xml_state_file_path(
+            state_model,
+            None,
+            file_exists=file_exists,
+            walk=walk,
+            package_share_lookup=package_share_lookup,
+        )
+        is None
+    )
+    assert len(walk_calls) == 1
 
 
 def test_window_geometry_helpers_select_the_expected_screen_and_center_window():

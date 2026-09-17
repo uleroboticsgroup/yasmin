@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+import os
+import uuid
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 from xml.etree import ElementTree as ET
@@ -42,7 +44,19 @@ def model_to_xml(
     xml_text = ET.tostring(root, encoding="utf-8", xml_declaration=True).decode("utf-8")
 
     if file_path is not None:
-        Path(file_path).write_text(xml_text, encoding="utf-8")
+        target = Path(file_path)
+        temp_path = target.with_name(
+            f".{target.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp"
+        )
+        try:
+            temp_path.write_text(xml_text, encoding="utf-8")
+            os.replace(temp_path, target)
+        except BaseException:
+            try:
+                temp_path.unlink()
+            except OSError:
+                pass
+            raise
 
     return xml_text
 

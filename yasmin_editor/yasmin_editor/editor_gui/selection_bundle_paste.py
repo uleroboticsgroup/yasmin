@@ -35,12 +35,13 @@ def paste_states(
     """Paste states into the target and return the name remapping."""
 
     state_name_map: dict[str, str] = {}
-    existing_state_names = set(target_model.states)
+    existing_names = set(target_model.states)
+    existing_names.update(outcome.name for outcome in target_model.outcomes)
 
     for original_name, state in bundle.states.items():
         copied_state = copy.deepcopy(state)
-        copied_name = increment_name(copied_state.name, existing_state_names)
-        existing_state_names.add(copied_name)
+        copied_name = increment_name(copied_state.name, existing_names)
+        existing_names.add(copied_name)
         copied_state.name = copied_name
         target_model.add_state(copied_state)
         state_name_map[original_name] = copied_name
@@ -64,23 +65,26 @@ def paste_outcomes(
 ) -> Tuple[dict[str, str], dict[str, str]]:
     """Paste logical outcomes and their visual aliases into the target.
 
-    Note: Outcome names are not de-duplicated. If multiple source outcomes
-    share the same name they will map to the same target outcome, which may
-    produce fewer outcomes than ``outcome_placements`` entries.
+    Outcome names are de-duplicated against child states, final outcomes, and
+    previously pasted outcomes. Placements that share one source outcome reuse
+    the same renamed target outcome.
     """
 
     outcome_instance_map: dict[str, str] = {}
     outcome_name_map: dict[str, str] = {}
-    existing_outcome_names = {outcome.name for outcome in target_model.outcomes}
+    existing_names = set(target_model.states)
+    existing_names.update(outcome.name for outcome in target_model.outcomes)
 
     for placement in bundle.outcome_placements:
-        copied_name = placement.outcome_name
-        outcome_name_map[placement.outcome_name] = copied_name
-        if copied_name not in existing_outcome_names:
+        copied_name = outcome_name_map.get(placement.outcome_name)
+        if copied_name is None:
+            copied_name = increment_name(placement.outcome_name, existing_names)
+            existing_names.add(copied_name)
+            outcome_name_map[placement.outcome_name] = copied_name
             outcome_model = copy.deepcopy(bundle.outcomes.get(placement.outcome_name))
             if outcome_model is not None:
+                outcome_model.name = copied_name
                 target_model.add_outcome(outcome_model)
-                existing_outcome_names.add(copied_name)
         new_instance_id = target_model.layout.create_outcome_alias(
             copied_name,
             placement.position.x + offset_x,

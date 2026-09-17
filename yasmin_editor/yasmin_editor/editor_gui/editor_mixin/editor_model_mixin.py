@@ -97,7 +97,20 @@ class EditorModelMixin:
     def resolve_plugin_info_for_model(self, model: State) -> PluginInfo:
         """Resolve the plugin-manager entry that matches one state model."""
 
-        return lookup_plugin_info_for_model(self.plugin_manager, model)
+        cache_key = (
+            model.state_type,
+            model.module,
+            model.class_name,
+            model.file_name,
+            model.package_name,
+        )
+        cache = getattr(self, "_plugin_info_cache", None)
+        if cache is None:
+            cache = {}
+            self._plugin_info_cache = cache
+        if cache_key not in cache:
+            cache[cache_key] = lookup_plugin_info_for_model(self.plugin_manager, model)
+        return cache[cache_key]
 
     def create_leaf_model(
         self,
@@ -145,13 +158,16 @@ class EditorModelMixin:
             parameter_mappings=parameter_mappings,
         )
 
-    def _create_connection_view(self, from_node, to_node, outcome: str) -> ConnectionLine:
+    def _create_connection_view(
+        self, from_node, to_node, outcome: str, *, update_existing: bool = True
+    ) -> ConnectionLine:
         return create_connection_view(
             self.canvas.scene,
             self.connections,
             from_node,
             to_node,
             outcome,
+            update_existing=update_existing,
         )
 
     def _rename_state_node_entries(self, old_prefix: str, new_prefix: str) -> None:
@@ -179,11 +195,6 @@ class EditorModelMixin:
         new_prefix = self.get_state_node_key(new_name, parent_container)
 
         parent_model.rename_state(old_name, new_name)
-
-        if parent_container is not None:
-            parent_container.child_states[new_name] = parent_container.child_states.pop(
-                old_name
-            )
 
         self._rename_state_node_entries(old_prefix, new_prefix)
         state_node.name = new_name
@@ -463,11 +474,11 @@ class EditorModelMixin:
                 return
             parent_model.rename_state(old_name, text)
         self.refresh_breadcrumbs()
-        self.record_history_checkpoint()
+        self._schedule_history_checkpoint()
 
     def on_root_sm_description_changed(self, text: str) -> None:
         self.current_container_model.description = text
-        self.record_history_checkpoint()
+        self._schedule_history_checkpoint()
 
     def on_start_state_changed(self, text: str) -> None:
         if isinstance(self.current_container_model, StateMachine):
@@ -914,16 +925,20 @@ class EditorModelMixin:
 
         try:
             self.save_to_xml(file_path)
-            self.current_file_path = file_path
-            self.register_recent_file(file_path)
-            self.reset_document_dirty_state()
-            self.statusBar().showMessage(f"Saved: {file_path}", 3000)
-            return True
         except Exception as error:
             QtWidgets.QMessageBox.critical(
                 self, "Error", f"Failed to save file: {str(error)}"
             )
             return False
+
+        self.current_file_path = file_path
+        self.reset_document_dirty_state()
+        try:
+            self.register_recent_file(file_path)
+        except Exception:
+            pass
+        self.statusBar().showMessage(f"Saved: {file_path}", 3000)
+        return True
 
     def save_state_machine(self) -> bool:
         """Save the current state machine to the active document path."""

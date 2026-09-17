@@ -158,6 +158,7 @@ class StateMachine(State):
             return
         self._assert_child_name_available(new_name, exclude_outcome=old_name)
         State.rename_outcome(self, old_name, new_name)
+        self.rename_transition_owner(old_name, new_name)
         for transitions in self.transitions.values():
             for transition in transitions:
                 if transition.target == old_name:

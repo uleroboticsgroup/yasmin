@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import os
+from functools import lru_cache
 from typing import Iterable, List, Union
 
 from yasmin_editor.model.concurrence import Concurrence
@@ -130,6 +131,29 @@ def _default_package_share_lookup(package_name: str) -> str:
     return get_package_share_directory(package_name)
 
 
+@lru_cache(maxsize=128)
+def _cached_package_xml_file_candidate(
+    package_name: Union[str, None],
+    file_name: Union[str, None],
+    package_share_lookup,
+    file_exists,
+    walk,
+) -> Union[str, None]:
+    """Memoize the package share-directory scan for one package/file pair."""
+    return next(
+        iter(
+            _package_xml_file_candidates(
+                package_name,
+                file_name,
+                package_share_lookup=package_share_lookup,
+                file_exists=file_exists,
+                walk=walk,
+            )
+        ),
+        None,
+    )
+
+
 def resolve_xml_state_file_path(
     plugin_info: Union[object, None],
     state_model: Union[object, None],
@@ -152,14 +176,13 @@ def resolve_xml_state_file_path(
         file_name = file_name or getattr(source, "file_name", None)
 
     package_share_lookup = package_share_lookup or _default_package_share_lookup
-    package_candidates = _package_xml_file_candidates(
+    return _cached_package_xml_file_candidate(
         package_name,
         file_name,
-        package_share_lookup=package_share_lookup,
-        file_exists=file_exists,
-        walk=walk,
+        package_share_lookup,
+        file_exists,
+        walk,
     )
-    return next(iter(package_candidates), None)
 
 
 def state_has_available_outcomes(

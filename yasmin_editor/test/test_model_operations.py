@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pathlib import Path
+
 import pytest
 
 from yasmin_editor.io.xml_converter import model_from_xml, model_to_xml
@@ -87,6 +89,46 @@ def test_state_rename_outcome_rejects_duplicates_and_ignores_missing_names():
 
     state.rename_outcome("missing", "ignored")
     assert [outcome.name for outcome in state.outcomes] == ["success", "failed"]
+
+
+def test_state_machine_rename_outcome_moves_outcome_owned_transitions():
+    root = StateMachine(
+        name="root",
+        outcomes=[Outcome("done"), Outcome("aborted")],
+    )
+    root.add_transition("done", Transition("done", "aborted"))
+
+    root.rename_outcome("done", "finished")
+
+    assert "done" not in root.transitions
+    assert [
+        (item.source_outcome, item.target) for item in root.transitions["finished"]
+    ] == [("done", "aborted")]
+
+
+def test_model_to_xml_writes_files_without_leaving_temporary_files(tmp_path: Path):
+    root = StateMachine(name="root")
+    target = tmp_path / "machine.xml"
+    target.write_text("old content", encoding="utf-8")
+
+    serialized = model_to_xml(root, target)
+
+    assert target.read_text(encoding="utf-8") == serialized
+    assert list(tmp_path.glob(".machine.xml.*")) == []
+
+
+def test_model_to_xml_keeps_target_and_cleans_temp_file_after_write_failure(
+    tmp_path: Path,
+):
+    root = StateMachine(name="root")
+    target = tmp_path / "subdir"
+    target.mkdir()
+
+    with pytest.raises(OSError):
+        model_to_xml(root, target)
+
+    assert target.is_dir()
+    assert list(tmp_path.glob(".subdir.*")) == []
 
 
 def test_state_machine_operations_update_transitions_layout_and_text_blocks():

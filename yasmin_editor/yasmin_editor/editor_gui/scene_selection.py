@@ -46,8 +46,8 @@ def _class_name_hierarchy(item: object) -> Set[str]:
     return {cls.__name__ for cls in type(item).mro()}
 
 
-def _matches_class_name(item: object, expected_names: frozenset[str]) -> bool:
-    return not expected_names.isdisjoint(_class_name_hierarchy(item))
+def _matches_class_name(class_names: Set[str], expected_names: frozenset[str]) -> bool:
+    return not expected_names.isdisjoint(class_names)
 
 
 def collect_scene_selection(items: Iterable[object]) -> SceneSelection:
@@ -59,25 +59,27 @@ def collect_scene_selection(items: Iterable[object]) -> SceneSelection:
 
     selection = SceneSelection()
     for item in items:
-        if _matches_class_name(item, _CONNECTION_ITEM_CLASS_NAMES):
+        class_names = _class_name_hierarchy(item)
+
+        if _matches_class_name(class_names, _CONNECTION_ITEM_CLASS_NAMES):
             selection.connections.append(item)
             continue
 
-        if _matches_class_name(item, _STATE_ITEM_CLASS_NAMES):
+        if _matches_class_name(class_names, _STATE_ITEM_CLASS_NAMES):
             selection.states.append(item)
             name = getattr(item, "name", "")
             if name:
                 selection.state_names.add(name)
             continue
 
-        if _matches_class_name(item, _FINAL_OUTCOME_ITEM_CLASS_NAMES):
+        if _matches_class_name(class_names, _FINAL_OUTCOME_ITEM_CLASS_NAMES):
             selection.final_outcomes.append(item)
             instance_id = getattr(item, "instance_id", "")
             if instance_id:
                 selection.outcome_instance_ids.add(instance_id)
             continue
 
-        if _matches_class_name(item, _TEXT_BLOCK_ITEM_CLASS_NAMES):
+        if _matches_class_name(class_names, _TEXT_BLOCK_ITEM_CLASS_NAMES):
             selection.text_blocks.append(item)
             model = getattr(item, "model", None)
             if model is not None:

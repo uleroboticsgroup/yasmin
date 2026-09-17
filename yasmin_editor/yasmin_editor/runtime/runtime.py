@@ -224,7 +224,7 @@ class Runtime(QtCore.QObject):
             return
 
         self._resume(step_once=False)
-        if self._running:
+        if self.is_running():
             self.status_changed.emit("Runtime resumed")
             return
 
@@ -235,7 +235,7 @@ class Runtime(QtCore.QObject):
         """Request a pause at the next state boundary."""
         if (
             not self.is_ready()
-            or not self._running
+            or not self.is_running()
             or self.is_finished()
             or self._disposed
         ):
@@ -250,7 +250,7 @@ class Runtime(QtCore.QObject):
             return
 
         self._resume(step_once=True)
-        if self._running:
+        if self.is_running():
             self.status_changed.emit("Runtime will execute one state")
             return
 
