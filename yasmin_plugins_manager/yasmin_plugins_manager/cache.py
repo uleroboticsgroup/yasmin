@@ -93,7 +93,12 @@ def build_environment_fingerprint() -> Dict[str, Any]:
 
 def load_cache(cache_dir: Optional[Path] = None) -> Optional[Dict[str, Any]]:
     """Load the cache file if it exists."""
-    cache_file = get_cache_file(cache_dir)
+    try:
+        cache_file = get_cache_file(cache_dir)
+    except OSError:
+        yasmin.YASMIN_LOG_DEBUG("Failed to create cache directory")
+        return None
+
     if not cache_file.exists():
         return None
 
@@ -107,13 +112,16 @@ def load_cache(cache_dir: Optional[Path] = None) -> Optional[Dict[str, Any]]:
 
 def save_cache(data: Dict[str, Any], cache_dir: Optional[Path] = None) -> None:
     """Write the cache file atomically."""
-    cache_file = get_cache_file(cache_dir)
-    tmp_file = cache_file.with_suffix(".tmp")
+    try:
+        cache_file = get_cache_file(cache_dir)
+        tmp_file = cache_file.with_suffix(".tmp")
 
-    with tmp_file.open("w", encoding="utf-8") as handle:
-        json.dump(data, handle, indent=2, sort_keys=True)
+        with tmp_file.open("w", encoding="utf-8") as handle:
+            json.dump(data, handle, indent=2, sort_keys=True)
 
-    tmp_file.replace(cache_file)
+        tmp_file.replace(cache_file)
+    except OSError:
+        yasmin.YASMIN_LOG_DEBUG("Failed to save cache file")
 
 
 def stat_signature(path: str) -> Optional[Dict[str, Any]]:

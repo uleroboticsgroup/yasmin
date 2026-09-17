@@ -140,11 +140,10 @@ class PluginManager:
                 )
                 self.load_xml_state_machines_from_package(package, tracked_files)
 
+            self._dedup_plugins()
             self._save_to_cache(tracked_files, tracked_dirs)
         finally:
             set_log_level(saved_log_level)
-
-        self._dedup_plugins()
 
     def _dedup_plugins(self) -> None:
         seen: set = set()
@@ -201,6 +200,7 @@ class PluginManager:
         self.xml_files = [
             PluginInfo.from_cache_dict(data) for data in cache.get("xml_files", [])
         ]
+        self._dedup_plugins()
         return True
 
     def _save_to_cache(
@@ -380,7 +380,7 @@ class PluginManager:
         except PackageNotFoundError:
             return
 
-        for resource_path in resource_paths:
+        for resource_path in dict.fromkeys(resource_paths):
             plugin_xml = os.path.join(package_prefix, resource_path)
 
             if not os.path.isfile(plugin_xml):
@@ -527,8 +527,10 @@ class PluginManager:
                             and self._is_python_state_constructible_without_arguments(obj)
                         ):
                             self.load_python_plugin(full_module_name, name)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    yasmin.YASMIN_LOG_DEBUG(
+                        f'Failed to import module {full_module_name}. Error: "{exc}"'
+                    )
 
     def load_xml_state_machines_from_package(
         self,

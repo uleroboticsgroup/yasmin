@@ -20,6 +20,7 @@ from typing import List
 
 import rclpy
 from rclpy.node import Node
+from rclpy.utilities import remove_ros_args
 
 from .plugin_manager import PluginManager
 
@@ -51,7 +52,7 @@ def parse_args():
         action="store_true",
         help="Print full plugin metadata.",
     )
-    return parser.parse_args()
+    return parser.parse_args(remove_ros_args()[1:])
 
 
 def _format_plugin_header(plugin) -> str:
