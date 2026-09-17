@@ -2,6 +2,16 @@
 Changelog for package yasmin_cli
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.2 (2026-09-17)
+------------------
+* refactor(cli): improve error handling and xml parsing in yasmin_cli
+  Refactor the CLI to handle XML parsing errors more gracefully in `print`,
+  `test`, and `validate` commands. Improved the file completer logic to
+  correctly filter files based on the provided prefix.
+  Additionally, add `rosidl_default_runtime` as an execution dependency
+  to `yasmin_msgs/package.xml`.
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.1 (2026-08-08)
 ------------------
 

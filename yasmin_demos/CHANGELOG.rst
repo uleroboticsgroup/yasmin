@@ -3,6 +3,15 @@ Changelog for package yasmin_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.2 (2026-09-17)
+------------------
+* refactor(demos): optimize data movement and thread management
+  Improve efficiency and resource handling in demonstration files:
+  - Use `std::move` for transferring large vectors (sequence and pose bytes) to the blackboard.
+  - Refactor `FibonacciActionServer` to use a managed `GoalThread` structure with `std::atomic` flags for cleaner thread lifecycle management and non-blocking cleanup.
+  - Update `parameters_demo` to use `int64_t` for counter comparisons to ensure type consistency.
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.1 (2026-08-08)
 ------------------
 

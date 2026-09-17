@@ -2,6 +2,21 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.2 (2026-09-17)
+------------------
+* refactor(factory): improve thread safety and Python lifecycle management
+  - Implement `std::once_flag` for thread-safe Python interpreter initialization.
+  - Add `py::gil_scoped_acquire` in `PythonStateHolder` destructor to safely release Python objects.
+  - Introduce `SharedStateDeleter` to ensure `pluginlib::ClassLoader` remains alive as long as the wrapped state exists.
+  - Add `XmlPathGuard` RAII helper to ensure `_xml_path` is restored after parsing.
+  - Add mutex locking in `YasminFactoryActionServer::handle_accepted` to prevent race conditions during shutdown.
+  - Improve error handling in action server shutdown by attempting to destroy the Python `YasminNode` instance.
+  - Refactor Python-side factory logic to reduce redundancy and improve XML parsing robustness.
+* Fix Concurrence GIL deadlock with factory-loaded Python states + clean node shutdown (`#130 <https://github.com/uleroboticsgroup/yasmin/issues/130>`_) (`#131 <https://github.com/uleroboticsgroup/yasmin/issues/131>`_)
+  * fix: Concurrence GIL deadlock with factory-loaded Python states + clean node shutdown (`#130 <https://github.com/uleroboticsgroup/yasmin/issues/130>`_)
+  * Compability for pybind11<2.6 and c++ formatting
+* Contributors: Marco Wong, Miguel Ángel González Santamarta
+
 6.1.1 (2026-08-08)
 ------------------
 

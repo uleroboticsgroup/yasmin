@@ -2,6 +2,18 @@
 Changelog for package yasmin_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.2 (2026-09-17)
+------------------
+* fix(pcl): improve robustness and data integrity in filter and io states
+  - Replace `std::unordered_set` with `std::vector<bool>` in `compute_removed_indices` for better performance and memory efficiency.
+  - Add bounds checking and exception handling when retrieving indices from the blackboard.
+  - Implement `try-catch` blocks in IO states (`LoadPcdState`, `LoadPlyState`) to gracefully handle filesystem and parsing errors.
+  - Fix PLY camera metadata parsing by correcting the rotation matrix construction and homogeneous coordinate.
+  - Add conditional compilation for PLY loading to utilize PCL 1.14+ native support for origin and orientation.
+  - Introduce parameter validation for `RandomSampleState` and `VoxelGridState` to prevent negative input values.
+  - Update documentation for parameters that are ignored by underlying PCL implementations.
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.1 (2026-08-08)
 ------------------
 

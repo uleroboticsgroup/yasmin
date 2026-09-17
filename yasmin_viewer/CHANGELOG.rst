@@ -3,6 +3,17 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.2 (2026-09-17)
+------------------
+* refactor(viewer): optimize session management and improve data handling
+  Refactor the `yasmin_viewer` to improve performance and robustness:
+  - Replace `std::thread` with `std::future` for HTTP session management to allow non-blocking task tracking and cleanup.
+  - Implement non-blocking `accept` loop in the server to prevent thread stalling.
+  - Optimize data passing by using `std::move` and passing large objects by const reference.
+  - Improve `YasminViewerPub` by using `std::move` for shared pointers and adding validation for the FSM pointer.
+  - Fix logic in `parse_state` to correctly handle transitions for nested states.
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.1 (2026-08-08)
 ------------------
 * Allow remote connections to yasmin_viewer (`#129 <https://github.com/uleroboticsgroup/yasmin/issues/129>`_)

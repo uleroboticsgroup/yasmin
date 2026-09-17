@@ -2,6 +2,16 @@
 Changelog for package yasmin_plugins_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.2 (2026-09-17)
+------------------
+* fix(plugins): improve error handling and plugin deduplication
+  - Add OSError handling to cache loading and saving operations to prevent crashes during filesystem failures.
+  - Use `remove_ros_args` in `discovery_node.py` to ensure correct argument parsing.
+  - Ensure plugin deduplication occurs during cache loading to maintain consistency.
+  - Improve error visibility by logging exceptions during Python plugin imports instead of silently passing.
+  - Optimize resource path iteration using `dict.fromkeys` to remove duplicates.
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.1 (2026-08-08)
 ------------------
 

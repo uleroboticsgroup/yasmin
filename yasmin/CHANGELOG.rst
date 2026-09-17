@@ -3,6 +3,22 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.2 (2026-09-17)
+------------------
+* fix(core): improve concurrency safety and Python interoperability
+  - Implement `PythonCallbackHolder` to manage Python function lifecycles safely across C++ threads by ensuring the GIL is held during destruction.
+  - Add exception safety and resource cleanup in `Concurrence` and `OrthogonalState` using try-catch blocks and thread joining.
+  - Improve `StateMachine` callback execution by copying callback lists under lock to prevent deadlocks or iterator invalidation during execution.
+  - Enhance `Blackboard` Python wrapper to support direct `py::object` round-tripping.
+  - Add input validation to prevent null states in `StateMachine` and `Concurrence`.
+  - Optimize `State` parameter handling using `std::move` to reduce unnecessary copies.
+  - Fix `SIGINT` handler registration to restore previous signal actions.
+  - Update `JoinState` type stubs and `OrthogonalState` configuration logic.
+* Fix Concurrence GIL deadlock with factory-loaded Python states + clean node shutdown (`#130 <https://github.com/uleroboticsgroup/yasmin/issues/130>`_) (`#131 <https://github.com/uleroboticsgroup/yasmin/issues/131>`_)
+  * fix: Concurrence GIL deadlock with factory-loaded Python states + clean node shutdown (`#130 <https://github.com/uleroboticsgroup/yasmin/issues/130>`_)
+  * Compability for pybind11<2.6 and c++ formatting
+* Contributors: Marco Wong, Miguel Ángel González Santamarta
+
 6.1.1 (2026-08-08)
 ------------------
 

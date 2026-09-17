@@ -2,6 +2,19 @@
 Changelog for package yasmin_editor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.2 (2026-09-17)
+------------------
+* refactor(editor): optimize performance and improve model consistency
+  - Implement memoization for XML path resolution and plugin info lookups to reduce filesystem and computation overhead.
+  - Introduce debounced history checkpoints using a QTimer to coalesce rapid edits.
+  - Improve data integrity during file saves by using atomic writes with temporary files.
+  - Enhance selection bundle pasting by ensuring name de-duplication across states and outcomes.
+  - Refactor connection rendering to allow batch updates, reducing redundant position calculations.
+  - Fix potential name collisions when renaming outcomes by updating transition owners.
+  - Improve resource cleanup in the interactive shell and runtime modules.
+  - Add comprehensive test coverage for model operations, XML conversion, and paste logic.
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.1 (2026-08-08)
 ------------------
 

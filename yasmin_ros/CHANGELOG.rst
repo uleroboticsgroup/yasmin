@@ -3,6 +3,30 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.2 (2026-09-17)
+------------------
+* refactor(ros): introduce GoalResponseArg alias for action callbacks
+  Introduce a `GoalResponseArg` type alias within `ActionState` to
+  abstract the argument type used in goal response callbacks. This
+  simplifies the callback signatures and improves code readability
+  across different ROS 2 versions by handling the variation between
+  direct shared pointers and shared futures.
+* fix(ros): use node name instead of fully qualified name for cache keys
+  Update `ROSClientsCache` to use `node.get_name()` instead of
+  `node.get_fully_qualified_name()` when generating cache keys for
+  action clients, service clients, and publishers. This ensures
+  consistent client retrieval regardless of the node's namespace
+  context.
+* refactor(ros): enhance state robustness and resource management
+  - Improve lifecycle safety in `ActionState` and `ServiceState` by implementing callback guards to prevent access to destroyed objects.
+  - Enhance `ROSClientsCache` by including `callback_group_name` in cache keys and using fully qualified node names.
+  - Optimize `TfBufferState` to reuse `tf2` buffer and listener instances unless configuration changes.
+  - Add better error handling and input validation in `GetParametersState`, `RosDeserializeCppState`, and `RosSerializeCppState`.
+  - Refactor `YasminNode` singleton initialization to use thread-safe locking and explicit executor management.
+  - Improve `MonitorState` by implementing safer message queue processing and cancellation logic.
+  - Update Python test suites to ensure proper cleanup of executors and nodes during teardown.
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.1 (2026-08-08)
 ------------------
 
