@@ -21,7 +21,7 @@ from typing import List
 from yasmin_editor.io import model_from_xml
 from yasmin_editor.model import validate_model
 
-from yasmin_cli.completer import is_state_machine_xml, strip_namespace, xml_file_completer
+from yasmin_cli.completer import strip_namespace, xml_file_completer
 
 CONTAINER_TAGS = {"StateMachine", "Concurrence"}
 STATE_TAGS = {"State", "StateMachine", "Concurrence"}
@@ -307,7 +307,12 @@ def _main_print(args):
         print(f"File does not exist: {args.state_machine_file}")
         return 1
 
-    if not is_state_machine_xml(xml_path):
+    try:
+        root = ET.parse(xml_path).getroot()
+    except (ET.ParseError, OSError):
+        root = None
+
+    if root is None or strip_namespace(root.tag) != "StateMachine":
         print(f"Not a valid YASMIN state machine XML file: {args.state_machine_file}")
         return 1
 
@@ -332,11 +337,6 @@ def _main_print(args):
             print(validation_result)
         return 0 if validation_result.is_valid else 1
 
-    try:
-        root = ET.parse(xml_path).getroot()
-        print(_render_state_machine(root))
-    except ET.ParseError as exc:
-        print(f"Failed to parse XML file '{args.state_machine_file}': {exc}")
-        return 1
+    print(_render_state_machine(root))
 
     return 0 if validation_result.is_valid else 1

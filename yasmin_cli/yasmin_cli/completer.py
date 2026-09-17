@@ -331,11 +331,13 @@ def xml_file_completer(prefix, parsed_args, **kwargs):
         if path.name in IGNORE_XML_FILES:
             continue
 
+        relative_path = path.relative_to(current_dir).as_posix()
+        if not relative_path.startswith(prefix):
+            continue
+
         if not is_state_machine_xml(path):
             continue
 
-        relative_path = path.relative_to(current_dir).as_posix()
-        if relative_path.startswith(prefix):
-            matches.append(relative_path)
+        matches.append(relative_path)
 
     return matches

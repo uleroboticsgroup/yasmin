@@ -495,7 +495,11 @@ def _main_test(args):
         )
         return 1
 
-    xml_content = _build_test_xml(plugin, provided_inputs, provided_parameters)
+    try:
+        xml_content = _build_test_xml(plugin, provided_inputs, provided_parameters)
+    except (TypeError, ValueError) as exc:
+        print(str(exc))
+        return 1
 
     if args.print_xml:
         print(xml_content)
