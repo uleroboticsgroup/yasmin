@@ -97,6 +97,11 @@ RandomSampleState::execute(yasmin::Blackboard::SharedPtr blackboard) {
       return "aborted";
     }
 
+    if (this->sample_ < 0) {
+      YASMIN_LOG_WARN("Parameter 'sample' must not be negative");
+      return "aborted";
+    }
+
     pcl::RandomSample<pcl::PCLPointCloud2> filter;
     filter.setInputCloud(input_cloud);
     filter.setSample(static_cast<unsigned int>(this->sample_));

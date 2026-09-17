@@ -106,18 +106,24 @@ ExtractIndicesState::execute(yasmin::Blackboard::SharedPtr blackboard) {
     blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
 
     const auto indices_ptr = filter.getIndices();
+    const auto domain_indices = common::make_domain_indices(input_cloud);
+    const bool all_indices_selected =
+        indices_ptr->size() == domain_indices.size();
+
     common::Indices output_indices;
     if (this->negative_) {
-      const auto domain_indices = common::make_domain_indices(input_cloud);
-      output_indices =
-          common::compute_removed_indices(domain_indices, *indices_ptr);
+      if (!all_indices_selected) {
+        output_indices =
+            common::compute_removed_indices(domain_indices, *indices_ptr);
+      }
+    } else if (all_indices_selected) {
+      output_indices = domain_indices;
     } else {
       output_indices = *indices_ptr;
     }
     blackboard->set<common::Indices>("output_indices", output_indices);
 
     if (this->extract_removed_indices_) {
-      const auto domain_indices = common::make_domain_indices(input_cloud);
       blackboard->set<common::Indices>(
           "removed_indices",
           common::compute_removed_indices(domain_indices, output_indices));

@@ -59,7 +59,8 @@ SavePcdState::SavePcdState() : yasmin::State({"succeeded", "aborted"}) {
   this->declare_parameter<float>(
       "origin_z", "Sensor origin z component used for writing.", 0.0F);
   this->declare_parameter<float>(
-      "origin_w", "Sensor origin w component used for writing.", 0.0F);
+      "origin_w", "Sensor origin w component (ignored by the PCD writer).",
+      0.0F);
   this->declare_parameter<float>("orientation_x",
                                  "Orientation quaternion x component.", 0.0F);
   this->declare_parameter<float>("orientation_y",

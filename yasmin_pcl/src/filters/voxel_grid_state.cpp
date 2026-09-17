@@ -113,6 +113,12 @@ std::string VoxelGridState::execute(yasmin::Blackboard::SharedPtr blackboard) {
       return "aborted";
     }
 
+    if (this->minimum_points_number_per_voxel_ < 0) {
+      YASMIN_LOG_WARN(
+          "Parameter 'minimum_points_number_per_voxel' must not be negative");
+      return "aborted";
+    }
+
     pcl::VoxelGrid<pcl::PCLPointCloud2> filter;
     filter.setInputCloud(input_cloud);
     filter.setLeafSize(this->leaf_size_x_, this->leaf_size_y_,

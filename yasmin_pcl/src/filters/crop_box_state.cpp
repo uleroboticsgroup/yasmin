@@ -67,13 +67,15 @@ CropBoxState::CropBoxState() : yasmin::State({"succeeded", "aborted"}) {
   this->declare_parameter<float>("min_x", "Crop box minimum x bound.", -1.0F);
   this->declare_parameter<float>("min_y", "Crop box minimum y bound.", -1.0F);
   this->declare_parameter<float>("min_z", "Crop box minimum z bound.", -1.0F);
-  this->declare_parameter<float>("min_w", "Crop box minimum homogeneous w.",
-                                 1.0F);
+  this->declare_parameter<float>(
+      "min_w", "Crop box minimum homogeneous w (ignored by pcl::CropBox).",
+      1.0F);
   this->declare_parameter<float>("max_x", "Crop box maximum x bound.", 1.0F);
   this->declare_parameter<float>("max_y", "Crop box maximum y bound.", 1.0F);
   this->declare_parameter<float>("max_z", "Crop box maximum z bound.", 1.0F);
-  this->declare_parameter<float>("max_w", "Crop box maximum homogeneous w.",
-                                 1.0F);
+  this->declare_parameter<float>(
+      "max_w", "Crop box maximum homogeneous w (ignored by pcl::CropBox).",
+      1.0F);
   this->declare_parameter<float>("translation_x",
                                  "Crop box translation along x.", 0.0F);
   this->declare_parameter<float>("translation_y",

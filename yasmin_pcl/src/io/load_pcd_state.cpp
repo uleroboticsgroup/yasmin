@@ -17,6 +17,7 @@
 #include <pcl/io/pcd_io.h>
 
 #include <Eigen/Geometry>
+#include <exception>
 #include <filesystem>
 #include <string>
 
@@ -56,40 +57,45 @@ void LoadPcdState::configure() {
 }
 
 std::string LoadPcdState::execute(yasmin::Blackboard::SharedPtr blackboard) {
-  if (this->file_path_.empty()) {
-    YASMIN_LOG_WARN("Parameter 'file_path' is empty");
+  try {
+    if (this->file_path_.empty()) {
+      YASMIN_LOG_WARN("Parameter 'file_path' is empty");
+      return "aborted";
+    }
+
+    const auto parent = std::filesystem::path(this->file_path_).parent_path();
+    if (!parent.empty() && !std::filesystem::exists(parent)) {
+      YASMIN_LOG_WARN("Parent directory does not exist for '%s'",
+                      this->file_path_.c_str());
+      return "aborted";
+    }
+
+    auto output_cloud = common::make_pcl_point_cloud2();
+    Eigen::Vector4f origin = Eigen::Vector4f::Zero();
+    Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity();
+    int pcd_version = 0;
+
+    pcl::PCDReader reader;
+    const int result = reader.read(this->file_path_, *output_cloud, origin,
+                                   orientation, pcd_version);
+
+    if (result < 0) {
+      YASMIN_LOG_WARN("Failed to load PCD file '%s'", this->file_path_.c_str());
+      return "aborted";
+    }
+
+    blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
+    blackboard->set<common::Vector4fArray>("sensor_origin",
+                                           common::to_array(origin));
+    blackboard->set<common::Vector4fArray>("sensor_orientation",
+                                           common::to_array(orientation));
+    blackboard->set<int>("pcd_version", pcd_version);
+
+    return "succeeded";
+  } catch (const std::exception &e) {
+    YASMIN_LOG_ERROR("Failed to load PCD file: %s", e.what());
     return "aborted";
   }
-
-  const auto parent = std::filesystem::path(this->file_path_).parent_path();
-  if (!parent.empty() && !std::filesystem::exists(parent)) {
-    YASMIN_LOG_WARN("Parent directory does not exist for '%s'",
-                    this->file_path_.c_str());
-    return "aborted";
-  }
-
-  auto output_cloud = common::make_pcl_point_cloud2();
-  Eigen::Vector4f origin = Eigen::Vector4f::Zero();
-  Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity();
-  int pcd_version = 0;
-
-  pcl::PCDReader reader;
-  const int result = reader.read(this->file_path_, *output_cloud, origin,
-                                 orientation, pcd_version);
-
-  if (result < 0) {
-    YASMIN_LOG_WARN("Failed to load PCD file '%s'", this->file_path_.c_str());
-    return "aborted";
-  }
-
-  blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
-  blackboard->set<common::Vector4fArray>("sensor_origin",
-                                         common::to_array(origin));
-  blackboard->set<common::Vector4fArray>("sensor_orientation",
-                                         common::to_array(orientation));
-  blackboard->set<int>("pcd_version", pcd_version);
-
-  return "succeeded";
 }
 
 } // namespace yasmin_pcl::io

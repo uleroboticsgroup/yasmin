@@ -29,9 +29,12 @@
 
 namespace yasmin_pcl::io {
 
+#if !(PCL_MAJOR_VERSION > 1 ||                                                 \
+      (PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 14))
+
 /// Read sensor origin and orientation from the camera element of an ASCII PLY
-/// file. PCL 1.12's loadPLYFile does not propagate these values through its
-/// output parameters due to a known bug, so we parse them manually here.
+/// file. PCL before 1.14 does not propagate these values through its output
+/// parameters due to a known bug, so we parse them manually here.
 /// Returns true when a camera element with viewpoint data was found.
 static bool read_ply_camera_ascii(const std::string &file_path,
                                   Eigen::Vector4f &origin,
@@ -137,10 +140,10 @@ static bool read_ply_camera_ascii(const std::string &file_path,
         }
       }
 
-      origin = Eigen::Vector4f(view_px, view_py, view_pz, 1.0f);
+      origin = Eigen::Vector4f(view_px, view_py, view_pz, 0.0f);
       Eigen::Matrix3f R;
-      R << x_axisx, y_axisx, z_axisx, x_axisy, y_axisy, z_axisy, x_axisz,
-          y_axisz, z_axisz;
+      R << x_axisx, x_axisy, x_axisz, y_axisx, y_axisy, y_axisz, z_axisx,
+          z_axisy, z_axisz;
       orientation = Eigen::Quaternionf(R);
       return true;
     }
@@ -155,6 +158,8 @@ static bool read_ply_camera_ascii(const std::string &file_path,
 
   return false;
 }
+
+#endif
 
 LoadPlyState::LoadPlyState() : yasmin::State({"succeeded", "aborted"}) {
   this->file_path_.clear();
@@ -186,47 +191,50 @@ void LoadPlyState::configure() {
 namespace {
 
 /// Load a PLY file and populate both the cloud and camera metadata.
-/// PCL's PLYReader does not provide origin/orientation for PCLPointCloud2
-/// (the overload only exists for PolygonMesh), so we parse the camera element
-/// manually from the header. The manual parse only reads the header and the
-/// camera element's data rows, not the full point data.
 bool load_ply_with_camera(const std::string &file_path,
                           pcl::PCLPointCloud2 &cloud, Eigen::Vector4f &origin,
                           Eigen::Quaternionf &orientation) {
-  // Parse camera metadata from the PLY header (reads header + camera rows only)
-  read_ply_camera_ascii(file_path, origin, orientation);
-
-  // Load the cloud data using PCL's reader (single call for the full file)
   pcl::PLYReader reader;
-  const int result = reader.read(file_path, cloud);
-  return result >= 0;
+
+#if PCL_MAJOR_VERSION > 1 || (PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 14)
+  int ply_version = 0;
+  return reader.read(file_path, cloud, origin, orientation, ply_version) >= 0;
+#else
+  read_ply_camera_ascii(file_path, origin, orientation);
+  return reader.read(file_path, cloud) >= 0;
+#endif
 }
 
 } // namespace
 
 std::string LoadPlyState::execute(yasmin::Blackboard::SharedPtr blackboard) {
-  if (this->file_path_.empty()) {
-    YASMIN_LOG_WARN("Parameter 'file_path' is empty");
+  try {
+    if (this->file_path_.empty()) {
+      YASMIN_LOG_WARN("Parameter 'file_path' is empty");
+      return "aborted";
+    }
+
+    auto output_cloud = common::make_pcl_point_cloud2();
+    Eigen::Vector4f origin = Eigen::Vector4f::Zero();
+    Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity();
+
+    if (!load_ply_with_camera(this->file_path_, *output_cloud, origin,
+                              orientation)) {
+      YASMIN_LOG_WARN("Failed to load PLY file '%s'", this->file_path_.c_str());
+      return "aborted";
+    }
+
+    blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
+    blackboard->set<common::Vector4fArray>("sensor_origin",
+                                           common::to_array(origin));
+    blackboard->set<common::Vector4fArray>("sensor_orientation",
+                                           common::to_array(orientation));
+
+    return "succeeded";
+  } catch (const std::exception &e) {
+    YASMIN_LOG_ERROR("Failed to load PLY file: %s", e.what());
     return "aborted";
   }
-
-  auto output_cloud = common::make_pcl_point_cloud2();
-  Eigen::Vector4f origin = Eigen::Vector4f::Zero();
-  Eigen::Quaternionf orientation = Eigen::Quaternionf::Identity();
-
-  if (!load_ply_with_camera(this->file_path_, *output_cloud, origin,
-                            orientation)) {
-    YASMIN_LOG_WARN("Failed to load PLY file '%s'", this->file_path_.c_str());
-    return "aborted";
-  }
-
-  blackboard->set<common::PclPointCloud2Ptr>("output_cloud", output_cloud);
-  blackboard->set<common::Vector4fArray>("sensor_origin",
-                                         common::to_array(origin));
-  blackboard->set<common::Vector4fArray>("sensor_orientation",
-                                         common::to_array(orientation));
-
-  return "succeeded";
 }
 
 } // namespace yasmin_pcl::io

@@ -23,8 +23,8 @@
 
 #if PCL_MAJOR_VERSION > 1 || (PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 12)
 #include <pcl/types.h>
-#else
-#include <pcl/pcl_base.h>
 #endif
+
+#include <pcl/pcl_base.h>
 
 #endif // YASMIN_PCL__COMMON__PCL_COMPAT_HPP_

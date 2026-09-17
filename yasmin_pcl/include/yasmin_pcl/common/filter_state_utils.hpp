@@ -16,8 +16,10 @@
 #define YASMIN_PCL__COMMON__FILTER_STATE_UTILS_HPP_
 
 #include <exception>
+#include <stdexcept>
 #include <string>
-#include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "yasmin/blackboard.hpp"
 #include "yasmin/logs.hpp"
@@ -41,12 +43,18 @@ inline Indices make_domain_indices(const PclPointCloud2Ptr &input_cloud) {
 /** @brief Return the set of indices present in domain but absent from kept. */
 inline Indices compute_removed_indices(const Indices &domain_indices,
                                        const Indices &output_indices) {
-  std::unordered_set<int> selected(output_indices.begin(),
-                                   output_indices.end());
+  std::vector<bool> selected(domain_indices.size(), false);
+  for (const int index : output_indices) {
+    if (index >= 0 && static_cast<std::size_t>(index) < selected.size()) {
+      selected[static_cast<std::size_t>(index)] = true;
+    }
+  }
+
   Indices removed;
   removed.reserve(domain_indices.size());
   for (const int index : domain_indices) {
-    if (selected.count(index) == 0U) {
+    if (index >= 0 && static_cast<std::size_t>(index) < selected.size() &&
+        !selected[static_cast<std::size_t>(index)]) {
       removed.push_back(index);
     }
   }
@@ -71,12 +79,26 @@ inline void
 set_optional_input_indices(FilterT &filter,
                            const yasmin::Blackboard::SharedPtr &blackboard,
                            const std::string &key = "input_indices") {
-  if (!blackboard->contains(key)) {
+  Indices input_indices;
+  try {
+    input_indices = blackboard->get<Indices>(key);
+  } catch (const std::exception &) {
     return;
   }
 
-  const auto input_indices = blackboard->get<Indices>(key);
-  pcl::IndicesPtr input_indices_ptr(new pcl::Indices(input_indices));
+  const auto input_cloud = filter.getInputCloud();
+  const std::size_t num_points =
+      input_cloud ? static_cast<std::size_t>(input_cloud->width) *
+                        static_cast<std::size_t>(input_cloud->height)
+                  : 0U;
+  for (const int index : input_indices) {
+    if (index < 0 || static_cast<std::size_t>(index) >= num_points) {
+      throw std::out_of_range("Blackboard key '" + key +
+                              "' contains an out-of-range point index");
+    }
+  }
+
+  pcl::IndicesPtr input_indices_ptr(new pcl::Indices(std::move(input_indices)));
   filter.setIndices(input_indices_ptr);
 }
 
