@@ -16,6 +16,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -154,13 +155,13 @@ std::filesystem::path resolve_file_path(const std::string &web_root,
 
 http::response<http::string_body> make_response(http::status status,
                                                 const std::string &content_type,
-                                                const std::string &body,
+                                                std::string body,
                                                 bool keep_alive) {
   http::response<http::string_body> response{status, 11};
   response.set(http::field::content_type, content_type);
   response.set(http::field::server, "yasmin_viewer");
   response.keep_alive(keep_alive);
-  response.body() = body;
+  response.body() = std::move(body);
   response.prepare_payload();
   return response;
 }
@@ -209,10 +210,10 @@ void handle_session(beast::tcp_stream stream, YasminViewerNode *node) {
               response.content_length(file_size);
             }
           } else {
-            const std::string body = read_file(file_path);
+            std::string body = read_file(file_path);
             response =
                 make_response(http::status::ok, mime_type(file_path.string()),
-                              body, request.keep_alive());
+                              std::move(body), request.keep_alive());
           }
         } catch (const std::exception &) {
           response = make_response(http::status::not_found, "text/plain",
@@ -291,7 +292,9 @@ std::string YasminViewerNode::get_fsms_json() {
   return stream.str();
 }
 
-std::string YasminViewerNode::get_web_root() const { return this->web_root_; }
+const std::string &YasminViewerNode::get_web_root() const {
+  return this->web_root_;
+}
 
 void YasminViewerNode::fsm_viewer_cb(const StateMachineMsg::SharedPtr msg) {
   if (!msg || msg->states.empty()) {
@@ -334,11 +337,6 @@ void YasminViewerNode::stop_server() {
 
   {
     std::lock_guard<std::mutex> lock(this->sessions_mutex_);
-    for (auto &t : this->sessions_) {
-      if (t.joinable()) {
-        t.join();
-      }
-    }
     this->sessions_.clear();
   }
 }
@@ -353,11 +351,19 @@ void YasminViewerNode::run_server() {
     auto &acceptor = this->acceptor_holder_->acceptor;
     auto &io_context = this->acceptor_holder_->io_context;
 
+    acceptor.non_blocking(true);
+
     while (rclcpp::ok() && this->server_running_.load()) {
       beast::tcp_stream stream(io_context);
       stream.expires_after(std::chrono::seconds(30));
       beast::error_code error_code;
       acceptor.accept(stream.socket(), error_code);
+
+      if (error_code == asio::error::would_block ||
+          error_code == asio::error::try_again) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        continue;
+      }
 
       if (error_code) {
         if (this->server_running_.load()) {
@@ -379,7 +385,18 @@ void YasminViewerNode::run_server() {
 
       {
         std::lock_guard<std::mutex> lock(this->sessions_mutex_);
-        this->sessions_.emplace_back(handle_session, std::move(stream), this);
+        for (auto iterator = this->sessions_.begin();
+             iterator != this->sessions_.end();) {
+          if (iterator->wait_for(std::chrono::seconds(0)) ==
+              std::future_status::ready) {
+            iterator = this->sessions_.erase(iterator);
+          } else {
+            ++iterator;
+          }
+        }
+
+        this->sessions_.emplace_back(std::async(
+            std::launch::async, handle_session, std::move(stream), this));
       }
     }
   } catch (const std::exception &exception) {
@@ -429,8 +446,8 @@ std::string YasminViewerNode::escape_json(const std::string &value) {
       break;
     default:
       if (static_cast<unsigned char>(character) < 0x20U) {
-        stream << "\\u" << std::hex << std::uppercase
-               << static_cast<int>(character);
+        stream << "\\u" << std::hex << std::uppercase << std::setw(4)
+               << std::setfill('0') << static_cast<int>(character);
       } else {
         stream << character;
       }

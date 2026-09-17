@@ -173,22 +173,23 @@ class YasminViewerPub(object):
                     "state": child_state,
                     "transitions": {},
                 }
+                child_state_id = len(states_list)
                 self.parse_state(
                     child_state_name, child_state_info, states_list, state_msg.id
                 )
-                states_list[-1].transitions = transitions[child_state_name]
+
+                child_transitions = transitions.get(child_state_name, [])
+                states_list[child_state_id].transitions = child_transitions
 
                 # Check if the child_state outcomes are in the transitions
-                existing_outcomes: Set[str] = {
-                    t.outcome for t in states_list[-1].transitions
-                }
+                existing_outcomes: Set[str] = {t.outcome for t in child_transitions}
                 for outcome in child_state.get_outcomes():
                     if outcome not in existing_outcomes:
                         # If not, add a transition to the default outcome of the concurrence
                         msg = TransitionMsg()
                         msg.outcome = outcome
                         msg.state = concurrence.get_default_outcome()
-                        states_list[-1].transitions.append(msg)
+                        child_transitions.append(msg)
 
         # Parse child states if this state is an OrthogonalState
         elif isinstance(state, OrthogonalState):

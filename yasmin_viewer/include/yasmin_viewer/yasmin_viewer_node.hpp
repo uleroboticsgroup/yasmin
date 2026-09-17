@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <future>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -69,7 +70,7 @@ public:
    * @brief Returns the configured web root directory.
    * @return Path to the web root directory.
    */
-  std::string get_web_root() const;
+  const std::string &get_web_root() const;
 
   /** @brief Callback invoked when an HTTP connection is closed. */
   void on_connection_closed() {
@@ -178,10 +179,10 @@ private:
   /// @brief Number of currently active HTTP connections.
   std::atomic<uint32_t> active_connections_{0};
 
-  /// @brief Protects access to the session thread list.
+  /// @brief Protects access to the session task list.
   std::mutex sessions_mutex_;
-  /// @brief Tracks active HTTP session threads for safe shutdown.
-  std::list<std::thread> sessions_;
+  /// @brief Tracks active HTTP session tasks for safe shutdown.
+  std::list<std::future<void>> sessions_;
 
   /// Asio acceptor holder (created in start_server, used by
   /// run_server/stop_server).

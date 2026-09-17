@@ -99,7 +99,7 @@ public:
    */
   std::unordered_map<std::string, std::vector<yasmin_msgs::msg::Transition>>
   parse_concurrence_transitions(
-      yasmin::Concurrence::SharedPtr concurrence) const;
+      const yasmin::Concurrence::SharedPtr &concurrence) const;
 
   /**
    * @brief Parses a state and its transitions to add it to the list of state
@@ -110,7 +110,8 @@ public:
    * @param states_list Vector to which the parsed State message will be added.
    * @param parent ID of the parent state.
    */
-  void parse_state(const std::string &name, yasmin::State::SharedPtr state,
+  void parse_state(const std::string &name,
+                   const yasmin::State::SharedPtr &state,
                    const yasmin::Transitions &transitions,
                    std::vector<yasmin_msgs::msg::State> &states_list,
                    int parent);

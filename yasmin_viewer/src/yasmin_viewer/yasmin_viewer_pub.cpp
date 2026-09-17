@@ -14,6 +14,9 @@
 
 #include "yasmin_viewer/yasmin_viewer_pub.hpp"
 
+#include <stdexcept>
+#include <utility>
+
 #include "yasmin/concurrence.hpp"
 #include "yasmin/logs.hpp"
 #include "yasmin/types.hpp"
@@ -23,20 +26,24 @@ using namespace yasmin_viewer;
 using namespace std::chrono_literals;
 
 YasminViewerPub::YasminViewerPub(yasmin::StateMachine::SharedPtr fsm)
-    : YasminViewerPub(nullptr, fsm, "") {}
+    : YasminViewerPub(nullptr, std::move(fsm), "") {}
 
 YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
                                  yasmin::StateMachine::SharedPtr fsm)
-    : YasminViewerPub(node, fsm, "") {}
+    : YasminViewerPub(node, std::move(fsm), "") {}
 
 YasminViewerPub::YasminViewerPub(yasmin::StateMachine::SharedPtr fsm,
                                  const std::string &fsm_name)
-    : YasminViewerPub(nullptr, fsm, fsm_name) {}
+    : YasminViewerPub(nullptr, std::move(fsm), fsm_name) {}
 
 YasminViewerPub::YasminViewerPub(const rclcpp::Node::SharedPtr &node,
                                  yasmin::StateMachine::SharedPtr fsm,
                                  const std::string &fsm_name, double rate_hz)
-    : fsm(fsm), fsm_name(fsm_name) {
+    : fsm(std::move(fsm)), fsm_name(fsm_name) {
+
+  if (this->fsm == nullptr) {
+    throw std::invalid_argument("fsm must not be null");
+  }
 
   if (node == nullptr) {
     this->node_ = yasmin_ros::YasminNode::get_instance();
@@ -80,7 +87,7 @@ std::vector<yasmin_msgs::msg::Transition> YasminViewerPub::parse_transitions(
 
 std::unordered_map<std::string, std::vector<yasmin_msgs::msg::Transition>>
 YasminViewerPub::parse_concurrence_transitions(
-    yasmin::Concurrence::SharedPtr concurrence) const {
+    const yasmin::Concurrence::SharedPtr &concurrence) const {
   std::unordered_map<std::string, std::vector<yasmin_msgs::msg::Transition>>
       transitions;
   const auto &outcome_map = concurrence->get_outcome_map();
@@ -98,7 +105,7 @@ YasminViewerPub::parse_concurrence_transitions(
 }
 
 void YasminViewerPub::parse_state(
-    const std::string &state_name, yasmin::State::SharedPtr state,
+    const std::string &state_name, const yasmin::State::SharedPtr &state,
     const yasmin::Transitions &transitions,
     std::vector<yasmin_msgs::msg::State> &states_list, int parent) {
 
@@ -110,7 +117,7 @@ void YasminViewerPub::parse_state(
   // State information
   state_msg.name = state_name;
   state_msg.transitions = this->parse_transitions(transitions);
-  auto outcomes = state->get_outcomes();
+  const auto &outcomes = state->get_outcomes();
   state_msg.outcomes =
       std::vector<std::string>(outcomes.begin(), outcomes.end());
 
@@ -126,13 +133,17 @@ void YasminViewerPub::parse_state(
 
   // Handle nested FSM states
   if (fsm != nullptr) {
-    auto states = fsm->get_states();
-    auto aux_transitions = fsm->get_transitions();
+    const auto &states = fsm->get_states();
+    const auto &aux_transitions = fsm->get_transitions();
+    const yasmin::Transitions empty_transitions;
 
     for (const auto &nested_state : states) {
+      const auto transitions_it = aux_transitions.find(nested_state.first);
       this->parse_state(nested_state.first, nested_state.second,
-                        aux_transitions[nested_state.first], states_list,
-                        state_msg.id);
+                        transitions_it != aux_transitions.end()
+                            ? transitions_it->second
+                            : empty_transitions,
+                        states_list, state_msg.id);
     }
 
     // Identify the current state in the FSM
@@ -147,25 +158,27 @@ void YasminViewerPub::parse_state(
   }
   // Handle concurrence states
   else if (concurrence != nullptr) {
-    auto concurrent_states = concurrence->get_states();
-    auto transitions = this->parse_concurrence_transitions(concurrence);
+    const auto &concurrent_states = concurrence->get_states();
+    const auto transitions = this->parse_concurrence_transitions(concurrence);
     states_list[state_msg.id].current_state =
         -2; // Special marker for concurrence
 
     for (const auto &[child_state_name, child_state] : concurrent_states) {
       yasmin::Transitions empty_transitions;
+      const std::size_t child_id = states_list.size();
       this->parse_state(child_state_name, child_state, empty_transitions,
                         states_list, state_msg.id);
 
       // Set transitions for this child state
-      if (transitions.find(child_state_name) != transitions.end()) {
-        states_list.back().transitions = transitions[child_state_name];
+      const auto transitions_it = transitions.find(child_state_name);
+      if (transitions_it != transitions.end()) {
+        states_list[child_id].transitions = transitions_it->second;
       }
 
       // Check if the child_state outcomes are in the transitions
-      auto child_outcomes = child_state->get_outcomes();
+      const auto &child_outcomes = child_state->get_outcomes();
       std::set<std::string> transition_outcomes;
-      for (const auto &transition : states_list.back().transitions) {
+      for (const auto &transition : states_list[child_id].transitions) {
         transition_outcomes.insert(transition.outcome);
       }
 
@@ -175,7 +188,7 @@ void YasminViewerPub::parse_state(
           auto msg = yasmin_msgs::msg::Transition();
           msg.outcome = outcome;
           msg.state = concurrence->get_default_outcome();
-          states_list.back().transitions.push_back(msg);
+          states_list[child_id].transitions.push_back(msg);
         }
       }
     }
@@ -193,22 +206,21 @@ void YasminViewerPub::parse_state(
       region_msg.name = region.name;
       region_msg.is_fsm = true;
       region_msg.current_state = -1;
-      auto region_outcomes = region.sm->get_outcomes();
+      const auto &region_outcomes = region.sm->get_outcomes();
       region_msg.outcomes = std::vector<std::string>(region_outcomes.begin(),
                                                      region_outcomes.end());
       states_list.push_back(region_msg);
 
-      auto region_states = region.sm->get_states();
-      auto region_transitions = region.sm->get_transitions();
+      const auto &region_states = region.sm->get_states();
+      const auto &region_transitions = region.sm->get_transitions();
+      const yasmin::Transitions empty_transitions;
 
       for (const auto &nested_state : region_states) {
-        yasmin::Transitions transitions;
-        auto trans_it = region_transitions.find(nested_state.first);
-        if (trans_it != region_transitions.end()) {
-          transitions = trans_it->second;
-        }
-
-        this->parse_state(nested_state.first, nested_state.second, transitions,
+        const auto transitions_it = region_transitions.find(nested_state.first);
+        this->parse_state(nested_state.first, nested_state.second,
+                          transitions_it != region_transitions.end()
+                              ? transitions_it->second
+                              : empty_transitions,
                           states_list, region_msg.id);
       }
 
