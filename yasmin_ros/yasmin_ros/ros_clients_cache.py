@@ -103,7 +103,7 @@ class ROSClientsCache:
         Returns:
             ActionClient: The cached or newly created action client.
         """
-        node_name = node.get_fully_qualified_name()
+        node_name = node.get_name()
         action_type_name = f"{action_type.__module__}.{action_type.__name__}"
         callback_group_name = cls._get_callback_group_name(callback_group)
         cache_key = (node_name, action_type_name, action_name, callback_group_name)
@@ -136,7 +136,7 @@ class ROSClientsCache:
         Returns:
             Client: The cached or newly created service client.
         """
-        node_name = node.get_fully_qualified_name()
+        node_name = node.get_name()
         service_type_name = f"{service_type.__module__}.{service_type.__name__}"
         callback_group_name = cls._get_callback_group_name(callback_group)
         cache_key = (node_name, service_type_name, service_name, callback_group_name)
@@ -171,7 +171,7 @@ class ROSClientsCache:
         Returns:
             Publisher: The cached or newly created publisher.
         """
-        node_name = node.get_fully_qualified_name()
+        node_name = node.get_name()
         msg_type_name = f"{msg_type.__module__}.{msg_type.__name__}"
         qos_hash = str(cls._hash_qos_profile(qos_profile))
         callback_group_name = cls._get_callback_group_name(callback_group)
