@@ -12,6 +12,12 @@ jobs:
     container:
       image: ros:lyrical
     steps:
+      - name: Update installed packages
+        shell: bash
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get -y upgrade
       - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.4
         with:
