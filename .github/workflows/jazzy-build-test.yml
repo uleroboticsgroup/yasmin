@@ -17,7 +17,8 @@ jobs:
         run: |
           export DEBIAN_FRONTEND=noninteractive
           apt-get update
-          apt-get -y upgrade      - name: Build and Test
+          apt-get -y upgrade
+      - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.4
         with:
           package-name: yasmin yasmin_ros yasmin_factory yasmin_pcl yasmin_editor
