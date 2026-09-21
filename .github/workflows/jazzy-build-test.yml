@@ -12,7 +12,12 @@ jobs:
     container:
       image: ros:jazzy
     steps:
-      - name: Build and Test
+      - name: Update installed packages
+        shell: bash
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get -y upgrade      - name: Build and Test
         uses: ros-tooling/action-ros-ci@v0.4
         with:
           package-name: yasmin yasmin_ros yasmin_factory yasmin_pcl yasmin_editor
