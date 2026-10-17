@@ -181,34 +181,67 @@ function cloneNodes(rawStates, fsmName, fsmIndex) {
 }
 
 function computeActiveFlags(nodesById) {
-  const parentsWithAllActive = [];
+  // `current_state` semantics as published by yasmin_viewer:
+  //   -1 -> no child state is running
+  //   -2 -> concurrence/orthogonal marker; all direct children run together,
+  //         but only while this node itself is running
+  //  >=0 -> id of the running child state
+  // Activity must be propagated top-down from the root, otherwise the children
+  // of an idle concurrence would be reported as active.
 
-  nodesById.forEach((node) => {
-    if (node.current_state === -2) {
-      parentsWithAllActive.push(node.id);
-    } else if (nodesById.has(node.current_state)) {
-      nodesById.get(node.current_state).active = true;
+  function isFanOutChildActive(child) {
+    if (child.isSyntheticOutcome) {
+      return false;
     }
-  });
 
-  if (parentsWithAllActive.length > 0) {
-    nodesById.forEach((node) => {
-      if (parentsWithAllActive.includes(node.parent)) {
-        node.active = true;
-      }
-    });
+    if (!child.is_fsm) {
+      // Plain states do not report sub-state information, so they stay active
+      // while their parent runs.
+      return true;
+    }
+
+    // Composite children (nested FSM, region) run their own state machine and
+    // report -1 once they are not executing anymore, so a finished child must
+    // not stay highlighted while its siblings keep running.
+    return child.current_state !== -1;
   }
 
-  nodesById.forEach((node) => {
-    if (!node.active) {
+  function markNodeActive(node) {
+    if (node.active) {
       return;
     }
+
+    node.active = true;
 
     let parentId = node.parent;
     while (nodesById.has(parentId)) {
       const parent = nodesById.get(parentId);
       parent.hasActiveDescendant = true;
       parentId = parent.parent;
+    }
+
+    activateChildren(node);
+  }
+
+  function activateChildren(node) {
+    if (node.current_state === -2) {
+      nodesById.forEach((child) => {
+        if (child.parent === node.id && isFanOutChildActive(child)) {
+          markNodeActive(child);
+        }
+      });
+      return;
+    }
+
+    const child = nodesById.get(node.current_state);
+    if (child) {
+      markNodeActive(child);
+    }
+  }
+
+  nodesById.forEach((node) => {
+    if (node.parent === -1) {
+      activateChildren(node);
     }
   });
 }
