@@ -21,6 +21,12 @@
 #include <stdexcept>
 #include <utility>
 
+#if defined(_WIN32)
+#include <winsock2.h>
+#else
+#include <sys/socket.h>
+#endif
+
 #if __has_include("rclcpp/version.h")
 #include "rclcpp/version.h"
 #if RCLCPP_VERSION_GTE(32, 0, 0)
@@ -160,18 +166,23 @@ http::response<http::string_body> make_response(http::status status,
   http::response<http::string_body> response{status, 11};
   response.set(http::field::content_type, content_type);
   response.set(http::field::server, "yasmin_viewer");
+  response.set(http::field::cache_control, "no-cache");
   response.keep_alive(keep_alive);
   response.body() = std::move(body);
   response.prepare_payload();
   return response;
 }
 
+/// Timeout for async operations and writes; synchronous reads in
+/// handle_session are unblocked explicitly by stop_server().
+constexpr auto kSocketTimeout = std::chrono::seconds(30);
+
 void handle_session(beast::tcp_stream stream, YasminViewerNode *node) {
   beast::error_code error_code;
   beast::flat_buffer buffer;
 
-  while (true) {
-    stream.expires_after(std::chrono::seconds(30));
+  while (node->is_server_running()) {
+    stream.expires_after(kSocketTimeout);
 
     http::request<http::string_body> request;
     http::read(stream, buffer, request, error_code);
@@ -194,8 +205,19 @@ void handle_session(beast::tcp_stream stream, YasminViewerNode *node) {
       const std::string target = std::string(request.target());
 
       if (target == "/api/fsms") {
-        response = make_response(http::status::ok, "application/json",
-                                 node->get_fsms_json(), request.keep_alive());
+        std::string body = node->get_fsms_json();
+
+        if (request.method() == http::verb::head) {
+          response = make_response(http::status::ok, "application/json", "",
+                                   request.keep_alive());
+          response.content_length(body.size());
+        } else {
+          response = make_response(http::status::ok, "application/json",
+                                   std::move(body), request.keep_alive());
+        }
+
+        response.set(http::field::cache_control, "no-store");
+
       } else {
         try {
           const auto file_path =
@@ -222,7 +244,7 @@ void handle_session(beast::tcp_stream stream, YasminViewerNode *node) {
       }
     }
 
-    stream.expires_after(std::chrono::seconds(30));
+    stream.expires_after(kSocketTimeout);
     http::write(stream, response, error_code);
     if (error_code || !request.keep_alive()) {
       break;
@@ -336,9 +358,32 @@ void YasminViewerNode::stop_server() {
   }
 
   {
+    // Wake sessions blocked in a synchronous read so that shutdown does not
+    // depend on clients closing their keep-alive connections.
+    const std::lock_guard<std::mutex> lock(this->session_sockets_mutex_);
+    for (const std::uintptr_t native_handle : this->session_sockets_) {
+#ifdef _WIN32
+      ::shutdown(static_cast<SOCKET>(native_handle), SD_BOTH);
+#else
+      ::shutdown(static_cast<int>(native_handle), SHUT_RDWR);
+#endif
+    }
+  }
+
+  {
     std::lock_guard<std::mutex> lock(this->sessions_mutex_);
     this->sessions_.clear();
   }
+}
+
+void YasminViewerNode::track_session_socket(std::uintptr_t native_handle) {
+  const std::lock_guard<std::mutex> lock(this->session_sockets_mutex_);
+  this->session_sockets_.insert(native_handle);
+}
+
+void YasminViewerNode::untrack_session_socket(std::uintptr_t native_handle) {
+  const std::lock_guard<std::mutex> lock(this->session_sockets_mutex_);
+  this->session_sockets_.erase(native_handle);
 }
 
 void YasminViewerNode::run_server() {
@@ -395,8 +440,25 @@ void YasminViewerNode::run_server() {
           }
         }
 
-        this->sessions_.emplace_back(std::async(
-            std::launch::async, handle_session, std::move(stream), this));
+        const auto native_handle =
+            static_cast<std::uintptr_t>(stream.socket().native_handle());
+        this->track_session_socket(native_handle);
+        this->sessions_.emplace_back(
+            std::async(std::launch::async, [this, stream = std::move(stream),
+                                            native_handle]() mutable {
+              try {
+                handle_session(std::move(stream), this);
+              } catch (const std::exception &exception) {
+                RCLCPP_WARN(this->get_logger(), "HTTP session failed: %s",
+                            exception.what());
+                this->on_connection_closed();
+              } catch (...) {
+                RCLCPP_WARN(this->get_logger(),
+                            "HTTP session failed with unknown error");
+                this->on_connection_closed();
+              }
+              this->untrack_session_socket(native_handle);
+            }));
       }
     }
   } catch (const std::exception &exception) {

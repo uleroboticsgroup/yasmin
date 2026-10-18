@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <future>
 #include <list>
 #include <memory>
@@ -24,6 +25,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
@@ -77,6 +79,12 @@ public:
     this->active_connections_.fetch_sub(1, std::memory_order_relaxed);
   }
 
+  /**
+   * @brief Returns whether the embedded web server is still running.
+   * @return true while the server accepts and serves connections.
+   */
+  bool is_server_running() const { return this->server_running_.load(); }
+
 private:
   /**
    * @struct CachedFsm
@@ -116,6 +124,18 @@ private:
    * @brief Runs the embedded web server loop.
    */
   void run_server();
+
+  /**
+   * @brief Registers a session socket so it can be shut down at server stop.
+   * @param native_handle Native socket handle of the session.
+   */
+  void track_session_socket(std::uintptr_t native_handle);
+
+  /**
+   * @brief Removes a session socket from the shutdown registry.
+   * @param native_handle Native socket handle of the session.
+   */
+  void untrack_session_socket(std::uintptr_t native_handle);
 
   /**
    * @brief Removes expired finite state machines from the cache.
@@ -183,6 +203,12 @@ private:
   std::mutex sessions_mutex_;
   /// @brief Tracks active HTTP session tasks for safe shutdown.
   std::list<std::future<void>> sessions_;
+
+  /// @brief Protects access to the set of active session sockets.
+  std::mutex session_sockets_mutex_;
+  /// @brief Native handles of active session sockets, used to unblock reads on
+  /// shutdown.
+  std::unordered_set<std::uintptr_t> session_sockets_;
 
   /// Asio acceptor holder (created in start_server, used by
   /// run_server/stop_server).
