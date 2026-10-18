@@ -1249,6 +1249,14 @@ function applyToVisibleCards(callback) {
 
 fsmSelect.addEventListener("change", async (event) => {
   state.currentFsm = event.target.value;
+
+  if (state.currentFsm !== "ALL") {
+    // A single selected FSM gets the full row width.
+    state.cardsPerRow = 1;
+    updateCardsPerRowSelector();
+    updateDiagramGridColumns();
+  }
+
   await updateView(true);
 });
 
