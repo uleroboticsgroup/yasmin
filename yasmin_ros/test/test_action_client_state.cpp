@@ -14,8 +14,11 @@
 
 #include <gtest/gtest.h>
 
+#include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <thread>
 
 #include <example_interfaces/action/fibonacci.hpp>
@@ -48,20 +51,68 @@ public:
         std::bind(&AuxNode::handle_accepted, this, std::placeholders::_1));
   }
 
+  void set_goal_response_delay(std::chrono::milliseconds delay) {
+    this->goal_response_delay_ms_.store(delay.count());
+  }
+
+  void set_execution_delay(std::chrono::milliseconds delay) {
+    this->execution_delay_ms_.store(delay.count());
+  }
+
+  void reset_flags() {
+    std::lock_guard<std::mutex> lock(this->state_mutex_);
+    this->goal_received_ = false;
+    this->cancel_received_ = false;
+  }
+
+  bool wait_for_goal_received(std::chrono::milliseconds timeout) {
+    std::unique_lock<std::mutex> lock(this->state_mutex_);
+    return this->state_cv_.wait_for(lock, timeout,
+                                    [this]() { return this->goal_received_; });
+  }
+
+  bool wait_for_cancel_received(std::chrono::milliseconds timeout) {
+    std::unique_lock<std::mutex> lock(this->state_mutex_);
+    return this->state_cv_.wait_for(
+        lock, timeout, [this]() { return this->cancel_received_; });
+  }
+
 private:
   rclcpp_action::Server<Fibonacci>::SharedPtr action_server_;
+  std::atomic<int64_t> goal_response_delay_ms_{0};
+  std::atomic<int64_t> execution_delay_ms_{5000};
+  std::mutex state_mutex_;
+  std::condition_variable state_cv_;
+  bool goal_received_{false};
+  bool cancel_received_{false};
 
   rclcpp_action::GoalResponse
   handle_goal(const rclcpp_action::GoalUUID &uuid,
               std::shared_ptr<const Fibonacci::Goal> goal) {
     (void)uuid;
     (void)goal;
+
+    {
+      std::lock_guard<std::mutex> lock(this->state_mutex_);
+      this->goal_received_ = true;
+    }
+    this->state_cv_.notify_all();
+
+    const int64_t delay_ms = this->goal_response_delay_ms_.load();
+    if (delay_ms > 0) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
+    }
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
   }
 
   rclcpp_action::CancelResponse
   handle_cancel(const std::shared_ptr<GoalHandleFibonacci> goal_handle) {
     (void)goal_handle;
+    {
+      std::lock_guard<std::mutex> lock(this->state_mutex_);
+      this->cancel_received_ = true;
+    }
+    this->state_cv_.notify_all();
     return rclcpp_action::CancelResponse::ACCEPT;
   }
 
@@ -79,7 +130,10 @@ private:
     if (goal->order < 0) {
       goal_handle->abort(result);
     } else {
-      std::this_thread::sleep_for(5s);
+      const int64_t delay_ms = this->execution_delay_ms_.load();
+      if (delay_ms > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
+      }
       if (goal_handle->is_canceling()) {
         goal_handle->canceled(result);
       } else {
@@ -101,6 +155,12 @@ protected:
     executor = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
     executor->add_node(aux_node);
     spin_thread = std::thread([&]() { executor->spin(); });
+  }
+
+  void SetUp() override {
+    aux_node->set_goal_response_delay(0ms);
+    aux_node->set_execution_delay(5s);
+    aux_node->reset_flags();
   }
 
   static void TearDownTestCase() {
@@ -204,6 +264,67 @@ TEST_F(TestActionClientState, TestActionClientStateCancel) {
 
   EXPECT_EQ((*state)(blackboard), std::string(CANCEL));
   cancel_thread.join();
+}
+
+TEST_F(TestActionClientState, TestActionClientStateCancelBeforeGoalResponse) {
+  aux_node->set_goal_response_delay(1s);
+  aux_node->set_execution_delay(2s);
+
+  auto blackboard = yasmin::Blackboard::make_shared();
+
+  auto state =
+      std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
+          "test", [](yasmin::Blackboard::SharedPtr blackboard) {
+            auto goal = example_interfaces::action::Fibonacci::Goal();
+            goal.order = 0;
+            return goal;
+          });
+
+  std::string outcome;
+  std::thread state_thread(
+      [&state, &blackboard, &outcome]() { outcome = (*state)(blackboard); });
+
+  ASSERT_TRUE(aux_node->wait_for_goal_received(5s));
+  state->cancel_state();
+  state_thread.join();
+
+  EXPECT_EQ(outcome, std::string(CANCEL));
+  EXPECT_TRUE(aux_node->wait_for_cancel_received(2s));
+}
+
+TEST_F(TestActionClientState,
+       TestActionClientStateCancelBeforeGoalResponseReuse) {
+  aux_node->set_goal_response_delay(1s);
+  aux_node->set_execution_delay(2s);
+
+  auto blackboard = yasmin::Blackboard::make_shared();
+
+  auto state =
+      std::make_shared<ActionState<example_interfaces::action::Fibonacci>>(
+          "test", [](yasmin::Blackboard::SharedPtr blackboard) {
+            auto goal = example_interfaces::action::Fibonacci::Goal();
+            goal.order = 0;
+            return goal;
+          });
+
+  std::string first_outcome;
+  std::thread first_thread([&state, &blackboard, &first_outcome]() {
+    first_outcome = (*state)(blackboard);
+  });
+
+  ASSERT_TRUE(aux_node->wait_for_goal_received(5s));
+  state->cancel_state();
+  first_thread.join();
+  EXPECT_EQ(first_outcome, std::string(CANCEL));
+
+  std::string second_outcome;
+  std::thread second_thread([&state, &blackboard, &second_outcome]() {
+    second_outcome = (*state)(blackboard);
+  });
+  second_thread.join();
+
+  EXPECT_EQ(second_outcome, std::string(SUCCEED));
+  EXPECT_TRUE(aux_node->wait_for_cancel_received(2s));
 }
 
 TEST_F(TestActionClientState, TestActionClientStateAbort) {

@@ -18,6 +18,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <cstdint>
+#include <exception>
 #include <functional>
 #include <future>
 #include <memory>
@@ -293,6 +294,10 @@ public:
     {
       std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
 
+      // Remember the request even if the goal response has not arrived yet.
+      // The goal response callback cancels the newly accepted goal.
+      this->cancel_requested_ = true;
+
       if (this->goal_handle && !this->action_done_.load()) {
         try {
           auto callback_guard = this->callback_guard;
@@ -439,7 +444,14 @@ public:
           };
     }
 
-    // Send the goal to the action server
+    // Send the goal to the action server. Clear any handle/flag from the
+    // previous execution so a cancel during submission applies to this goal.
+    {
+      std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
+      this->goal_handle.reset();
+      this->cancel_requested_ = false;
+    }
+
     YASMIN_LOG_INFO("Sending goal to action '%s'", this->action_name.c_str());
     this->action_done_.store(false);
     this->action_client->async_send_goal(goal, send_goal_options);
@@ -526,6 +538,9 @@ private:
 
   /// @brief Handle for the current goal.
   std::shared_ptr<GoalHandle> goal_handle;
+  /// @brief Whether a cancel was requested before the goal handle arrived.
+  /// Protected by goal_handle_mutex.
+  bool cancel_requested_{false};
   /// @brief Mutex for protecting access to the goal handle.
   std::mutex goal_handle_mutex;
 
@@ -563,8 +578,82 @@ private:
                                  std::shared_ptr<CallbackGuard> callback_guard,
                                  uint64_t epoch, GoalResponse goal_response) {
     std::lock_guard<std::mutex> lock(callback_guard->mutex);
-    if (callback_guard->alive && state->action_epoch_.load() == epoch) {
+    if (!callback_guard->alive) {
+      return;
+    }
+    if (state->action_epoch_.load() == epoch) {
       state->goal_response_callback(goal_response);
+    } else {
+      // The state moved on to a new execution before this goal response
+      // arrived. Cancel the abandoned goal so it cannot occupy the server
+      // and make the next goal fail.
+      cancel_stale_goal(state, goal_response);
+    }
+  }
+
+  /// @brief Extract a goal handle from a new-rclcpp goal response.
+  static std::shared_ptr<GoalHandle>
+  goal_handle_from_response(const std::shared_ptr<GoalHandle> &response) {
+    return response;
+  }
+
+  /// @brief Extract a goal handle from an old-rclcpp goal response.
+  static std::shared_ptr<GoalHandle> goal_handle_from_response(
+      const std::shared_future<std::shared_ptr<GoalHandle>> &response) {
+    return response.get();
+  }
+
+  /// @brief Cancel a goal response that belongs to a previous execution.
+  template <typename GoalResponse>
+  static void cancel_stale_goal(ActionState *state,
+                                const GoalResponse &goal_response) {
+    const std::shared_ptr<GoalHandle> goal_handle =
+        goal_handle_from_response(goal_response);
+    if (!goal_handle) {
+      return;
+    }
+    try {
+      state->action_client->async_cancel_goal(goal_handle);
+    } catch (const std::exception &e) {
+      YASMIN_LOG_WARN("Failed to cancel stale goal for action '%s': %s",
+                      state->action_name.c_str(), e.what());
+    }
+  }
+
+  /**
+   * @brief Store a goal handle and cancel it if a cancel arrived first.
+   *
+   * The goal response is delivered asynchronously. A cancellation may happen
+   * while the goal has been sent but before its handle is available; in that
+   * case cancel_state() sets cancel_requested_ and this callback cancels the
+   * newly accepted goal as soon as the handle arrives.
+   *
+   * @param goal_handle Accepted goal handle, or nullptr if rejected.
+   */
+  void handle_goal_response(const std::shared_ptr<GoalHandle> &goal_handle) {
+    if (goal_handle == nullptr) {
+      std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
+      this->goal_handle = nullptr;
+      this->action_status = rclcpp_action::ResultCode::ABORTED;
+      this->action_done_.store(true);
+      this->action_done_cond.notify_one();
+      return;
+    }
+
+    bool cancel = false;
+    {
+      std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
+      this->goal_handle = goal_handle;
+      cancel = this->cancel_requested_ || this->is_canceled();
+    }
+
+    if (cancel) {
+      try {
+        this->action_client->async_cancel_goal(goal_handle);
+      } catch (const std::exception &e) {
+        YASMIN_LOG_WARN("Failed to cancel action '%s': %s",
+                        this->action_name.c_str(), e.what());
+      }
     }
   }
 
@@ -582,14 +671,7 @@ private:
    * @param goal_handle A shared pointer to the goal handle.
    */
   void goal_response_callback(const GoalResponseArg &goal_handle) {
-    std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
-    this->goal_handle = goal_handle;
-
-    if (goal_handle == nullptr) {
-      this->action_status = rclcpp_action::ResultCode::ABORTED;
-      this->action_done_.store(true);
-      this->action_done_cond.notify_one();
-    }
+    this->handle_goal_response(goal_handle);
   }
 #else
   /// @brief Argument type passed to the goal response callback.
@@ -603,14 +685,7 @@ private:
    * @param future A future that holds the goal handle.
    */
   void goal_response_callback(GoalResponseArg future) {
-    std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
-    this->goal_handle = future.get();
-
-    if (this->goal_handle == nullptr) {
-      this->action_status = rclcpp_action::ResultCode::ABORTED;
-      this->action_done_.store(true);
-      this->action_done_cond.notify_one();
-    }
+    this->handle_goal_response(future.get());
   }
 #endif
 #else
@@ -625,14 +700,7 @@ private:
    * @param future A future that holds the goal handle.
    */
   void goal_response_callback(GoalResponseArg future) {
-    std::lock_guard<std::mutex> lock(this->goal_handle_mutex);
-    this->goal_handle = future.get();
-
-    if (this->goal_handle == nullptr) {
-      this->action_status = rclcpp_action::ResultCode::ABORTED;
-      this->action_done_.store(true);
-      this->action_done_cond.notify_one();
-    }
+    this->handle_goal_response(future.get());
   }
 #endif
 
