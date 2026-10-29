@@ -1,0 +1,20 @@
+<map id="yasmin::Blackboard" name="yasmin::Blackboard">
+<area shape="rect" id="Node000001" title="A thread&#45;safe storage for key&#45;value pairs of varying types." alt="" coords="1259,135,1393,160"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="965,87,1160,128"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1176,122,1259,135,1259,140,1175,127"/>
+<area shape="rect" id="Node000003" href="$structyasmin_1_1Blackboard_1_1SharedStorage.html" title="Shared storage used by blackboard copies." alt="" coords="709,62,842,102"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="857,87,965,96,964,102,857,92"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="439,5,580,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="596,31,685,52,711,59,709,64,684,57,595,36"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="440,56,579,111"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="595,80,708,80,708,85,595,86"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="216,44,293,70"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="309,60,440,74,439,79,308,65"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="5,36,129,77"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="145,54,215,54,215,60,145,60"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="178,97,330,123"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="345,105,415,99,439,95,440,100,416,104,346,110"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="442,138,577,194"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="592,162,1259,146,1259,152,592,167"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="591,139,684,109,711,101,712,106,685,114,592,144"/>
+</map>

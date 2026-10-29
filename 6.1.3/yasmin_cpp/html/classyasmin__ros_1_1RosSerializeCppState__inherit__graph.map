@@ -1,0 +1,5 @@
+<map id="yasmin_ros::RosSerializeCppState" name="yasmin_ros::RosSerializeCppState">
+<area shape="rect" id="Node000001" title="A state for serializing C++ objects into ROS 2 messages." alt="" coords="5,79,171,120"/>
+<area shape="rect" id="Node000002" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="38,5,138,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,46,91,79,85,79,85,46"/>
+</map>
