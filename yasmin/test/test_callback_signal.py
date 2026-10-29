@@ -101,8 +101,7 @@ class TestCallbackSignal(unittest.TestCase):
         self.assertEqual("boom", future.get_exception_message())
 
     def test_trigger_async_future_cleanup_does_not_deadlock(self):
-        script = textwrap.dedent(
-            """
+        script = textwrap.dedent("""
             import faulthandler
             from yasmin import CallbackSignal
 
@@ -115,8 +114,7 @@ class TestCallbackSignal(unittest.TestCase):
                 future.wait()
                 del future
             faulthandler.cancel_dump_traceback_later()
-            """
-        )
+            """)
 
         # A subprocess keeps a GIL deadlock from hanging the entire test suite.
         with subprocess.Popen(
