@@ -61,11 +61,6 @@ PYBIND11_MODULE(callback_signal, m) {
 
   py::class_<yasmin::CallbackSignalFuture,
              yasmin::CallbackSignalFuture::SharedPtr>(m, "CallbackSignalFuture")
-      .def("__del__",
-           [](yasmin::CallbackSignalFuture &self) {
-             py::gil_scoped_release release;
-             self.join();
-           })
       .def("wait", &yasmin::CallbackSignalFuture::wait,
            py::call_guard<py::gil_scoped_release>(),
            "Wait until the asynchronous trigger completes")
@@ -104,7 +99,23 @@ PYBIND11_MODULE(callback_signal, m) {
       .def("trigger", &yasmin::CallbackSignal::trigger,
            py::call_guard<py::gil_scoped_release>(),
            "Trigger all registered callbacks synchronously")
-      .def("trigger_async", &yasmin::CallbackSignal::trigger_async,
-           py::call_guard<py::gil_scoped_release>(),
-           "Trigger all registered callbacks asynchronously");
+      .def(
+          "trigger_async",
+          [](const yasmin::CallbackSignal &self) {
+            using Future = yasmin::CallbackSignalFuture;
+            auto future = self.trigger_async();
+            auto *ptr = future.get();
+
+            // Release the GIL during actual destruction, including thread join.
+            return Future::SharedPtr(ptr, [future](Future *) mutable {
+              if (PyGILState_Check()) {
+                py::gil_scoped_release release;
+                future.reset();
+              } else {
+                future.reset();
+              }
+            });
+          },
+          py::call_guard<py::gil_scoped_release>(),
+          "Trigger all registered callbacks asynchronously");
 }
