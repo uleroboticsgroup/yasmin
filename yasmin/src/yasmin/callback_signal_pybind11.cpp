@@ -37,7 +37,8 @@ public:
     }
 
     py::gil_scoped_acquire acquire;
-    this->callback_ = py::none();
+    // Clear the handle before the GIL guard is destroyed.
+    this->callback_ = py::object();
   }
 
   void invoke() {
