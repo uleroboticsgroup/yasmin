@@ -4,7 +4,7 @@ package_name = "yasmin_plugins_manager"
 
 setup(
     name=package_name,
-    version="6.1.2",
+    version="6.1.3",
     packages=[package_name],
     data_files=[
         ("share/ament_index/resource_index/packages", [f"resource/{package_name}"]),

@@ -3,6 +3,21 @@ Changelog for package yasmin_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.3 (2026-10-29)
+------------------
+* fix(yasmin_ros): prevent race condition when canceling goal before response
+  Handle cases where a cancellation request is issued after a goal is sent
+  but before the action server's goal response is received.
+  The changes introduce a `cancel_requested\_` flag to track cancellation
+  requests during the asynchronous window between sending a goal and
+  receiving its response. If a goal response arrives for a stale epoch
+  (i.e., a new goal was already sent), the stale goal handle is
+  automatically canceled to prevent it from interfering with the current
+  execution.
+  Additionally, updated the action client tests to include a scenario
+  specifically testing cancellation during the goal response delay.
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.2 (2026-09-17)
 ------------------
 * refactor(ros): introduce GoalResponseArg alias for action callbacks

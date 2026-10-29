@@ -3,6 +3,9 @@ Changelog for package yasmin_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.3 (2026-10-29)
+------------------
+
 6.1.2 (2026-09-17)
 ------------------
 * refactor(cli): improve error handling and xml parsing in yasmin_cli

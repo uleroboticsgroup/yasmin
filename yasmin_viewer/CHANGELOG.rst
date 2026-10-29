@@ -3,6 +3,13 @@ Changelog for package yasmin_viewer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.3 (2026-10-29)
+------------------
+* feat: adjust card layout for selected FSM in viewer
+* feat: enhance server session management and error handling in yasmin viewer
+* refactor: enhance activity propagation logic in computeActiveFlags function
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.2 (2026-09-17)
 ------------------
 * refactor(viewer): optimize session management and improve data handling

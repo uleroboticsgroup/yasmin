@@ -2,6 +2,9 @@
 Changelog for package yasmin_factory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.3 (2026-10-29)
+------------------
+
 6.1.2 (2026-09-17)
 ------------------
 * refactor(factory): improve thread safety and Python lifecycle management

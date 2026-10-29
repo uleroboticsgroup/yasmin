@@ -3,6 +3,9 @@ Changelog for package yasmin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+6.1.3 (2026-10-29)
+------------------
+
 6.1.2 (2026-09-17)
 ------------------
 * fix(core): improve concurrency safety and Python interoperability

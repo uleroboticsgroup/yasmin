@@ -2,6 +2,9 @@
 Changelog for package yasmin_pcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.3 (2026-10-29)
+------------------
+
 6.1.2 (2026-09-17)
 ------------------
 * fix(pcl): improve robustness and data integrity in filter and io states
