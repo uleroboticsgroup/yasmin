@@ -21,6 +21,11 @@
 
 #include "yasmin_ros/yasmin_node.hpp"
 
+// Foxy's bundled Google Test uses the legacy test-case macro.
+#ifndef INSTANTIATE_TEST_SUITE_P
+#define INSTANTIATE_TEST_SUITE_P INSTANTIATE_TEST_CASE_P
+#endif
+
 class TestYasminNode : public ::testing::Test {
 protected:
   void SetUp() override {
