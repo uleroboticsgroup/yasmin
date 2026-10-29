@@ -15,12 +15,42 @@
 #include "yasmin_ros/yasmin_node.hpp"
 #include "yasmin_ros/ros_logs.hpp"
 
+#include <algorithm>
+#include <cctype>
+#include <cstdlib>
 #include <random>
+#include <stdexcept>
 #include <string>
 
 using namespace yasmin_ros;
 
 namespace {
+rclcpp::NodeOptions make_node_options() {
+  rclcpp::NodeOptions options;
+  const char *value = std::getenv("YASMIN_USE_SIM_TIME");
+  if (value == nullptr) {
+    return options;
+  }
+
+  std::string text(value);
+  const auto first = text.find_first_not_of(" \t\n\r\f\v");
+  text = first == std::string::npos
+             ? ""
+             : text.substr(first,
+                           text.find_last_not_of(" \t\n\r\f\v") - first + 1);
+  std::transform(text.begin(), text.end(), text.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+
+  if (text != "true" && text != "false" && text != "1" && text != "0") {
+    throw std::invalid_argument(
+        "YASMIN_USE_SIM_TIME must be true, false, 1, or 0");
+  }
+
+  options.append_parameter_override("use_sim_time",
+                                    text == "true" || text == "1");
+  return options;
+}
+
 YasminNode::SharedPtr &get_yasmin_node_instance() {
   static YasminNode::SharedPtr instance;
   return instance;
@@ -76,7 +106,8 @@ void YasminNode::destroy_instance() {
   instance.reset();
 }
 
-YasminNode::YasminNode() : rclcpp::Node("yasmin_" + generateUUID() + "_node") {
+YasminNode::YasminNode()
+    : rclcpp::Node("yasmin_" + generateUUID() + "_node", make_node_options()) {
   // Add this node's base interface to the executor for multi-threaded
   // execution.
   this->executor.add_node(this->get_node_base_interface());

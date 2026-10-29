@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import atexit
+import os
 import uuid
 from threading import Thread, RLock
 
@@ -20,6 +21,7 @@ import yasmin_ros
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 
 # Check if EventsExecutor is available
 try:
@@ -93,7 +95,18 @@ class YasminNode(Node):
             if YasminNode._instance is not None:
                 raise RuntimeError("This class is a Singleton")
 
-            super().__init__(f"yasmin_{str(uuid.uuid4()).replace('-', '')[:16]}_node")
+            overrides = []
+            value = os.getenv("YASMIN_USE_SIM_TIME")
+            if value is not None:
+                value = value.strip().lower()
+                if value not in ("true", "false", "1", "0"):
+                    raise ValueError("YASMIN_USE_SIM_TIME must be true, false, 1, or 0")
+                overrides.append(Parameter("use_sim_time", value=value in ("true", "1")))
+
+            super().__init__(
+                f"yasmin_{str(uuid.uuid4()).replace('-', '')[:16]}_node",
+                parameter_overrides=overrides,
+            )
 
             ## Executor for managing node operations.
             self._executor = Executor()
