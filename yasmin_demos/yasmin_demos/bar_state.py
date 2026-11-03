@@ -50,6 +50,7 @@ class BarState(State):
         self.add_input_key(
             "foo_str",
             "String produced by FooState and printed by this state.",
+            "Foo",
         )
 
     def configure(self) -> None:
