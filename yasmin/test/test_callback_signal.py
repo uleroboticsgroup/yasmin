@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import subprocess
+import sys
+import textwrap
 import time
 import unittest
 
@@ -96,6 +99,40 @@ class TestCallbackSignal(unittest.TestCase):
         self.assertTrue(future.is_completed())
         self.assertTrue(future.has_exception())
         self.assertEqual("boom", future.get_exception_message())
+
+    def test_trigger_async_future_cleanup_does_not_deadlock(self):
+        script = textwrap.dedent("""
+            import faulthandler
+            from yasmin import CallbackSignal
+
+            faulthandler.dump_traceback_later(5)
+            for _ in range(1000):
+                signal = CallbackSignal()
+                signal.add_callback(lambda: None)
+                future = signal.trigger_async()
+                del signal
+                future.wait()
+                del future
+            faulthandler.cancel_dump_traceback_later()
+            """)
+
+        # A subprocess keeps a GIL deadlock from hanging the entire test suite.
+        with subprocess.Popen(
+            [sys.executable, "-u", "-c", script],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        ) as process:
+            try:
+                output, _ = process.communicate(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                output, _ = process.communicate()
+                self.fail(
+                    f"Callback future cleanup timed out after 10 seconds:\n{output}"
+                )
+
+            self.assertEqual(0, process.returncode, output)
 
 
 if __name__ == "__main__":

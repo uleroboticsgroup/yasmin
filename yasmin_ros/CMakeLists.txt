@@ -156,6 +156,7 @@ ament_python_install_package(${PROJECT_NAME})
 if(BUILD_TESTING)
   # Python tests
   set(_pytest_tests
+    test_yasmin_node
     test_action_client_state
     test_service_client_state
     test_monitor_state
@@ -171,6 +172,7 @@ if(BUILD_TESTING)
   endforeach()
 
   set(_gtest_tests
+    test_yasmin_node
     test_action_client_state
     test_service_client_state
     test_monitor_state
