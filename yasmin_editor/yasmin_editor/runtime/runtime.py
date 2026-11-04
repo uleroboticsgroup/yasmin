@@ -447,10 +447,7 @@ class Runtime(QtCore.QObject):
             self._pause_requested = False
             self._pause_status_message = None
             self._pause_condition.notify_all()
-        with self._worker_state_lock:
-            if self._blocked:
-                self._blocked = False
-                self.blocked_changed.emit(False)
+        self._set_blocked(False)
 
     def _set_running(self, value: bool) -> None:
         """Update the running flag and emit the corresponding signal."""
