@@ -193,9 +193,6 @@ private:
   /// Pluginlib class loader for yasmin::State classes
   std::unique_ptr<pluginlib::ClassLoader<yasmin::State>> state_loader_;
 
-  /// Python interpreter guard (initialized once)
-  static std::unique_ptr<py::scoped_interpreter> py_interpreter_;
-
   /// Guards one-time Python interpreter initialization
   static std::once_flag py_init_flag_;
 
