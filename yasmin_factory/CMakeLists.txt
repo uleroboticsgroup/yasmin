@@ -61,7 +61,7 @@ ament_export_dependencies(
 )
 
 # Build pybind11 bridge
-pybind11_add_module(yasmin_pybind_bridge 
+pybind11_add_module(yasmin_pybind_bridge
   src/pybind_bridge.cpp
 )
 target_link_libraries(yasmin_pybind_bridge PUBLIC
@@ -123,12 +123,12 @@ if(BUILD_TESTING)
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
   )
-  
+
   # Install test plugin description
   install(FILES test/test_plugins.xml
     DESTINATION share/${PROJECT_NAME}
   )
-  
+
   # Install test XML files
   install(FILES
     test/test_simple_sm_1.xml
@@ -165,6 +165,14 @@ if(BUILD_TESTING)
   target_include_directories(test_yasmin_factory_cpp PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
   )
+
+  add_executable(test_python_teardown test/test_python_teardown.cpp)
+  target_link_libraries(test_python_teardown ${PROJECT_NAME})
+  ament_add_test(test_python_teardown
+    COMMAND $<TARGET_FILE:test_python_teardown>
+    GENERATE_RESULT_FOR_RETURN_CODE_ZERO
+  )
+
   if(TARGET test_yasmin_factory_cpp)
     set_tests_properties(test_yasmin_factory_cpp PROPERTIES
       ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR}:$ENV{PYTHONPATH}"
