@@ -472,8 +472,8 @@ void YasminFactory::initialize_python() {
     // Check if Python is already initialized (e.g., by ROS or another module)
     // The interpreter must be a function-local static constructed here, because
     // static destructors run in reverse order of construction completion and
-    // constructing the interpreter also constructs pybind11's own function-local
-    // internals statics.
+    // constructing the interpreter also constructs pybind11's own
+    // function-local internals statics.
     if (!Py_IsInitialized()) {
       static py::scoped_interpreter py_interpreter;
     }
