@@ -383,8 +383,6 @@ void with_typed_xml_value(const std::string &value_str,
 } // namespace
 
 // Static member initialization
-std::unique_ptr<py::scoped_interpreter> YasminFactory::py_interpreter_ =
-    nullptr;
 std::once_flag YasminFactory::py_init_flag_;
 
 // PythonStateHolder implementation
@@ -473,7 +471,11 @@ void YasminFactory::initialize_python() {
 
     // Check if Python is already initialized (e.g., by ROS or another module)
     if (!Py_IsInitialized()) {
-      py_interpreter_ = std::make_unique<py::scoped_interpreter>();
+      auto interpreter = std::make_unique<py::scoped_interpreter>();
+      // Create pybind11's internals statics before py_interpreter, so they
+      // are destroyed after it and still exist when it finalizes.
+      { py::gil_scoped_acquire acquire; }
+      static auto py_interpreter = std::move(interpreter);
     }
 
     // Import sys to ensure Python path is set up
