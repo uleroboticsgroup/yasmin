@@ -1,0 +1,29 @@
+<map id="yasmin_viewer::YasminViewerNode" name="yasmin_viewer::YasminViewerNode">
+<area shape="rect" id="Node000001" title="ROS 2 node that receives state machine descriptions and exposes them for the web viewer." alt="" coords="1038,301,1266,327"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="702,9,795,35"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="810,7,858,3,912,5,966,15,991,25,1016,38,1049,66,1076,100,1099,137,1117,176,1141,249,1151,300,1146,301,1135,250,1112,178,1094,140,1072,103,1045,70,1012,43,989,30,964,20,911,10,858,9,811,13"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="708,109,788,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="805,121,921,131,976,140,1015,153,1061,186,1099,228,1128,268,1146,299,1142,302,1123,271,1095,231,1058,190,1013,158,975,145,921,137,804,127"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="655,210,842,281"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="857,259,1014,285,1085,298,1084,303,1014,290,856,264"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="178,220,255,245"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="270,216,335,205,477,190,589,183,700,183,842,195,930,206,1015,233,1081,265,1133,298,1130,303,1079,270,1013,238,929,212,842,200,700,189,589,188,478,196,336,210,271,221"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="271,231,654,241,654,246,271,236"/>
+<area shape="rect" id="Node000007" href="$structyasmin__viewer_1_1YasminViewerNode_1_1CachedFsm.html" title="Stores a serialized finite state machine and its last update time." alt="" coords="338,280,536,321"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="247,253,280,272,339,288,337,293,278,277,244,257"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,212,129,253"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="144,230,178,230,178,235,144,235"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="551,284,630,272,654,267,655,272,631,277,552,290"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="708,305,789,331"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="805,315,1038,312,1038,318,805,320"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="672,354,824,380"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="839,360,924,353,1014,342,1099,325,1100,330,1014,347,925,359,840,365"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="683,404,814,445"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="829,419,919,408,967,399,1013,386,1079,357,1131,325,1133,329,1082,361,1015,391,968,404,920,414,830,424"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="685,469,812,510"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="827,486,919,475,967,462,1013,444,1054,417,1090,384,1140,325,1144,329,1094,388,1057,421,1015,449,969,467,920,480,828,492"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="662,535,835,575"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="850,555,891,552,933,544,974,531,1013,512,1039,492,1062,468,1101,415,1128,364,1144,326,1149,328,1133,366,1105,418,1066,472,1042,496,1015,516,976,536,934,549,892,557,851,561"/>
+<area shape="rect" id="Node000013" href="$structyasmin__viewer_1_1AcceptorHolder.html" title=" " alt="" coords="335,542,539,568"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="554,552,662,552,662,558,554,558"/>
+</map>

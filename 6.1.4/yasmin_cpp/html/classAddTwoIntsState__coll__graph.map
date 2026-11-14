@@ -1,0 +1,24 @@
+<map id="AddTwoIntsState" name="AddTwoIntsState">
+<area shape="rect" id="Node000001" title="State for calling the AddTwoInts service in ROS 2." alt="" coords="1093,164,1215,190"/>
+<area shape="rect" id="Node000002" href="$classyasmin__ros_1_1ServiceState.html" title=" " alt="" coords="875,149,1044,205"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1059,174,1093,174,1093,180,1059,180"/>
+<area shape="rect" id="Node000003" href="$classyasmin_1_1State.html" title="Represents a state in a state machine." alt="" coords="591,34,690,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="706,55,778,72,852,100,892,122,926,147,923,151,889,127,850,105,776,78,705,60"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="199,7,340,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="356,23,591,40,590,45,356,29"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="182,60,358,86"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="372,71,525,64,590,54,591,59,525,69,373,77"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="549,84,732,140"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="748,126,852,146,876,152,874,157,851,152,747,132"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="602,164,679,190"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="695,174,875,174,875,180,695,180"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="208,150,332,191"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="347,169,602,174,601,179,347,174"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="5,243,86,269"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="101,245,109,244,284,228,421,220,557,213,732,200,875,185,875,190,733,205,557,218,421,225,285,233,110,249,102,250"/>
+<area shape="rect" id="Node000011" href="$structyasmin__ros_1_1ServiceState_1_1CallbackGuard.html" title="Guard disabling callbacks after the state is destroyed." alt="" coords="177,266,363,307"/>
+<area shape="poly" id="edge11_Node000011_Node000009" title=" " alt="" coords="101,265,110,267,177,276,176,281,109,272,101,270"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="549,265,732,321"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="747,291,800,283,850,267,874,254,896,238,933,203,936,207,900,242,877,259,852,272,801,288,748,296"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="379,286,549,289,549,294,379,291"/>
+</map>

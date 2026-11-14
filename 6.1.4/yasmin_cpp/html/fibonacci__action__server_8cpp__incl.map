@@ -1,0 +1,19 @@
+<map id="yasmin_demos/src/fibonacci_action_server.cpp" name="yasmin_demos/src/fibonacci_action_server.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="238,5,423,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,102,66,127"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="243,49,163,70,79,97,76,98,74,93,77,91,162,65,242,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="90,102,157,127"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="284,49,170,96,167,98,165,93,168,92,282,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="181,102,237,127"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="304,49,240,94,237,90,301,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="262,102,319,127"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="324,48,304,89,300,86,319,45"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="343,102,400,127"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="342,45,362,86,357,89,337,48"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="424,94,564,135"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="369,44,445,84,442,89,366,49"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="588,102,707,127"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="403,44,589,94,587,99,402,49"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="731,94,868,135"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="424,39,716,91,715,96,423,44"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="TestYasminNode" name="TestYasminNode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="12,192,134,218"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,95,98,121"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="60,136,73,191,67,192,55,137"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="122,95,200,121"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="141,134,86,193,82,190,137,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="99,5,222,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="164,61,164,95,158,95,158,61"/>
+</map>

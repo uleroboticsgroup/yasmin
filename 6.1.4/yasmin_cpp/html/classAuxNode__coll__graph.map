@@ -1,0 +1,12 @@
+<map id="AuxNode" name="AuxNode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="15,143,89,168"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,99,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="33,46,28,70,28,96,31,121,38,141,33,143,26,123,23,97,23,70,27,45"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="47,47,46,97,49,142,44,142,40,97,42,46"/>
+<area shape="poly" id="edge3_Node000001_Node000002" title=" " alt="" coords="62,46,64,97,60,142,55,142,58,97,57,47"/>
+<area shape="poly" id="edge4_Node000001_Node000002" title=" " alt="" coords="77,45,81,70,81,97,78,123,71,143,66,141,73,121,76,96,76,70,71,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="123,5,269,31"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="180,45,148,82,108,121,75,144,72,140,105,117,144,78,176,41"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="320,5,400,31"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="362,47,355,85,346,105,332,121,314,131,288,140,222,150,151,155,89,157,89,152,150,150,222,145,287,134,312,126,329,117,341,102,350,84,357,46"/>
+</map>

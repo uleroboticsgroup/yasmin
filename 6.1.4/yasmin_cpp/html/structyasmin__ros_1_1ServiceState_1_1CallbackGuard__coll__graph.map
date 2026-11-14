@@ -1,0 +1,5 @@
+<map id="yasmin_ros::ServiceState&lt; ServiceT &gt;::CallbackGuard" name="yasmin_ros::ServiceState&lt; ServiceT &gt;::CallbackGuard">
+<area shape="rect" id="Node000001" title="Guard disabling callbacks after the state is destroyed." alt="" coords="5,102,192,143"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="58,5,139,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,46,101,102,96,102,96,46"/>
+</map>

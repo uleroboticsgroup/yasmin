@@ -1,0 +1,7 @@
+<map id="TestCbState" name="TestCbState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="87,102,181,128"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,98,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,41,126,100,122,103,70,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="122,5,315,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,44,147,103,143,100,196,41"/>
+</map>
