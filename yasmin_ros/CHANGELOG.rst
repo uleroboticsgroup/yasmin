@@ -18,6 +18,34 @@ Changelog for package yasmin_ros
   specifically testing cancellation during the goal response delay.
 * Contributors: Miguel Ángel González Santamarta
 
+6.1.4 (2026-11-14)
+------------------
+* Add YASMIN_USE_SIM_TIME support to ROS nodes (`#132 <https://github.com/uleroboticsgroup/yasmin/issues/132>`_)
+  * Support YASMIN_USE_SIM_TIME in ROS nodes
+  Apply the environment setting at node creation in C++ and Python, with startup tests for both.
+  * Fix Foxy Google Test compatibility
+  Use the legacy parameterized-test macro when the suite macro is unavailable.
+  * Fix Python callback future cleanup deadlock
+  Release the GIL when destroying asynchronous callback futures and add a subprocess regression test for teardown hangs.
+  * Fix formatter
+  * Keep callback cleanup under the GIL
+  Reset the callback to a null handle before releasing the GIL so member destruction cannot decrement None without the lock.
+  ---------
+  Co-authored-by: Maik Knof <knofm@rwu.de>
+* new version 6.1.3
+* fix(yasmin_ros): prevent race condition when canceling goal before response
+  Handle cases where a cancellation request is issued after a goal is sent
+  but before the action server's goal response is received.
+  The changes introduce a `cancel_requested\_` flag to track cancellation
+  requests during the asynchronous window between sending a goal and
+  receiving its response. If a goal response arrives for a stale epoch
+  (i.e., a new goal was already sent), the stale goal handle is
+  automatically canceled to prevent it from interfering with the current
+  execution.
+  Additionally, updated the action client tests to include a scenario
+  specifically testing cancellation during the goal response delay.
+* Contributors: Maik, Miguel Ángel González Santamarta
+
 6.1.2 (2026-09-17)
 ------------------
 * refactor(ros): introduce GoalResponseArg alias for action callbacks

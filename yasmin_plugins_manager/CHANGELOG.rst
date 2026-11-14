@@ -5,6 +5,11 @@ Changelog for package yasmin_plugins_manager
 6.1.3 (2026-10-29)
 ------------------
 
+6.1.4 (2026-11-14)
+------------------
+* new version 6.1.3
+* Contributors: Miguel Ángel González Santamarta
+
 6.1.2 (2026-09-17)
 ------------------
 * fix(plugins): improve error handling and plugin deduplication

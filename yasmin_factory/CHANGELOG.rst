@@ -5,6 +5,16 @@ Changelog for package yasmin_factory
 6.1.3 (2026-10-29)
 ------------------
 
+6.1.4 (2026-11-14)
+------------------
+* Fix factory-interpreter teardown order (`#134 <https://github.com/uleroboticsgroup/yasmin/issues/134>`_)
+  * Fix factory-interpreter teardown order
+  * fixup! Fix factory-interpreter teardown order
+  * Better fix with reproducible test
+  * fixup! Better fix with reproducible test
+* new version 6.1.3
+* Contributors: Miguel Ángel González Santamarta, Tim Clephas
+
 6.1.2 (2026-09-17)
 ------------------
 * refactor(factory): improve thread safety and Python lifecycle management

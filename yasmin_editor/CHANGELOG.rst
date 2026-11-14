@@ -5,6 +5,14 @@ Changelog for package yasmin_editor
 6.1.3 (2026-10-29)
 ------------------
 
+6.1.4 (2026-11-14)
+------------------
+* Merge branch 'Maik13579-fix/editor-resume-deadlock'
+* Fix editor deadlock when resuming runtime execution
+  Reuse _set_blocked(False) when resuming so blocked_changed is emitted after releasing _worker_state_lock. This prevents synchronous GUI updates from deadlocking when they query the runtime state and covers both Play and Play Once.
+* new version 6.1.3
+* Contributors: Maik Knof, Miguel Ángel González Santamarta
+
 6.1.2 (2026-09-17)
 ------------------
 * refactor(editor): optimize performance and improve model consistency
